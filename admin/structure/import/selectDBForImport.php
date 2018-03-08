@@ -69,6 +69,8 @@
 
         <script type="text/javascript">
         var registeredDBs = {};
+        var modeCloneTemplate = true;
+        var myDataTable;
 
     $(document).ready(function() {
 
@@ -141,17 +143,26 @@
         params);
 
         // Create a YUI DataTable
-        var myDataTable;
+        
 
         function initDbTable(){
 
                 var myColumnDefs = [
                     {key:"id", label:"ID" , formatter:YAHOO.widget.DataTable.formatNumber, sortable:false, resizeable:false, width:"40", className:"right"},
-                    {key:"crosswalk", label:"Browse", resizeable:false, width:"60", className: "center"},
+                    {key:"crosswalk", label:"Browse", resizeable:false, width:"60", className: "center",
+                        formatter:function(elLiner, oRecord, oColumn, oData) {
+                            if(modeCloneTemplate && oRecord.getData("id")>0){
+                                elLiner.innerHTML = '<img src="../../../common/images/drag_up_down_16x16.png" class="button"/>';
+                            }else{
+                                var str = oRecord.getData("crosswalk");
+                                elLiner.innerHTML = str;
+                            }
+                        }
+                    },
                     {key:"name", label:"Database Name" , sortable:false, resizeable:true, formatter:function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("name");
                         var id = oRecord.getData("id");
-                        if(id=='XXX'){
+                        if(id=='XXX' || id=='YYY'){
                             var str2 = oRecord.getData('description');
                             elLiner.innerHTML = '<h2 style="padding-top:3px">'+str+
                                 '</h2><div>&nbsp;</div><div style="position: absolute;margin-top: -12px;"><i>'+
@@ -164,7 +175,7 @@
                     }},
                     {key:"description", label:"Description", sortable:false, resizeable:true, formatter:function(elLiner, oRecord, oColumn, oData) {
                         var id = oRecord.getData("id");
-                        if(id!='XXX'){
+                        if(id!='XXX' && id!='YYY'){
                             var str = oRecord.getData("description");
                             elLiner.innerHTML = '<span title="'+str+'">'+str+'</span>';
                         }else{
@@ -185,9 +196,9 @@
                 ];
                 var notAdded = true;
                 for(dbID in registeredDBs) {
-                    if(notAdded && Number(dbID)>21){
+                    if(notAdded && Number(dbID)>20){
                         notAdded = false;
-                        dataArray.push(['XXX','User databases','Databases registered by Heurist users - use with care, look for entity types with good internal documentation','','']);
+                        dataArray.push(['YYY','User databases','Databases registered by Heurist users - use with care, look for entity types with good internal documentation','','']);
                     }else{
                         db = registeredDBs[dbID];
                         dataArray.push([db[0],db[2],db[3],
@@ -206,11 +217,20 @@
                         var data = res.results || [],
                         filtered = [],
                         i,l;
-                        if (req) {
+//console.log('1>>>'+req);                        
+                        if(modeCloneTemplate && !req){
+                            req = '';
+                        }
+//console.log('2>>>'+req);                        
+                        if (req!=null) {
                             req = req.toLowerCase();
                             // Do a wildcard search for both name and description and URL
                             for (i = 0, l = data.length; i < l; ++i) {
-                                if (data[i].description.toLowerCase().indexOf(req) >= 0 ||
+                                var id = data[i].id;
+                                if (modeCloneTemplate && (id=='YYY' || id>20)) continue;
+                                
+                                if ( id=='XXX' || id=='YYY' ||
+                                    data[i].description.toLowerCase().indexOf(req) >= 0 ||
                                     data[i].URL.toLowerCase().indexOf(req) >= 0)
                                 {
                                     filtered.push(data[i]);
@@ -243,7 +263,19 @@
                         var oRecord = myDataTable.getRecord(elTargetCell);
                         if(oColumn.key !== 'URL' && oRecord){
                             var dbID = oRecord.getData("id");
-                            if(dbID>0) doCrosswalk(dbID);
+                            if(dbID>0){
+                                if (modeCloneTemplate) {
+                                    //doCloneDatabase(dbID);
+                                    dbName = registeredDBs[dbID][2];
+                                    var URL = top.HEURIST.baseURL 
+                                        + 'admin/setup/dboperations/cloneDatabase.php?db=<?= HEURIST_DBNAME?>&templatedb='+dbName;
+                                    document.location.href = URL;
+                                }else{
+                                    doCrosswalk(dbID);      
+                                }
+                            } 
+                            
+                            
                         }
                     }
 
@@ -268,14 +300,21 @@
                     });
                 };
 
-                YAHOO.util.Event.on('filter','keyup',function (e) {
+                //YAHOO.util.Event.on('filter','keyup',
+                $('#filter').on({'keyup':
+                function (e) {
                     clearTimeout(filterTimeout);
-                    setTimeout(updateFilter,600);
-                });
+                    if($('#filter').val()==''){
+                        updateFilter();
+                    }else{
+                        setTimeout(updateFilter, 600);    
+                    }
+                    
+                }});
 
                 //$('#statusMsg').hide();
                 $('#divLoading').hide();
-                
+                document.getElementById('div_clone_description').style.display = 'block';
         }//  initDbTable
         // Enter information about the selected database to an invisible form, and submit to the crosswalk page, to start crosswalking
         function doCrosswalk(dbID) {
@@ -289,6 +328,15 @@
             document.getElementById('divLoading').style.display = 'inline-block';
             document.getElementById('divLoadingMsg').innerHTML = 'Loading record types'
             document.getElementById('page-inner').style.display = 'none';
+        }
+        
+        //
+        //
+        //
+        function doCloneDatabase(dbID){
+          db = registeredDBs[dbID];
+          document.getElementById("cloneDatabseName").value = db[2];
+          document.forms["cloneDatabse"].submit();
         }
 
 
@@ -347,6 +395,35 @@
                 <input id="dbTitle" name="dbTitle" type="hidden">
                 <input id="dbPrefix" name="dbPrefix" type="hidden">
             </form>
+
+            <!--
+            <form id="cloneDatabse" action="../../setup/dboperations/cloneDatbase.php" method="POST">
+                <input id="cloneDatabseName" name="db" type="hidden">
+                <input name="mode" value="clone_template" type="hidden">
+            </form>
+            -->
+
+            
+            <div style="font-style:italic;display:none" id="div_clone_description">
+            
+<h4>Clone database</h4>
+
+<p>Click one of the copy icons above to clone the template database. You will become the owner of the clone which is completely independent from its source. The clone will include some example data (easily deleted), as well as saved filters and report formats.</p>
+
+<p>The cloned database is just a starting point which you can then extend or modify to your specific needs. You are free to do anything you wish in this cloned database - it is yours exclusively, until you invite others to share it.</p>
+
+<h4>Nothing suitable?</h4>
+
+<p>We only have a limited set of template databases, although we are working on more. The lack of a suitable template does not mean Heurist is not appropriate to your project. </p>
+
+<p>If you find nothing suitable as a starting point. <a href="#" 
+    onclick="{modeCloneTemplate=false; $('#div_clone_description').hide(); $('#filter').val(''); $('#filter').trigger('keyup'); return false;}"><b>follow this link</b></a>
+ to selectively add structural elements (record types, fields, vocabularies and terms) to your current database, chosen from the databases listed above or from databases created and registered by other users. </p>
+
+<p>If you find nothing suitable in any of the registered databases, you can also create new structural elements from scratch (and extend and modify existing elements) with Structure > Build on the Manage tab of the main page.</p>
+            
+            </div>
+            
         </div>
     </body>
 </html>

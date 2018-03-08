@@ -206,7 +206,7 @@ function db_clean($db_name, $verbose=true){
 * @param mixed $db_target
 * @param mixed $verbose
 */
-function db_clone($db_source, $db_target, $verbose=true, $nodata=false){
+function db_clone($db_source, $db_target, $verbose, $nodata=false, $isCloneTemplate){
 
     $res = true;
 
@@ -222,10 +222,24 @@ function db_clone($db_source, $db_target, $verbose=true, $nodata=false){
 
         if($res){
             
+            //$isCloneTemplate
+            $exception_for_clone_template = array('sysugrps','sysusrgrplinks',
+            'woot_chunkpermissions','woot_chunks','woot_recpermissions','woots',
+            'usrreminders','usrremindersblocklist','recthreadedcomments','usrrecentrecords','usrreportschedule','usrhyperlinkfilters');
+            
+            $data_tables = array('records','recdetails','reclinks','recrelationshipscache',
+            'recsimilarbutnotdupes','recthreadedcomments','recuploadedfiles','usrbookmarks','usrrecentrecords','usrrectaglinks',
+            'usrreminders','usrremindersblocklist','woot_chunkpermissions','woot_chunks','woot_recpermissions','woots');
+
+/*
+            $exception_for_clone_template = array('sysUGrps','sysUsrGrpLinks',
+            'woot_ChunkPermissions','woot_Chunks','woot_RecPermissions','woots',
+            'usrReminders','usrRemindersBlockList','recThreadedComments','usrRecentRecords','usrReportSchedule','usrHyperlinkFilters');
             $data_tables = array('Records','recDetails','recLinks','recRelationshipsCache',
             'recSimilarButNotDupes','recThreadedComments','recUploadedFiles','usrBookmarks','usrRecentRecords','usrRecTagLinks',
             'usrReminders','usrRemindersBlockList','woot_ChunkPermissions','woot_Chunks','woot_RecPermissions','woots');
-
+*/            
+            
             $tables = $mysqli->query("SHOW TABLES");
             if($tables){
 
@@ -236,10 +250,12 @@ function db_clone($db_source, $db_target, $verbose=true, $nodata=false){
                 while ($table = $tables->fetch_row()) { //loop for all tables
                     $table = $table[0];
                     
-                    if($nodata && in_array($table, $data_tables)){
+                    if($nodata && in_array(strtolower($table), $data_tables)){
                         continue;
                     }
-                    
+                    if($isCloneTemplate &&  in_array(strtolower($table), $exception_for_clone_template)){
+                        continue;
+                    }
                     
                     $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
                     $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  );
@@ -261,8 +277,22 @@ function db_clone($db_source, $db_target, $verbose=true, $nodata=false){
                     }
 
                     $mysqli->query("ALTER TABLE `".$table."` ENABLE KEYS");
-                }
+                }//while
 
+                if($isCloneTemplate){
+                    //change ownership OR remove entries for all users and groups but 0~3
+                    $mysqli->query('delete FROM usrRecTagLinks,usrTags WHERE rtl_TagID=tag_ID AND tag_UGrpID NOT IN (0,1,2,3)');
+                    $mysqli->query('delete FROM usrTags WHERE tag_UGrpID NOT IN (0,1,2,3)');
+
+                    $mysqli->query('delete FROM usrBookmarks WHERE bkm_UGrpID NOT IN (0,1,2,3)');
+                    $mysqli->query('delete FROM usrSavedSearches WHERE svs_UGrpID NOT IN (0,1,2,3)');
+                    
+                    $mysqli->query('update Records set rec_AddedByUGrpID=2 WHERE rec_AddedByUGrpID NOT IN (0,1,2,3)');
+                    $mysqli->query('update Records set rec_OwnerUGrpID=2 WHERE rec_OwnerUGrpID NOT IN (0,1,2,3)');
+                    $mysqli->query('update recUploadedFiles set ulf_UploaderUGrpID=2 WHERE ulf_UploaderUGrpID NOT IN (0,1,2,3)');
+                }
+                
+                
                 $mysqli->query("SET foreign_key_checks = 1"); //restore/enable foreign indexes verification
 
             }else{

@@ -39,14 +39,45 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.p
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../hserver/dbaccess/utils_db_load_script.php');
 
-if(isForAdminOnly("to clone a database")){
+if(isForAdminOnly("to clone a database")){ //first 20 databases are templates
     return;
 }
 
-mysql_connection_overwrite(DATABASE);
-if(mysql_error()) {
-    die("<h2>Error</h2>Sorry, could not connect to the database (mysql_connection_overwrite error)");
+$user_id = get_user_id(); //keep user id (need to copy current user into cloned db for template cloning)
+
+$templateddb = @$_REQUEST['templatedb'];
+$isCloneTemplate = ($templateddb!=null);
+
+if($isCloneTemplate){ //template db must be registered with id less than 21
+
+    if(strpos($templateddb,'hdb_')!==0){
+        $templateddb = HEURIST_DB_PREFIX .$templateddb;
+    }
+    mysql_connection_select($templateddb);
+    if(mysql_error()) {
+        die("<h2>Error</h2>Sorry, could not connect to the database $templateddb (mysql_connection_overwrite error)");
+    }
+    
+    $dbRegID = 'SELECT sys_dbRegisteredID FROM sysIdentification';
+    $res = mysql_query('select sys_dbRegisteredID from sysIdentification');
+    if (!$res) {
+        die("<h2>Error</h2>Unable to read database description from sysIdentification table. ".
+            "May indicate corrupted database. ".$talkToSysAdmin." MySQL error: " . mysql_error());
+    }
+    $res = mysql_fetch_row($res);
+    $dbRegID = $res[0];
+    
+    if(!($dbRegID>0 && $dbRegID<21)){
+        die("<h2>Error</h2>The database $templateddb is not a template. It must be registered and has ID within specific range");
+    }
+}else{
+    $templateddb = null;
+    mysql_connection_overwrite(DATABASE);
+    if(mysql_error()) {
+        die("<h2>Error</h2>Sorry, could not connect to the database ".DATABASE." (mysql_connection_overwrite error)");
+    }
 }
+
 ?>
 
 <html>
@@ -121,38 +152,74 @@ if(mysql_error()) {
         </script>
 
 
-        <div class="banner"><h2>Clone Database</h2></div>
+        <div class="banner"><h2>Clone <?php print ($isCloneTemplate?'Template ':'')?>Database</h2></div>
 
         <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
         <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
         <script src="../../../common/php/loadCommonInfo.php"></script>
         <div id="page-inner" style="overflow:auto">
 
+        
             <div id="loading" style="display:none">
                 <img alt="cloning ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
                 <strong><span id="divProgress">&nbsp; Cloning of database may take a few minutes for large databases </span></strong>
             </div>
             <div id="mainform">
 
+                <?php if(!$isCloneTemplate) { ?>
 
                 <p>
                     This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
-                    The new database is identical to the old in all respects including users, access and attaachments <br />
+                    The new database is identical to the old in all respects including users, access and attachments <br />
                     (beware of making many copies of databases containing many large files, as all uploaded files are copied).<br />
                     The target database is unregistered with the Heurist central index even if the source database is registered.
                 </p>
 
                 <?php
+                
+                }
+                
+                //verify that name of database is unique
+                if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
+                    $targetdbname = $_REQUEST['targetdbname'];
 
+                    // Avoid illegal chars in db name
+                    $hasInvalid = isInValid($targetdbname);
+                    if ($hasInvalid) {
+                        echo ("<p><hr><p>&nbsp;<p>Requested database copy name: <b>$targetdbname</b>".
+                            "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name");
+
+                            $_REQUEST['mode'] = 0;
+                            $_REQUEST['targetdbname'] = null;
+                            unset($_REQUEST['targetdbname']);
+                    } // rejecting illegal characters in db name
+                    else{
+
+                        $list = mysql__getdatabases();
+                        $list = array_map("arraytolower", $list);
+                        if(in_array(strtolower($targetdbname), $list)){
+                            echo ("<p class='error'>Warning: database '".$targetdbname."' already exists. Please choose a different name<br/></p>");
+                            $_REQUEST['mode'] = 0;
+                            $_REQUEST['targetdbname'] = null;
+                            unset($_REQUEST['targetdbname']);
+                        }
+                    }
+                }
+                
 
                 // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
 
-                if(!array_key_exists('mode', $_REQUEST) || !array_key_exists('targetdbname', $_REQUEST)){
+                if(@$_REQUEST['mode']!='2' || !@$_REQUEST['targetdbname']){
                     ?>
                     <div class="separator_row" style="margin:20px 0;"></div>
                     <form name='selectdb' action='cloneDatabase.php' method='get'>
                         <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
                         <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
+                        <?php
+                        if($isCloneTemplate){
+                            print '<input name="templatedb" value="'.$_REQUEST['templatedb'].'" type="hidden">';
+                        }
+                        ?>
                         <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
                             (all databases created by this installation of the software will have the same prefix).</p>
                         <p>
@@ -161,7 +228,7 @@ if(mysql_error()) {
                         <h3>Enter a name for the cloned database:</h3>
                         <div style="margin-left: 40px;">
                             <input type='text' name='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
-                            <input type='button' value='Clone "<?=HEURIST_DBNAME?>"'
+                            <input type='button' value='Clone "<?=($isCloneTemplate)?$_REQUEST['templatedb']:HEURIST_DBNAME?>"'
                                 onclick='onSubmit(event)'/>
                         </div>
 
@@ -186,26 +253,10 @@ function arraytolower($item)
 }
 
 if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
+
     $targetdbname = $_REQUEST['targetdbname'];
     $nodata = (@$_REQUEST['nodata']==1);
-
-    // Avoid illegal chars in db name
-    $hasInvalid = isInValid($targetdbname);
-    if ($hasInvalid) {
-        echo ("<p><hr><p>&nbsp;<p>Requested database copy name: <b>$targetdbname</b>".
-            "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name");
-        return false;
-    } // rejecting illegal characters in db name
-
-
-    $list = mysql__getdatabases();
-    $list = array_map("arraytolower", $list);
-    if(in_array(strtolower($targetdbname), $list)){
-        echo ("<p class='error'>Warning: database '".$targetdbname."' already exists. Please choose a different name<br/></p>");
-        return false;
-    }
-
-    $res = cloneDatabase($targetdbname, $nodata);
+    $res = cloneDatabase($targetdbname, $nodata, $templateddb);
     
     if(!$res){
         echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">WARNING: Your database has not been cloned.</h2>'
@@ -226,9 +277,11 @@ if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 // 4. add contrainsts, procedure and triggers
 // 5. remove registration info and assign originID for definitions
 //
-function cloneDatabase($targetdbname, $nodata=false) {
+function cloneDatabase($targetdbname, $nodata=false, $templateddb) {
     set_time_limit(0);
 
+    $isCloneTemplate = ($templateddb!=null);
+    
     $newname = HEURIST_DB_PREFIX.$targetdbname;
 
     //create new empty database
@@ -243,28 +296,47 @@ function cloneDatabase($targetdbname, $nodata=false) {
         db_drop($newname);
         return false;
     }
-
+    
     // Remove initial values from empty database
     mysql_connection_insert($newname);
     mysql_query('delete from sysIdentification where 1');
     mysql_query('delete from sysTableLastUpdated where 1');
-    mysql_query('delete from sysUsrGrpLinks where 1');
-    mysql_query('delete from sysUGrps where ugr_ID>=0');
     mysql_query('delete from defLanguages where 1');
+    
+    if($isCloneTemplate){
+        $source_database = $templateddb;
+        //copy current user from DATABASE to cloned database as user#2
+        mysql_query('update sysUGrps u1, '.$source_database.'.sysUGrps u2 SET '
+.'u1.ugr_Type=u2.ugr_Type ,u1.ugr_Name=u2.ugr_Name ,u1.ugr_LongName=u2.ugr_LongName ,u1.ugr_Description=u2.ugr_Description '
+.',u1.ugr_Password=u2.ugr_Password ,u1.ugr_eMail=u2.ugr_eMail, u1.ugr_FirstName=u2.ugr_FirstName ,u1.ugr_LastName=u2.ugr_LastName '
+.',u1.ugr_Department=u2.ugr_Department ,u1.ugr_Organisation=u2.ugr_Organisation ,u1.ugr_City=u2.ugr_City '
+.',u1.ugr_State=u2.ugr_State ,u1.ugr_Postcode=u2.ugr_Postcode ,u1.ugr_Interests=u2.ugr_Interests ,u1.ugr_Enabled=u2.ugr_Enabled '
+.',u1.ugr_MinHyperlinkWords=u2.ugr_MinHyperlinkWords '
+.',u1.ugr_IsModelUser=u2.ugr_IsModelUser ,u1.ugr_IncomingEmailAddresses=u2.ugr_IncomingEmailAddresses '
+.',u1.ugr_TargetEmailAddresses=u2.ugr_TargetEmailAddresses ,u1.ugr_URLs=u2.ugr_URLs,u1.ugr_FlagJT=u2.ugr_FlagJT '
+        .' where u1.ugr_ID=2 AND u2.ugr_ID='.get_user_id());
+        
+    }else{
+        $source_database = DATABASE;
+        mysql_query('delete from sysUsrGrpLinks where 1');
+        mysql_query('delete from sysUGrps where ugr_ID>=0');
+    }
 
+    
 
     echo_flush ("<p>Copy data</p>");
     // db_clone function in /common/php/db_utils.php does all the work
-    if( db_clone(DATABASE, $newname, true, $nodata) ){
+    if( db_clone($source_database, $newname, true, $nodata, $isCloneTemplate) ){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
         db_drop($newname);
         
         return false;
     }
-
-    //cleanup database to avoid issues with addition of constraints
     
+    //cleanup target database to avoid issues with addition of constraints
+    mysql_connection_insert($newname);
+
     //1. cleanup missed trm_InverseTermId
     mysql_query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID
         set t1.trm_InverseTermId=null
@@ -293,9 +365,15 @@ function cloneDatabase($targetdbname, $nodata=false) {
     mysql_query('delete FROM recDetails
         where dtl_UploadedFileID is not null
     and dtl_UploadedFileID not in (select ulf_ID from recUploadedFiles)');
-    
-    
 
+    //6. cleanup missed rec tags links
+    mysql_query('delete FROM usrRecTagLinks where rtl_TagID not in (select tag_ID from usrTags)');
+    mysql_query('delete FROM usrRecTagLinks where rtl_RecID not in (select rec_ID from Records)');
+
+    //7. cleanup orphaned bookmarks
+    mysql_query('delete FROM usrBookmarks where bkm_RecID not in (select rec_ID from Records)');
+
+    
     $sHighLoadWarning = "<p><h4>Note: </h4>Failure to clone a database may result from high server load. Please try again, and if the problem continues contact the Heurist developers at info heuristnetwork dot org</p>";
     
     // 4. add contrainsts, procedure and triggers
@@ -318,7 +396,6 @@ function cloneDatabase($targetdbname, $nodata=false) {
     }
 
     // 5. remove registration info and assign originID for definitions
-    mysql_connection_insert($newname);
     $sourceRegID = 0;
     $res = mysql_query('select sys_dbRegisteredID from sysIdentification where 1');
     if($res){
@@ -328,8 +405,9 @@ function cloneDatabase($targetdbname, $nodata=false) {
         }
     }
     //print "<p>".$sourceRegID."</p>";
-    // RESET register db ID
-    $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders=null where 1";
+    // RESET register db ID and zotero credentials
+    mysql_connection_insert($newname);
+    $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders=null, sys_eMailImapProtocol=null, sys_eMailImapUsername=null, sys_dbRights=null, sys_NewRecOwnerGrpID=0 where 1";
     $res1 = mysql_query($query1);
     if (mysql_error())  { //(mysql_num_rows($res1) == 0)
         print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().
