@@ -37,6 +37,7 @@
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../common/php/utilsMail.php');
 require_once(dirname(__FILE__).'/../../../hserver/dbaccess/utils_db_load_script.php');
 
 if(isForAdminOnly("to clone a database")){ //first 20 databases are templates
@@ -256,7 +257,7 @@ if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 
     $targetdbname = $_REQUEST['targetdbname'];
     $nodata = (@$_REQUEST['nodata']==1);
-    $res = cloneDatabase($targetdbname, $nodata, $templateddb);
+    $res = cloneDatabase($targetdbname, $nodata, $templateddb, $user_id);
     
     if(!$res){
         echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">WARNING: Your database has not been cloned.</h2>'
@@ -277,7 +278,7 @@ if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 // 4. add contrainsts, procedure and triggers
 // 5. remove registration info and assign originID for definitions
 //
-function cloneDatabase($targetdbname, $nodata=false, $templateddb) {
+function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     set_time_limit(0);
 
     $isCloneTemplate = ($templateddb!=null);
@@ -306,7 +307,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb) {
     if($isCloneTemplate){
         $source_database = $templateddb;
         //copy current user from DATABASE to cloned database as user#2
-        mysql_query('update sysUGrps u1, '.$source_database.'.sysUGrps u2 SET '
+        mysql_query('update sysUGrps u1, '.DATABASE.'.sysUGrps u2 SET '
 .'u1.ugr_Type=u2.ugr_Type ,u1.ugr_Name=u2.ugr_Name ,u1.ugr_LongName=u2.ugr_LongName ,u1.ugr_Description=u2.ugr_Description '
 .',u1.ugr_Password=u2.ugr_Password ,u1.ugr_eMail=u2.ugr_eMail, u1.ugr_FirstName=u2.ugr_FirstName ,u1.ugr_LastName=u2.ugr_LastName '
 .',u1.ugr_Department=u2.ugr_Department ,u1.ugr_Organisation=u2.ugr_Organisation ,u1.ugr_City=u2.ugr_City '
@@ -314,7 +315,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb) {
 .',u1.ugr_MinHyperlinkWords=u2.ugr_MinHyperlinkWords '
 .',u1.ugr_IsModelUser=u2.ugr_IsModelUser ,u1.ugr_IncomingEmailAddresses=u2.ugr_IncomingEmailAddresses '
 .',u1.ugr_TargetEmailAddresses=u2.ugr_TargetEmailAddresses ,u1.ugr_URLs=u2.ugr_URLs,u1.ugr_FlagJT=u2.ugr_FlagJT '
-        .' where u1.ugr_ID=2 AND u2.ugr_ID='.get_user_id());
+        .' where u1.ugr_ID=2 AND u2.ugr_ID='.$user_id);
         
     }else{
         $source_database = DATABASE;
@@ -396,6 +397,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb) {
     }
 
     // 5. remove registration info and assign originID for definitions
+    mysql_connection_insert($newname);
     $sourceRegID = 0;
     $res = mysql_query('select sys_dbRegisteredID from sysIdentification where 1');
     if($res){
@@ -406,8 +408,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb) {
     }
     //print "<p>".$sourceRegID."</p>";
     // RESET register db ID and zotero credentials
-    mysql_connection_insert($newname);
-    $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders=null, sys_eMailImapProtocol=null, sys_eMailImapUsername=null, sys_dbRights=null, sys_NewRecOwnerGrpID=0 where 1";
+    $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders='', sys_eMailImapProtocol='', sys_eMailImapUsername='', sys_dbRights='', sys_NewRecOwnerGrpID=0 where 1";
     $res1 = mysql_query($query1);
     if (mysql_error())  { //(mysql_num_rows($res1) == 0)
         print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().
@@ -438,6 +439,20 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb) {
     echo "<hr><p>&nbsp;</p><h2>New database '$targetdbname' created successfully</h2>";
     print "<p>Please access your new database through this link: <a href='".HEURIST_BASE_URL."?db=".$targetdbname.
     "' title='' target=\"_new\"><strong>".$targetdbname."</strong></a></p>";
+    
+    if($isCloneTemplate){
+        
+         $res = mysql_query('select ugr_Name, CONCAT(ugr_FirstName," ",ugr_LongName) as ugr_FullName,'
+         .'ugr_Organisation,ugr_eMail,ugr_Interests '
+         .' FROM sysUGrps WHERE ugr_ID=2');
+
+        $row = mysql_fetch_assoc($res);
+        if($row){
+            user_EmailAboutNewDatabase($row['ugr_Name'], $row['ugr_FullName'], $row['ugr_Organisation'],
+                    $row['ugr_eMail'], $targetdbname, $row['ugr_Interests'], $_REQUEST['templatedb']);
+        }
+    }
+    
     
     return true;
 } // straightCopyNewDatabase

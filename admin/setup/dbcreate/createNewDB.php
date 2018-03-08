@@ -62,34 +62,6 @@ function errorOut($msg){
     print '<p class="error ui-state-error" style="margin:10px"><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>'
     .$msg.'</p>';
 }
-
-//
-//
-//
-function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation, $ugr_eMail, $newDatabaseName, $ugr_Interests){
-
-    //create email text for admin
-    $email_text =
-    "There is new Heurist database.\n".
-    "The user who created the new database is:\n".
-    "Database name: ".$newDatabaseName."\n".
-    "Full name:    ".$ugr_FullName."\n".
-    "Email address: ".$ugr_eMail."\n".
-    "Organisation:  ".$ugr_Organisation."\n".
-    "Research interests:  ".$ugr_Interests."\n".
-    "Go to the address below to review further details:\n".
-    HEURIST_BASE_URL."?db=".$newDatabaseName;
-
-    $email_title = 'New database: '.$newDatabaseName.' by '.$ugr_FullName.' ['.$ugr_eMail.']';
-
-    //HEURIST_MAIL_TO_ADMIN
-    $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
-    if($rv != 'ok'){
-        return false;
-    }
-    return true;
-}
-
 ?>
 <html>
     <head>

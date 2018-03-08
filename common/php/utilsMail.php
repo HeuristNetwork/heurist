@@ -101,4 +101,34 @@ function checkSmtp(){
   }
   return true;
 }
+
+//---------------------------------------------------------------------------
+//
+//
+//
+function user_EmailAboutNewDatabase($ugr_Name, $ugr_FullName, $ugr_Organisation, $ugr_eMail, $newDatabaseName, 
+                $ugr_Interests, $cloned_from_db=null){
+
+    //create email text for admin
+    $email_text =
+    "There is new Heurist database.\n".
+    "Database name: ".$newDatabaseName."\n\n".
+    ($cloned_from_db?('Cloned from database '.$cloned_from_db."\n"):'').
+    "The user who created the new database is:$ugr_Name\n".
+    "Full name:    ".$ugr_FullName."\n".
+    "Email address: ".$ugr_eMail."\n".
+    "Organisation:  ".$ugr_Organisation."\n".
+    "Research interests:  ".$ugr_Interests."\n".
+    "Go to the address below to review further details:\n".
+    HEURIST_BASE_URL."?db=".$newDatabaseName;
+
+    $email_title = ($cloned_from_db?'Cloned':'New').' database: '.$newDatabaseName.' by '.$ugr_FullName.' ['.$ugr_eMail.']';
+
+    //HEURIST_MAIL_TO_ADMIN
+    $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
+    if($rv != 'ok'){
+        return false;
+    }
+    return true;
+}
 ?>
