@@ -129,8 +129,8 @@
 
         $query = "INSERT INTO Records
         (rec_AddedByUGrpID, rec_RecTypeID, rec_OwnerUGrpID, rec_NonOwnerVisibility,"
-        ."rec_URL, rec_ScratchPad, rec_AddedByImport, rec_FlagTemporary) "
-        ."VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        ."rec_URL, rec_ScratchPad, rec_Added, rec_AddedByImport, rec_FlagTemporary) "
+        ."VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $mysqli->prepare($query);
 
@@ -140,8 +140,11 @@
         $rec_imp  = (@$record['AddedByImport']?1:0);
         $rec_temp = (@$record['FlagTemporary']?1:0);
 
-        $stmt->bind_param('iiisssii', $currentUserId, $rectype, $ownerid, $access,
-            $rec_url, $rec_scr, $rec_imp, $rec_temp);
+        //DateTime('now')->format('Y-m-d H:i:s') is same as date('Y-m-d H:i:s')
+        $data_add = date('Y-m-d H:i:s');
+        
+        $stmt->bind_param('iiissssii', $currentUserId, $rectype, $ownerid, $access,
+            $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp);
         $stmt->execute();
         $newId = $stmt->insert_id;
         $syserror = $mysqli->error;

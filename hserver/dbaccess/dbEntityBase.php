@@ -287,8 +287,10 @@ class DbEntityBase
         
         $fieldvalues = $this->data['fields'];
         
-        $table_prefix = $this->config['tablePrefix'];
-        if (substr($table_prefix, -1) !== '_') {
+        $table_prefix = @$this->config['tablePrefix'];
+        if($table_prefix==null){
+            $table_prefix = '';
+        }else if (substr($table_prefix, -1) !== '_') {
             $table_prefix = $table_prefix.'_';
         }
         $rec_ID = intval(@$fieldvalues[$this->primaryField]); // $table_prefix.'ID'

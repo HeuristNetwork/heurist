@@ -1090,6 +1090,9 @@
                     foreach($_flds as $fld){
                         array_push($fields, $fld->name);
                     }
+                    $date_add_index = array_search('rec_Added', $fields);
+                    $date_mod_index = array_search('rec_Modified', $fields);
+                    
                     if($needThumbField) array_push($fields, 'rec_ThumbnailURL');
                     if($needThumbBackground) array_push($fields, 'rec_ThumbnailBg');
                     //array_push($fields, 'rec_Icon'); //last one -icon ID
@@ -1113,12 +1116,26 @@
                             array_push( $row, mysql__select_list2($mysqli, $query));
                         }
                         
+                        //convert add and modified date to UTC
+                        if($date_add_index!==false) {
+                            $row[$date_add_index] = DateTime::createFromFormat('Y-m-d H:i:s', $row[$date_add_index])
+                                                ->setTimezone(new DateTimeZone('UTC'))
+                                                ->format('Y-m-d H:i:s');
+                        }
+                        if($date_mod_index!==false) {
+                            $row[$date_mod_index] = DateTime::createFromFormat('Y-m-d H:i:s', $row[$date_mod_index])
+                                                ->setTimezone(new DateTimeZone('UTC'))
+                                                ->format('Y-m-d H:i:s');
+                        }
+                        
+                        
                         //array_push( $row, $row[4] ); //by default icon if record type ID
                         $records[$row[2]] = $row;
                         array_push($order, $row[2]);
                         if(!@$rectypes[$row[4]]){
                             $rectypes[$row[4]]=1;
                         }
+                        
                     }
                     $res->close();
                     

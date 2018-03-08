@@ -135,7 +135,16 @@ if(!$is_map_popup){
                     currentImg.parentNode.className = "thumb_image";
                 }
             }
-
+            
+            //
+            //
+            function printLTime(sdate){
+                var date = new Date(sdate+" UTC");
+                document.write((''+date.getHours()).padStart(2, "0")
+                        +':'+(''+date.getMinutes()).padStart(2, "0")
+                        +':'+(''+date.getSeconds()).padStart(2, "0"));
+            }
+            
             //
             //
             function showPlayer(obj, id, url) {
@@ -801,10 +810,18 @@ if($is_map_popup){
                     .' '.$bd['val'].'</div></div>';
                 $prevLbl = $bd['name'];
             }
+            
+            $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']); //get form database in servet time
+            $mod_date = $mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
+            $mod_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
+                            $mod_date.'")</script> local)';
             ?>
 
             <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
-                    <div class=detailType>Updated</div><div class=detail><?= $bib['rec_Modified'] ?></div>
+                    <div class=detailType>Updated</div><div class=detail>
+                        <?php print $mod_date
+                                .' '.$mod_date_local; ?>
+                    </div>
             </div>
             <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
                     <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>">

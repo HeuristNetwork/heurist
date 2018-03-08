@@ -33,8 +33,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
-        this.options.width = 640;
-        this.options.height = 480;
+        this.options.width = 700;
+        this.options.height = 520;
 
         this._super();
     },

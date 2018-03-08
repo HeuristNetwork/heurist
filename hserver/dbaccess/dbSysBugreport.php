@@ -160,6 +160,9 @@ class DbSysBugreport extends DbEntityBase
         
         if (!$geekMail->send())
         {
+            //$errors = $geekMail->getDebugger();
+            //print_r($errors);
+            
              $this->system->addError(HEURIST_SYSTEM_CONFIG, 
                     'Cannot send email. Please ask system administrator to verify that mailing is enabled on your server');
             return false;
