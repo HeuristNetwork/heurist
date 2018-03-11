@@ -444,6 +444,7 @@ function hSvsEdit(args) {
 
                 
                 function __getFilterString(){
+                    
                     var filter = $dlg.find('#svs_Query').val();
                     if(filter.trim()!=''){
                         var rules = $dlg.find('#svs_Rules').val();

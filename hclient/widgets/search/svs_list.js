@@ -61,7 +61,7 @@ $.widget( "heurist.svs_list", {
         }
 
         var that = this;
-
+        
         //panel to show list of saved filters
         this.search_tree = $( "<div>" ).css({'height':'100%'}).appendTo( this.element );
 
@@ -1063,6 +1063,8 @@ $.widget( "heurist.svs_list", {
                             node.moveTo(node.getParent(), "after");
                             node.setActive();
                             break;
+                        case "copycb":
+                            break;    
                         case "embed":   //EMBED
                             //show popup with link
                             if(!node.folder && node.key>0){
@@ -1240,7 +1242,6 @@ $.widget( "heurist.svs_list", {
             /*
             * Context menu (https://github.com/mar10/jquery-ui-contextmenu)
             */
-            var that = this;
             tree.contextmenu({
                 delegate: "li", //span.fancytree-node
                 menu: [
@@ -1248,6 +1249,8 @@ $.widget( "heurist.svs_list", {
                     {title: "New Faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
                     {title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
                     {title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" }, // <kbd>[F2]</kbd>
+                    {title: "----"},
+                    {title: "Copy to clipboard", cmd: "copycb", uiIcon: "ui-icon-copy" }, 
                     {title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" }, 
                     {title: "----"},
                     {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }, // <kbd>[Ctrl+Shift+N]</kbd>
@@ -1265,12 +1268,20 @@ $.widget( "heurist.svs_list", {
                     node.setActive();
                 },
                 select: function(event, ui) {
-                    var that = this;
-                    // delay the event, so the menu can close and the click event does
-                    // not interfere with the edit control
-                    setTimeout(function(){
-                        $(that).trigger("nodeCommand", {cmd: ui.cmd});
-                        }, 100);
+                    
+                    if(ui.cmd=='copycb'){
+                            var wtree = $(tree).fancytree("getTree"),
+                                node = wtree.getActiveNode();
+                            that._getFilterString(node.key);
+                    }else{
+                        var that2 = this;
+                        // delay the event, so the menu can close and the click event does
+                        // not interfere with the edit control
+                        setTimeout(function(){
+                            $(that2).trigger("nodeCommand", {cmd: ui.cmd});
+                            }, 100);
+                            
+                    }
                 }
             });
 
@@ -1773,9 +1784,64 @@ $.widget( "heurist.svs_list", {
 
         window.hWin.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary',} );
 
-    }
+    },
     
-    ,_showEmbedDialog: function(svs_ID){
+    //
+    //
+    //
+    _getFilterString: function( svs_ID ){
+        
+        var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
+        if(svs && !svs[_FACET]){
+            var qsearch = svs[_QUERY];
+            var prms = Hul.parseHeuristQuery(qsearch);
+            
+                        var res = '';
+                        var filter = prms.q;
+                        var rules = prms.rules;
+
+                        try {
+                            var r = $.parseJSON(filter);
+                            if($.isArray(r) || $.isPlainObject(r)){
+                                if(r.facets) return;
+                                
+                                res = '{"q":'+filter;
+                            }
+                        }
+                        catch (err) {
+                        }
+                        if(Hul.isempty(res)){
+                            //escape backslash to avoid errors
+                            res = '{"q":"'+filter.split('"').join('\\\"')+'"';
+                        }
+
+                        if(!Hul.isempty(rules)){
+                            res = res + ',"rules":'+rules+'}';
+                        } else{
+                            res = res + '}';     
+                        }            
+
+                        var dummy = document.createElement("input");
+                        dummy.value = res;
+                        document.body.appendChild(dummy);
+                        dummy.select();
+                        try {
+                            //console.log(
+                            document.execCommand("copy");  // Security exception may be thrown by some browsers.
+                        } catch (ex) {
+                            console.warn("Copy to clipboard failed.", ex);
+                        } finally {
+                            document.body.removeChild(dummy);
+                        }            
+            
+        }
+        
+    },
+    
+    //
+    //
+    //
+    _showEmbedDialog: function(svs_ID){
         
         if(!this.embed_dialog){
             var that = this;
