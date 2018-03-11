@@ -645,8 +645,8 @@ function hLayout(args) {
             $d.css('width', '98%');
             $d.css('height', '98%');
         }else {
-            $d.css('width', '99%');
-            $d.css('height', '99%');
+            $d.css('width', '99.999%');
+            $d.css('height', '99.999%');
         }
 
         return $d;

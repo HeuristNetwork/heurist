@@ -1733,6 +1733,9 @@ ed_html +
                 _timeLineFixHeightBug();
 
                 keepMinMaxDate = true;
+                
+                _adjustLegendHeight();
+                
                 }, 1000);
         }
     }

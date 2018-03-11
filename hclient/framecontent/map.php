@@ -23,6 +23,8 @@
 //<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 //
 require_once(dirname(__FILE__)."/initPage.php");
+
+$system->defineConstants();
 ?>
 <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
 
@@ -174,6 +176,8 @@ require_once(dirname(__FILE__)."/initPage.php");
         }
 
         var mylayout = $('#mapping').layout(layout_opts);
+        
+        $('#map').css('padding',0);
         
         // Mapping data
         var mapdata = [];
@@ -399,28 +403,39 @@ require_once(dirname(__FILE__)."/initPage.php");
         
         setTimeout(function(){
             var legend = document.getElementById('map_legend');
-            var ch = $("#map_legend .content").height()+65;
+            var ch = $("#map_legend .content").height()+50;
 
+            
             var nt = parseInt($(legend).css('bottom'), 10);
+            nt = 30;
             var mh = $('#map').height();
             
             var is_collapsed = ($(legend).find('#collapse').text() == "+");
-            
+           
+           /*
             if(is_collapsed===true){
                 $(legend).css('top', mh-nt-50);   
             }else{
             
-            if(mh-nt-ch < 70){
-                $(legend).css('top', 50);
-            }else{
-                $(legend).css('top', mh-nt-ch);        
+                if(mh-nt-ch < 70){
+                    $(legend).css('top', 50);
+                }else{
+                    $(legend).css('top', mh-nt-ch);        
+                }
             }
-        
-            }
+            */
             
-//console.log('lh='+(mh-nt-ch)+'  mh='+mh+'  ch='+ch);            
-            
+//console.log('legend h='+(mh-nt-ch)+'  maph='+mh+'  contetn h='+ch+' bottom '+nt);            
+                         
             $(legend).css('bottom', nt);
+            
+            if(mh-nt-ch<70){
+                ch = mh-nt-50;
+            }
+            var top = mh-nt-ch;
+            $(legend).css('top',top).height(ch);
+            
+//console.log('legend h='+ch+' top '+top+' bottom '+nt);            
             
         },500);
     }
@@ -537,8 +552,9 @@ require_once(dirname(__FILE__)."/initPage.php");
     <div id="mapping" style="min-height:1px;height:100%; width:100%;cursor:progress">
         <!-- Map -->
         <div class="ui-layout-center">
-            <div id="map" style="width:100%; height:100%">Mapping</div>
-            <div id="map_empty_message" style="width:100%; height:100%;margin:7px;display: none;">There are no spatial objects to plot on map</div>
+                <div id="map" style="width:100%; height:100%" class="ui-layout-content">Mapping</div>
+                <div id="map_empty_message" style="width:100%; height:100%;margin:7px;display: none;">There are no spatial objects to plot on map</div>
+            
         </div>
 
         <!-- Toolbar -->
@@ -552,7 +568,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             
             <div id="mapSelector" class="map-inited" style="float:left;">
                 <label id="map-doc-select-lbl"><i>Map document:</i></label>
-                <button id="mapSelectorBtn"></button> 
+                <button id="mapSelectorBtn" class="truncate" style="max-width: 200px;"></button> 
             </div>
             <div id="mapToolbar" class="map-inited" style="float:left;display:none">
                 <button id="btnMapRefresh" xxxdisabled="disabled" title="Refresh/reload current Map Document">Refresh current map</button>
@@ -579,7 +595,8 @@ require_once(dirname(__FILE__)."/initPage.php");
             </select>-->
 
             <!-- Legend overlay -->
-            <div id="map_legend" style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px; overflow-y:auto; display:none;">
+            <div id="map_legend" 
+                style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px;overflow-y:auto; display:none;">
                 <div id="map_extents"  style="font-size: 0.9em;display:inline-block;visibility:hidden;padding-bottom:1em;">Zoom to:&nbsp;
                         <select id="selMapBookmarks" style="font-size:1.0em;"></select>
                 </div>

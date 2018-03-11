@@ -999,7 +999,7 @@ map.data.addListener('mouseover', function(event) {
             }
 
             //request['getrelrecs'] = 1;  //return all related records including relationship records
-            request['detail'] = 'timemap';
+            request['detail'] = 'detail';//'timemap';
 
             if(loadingbar==null){
                 var image = window.hWin.HAPI4.baseURL+'hclient/assets/loading_bar.gif';
@@ -1564,8 +1564,8 @@ map.data.addListener('mouseover', function(event) {
             var colorPicker = $dlg_edit_layer.find("#layer_color");
 
             colorPicker.colorpicker('val', mapdata.color);
-
-            //colorPicker.css('background-color', mapdata.color)
+            //colorPicker.
+            //$('.evo-pop').css('z-index', '1000000 !important'); //ui-front in h4styles 999999+1
 
             $dlg_edit_layer.find(".messages").removeClass( "ui-state-highlight" ).text('');
         }
@@ -1586,11 +1586,10 @@ map.data.addListener('mouseover', function(event) {
                     __onOpen();
                 }
             });
-
-            $dlg_edit_layer.find("#layer_color").colorpicker({
+            
+             $dlg_edit_layer.find("#layer_color").colorpicker({
                 hideButton: false, //show button right to input
-                showOn: "both"  //button, focus
-            });
+                showOn: "both"});
 
 
         }
@@ -1727,7 +1726,7 @@ map.data.addListener('mouseover', function(event) {
         mapping = _mapping;
         map = _mapping.getNativeMap();
         var legend = document.getElementById('map_legend');
-        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legend);
+        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(legend); //LEFT_BOTTOM
         
         var warning = document.getElementById('map_limit_warning');
         map.controls[google.maps.ControlPosition.RIGHT_TOP].push(warning);

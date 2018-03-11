@@ -75,7 +75,7 @@ body {
     padding: 0.1em 2.1em 0.2em 0.2em;
 }
 .ui-front{
-    z-index: 999999999;
+    z-index: 999999;
 }
 /*  LAYOUT */
 .ui-layout-pane {
@@ -140,7 +140,7 @@ body {
 }
 
 .ui-resizable-resizing {
-    z-index: 9999999 !important;
+    z-index: 99999 !important;
 }
 .ui-widget {
 }
