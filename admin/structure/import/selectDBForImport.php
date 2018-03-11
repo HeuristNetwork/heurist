@@ -69,7 +69,7 @@
 
         <script type="text/javascript">
         var registeredDBs = {};
-        var modeCloneTemplate = true;
+        var modeCloneTemplate = true; //two modes - clone template and browse for rt import
         var myDataTable;
 
     $(document).ready(function() {
@@ -78,6 +78,25 @@
         if(params && params['popup']){
                 //$('.banner').hide();
         }
+        
+        if(params && params['browse']==1){
+            setModeCloneTemplate(false);
+        }else{
+            setModeCloneTemplate(true);
+<?php
+            $isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false);
+            if($isOutSideRequest) { //clone from template not allowed
+?>        
+                modeCloneTemplate = false;
+                $('#div_clone_description').hide(); 
+                $('#cloneNotAllowed').show();
+                $('#div_DB_selector').hide();
+<?php            
+            }
+?>        
+        }
+        
+        
         //document.getElementById("statusMsg").innerHTML = "";
         document.getElementById("filterDiv").style.display = "block";
 
@@ -314,7 +333,9 @@
 
                 //$('#statusMsg').hide();
                 $('#divLoading').hide();
-                document.getElementById('div_clone_description').style.display = 'block';
+                if(modeCloneTemplate){
+                    document.getElementById('div_clone_description').style.display = 'block';
+                }
         }//  initDbTable
         // Enter information about the selected database to an invisible form, and submit to the crosswalk page, to start crosswalking
         function doCrosswalk(dbID) {
@@ -338,9 +359,21 @@
           document.getElementById("cloneDatabseName").value = db[2];
           document.forms["cloneDatabse"].submit();
         }
-
-
+        
     });
+
+
+        function setModeCloneTemplate(mode){
+            modeCloneTemplate = mode;
+            if(modeCloneTemplate){
+                $('#div_clone_description').show(); 
+                $('#divHeader').text('Clone template database');    
+            }else{
+                $('#cloneNotAllowed').hide();
+                $('#div_clone_description').hide(); 
+                $('#divHeader').text('Import structural definitions into current database');
+            }
+        }
 
         </script>
     </head>
@@ -350,16 +383,23 @@
         <script src="../../../common/php/loadCommonInfo.php"></script>
 
         <div class="banner">
-            <h2 style="display:inline-block">Import structural definitions into current database</h2>
+            <h2 style="display:inline-block" id="divHeader">Import structural definitions into current database</h2>
         
             <div id="divLoading" style="display:inline-block">&nbsp;<img src="../../../common/images/mini-loading.gif" width="16" height="16" />&nbsp;&nbsp;<span id="divLoadingMsg">Loading databases ...   (Please be patient - this may take several seconds on slow connections)</span></div>
         
         </div>
         <div id="page-inner" style="overflow:auto;top:20;">
 
+            <div id="cloneNotAllowed" style="display:none;font-style:italic;padding-top:10px">
+<p>Cloning of templates can only be carried out on the Heurist service at heurist.sydney.edu.au. You are accessing an alternative service. In order to create a database based on these templates you will need to register with / log into heurist.sydney.edu.au </p>
 
-           <h4>Use the filter to locate a specific term in the name or description. Click the database icon on the left to view available record types in that database and select them for addition to this database (including all related record types, fields and terms).</h4> 
-            
+<p>Having created and experimented with the clone you can download it with Manage > Administration > Create archive package. The downloaded database can then be loaded on your server by your system administrator (or contact support - at - heuristnetwork dot org for assistance).</p>
+
+<p><a href="#" 
+    onclick="{setModeCloneTemplate(false); $('#div_DB_selector').show(); return false;}"><b>follow this link</b></a>
+ to selectively add structural elements (record types, fields, vocabularies and terms) to your current database</p>
+           </div>
+        
 <!--            
             
             The list below shows available databases registered with the Heurist Master Index database
@@ -376,6 +416,9 @@
                 as this list only shows databases with format version number <?=HEURIST_DBVERSION?>.
             </h4>
 -->
+            <div id="div_DB_selector">
+           <h4>Use the filter to locate a specific term in the name or description. Click the database icon on the left to view available record types in that database and select them for addition to this database (including all related record types, fields and terms).</h4> 
+            
             <div class="markup" id="filterDiv" style="display:none">
                 <label for="filter">Filter:</label> <input type="text" id="filter" value="">
                 <div id="tbl"></div>
@@ -383,7 +426,7 @@
             <div id="topPagination"></div>
             <div id="selectDB"></div>
             <div id="bottomPagination"></div>
-
+            </div>
 
             <!-- Beware: buildCrosswalks.php does includes of record structure in  admin/structure/crosswalk, and these includes
             appear to use paths relative to the calling script not relative to buildCrosswalks; so this will break if moved to
@@ -417,7 +460,7 @@
 <p>We only have a limited set of template databases, although we are working on more. The lack of a suitable template does not mean Heurist is not appropriate to your project. </p>
 
 <p>If you find nothing suitable as a starting point. <a href="#" 
-    onclick="{modeCloneTemplate=false; $('#div_clone_description').hide(); $('#filter').val(''); $('#filter').trigger('keyup'); return false;}"><b>follow this link</b></a>
+    onclick="{setModeCloneTemplate(false); $('#filter').val(''); $('#filter').trigger('keyup'); return false;}"><b>follow this link</b></a>
  to selectively add structural elements (record types, fields, vocabularies and terms) to your current database, chosen from the databases listed above or from databases created and registered by other users. </p>
 
 <p>If you find nothing suitable in any of the registered databases, you can also create new structural elements from scratch (and extend and modify existing elements) with Structure > Build on the Manage tab of the main page.</p>

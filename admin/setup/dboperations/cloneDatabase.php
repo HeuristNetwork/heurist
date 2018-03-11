@@ -440,19 +440,19 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     print "<p>Please access your new database through this link: <a href='".HEURIST_BASE_URL."?db=".$targetdbname.
     "' title='' target=\"_new\"><strong>".$targetdbname."</strong></a></p>";
     
-    if($isCloneTemplate){
-        
-         $res = mysql_query('select ugr_Name, CONCAT(ugr_FirstName," ",ugr_LongName) as ugr_FullName,'
+    //SEND EMAIL ABOUT CREATING NEW DB
+    $res = mysql_query('select ugr_Name, CONCAT(ugr_FirstName," ",ugr_LongName) as ugr_FullName,'
          .'ugr_Organisation,ugr_eMail,ugr_Interests '
-         .' FROM sysUGrps WHERE ugr_ID=2');
+         .' FROM sysUGrps WHERE ugr_ID='.($isCloneTemplate?'2':$user_id));
 
-        $row = mysql_fetch_assoc($res);
-        if($row){
-            user_EmailAboutNewDatabase($row['ugr_Name'], $row['ugr_FullName'], $row['ugr_Organisation'],
-                    $row['ugr_eMail'], $targetdbname, $row['ugr_Interests'], $_REQUEST['templatedb']);
-        }
+    $row = mysql_fetch_assoc($res);
+    if($row){
+        user_EmailAboutNewDatabase($row['ugr_Name'], $row['ugr_FullName'], $row['ugr_Organisation'],
+                $row['ugr_eMail'], $targetdbname, $row['ugr_Interests'],
+                ($isCloneTemplate?$_REQUEST['templatedb']:HEURIST_DBNAME),
+                $isCloneTemplate);
     }
-    
+
     
     return true;
 } // straightCopyNewDatabase
