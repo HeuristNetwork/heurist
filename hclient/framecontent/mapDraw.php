@@ -221,7 +221,7 @@ console.log('load google map api')
             <div>
                 <label>Paste geo data in supported format (GeoJSON,.....)</label>
             </div>
-            <textarea cols="" rows="" id="geodata-textarea"
+            <textarea cols="" rows="" id="geodata_textarea"
                 style="position:absolute;top:2em;bottom:0;width:97%;resize:none"></textarea>
         </div>
 

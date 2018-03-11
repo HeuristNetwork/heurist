@@ -1042,16 +1042,18 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             var titleYes = window.hWin.HR('Yes'),
             titleNo = window.hWin.HR('No'),
             buttons = {};
+            
+            var $dlg;
 
             buttons[titleYes] = function() {
-                _loadGeoJSON( $('#geodata-textarea').val() );
+                _loadGeoJSON( $dlg.find('#geodata_textarea').val() );
                 $dlg.dialog( "close" );
             };
             buttons[titleNo] = function() {
                 $dlg.dialog( "close" );
             };
 
-            var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
+            $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                 element: document.getElementById( "get-set-coordinates" ),
                 resizable:false,
                 width:690, height:400,
@@ -1063,7 +1065,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         $('#get-geometry-button').button().click(function(){
 
-            $('#geodata-textarea').val(JSON.stringify(_getGeoJSON()));    
+            $('#geodata_textarea').val(JSON.stringify(_getGeoJSON()));    
 
             var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                 element: document.getElementById( "get-set-coordinates" ),
