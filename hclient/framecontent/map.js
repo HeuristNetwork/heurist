@@ -64,9 +64,9 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
             "color": "#0000FF",  //for lines and polygones
             "lineColor": "#0000FF",
             //"icon": "assets/star-red.png",
-            "iconSize": [24,24], //[25,25],
+            "iconSize": [16,16], //[24,24],
             "iconShadow": null,
-            "iconAnchor":[9,17]
+            "iconAnchor":[8,8] //[9,17]
     });
 
 
