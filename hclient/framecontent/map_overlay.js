@@ -972,34 +972,17 @@ map.data.addListener('mouseover', function(event) {
     */
     function _addQueryLayer(source, index) {
         // Query
-        if(source.query !== undefined) {
+        if(source && !window.hWin.HEURIST4.util.isempty(source.query)) {
             //console.log("Query: " + source.query);
+            var request = window.hWin.HEURIST4.util.parseHeuristQuery(source.query);
             
-            
-
-            var request = null;
-            try{
-                var query = window.hWin.HEURIST4.util.isObject(source.query) ?source.query :JSON.parse(source.query);
-                if(query && query['q']){
-                    request = { q: query['q'], 
-                        rules: query['rules'],
-                        w: query['w']?query['w']:'all',
-                        //keep primary rt in case faceted search (need for DH) to distinguish what info to show in map popup
-                        primary_rt:query['primary_rt']}; 
-                }
-            }catch(err){
-            }
-            if(request==null){
-                if(source.query){ //this is simple (non JSON) query without rules
-                    request = {q: source.query, w: 'all'};
-                }else{
-                    $('#mapping').css('cursor','auto');
-                    return;
-                }
+            if(window.hWin.HEURIST4.util.isempty(request.q)){
+                $('#mapping').css('cursor','auto');
+                return;
             }
 
             //request['getrelrecs'] = 1;  //return all related records including relationship records
-            request['detail'] = 'detail';//'timemap';
+            request['detail'] = request.rules?'detail':'timemap'; //@todo on server side timemap details for rules
 
             if(loadingbar==null){
                 var image = window.hWin.HAPI4.baseURL+'hclient/assets/loading_bar.gif';
@@ -1056,6 +1039,8 @@ map.data.addListener('mouseover', function(event) {
             );*/
 
 
+        }else{
+            $('#mapping').css('cursor','auto');
         }
     }
 

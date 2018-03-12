@@ -179,13 +179,19 @@ window.hWin.HEURIST4.util = {
                     
                     query_string = query_string + '&q=' + sq;
                 }
-                if(!window.hWin.HEURIST4.util.isempty(query_request.rules)){
+                
+                var rules = query_request.rules;
+                if(!window.hWin.HEURIST4.util.isempty(rules)){
+                    if($.isArray(query_request.rules) || $.isPlainObject(query_request.rules)){
+                        rules = JSON.stringify(query_request.rules);
+                    }
                     //@todo simplify rules array - rempove redundant info
                     query_string = query_string + '&rules=' + 
-                        (encode?encodeURIComponent(query_request.rules):query_request.rules) + 
+                        (encode?encodeURIComponent(rules):rules) + 
                         ((query_request.rulesonly==1 || query_request.rulesonly==true)?'&rulesonly=1':'');
-                        
                 }
+                
+                        
             }else{
                 query_string = query_string + '&w=all';
             }        
@@ -344,17 +350,34 @@ window.hWin.HEURIST4.util = {
     //
     parseHeuristQuery: function(qsearch)
     {
-        var domain = null, rules = '', rulesonly = 0, notes = '';
-        if(qsearch && qsearch.indexOf('?')==0){
-            domain  = window.hWin.HEURIST4.util.getUrlParameter('w', qsearch);
-            rules   = window.hWin.HEURIST4.util.getUrlParameter('rules', qsearch);
-            rulesonly = window.hWin.HEURIST4.util.getUrlParameter('rulesonly', qsearch);
-            notes   = window.hWin.HEURIST4.util.getUrlParameter('notes', qsearch);
-            qsearch = window.hWin.HEURIST4.util.getUrlParameter('q', qsearch);
+        var domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null;
+        if(qsearch){
+            
+            if(typeof qsearch === 'string' && qsearch.indexOf('?')==0){ //this is quesry in form of URL 
+                domain  = window.hWin.HEURIST4.util.getUrlParameter('w', qsearch);
+                rules   = window.hWin.HEURIST4.util.getUrlParameter('rules', qsearch);
+                rulesonly = window.hWin.HEURIST4.util.getUrlParameter('rulesonly', qsearch);
+                notes   = window.hWin.HEURIST4.util.getUrlParameter('notes', qsearch);
+                qsearch = window.hWin.HEURIST4.util.getUrlParameter('q', qsearch);
+            }else{ //it may be aquery in form of json
+            
+                var r = window.hWin.HEURIST4.util.isJSON(qsearch);
+                if(r!==false){
+                    if(r.rules){
+                        rules = r.rules;
+                    }
+                    if(r.q){
+                        qsearch = r.q;
+                    }
+                    domain = r.w?r.w:'all';
+                    primary_rt= r.primary_rt; 
+                }
+            }
+            
         }
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
-        return {q:qsearch, w:domain, rules:rules, rulesonly:rulesonly, notes:notes};
+        return {q:qsearch, w:domain, rules:rules, rulesonly:rulesonly, notes:notes, primary_rt:primary_rt};
     },
 
     //
@@ -367,7 +390,7 @@ window.hWin.HEURIST4.util = {
                     value = $.parseJSON(value);    
                 }
                 if($.isArray(value) || $.isPlainObject(value)){
-                    return true;
+                    return value;
                 }
             }
             catch (err) {
@@ -385,13 +408,24 @@ window.hWin.HEURIST4.util = {
         if(!window.hWin.HEURIST4.util.isempty(filter.trim())){
             
             var hasRules = !window.hWin.HEURIST4.util.isempty(rules);
+            if(hasRules){
+                res = '{"q":';
+            }
 
-            if(window.hWin.HEURIST4.util.isJSON(filter)){
-                res = (hasRules?'{"q":':'')+filter;
+            var r = window.hWin.HEURIST4.util.isJSON(filter);            
+
+            if(r!==false){
+                if(r.facets) return ''; //faceted search not allowed for map queries
+                res += filter;
             }else{
                 //this is not json query
-                //escape backslash to avoid errors
-                res = hasRules?('{"q":"'+filter.split('"').join('\\\"')+'"'):filter;
+                if(hasRules){
+                    //escape backslash to avoid errors
+                    res += ('"'+filter.split('"').join('\\\"')+'"');
+                }else{
+                    res = filter;    
+                }
+                
             }
 
             if(hasRules){

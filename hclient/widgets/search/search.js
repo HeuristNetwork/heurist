@@ -754,15 +754,18 @@ $.widget( "heurist.search", {
 
             var that = this;
 
-            if(this.options.search_domain=="c" && !window.hWin.HEURIST4.util.isnull(this.query_request)){ //NOT USED
+            /* concatemation with previos search  -- NOT USED
+            if(this.options.search_domain=="c" && !window.hWin.HEURIST4.util.isnull(this.query_request)){ 
                 this.options.search_domain = this.query_request.w;
                 qsearch = this.query_request.q + ' AND ' + qsearch;
             }
+            */
+            
+            var request = window.hWin.HEURIST4.util.parseHeuristQuery(qsearch);
 
-            var request = { q: qsearch,
-                w: this.options.search_domain,
-                detail: 'detail',
-                source: this.element.attr('id') };
+            request.w  = this.options.search_domain;
+            request.detail = 'detail';
+            request.source = this.element.attr('id');
 
             window.hWin.HAPI4.SearchMgr.doSearch( this, request );
 

@@ -449,27 +449,7 @@ function hSvsEdit(args) {
                     if(filter.trim()!=''){
                         var rules = $dlg.find('#svs_Rules').val();
 
-                        var res = '';
-
-                        try {
-                            var r = $.parseJSON(filter);
-                            if($.isArray(r) || $.isPlainObject(r)){
-                                res = '{"q":'+filter;
-                            }
-                        }
-                        catch (err) {
-                        }
-                        if(res==''){
-                            //escape backslash to avoid errors
-                            res = '{"q":"'+filter.split('"').join('\\\"')+'"';
-                        }
-
-                        if(rules!=''){
-                            res = res + ',"rules":'+rules+'}';
-                        } else{
-                            res = res + '}';     
-                        }
-                        
+                        var res = Hul.getJSON_HeuristQueryAndRules(filter, rules);
                         
                         var buttons = {};
                         buttons[window.hWin.HR('Copy')]  = function() {

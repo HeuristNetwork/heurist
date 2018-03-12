@@ -1796,44 +1796,26 @@ $.widget( "heurist.svs_list", {
             var qsearch = svs[_QUERY];
             var prms = Hul.parseHeuristQuery(qsearch);
             
-                        var res = '';
-                        var filter = prms.q;
-                        var rules = prms.rules;
+            var res = Hul.getJSON_HeuristQueryAndRules(prms.q, prms.rules);
 
-                        try {
-                            var r = $.parseJSON(filter);
-                            if($.isArray(r) || $.isPlainObject(r)){
-                                if(r.facets) return;
-                                
-                                res = '{"q":'+filter;
-                            }
-                        }
-                        catch (err) {
-                        }
-                        if(Hul.isempty(res)){
-                            //escape backslash to avoid errors
-                            res = '{"q":"'+filter.split('"').join('\\\"')+'"';
-                        }
-
-                        if(!Hul.isempty(rules)){
-                            res = res + ',"rules":'+rules+'}';
-                        } else{
-                            res = res + '}';     
-                        }            
-
+            if(!Hul.isempty(res)){
                         var dummy = document.createElement("input");
                         dummy.value = res;
                         document.body.appendChild(dummy);
                         dummy.select();
                         try {
                             //console.log(
-                            document.execCommand("copy");  // Security exception may be thrown by some browsers.
+                            if(document.execCommand("copy"));  // Security exception may be thrown by some browsers.
+                            {
+                                window.hWin.HEURIST4.msg.showMsgFlash('Query is in clipboard');
+                            }
+                            
                         } catch (ex) {
                             console.warn("Copy to clipboard failed.", ex);
                         } finally {
                             document.body.removeChild(dummy);
-                        }            
-            
+                        }        
+            }    
         }
         
     },
