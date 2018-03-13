@@ -1686,7 +1686,7 @@ $.widget( "heurist.editing_input", {
             else //------------------------------------------------------------------------------------
             if(this.detailType=='geo'){
                 
-                $input.css({'width':'30ex','padding-left':'30px',cursor:'hand'});
+                $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
                    
                 var $gicon = $('<span>').addClass('ui-icon ui-icon-globe')
                     .css({position:'absolute',margin:'5px 0 0 8px',cursor:'hand'})

@@ -751,7 +751,7 @@ $.widget( "heurist.resultList", {
 
         this._count_of_divs = 0;
     },
-
+    
     //
     // this is public method, it is called on search complete (if events are not used)
     //

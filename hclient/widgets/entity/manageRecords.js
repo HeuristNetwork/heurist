@@ -24,8 +24,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     _currentEditRecTypeID:null,
     _isInsert: false,
+    _additionWasPerformed: false, //for selectAndSave mode
     _updated_tags_selection: null,
     _keepYPos: 0,
+    
+    //this.options.selectOnSave - special case when open edit record from select popup
 
     usrPreferences:{},
     defaultPrefs:{
@@ -243,7 +246,33 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }else{
                 
                 if(this.options.selectOnSave==true){
-                    var btns = [];    
+                    var btns = [               
+                                
+                        {text:window.hWin.HR('Save'), id:'btnRecSave',
+                              accesskey:"S",
+                              css:{'font-weight':'bold'},
+                              click: function() { that._saveEditAndClose( null, 'none' ); }},
+                        {text:window.hWin.HR('Save + Close'), id:'btnRecSaveAndClose',
+                              css:{'margin-left':'0.5em'},
+                              click: function() { that._saveEditAndClose( null, 'close' ); }},
+                        {text:window.hWin.HR('Close'), 
+                              css:{'margin-left':'0.5em'},
+                              click: function() { 
+                                  
+                                if(that._additionWasPerformed){
+                                    that.selectedRecords(that._currentEditRecordset);
+                                    that._selectAndClose();
+                                }else{
+                                    that.closeEditDialog();   
+                                }
+                                  
+                              }},
+                        {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
+                              css:{'margin-left':'3em'},
+                              click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
+                              
+                              
+                              ];    
                 }else{
                 
                     var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
@@ -292,12 +321,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 }},
                         {text:window.hWin.HR('New'), id:'btnRecSaveAndNew',
                               css:{'margin-left':'0.5em','margin-right':'10em'},
-                              click: function() { that._saveEditAndClose( null, 'newrecord' ); }}
-                              ];
-                }
-                                
-                btns = btns.concat([               
-                                
+                              click: function() { that._saveEditAndClose( null, 'newrecord' ); }},
+                              
                         {text:window.hWin.HR('Save'), id:'btnRecSave',
                               accesskey:"S",
                               css:{'font-weight':'bold'},
@@ -314,8 +339,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               css:{'margin-left':'3em'},
                               click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
                               
-                              
-                              ]); 
+                              ];
+                }
+                                
+                //btns = btns.concat([]); 
                               
             }
             return btns;
@@ -1850,6 +1877,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             
                             //that._afterSaveEventHandler( recID, fields);
                             //
+                            if(that.options.selectOnSave==true){
+                                that._additionWasPerformed = true;
+                            }
                             
                             if($.isFunction(afterAction)){
                                
