@@ -246,10 +246,24 @@
             return $system->addError(HEURIST_INVALID_REQUEST, "Details not defined");
         }
         
+        $system->defineConstant('RT_RELATION');
+            
         $is_insert = ($recID<1);
 
         if($is_insert){   // ADD NEW RECORD
 
+            //if source of target of relationship record is temporal - relationship is temporal as well
+            if($record['RecTypeID']==RT_RELATION && $record['FlagTemporary']!=1){
+                $system->defineConstant('DT_PRIMARY_RESOURCE');
+                $system->defineConstant('DT_TARGET_RESOURCE');
+                
+                $query = 'SELECT rec_FlagTemporary FROM Records where rec_FlagTemporary=1 AND rec_ID in ('
+                    .$record['details']['t:'.DT_PRIMARY_RESOURCE][0].','.$record['details']['t:'.DT_TARGET_RESOURCE][0].')';
+                if(mysql__select_value($mysqli, $query)>0){
+                    $record['FlagTemporary'] = 1;
+                }
+            }
+        
             // start transaction
             $keep_autocommit = mysql__begin_transaction($mysqli);
 
@@ -373,6 +387,7 @@
             }
             $stmt->close();
             //$stmt_geo->close();
+            
         }else{
             $syserror = $mysqli->error;
             $mysqli->rollback();
@@ -384,7 +399,32 @@
 
         if(!$is_insert){
             removeReverseChildToParentPointer($system, $recID, $rectype);    
+
+            //find all relationship records and update FlagTemporary and record title
+            $relRecsIDs = array();
+            
+            //@todo - rollback in case of error
+            $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".RT_RELATION);
+            
+            $relRecs = recordGetRelationship($system, $recID, null, array('detail'=>'ids'));
+            if(count($relRecs)>0){
+                $relRecsIDs = $relRecs;
+            }
+            $relRecs = recordGetRelationship($system, null, $recID, array('detail'=>'ids'));
+            if(count($relRecs)>0){
+                $relRecsIDs = array_merge($relRecsIDs, $relRecs);
+            }
+            //reset temporary flag for all relationship records
+            if(count($relRecsIDs)>0){
+                foreach($relRecsIDs as $relID){
+                    $res = recordUpdateTitle($system, $relID, RT_RELATION, $mask);
+                }
+                $query = 'UPDATE Records set rec_FlagTemporary=0 where rec_ID in ('.implode(',',$relRecsIDs).')';
+                $res = $mysqli->query($query);
+            }
+        
         }
+        
         
         $mysqli->commit();
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);

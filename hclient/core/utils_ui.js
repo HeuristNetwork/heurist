@@ -1691,11 +1691,11 @@ window.hWin.HEURIST4.ui = {
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
                         +' style="margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
                         + (info['trm_ID']>0
-                           ?'<div class="detailType" style="display:inline-block;width:15ex;padding-top:4px;float:left;">'
+                           ?'<div class="detailType" style="display:inline-block;width:19ex;padding-top:4px;">'
                             + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
                            :'')  
                         + '<div class="detail" '  // truncate
-                        + 'style="display:inline-block;min-width:60ex;padding:2px;max-width:160ex;">'
+                        + 'style="display:inline-block;min-width:60ex;max-width:160ex;">'  //padding:2px;
                         + (info['rec_IsChildRecord']==1?'<span style="font-size:0.8em;color:#999999;margin:2px">child</span>':'')
                         + (isEdit?'<span class="ui-icon ui-icon-triangle-1-e" style="display: inline-block;vertical-align: middle;margin:2px"/>':'') //&nbsp;&nbsp;&nbsp;
                         + '<img src="'+ph_gif+'" style="vertical-align:top;margin-top:2px;margin-right:10px;background-image:url(\''

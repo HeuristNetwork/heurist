@@ -1292,6 +1292,10 @@ function hRecordSet(initdata) {
             return relationship;
         },
         
+        getRelations:function(){
+            return relations_ids;    
+        },
+        
         makeKeyValueArray:function(titlefield){
             return _makeKeyValueArray(titlefield);
         },
@@ -1333,10 +1337,6 @@ function hRecordSet(initdata) {
             }else{
                 this.addRecord(recID, record);
             }
-        },
-        
-        getRelations:function(){
-            return relations_ids;    
         },
         
         getDetailsFieldTypes:function(){

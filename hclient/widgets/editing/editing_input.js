@@ -733,7 +733,7 @@ $.widget( "heurist.editing_input", {
                                 +'&source_ID=' + that.options.recID
                                 +'&dty_ID=' + that.options.dtID;
                             
-                            window.hWin.HEURIST4.msg.showDialog(url, {height:380, width:750,
+                            window.hWin.HEURIST4.msg.showDialog(url, {height:280, width:750,
                                 title: window.hWin.HR('Add relationship'),
                                 class:'ui-heurist-bg-light',
                                 callback: function(context){
@@ -760,6 +760,9 @@ $.widget( "heurist.editing_input", {
                     if(relations && relations.direct){
                         
                         var ptrset = that.f('rst_PtrFilteredIDs');
+                        if(ptrset) ptrset = ptrset.split(',')
+                        else ptrset = [];
+                        
                         var allTerms = this.f('rst_FilteredJsonTermIDTree');        
                         var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
                         //var terms = window.hWin.HEURIST4.ui.getPlainTermsList(this.detailType, allTerms, headerTerms, null);
@@ -773,18 +776,27 @@ $.widget( "heurist.editing_input", {
                             //direct[k]['dtID']==this.options.dtID && 
                             if(direct[k]['trmID']>0){ //relation   
                             
-                                //verify that target rectype is satisfy to constraints and trmID allowed
-                                var targetID = direct[k].targetID;
-                                var targetRectypeID = headers[targetID][2];
                                 
-                                if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))                               {
-                                    var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
-                                        {rec_ID: targetID, 
-                                         rec_Title: headers[targetID][0], 
-                                         rec_RecTypeID: headers[targetID][1], 
-                                         relation_recID: direct[k]['relationID'], 
-                                         trm_ID: direct[k]['trmID']}, true);
-                                    ele.on('remove', __onRelRemove);
+                                if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))
+                                { //it satisfies to allowed relationship types
+
+                                        //verify that target rectype is satisfy to constraints and trmID allowed
+                                        var targetID = direct[k].targetID;
+                                        var targetRectypeID = headers[targetID][1];
+                                        if( headers[targetID]['used']!=1 &&
+                                           (ptrset.length==0 || 
+                                            window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
+                                        {
+                                            var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
+                                                {rec_ID: targetID, 
+                                                 rec_Title: headers[targetID][0], 
+                                                 rec_RecTypeID: headers[targetID][1], 
+                                                 relation_recID: direct[k]['relationID'], 
+                                                 trm_ID: direct[k]['trmID']}, true);
+                                            ele.on('remove', __onRelRemove);
+                                            
+                                            headers[targetID]['used'] = 1;
+                                        }
                                 }
                             }
                         }

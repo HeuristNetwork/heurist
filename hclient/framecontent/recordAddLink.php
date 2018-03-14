@@ -66,7 +66,7 @@ require_once(dirname(__FILE__)."/initPage.php");
             
             <!-- field selector -->
             <div id="source_field" 
-                style="margin-top:5px;margin-bottom:40px;max-height: 40%;overflow: auto;border: 1px solid gray;">
+                style="margin-top:15px;margin-bottom:15px;max-height: 40%;overflow: auto;border:none;">
             </div>
 
             <label style="vertical-align: top; padding-top:4px;display:inline-block;width:95px;">Target record:</label>
@@ -94,8 +94,8 @@ require_once(dirname(__FILE__)."/initPage.php");
                 </div>
                 -->
                                     
-            <!-- field selector -->
-            <div id="target_field" style="margin-top:5px;max-height:25%;overflow: auto;border: 1px solid lightgray;">
+            <!-- field selector  border: 1px solid lightgray; -->
+            <div id="target_field" style="margin-top:5px;max-height:25%;overflow: auto;">
             </div>
                     
         </div>

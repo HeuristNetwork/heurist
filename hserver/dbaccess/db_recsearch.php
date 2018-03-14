@@ -499,14 +499,18 @@
     //
     // returns relationship records(s) for given source and target records
     //
-    function recordGetRelationship($system, $sourceID, $targetID ){
+    function recordGetRelationship($system, $sourceID, $targetID, $search_request=null){
 
         $mysqli = $system->get_mysqli();
 
         //find all target related records
-        $query = 'SELECT rl_RelationID FROM recLinks '
-            .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
-
+        $query = 'SELECT rl_RelationID FROM recLinks WHERE rl_RelationID IS NOT NULL';
+        if($sourceID>0){
+            $query = $query.' AND rl_SourceID='.$sourceID;
+        }
+        if($targetID>0){
+            $query = $query.' AND rl_TargetID='.$targetID;
+        }
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -517,8 +521,19 @@
                     array_push($ids, intval($row[0]));
                 }
                 $res->close();
+                
+                if($search_request==null){
+                    $search_request = array('q'=>'ids:'.implode(',', $ids), 'detail'=>'detail');
+                }else{
+                    $search_request['q'] = 'ids:'.implode(',', $ids);
+                    if(@$search_request['detail']=='ids'){
+                        return $ids;
+                    }else if(!@$search_request['detail']){
+                        $search_request['detail'] = detail; //returns all details
+                    }
+                }
 
-                return recordSearch($system, array('q'=>'ids:'.implode(',', $ids), 'detail'=>'detail'));
+                return recordSearch($system, $search_request);
         }
 
 

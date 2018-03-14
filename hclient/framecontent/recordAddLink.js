@@ -240,6 +240,7 @@ function hRecordAddLink() {
         }else if(target_ID>0 && onlyReverse){
             $('#helpmsg').text('Select source record and pointer(link) or relation type');
         }
+        $('#helpmsg').text('');
         
         //destination record
         target_ID = window.hWin.HEURIST4.util.getUrlParameter("target_ID", window.location.search);
