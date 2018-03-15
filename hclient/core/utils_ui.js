@@ -766,7 +766,7 @@ window.hWin.HEURIST4.ui = {
                 rectypeList = rectypeList.split(',');
             }
         }else{
-            rectypeList = []; //all rectypes
+            rectypeList = [];
         }
         
         if(rectypeList.length>0 && rectypeList.length<4){  //show only specified list of rectypes
@@ -824,10 +824,6 @@ window.hWin.HEURIST4.ui = {
                     }
                 }
                 
-            }
-            
-            if(rectypeList.length>0){
-                $(selObj).val(rectypeList[0]);
             }
             
         }

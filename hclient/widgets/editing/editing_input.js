@@ -719,10 +719,6 @@ $.widget( "heurist.editing_input", {
             
                 if(this.inputs.length==0){ //show current relations
                 
-                    //these are relmarker fields from other rectypes that points to this record
-                    var isInwardRelation = (that.f('rst_DisplayOrder')>1000);
-                
-                
                     function __onRelRemove(){
                         if( that.element.find('.link-div').length==0){ //hide this button if there are links
                             that.element.find('.rel_link').show()
@@ -734,13 +730,8 @@ $.widget( "heurist.editing_input", {
                         
                             var url = window.hWin.HAPI4.baseURL 
                                 +'hclient/framecontent/recordAddLink.php?db='+window.hWin.HAPI4.database
+                                +'&source_ID=' + that.options.recID
                                 +'&dty_ID=' + that.options.dtID;
-                           
-                           if(isInwardRelation){
-                              url +=  '&source_RecTypes='+that.f('rst_PtrFilteredIDs')+'&target_ID=' + that.options.recID;
-                           }else{
-                              url +=  '&source_ID=' + that.options.recID;
-                           }     
                             
                             window.hWin.HEURIST4.msg.showDialog(url, {height:280, width:750,
                                 title: window.hWin.HR('Add relationship'),
@@ -749,15 +740,9 @@ $.widget( "heurist.editing_input", {
                                     
                                     //add new element
                 //context = {rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:target_RecTypeID,                     relation_recID:0, trm_ID:termID };
-//console.log(context);                
                                     if(context && context.count>0){
-                                        
-                                        var link_info = isInwardRelation?context.source:context.target;
-                                        link_info.relation_recID = context.relation_recID;
-                                        link_info.trm_ID = context.trm_ID;
-                                        
                                         var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv,
-                                            link_info, true);
+                                            context, true);
                                         ele.insertBefore(that.element.find('.rel_link'));
                                         that.element.find('.rel_link').hide();//hide this button if there are links
                                         ele.on('remove', __onRelRemove);
@@ -766,33 +751,27 @@ $.widget( "heurist.editing_input", {
                                 }
                             } );
                     };
-                    
-                    
+                
                 
                     var sRels = '';
                     if(that.options.recordset){
                     
                     var relations = that.options.recordset.getRelations();
-                    if(relations && (relations.direct || relations.reverse)){
+                    if(relations && relations.direct){
                         
                         var ptrset = that.f('rst_PtrFilteredIDs');
-                        if(!$.isArray(ptrset)){
-                            if(ptrset) ptrset = ptrset.split(',')
-                            else ptrset = [];
-                        }
+                        if(ptrset) ptrset = ptrset.split(',')
+                        else ptrset = [];
                         
                         var allTerms = this.f('rst_FilteredJsonTermIDTree');        
                         var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
                         //var terms = window.hWin.HEURIST4.ui.getPlainTermsList(this.detailType, allTerms, headerTerms, null);
-
-                        var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+                        
                         var headers = relations.headers;
+                        var direct = relations.direct;
                         
+                        var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
                         
-                        if(!isInwardRelation){
-                            var direct = relations.direct; //outward
-                            
-                        //take only those that satisify to allowed terms and pointer constraints
                         for(var k in direct){
                             //direct[k]['dtID']==this.options.dtID && 
                             if(direct[k]['trmID']>0){ //relation   
@@ -821,42 +800,6 @@ $.widget( "heurist.editing_input", {
                                 }
                             }
                         }
-                        
-                        }//!isInwardRelation
-
-                        
-                        //now scan all indirect /inward relations
-                        var reverse = relations.reverse; //outward
-                        //take only those that satisify to allowed terms and pointer constraints
-                        for(var k in reverse){
-                            //direct[k]['dtID']==this.options.dtID && 
-                            if(reverse[k]['trmID']>0){ //relation   
-                                
-                                if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, reverse[k]['trmID']))
-                                { //it satisfies to allowed relationship types
-                                
-                                        //verify that target rectype is satisfy to constraints and trmID allowed
-                                        var targetID = reverse[k].sourceID;
-                                        var targetRectypeID = headers[targetID][1];
-                                        
-                                        if (headers[targetID]['used']!=1 && (ptrset.length==0) ||
-                                                (window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
-                                        {
-                                            var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
-                                                {rec_ID: targetID, 
-                                                 rec_Title: headers[targetID][0], 
-                                                 rec_RecTypeID: targetRectypeID, 
-                                                 relation_recID: reverse[k]['relationID'], 
-                                                 trm_ID: reverse[k]['trmID']}, true);
-                                            ele.on('remove', __onRelRemove);
-                                            
-                                            headers[targetID]['used'] = 1;
-                                        }
-                                }
-                            }
-                        }
-                        
-                        
                     }
                 }
                 

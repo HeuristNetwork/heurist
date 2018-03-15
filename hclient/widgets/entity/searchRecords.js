@@ -51,8 +51,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             ?window.hWin.HR('Any Record Type')
                 :'',  // (this.options.parententity>0)?window.hWin.HR('select record type')
             false);
-            
-            
 
         this.btn_add_record = this.element.find('#btn_add_record')
         .button({label: window.hWin.HR("Add Record"), icon: "ui-icon-plus"})

@@ -217,7 +217,7 @@ function hRecordAddLink() {
     var _className = "RecordAddLink",
     _version   = "0.4",
 
-    source_ID, target_ID, relmarker_dty_ID, source_AllowedTypes,
+    source_ID, target_ID, relmarker_dty_ID,
     sSourceName, sTargetName,
     
     onlyReverse,
@@ -232,8 +232,6 @@ function hRecordAddLink() {
         source_ID = window.hWin.HEURIST4.util.getUrlParameter("source_ID", window.location.search);
         //relmarker field type id 
         relmarker_dty_ID = window.hWin.HEURIST4.util.getUrlParameter("dty_ID", window.location.search);
-        
-        source_AllowedTypes = window.hWin.HEURIST4.util.getUrlParameter("source_RecTypes", window.location.search);
         
         onlyReverse = (window.hWin.HEURIST4.util.getUrlParameter("reverse", window.location.search)==1);
         
@@ -279,16 +277,6 @@ function hRecordAddLink() {
 
             $('#div_target1').hide();
             $('#div_target2').css('display','inline-block');
-        }else{
-            getRecordValue(target_ID, 'target');
-
-            if(source_AllowedTypes && relmarker_dty_ID>0){
-                
-                source_AllowedTypes = source_AllowedTypes.split(',');
-                
-                _fillSelectFieldTypes('source', source_AllowedTypes[0], null);
-                _createInputElement_RecordSelector('source', source_AllowedTypes);
-            }
         }
 
     }
@@ -413,9 +401,8 @@ function hRecordAddLink() {
             if(!(field_type=='resource' || field_type=='relmarker')){
                  continue;
             }
-            if(relmarker_dty_ID>0){  //detail id is defined in URL
-            
-                if( relmarker_dty_ID==dty && (party=='source') ){  //&& (source_ID>0 || target_ID>0)
+            if(relmarker_dty_ID>0){
+                if(party=='source' && relmarker_dty_ID==dty){
                     
                 }else{
                     continue;
@@ -490,10 +477,6 @@ function hRecordAddLink() {
                     $('#cb'+party+'_cb_'+dty).change(_enableActionButton);
             }
             
-            
-            if( relmarker_dty_ID>0 && (party=='source' && source_ID>0) ){            
-                break;
-            }
         }//for fields
         
         if(relmarker_dty_ID>0){
@@ -510,26 +493,17 @@ function hRecordAddLink() {
             if($('input[type="radio"][name="link_field"]').length>0){
                 $($('input[type="radio"][name="link_field"]')[0]).attr('checked','checked').change();
             }
-
-            if(window.hWin.HEURIST4.util.isempty(target_ID)){
-                //add reverse link option
-                $('<div style="line-height:2.5em;padding-left:20px"><input name="link_field" type="radio" id="cbsource_cb_0" '
-                    + ' data-party="source" value="0"'
-                    +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
-                    +'<label style="font-style:italic;line-height: 1em;" for="cbsource_cb_0">Reverse links: Add links to the target record rather than the current selection<br><span style="width:1.5em;display:inline-block;"/>(where appropriate record pointer or relationship marker fields exist in the target record)</label><div>')
+        
+            //add reverse link option
+    $('<div style="line-height:2.5em;padding-left:20px"><input name="link_field" type="radio" id="cbsource_cb_0" '
+            + ' data-party="source" value="0"'
+    +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
+    +'<label style="font-style:italic;line-height: 1em;" for="cbsource_cb_0">Reverse links: Add links to the target record rather than the current selection<br><span style="width:1.5em;display:inline-block;"/>(where appropriate record pointer or relationship marker fields exist in the target record)</label><div>')
                 .appendTo($('#source_field'))
                 .change(_createInputElement);
-            }
         }
-        /*else if(party=='target' && target_ID>0 &&
-            window.hWin.HEURIST4.util.isempty(source_ID) && relmarker_dty_ID>0){
-
-                if($('input[type="radio"][name="link_field"]').length>0){
-                    $($('input[type="radio"][name="link_field"]')[0]).attr('checked','checked').change();
-                }
-
-                _createInputElement_forSource(relmarker_dty_ID);
-            }*/
+            
+        
         }//if rectype defined
 
     }   
@@ -546,84 +520,6 @@ function hRecordAddLink() {
             $('#btn_save').removeClass('ui-state-disabled').click(addLinks);    
         }
     } 
-    
-    //
-    //
-    //
-    function _createInputElement_RecordSelector(party, rt_constraints){
-        
-        if(!$.isArray(rt_constraints)){
-            if(window.hWin.HEURIST4.util.isempty(rt_constraints)){
-                rt_constraints = [];
-            }else{
-                rt_constraints = rt_constraints.split(',');        
-            }
-        }
-        
-        $('#div_'+party+'1').hide();
-        var $fieldset = $('#div_'+party+'2').empty();
-        
-        var dtID = 0;
-        var typedefs = window.hWin.HEURIST4.rectypes.typedefs;
-        var fi = typedefs.dtFieldNamesToIndex;
-        var dtFields = [];
-        
-        /*if(typedefs[rectypeID].dtFields[dtID]){
-            dtFields = window.hWin.HEURIST4.util.cloneJSON(typedefs[rectypeID].dtFields[dtID]);
-        }else{*/
-        
-        //get first resource field and reset constraints
-        for(rtid in typedefs){
-            if(typedefs[rtid]){
-                for(dtid in typedefs[rtid].dtFields){
-                    if(typedefs[rtid].dtFields[dtid][fi['dty_Type']]=='resource'){
-                        dtFields = window.hWin.HEURIST4.util.cloneJSON(typedefs[rtid].dtFields[dtid]);
-                        dtID = dtid;
-                        break;
-                    }
-                }        
-            }
-        }
-        dtFields[fi['rst_PtrFilteredIDs']] = rt_constraints;    
-        dtFields[fi['rst_DisplayName']] = '';//input_label;
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_MaxValues']] = 1;
-        
-        var that = this;
-
-        var ed_options = {
-            recID: -1,
-            dtID: dtID,
-            //rectypeID: rectypeID,
-            rectypes: window.hWin.HEURIST4.rectypes,
-            values: '',// init_value
-            readonly: false,
-
-            showclear_button: false,
-            suppress_prompts: true,
-            show_header: false,
-            detailtype: 'resource',  //overwrite detail type from db (for example freetext instead of memo)
-            dtFields:dtFields,
-            
-            change: function(){
-                var rec_id = getFieldValue(party+'_record');
-                if(party=='source'){
-                    source_ID = rec_id;    
-                }else{
-                    target_ID = rec_id;    
-                }
-                
-                //getRecordValue(rec_id, party);
-                //_enableActionButton();
-            }    
-        };
-
-        $("<div>").attr('id',party+'_record')
-                    //.css({'padding-left':'130px'})
-                    .editing_input(ed_options).appendTo($fieldset)
-                    .find('input').css({'font-weight':'bold'});        
-    }
 
     //
     // create input element to select target record
@@ -642,9 +538,6 @@ function hRecordAddLink() {
 
         
         var rectypeID = source_RecTypeID; //selectRecordScope.val(); 
-        
-        //_createInputElement_step2(rectypeID, dtID, $fieldset);
-        
         
         var typedefs = window.hWin.HEURIST4.rectypes.typedefs;
         var fi = typedefs.dtFieldNamesToIndex;
@@ -754,8 +647,7 @@ function hRecordAddLink() {
                 //find fields
                 var oppositeRecTypeID = (party=='target')?source_RecTypeID:null; 
                 
-                if(!(relmarker_dty_ID>0))
-                    _fillSelectFieldTypes(party, recRecTypeID, oppositeRecTypeID);
+                _fillSelectFieldTypes(party, recRecTypeID, oppositeRecTypeID);
                 
                 $('#div_'+party+'1').css('display','inline-block');
                 if(party=='target'){
@@ -889,7 +781,6 @@ function hRecordAddLink() {
                     if(window.hWin.HEURIST4.util.isempty(sSourceName)){
                        var record = window.hWin.HAPI4.currentRecordset.getById( isReverce?sourceIDs[0]:sourceIDs[idx] );
                        sSourceName =  window.hWin.HAPI4.currentRecordset.fld(record, 'rec_Title');
-                       source_RecTypeID=  window.hWin.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
                     }
                     if(window.hWin.HEURIST4.util.isempty(sTargetName)){
                        var record = window.hWin.HAPI4.currentRecordset.getById( isReverce?targetIDs[idx]:targetIDs[0] );
@@ -904,10 +795,7 @@ function hRecordAddLink() {
                         details: details });
                      
                 }//for
-                res = {
-                    source:{rec_ID: sourceIDs[0], rec_Title:sSourceName, rec_RecTypeID:source_RecTypeID},
-                    target:{rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:target_RecTypeID},
-                    //rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:target_RecTypeID,
+                res = {rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:target_RecTypeID, 
                     relation_recID:0, trm_ID:termID };
         }
         
