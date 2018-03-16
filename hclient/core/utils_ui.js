@@ -1702,32 +1702,36 @@ window.hWin.HEURIST4.ui = {
         
         
         if(info['trm_ID']>0){
-            sRelBtn = '<div style="float:right;margin-left:0.5em"><div class="btn-rel"/><div class="btn-del"/></div>';
+            sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:46px"><div class="btn-rel"/><div class="btn-del"/></div>';
         }else{
             sRelBtn = '<div style="float:right;margin-left:0.5em"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
                         +' style="margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
-                        + (info['trm_ID']>0
-                           ?'<div class="detailType" style="display:inline-block;width:19ex;padding-top:4px;">'
-                            + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
-                           :'')  
+
                         + '<div class="detail" '  // truncate
-                        + 'style="display:inline-block;min-width:60ex;max-width:160ex;">'  //padding:2px;
-                        + (info['rec_IsChildRecord']==1?'<span style="font-size:0.8em;color:#999999;margin:2px">child</span>':'')
-                        + (isEdit?'<span class="ui-icon ui-icon-triangle-1-e" style="display: inline-block;vertical-align: middle;margin:2px"/>':'') //&nbsp;&nbsp;&nbsp;
+                        + 'style="display:table-cell;min-width:60ex;max-width:160ex;">'  //padding:2px;
+                        
+                        + (info['trm_ID']>0
+                           ?'<div class="detailType" style="display:table-cell;width:19ex;padding-top:4px;">'
+                            + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
+                           :'')                          
+                        
+                        + (info['rec_IsChildRecord']==1?'<span style="font-size:0.8em;color:#999999;padding:4px 2px">child</span>':'')
+                        + (isEdit?'<span style="display:table-cell;padding-top:3px;"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //&nbsp;&nbsp;&nbsp;
+                        + '<span style="display:table-cell;padding-top:2px;">'
                         + '<img src="'+ph_gif+'" style="vertical-align:top;margin-top:2px;margin-right:10px;background-image:url(\''
                         + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
                         + '\');"/>'
                         //2017-11-08 no more link here
                         //+ '<a target=_new href="#" data-recID="'+info['rec_ID'] +'">'
                         //+ window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a>'
-                        + '<span data-recID="'+info['rec_ID'] +'>'
+                        + '</span><span data-recID="'+info['rec_ID'] +'" style="display:table-cell;padding-top:4px;">'
                         + rec_Title
                         + '</span>'
-                        + sRelBtn
                         + '</div>'
+                        + sRelBtn
                         + '</div>')
         .appendTo($(container));
         

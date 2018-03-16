@@ -812,14 +812,15 @@ $.widget( "heurist.editing_input", {
                                            (ptrset.length==0 || 
                                             window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
                                         {
+                                            
                                             var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
                                                 {rec_ID: targetID, 
                                                  rec_Title: headers[targetID][0], 
                                                  rec_RecTypeID: headers[targetID][1], 
                                                  relation_recID: direct[k]['relationID'], 
                                                  trm_ID: direct[k]['trmID'],
-                                                 dtl_StartDate: headers[targetID][2],
-                                                 dtl_EndDate: headers[targetID][3]
+                                                 dtl_StartDate: direct[k]['dtl_StartDate'], 
+                                                 dtl_EndDate: direct[k]['dtl_EndDate']
                                                 }, true);
                                             ele.on('remove', __onRelRemove);
                                             
@@ -868,8 +869,8 @@ $.widget( "heurist.editing_input", {
                                                  rec_RecTypeID: targetRectypeID, 
                                                  relation_recID: reverse[k]['relationID'], 
                                                  trm_ID: invTermID,
-                                                 dtl_StartDate: headers[targetID][2],
-                                                 dtl_EndDate: headers[targetID][3]
+                                                 dtl_StartDate: reverse[k]['dtl_StartDate'], 
+                                                 dtl_EndDate: reverse[k]['dtl_EndDate']
                                                 }, true);
                                             ele.addClass('reverse-relation', 1)
                                                 .on('remove', __onRelRemove);
@@ -970,8 +971,6 @@ $.widget( "heurist.editing_input", {
                                         var targetID = recordset.fld(record,'rec_ID');
                                         var rec_Title = recordset.fld(record,'rec_Title');
                                         var rec_RecType = recordset.fld(record,'rec_RecTypeID');
-                                        var dtl_StartDate = recordset.fld(record,'dtl_StartDate');
-                                        var dtl_EndDate = recordset.fld(record,'dtl_EndDate');
                                         that.newvalues[$input.attr('id')] = targetID;
                                         
                                         //window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
@@ -986,9 +985,7 @@ $.widget( "heurist.editing_input", {
                                             {rec_ID: targetID, 
                                              rec_Title: rec_Title, 
                                              rec_RecTypeID: rec_RecType,
-                                             rec_IsChildRecord:isparententity,
-                                             dtl_StartDate: dtl_StartDate,
-                                             dtl_EndDate: dtl_EndDate
+                                             rec_IsChildRecord:isparententity
                                             }, __show_select_dialog);
                                         //ele.appendTo($inputdiv);
                                         that._onChange();
@@ -2024,9 +2021,7 @@ $.widget( "heurist.editing_input", {
                                             {rec_ID: value, 
                                              rec_Title: relations.headers[value][0], 
                                              rec_RecTypeID: relations.headers[value][1],
-                                             rec_IsChildRecord: isChildRecord,
-                                             dtl_StartDate: relations.headers[value][2],
-                                             dtl_EndDate: relations.headers[value][3]
+                                             rec_IsChildRecord: isChildRecord
                                              },
                                              selector_function);
 
@@ -2045,17 +2040,12 @@ $.widget( "heurist.editing_input", {
                                         var rec_Title = recordset.fld(record,'rec_Title');
                                         if(!rec_Title) {rec_Title = 'New record. Title is not defined yet.';}
                                         
-                                        var dtl_StartDate = recordset.fld(record,'dtl_StartDate');
-                                        var dtl_EndDate = recordset.fld(record,'dtl_EndDate');
-                                        
                                         var rec_RecType = recordset.fld(record,'rec_RecTypeID');
                                         window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
                                                 {rec_ID: value, 
                                                  rec_Title: rec_Title, 
                                                  rec_RecTypeID: rec_RecType,
-                                                 rec_IsChildRecord: isChildRecord,
-                                                 dtl_StartDate: dtl_StartDate,
-                                                 dtl_EndDate: dtl_EndDate
+                                                 rec_IsChildRecord: isChildRecord
                                                  }, selector_function);
                                     }else{
                                         that._removeInput( ele.attr('id') );

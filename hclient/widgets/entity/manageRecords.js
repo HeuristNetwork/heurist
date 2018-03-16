@@ -831,8 +831,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                              rec_RecTypeID: headers[targetID][1], 
                              relation_recID: direct[k]['relationID'], 
                              trm_ID: direct[k]['trmID'],
-                             dtl_StartDate: headers[targetID][2],
-                             dtl_EndDate: headers[targetID][3]
+                             dtl_StartDate: direct[k]['dtl_StartDate'],
+                             dtl_EndDate: direct[k]['dtl_EndDate']
                             }, true);
                         if(!ele1) ele1 = ele;     
                     }
@@ -850,8 +850,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                              rec_RecTypeID: headers[sourceID][1], 
                              relation_recID: reverse[k]['relationID'], 
                              trm_ID: invTermID,
-                             dtl_StartDate: headers[sourceID][2],
-                             dtl_EndDate: headers[sourceID][3]
+                             dtl_StartDate: reverse[k]['dtl_StartDate'],
+                             dtl_EndDate: reverse[k]['dtl_EndDate']
                             }, true);
                         if(!ele1) ele1 = ele;     
                     }
@@ -866,9 +866,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
                             {rec_ID: sourceID, 
                              rec_Title: headers[sourceID][0], 
-                             rec_RecTypeID: headers[sourceID][1],
-                             dtl_StartDate: headers[sourceID][2],
-                             dtl_EndDate: headers[sourceID][3]
+                             rec_RecTypeID: headers[sourceID][1]
                             }, true);
                         if(!ele2) ele2 = ele;     
                     }

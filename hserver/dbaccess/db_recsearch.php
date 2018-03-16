@@ -396,12 +396,19 @@
             $direction = 0;
         }
         
-        $rel_ids = array();
+        $rel_ids = array(); //relationship records (rt #1)
+
         $direct = array();
         $reverse = array();
         $headers = array(); //record title and type for main record
 
         $mysqli = $system->get_mysqli();
+        $system->defineConstant('DT_START_DATE');
+        $system->defineConstant('DT_END_DATE');
+        $query_rel = 'SELECT rec_ID, d2.dtl_Value t2, d3.dtl_Value t3 from Records '
+            .' LEFT JOIN recDetails d2 on rec_ID=d2.dtl_RecID and d2.dtl_DetailTypeID='.DT_START_DATE
+            .' LEFT JOIN recDetails d3 on rec_ID=d3.dtl_RecID and d3.dtl_DetailTypeID='.DT_END_DATE
+            .' WHERE rec_ID=';
         
         
         //find all target related records
@@ -419,9 +426,17 @@
                     $relation->trmID = intval($row[2]);
                     $relation->dtID  = intval($row[3]);
                     $relation->relationID  = intval($row[4]);
-                    array_push($direct, $relation);
+                    
+                    if($relation->relationID>0) {
+                        $vals = mysql__select_row($mysqli, $query_rel.$relation->relationID);
+                        if($vals!=null){
+                            $relation->dtl_StartDate = $vals[1];
+                            $relation->dtl_EndDate = $vals[2];
+                        }
+                    }
                     
                     array_push($rel_ids, intval($row[1]));
+                    array_push($direct, $relation);
                 }
                 $res->close();
         }
@@ -442,26 +457,28 @@
                     $relation->trmID = intval($row[2]);
                     $relation->dtID  = intval($row[3]);
                     $relation->relationID  = intval($row[4]);
-                    array_push($reverse, $relation);
                     
+                    if($relation->relationID>0) {
+                        $vals = mysql__select_row($mysqli, $query_rel.$relation->relationID);
+                        if($vals!=null){
+                            $relation->dtl_StartDate = $vals[1];
+                            $relation->dtl_EndDate = $vals[2];
+                        }
+                    }
+                    
+                    array_push($reverse, $relation);
                     array_push($rel_ids, intval($row[1]));
                 }
                 $res->close();
         }
         
-        $system->defineConstant('DT_DATE');
-        $system->defineConstant('DT_START_DATE');
-        $system->defineConstant('DT_END_DATE');
-        
         //find all rectitles and record types for main recordset AND all related records
         if(!is_array($ids)){
             $ids = explode(',',$ids);
         }
-        $ids = array_merge($ids, $rel_ids);        
-        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID, d1.dtl_Value t1, d2.dtl_Value t2, d3.dtl_Value t3 from Records '
-        .' LEFT JOIN recDetails d1 on rec_ID=d1.dtl_RecID and d1.dtl_DetailTypeID='.DT_DATE
-        .' LEFT JOIN recDetails d2 on rec_ID=d2.dtl_RecID and d2.dtl_DetailTypeID='.DT_START_DATE
-        .' LEFT JOIN recDetails d3 on rec_ID=d3.dtl_RecID and d3.dtl_DetailTypeID='.DT_END_DATE
+        $ids = array_merge($ids, $rel_ids);  
+              
+        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID from Records '
         .' WHERE rec_ID IN ('.implode(',',$ids).')';
         $res = $mysqli->query($query);
         if (!$res){
@@ -469,10 +486,7 @@
         }else{
             
                 while ($row = $res->fetch_row()) {
-                    $startData = $row[4]?$row[4]:$row[3];
-                    $endData = $row[5];
-                    
-                    $headers[$row[0]] = array($row[1], $row[2], $startData, $endData);   
+                    $headers[$row[0]] = array($row[1], $row[2]);   
                 }
                 $res->close();
         }

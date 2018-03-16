@@ -188,9 +188,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     window.hWin.HEURIST4.ui.createRecordLinkInfo(this.editForm, 
                                 {rec_ID: targetID, 
                                  rec_Title: headers[targetID][0], 
-                                 rec_RecTypeID: headers[targetID][1],
-                                 dtl_StartDate: headers[targetID][2],
-                                 dtl_EndDate: headers[targetID][3]
+                                 rec_RecTypeID: headers[targetID][1]
                                 }, true);
                 }//for
             }
