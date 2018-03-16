@@ -1461,7 +1461,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     _getFakeRectypeField: function(detailTypeID, order){
         
-        var dt = window.hWin.HEURIST4.detailtypes.typedefs[detailTypeID]['commonFields'];
+        var dt = null;
+        if(window.hWin.HEURIST4.detailtypes.typedefs[detailTypeID]){
+         dt = window.hWin.HEURIST4.detailtypes.typedefs[detailTypeID]['commonFields'];
+        }
         
         var fieldIndexMap = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
         var dtyFieldNamesIndexMap = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
@@ -1549,6 +1552,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields);
             var fieldNames = rectypes.typedefs.dtFieldNames;
             var fi = rectypes.typedefs.dtFieldNamesToIndex;
+            var dt_ID;
 
             /*
             function __findFieldIdxById(id){
@@ -1577,7 +1581,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             var s_fields = []; //sorted fields
             var fields_ids = [];
-            for(var dt_ID in rfrs){ //in rt structure
+            for(dt_ID in rfrs){ //in rt structure
                 if(dt_ID>0){
                     rfrs[dt_ID]['dt_ID'] = dt_ID;
                     s_fields.push(rfrs[dt_ID]);
@@ -1593,7 +1597,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var parentsIds = that.__findParentRecordTypes(rectypeID);
             
             var DT_PARENT_ENTITY  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
-            if(field_in_recset.indexOf(DT_PARENT_ENTITY)<0 && 
+            if( window.hWin.HEURIST4.util.findArrayIndex(DT_PARENT_ENTITY, field_in_recset)<0 && 
                     (this.options.parententity>0 ||   //parent record id is set already (case: this is addition of new child from search record dialog)
                     (parentsIds.length>0 && that._isInsert) ))   //current rectype is referenced as a child and this is ADDITION
             {
@@ -1601,8 +1605,61 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             var addhead = 0;
+            //Add inward relationship fields
+            //1. scan all other record structures
+            //2. find relmarker feidls that targets current rectypes
+            //3. add fake field into structure
+            var rt, already_added = [];
+            for(rt in rectypes.typedefs)
+            if(rt>0 && rt!=rectypeID){
+                for(dt_ID in rectypes.typedefs[rt].dtFields)
+                if(dt_ID>0 && rectypes.typedefs[rt].dtFields[dt_ID][fi_type]=='relmarker'){
+                    
+                    //this field can be already added - in this case we need just extend constraints
+                    var k = window.hWin.HEURIST4.util.findArrayIndex(dt_ID, already_added);
+                    if(k>=0){
+                        s_fields[k][fi_ptrs].push(rt);
+                        continue;
+                    }
+                    
+                    var ptr = rectypes.typedefs[rt].dtFields[dt_ID][fi_ptrs];
+                    if(window.hWin.HEURIST4.util.isempty(ptr)){ 
+                        //skip unconstrined
+                        continue;
+                    }else{
+                        ptr = ptr.split(',')
+                        if(window.hWin.HEURIST4.util.findArrayIndex(rectypeID, ptr)<0){
+                            continue;
+                        }
+                    }
+                    //this relmarker suits us
+                    
+                    if(addhead==0){                    
+                        var rfr = that._getFakeRectypeField(999999);
+                        rfr[fi_name] = 'Inward (reverse) relationships for this record type';
+                        rfr[fi_type] = 'separator';
+                        rfr[fi_order] = 1000;
+                        s_fields.push(rfr);
+                    }
+                    addhead++;
+                    
+                    var rfr = window.hWin.HEURIST4.util.cloneJSON(rectypes.typedefs[rt].dtFields[dt_ID]);
+                    rfr['dt_ID'] = dt_ID;
+                    rfr[fi_reqtype] = 'optional';
+                    rfr[fi_order] = 1000+addhead;
+                    rfr[fi_ptrs] = [rt];
+                    
+                    already_added.push(dt_ID)
+                    s_fields.push(rfr);
+                        
+                }
+            }
+            
+            //Add fields that are in record set but not in structure - NON STANDARD FIELDS
+            addhead = 0;
             for(var k=0; k<field_in_recset.length; k++){
-                if(fields_ids.indexOf(field_in_recset[k])<0){ //field in recset is not in structure
+                //field in recset is not in structure
+                if( window.hWin.HEURIST4.util.findArrayIndex(field_in_recset[k],fields_ids)<0){ 
                     if(field_in_recset[k]==DT_PARENT_ENTITY){
 
                         var rfr = that._getFakeRectypeField(DT_PARENT_ENTITY);
@@ -1632,14 +1689,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     }else{
                     
                         if(addhead==0){                    
-                            var rfr = that._getFakeRectypeField(1);
+                            var rfr = that._getFakeRectypeField(9999999);
                             rfr[fi_name] = 'Non-standard fields for this record type';
                             rfr[fi_type] = 'separator';
+                            rfr[fi_order] = 1100;
                             s_fields.push(rfr);
-                            addhead++;
                         }
+                        addhead++;
                         
-                        var rfr = that._getFakeRectypeField(field_in_recset[k], 999+addhead);
+                        var rfr = that._getFakeRectypeField(field_in_recset[k], 1100+addhead);
                         s_fields.push(rfr);
                     }
                 }
