@@ -889,7 +889,7 @@ function hRecordAddLink() {
                     if(window.hWin.HEURIST4.util.isempty(sSourceName)){
                        var record = window.hWin.HAPI4.currentRecordset.getById( isReverce?sourceIDs[0]:sourceIDs[idx] );
                        sSourceName =  window.hWin.HAPI4.currentRecordset.fld(record, 'rec_Title');
-                       source_RecTypeID=  window.hWin.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
+                       source_RecTypeID = window.hWin.HAPI4.currentRecordset.fld(record, 'rec_RecTypeID');
                     }
                     if(window.hWin.HEURIST4.util.isempty(sTargetName)){
                        var record = window.hWin.HAPI4.currentRecordset.getById( isReverce?targetIDs[idx]:targetIDs[0] );
