@@ -449,19 +449,30 @@
                 $res->close();
         }
         
+        $system->defineConstant('DT_DATE');
+        $system->defineConstant('DT_START_DATE');
+        $system->defineConstant('DT_END_DATE');
         
         //find all rectitles and record types for main recordset AND all related records
         if(!is_array($ids)){
             $ids = explode(',',$ids);
         }
         $ids = array_merge($ids, $rel_ids);        
-        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID from Records where rec_ID in ('.implode(',',$ids).')';
+        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID, d1.dtl_Value t1, d2.dtl_Value t2, d3.dtl_Value t3 from Records '
+        .' LEFT JOIN recDetails d1 on rec_ID=d1.dtl_RecID and d1.dtl_DetailTypeID='.DT_DATE
+        .' LEFT JOIN recDetails d2 on rec_ID=d2.dtl_RecID and d2.dtl_DetailTypeID='.DT_START_DATE
+        .' LEFT JOIN recDetails d3 on rec_ID=d3.dtl_RecID and d3.dtl_DetailTypeID='.DT_END_DATE
+        .' WHERE rec_ID IN ('.implode(',',$ids).')';
         $res = $mysqli->query($query);
         if (!$res){
             return $system->addError(HEURIST_DB_ERROR, "Search query error on search related. Query ".$query, $mysqli->error);
         }else{
+            
                 while ($row = $res->fetch_row()) {
-                    $headers[$row[0]] = array($row[1], $row[2]);   
+                    $startData = $row[4]?$row[4]:$row[3];
+                    $endData = $row[5];
+                    
+                    $headers[$row[0]] = array($row[1], $row[2], $startData, $endData);   
                 }
                 $res->close();
         }

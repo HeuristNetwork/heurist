@@ -830,7 +830,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                              rec_Title: headers[targetID][0], 
                              rec_RecTypeID: headers[targetID][1], 
                              relation_recID: direct[k]['relationID'], 
-                             trm_ID: direct[k]['trmID']}, true);
+                             trm_ID: direct[k]['trmID'],
+                             dtl_StartDate: headers[targetID][2],
+                             dtl_EndDate: headers[targetID][3]
+                            }, true);
                         if(!ele1) ele1 = ele;     
                     }
                 }
@@ -846,7 +849,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                              rec_Title: headers[sourceID][0], 
                              rec_RecTypeID: headers[sourceID][1], 
                              relation_recID: reverse[k]['relationID'], 
-                             trm_ID: invTermID}, true);
+                             trm_ID: invTermID,
+                             dtl_StartDate: headers[sourceID][2],
+                             dtl_EndDate: headers[sourceID][3]
+                            }, true);
                         if(!ele1) ele1 = ele;     
                     }
                 }
@@ -860,7 +866,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
                             {rec_ID: sourceID, 
                              rec_Title: headers[sourceID][0], 
-                             rec_RecTypeID: headers[sourceID][1]}, true);
+                             rec_RecTypeID: headers[sourceID][1],
+                             dtl_StartDate: headers[sourceID][2],
+                             dtl_EndDate: headers[sourceID][3]
+                            }, true);
                         if(!ele2) ele2 = ele;     
                     }
                 }
@@ -1609,16 +1618,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //1. scan all other record structures
             //2. find relmarker feidls that targets current rectypes
             //3. add fake field into structure
-            var rt, already_added = [];
+            var rt, already_added = {};
             for(rt in rectypes.typedefs)
             if(rt>0 && rt!=rectypeID){
                 for(dt_ID in rectypes.typedefs[rt].dtFields)
                 if(dt_ID>0 && rectypes.typedefs[rt].dtFields[dt_ID][fi_type]=='relmarker'){
                     
                     //this field can be already added - in this case we need just extend constraints
-                    var k = window.hWin.HEURIST4.util.findArrayIndex(dt_ID, already_added);
-                    if(k>=0){
-                        s_fields[k][fi_ptrs].push(rt);
+                    if(already_added[dt_ID]>=0){
+                        s_fields[already_added[dt_ID]][fi_ptrs].push(rt);
                         continue;
                     }
                     
@@ -1649,7 +1657,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     rfr[fi_order] = 1000+addhead;
                     rfr[fi_ptrs] = [rt];
                     
-                    already_added.push(dt_ID)
+                    already_added[dt_ID] = s_fields.length;
                     s_fields.push(rfr);
                         
                 }

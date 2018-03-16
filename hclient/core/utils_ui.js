@@ -1675,10 +1675,25 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
-    // info {rec_ID,rec_Title,rec_RecTypeID,relation_recID,trm_ID}
+    // info {rec_ID,rec_Title,rec_RecTypeID,relation_recID,trm_ID,dtl_StartDate,dtl_EndDate,rec_IsChildRecord}
+    //
     //
     // selector_function opens select dialog. it it is true it opens record edit popup dialog
     createRecordLinkInfo:function(container, info, selector_function){
+        
+        //headers[targetID][0], headers[targetID][2] + headers[targetID][3]
+       
+        var rec_Title = info['rec_Title'];
+        if(info['dtl_StartDate'] || info['dtl_EndDate']){
+            rec_Title += ': ';
+            if(info['dtl_StartDate']){
+                rec_Title += info['dtl_StartDate'];
+            }
+            if(info['dtl_EndDate']){
+                rec_Title += (' - '+info['dtl_EndDate']);
+            }
+        }
+        rec_Title = window.hWin.HEURIST4.util.htmlEscape(rec_Title);
         
         var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
         var sRelBtn = '';
@@ -1708,8 +1723,8 @@ window.hWin.HEURIST4.ui = {
                         //2017-11-08 no more link here
                         //+ '<a target=_new href="#" data-recID="'+info['rec_ID'] +'">'
                         //+ window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a>'
-                        + '<span data-recID="'+info['rec_ID'] +'">'
-                        + window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])
+                        + '<span data-recID="'+info['rec_ID'] +'>'
+                        + rec_Title
                         + '</span>'
                         + sRelBtn
                         + '</div>'
