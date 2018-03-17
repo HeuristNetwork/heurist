@@ -811,7 +811,7 @@ function hSearchMinimalDigitalHarlem() {
     //
     // apply rules to existed result set
     //
-    function _doApplyRules( originator, rules ){
+    function _doApplyRules( originator, rules, rulesonly ){
         /*
         if(window.hWin.HAPI4.currentRecordset && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.currentRecordset.getMainSet())){
 
@@ -846,8 +846,8 @@ function hSearchMinimalDigitalHarlem() {
         },
 
         // apply rules to existing result set
-        doApplyRules:function( originator, request ){
-            return _doApplyRules( originator, request );
+        doApplyRules:function( originator, rules, rulesonly ){
+            return _doApplyRules( originator, rules, rulesonly );
         },
 
         doStop: function(){

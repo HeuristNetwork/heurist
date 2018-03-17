@@ -357,7 +357,7 @@ function hSearchIncremental() {
     //
     // apply rules to existed result set
     //
-    function _doApplyRules( originator, rules ){
+    function _doApplyRules( originator, rules, rulesonly ){
 
                 if(rules){
 
@@ -369,6 +369,7 @@ function hSearchIncremental() {
 
                          //keep json (to possitble save as saved searches)
                          that.query_request.rules = rules;
+                         that.query_request.rulesonly = rulesonly;
 
                          //remove results of other rules and re-render the original set of records only
                          var rec_ids_level0 = [];
@@ -488,8 +489,8 @@ function hSearchIncremental() {
         },
 
         // apply rules to existing result set
-        doApplyRules:function( originator, request ){
-            return _doApplyRules( originator, request );
+        doApplyRules:function( originator, rules, rulesonly ){
+            return _doApplyRules( originator, rules, rulesonly );
         },
 
         doStop: function(){

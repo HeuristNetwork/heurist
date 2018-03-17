@@ -1642,7 +1642,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                     if(addhead==0){                    
                         var rfr = that._getFakeRectypeField(999999);
-                        rfr[fi_name] = 'Inward (reverse) relationships for this record type';
+                        rfr[fi_name] = 'Inward (reverse) relationships not included in fields above';
+                        rfr[fi_help] = 'These relationships target the current record but are not defined '
+                                    +'in a relationship marker field for this record type. They do not, '   
+                                    +'therefore, display in the relationship marker fields above (if any).';
                         rfr[fi_type] = 'separator';
                         rfr[fi_order] = 1000;
                         s_fields.push(rfr);

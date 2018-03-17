@@ -1637,7 +1637,7 @@ $.widget( "heurist.svs_list", {
                     }
 
                     //target is required
-                    if(! window.hWin.HAPI4.SearchMgr.doApplyRules( this, request.rules ) ){
+                    if(! window.hWin.HAPI4.SearchMgr.doApplyRules( this, request.rules, request.rulesonly ) ){
                         window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('RuleSets require an initial search result as a starting point.'),
                             3000, window.hWin.HR('Warning'), ele);
                     }

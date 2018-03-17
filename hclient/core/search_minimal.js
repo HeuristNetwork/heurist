@@ -164,12 +164,13 @@ function hSearchMinimal() {
     //
     // apply rules to existed result set
     //
-    function _doApplyRules( originator, rules ){
+    function _doApplyRules( originator, rules, rulesonly ){
         
         if(window.hWin.HAPI4.currentRecordset && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.currentRecordset.getMainSet())){
         
             var request = { q: 'ids:'+window.hWin.HAPI4.currentRecordset.getMainSet().join(','),
                             rules: rules,
+                            rulesonly: rulesonly,
                             w: _query_request?_query_request.w:'a'};
         
             _doSearch( originator, request );
@@ -196,8 +197,8 @@ function hSearchMinimal() {
         },
  
         // apply rules to existing result set
-        doApplyRules:function( originator, request ){
-            return _doApplyRules( originator, request );
+        doApplyRules:function( originator, rules, rulesonly ){
+            return _doApplyRules( originator, rules, rulesonly );
         },
         
         doStop: function(){

@@ -139,11 +139,11 @@ function hSvsEdit(args) {
 
             if(isRules){ //ruleset only
                 svs_query.parent().hide();
-                svs_rules_only.parent().hide();
+                //2018-03-17 svs_rules_only.parent().hide();
                 return true;
             }else{
                 svs_query.parent().show();
-                svs_rules_only.parent().show();
+                //2018-03-17 svs_rules_only.parent().show();
                 return false;
             }
 
