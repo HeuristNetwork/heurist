@@ -152,6 +152,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
     //
     // show simple input value dialog with given message
+    //  message - either plain text or html with #dlg-prompt-value input element
     //
     showPrompt: function(message, callbackFunc, sTitle, ext_options){
         
@@ -656,7 +657,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         
                         var content = $dosframe[0].contentWindow;
                         content.alert = function(txt){
-                            window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
+                            $dlg.dialog('open');
                             return true;
                         }
                         

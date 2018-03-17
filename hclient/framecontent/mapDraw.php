@@ -27,6 +27,11 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         <script type="text/javascript" src="mapDraw.js"></script>
         <script type="text/javascript" src="mapLayer.js"></script>
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/vector3d.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/latlon-ellipsoidal.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/utm.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/dms.js"></script>        
 
         <!-- Initializing -->
 
@@ -133,7 +138,7 @@ console.log('load google map api')
                 padding: 5px;
                 font-weight: normal;
                 width:190px;
-                min-height:135px;
+                min-height:115px;
                 border:1px solid #000000;
                 font-size:0.9em;
                 text-align:left;
@@ -206,7 +211,8 @@ console.log('load google map api')
                     <button id="get-geometry-button">Get Geometry</button>
                 </div> 
                 
-                <div style="bottom:30;position: absolute;height:150px">
+                <div style="bottom:30;position: absolute;height:160px">
+                    <div id="coords_hint" style="padding:0 4px 2px 4px"></div>    
                     <textarea id="coords1">Click on the map. The code for the selected shape you create will be presented here.</textarea>
                     <button id="apply-coords-button" style="margin-top:10px">Apply Coordinates</button>
                 </div> 

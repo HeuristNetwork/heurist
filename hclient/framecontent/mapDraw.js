@@ -53,6 +53,27 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         }
         $('#coords1').val('');
     }
+    
+    function showCoordsHint(){
+        
+        var type = drawingManager.getDrawingMode();
+        if (selectedShape!=null) {
+            type = selectedShape.type;
+        }
+        var sPrompt = '';
+        if(type==google.maps.drawing.OverlayType.MARKER){
+            sPrompt = 'Marker: enter coordinates as: lat long';
+        }else if(type==google.maps.drawing.OverlayType.CIRCLE){
+            sPrompt = 'Circle: enter coordinates as: lat-center long-center radius-km';
+        }else if(type==google.maps.drawing.OverlayType.RECTANGLE){
+            sPrompt = 'Rectangle: enter coordinates as: lat-min long-min lat-max long-max';
+        }else if(type==google.maps.drawing.OverlayType.POLYLINE || type==google.maps.drawing.OverlayType.POLYGON){
+            sPrompt = (type==google.maps.drawing.OverlayType.POLYGON?'Polygon':'Polyline')
+                +': enter coordinates as sequence of lat long separated by space';
+        }
+        //if(sPrompt) sPrompt += '(for UTM first easting then northing)';
+        $('#coords_hint').html(sPrompt);
+    }
 
     function setSelection(shape) {
         clearSelection();
@@ -482,11 +503,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         }
 
         var sCoords = $("#coords1").val();
-        var coords = _parseManualEntry(sCoords, type);
-        var res = _loadShape(coords, type);
-        if(res && selectedShape!=null){
-            _zoomToSelection();
-        }
+        _parseManualEntry(sCoords, type);
     }
 
     Number.prototype.toRad = function() {
@@ -536,14 +553,68 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     //
     //        
-    function _parseManualEntry(sCoords, type){
+    function _parseManualEntry(sCoords, type, UTMzone){
 
         var s = sCoords.replace(/[\b\t\n\v\f\r]/g, ' ');
         s = s.replace("  "," ").trim();
         var arc = s.split(" ");  
         var coords = []; //Array of LatLngLiteral
-
-        var islat = true, k;
+        
+        var islat = false, k;
+        var hemisphere = 'N';        
+        
+        if(window.hWin.HEURIST4.util.isnull(UTMzone)){
+            
+            var allInteger = true, allOutWGS = true;
+            //check for UTM - assume they are integer and at least several are more than 180
+            for (k=0; k<arc.length; k++){
+                
+                if(k==2 && type==google.maps.drawing.OverlayType.CIRCLE) continue;
+            
+                var crd = Number(arc[k]);
+                if(isNaN(crd)){
+                    alert(arc[k]+" is not number value");
+                    return null;
+                }
+                allInteger = allInteger && (crd==parseInt(arc[k]));
+                allOutWGS = allOutWGS &&  ((islat && Math.abs(crd)>90) || Math.abs(crd)>180);
+                if (!(allOutWGS && allInteger)) break;
+                
+                islat = !islat;
+            }
+            if(allInteger || allOutWGS){ //offer to convert UTM to LatLong
+                
+                window.hWin.HEURIST4.msg.showPrompt(
+    '<p>We have detected coordinate values in the import '
+    +'which we assume to be UTM coordinates/grid references.</p><br>'
+    +'<p>Heurist will only import coordinates from one UTM zone at a time. Please '
+    +'split into separate files if you have more than one UTM zone in your data.</p><br>'
+    +'<p>UTM zone (1-60) and Hemisphere (N or S) for these data: <input id="dlg-prompt-value"></p>',
+                function(UTMzone){
+                    if(!window.hWin.HEURIST4.util.isempty(UTMzone)){
+                            _parseManualEntry(sCoords, type, UTMzone);
+                    }
+                }, 'UTM coordinates?');
+            
+                return;
+            }
+            UTMzone = 0;
+        }else{
+            //parse UTMzone must be 1-60 N or S
+            if(UTMzone.toLowerCase().indexOf('s')>=0){
+                hemisphere = 'S';
+            }
+            var re = /s|n/gi;
+            UTMzone = parseInt(UTMzone.replace(re,''));
+            if(UTMzone<1 || UTMzone>60){
+                setTimeout("alert('UTM zone must be within range 1-60')",500);
+                return;
+                //38N 572978.70 5709317.22 
+            }
+        }
+        
+        //verify and gather coordintes
+        islat = true;
         for (k=0; k<arc.length; k++){
 
             //special case for circle
@@ -568,18 +639,34 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             if(isNaN(crd)){
                 alert(arc[k]+" is not number value");
                 return null;
-            }else if(!islat && Math.abs(crd)>180){
+            }else if(UTMzone==0 && !islat && Math.abs(crd)>180){
                 alert(arc[k]+" is an invalid longitude value");
                 return null;
-            }else if(islat && Math.abs(crd)>90){
+            }else if(UTMzone==0 && islat && Math.abs(crd)>90){
                 alert(arc[k]+" is an invalid latitude value");
                 return null;
             }
             islat = !islat;
-            if(islat)
-                coords.push({lat:Number(arc[k-1]), lng:crd});
+            if(islat){
+                if(UTMzone>0){
+                    easting = Number(arc[k-1]);
+                    northing = crd;
+                    
+                    var utm = new Utm( UTMzone, hemisphere, easting, northing );
+                    var latlon = utm.toLatLonE();
+                    coords.push({lat:latlon.lat, lng:latlon.lon});    
+                }else{
+                    coords.push({lat:Number(arc[k-1]), lng:crd});    
+                }
+            }
+                
         }//for
 
+        var res = _loadShape(coords, type);
+        if(res && selectedShape!=null){
+            _zoomToSelection();
+        }
+        
         return coords;
     }
 
@@ -1167,7 +1254,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         // Clear the current selection when the drawing mode is changed, or when the
         // map is clicked.
-        google.maps.event.addListener(drawingManager, 'drawingmode_changed', clearSelection); 
+        google.maps.event.addListener(drawingManager, 'drawingmode_changed', function(){
+            clearSelection();   
+            showCoordsHint();
+        }); 
         google.maps.event.addListener(gmap, 'click', clearSelection);
         google.maps.event.addListener(gmap, 'mousemove', function (event) {
             var pnt = event.latLng;
