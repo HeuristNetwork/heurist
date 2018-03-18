@@ -255,7 +255,7 @@
                         "dty_Size":10000,
                         "rst_DisplayWidth":100,
                         "rst_DisplayName": "Path(s) which contain files to be indexed as multimedia records for Picasa/FieldHelper compatibility",
-                        "rst_DisplayHelpText": "They relative to database directory for additional directory(ies). Subdirectories are also indexed. A fieldhelper.xml file is written in each (sub)directory."
+                        "rst_DisplayHelpText": "They are relative to database directory for additional directory(ies). Subdirectories are also indexed. A fieldhelper.xml file is written in each (sub)directory."
                     }
                 }
         ]}
