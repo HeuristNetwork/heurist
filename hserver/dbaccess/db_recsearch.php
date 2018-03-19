@@ -121,8 +121,8 @@
             $step_level  = @$params['step'];
             $fieldid     = $params['field'];
             $facet_type =  @$params['facet_type']; //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
-            $facet_groupby =  @$params['facet_groupby'];  //by first char for freetext, by year for dates, by level for enum
-            $vocabulary_id =  @$params['vocabulary_id'];  //special case for groupby first level
+            $facet_groupby = @$params['facet_groupby'];  //by first char for freetext, by year for dates, by level for enum
+            $vocabulary_id = @$params['vocabulary_id'];  //special case for groupby first level
             $limit         = @$params['limit']; //limit for preview
             
             //special parameter to avoid nested queries - it allows performs correct count for distinct target record type

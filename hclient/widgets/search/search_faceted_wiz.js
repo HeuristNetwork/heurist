@@ -379,7 +379,11 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 if(!($(opt_rectypes).val()>0)){
                     window.hWin.HEURIST4.msg.showMsgErr('Select record type');
-                    $(opt_rectypes).focus();
+                    if($(opt_rectypes).hSelect("instance")!=undefined){
+                        $(opt_rectypes).hSelect("focus"); 
+                    }else{
+                        $(opt_rectypes).focus();  
+                    }
                     return;
                 }
             
@@ -593,6 +597,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 if(this.options.params.rectypes) {
                     $(opt_rectypes).val(this.options.params.rectypes[0]);
+                    if($(opt_rectypes).hSelect("instance")!=undefined){
+                       $(opt_rectypes).hSelect("refresh"); 
+                    }
                     
                     $(opt_rectypes).change(function(){
                             that.originalRectypeID=null; 

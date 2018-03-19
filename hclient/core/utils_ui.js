@@ -1704,7 +1704,7 @@ window.hWin.HEURIST4.ui = {
         if(info['trm_ID']>0){
             sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:46px"><div class="btn-rel"/><div class="btn-del"/></div>';
         }else{
-            sRelBtn = '<div style="float:right;margin-left:0.5em"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
+            sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:23px"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '

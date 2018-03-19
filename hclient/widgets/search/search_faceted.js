@@ -998,6 +998,7 @@ $.widget( "heurist.search_faceted", {
                 */
                 
                 
+
                 var step_level = field['selectedvalue']?field['selectedvalue'].step:0;
                 var vocabulary_id = null;
                 if(field['type']=='enum' && field['groupby']=='firstlevel'){
