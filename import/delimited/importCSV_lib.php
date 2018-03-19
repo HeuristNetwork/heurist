@@ -22,6 +22,7 @@
 
 require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 require_once(dirname(__FILE__)."/../../admin/verification/valueVerification.php");
+require_once('UTMtoLL.php');
 
 // global variable for progress report
 $rep_processed = 0;
@@ -1008,9 +1009,12 @@ function validateImport($mysqli, $imp_session, $params){
         "count_error"=>0, 
         "error"=>array(),
         "count_warning"=>0, 
-        "warning"=>array()
+        "warning"=>array(),
+        'utm_warning'=>0,
          );
 
+    
+         
     //get rectype to import
     $recordType = @$params['sa_rectype'];
 
@@ -1225,16 +1229,23 @@ function validateImport($mysqli, $imp_session, $params){
     $query_date_where = array();
 
     $numeric_regex = "'^([+-]?[0-9]+\.*)+'"; // "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
-
+    
     if($sequence){
         $mapping_prev_session = @$sequence['mapping_keys']; //OR mapping_flds???
     }else{
         $mapping_prev_session = @$imp_session['mapping'];
     }
 
+    
+    $geo_fields = null;
+    /*
+    if($mapping['latitude'] && $mapping['longitude']){ //not used
+        // northing, easting
+        $geo_fields = array($mapping['latitude'],$mapping['longitude']);
+    }*/
+    
     //loop for all fields in record type structure
     foreach ($recStruc[$recordType]['dtFields'] as $ft_id => $ft_vals) {
-
 
         //find among mappings
         $field_name = @$mapping[$ft_id];
@@ -1244,7 +1255,7 @@ function validateImport($mysqli, $imp_session, $params){
                 $field_name = array_search($recordType.".".$ft_id, $mapping_prev_session, true); //from previous session    
             }
         }
-
+        
         if(!$field_name && $ft_vals[$idx_fieldtype] == "geo"){
             //specific mapping for geo fields
             //it may be mapped to itself or mapped to two fields - lat and long
@@ -1272,6 +1283,10 @@ function validateImport($mysqli, $imp_session, $params){
                 array_push($query_num_where, "(NOT($field_name1 is null or $field_name1='') and NOT($field_name1 REGEXP ".$numeric_regex."))");
                 array_push($query_num, $field_name2);
                 array_push($query_num_where, "(NOT($field_name2 is null or $field_name2='') and NOT($field_name2 REGEXP ".$numeric_regex."))");
+                
+                //if UTM zone is not specified need validate for possible UTM values
+                // northing, easting
+                $geo_fields = array($field_name1,$field_name2);                
             }
 
 
@@ -1544,7 +1559,28 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
 
     //7. TODO Verify geo fields
-
+    if(true && count($geo_fields)>0){
+        // northing, easting
+        $query = "select ".implode(',',$geo_fields)." from $import_table LIMIT 5";
+        $res = $mysqli->query($query);
+        $allInteger = true;
+        $allOutWGS = true;
+        if($res){
+            while ($row = $res->fetch_row()){
+                $northing = $row[0];
+                $easting = $row[1];
+                
+                $allInteger = $allInteger && ($northing==round($northing)) && ($easting==parseInt($easting));
+                $allOutWGS = allOutWGS && (abs($easting)>180) && (abs($northing)>90);
+                if (!($allOutWGS && $allInteger)) break;                
+            }
+            if($allInteger || $allOutWGS){
+                $imp_session['validation']['utm_warning'] = 1;
+            }
+            $res->close();
+        }
+    }
+    
     return $imp_session;
 }
 
@@ -1922,6 +1958,15 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
     $import_table = $imp_session['import_table'];
     $recordType = @$params['sa_rectype'];
     
+    $utm_zone = @$params['utm_zone'];
+    $hemisphere = 'N';
+    if($utm_zone==0 && $utm_zone!=null){
+        $utm_zone = strtoupper($utm_zone);
+        if(strpos($utm_zome, 'S')!==false) $hemisphere='N'; 
+        $utm_zome = intval(str_replace(arrat('N','S'),'',$utm_zome));
+        if($utm_zone<1 || $utm_zome>60) $utm_zome = 0;
+    }   
+    
     $currentSeqIndex = @$params['seq_index'];
     $use_sequence = false;
     if($currentSeqIndex>=0 && @$imp_session['sequence'] && is_array(@$imp_session['sequence'][$currentSeqIndex])){
@@ -2156,10 +2201,10 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                         
                     }else{
 
-                        if(substr($field_type, -strlen("_lat")) === "_lat"){
+                        if(substr($field_type, -strlen("_lat")) === "_lat"){ // || $field_type=="latitude"
                             $field_type = substr($field_type, 0, strlen($field_type)-4);
                             $fieldtype_type = "lat";
-                        }else if (substr($field_type, -strlen("_long")) === "_long"){
+                        }else if (substr($field_type, -strlen("_long")) === "_long"){ // || $field_type=="longitude"
                             $field_type = substr($field_type, 0, strlen($field_type)-5);
                             $fieldtype_type = "long";
                         }else{
@@ -2238,7 +2283,8 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                                     $value = null;
                                 }
 
-                            }else if($fieldtype_type == "lat") {
+                            }
+                            else if($fieldtype_type == "lat") {
                                 $lat = $r_value;
                             }else if($fieldtype_type == "long"){
                                 //WARNING MILTIVALUE IS NOT SUPPORTED
@@ -2318,7 +2364,8 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                                 
                                 $value = $ulf_ID;
                                 
-                            }else{
+                            }
+                            else{
                                 //double spaces are removed on preprocess stage $value = trim(preg_replace('/([\s])\1+/', ' ', $r_value));
 
                                 $value = trim($r_value);
@@ -2336,10 +2383,19 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                             }
 
                             if($lat && $long){
+                                
+                                if($utm_zone>0){ //convert from UTM
+                                    $PC_LatLon = ToLL($lat, $long, $utm_zone, $hemisphere);
+                                    $lat  = $PC_LatLon['lat'];
+                                    $long = $PC_LatLon['lon'];
+                                }
+                                
                                 $value = "p POINT (".$long."  ".$lat.")"; //TODO Where does the 'p' come from? This appears to have been a local invention ...
                                 //reset
                                 $lat = null;
                                 $long = null;
+                                
+                                //$field_type = 28;
                             }
 
                             if($value  &&   //value defined
@@ -2385,7 +2441,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
 
                         //if insert and require field is not defined - skip it
                         if( !($recordId>0) &&
-                            $recordTypeStructure[$field_type][$idx_reqtype] == "required")
+                            @$recordTypeStructure[$field_type][$idx_reqtype] == "required")
                             //!@$details["t:".$field_type][0])
                         {
 //error_log($field_type.' = '.print_r(@$details["t:".$field_type],true));

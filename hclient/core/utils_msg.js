@@ -168,7 +168,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 callbackFunc.call(this, $dlg.find('#dlg-prompt-value').val());
             }
         },
-        window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle,ext_options);
+        window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle, ext_options);
         
     },
     

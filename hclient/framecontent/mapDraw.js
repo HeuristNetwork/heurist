@@ -583,30 +583,50 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 islat = !islat;
             }
             if(allInteger || allOutWGS){ //offer to convert UTM to LatLong
+
+                var $ddlg, buttons = {};
+                buttons['Yes, UTM'] = function(){ 
+                    
+                    var UTMzone = $ddlg.find('#dlg-prompt-value').val();
+                    if(!window.hWin.HEURIST4.util.isempty(UTMzone)){
+                            var re = /s|n/gi;
+                            var zone = parseInt(UTMzone.replace(re,''));
+                            if(isNaN(zone) || zone<1 || zone>60){
+                                setTimeout('alert("UTM zone must be within range 1-60");',500);
+                                return false;
+                                //38N 572978.70 5709317.22 
+                                //east 572980.08 5709317.24
+                                //574976.85  5706301.55
+                            }
+                    }else{
+                        UTMzone = 0;
+                    }
+                    setTimeout(function(){_parseManualEntry(sCoords, type, UTMzone);},500);
+                    $ddlg.dialog('close'); 
+                }; 
+                buttons['No'] = function(){ $ddlg.dialog('close'); 
+                    setTimeout(function(){_parseManualEntry(sCoords, type, 0);},500);
+                };
                 
-                window.hWin.HEURIST4.msg.showPrompt(
+                $ddlg = window.hWin.HEURIST4.msg.showMsgDlg( 
     '<p>We have detected coordinate values in the import '
     +'which we assume to be UTM coordinates/grid references.</p><br>'
     +'<p>Heurist will only import coordinates from one UTM zone at a time. Please '
     +'split into separate files if you have more than one UTM zone in your data.</p><br>'
     +'<p>UTM zone (1-60) and Hemisphere (N or S) for these data: <input id="dlg-prompt-value"></p>',
-                function(UTMzone){
-                    if(!window.hWin.HEURIST4.util.isempty(UTMzone)){
-                            _parseManualEntry(sCoords, type, UTMzone);
-                    }
-                }, 'UTM coordinates?');
-            
-                return;
+        buttons, 'UTM coordinates?');
+        
+                 return;                       
             }
             UTMzone = 0;
-        }else{
+        }else if(UTMzone!=0) {
             //parse UTMzone must be 1-60 N or S
             if(UTMzone.toLowerCase().indexOf('s')>=0){
                 hemisphere = 'S';
             }
             var re = /s|n/gi;
             UTMzone = parseInt(UTMzone.replace(re,''));
-            if(UTMzone<1 || UTMzone>60){
+            if(isNaN(UTMzone) || UTMzone<1 || UTMzone>60){
                 setTimeout("alert('UTM zone must be within range 1-60')",500);
                 return;
                 //38N 572978.70 5709317.22 

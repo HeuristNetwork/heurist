@@ -1069,8 +1069,8 @@ window.hWin.HEURIST4.ui = {
                         
                     }
                     if(addLatLongForGeo && details[dtyID][fit]=="geo"){
-                        arrterm.push([ 'longitude', 'geo: Longitude', false ]);
-                        arrterm.push([ 'latitude', 'geo: Latitude', false ]);
+                        arrterm.push([ dtyID+'_long', 'geo: Longitude', false ]);
+                        arrterm.push([ dtyID+'_lat', 'geo: Latitude', false ]);
                     } 
                 }
             }

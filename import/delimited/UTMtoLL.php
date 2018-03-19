@@ -1,6 +1,6 @@
 <?php
 
-function ToLL($north, $east, $utmZone)
+function ToLL($north, $east, $utmZone, $hemisphere)
 { 
   // This is the lambda knot value in the reference
   $LngOrigin = Deg2Rad($utmZone * 6 - 183);
@@ -10,6 +10,9 @@ function ToLL($north, $east, $utmZone)
   // changed if a different dataum is used.    
 
   $FalseNorth = 0;   // South or North?
+  if(strtoupper($hemisphere)=='S'){
+      $FalseNorth = 10000000.0;
+  }
   //if (lat < 0.) FalseNorth = 10000000.  // South or North?
   //else          FalseNorth = 0.   
 

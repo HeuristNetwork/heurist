@@ -1866,7 +1866,7 @@ function validateImport($params){
     $query_date_where = array();
 
     $numeric_regex = "'^([+-]?[0-9]+\.*)+'"; // "'^([+-]?[0-9]+\\.?[0-9]*e?[0-9]+)|(0x[0-9A-F]+)$'";
-
+    $geo_fields = null;
 
     //loop for all fields in record type structure
     foreach ($recStruc[$rty_ID]['dtFields'] as $ft_id => $ft_vals) {
@@ -1903,7 +1903,12 @@ function validateImport($params){
                 array_push($query_num_where, "(NOT($field_name1 is null or $field_name1='') and NOT($field_name1 REGEXP ".$numeric_regex."))");
                 array_push($query_num, $field_name2);
                 array_push($query_num_where, "(NOT($field_name2 is null or $field_name2='') and NOT($field_name2 REGEXP ".$numeric_regex."))");
+
+                //if UTM zone is not specified need validate for possible UTM values
+                // northing, easting
+                $geo_fields = $field_name1.','.$field_name2;
             }
+            
 
 
         }else
@@ -2178,6 +2183,19 @@ them to incoming data before you can import new records:<br><br>'.implode(',', $
     }
 
     //7. TODO Verify geo fields
+    // check for UTM values
+    if(true){
+        // northing, easting
+        $query = "select ".$geo_fields." from $import_table LIMIT 5";
+        $res = $mysqli->query($query);
+        if($res){
+            while ($row = $res->fetch_row()){
+                $northing = $row[0];
+                $easting = $row[1];
+            }
+            $res->close();
+        }
+    }
 
     return $imp_session;
 } //end validateImport

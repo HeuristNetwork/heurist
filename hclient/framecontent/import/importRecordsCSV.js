@@ -28,6 +28,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     imp_session,  //json with session parameters
     
     currentSeqIndex = -1,  
+    
+    UTMzone = 0,
 
     uniq_fieldnames = [],
     
@@ -304,7 +306,44 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     .click(function(e) {
                             _showRecords('warning');
                         });
+        $('#btnShowUTMWarnings')
+                    .css({'font-weight':'bold'})
+                    .button({label: window.hWin.HR('UTM coords?'), icons:{primary: "ui-icon-alert"}})
+                    .click(function(e) {
+                        
+                $('#btnShowUTMWarnings').text('UTM coords?');
+                        
+                                     var $ddlg, buttons = {};
+                buttons['Yes, UTM'] = function(){ 
+                    
+                    UTMzone = $ddlg.find('#dlg-prompt-value').val();
+                    if(!window.hWin.HEURIST4.util.isempty(UTMzone)){
+                            var re = /s|n/gi;
+                            var zone = parseInt(UTMzone.replace(re,''));
+                            if(isNaN(zone) || zone<1 || zone>60){
+                                UTMzone = 0;
+                                setTimeout('alert("UTM zone must be within range 1-60");',500);
+                                return false;
+                            }
+                            $('#btnShowUTMWarnings').text('UTM '+UTMzone);
+                    }else{
+                        UTMzone = 0;
+                    }
+                    $ddlg.dialog('close'); 
+                }; 
+                buttons['No'] = function(){ $ddlg.dialog('close'); };
+                
+                $ddlg = window.hWin.HEURIST4.msg.showMsgDlg( 
+    '<p>We have detected coordinate values in the import '
+    +'which we assume to be UTM coordinates/grid references.</p><br>'
+    +'<p>Heurist will only import coordinates from one UTM zone at a time. Please '
+    +'split into separate files if you have more than one UTM zone in your data.</p><br>'
+    +'<p>UTM zone (1-60) and Hemisphere (N or S) for these data: <input id="dlg-prompt-value"></p>',
+        buttons, 'UTM coordinates?');
+        
+                        });
 
+                        
         $('#btnPrepareStart')
                     //.css({'width':'250px'})
                     .css({'font-weight':'bold'})
@@ -2765,13 +2804,23 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                         }else{
                             $('.mr_ignore').hide();                                     
                         }
+
+                        //reset
+                        $('#prepareWarnings').css('display','none');    
+                        $('#mrr_warning').text('');
                             
-                        
+                        if(res['utm_warning']>0){
+                            $('#prepareWarnings').show();
+                            $('#btnShowUTMWarnings').show();
+                        }else{
+                            $('#btnShowUTMWarnings').hide();
+                        }
 
                         if(res['count_warning']>0){
 
                             $('#mrr_warning').text('Warnings: '+res['count_warning']);
                             $('#prepareWarnings').show();//.css('display','inline-block');
+                            $('#btnShowWarnings').show();
 //console.log(res);                            
                             if(res['missed_required']==true){
                                 window.hWin.HEURIST4.msg.showMsgErr((res['count_warning']==1?'There is one row':('There are '+res['count_warning']+' rows'))
@@ -2781,7 +2830,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                                 + 'Click "Show" button  for a list of rows with missing values');                            
                             }
                         }else{
-                            $('#prepareWarnings').css('display','none');    
+                            $('#btnShowWarnings').hide();
                         }
                         
                         if(res['count_error']>0){
@@ -2863,6 +2912,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             seq_index : currentSeqIndex,
             mapping   : field_mapping,
             ignore_insert: 0,
+            utm_zone  : UTMzone,
             recid_field: 'field_'+key_idx, //imp_session['columns'][key_idx]
             sa_upd: $("input[name='sa_upd']:checked"). val(),
             sa_upd2: $("input[name='sa_upd2']:checked"). val()

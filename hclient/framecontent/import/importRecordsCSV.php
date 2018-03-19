@@ -542,7 +542,8 @@ If you have missing data for Required fields, you may find it convenient to set 
                                             <div id="prepareWarnings" 
                                                 style="display:none;padding:2px;background-color:#ffaaaa;border-color:red;margin-left:2em">
                                                 <h2 id="mrr_warning" style="display:inline-block;margin:0 10px;">Warnings: 0</h2>
-                                                <div id="btnShowWarnings"></div>
+                                                <div id="btnShowWarnings" style="display:none"></div>
+                                                <div id="btnShowUTMWarnings" style="display:none"></div>
                                             </div>
                                         </td>
                                         <td rowspan="3">
