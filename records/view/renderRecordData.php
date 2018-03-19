@@ -812,28 +812,43 @@ if($is_map_popup){
             }
             
             $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']); //get form database in server time
-            $add_date = $add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
-            $add_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
+            if($add_date){
+                $add_date = $add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
+                $add_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
                             $add_date.'")</script> local)';
+            }else{
+                $add_date = false;
+            }
             
             $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']); //get form database in server time
-            $mod_date = $mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
-            $mod_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
+            if($mod_date){
+                $mod_date = $mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
+                $mod_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
                             $mod_date.'")</script> local)';
+            }else{
+                $mod_date = false;
+            }
+            if($add_date){
             ?>
-
             <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
                     <div class=detailType>Added</div><div class=detail>
                         <?php print $add_date.'  '
                                 .' '.$add_date_local; ?>
                     </div>
             </div>
+            <?php
+            }
+            if($mod_date){
+            ?>
             <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
                     <div class=detailType>Updated</div><div class=detail>
                         <?php print $mod_date
                                 .' '.$mod_date_local; ?>
                     </div>
             </div>
+            <?php
+            }
+            ?>
             <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
                     <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>">
                     <a target=_blank class="external-link" 
