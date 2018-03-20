@@ -23,6 +23,7 @@
 require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
 require_once(dirname(__FILE__)."/../../admin/verification/valueVerification.php");
 require_once('UTMtoLL.php');
+require_once('GpointConverter.php');
 
 // global variable for progress report
 $rep_processed = 0;
@@ -1960,11 +1961,17 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
     
     $utm_zone = @$params['utm_zone'];
     $hemisphere = 'N';
-    if($utm_zone==0 && $utm_zone!=null){
+    $gPoint;
+    if($utm_zone!=0 && $utm_zone!=null){
         $utm_zone = strtoupper($utm_zone);
-        if(strpos($utm_zome, 'S')!==false) $hemisphere='N'; 
-        $utm_zome = intval(str_replace(arrat('N','S'),'',$utm_zome));
-        if($utm_zone<1 || $utm_zome>60) $utm_zome = 0;
+        if(strpos($utm_zone, 'S')==false){ $hemisphere='N'; }
+        else {$hemisphere = 'S';}
+        $utm_zone = intval(str_replace(array('N','S'),'',$utm_zone));
+        if($utm_zone<1 || $utm_zone>60) {
+            $utm_zone = 0;
+        }else{
+            $gPoint = new GpointConverter();
+        }
     }   
     
     $currentSeqIndex = @$params['seq_index'];
@@ -2385,9 +2392,15 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                             if($lat && $long){
                                 
                                 if($utm_zone>0){ //convert from UTM
+                                    $gPoint->setUTM($long, $lat, $utm_zone.$hemisphere);
+                                    $gPoint->convertTMtoLL();
+                                    $lat  = $gPoint->Lat();
+                                    $long = $gPoint->Long();
+                                    /*
                                     $PC_LatLon = ToLL($lat, $long, $utm_zone, $hemisphere);
                                     $lat  = $PC_LatLon['lat'];
                                     $long = $PC_LatLon['lon'];
+                                    */
                                 }
                                 
                                 $value = "p POINT (".$long."  ".$lat.")"; //TODO Where does the 'p' come from? This appears to have been a local invention ...
