@@ -79,23 +79,17 @@
                 //$('.banner').hide();
         }
         
-        if(params && params['browse']==1){
-            setModeCloneTemplate(false);
-        }else{
-            setModeCloneTemplate(true);
 <?php
             $isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false);
             if($isOutSideRequest) { //clone from template not allowed
 ?>        
                 modeCloneTemplate = false;
-                $('#div_clone_description').hide(); 
-                $('#cloneNotAllowed').show();
-                $('#div_DB_selector').hide();
+                //$('#div_clone_description').hide(); 
+                //$('#cloneNotAllowed').show();
+                //$('#div_DB_selector').hide();
 <?php            
             }
 ?>        
-        }
-        
         
         //document.getElementById("statusMsg").innerHTML = "";
         document.getElementById("filterDiv").style.display = "block";
@@ -168,14 +162,22 @@
 
                 var myColumnDefs = [
                     {key:"id", label:"ID" , formatter:YAHOO.widget.DataTable.formatNumber, sortable:false, resizeable:false, width:"40", className:"right"},
-                    {key:"crosswalk", label:"Browse", resizeable:false, width:"60", className: "center",
+                    {key:"crosswalk", label:"Action", resizeable:false, width:"60", className: "center",
                         formatter:function(elLiner, oRecord, oColumn, oData) {
-                            if(modeCloneTemplate && oRecord.getData("id")>0){
-                                elLiner.innerHTML = '<img src="../../../common/images/drag_up_down_16x16.png" class="button"/>';
-                            }else{
                                 var str = oRecord.getData("crosswalk");
+                                if(oRecord.getData("id")>0 && oRecord.getData("id")<21){
+                                    str = str
+                                    + (' <a href="'
+                                    + top.HEURIST.baseURL 
+                                    + 'admin/setup/dboperations/cloneDatabase.php?db=<?= HEURIST_DBNAME?>&templatedb='
+                                    + registeredDBs[oRecord.getData("id")][2]
+                                    +'">clone</a>');
+                                   
+                                    
+                                }else{
+                                    str = str + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+                                }
                                 elLiner.innerHTML = str;
-                            }
                         }
                     },
                     {key:"name", label:"Database Name" , sortable:false, resizeable:true, formatter:function(elLiner, oRecord, oColumn, oData) {
@@ -222,7 +224,7 @@
                         db = registeredDBs[dbID];
                         dataArray.push([db[0],db[2],db[3],
                             '<a href=\"'+db[1]+'?db='+db[2]+'\" target=\"_blank\">'+db[1]+'</a>',
-                            '<img src="../../../common/images/b_database.png" class="button"/>']);
+                            '<img src="../../../common/images/drag_up_down_16x16.png" class="button"/>']);  //b_database.png
                     }
                 }
 
@@ -236,17 +238,12 @@
                         var data = res.results || [],
                         filtered = [],
                         i,l;
-//console.log('1>>>'+req);                        
-                        if(modeCloneTemplate && !req){
-                            req = '';
-                        }
-//console.log('2>>>'+req);                        
+
                         if (req!=null) {
                             req = req.toLowerCase();
                             // Do a wildcard search for both name and description and URL
                             for (i = 0, l = data.length; i < l; ++i) {
                                 var id = data[i].id;
-                                if (modeCloneTemplate && (id=='YYY' || id>20)) continue;
                                 
                                 if ( id=='XXX' || id=='YYY' ||
                                     data[i].description.toLowerCase().indexOf(req) >= 0 ||
@@ -276,6 +273,9 @@
 
                 myDataTable.subscribe("cellClickEvent", function(oArgs){
 
+                    if ($(oArgs.event.target).is('a')) return;
+                    
+                    //console.log(oArgs);
                     var elTargetCell = oArgs.target;
                     if(elTargetCell) {
                         var oColumn = myDataTable.getColumn(elTargetCell);
@@ -283,15 +283,7 @@
                         if(oColumn.key !== 'URL' && oRecord){
                             var dbID = oRecord.getData("id");
                             if(dbID>0){
-                                if (modeCloneTemplate) {
-                                    //doCloneDatabase(dbID);
-                                    dbName = registeredDBs[dbID][2];
-                                    var URL = top.HEURIST.baseURL 
-                                        + 'admin/setup/dboperations/cloneDatabase.php?db=<?= HEURIST_DBNAME?>&templatedb='+dbName;
-                                    document.location.href = URL;
-                                }else{
-                                    doCrosswalk(dbID);      
-                                }
+                                doCrosswalk(dbID);      
                             } 
                             
                             
@@ -333,9 +325,6 @@
 
                 //$('#statusMsg').hide();
                 $('#divLoading').hide();
-                if(modeCloneTemplate){
-                    document.getElementById('div_clone_description').style.display = 'block';
-                }
         }//  initDbTable
         // Enter information about the selected database to an invisible form, and submit to the crosswalk page, to start crosswalking
         function doCrosswalk(dbID) {
@@ -363,18 +352,6 @@
     });
 
 
-        function setModeCloneTemplate(mode){
-            modeCloneTemplate = mode;
-            if(modeCloneTemplate){
-                $('#div_clone_description').show(); 
-                $('#divHeader').text('Clone template database');    
-            }else{
-                $('#cloneNotAllowed').hide();
-                $('#div_clone_description').hide(); 
-                $('#divHeader').text('Import structural definitions into current database');
-            }
-        }
-
         </script>
     </head>
 
@@ -389,35 +366,10 @@
         
         </div>
         <div id="page-inner" style="overflow:auto;top:20;">
-
-            <div id="cloneNotAllowed" style="display:none;font-style:italic;padding-top:10px">
-<p>Cloning of templates can only be carried out on the Heurist service at heurist.sydney.edu.au. You are accessing an alternative service. In order to create a database based on these templates you will need to register with / log into heurist.sydney.edu.au </p>
-
-<p>Having created and experimented with the clone you can download it with Manage > Administration > Create archive package. The downloaded database can then be loaded on your server by your system administrator (or contact support - at - heuristnetwork dot org for assistance).</p>
-
-<p><a href="#" 
-    onclick="{setModeCloneTemplate(false); $('#div_DB_selector').show(); return false;}"><b>follow this link</b></a>
- to selectively add structural elements (record types, fields, vocabularies and terms) to your current database</p>
-           </div>
         
-<!--            
-            
-            The list below shows available databases registered with the Heurist Master Index database
-            which have the same major/minor version as the current database<br />
-            Use the filter to locate a specific term in the name or title.
-            Click the database icon on the left to view available record types in that database.
-            <br />
-            <b>Bolded</b> databases contain collections of schemas curated by the Heurist team or members of the Heurist community
-
-            <br />
-
-            <h4>
-                Older (or newer) format registered databases may not be shown,
-                as this list only shows databases with format version number <?=HEURIST_DBVERSION?>.
-            </h4>
--->
             <div id="div_DB_selector">
-           <h4>Use the filter to locate a specific term in the name or description. Click the database icon on the left to view available record types in that database and select them for addition to this database (including all related record types, fields and terms).</h4> 
+                <h4>Use the filter to locate a specific term in the name or description. 
+<a href="#" onclick="top.HEURIST4.msg.showElementAsDialog({element:document.getElementById('divHelpPopup'),height:265})">Click here to get more information</a></h4> 
             
             <div class="markup" id="filterDiv" style="display:none">
                 <label for="filter">Filter:</label> <input type="text" id="filter" value="">
@@ -445,28 +397,16 @@
                 <input name="mode" value="clone_template" type="hidden">
             </form>
             -->
-
-            
-            <div style="font-style:italic;display:none" id="div_clone_description">
-            
-<h4>Clone database</h4>
-
-<p>Click one of the copy icons above to clone the template database. You will become the owner of the clone which is completely independent from its source. The clone will include some example data (easily deleted), as well as saved filters and report formats.</p>
-
-<p>The cloned database is just a starting point which you can then extend or modify to your specific needs. You are free to do anything you wish in this cloned database - it is yours exclusively, until you invite others to share it.</p>
-
-<h4>Nothing suitable?</h4>
-
-<p>We only have a limited set of template databases, although we are working on more. The lack of a suitable template does not mean Heurist is not appropriate to your project. </p>
-
-<p>If you find nothing suitable as a starting point. <a href="#" 
-    onclick="{setModeCloneTemplate(false); $('#filter').val(''); $('#filter').trigger('keyup'); return false;}"><b>follow this link</b></a>
- to selectively add structural elements (record types, fields, vocabularies and terms) to your current database, chosen from the databases listed above or from databases created and registered by other users. </p>
-
-<p>If you find nothing suitable in any of the registered databases, you can also create new structural elements from scratch (and extend and modify existing elements) with Structure > Build on the Manage tab of the main page.</p>
-            
             </div>
             
+        </div>
+        <div id="divHelpPopup" style="display:none;padding:5px">
+<h3>Browse or clone templates</h3>
+ <p style="padding:5px;"><img src="<?=HEURIST_BASE_URL?>common/images/drag_up_down_16x16.png">&nbsp;<b>Browse templates</b> selectively adds structural elements (record types, fields, vocabularies and terms) to your <u>current database</u>, chosen from the databases curated by the Heurist team or from databases created and registered by other users.</p>
+
+ <p style="padding:5px;"><b>Clone template</b> clones a completely <u>new database</u> from one of the template databases. You will become the owner of the clone which is completely independent from its source. The clone will include some example data (easily deleted), as well as saved filters and report formats.</p>
+
+<p style="padding:5px;">Note: We only have a limited set of template databases, although we are working on more. <u>The lack of a suitable template does not mean Heurist is not appropriate to your project.</u> Simply add new record types or extend and modify existing ones to create the structure you require.</p>
         </div>
     </body>
 </html>

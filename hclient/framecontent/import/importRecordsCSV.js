@@ -2238,7 +2238,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             //fill list of columns
                             for(i in response.data.fields){
                                 
-                                if(response.data.fields[i].indexOf('H-ID')>=0 || 
+                                if(response.data.fields[i] && response.data.fields[i].indexOf('H-ID')>=0 || 
                                 response.data.fields[i].toLowerCase().indexOf('identifier')>=0){
                                     id_suggestions.push(i);
                                 }
