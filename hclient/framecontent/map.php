@@ -647,5 +647,28 @@ $system->defineConstants();
         </fieldset>
         <div class="messages"></div>
     </div>
+    
+    <div id="timeline-edit-dialog"  style="display:none" class="ui-heurist-bg-light">
+        
+            <div style="padding:5px">
+                <label><input type="radio" name="time-label" checked value="0">Full length labels</label><br>
+                <label><input type="radio" name="time-label" value="1">Truncate label to bar</label><br>
+                <label><input type="radio" name="time-label" value="2">Fixed label width</label><br>
+                <label><input type="radio" name="time-label" value="3">Hide labels</label>
+            </div>
+            
+            <div style="padding:5px">
+                <label><input type="radio" name="time-label-pos" checked value="0">Label to the left of the bar</label><br>
+                <!-- <label><input type="radio" name="time-label-pos" value="1">Label to the right of the bar</label><br> -->
+                <label><input type="radio" name="time-label-pos" value="2">Label on top of the bar</label>
+            </div>
+        
+            <div style="padding:5px">
+                <label><input type="radio" name="time-label-stack" checked value="0">Bars stacked on the above the other</label><br>
+                <label><input type="radio" name="time-label-stack" value="1">Bars wrapped to minimise height of timeline</label>
+            </div>
+        
+    </div>
+    
 </body>
 </html>

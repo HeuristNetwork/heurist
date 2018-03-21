@@ -402,34 +402,50 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     //
     // dependent_layers -  dependent map layers  [{key :title}]
     //
-    function _addLegendEntryForLayer(overlay_idx, title, rectypeID_or_color, dependent_layers, ontop){
+    function _addLegendEntryForLayer(overlay_idx, layer_options, dependent_layers, ontop){
 
         var overlay = null,
         legendid,
-        rectypeID = 0,
         ismapdoc = (overlay_idx>0);
+        
         var icon_bg = null;
+        
+        var title = layer_options.title;
+        var bg_color = layer_options.color;
+        var rectypeID = layer_options.rectypeID;
 
 
         if (ismapdoc) {
             legendid = 'md-'+overlay_idx;
             overlay = overlays[overlay_idx];
-            rectypeID = rectypeID_or_color;
 
-            if(rectypeID==RT_SHP_SOURCE && overlay.visible){
+            if(rectypeID && rectypeID==RT_SHP_SOURCE && overlay.visible){
                 icon_bg = 'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif);'
                 + 'background-position: center; background-repeat: no-repeat;"'            
-                + ' data-icon="'+window.hWin.HAPI4.iconBaseURL + rectypeID + '.png"';
-            } else if(Number.isInteger(rectypeID)){
-                icon_bg = 'url('+ window.hWin.HAPI4.iconBaseURL + rectypeID + '.png)"';
+                + ' data-icon="'+(layer_options.iconMarker
+                        ?layer_options.iconMarker
+                        :(window.hWin.HAPI4.iconBaseURL + rectypeID + '.png'))
+                        +'"';
+            } else if(layer_options.iconMarker){
+                icon_bg = 'url('+ layer_options.iconMarker + ');background-size: 18px 18px;"';
             }
-            if(icon_bg!=null){
-                icon_bg = ' style="background-image: '+icon_bg;
-            }
+                        
         }else{
             legendid = overlay_idx;
             overlay = overlays_not_in_doc[overlay_idx];
         }
+        
+        if(icon_bg==null && Number.isInteger(rectypeID)){
+                var suffix = '.png';
+                if(bg_color){
+                    suffix = 'm.png&color='+encodeURIComponent(bg_color.replace(/ /g,''));            
+                }
+                icon_bg = 'url(\''+ window.hWin.HAPI4.iconBaseURL + rectypeID + suffix + '\');background-size: 18px 18px;"';
+        }
+        if(icon_bg!=null){
+            icon_bg = ' style="background-image: '+icon_bg;
+        }
+        
         overlay.legendid = legendid;
         
         if(!overlay) return;
@@ -447,11 +463,11 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         + (overlay.visible?'checked="checked">':'>')
         + '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif" id="loading-'+overlay_idx+'" '
         + ' style="display:none;margin-right:2px;vertical-align: text-top;background:url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif) no-repeat center center">'
-        + ((ismapdoc && icon_bg)
+        + ((icon_bg)
             ? ('<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif"'
                 + ' align="top" class="rt-icon" ' + icon_bg     
                 + '>')
-            : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+rectypeID_or_color+'" />')
+            : ('<div style="display:inline-block;vertical-align:-3px;border:6px solid '+bg_color+'" />')
         )
         + '<label for="chbox-'+legendid+'" style="padding-left:1em">' + title
         + '</label>'
@@ -634,7 +650,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
             if(source.rectypeID != RT_MAPABLE_QUERY){
 
-                _addLegendEntryForLayer(index, layer.title, source.rectypeID);
+                _addLegendEntryForLayer(index, {title:layer.title, rectypeID:source.rectypeID} );
                 
                 if(overlays[index]){
                     overlays[index].source = source;       
@@ -942,11 +958,12 @@ map.data.addListener('mouseover', function(event) {
             },
             editProperties: function(){
                 var that = this;
-                _editLayerOverlayProperties( index, function(colorChanged){
-                    if(colorChanged){
+                _editLayerOverlayProperties( index, function(wasChanged){
+                    if(wasChanged){
                         for (var i = 0; i < that.features.length; i++) {
                             map.data.overrideStyle(that.features[i], 
                                 {fillColor: that.source.color, strokeColor: that.source.color});
+                                //icon: that.source.iconMarker
                         }
                     }
                 } );
@@ -1188,12 +1205,23 @@ map.data.addListener('mouseover', function(event) {
                     
                     
                     mapdata = recset.toTimemap(source.id, null, {iconColor:source.color, iconMarker:source.iconMarker});
+
                     if(source.color) mapdata.color = source.color;
+                    if(source.iconMarker) {
+                        mapdata.iconMarker = source.iconMarker;    
+                    }else{
+                        var rts =recset.getRectypes();
+                        if(rts && rts.length==1){
+                            mapdata.rectypeID = rts[0];    
+                        }
+                        
+                    }
                     mapdata.id = source.id;
                     mapdata.title = source['title']?source['title']:mapdata.id;
 
                     mapdata.forceZoom = source.forceZoom;
                     mapdata.min_zoom = source.min_zoom;
+
                     
                     if(recset['limit_warning']){
                         /* @todo - show individual warning per layer
@@ -1267,7 +1295,7 @@ map.data.addListener('mouseover', function(event) {
             if(index>=0){  //this layer belong to map document
                 //was mapdata.title
                 overlays[index] = overlay;
-                _addLegendEntryForLayer(index, mapdata.title, mapdata.color, dependent_layers); //was RT_MAPABLE_QUERY insteadof color
+                _addLegendEntryForLayer(index, mapdata, dependent_layers); //was RT_MAPABLE_QUERY insteadof color
 
             }else{ // this layer is explicitely (by user) added
 
@@ -1281,7 +1309,7 @@ map.data.addListener('mouseover', function(event) {
                 if(legenditem.length>0) legenditem.remove();
 
                 //show custom query on top
-                _addLegendEntryForLayer(source.id, mapdata.title, mapdata.color, dependent_layers, true );
+                _addLegendEntryForLayer(source.id, mapdata, dependent_layers, true );
             }
                  
             _adjustLegendHeight();

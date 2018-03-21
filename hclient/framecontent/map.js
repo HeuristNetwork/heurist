@@ -607,6 +607,54 @@ if(_mapdata.limit_warning){
                 $(".vis-item-content").find("span").hide();
             }
         }
+        
+       
+        function __timelineEditProperties(){
+            
+            var $dlg_edit_layer = $('#timeline-edit-dialog').dialog({
+                width: 450,
+                modal: true,
+                resizable: false,
+                title: window.hWin.HR('Timeline options'),
+                buttons: [
+                    {text:window.hWin.HR('Apply'), click: function(){
+                        
+                        var mode = $( this ).find('input[type="radio"][name="time-label"]:checked').val();
+                        
+                        vis_timeline_label_mode = mode;
+                        var spinner = $("#timeline_spinner");
+                        if(mode==2){
+                            spinner.show();
+                        }else{
+                            spinner.hide();
+                        }
+                        
+                        var labelpos = $( this ).find('input[type="radio"][name="time-label-pos"]:checked').val();
+
+                        _current_stack_setting = ($( this ).find('input[type="radio"][name="time-label-stack"]:checked').val()==1);
+
+                        _applyTimeLineLabelsSettings(mode, labelpos);                
+                        vis_timeline.redraw();    
+                        
+                        /*
+                        var stack_mode = $( this ).find('input[type="radio"][name="time-label-stack"]:checked').val()==1;
+                        if(_current_stack_setting != (stack_mode==1)){
+                            _current_stack_setting = (stack_mode==1);
+                            vis_timeline.setOptions({'stack':_current_stack_setting});
+                        }else{
+                            vis_timeline.redraw();    
+                        }*/
+                        
+                         $( this ).dialog( "close" );
+                    }},
+                    {text:window.hWin.HR('Cancel'), click: function() {
+                        $( this ).dialog( "close" );
+                    }}
+                ]                
+            });
+            
+        }
+        
 
         var toolbar = $("#timeline_toolbar").css({'font-size':'0.8em', zIndex:3});
 
@@ -640,14 +688,20 @@ if(_mapdata.limit_warning){
             },text:false, label:window.hWin.HR("Move to End")})
             .click(function(){ __timelineMoveToRight(); })
             .appendTo(toolbar);
+        $("<button>").button({icons: {
+            primary: "ui-icon-gear"
+            },text:false, label:window.hWin.HR("Timeline options")})
+            .click(function(){ __timelineEditProperties(); })
+            .appendTo(toolbar);
 
+            /*
         var menu_label_settings = $('<ul id="vis_timeline_toolbar"><li id="tlm0"><a href="#"><span class="ui-icon ui-icon-check"/>Full label</a></li>'
                         +'<li id="tlm1"><a href="#"><span/>Truncate to bar</a></li>'
                         +'<li id="tlm2"><a href="#"><span/>Fixed length</a></li>'
                         +'<li id="tlm3"><a href="#"><span/>Hide labels</a></li>'
-                        /*+'<li class="separator">-</li>'
-                        +'<li id="tlm10"><a href="#"><span/>No stack</a></li>'
-                        +'<li id="tlm11"><a href="#"><span/>Label after bar</a></li>'*/
+                        //+'<li class="separator">-</li>'
+                        //+'<li id="tlm10"><a href="#"><span/>No stack</a></li>'
+                        //+'<li id="tlm11"><a href="#"><span/>Label after bar</a></li>'
                         +'</ul>')
                         //+'<li id="tlm4"><a href="#"><span/>Hide labels/No stack</a></li>
         .addClass('menu-or-popup')
@@ -659,8 +713,6 @@ if(_mapdata.limit_warning){
                 var mode =  Number(ui.item.attr('id').substr(3));
                 
                 if(mode>=10){
-                    
-                    
                     return;
                 }
                 
@@ -696,6 +748,7 @@ if(_mapdata.limit_warning){
             })
             //.css({width:'5em'})
             .appendTo(toolbar);
+        */
 
         var spinner = $( "<input>", {id:"timeline_spinner", value:10} ).appendTo(toolbar);
         $("#timeline_spinner").spinner({
@@ -712,7 +765,7 @@ if(_mapdata.limit_warning){
 
                 }
               }
-            }).css('width','2em');//rre.hide();
+            }).css('width','2em').hide();//rre.hide();
 
         /*
         $("<input id='btn_timeline_labels' type='checkbox' checked>").appendTo(toolbar);
@@ -724,40 +777,69 @@ if(_mapdata.limit_warning){
             .appendTo(toolbar);
         */
         
+        /*
         var el = $('<label style="padding:3px 4px;background:#DDDDDD"><input type="checkbox" checked>Stack</label>').appendTo(toolbar);
         el.find('input').change(function(event){ 
               _current_stack_setting = $(event.target).is(':checked');
               vis_timeline.setOptions({'stack':_current_stack_setting}); //(mode!=4)
 //              vis_timeline.redraw();
         });
-
+        */
 
     }
     
     //
     //
     //
-    function _applyTimeLineLabelsSettings(mode){
+    function _applyTimeLineLabelsSettings(mode, labelpos){
         
                 var contents = $(".vis-item-content");
                 var spinner = $("#timeline_spinner");
 
-                if(mode==0){  //full length
+                /*if(mode==0){  //full length
                     $.each(contents, function(i,item){item.style.width = 'auto';});//.css({'width':''});
                 }else if(mode==2){  //specific length 
                     contents.css({'width': spinner.spinner('value')+'em'});
-                }
+                }*/
 
-                $('div .vis-item-overflow').css('overflow',(mode===1)?'hidden':'visible');
+                if(mode==1){ //truncate
+                    $('div .vis-item-overflow').css('overflow','hidden');
+                    contents.css({'width': '100%'});
+                }else{
+                    $('div .vis-item-overflow').css('overflow','visible');
+                    if(mode==0){  //full length
+                        //$.each(contents, function(i,item){item.style.width = 'auto';});//.css({'width':''});
+                        contents.css({'width': 'auto'});
+                    }else if(mode==2){  //specific length 
+                        contents.css({'width': spinner.spinner('value')+'em'});
+                    }else{
+                        contents.css({'width': '16px'});
+                    }                    
+                }
+                
+                if(labelpos==2){ //above
+                    $(".vis-item-bbox").css('top','10px');
+                }else{
+                    $(".vis-item-bbox").css('top','25%');
+                }
+                /*
+                if(labelpos==1){ //on right
+                }else{ //on left
+                }*/
+                    
+                
+                
 
                 //'label_in_bar':(mode==1),
                 vis_timeline.setOptions({'margin':1,'stack':_current_stack_setting}); //(mode!=4)
 
+                /*
                 if(mode>=3){ //hide labels at all
-                    contents.find("span").hide();
+                    contents.find("span").css('visibility','hidden'); //.hide();
                 }else{
-                    contents.find("span").show();
+                    contents.find("span").css('visibility','visible'); //.show();
                 }
+                */
         
     }                
 
@@ -855,7 +937,7 @@ if(_mapdata.limit_warning){
         
         
         //apply label settings
-        _applyTimeLineLabelsSettings(vis_timeline_label_mode);
+        _applyTimeLineLabelsSettings(vis_timeline_label_mode, 0);
         
 //console.log('TIMELINE DATASET. set data: '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
 //        window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
