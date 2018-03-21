@@ -1571,7 +1571,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                 $northing = $row[0];
                 $easting = $row[1];
                 
-                $allInteger = $allInteger && ($northing==round($northing)) && ($easting==parseInt($easting));
+                $allInteger = $allInteger && ($northing==round($northing)) && ($easting==round($easting));
                 $allOutWGS = $allOutWGS && (abs($easting)>180) && (abs($northing)>90);
                 if (!($allOutWGS && $allInteger)) break;                
             }

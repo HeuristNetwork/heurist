@@ -488,16 +488,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
             if($('#sa_primary_rectype > option').length==0){
                 window.hWin.HEURIST4.ui.createRectypeSelect( $('#sa_primary_rectype').get(0), null, window.hWin.HR('select...'), true);
-
-                //reload dependency tree on select change
-                $('#sa_primary_rectype').change( function(event){ 
-                        var ele = $(event.target);
-                        var treeElement = ele.parents('#divSelectPrimaryRecType').find('#dependencies_preview');
-
-                        _loadRectypeDependencies( $dlg, treeElement, ele.val() ); 
-                        
-                });
-                
             }else{
                 $('#sa_primary_rectype').val(imp_session['primary_rectype']);
             }
@@ -505,7 +495,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
             //apply selection of primary and dependent reccord types
             buttons[window.hWin.HR('OK')]  = function() {
                     
-                    
+                $dlg.parent().find('#sa_primary_rectype').off('change');    
                 $dlg.dialog( "close" );
 
                 //prepare sequence object - based on selected rectypes and field names
@@ -595,6 +585,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                     
                 }; 
             buttons[window.hWin.HR('Cancel')]  = function() {
+                    $dlg.parent().find('#sa_primary_rectype').off('change');
                     $dlg.dialog( "close" );
                     if(is_initial==true){
                          _showStep(1);
@@ -615,6 +606,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 var btn = $dlg.parent().find('.ui-dialog-buttonset > button').first();
                 window.hWin.HEURIST4.util.setDisabled(btn, true);
             }
+            
+            //reload dependency tree on select change
+            $dlg.parent().find('#sa_primary_rectype').change( function(event){ 
+                    var ele = $(event.target);
+                    var treeElement = ele.parents('#divSelectPrimaryRecType').find('#dependencies_preview');
+
+                    _loadRectypeDependencies( $dlg, treeElement, ele.val() ); 
+                    
+            });
+                
+            
         
     }
 

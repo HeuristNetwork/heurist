@@ -253,7 +253,7 @@
         if($is_insert){   // ADD NEW RECORD
 
             //if source of target of relationship record is temporal - relationship is temporal as well
-            if($record['RecTypeID']==RT_RELATION && $record['FlagTemporary']!=1){
+            if($record['RecTypeID']==RT_RELATION && @$record['FlagTemporary']!=1){
                 $system->defineConstant('DT_PRIMARY_RESOURCE');
                 $system->defineConstant('DT_TARGET_RESOURCE');
                 
