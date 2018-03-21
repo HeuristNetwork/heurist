@@ -1931,8 +1931,7 @@ function EditRecStructure() {
     * returns true if there is at list on required field in structure
     */
     function _checkForRequired(){
-
-
+        
         var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
         var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
         var _dts = typedef.dtFields;
@@ -2371,6 +2370,40 @@ function EditRecStructure() {
         }
     }
     
+    //
+    // apparently it should be moved to ui?
+    //
+    function __findParentRecordTypes(childRecordType){
+
+        var parentRecordTypes = []; //result
+        
+        var fieldIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+        //var dtyFieldNamesIndexMap = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
+        
+        childRecordType = ''+childRecordType; //must be strig otherwise indexOf fails
+        
+        var rtyID, dtyID, allrectypes = top.HEURIST.rectypes.typedefs;
+        for (rtyID in allrectypes)
+        if(rtyID>0){
+
+            var fields = allrectypes[rtyID].dtFields;
+            
+            for (dtyID in fields)
+            if(dtyID>0 && 
+                fields[dtyID][fieldIndexMap['dty_Type']]=='resource' &&
+                fields[dtyID][fieldIndexMap['rst_CreateChildIfRecPtr']]==1)
+            { //for all fields in this rectype
+                var ptrIds = fields[dtyID][fieldIndexMap['rst_PtrFilteredIDs']];
+                if(ptrIds.split(',').indexOf(childRecordType)>=0){
+                    parentRecordTypes.push(rtyID);
+                    break;
+                }
+            }
+        }
+        
+        return parentRecordTypes;
+    }    
+    
 
     //---------------------------------------------
     // public members
@@ -2458,9 +2491,8 @@ function EditRecStructure() {
                 //alert("You have to save or cancel changes for editing field first");
                 return;                
             }
-            if(_checkForRequired()){
-
-                _checkForTitleMask(function(){ 
+            
+            function __reviseTitleMask(){ 
                         //wait for inline editor
                         function __waitForInlineEditor(){
                              if(_isServerOperationInProgress){ //wait next 500 seconds
@@ -2471,10 +2503,25 @@ function EditRecStructure() {
                         }
                         
                         setTimeout(__waitForInlineEditor, 300);
-                });
+                }
+            
+            if(_checkForRequired()){
+
+                _checkForTitleMask(__reviseTitleMask);
 
             }else{
-                alert("You should have at least one required field and at least one of them should appear in the title mask to ensure that the constructed title is not blank. \n\nPlease set one or more fields to Required.");
+                //check for parent pointers
+                var parent_rtys = __findParentRecordTypes(rty_ID);
+                if(parent_rtys.length>0){
+                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlg('We recommend the addition of at least one field from this record structure in addition to the parent record fields - preferably a required field'
++' - to ensure that the record title distinguishes the record from other records belonging to the parent entity.<br><br> '
++'Click [OK] to revise the title (recommended), [Proceed without revision] if you want to proceed without additional fields.',
+[{text:'OK', click: function(){$dlg.dialog( "close" );}},
+ {text:'Proceed without revision', click: function(){$dlg.dialog( "close" );  _checkForTitleMask(__reviseTitleMask); }} ]        
+);
+                }else{
+                    alert("You should have at least one required field and at least one of them should appear in the title mask to ensure that the constructed title is not blank. \n\nPlease set one or more fields to Required.");
+                }
             }
         },
 
