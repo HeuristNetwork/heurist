@@ -422,7 +422,19 @@
                 $query = 'UPDATE Records set rec_FlagTemporary=0 where rec_ID in ('.implode(',',$relRecsIDs).')';
                 $res = $mysqli->query($query);
             }
-        
+            
+            //recordGetLinkedRecords - get all linked and related records and update them
+            $links = recordGetLinkedRecords($system, $recID);
+            if(count($links)>0){
+                //find title masks
+                $links_rectypes = array_unique(array_values($links));
+                $masks = mysql__select_assoc2($mysqli,'select rty_ID, rty_TitleMask from defRecTypes where rty_ID in ('
+                    .implode(',',$links_rectypes) .')');
+
+                foreach($links as $linkRecID=>$linkRecTypeID){
+                    $res = recordUpdateTitle($system, $linkRecID, $linkRecTypeID, $masks[$linkRecTypeID]);
+                }
+            }
         }
         
         

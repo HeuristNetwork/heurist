@@ -520,7 +520,46 @@
             }
         }
     }
+    
+    //
+    //return linked record ids and their types
+    //
+    function recordGetLinkedRecords($system, $recordID){
 
+        $mysqli = $system->get_mysqli();
+        $query = 'SELECT DISTINCT rl_TargetID, rec_RecTypeID FROM recLinks, Records WHERE rl_TargetID=rec_ID  AND rl_SourceID='.$recordID;
+        $ids1 = mysql__select_assoc2($mysqli, $query);
+        if($ids1===null){
+            $system->addError(HEURIST_DB_ERROR, "Search query error for target linked and related records. Query ".$query, $mysqli->error);
+            return false;
+        }
+        $query = 'SELECT DISTINCT rl_SourceID, rec_RecTypeID FROM recLinks, Records WHERE rl_SourceID=rec_ID  AND rl_TargetID='.$recordID;
+        $ids2 = mysql__select_assoc2($mysqli, $query);
+        if($ids2===null){
+            $system->addError(HEURIST_DB_ERROR, "Search query error for source linked and related records. Query ".$query, $mysqli->error); 
+            return false;
+        }
+        
+        //merge
+        if(count($ids2)>count($ids1)){
+            foreach($ids1 as $recid=>$rectype_id){
+                if(!@$ids2[$recid]){
+                    $ids2[$recid] = $rectype_id;
+                }
+            }
+            return $ids2;
+        }else{
+            foreach($ids2 as $recid=>$rectype_id){
+                if(!@$ids1[$recid]){
+                    $ids1[$recid] = $rectype_id;
+                }
+            }
+            return $ids1;
+        }
+        
+        
+        
+    }
     //
     // returns relationship records(s) for given source and target records
     //
@@ -530,6 +569,7 @@
 
         //find all target related records
         $query = 'SELECT rl_RelationID FROM recLinks WHERE rl_RelationID IS NOT NULL';
+        
         if($sourceID>0){
             $query = $query.' AND rl_SourceID='.$sourceID;
         }
