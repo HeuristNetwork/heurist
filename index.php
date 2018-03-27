@@ -347,7 +347,10 @@ var fin_time = new Date().getTime() / 1000;
                         {element:document.getElementById('heurist-platform-warning'),
                          width:480, height:220,
                          title: 'Welcome',
-                        buttons:{'Close':function(){ $(this).dialog( 'close' )} } });                                  }
+                        buttons:{'Close':function(){ $(this).dialog( 'close' )} } });                                  
+                }else if (window.hWin.HEURIST4.util.isIE() ) {
+                    window.hWin.HEURIST4.msg.showMsgDlg('Heurist is not fully supported in Internet Explorer. Please use Chrome, Firefox, Safari or Edge.');
+                }
 
             } //onInitCompleted_PerformSearch
 
