@@ -556,8 +556,8 @@ function DetailTypeEditor() {
                 "close-on-blur": false,
                 "no-resize": true,
                 title: 'Select Record Type',
-                height: 480,
-                width: 540,
+                height: 600,
+                width: 640,
                 callback: function(recordTypesSelected) {
                     if(!Hul.isnull(recordTypesSelected)) {
                         _setRecordsPointerValue(recordTypesSelected);
