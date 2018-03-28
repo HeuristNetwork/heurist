@@ -38,7 +38,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
     },
 
-    showMsgErr: function(response, needlogin){
+    showMsgErr: function(response, needlogin, ext_options){
         var msg = '';
         var dlg_title = null;
         if(typeof response === "string"){
@@ -111,7 +111,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             //$(top.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
                     }
                 }; 
-        window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons, dlg_title);
+        window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons, dlg_title, ext_options);
         
     },
 
@@ -203,141 +203,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         return $dlg;
     },
 
-    //
-    // MAIN method
-    // buttons - callback function or objects of buttons for dialog option
-    // title - either string for title, or object {title:, yes: ,no, cancel, }
-    //
-    showMsgDlg: function(message, buttons, labels, ext_options, isPopupDlg){
-
-        if(!$.isFunction(window.hWin.HR)){
-            alert(message);
-            return;
-        }
-
-        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-        var isPopup = false; //bigger and resizable
-
-        if(message!=null){
-            
-            var isobj = (typeof message ===  "object");
-
-            if(!isobj){
-                isPopupDlg = isPopupDlg || (message.indexOf('#')===0 && $(message).length>0);
-            }
-
-            if(isPopupDlg){
-
-                $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
-                if(isobj){
-                    $dlg.append(message);
-                }else if(message.indexOf('#')===0 && $(message).length>0){
-                    $dlg.html($(message).html());
-                }else{
-                    $dlg.html(message);
-                }
-
-                isPopup = true;
-
-            }else{
-                $dlg.empty();
-                isPopup = false;
-                if(isobj){
-                    $dlg.append(message);
-                }else{
-                    $dlg.append('<span>'+window.hWin.HR(message)+'</span>');
-                }
-            }
-        }
-
-        var title = '·', // 'Info' removed - it's a useless popup window title, better to have none at all
-            lblYes = window.hWin.HR('Yes'),
-            lblNo =  window.hWin.HR('No'),
-            lblOk = window.hWin.HR('OK'),
-            lblCancel = window.hWin.HR('Cancel');
-        
-        if($.isPlainObject(labels)){
-            if(labels.title)  title = labels.title;
-            if(labels.yes)    lblYes = labels.yes;
-            if(labels.no)     lblNo = labels.no;
-            if(labels.ok)     lblOk = labels.ok;
-            if(labels.cancel) lblCancel = labels.cancel;
-        }else if (labels!=''){
-            title = labels;
-        }
-        
-        if ($.isFunction(buttons)){ //}typeof buttons === "function"){
-
-            callback = buttons;
-
-            buttons = {};
-            buttons[lblYes] = function() {
-                callback.call();
-                $dlg.dialog( "close" );
-            };
-            buttons[lblNo] = function() {
-                $dlg.dialog( "close" );
-            };
-        }else if(!buttons){    //buttons are not defined - the only one OK button
-
-            buttons = {};
-            buttons[lblOk] = function() {
-                $dlg.dialog( "close" );
-            };
-
-        }
-
-        var options =  {
-            title: window.hWin.HR(title),
-            resizable: false,
-            //height:140,
-            width: 'auto',
-            modal: true,
-            closeOnEscape: true,
-            buttons: buttons
-        };
-        if(isPopup){
-
-            options.open = function(event, ui){
-                $dlg.scrollTop(0);
-            };
-
-            options.height = 515;
-            options.width = 705;
-            options.resizable = true;
-            options.resizeStop = function( event, ui ) {
-                    $dlg.css({overflow: 'none !important','width':'100%', 'height':$dlg.parent().height()
-                            - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height() - 20 });
-                };
-        }
-        
-        if(ext_options){
-           if(ext_options.options){
-                $.extend(options, ext_options.options);
-           }
-           if(ext_options.my && ext_options.at && ext_options.of){
-               options.position = {my:ext_options.my, at:ext_options.at, of:ext_options.of};
-           }else if(!ext_options.options){  
-                options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
-           }
-        }
-        
-
-        $dlg.dialog(options);
-        //$dlg.dialog('option','buttons',buttons);
-
-        if(options.hideTitle){
-            $dlg.parent().find('.ui-dialog-titlebar').hide();
-        }else{
-            $dlg.parent().find('.ui-dialog-titlebar').show();
-        }
-        
-        return $dlg;
-        //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
-        //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});
-        //$dlg.parent().find('.ui-dialog-buttonpane').css({'background':'red none repeat scroll 0 0 !important','background-color':'transparent !important'});
-        //'#8ea9b9 none repeat scroll 0 0 !important'     none !important','background-color':'none !important
-    },
     
     //
     //
@@ -860,5 +725,141 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         $(window.hWin.HEURIST4.msg.coverall).hide();//.style.visibility = "hidden";
     },
   
+
+    //
+    // MAIN method
+    // buttons - callback function or objects of buttons for dialog option
+    // title - either string for title, or object {title:, yes: ,no, cancel, }
+    //
+    showMsgDlg: function(message, buttons, labels, ext_options, isPopupDlg){
+
+        if(!$.isFunction(window.hWin.HR)){
+            alert(message);
+            return;
+        }
+
+        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+        var isPopup = false; //bigger and resizable
+
+        if(message!=null){
+            
+            var isobj = (typeof message ===  "object");
+
+            if(!isobj){
+                isPopupDlg = isPopupDlg || (message.indexOf('#')===0 && $(message).length>0);
+            }
+
+            if(isPopupDlg){
+
+                $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
+                if(isobj){
+                    $dlg.append(message);
+                }else if(message.indexOf('#')===0 && $(message).length>0){
+                    $dlg.html($(message).html());
+                }else{
+                    $dlg.html(message);
+                }
+
+                isPopup = true;
+
+            }else{
+                $dlg.empty();
+                isPopup = false;
+                if(isobj){
+                    $dlg.append(message);
+                }else{
+                    $dlg.append('<span>'+window.hWin.HR(message)+'</span>');
+                }
+            }
+        }
+
+        var title = '·', // 'Info' removed - it's a useless popup window title, better to have none at all
+            lblYes = window.hWin.HR('Yes'),
+            lblNo =  window.hWin.HR('No'),
+            lblOk = window.hWin.HR('OK'),
+            lblCancel = window.hWin.HR('Cancel');
+        
+        if($.isPlainObject(labels)){
+            if(labels.title)  title = labels.title;
+            if(labels.yes)    lblYes = labels.yes;
+            if(labels.no)     lblNo = labels.no;
+            if(labels.ok)     lblOk = labels.ok;
+            if(labels.cancel) lblCancel = labels.cancel;
+        }else if (labels!=''){
+            title = labels;
+        }
+        
+        if ($.isFunction(buttons)){ //}typeof buttons === "function"){
+
+            callback = buttons;
+
+            buttons = {};
+            buttons[lblYes] = function() {
+                callback.call();
+                $dlg.dialog( "close" );
+            };
+            buttons[lblNo] = function() {
+                $dlg.dialog( "close" );
+            };
+        }else if(!buttons){    //buttons are not defined - the only one OK button
+
+            buttons = {};
+            buttons[lblOk] = function() {
+                $dlg.dialog( "close" );
+            };
+
+        }
+
+        var options =  {
+            title: window.hWin.HR(title),
+            resizable: false,
+            //height:140,
+            width: 'auto',
+            modal: true,
+            closeOnEscape: true,
+            buttons: buttons
+        };
+        if(isPopup){
+
+            options.open = function(event, ui){
+                $dlg.scrollTop(0);
+            };
+
+            options.height = 515;
+            options.width = 705;
+            options.resizable = true;
+            options.resizeStop = function( event, ui ) {
+                    $dlg.css({overflow: 'none !important','width':'100%', 'height':$dlg.parent().height()
+                            - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height() - 20 });
+                };
+        }
+        
+        if(ext_options){
+           if(ext_options.options){
+                $.extend(options, ext_options.options);
+           }
+           if(ext_options.my && ext_options.at && ext_options.of){
+               options.position = {my:ext_options.my, at:ext_options.at, of:ext_options.of};
+           }else if(!ext_options.options){  
+                options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
+           }
+        }
+        
+
+        $dlg.dialog(options);
+        //$dlg.dialog('option','buttons',buttons);
+
+        if(options.hideTitle){
+            $dlg.parent().find('.ui-dialog-titlebar').hide();
+        }else{
+            $dlg.parent().find('.ui-dialog-titlebar').show();
+        }
+        
+        return $dlg;
+        //$dlg.parent().find('.ui-dialog-buttonpane').removeClass('ui-dialog-buttonpane');
+        //$dlg.parent().find('.ui-dialog-buttonpane').css({'background-color':''});
+        //$dlg.parent().find('.ui-dialog-buttonpane').css({'background':'red none repeat scroll 0 0 !important','background-color':'transparent !important'});
+        //'#8ea9b9 none repeat scroll 0 0 !important'     none !important','background-color':'none !important
+    },  
   
 };

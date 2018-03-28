@@ -573,7 +573,7 @@ $.widget( "heurist.search", {
 
                    var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
                    if(!$.isArray(prefs) || prefs.length<4){
-                        prefs = [selval, window.hWin.HAPI4.currentUser['ugr_ID'], 'viewable', '']; //default
+                        prefs = [selval, 0, 'viewable', '']; //default to everyone   window.hWin.HAPI4.currentUser['ugr_ID']
                    }else{
                         prefs[0] = selval; 
                    }

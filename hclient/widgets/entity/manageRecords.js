@@ -1407,14 +1407,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 //default values for ownership and viewability from preferences
                 var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
                 if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
-                    add_rec_prefs = [0, window.hWin.HAPI4.currentUser['ugr_ID'], 'viewable', '']; //default
+                    add_rec_prefs = [0, 0, 'viewable', '']; //default to Everyone
                 }
                 
                 if(!(that.options.new_record_params.ro>=0)){
                     that.options.new_record_params.ro = add_rec_prefs[1];    
                 }
                 if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(add_rec_prefs[1]))) {
-                    that.options.new_record_params.ro = window.hWin.HAPI4.currentUser['ugr_ID'];    
+                    that.options.new_record_params.ro = 0; //default to eveyone window.hWin.HAPI4.currentUser['ugr_ID'];    
                 }
                 if(window.hWin.HEURIST4.util.isempty(that.options.new_record_params.rv)){
                     that.options.new_record_params.rv = add_rec_prefs[2];
@@ -1526,7 +1526,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             if(response){ // && response.length()>0
                 that._currentEditRecordset = new hRecordSet(response.data);
-                that._isInsert = response.is_insert; 
+                if(that._currentEditRecordset.length()==0){
+                    var sMsg = 'Record does not exist in database or has status "hidden" for non owners';
+                    window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 
+                            {ok:'Close', title:'Record not found or hidden'}, 
+                                {options:{close:function(){ that.closeEditDialog(); }}});
+                    return;
+                }else{
+                    that._isInsert = response.is_insert;     
+                }                
             }
             
             var rectypeID = that._getField('rec_RecTypeID');

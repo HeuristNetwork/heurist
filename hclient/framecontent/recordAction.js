@@ -65,7 +65,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         //$("#add-link-tags").val().replace(/,/g,'|'), 1];
         add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
         if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
-            add_rec_prefs = [0, window.hWin.HAPI4.currentUser['ugr_ID'], 'viewable', '']; //default
+            add_rec_prefs = [0, 0, 'viewable', '']; //default: rectype not defined, Everyone
         }
         
         //fill selector for records: all, selected, by record type

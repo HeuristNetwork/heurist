@@ -121,11 +121,22 @@
                                             $container.manageRecords('addEditRecord', recset.getOrder()[0]);
                                             //since recID may be resolved via recForwarding  (recID>0)?recID:recset.getOrder()[0]);
                                         }else{ // if(isPopup){
-                                            window.close();  //nothing found
+                                        
+                                            var sMsg = ' does not exist in database or has status "hidden" for non owners';
+                                            if(recID>0){
+                                                sMsg = 'Record id#'+recID + sMsg;
+                                            }else{
+                                                sMsg = 'Record '+ sMsg;                                                    
+                                            }
+                                            
+                                            window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 
+                                                {ok:'Close', title:'Record not found or hidden'}, 
+                                                    {options:{close:function(){ window.close(); }}});
+                                            
                                         }
                                     }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                                        if(isPopup){ window.close(); }
+                                        window.hWin.HEURIST4.msg.showMsgErr(response, false, 
+                                            {options:{close:function(){ if(isPopup){ window.close(); } }}});
                                     }
 
                                 });
