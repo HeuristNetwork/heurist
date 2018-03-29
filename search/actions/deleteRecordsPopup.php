@@ -283,14 +283,22 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 	} else {
 		print '<p style="color:#BB0000; font-size:12px; line-height:14px"><strong>NOTE:</strong>You may not delete records you did not create, or records that have been bookmarked by other users</p><div class="separator_row"></div>';
 	}
+    
+    $current_user_groups = get_group_ids();
+    if(!is_array($current_user_groups)) $current_user_groups = array();
+    array_push($current_user_groups, 0);    
+    array_push($current_user_groups, get_user_id());
+    $current_user_groups = array_map('intval', $current_user_groups);
+    
+    
 	$cnt_checked = 0;
 	foreach ($bib_ids as $rec_id) {
 		if (! $rec_id) continue;
-		$res = mysql_query('select rec_Title,rec_AddedByUGrpID from Records where rec_ID = ' . $rec_id);
+		$res = mysql_query('select rec_Title,rec_OwnerUGrpID from Records where rec_ID = ' . $rec_id);
 		$row = mysql_fetch_assoc($res);
 		$rec_title = $row['rec_Title'];
-		$owner = $row['rec_AddedByUGrpID'];
-		$res = mysql_query('select '.USERS_USERNAME_FIELD.' from Records left join usrBookmarks on bkm_recID=rec_ID left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_ID = ' . $rec_id);
+		$owner = $row['rec_OwnerUGrpID']; //was rec_AddedByUGrpID
+		$res = mysql_query('select '.USERS_USERNAME_FIELD.' from Records left join usrBookmarks on bkm_recID=rec_ID left join '.USERS_DATABASE.'.'.USERS_TABLE.' on '.USERS_ID_FIELD.'=bkm_UGrpID where rec_ID = ' . $rec_id.' and ugr_Name is not null');
 		$bkmk_count = mysql_num_rows($res);
 		$bkmk_users = array();
 		while ($row = mysql_fetch_assoc($res)) array_push($bkmk_users, $row[USERS_USERNAME_FIELD]);
@@ -298,7 +306,7 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 		$refs = mysql_num_rows($refs_res);
 
 		$allowed = is_admin()  ||
-				   ($owner == get_user_id()  &&
+				   (in_array(intval($owner), $current_user_groups) &&
 				   ($bkmk_count == 0  ||
 				   ($bkmk_count == 1  &&  $bkmk_users[0] == get_user_username())));
 
@@ -308,7 +316,7 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
 
 		print "<div".(! $allowed ? ' class=greyed' : '').">";
 		print ' <p><input type="checkbox" name="bib[]" value="'.$rec_id.'"'.($is_checked ? ' checked' : '').(! $allowed ? ' disabled' : ' onchange="onSelect(this)"').'>';
-		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_BASE_URL.'records/edit/editRecord.html?db='.HEURIST_DBNAME.'&recID='.$rec_id.'"><img src='.HEURIST_BASE_URL.'common/images/external_link_16x16.gif></a>';
+		print ' ' . $rec_id . '<a target=_new href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id.'"><img src='.HEURIST_BASE_URL.'common/images/external_link_16x16.gif></a>';
 		print ' ' . $rec_title ."</p>";
 
 		print ' <p style="margin-left: 20px;"><b>' . $bkmk_count . '</b> bookmark' . ($bkmk_count == 1 ? '' : 's') . ($bkmk_count > 0 ? ':' : '') . "  ";

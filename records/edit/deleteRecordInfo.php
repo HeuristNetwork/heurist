@@ -39,16 +39,26 @@ require_once(dirname(__FILE__)."/../../records/index/elasticSearchFunctions.php"
 //
 function deleteRecord($id, $needDeleteFile=true) {
 	$id = intval($id);
-
+    
 	$res = mysql_query("SELECT rec_AddedByUGrpID, rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = " . $id);
 	$row = mysql_fetch_assoc($res);
     $recTypeID = $row["rec_RecTypeID"];
 	$owner = $row["rec_OwnerUGrpID"];
         
     if (!is_admin()) {
-		if (!($owner == get_user_id() || is_admin('group', $owner))){
-			return  array("error" => "user not authorised to delete record");
-		}
+        
+        $current_user_groups = get_group_ids();
+        if(!is_array($current_user_groups)) $current_user_groups = array();
+        array_push($current_user_groups, 0);    
+        array_push($current_user_groups, get_user_id());
+        $current_user_groups = array_map('intval', $current_user_groups);
+    
+        if(!in_array(intval($owner), $current_user_groups)){
+            return  array("error" => "user not authorised to delete record");
+        }
+		//if (!($owner == get_user_id() || is_admin('group', $owner))){
+		//	return  array("error" => "user not authorised to delete record");
+		//}
 	}
 
 	// find any references to the record
