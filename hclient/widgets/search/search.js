@@ -392,13 +392,14 @@ $.widget( "heurist.search", {
 
 
             this.btn_add_record = $( "<button>", {
-                title: "Click to select a record type and access permissions, and create a new record (entity) in the database"
+                title: "Click to select a record type and create a new record (entity) in the database"
             })
-            .css({'min-width':'110px','margin-left':'4em','font-size':'1.3em'})
+            .css({'min-width':'110px','margin-left':'4em','font-size':'1.3em','max-width':'250px'})
             //.addClass('logged-in-only')
             //.addClass('ui-heurist-btn-header1')
             .appendTo( this.div_add_record )
             .button({label: window.hWin.HR("Add Record"), icon:'ui-icon-plusthick'}) //"ui-icon-circle-plus"
+            .addClass('truncate')
             .click( function(){ 
                 window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                     if(that.select_rectype_addrec.val()>0){
@@ -416,6 +417,13 @@ $.widget( "heurist.search", {
             //.addClass('ui-heurist-btn-header1 heurist-bookmark-search')
             .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
 
+            this.btn_select_owner = $( "<button>")
+            .css({'font-size':'1.3em'})
+            .appendTo( this.div_add_record )
+            .button({label:'owner', icon: "ui-icon-carat-1-s", iconPosition:'end'});
+            //.addClass('truncate');
+            
+            
             /*
             this.select_rectype_addrec = $('<select>')   
                 .attr('size',20)
@@ -428,16 +436,19 @@ $.widget( "heurist.search", {
             this._on( this.btn_select_rt, {
                 click:  function(){
             
-                //this.select_rectype_addrec.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
                 this.select_rectype_addrec.hSelect('open');
-                this.select_rectype_addrec.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
-                /*    
-                $('.menu-or-popup').hide(); //hide other
-                var $menu_recordtypes = $( this.select_rectype_addrec )
-                    .show()
+                this.select_rectype_addrec.hSelect('menuWidget')
                     .position({my: "left top", at: "left bottom", of: this.btn_add_record });
-                $( document ).one( "click", function() { $menu_recordtypes.hide(); });
-                */
+                return false;
+                    
+            }});
+
+            this._on( this.btn_select_owner, {
+                click:  function(){
+            
+                this.select_owner_addrec.hSelect('open');
+                this.select_owner_addrec.hSelect('menuWidget')
+                    .position({my: "right top", at: "right bottom", of: this.btn_select_owner });
                 return false;
                     
             }});
@@ -478,10 +489,22 @@ $.widget( "heurist.search", {
         //-----------------------
 
         //global listeners
-        $(this.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
-            that._refresh();
+        $(window.hWin.document).on(
+            window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
+                +window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, function(e, data) {
+                    
+            if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
+                if(that.select_owner_addrec!=null){
+                    that.select_owner_addrec.remove();
+                    that.select_owner_addrec = null;
+                }
+            }
+            if(!data || data.origin!='search'){
+                that._refresh();
+            }
         });
-        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
+        $(this.document).on(
+            window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
             + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
@@ -579,21 +602,60 @@ $.widget( "heurist.search", {
                    }
                    window.hWin.HAPI4.save_pref('record-add-defaults', prefs);
                    
+                   window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
+                   
                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{rt:selval}});
                    return false;
                 }
             });
-
+        }
+        if(!this.select_owner_addrec){
             
-            var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-            if($.isArray(prefs) && prefs.length>0) prefs = prefs[0];
-            if(prefs>0) {
-                this.select_rectype_addrec.val(prefs); 
-                var opt = this.select_rectype_addrec.find('option[value="'+prefs+'"]');
+            this.select_owner_addrec = window.hWin.HEURIST4.ui.createSelector();
+            window.hWin.HEURIST4.ui.createUserGroupsSelect(this.select_owner_addrec, null,  //take groups of current user
+                [{key:0, title:'Everyone (no restriction)'}, 
+                 {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}]);
+            
+            this.select_owner_addrec = $(this.select_owner_addrec);
+            
+            var that = this;
+            this.select_owner_addrec.hSelect({change: function(event, data){
+                    
+                   var selval = data.item.value;
+                   that.select_owner_addrec.val(selval);
+
+                   var opt = that.select_owner_addrec.find('option[value="'+selval+'"]');
+                   that.btn_select_owner.attr('title', 'Owner: '+opt.text()+'. Click to select other');
+
+                   var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                   if(!$.isArray(prefs) || prefs.length<4){
+                        prefs = [selval, 0, 'viewable', '']; //default to everyone   window.hWin.HAPI4.currentUser['ugr_ID']
+                   }else{
+                        prefs[1] = selval; 
+                   }
+                   window.hWin.HAPI4.save_pref('record-add-defaults', prefs);
+                   window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
+                }
+            });
+            
+        }
+            
+        var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+        if($.isArray(prefs) && prefs.length>1){
+            if(prefs[0]>0) {
+                this.select_rectype_addrec.val(prefs[0]); 
+                var opt = this.select_rectype_addrec.find('option[value="'+prefs[0]+'"]');
                 this.btn_add_record.button({label: 'Add '+opt.text()});
             }
+            if(parseInt(prefs[1])>=0) {
+                this.select_owner_addrec.val(prefs[1]); 
+                
+                var opt = this.select_owner_addrec.find('option[value="'+prefs[1]+'"]');
+                //this.btn_select_owner.button({label:opt.text()});
+                this.btn_select_owner.attr('title', 'Owner: '+opt.text()+'. Click to select other');
+            }
         }
-        
+            
         this._showhide_input_prompt();
     },
 
@@ -681,6 +743,11 @@ $.widget( "heurist.search", {
             if(this.search_assistant!=null){
                 this.search_assistant.remove();
                 this.search_assistant = null;
+            }
+            if(this.select_rectype_addrec!=null){
+                this.select_rectype_addrec.remove();
+                this.select_rectype_addrec = null;
+                this._refresh();
             }
         }
 
@@ -1140,7 +1207,8 @@ $.widget( "heurist.search", {
     // revert other modifications here
     ,_destroy: function() {
 
-        $(this.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS);
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS
+          +' '+window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
         $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
           + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
           + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH

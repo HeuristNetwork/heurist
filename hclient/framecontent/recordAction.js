@@ -67,6 +67,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
             add_rec_prefs = [0, 0, 'viewable', '']; //default: rectype not defined, Everyone
         }
+        if(!(parseInt(add_rec_prefs[1])>=0)) add_rec_prefs[1] = 0;
         
         //fill selector for records: all, selected, by record type
         if(action_type=='add_record'){
@@ -194,10 +195,16 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).click(function(){window.close();});
 
         
-        //global listener
-        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
-            _fillOwnership();
+        //global listener - it does not work
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
+                +window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, function(e, data) {
+                    
+              if(!data || data.origin!='recordAction'){
+                  _fillOwnership();
+              }
         });
+        //if(!data || data.origin!='recordAction'){
+        //}
     }
 
     //
@@ -224,6 +231,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);        
             window.hWin.HEURIST4.util.setDisabled($('#btnAddRecordInNewWin'),false);
             window.hWin.HEURIST4.util.setDisabled($('#btnAddRecord'),false);
+            
+            window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'recordAction'});
+            
         }else{
             window.hWin.HEURIST4.util.setDisabled($('#btnAddRecordInNewWin'),true);
             window.hWin.HEURIST4.util.setDisabled($('#btnAddRecord'),true);
@@ -407,10 +417,11 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         if(val_owner!=null && val_owner>=0){
             fieldSelect.val(val_owner);
 
-            if(!(fieldSelect.val()>0)) fieldSelect.val(0); //set to everyone
+            if(!(parseInt(fieldSelect.val())>=0)) fieldSelect.val(0); //set to everyone
         }else{
             if(action_type=='add_record'){
                     $('#sel_Ownership').val(add_rec_prefs[1]);
+                    if(!(parseInt(fieldSelect.val())>=0)) fieldSelect.val(0); //set to everyone
                     
                     //$('#rb_Access-'+add_rec_prefs[2]).prop('checked', true);
                     $('#sel_Access').val(add_rec_prefs[2]);

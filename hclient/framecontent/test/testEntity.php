@@ -419,11 +419,11 @@ print $targetPath.'<br>';
                             <option value="SysBugreport">Bug report</option>
                             <option value="Records">Records</option>
                             <option value="SysUsers" >Users +</option>
-                            <option value="SysGroups" >Workgroups +</option>
+                            <option value="SysGroups" selected>Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
                             <option value="UsrReminders" >Reminders</option>
-                            <option value="SysIdentification" selected>Database Property</option>
+                            <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
                             <option value="Records">Saved Searches</option>
                             <option value="DefRecTypes">Record Types</option>

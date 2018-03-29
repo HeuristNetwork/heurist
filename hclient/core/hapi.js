@@ -403,7 +403,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'save_prefs';
                 _callserver('usr_info', request, callback);
             }
-
+            
             /**
             * Returns detailed description of groupfs for current user
             *
@@ -873,7 +873,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             ON_REC_SELECT: "ON_REC_SELECT",
             ON_LAYOUT_RESIZE: "ON_LAYOUT_RESIZE",
             ON_SYSTEM_INITED: "ON_SYSTEM_INITED",
-            ON_STRUCTURE_CHANGE: 'ON_STRUCTURE_CHANGE'
+            ON_STRUCTURE_CHANGE: 'ON_STRUCTURE_CHANGE',
+            ON_PREFERENCES_CHANGE: 'ON_PREFERENCES_CHANGE',
         },
 
         /**
@@ -1021,6 +1022,10 @@ function hAPI(_db, _oninit) { //, _currentUser
                 );
         },
 
+        triggerEvent:function(eventType, data){
+            $(window.hWin.document).trigger(eventType, null );
+        },
+        
         is_ui_normal: function(){
             return (window.hWin.HAPI4.get_prefs('layout_style')=='normal');
         },

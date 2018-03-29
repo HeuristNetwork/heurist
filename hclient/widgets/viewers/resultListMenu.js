@@ -66,7 +66,7 @@ $.widget( "heurist.resultListMenu", {
         sevents = sevents + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT;
         }*/
 
-        $(this.document).on(sevents, function(e, data) {
+        $(window.hWin.document).on(sevents, function(e, data) {
 
             if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
 
@@ -132,7 +132,7 @@ $.widget( "heurist.resultListMenu", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
 
-        $(this.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT);
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT);
 
         // remove generated elements
         if(this.btn_Search){

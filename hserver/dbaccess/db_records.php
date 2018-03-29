@@ -757,7 +757,7 @@
             return false;
         }  
         
-        //2. Can current user change ownership of this record
+        //2. Can current user change ownership of this record?
         if($ownerid != $ownerid_old && !$system->is_admin()){
             
             $res = true;

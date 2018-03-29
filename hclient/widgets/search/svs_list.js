@@ -189,7 +189,7 @@ $.widget( "heurist.svs_list", {
 
 
         //global listener
-        $(this.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
             that.accordeon.empty();
             //that.helper_top = null;
             that.helper_btm = null;

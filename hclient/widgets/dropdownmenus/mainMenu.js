@@ -245,7 +245,7 @@ $.widget( "heurist.mainMenu", {
                 }
         });
 
-        $(this.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
             that._refresh();
         });
 
@@ -316,7 +316,7 @@ $.widget( "heurist.mainMenu", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
 
-        $(this.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS);
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS);
         $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SELECT + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECTON_REC_SEARCHSTART);
 
         // remove generated elements

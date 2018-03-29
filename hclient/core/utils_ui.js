@@ -50,7 +50,7 @@ openRecordInPopup - open viewer or add/edit record form
 createRecordLinkInfo - creates ui for resource or relationship record
 
 createEntitySelector - get id-name selector for specified entity
-showEntityDialog - get id-name selector for specified entity
+showEntityDialog - entity editor/selector dialog
 
 
 Other UI functions    
