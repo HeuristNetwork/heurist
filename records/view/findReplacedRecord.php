@@ -43,6 +43,7 @@ require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 function get_replacement_bib_id ($rec_id) {
 	$res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=" . intval($rec_id));
 	$recurseLimit = 10;
+    if($res)
 	while (mysql_num_rows($res) > 0) {
 		$row = mysql_fetch_row($res);
 		$rec_id = $row[0];
