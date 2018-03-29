@@ -152,6 +152,11 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
         $search_domain = null;
     }
 
+    //for database owner we will search records of any workgroup and view access
+    //@todo UNLESS parameter owner is not defined explicitely
+    if($currUserID==2 && $search_domain != BOOKMARK){
+        $wg_ids = array();    
+    }
 
     // 3a. SPECIAL CASE for _BROKEN_
 
@@ -195,7 +200,7 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
         } else if ($search_domain == BIBLIO) {   //NOT USED
             $where_clause .= ' (bkm_UGrpID is null and not TOPBIBLIO.rec_FlagTemporary) ';
         } else {
-            $where_clause .= ' not TOPBIBLIO.rec_FlagTemporary ';
+            $where_clause .= ' (not TOPBIBLIO.rec_FlagTemporary) ';
         }
 
     }
@@ -204,19 +209,26 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
         $query->recVisibilityType = "public";
     }
 
+    $where2 = '';
     if($query->recVisibilityType && $query->recVisibilityType!="hidden"){
         $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';  //'pending','public','viewable'
     }else{
+        $where2_conj = '';
         if($query->recVisibilityType){ //hidden
-            $where2 = 'TOPBIBLIO.rec_NonOwnerVisibility="hidden" and ';
-        }else{
-            $where2 = '(not TOPBIBLIO.rec_NonOwnerVisibility="hidden") or ';
+            $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="hidden")';
+            $where2_conj = ' and ';
+        }else if($currUserID!=2){ //not database owner
+            $where2 = '(not TOPBIBLIO.rec_NonOwnerVisibility="hidden")';
+            $where2_conj = ' or ';
         }
 
-        $where2 = '( '.$where2.'TOPBIBLIO.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+        if(count($wg_ids)>0){
+            $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+        }
     }
-
-    $where_clause = $where_clause . ' and ' . $where2;
+    if($where2!=''){
+        $where_clause = $where_clause . ' and ' . $where2;
+    }
 
     // 6. DEFINE LIMIT AND OFFSET ---------------------------------------------------------------------------------------
 

@@ -142,6 +142,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
         }
         $currUserID = $currentUser['ugr_ID'];
         array_push($wg_ids, $currUserID);
+        
     }else{
         $currUserID = 0;
         $params['w'] = 'all';
@@ -161,6 +162,14 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
         $search_domain = "a";
     }
 
+    //$system->is_dbowner()
+    //for database owner we will search records of any workgroup and view access
+    //@todo UNLESS parameter owner is not defined explicitely
+    if($currUserID==2 && $search_domain != BOOKMARK){
+        $wg_ids = array();    
+    }
+    
+    
     if(is_array(@$params['q'])){
         $query_json = $params['q'];
     }else{
@@ -182,7 +191,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
     $offset = get_offset($params);
 
-    if(!$query->where_clause){
+    if(!$query->where_clause || trim($query->where_clause)==''){
         $query->where_clause = "(1=1)";
     }
 
@@ -272,23 +281,33 @@ class HQuery {
                 $recVisibilityType = null;
             }
 
+            $where2 = '';    
             if($recVisibilityType && $recVisibilityType!="hidden"){
                 $where2 = '(r0.rec_NonOwnerVisibility="'.$recVisibilityType.'")';  //'pending','public','viewable'
             }else{
+                $where2_conj = '';
                 if($recVisibilityType){ //hidden
-                    $where2 = 'r0.rec_NonOwnerVisibility="hidden" and ';
-                }else{
-                    $where2 = '(not r0.rec_NonOwnerVisibility="hidden") or ';
+                    $where2 = '(r0.rec_NonOwnerVisibility="hidden")';
+                    $where2_conj = ' and ';
+                }else if($this->currUserID!=2){ //not database owner
+                    $where2 = '(not r0.rec_NonOwnerVisibility="hidden")';
+                    $where2_conj = ' or ';
                 }
-
-                $where2 = '( '.$where2.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+                if(count($wg_ids)>0){
+                    $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+                }
             }
-            $where2 = '(not r0.rec_FlagTemporary) and '.$where2;
+            
+            if($this->search_domain!=EVERYTHING){
+                $where2 = '(not r0.rec_FlagTemporary)'.($where2?' and ':'').$where2;
+            }
 
-            if(trim($this->where_clause)!=''){
-                $this->where_clause = $this->where_clause. ' and ' . $where2;
-            }else{
-                $this->where_clause = $where2;
+            if(trim($where2)!=''){
+                if(trim($this->where_clause)!=''){
+                    $this->where_clause = $this->where_clause. ' and ' . $where2;
+                }else{
+                    $this->where_clause = $where2;
+                }
             }
             
             //apply sort clause for top level only

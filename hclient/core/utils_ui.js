@@ -1171,7 +1171,7 @@ window.hWin.HEURIST4.ui = {
                         topOptions.push({key:groupID, title:name});
                 }
             }
-            topOptions.push({key:0, title:'------'});
+            topOptions.push({key:0, title:'──────────',disabled:true});
             
             groups = window.hWin.HAPI4.sysinfo.db_usergroups;
             
@@ -1198,7 +1198,7 @@ window.hWin.HEURIST4.ui = {
                     var title = topOptions[idx].title;
                     if(!window.hWin.HEURIST4.util.isnull(title))
                     {
-                        window.hWin.HEURIST4.ui.addoption(selObj, key, title);
+                        window.hWin.HEURIST4.ui.addoption(selObj, key, title, (topOptions[idx].disabled==true));
                         addedontop.push(key);
                     }
                 }

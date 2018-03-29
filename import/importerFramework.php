@@ -263,6 +263,7 @@ function mode_file_selection() {
     <div class="file_selection">
         Select a file:
         <input type="file" size="50" name="import_file" onchange="{document.forms[0].submit()}">
+        <!-- input type="hidden" name="DBGSESSID" value="425944380594800002;d=1,p=0,c=07" -->
     </div>
     <br clear=all>
 
