@@ -618,8 +618,10 @@ $.widget( "heurist.editing_input", {
                     window.hWin.HEURIST4.msg.showDialog(url, {height:320, width:650,
                         title: 'Add Term',
                         //class:'ui-heurist-bg-light',
-                        callback: function(context){
-                            if(context=="ok") {
+                        //callback: function(context){
+                        //    if(context=="ok") {
+                        afterclose: function(){
+                            if(true){ //always reload term list after this popup
                                 window.hWin.HEURIST4.terms = window.hWin.HEURIST.terms;
                                 $input = that._recreateSelector($input, true);
                                 

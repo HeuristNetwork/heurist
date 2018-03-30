@@ -259,13 +259,18 @@ This is a fairly slow process, taking several minutes per 1000 records, please b
             }else{
                 $sMsg = 'These '.$cnt_bibs.' selected records are';
             }
-            $sMsg = '<div style="color:red">'.$sMsg
+            $sMsg = '<div style="color:red;padding-top:5px">'.$sMsg
             .' pointed to by '.$cnt_source.' other records. If you delete '.($cnt_target==1?'it':'them')
-            .' you will leave '.(($cnt_source>1)?'these records':'this record').' with invalid data. '
+            .' you will leave '.(($cnt_source>1)?'these records':'this record').' with invalid data.<br>'
             .'Invalid records can be found through the Manage > Structure > Verify function.</div>';
 
             print $sMsg;
-            print '<div style="padding-bottom:10px">You may look at relationships '
+            
+            print '<div style="padding:10px 0">If the record is a child record you can avoid creating invalid data by '
+            .'editing the parent and deleting the child record pointer - by default this deletes '
+            .'the child and the pointer to it.</div>';
+            
+            print '<div style="padding-bottom:10px">You may look at relationships and edit parent records '
             .'<a target=_new href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
             .'&tab=connections&q=ids:'.implode(',',$merged_ids).'">here.<img src='.HEURIST_BASE_URL.'common/images/external_link_16x16.gif></a></div>';
         

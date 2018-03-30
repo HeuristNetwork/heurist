@@ -1726,7 +1726,8 @@ window.hWin.HEURIST4.ui = {
                             + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
                            :'')                          
                         
-                        + (info['rec_IsChildRecord']==1?'<span style="font-size:0.8em;color:#999999;padding:4px 2px">child</span>':'')
+                        + (info['rec_IsChildRecord']==1
+                            ?'<span style="font-size:0.8em;color:#999999;padding:4px 2px;display:table-cell;min-width: 5ex;">child</span>':'')
                         + (isEdit?'<span style="display:table-cell;padding-top:3px;"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //&nbsp;&nbsp;&nbsp;
                         + '<span style="display:table-cell;padding-top:2px;">'
                         + '<img src="'+ph_gif+'" style="vertical-align:top;margin-top:2px;margin-right:10px;background-image:url(\''
