@@ -116,6 +116,31 @@ function haddDataMenu() {
                 })
             }
         );
+
+        menu.find('#menu-import-kml').click(
+            function(event){
+                window.hWin.HAPI4.SystemMgr.user_log('impKML');
+                
+                window.hWin.HAPI4.SystemMgr.verify_credentials(
+                function(){
+                   var url = window.hWin.HAPI4.baseURL + "hclient/framecontent/import/importRecordsCSV.php?format=kml&db="+ window.hWin.HAPI4.database;
+                   
+                   var body = $(this.document).find('body');
+                   var dim = {h:body.innerHeight(), w:body.innerWidth()};
+                   
+                   window.hWin.HEURIST4.msg.showDialog(url, {    
+                        title: 'Import Records from KML',
+                        height: dim.h-5,
+                        width: dim.w-5,
+                        'context_help':window.hWin.HAPI4.baseURL+'context_help/importRecordsCSV.html #content'
+                        //callback: _import_complete
+                    });
+                
+                event.preventDefault();
+                return false;
+                })
+            }
+        );
         
         
         $('#menulink-add-record').click( //.attr('href', 

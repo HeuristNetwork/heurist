@@ -86,6 +86,7 @@ if($response!=null){
                 'correct_image_extensions' => true,
                 'image_versions' => array(
                     ''=>array(
+                        'auto_orient' => true,
                         'max_width' => 400,
                         'max_height' => 400,
                         'scale_to_png' => true    
@@ -115,7 +116,11 @@ if($response!=null){
                 'newfilename' => @$_REQUEST['newfilename'],
                 'correct_image_extensions' => true,
                 'image_versions' => array(
+                    ''=>array(
+                        'auto_orient' => true,
+                        ),
                     'thumbnail'=>array(
+                        'auto_orient' => true,
                         'upload_dir' => HEURIST_SCRATCH_DIR.'thumbs/',//'filethumbs/',
                         'upload_url' => HEURIST_FILESTORE_URL.'scratch/thumbs/',
                         'max_width' => 200,
@@ -137,7 +142,11 @@ if($response!=null){
                 'newfilename' => @$_REQUEST['newfilename'],
                 'correct_image_extensions' => true,
                 'image_versions' => array(
+                    ''=>array(
+                        'auto_orient' => true,
+                        ),
                     'thumbnail'=>array(
+                        'auto_orient' => true,
                         'max_width' => 120,
                         'max_height' => 120,
                         'scale_to_png' => true    
@@ -174,10 +183,18 @@ if($response!=null){
             }
         }else if($entity_name=="temp" && $is_autodect_csv) {
             
+            
             $filename = HEURIST_FILESTORE_DIR.'scratch/'.$file->original_name;
-            $csv_params = autoDetectSeparators( $filename );
-            if(is_array($csv_params) && !@$csv_params['error']){
-                $res['files'][$idx]->csv_params = $csv_params;
+            
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            $isKML = ($extension=='kml');
+            if($isKML){ //no need to detect params for kml
+                $res['files'][$idx]->isKML = true;
+            }else{
+                $csv_params = autoDetectSeparators( $filename );
+                if(is_array($csv_params) && !@$csv_params['error']){
+                    $res['files'][$idx]->csv_params = $csv_params;
+                }
             }
         }
     }

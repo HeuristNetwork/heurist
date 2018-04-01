@@ -112,11 +112,18 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         Import hyperlinks</a>
                     </li>
 
-                    <li><a href="import/importerFramework.php?format=GEO" name="auto-popup" class="fixed h3link embed"
+                    <li id="menu-import-kml">
+                        <a href="#"
+                            data-logaction="impKML"
+                            title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
+                            Import KML</a>
+                    <!--
+                        <a href="import/importerFramework.php?format=GEO" name="auto-popup" class="fixed h3link embed"
                             data-logaction="impKML"
                         onClick="{return false;}"
                         title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
                         Import KML</a>
+                    -->
                     </li>
                     
                     <li><a href="applications/faims/syncFAIMS.php" name="auto-popup" class="fixed h3link embed"

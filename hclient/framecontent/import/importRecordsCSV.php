@@ -26,6 +26,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
 $post_max_size = get_config_bytes(ini_get('post_max_size'));
 $file_max_size = get_config_bytes(ini_get('upload_max_filesize'));
+$format = @$_REQUEST['format'];
+if(!$format) $format='csv';
 
 function fix_integer_overflow($size) {
         if ($size < 0) {
@@ -58,7 +60,7 @@ function get_config_bytes($val) {
                     var max_size = Math.min(<?php echo $file_max_size;?>, <?php echo $post_max_size;?>);
                     importRecordsCSV = new hImportRecordsCSV(
                                 window.hWin.HEURIST4.util.getUrlParameter('imp_ID', window.location.search), 
-                                max_size);
+                                max_size, "<?php echo $format;?>");
                 }
             }
         
@@ -130,7 +132,7 @@ function get_config_bytes($val) {
     <div class="ent_header" style="height:28em;padding:20px;">
     
         
-        <div style="padding:0 20 20 20">
+        <div id="divCsvIntro" style="padding:0 20 20 20" class="format-csv">
         
             <p>
 Importing all but the simplest spreadsheet is a complex business. It is important to clean up the data as much as possible in advance, so that there is one row per entry and columns contain a single element of data (which may include repeated values, normally separated by pipe symbols | ). Split concatenated values into separate columns; place notes about data items in a separate column - don't append to the data value; coded columns should use a consistent set of codes. In addition to your spreadsheet program, you may find OpenRefine (<a href="http://openrefine.org" target="_blank">http://openrefine.org</a>) a useful tool for checking and correcting coded columns, splitting fields, georeferencing, finding URL references and so forth.
@@ -143,6 +145,14 @@ If you have missing data for Required fields, you may find it convenient to set 
             </p>        
         
         </div>      
+
+        <div id="divKmlIntro" style="padding:0 20 20 20;display:none">
+<h4>This function imports a KML file into a set of map-enabled Heurist records</h4><br><br>
+<p>Each spatial object in the KML file generates a Heurist record which also stores attached attributes.  You may select the type of record to be created in a following step.</p><br><br>
+<p>A KML file can also be mapped directly by uploading it as a file attached to a record or storing it as a KML snippet in a text field within a record - use the KML record type for this purpose (in Manage > Structure > Build > Spatial and Mapping tab). However, plotting KML in this way does not allow any additional information to be attached to the spatial objects, all you get is a single monolithic map layer.</<p><br><br>
+<p>More info</p>
+        </div>      
+        
     
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Upload new file (CSV/TSV)</h2>
             <input type="file" id="uploadFile" style="display:none">
@@ -158,13 +168,13 @@ If you have missing data for Required fields, you may find it convenient to set 
                 title="All uploaded files will be removed from the sytem. Start this action if you sure that you do not need any import data anymore"
                             style="margin-left: 10px;">Clear all files</a>        
             
-        <h2 style="padding:10 0 10 120">OR</h2>
-        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Paste delimited data in area below</h2>
-        <div id="btnUploadData"
+        <h2 style="padding:10 0 10 120"  class="format-csv">OR</h2>
+        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;"  class="format-csv">Paste delimited data in area below</h2>
+        <div id="btnUploadData"  class="format-csv"
             title="Upload content of text area below to server side and use it as source for CSV/TSV import operation">Upload Data</div>
     </div>
     <div class="ent_content_full" style="top:29em;width:100%;">
-        <textarea id="sourceContent" style="height:100%;width:100%;resize:none;"></textarea>
+        <textarea id="sourceContent" style="height:100%;width:100%;resize:none;" class="format-csv"></textarea>
     </div>
 </div>
 <!-- STEP 2 parse uploaded data -->

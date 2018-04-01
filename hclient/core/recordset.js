@@ -301,10 +301,14 @@ function hRecordSet(initdata) {
                         var geodata = _getFieldGeoValue(record, geofields[k]);
                         if(geodata){
                             for(m=0; m<geodata.length; m++){
-                                var shape = window.hWin.HEURIST4.util.parseCoordinates(geodata[m].geotype, geodata[m].wkt, 0);
+                                var shape = window.hWin.HEURIST4.util.parseWKTCoordinates(geodata[m].geotype, geodata[m].wkt, 0);
                                 if(shape){ //main shape
                                     if($.isArray(shapes)){
-                                        shapes.push(shape);
+                                        if($.isArray(shape)){
+                                            shapes = shapes.concat(shape);                                            
+                                        }else{
+                                            shapes.push(shape);    
+                                        }
                                     }else{
                                         console.log(record);
                                         console.log(shapes);

@@ -168,6 +168,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
 
+<script type="text/javascript" src="<?php echo PDIR;?>ext/js/wellknown.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 
 <!-- for debug  remark it and use getMultiScripts for production -->

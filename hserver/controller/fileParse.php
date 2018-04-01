@@ -1,4 +1,5 @@
 <?php
+    require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
     /**
     * Interface for CSV parse and import 
     *
@@ -246,8 +247,10 @@ function parse_step0(){
         }
         
         $path_parts = pathinfo($upload_file_name);
+        //$extension = strtolower(pathinfo($upload_file_name, PATHINFO_EXTENSION));
+        //, 'isKML'=>($extension=='kml') 
         
-        return array( "filename"=>$path_parts['basename'] );
+        return array( "filename"=>$path_parts['basename']);
 }
 //
 // check encoding, save file in new encoding  and parse first 100 lines 
@@ -259,20 +262,26 @@ function parse_step1(){
     $upload_file_name = HEURIST_FILESTORE_DIR.'scratch/'.$_REQUEST["upload_file_name"];
     $original_filename =  $_REQUEST["upload_file_name"];
     
+    $s = null;
+    if (! file_exists($upload_file_name)) $s = ' does not exist.<br><br>'
+    .'Please clear your browser cache and try again. if problem persists please report immediately to Heurist developers (info at HeuristNetwork dot org)';
+    else if (! is_readable($upload_file_name)) $s = ' is not readable';
+        
+    if($s){
+        $system->addError(HEURIST_ERROR, 'Temporary file (uploaded csv data) '.$upload_file_name. $s);                
+        return false;
+    }
+  
+    $extension = strtolower(pathinfo($upload_file_name, PATHINFO_EXTENSION));
+    if($extension=='kml'){
+        return parse_step2($upload_file_name, $original_filename, 3);
+    }
+    
     $csv_encoding  = $_REQUEST["csv_encoding"];
 
     $handle = @fopen($upload_file_name, "r");
     if (!$handle) {
-        $s = null;
-        if (! file_exists($upload_file_name)) $s = ' does not exist.<br><br>'
-        .'Please clear your browser cache and try again. if problem persists please report immediately to Heurist developers (info at HeuristNetwork dot org)';
-        else if (! is_readable($upload_file_name)) $s = ' is not readable';
-            else $s = ' could not be read';
-            
-        if($s){
-            $system->addError(HEURIST_ERROR, 'Temporary file (uploaded csv data) '.$upload_file_name. $s);                
-            return false;
-        }
+        $system->addError(HEURIST_ERROR, 'Can\'t open temporary file (uploaded csv data) '.$upload_file_name);                          return false;
     }
 
     //fgetcsv и str_getcsv depends on server locale
@@ -339,11 +348,24 @@ function parse_step1(){
 
 // $limit if >0 returns first 100 lines
 // otherwise convert dates, validate identifies, find memo and multivalues
-// if there are no errors invokes  parse_db_save - to dave csv into database
+// if there are no errors invokes  parse_db_save - to save csv into database
 //
 function parse_step2($encoded_filename, $original_filename, $limit){
 
     global $system;
+    
+    $s = null;
+    if (! file_exists($encoded_filename)) $s = ' does not exist';
+    else if (! is_readable($encoded_filename)) $s = ' is not readable';
+    if($s){
+        $system->addError(HEURIST_ERROR, 'Temporary file '.$encoded_filename. $s);                
+        return false;
+    }
+    
+    
+    $extension = strtolower(pathinfo($encoded_filename, PATHINFO_EXTENSION));
+    $isKML = ($extension=='kml');
+    
     
     $err_colnums = array();
     $err_encoding = array();
@@ -397,205 +419,279 @@ function parse_step2($encoded_filename, $original_filename, $limit){
         $lb = "\r";
     }
     
-    $handle_wr = null;
-    $handle = @fopen($encoded_filename, "r");
-    if (!$handle) {
-        $s = null;
-        if (! file_exists($encoded_filename)) $s = ' does not exist';
-        else if (! is_readable($encoded_filename)) $s = ' is not readable';
-            else $s = ' could not be read';
-            
-        if($s){
-            $system->addError(HEURIST_ERROR, 'Temporary file '.$encoded_filename. $s);                
-            return false;
-        }
-    }
-    
-    //fgetcsv и str_getcsv depends on server locale
-    // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
-    setlocale(LC_ALL, 'en_US.utf8');    
-
     $len = 0;
     $header = null;
+    $handle_wr = null;
 
-    if($limit==0){
+    if($limit==0){ //if limit no defined prepare data and write into temp csv file
         //get filename for prepared filename with converted dates and removed spaces
         $prepared_filename = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $encoded_filename);  //HEURIST_SCRATCHSPACE_DIR
         if (!is_writable($prepared_filename)) {
-            $system->addError(HEURIST_ERROR, 'Cannot save prepared csv data: '.$prepared_filename);                
+            $system->addError(HEURIST_ERROR, 'Cannot save prepared data: '.$prepared_filename);                
             return false;
             
         }
         if (!$handle_wr = fopen($prepared_filename, 'w')) {
-            $system->addError(HEURIST_ERROR, 'Cannot open file to save prepared csv data: '.$prepared_filename);                
+            $system->addError(HEURIST_ERROR, 'Cannot open file to save prepared data: '.$prepared_filename);                
             return false;
         }
     }
 
-    $line_no = 0;
-    while (!feof($handle)) {
+    if($isKML){
+        
+        $kml_content = file_get_contents($encoded_filename);
 
-        if($csv_linebreak=="auto" || $lb==null){
-            $line = fgets($handle, 1000000);      //read line and auto detect line break
-        }else{
-            $line = stream_get_line($handle, 1000000, $lb);
+        // Change tags to lower-case
+        preg_match_all('%(</?[^? ><![]+)%m', $kml_content, $result, PREG_PATTERN_ORDER);
+        $result = $result[0];
+
+        $result = array_unique($result);
+        sort($result);
+        $result = array_reverse($result);
+
+        foreach ($result as $search) {
+          $replace = mb_strtolower($search, mb_detect_encoding($search));
+          $kml_content = str_replace($search, $replace, $kml_content);
         }
 
-        if(!mb_detect_encoding($line, 'UTF-8', true)){
-            $err_encoding_count++;
-            if(count($err_encoding)<100){
-                $line = mb_convert_encoding( substr($line,0,2000), 'UTF-8'); //to send back to client
-                array_push($err_encoding, array("no"=>($line_no+2), "line"=>htmlspecialchars($line)));
-            }
-            //if(count($err_encoding)>100) break;
+        // Load into DOMDocument
+        $xmlobj = new DOMDocument();
+        //@
+        $xmlobj->loadXML($kml_content);
+        if ($xmlobj === false) {
+            $system->addError(HEURIST_ERROR, 'Invalid KML file '.$encoded_filename);                
+            return false;
         }
-
-        $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
-
-        if($len==0){
-            $header = $fields;
-            
-            $len = count($fields);
-            
-            if($len>200){
-                fclose($handle);
-                if($handle_wr) fclose($handle_wr);
+        
+        $geom_types = geoPHP::geometryList();
+        $placemark_elements = $xmlobj->getElementsByTagName('placemark');
+        $line_no = 0;
+        if ($placemark_elements && $placemark_elements->length) {
+          foreach ($placemark_elements as $placemark) {
+                $properties = parseKMLPlacemark($placemark, $geom_types);
+                if($properties==null) continue;
+                if($line_no==0){
+                    $fields = array_keys($properties);
+                    
+                    $header = $fields;
+                    $len = count($fields);                    
+                    $int_fields = $fields; //assume all fields are integer
+                    $num_fields = $fields; //assume all fields are numeric
+                    $empty_fields = $fields; //assume all fields are empty
+                    $empty75_fields = array_pad(array(),$len,0);
+                }
                 
-                $system->addError(HEURIST_ERROR, 
-                    "Too many columns ".$len."  This probably indicates that you have selected the wrong separator type.");                
-                return false;
-            }            
-            
-            $int_fields = $fields; //assume all fields are integer
-            $num_fields = $fields; //assume all fields are numeric
-            $empty_fields = $fields; //assume all fields are empty
-            $empty75_fields = array_pad(array(),$len,0);
-            
-        }else{
-            $line_no++;
-
-            if(trim($line)=="") continue;
-
-            if($len!=count($fields)){        //number of columns differs from header
-                // Add error to log if wrong field count
-                array_push($err_colnums, array("cnt"=>count($fields), "no"=>$line_no, "line"=>htmlspecialchars(substr($line,0,2000))));
-                if(count($err_colnums)>100) break; //too many mistakes
-            }else{
                 $k=0;
                 $newfields = array();
                 $line_values = array();
-                foreach($fields as $field){
+                foreach($header as $field_name){
 
+                    $field = @$properties[$field_name];
+                    
+                    if($field==null) $field='';
+                        
                     //Identify repeating value fields and flag - will not be used as key fields
-                    if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
-//DEBUG error_log('Line '.$line_no.'  '.$field.'  '.strpos($field, '|').'  field '.$k.' is multivalue');
-                        array_push($multivals, $k);
-                    }
-                    if( !in_array($k, $memos) && (in_array($k, $memofields) || strlen($field)>250 || strpos($field, '\\r')!==false) ){
+                    if($field_name=='geometry'){
+                        $int_fields[$k] = null;
+                        $num_fields[$k] = null;
+                        $empty_fields[$k] = null;
                         array_push($memos, $k);
-                    }
-
-                    //Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line
-                    if(in_array($k, $memos)){
-                        $field = trim($field);
                     }else{
-                        $field = trim(preg_replace('/([\s])\1+/', ' ', $field)); 
-                    }
+                            
+                        if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
+    //DEBUG error_log('Line '.$line_no.'  '.$field.'  '.strpos($field, '|').'  field '.$k.' is multivalue');
+                            array_push($multivals, $k);
+                        }
+                        
+                        if( !in_array($k, $memos) && (in_array($k, $memofields) || strlen($field)>250 || strpos($field, '\\r')!==false) ){
+                            array_push($memos, $k);
+                        }
 
-                    //Convert dates to standardised format.  //'field_'.
-                    if($check_datefield && @$datefields[$k]!=null && $field!=""){
-                        if(is_numeric($field) && abs($field)<99999){ //year????
-
+                        //Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line
+                        if(in_array($k, $memos)){
+                            $field = trim($field);
                         }else{
-                            if($csv_dateformat==1){
-                                $field = str_replace("/","-",$field);
-                            }
-                            
-                             try{   
-                                $t2 = new DateTime($field);
-                                $t3 = $t2->format('Y-m-d H:i:s');
-                                $field = $t3;
-                             } catch (Exception  $e){
-                                //print $field.' => NOT SUPPORTED<br>';                            
-                             }                            
-                            /* strtotime works for dates after 1901 ONLY!
-                            $field2 = strtotime($field);
-                            $field3 = date('Y-m-d H:i:s', $field2);
-                            $field = $field3;
-                            */
+                            $field = trim(preg_replace('/([\s])\1+/', ' ', $field)); 
                         }
-                    }
+
+                        //Convert dates to standardised format.  //'field_'.
+                        if($check_datefield && @$datefields[$k]!=null && $field!=""){
+                            $field = prepareDateField($field);
+                        }
+                        
+                        $check_keyfield_K =  ($check_keyfield && @$keyfields['field_'.$k]!=null);
+                        //check integer value
+                        if(@$int_fields[$k] || $check_keyfield_K){
+                            prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
+                        }
+                        if(@$num_fields[$k] && !is_numeric($field)){
+                            $num_fields[$k]=null;
+                        }
+                        if($field==null || trim($field)==''){ //not empty
+                             $empty75_fields[$k]++;
+                        }else if(@$empty_fields[$k]){
+                             $empty_fields[$k]=null; //field has value
+                        }                    
+                        
+                        }//not geometry
+
+                        //Doubling up as an escape for quote marks
+                        $field = addslashes($field);
+                        array_push($line_values, $field);
+                        $field = '"'.$field.'"';
+                        array_push($newfields, $field);
+                        $k++;
+                }//foreach field value
                     
-                    $check_keyfield_K =  ($check_keyfield && @$keyfields['field_'.$k]!=null);
-                    //check integer value
-                    if(@$int_fields[$k] || $check_keyfield_K){
+                    $line_no++;
 
-                        $values = explode('|', $field);
-                        foreach($values as $value){
-                            if($value=='')continue;
-                            
-                            if(!ctype_digit(strval($value))){ //is_integer
-                                    //not integer
-                                    if($check_keyfield_K){
+                    if ($handle_wr){
+                        $line = implode(',', $newfields)."\n";
 
-                                        if(is_array(@$err_keyfields[$k])){
-                                            $err_keyfields[$k][1]++;
-                                        }else{
-                                            $err_keyfields[$k] = array(0,1);
-                                        }
-                                    }
-                                    //exclude from array of fields with integer values
-                                    if(@$int_fields[$k]) $int_fields[$k]=null;
-
-                            }else if(intval($value)<1 || intval($value)>2147483646){ //max int value in mysql
-
-                                if($check_keyfield_K){
-                                    if(is_array(@$err_keyfields[$k])){  //out of range
-                                        $err_keyfields[$k][0]++;
-                                    }else{
-                                        $err_keyfields[$k] = array(1,0);
-                                    }
-                                }
-                                //exclude from array of fields with integer values
-                                if(@$int_fields[$k]) $int_fields[$k]=null;
-                            }
+                        if (fwrite($handle_wr, $line) === FALSE) {
+                            return "Cannot write to file $prepared_filename";
                         }
-                    }
-                    if(@$num_fields[$k] && !is_numeric($field)){
-                        $num_fields[$k]=null;
-                    }
-                    if($field==null || trim($field)==''){ //not empty
-                         $empty75_fields[$k]++;
-                    }else if(@$empty_fields[$k]){
-                         $empty_fields[$k]=null; //field has value
-                    }                    
+                        
+                    }else {
+                        array_push($parsed_values, $line_values);
+                        if($line_no>$limit){
+                            break; //for preview
+                        }
+                    }                
+                
+          }//foreach
+        }        
+        
+    }else{
+        $handle = @fopen($encoded_filename, "r");
+        if (!$handle) {
+            $system->addError(HEURIST_ERROR, 'Temporary file '.$encoded_filename.' could not be read');                
+            return false;
+        }
+        //fgetcsv и str_getcsv depends on server locale
+        // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
+        setlocale(LC_ALL, 'en_US.utf8');    
+        
+        $line_no = 0;
+        while (!feof($handle)) {
 
-                    //Doubling up as an escape for quote marks
-                    $field = addslashes($field);
-                    array_push($line_values, $field);
-                    $field = '"'.$field.'"';
-                    array_push($newfields, $field);
-                    $k++;
+            if($csv_linebreak=="auto" || $lb==null){
+                $line = fgets($handle, 1000000);      //read line and auto detect line break
+            }else{
+                $line = stream_get_line($handle, 1000000, $lb);
+            }
+
+            if(!mb_detect_encoding($line, 'UTF-8', true)){
+                $err_encoding_count++;
+                if(count($err_encoding)<100){
+                    $line = mb_convert_encoding( substr($line,0,2000), 'UTF-8'); //to send back to client
+                    array_push($err_encoding, array("no"=>($line_no+2), "line"=>htmlspecialchars($line)));
                 }
+                //if(count($err_encoding)>100) break;
+            }
 
-                if ($handle_wr){
-                    $line = implode(',', $newfields)."\n";
+            $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
 
-                    if (fwrite($handle_wr, $line) === FALSE) {
-                        return "Cannot write to file $prepared_filename";
-                    }
+            if($len==0){ //first line is header with field names
+                $header = $fields;
+                
+                $len = count($fields);
+                
+                if($len>200){
+                    fclose($handle);
+                    if($handle_wr) fclose($handle_wr);
                     
-                }else {
-                    array_push($parsed_values, $line_values);
-                    if($line_no>$limit){
-                        break; //for preview
+                    $system->addError(HEURIST_ERROR, 
+                        "Too many columns ".$len."  This probably indicates that you have selected the wrong separator type.");                
+                    return false;
+                }            
+                
+                $int_fields = $fields; //assume all fields are integer
+                $num_fields = $fields; //assume all fields are numeric
+                $empty_fields = $fields; //assume all fields are empty
+                $empty75_fields = array_pad(array(),$len,0);
+                
+            }
+            else{
+                $line_no++;
+
+                if(trim($line)=="") continue;
+
+                if($len!=count($fields)){        //number of columns differs from header
+                    // Add error to log if wrong field count
+                    array_push($err_colnums, array("cnt"=>count($fields), "no"=>$line_no, "line"=>htmlspecialchars(substr($line,0,2000))));
+                    if(count($err_colnums)>100) break; //too many mistakes
+                }else{
+                    $k=0;
+                    $newfields = array();
+                    $line_values = array();
+                    foreach($fields as $field){
+
+                        //Identify repeating value fields and flag - will not be used as key fields
+                        if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
+    //DEBUG error_log('Line '.$line_no.'  '.$field.'  '.strpos($field, '|').'  field '.$k.' is multivalue');
+                            array_push($multivals, $k);
+                        }
+                        if( !in_array($k, $memos) && (in_array($k, $memofields) || strlen($field)>250 || strpos($field, '\\r')!==false) ){
+                            array_push($memos, $k);
+                        }
+
+                        //Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line
+                        if(in_array($k, $memos)){
+                            $field = trim($field);
+                        }else{
+                            $field = trim(preg_replace('/([\s])\1+/', ' ', $field)); 
+                        }
+
+                        //Convert dates to standardised format.  //'field_'.
+                        if($check_datefield && @$datefields[$k]!=null && $field!=""){
+                            $field = prepareDateField($field);
+                        }
+                        
+                        $check_keyfield_K =  ($check_keyfield && @$keyfields['field_'.$k]!=null);
+                        //check integer value
+                        if(@$int_fields[$k] || $check_keyfield_K){
+                            prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
+                        }
+                        if(@$num_fields[$k] && !is_numeric($field)){
+                            $num_fields[$k]=null;
+                        }
+                        if($field==null || trim($field)==''){ //not empty
+                             $empty75_fields[$k]++;
+                        }else if(@$empty_fields[$k]){
+                             $empty_fields[$k]=null; //field has value
+                        }                    
+
+                        //Doubling up as an escape for quote marks
+                        $field = addslashes($field);
+                        array_push($line_values, $field);
+                        $field = '"'.$field.'"';
+                        array_push($newfields, $field);
+                        $k++;
+                    }
+
+                    if ($handle_wr){
+                        $line = implode(',', $newfields)."\n";
+
+                        if (fwrite($handle_wr, $line) === FALSE) {
+                            return "Cannot write to file $prepared_filename";
+                        }
+                        
+                    }else {
+                        array_push($parsed_values, $line_values);
+                        if($line_no>$limit){
+                            break; //for preview
+                        }
                     }
                 }
             }
+
         }
+        fclose($handle);
 
     }
-    fclose($handle);
+
+
     if($handle_wr) fclose($handle_wr);
 
     //???? unlink($encoded_filename);
@@ -675,7 +771,118 @@ function parse_step2($encoded_filename, $original_filename, $limit){
 }
 
 //
-//  save content of file into import table, create session object and saves ti to sysImportFiles table, returns session
+//
+//
+function prepareDateField($field){
+    
+    if(is_numeric($field) && abs($field)<99999){ //year????
+
+    }else{
+        if($csv_dateformat==1){
+            $field = str_replace("/","-",$field);
+        }
+
+        try{   
+            $t2 = new DateTime($field);
+            $t3 = $t2->format('Y-m-d H:i:s');
+            $field = $t3;
+        } catch (Exception  $e){
+            //print $field.' => NOT SUPPORTED<br>';                            
+        }                            
+        /* strtotime works for dates after 1901 ONLY!
+        $field2 = strtotime($field);
+        $field3 = date('Y-m-d H:i:s', $field2);
+        $field = $field3;
+        */
+    }
+    return $field;
+}
+
+function prepareIntegerField($field, $k, $check_keyfield_K, &$err_keyfields, &$int_fields){
+
+    $values = explode('|', $field);
+    foreach($values as $value){
+        if($value=='')continue;
+
+        if(!ctype_digit(strval($value))){ //is_integer
+            //not integer
+            if($check_keyfield_K){
+
+                if(is_array(@$err_keyfields[$k])){
+                    $err_keyfields[$k][1]++;
+                }else{
+                    $err_keyfields[$k] = array(0,1);
+                }
+            }
+            //exclude from array of fields with integer values
+            if(@$int_fields[$k]) $int_fields[$k]=null;
+
+        }else if(intval($value)<1 || intval($value)>2147483646){ //max int value in mysql
+
+            if($check_keyfield_K){
+                if(is_array(@$err_keyfields[$k])){  //out of range
+                    $err_keyfields[$k][0]++;
+                }else{
+                    $err_keyfields[$k] = array(1,0);
+                }
+            }
+            //exclude from array of fields with integer values
+            if(@$int_fields[$k]) $int_fields[$k]=null;
+        }
+    }
+}
+//
+//
+//
+function parseKMLPlacemark($placemark, &$geom_types){
+    
+        $wkt = new WKT();  
+        $properties = [];
+
+        foreach ($placemark->childNodes as $child) {
+          // Node names are all the same, except for MultiGeometry, which maps to GeometryCollection
+          $node_name = $child->nodeName == 'multigeometry' ? 'geometrycollection' : $child->nodeName;
+          
+          if (array_key_exists($node_name, $geom_types))
+          {
+            $adapter = new KML;
+            $geometry = $adapter->read($child->ownerDocument->saveXML($child));
+            $geometry = $wkt->write($geometry);
+            $properties['geometry'] = $geometry;
+//error_log($geometry);            
+          }
+          elseif ($node_name == 'extendeddata')
+          {
+            foreach ($child->childNodes as $data) {
+              if ($data->nodeName != '#text') {
+                if ($data->nodeName == 'data') {
+                  $value = $data->getElementsByTagName('value')[0];
+                  $properties[$data->getAttribute('name')] = preg_replace('/\n\s+/',' ',trim($value->textContent));
+                }
+                elseif ($data->nodeName == 'schemadata')
+                {
+                  foreach ($data->childNodes as $schemadata) {
+                    if ($schemadata->nodeName != '#text') {
+                      $properties[$schemadata->getAttribute('name')] = preg_replace('/\n\s+/',' ',trim($schemadata->textContent));
+                    }
+                  }
+                }
+
+              }
+            }
+          }
+          elseif (!in_array($node_name, ['#text', 'lookat', 'style', 'styleurl']))
+          {
+            $properties[$child->nodeName] = preg_replace('/\n\s+/',' ',trim($child->textContent));
+          }
+
+        }
+    
+        return (@$properties['geometry'])?$properties:null;
+}
+
+//
+//  save content of file into import table, create session object and saves it to sysImportFiles table, returns session
 //
 function parse_db_save($preproc){
     global $system;
@@ -798,6 +1005,9 @@ function parse_db_save($preproc){
     return $session;
 }
 
+
+
+//----------------------------------------------------------------
 //
 // @todo save session as entity method
 //

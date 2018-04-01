@@ -2275,7 +2275,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                                     $geoType = "p";
                                 }else if(strpos($r_value,'LINESTRING')!==false){
                                     $geoType = "l";
-                                }else if(strpos($r_value,'POLYGON')!==false){
+                                }else if(strpos($r_value,'POLYGON')!==false){ //MULTIPOLYGON
                                     $geoType = "pl";
                                 }
 

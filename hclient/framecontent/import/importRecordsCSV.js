@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hImportRecordsCSV(_imp_ID, _max_upload_size) {
+function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     var _className = "ImportRecordsCSV",
     _version   = "0.4",
 
@@ -38,9 +38,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
     upload_file_name,  //file on server with original uploaded data
     encoded_file_name; //file on server with UTF8 encoded data
     
-    function _init(_imp_ID, _max_upload_size){
+    function _init(_imp_ID, _max_upload_size, format){
     
         imp_ID = _imp_ID;
+        
+        if(format=='kml'){
+            $('#divKmlIntro').show();
+            $('.format-csv').hide();
+            
+        }else{
+            $('.format-csv').show();
+            $('#divKmlIntro').hide();
+        }
         
         //init STEP 1  - upload
         
@@ -112,7 +121,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                 //!!! $('#upload_form_div').show();                
                 pbar_div.hide();       //hide progress bar
                 response = response.result;
-                if(response.status==window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status==window.hWin.HAPI4.ResponseStatus.OK){  //after upload
                     var data = response.data;
                     $.each(data.files, function (index, file) {
                         if(file.error){
@@ -122,15 +131,22 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
                             $('#divParsePreview').load(file.url, function(){
                             //$.ajax({url:file.deleteUrl, type:'DELETE'});
                             }); */
-                            
-                            upload_file_name = file.name;
-                            window.hWin.HEURIST4.util.setDisabled($('#csv_encoding'), false);
                             _showStep(2);
                             
-                            if(file.csv_params){
-                                $('#csv_delimiter').val(file.csv_params['csv_delimiter']);
-                                $('#csv_linebreak').val(file.csv_params['csv_linebreak']);
-                                $('#csv_enclosure').val(2);
+                            upload_file_name = file.name;
+                            
+                            if(file.isKML){
+                                $('#divStep2').find('fieldset').hide();
+                                _doParse(1);
+                            }else{
+                            
+                                window.hWin.HEURIST4.util.setDisabled($('#csv_encoding'), false);
+                                
+                                if(file.csv_params){
+                                    $('#csv_delimiter').val(file.csv_params['csv_delimiter']);
+                                    $('#csv_linebreak').val(file.csv_params['csv_linebreak']);
+                                    $('#csv_enclosure').val(2);
+                                }
                             }
                             
                             window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
@@ -3887,6 +3903,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         if(page==1){
             $('#selImportId').val('');  //clear selection
             imp_ID = 0;
+        }else if(page==1){
+            $('#divStep2').find('fieldset').show();
         }else if(page>2){  //matching and import
         
             $("div[class*='step'],h2[class*='step']").hide();
@@ -3926,7 +3944,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size) {
         
     }
 
-    _init(_imp_ID, _max_upload_size);
+    _init(_imp_ID, _max_upload_size, _format);
     return that;  //returns object
 }
     

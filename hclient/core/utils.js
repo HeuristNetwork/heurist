@@ -561,6 +561,154 @@ window.hWin.HEURIST4.util = {
     * @todo 2 - kml
     * @todo 3 - OpenLayers
     */
+    parseWKTCoordinates: function(type, wkt, format, google) {
+    
+        if(type==1 && typeof google.maps.LatLng != "function") {
+            return null;
+        }
+        
+        var gjson =  parseWKT(wkt);
+        
+        var bounds = null, southWest, northEast,
+        shape  = null,
+        points = []; //google points
+
+        if(gjson && gjson.coordinates){
+
+            switch (type) {
+                case "p":
+                case "point":
+                
+                    var x0 = gjson.coordinates[0];
+                    var y0 = gjson.coordinates[1];
+                    
+                    if(format==0){
+                        shape = { point:{lat: y0, lon:x0 } };
+                    }else{
+                        point = new google.maps.LatLng(y0, x0);
+                        points.push(point);
+                        bounds = new google.maps.LatLngBounds(
+                            new google.maps.LatLng(y0 - 0.5, x0 - 0.5),
+                            new google.maps.LatLng(y0 + 0.5, x0 + 0.5));
+                    }
+                    
+                    
+
+                    break;
+
+                case "c":  //circle
+                case "circle":  //circle
+
+                    if(format==0){ //@todo use geodesy-master to calculate distance
+
+                        var x0 = gjson.coordinates[0];
+                        var y0 = gjson.coordinates[1];
+                        var radius = gjson.coordinates[2] - gjson.coordinates[0];
+
+                        shape = [];
+                        for (var i=0; i <= 40; ++i) {
+                            var x = x0 + radius * Math.cos(i * 2*Math.PI / 40);
+                            var y = y0 + radius * Math.sin(i * 2*Math.PI / 40);
+                            shape.push({lat: y, lon: x});
+                        }
+                        shape = {polygon:shape};
+                        /*
+                        bounds = new google.maps.LatLngBounds(
+                            new google.maps.LatLng(y0 - radius, x0 - radius),
+                            new google.maps.LatLng(y0 + radius, x0 + radius));
+                         */
+                        
+                    }else{
+                        /* ARTEM TODO
+                        var centre = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[1]));
+                        var oncircle = new google.maps.LatLng(parseFloat(matches[2]), parseFloat(matches[3]));
+                        setstartMarker(centre);
+                        createcircle(oncircle);
+
+                        //bounds = circle.getBounds();
+                        */
+                    }
+
+                    break;
+
+                case "l":  ///polyline
+                case "path":
+                case "polyline":
+
+                case "r":  //rectangle
+                case "rect":
+                case "pl": //polygon
+                case "polygon":
+
+                    var shapes = [];
+                    
+
+                    var j, i, k, ismulti = true;
+                    var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
+                    var len2 = gjson.coordinates.length;
+                    for (j=0; j < len2; ++j) {
+                        var len = gjson.coordinates[j].length;
+                        for (i=0; i < len; ++i) {
+                            
+                            var placemark = gjson.coordinates[j][i];
+                            if(!$.isArray(placemark)){
+                                placemark = gjson.coordinates;
+                                len2 = 0;
+                                len = 0;
+                            }
+                            if($.isArray(placemark) && placemark.length==2 && 
+                                !$.isArray(placemark[0])){
+                                placemark = gjson.coordinates[j];
+                                len = 0;
+                            }
+                            shape = [];    
+                            
+                            for (k=0; k < placemark.length; ++k) {
+                                var point = {lat:placemark[k][1], 
+                                             lon:placemark[k][0]};
+
+                                if(format==0){
+                                    shape.push(point);
+                                }else{
+                                    points.push(new google.maps.LatLng(points.lat, points.lon));
+                                }
+                                
+                                if (point.lat < minLat) minLat = point.lat;
+                                if (point.lat > maxLat) maxLat = point.lat;
+                                if (point.lon < minLng) minLng = point.lon;
+                                if (point.lon > maxLng) maxLng = point.lon;
+                            }//for coords
+                            
+                            if(format==0){
+                                shape = (type=="l" || type=="polyline")?{polyline:shape}:{polygon:shape};
+                                shapes.push(shape);    
+                            }
+                            
+                        }    
+                    }
+                    if(shapes.length==1) shape = shapes[0]
+                    else shape = shapes;
+
+                    if(!format==0){
+                        southWest = new google.maps.LatLng(minLat, minLng);
+                        northEast = new google.maps.LatLng(maxLat, maxLng);
+                        bounds = new google.maps.LatLngBounds(southWest, northEast);
+                    }
+                    
+                        
+            }
+
+        }
+        
+        if(format==0){
+            return shape;
+        }else{
+            return {bounds:bounds, points:points};
+        }        
+        
+    
+    },
+    
     parseCoordinates: function(type, wkt, format, google) {
 
         if(type==1 && typeof google.maps.LatLng != "function") {
@@ -599,6 +747,7 @@ window.hWin.HEURIST4.util = {
                 if (matches) {
                     matches = matches[1].match(/\S+\s+\S+(?:,|$)/g);
                 }
+                
                 break;
         }
 
