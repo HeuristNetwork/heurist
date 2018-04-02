@@ -418,10 +418,13 @@ $.widget( "heurist.search", {
             .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
 
             this.btn_select_owner = $( "<button>")
-            .css({'font-size':'1.3em'})
+            .css({'font-size':'0.765em'})
             .appendTo( this.div_add_record )
-            .button({label:'owner', icon: "ui-icon-carat-1-s", iconPosition:'end'});
+            .button({label:'owner', icon: "ui-icon-carat-1-s", iconPosition:'end',
+                     title:'Ownership and access rights for new record'});
             //.addClass('truncate');
+            this.btn_select_owner.find('.ui-button-icon').css('vertical-align','baseline');
+            
             
             
             /*
@@ -443,12 +446,52 @@ $.widget( "heurist.search", {
                     
             }});
 
+            var that = this;
             this._on( this.btn_select_owner, {
                 click:  function(){
-            
-                this.select_owner_addrec.hSelect('open');
+                    
+                    var btn_select_owner = this.btn_select_owner;
+                    
+                    var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                    if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+                        add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
+                    }
+                        
+                    var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database
+                            +'&action=ownership&owner='+add_rec_prefs[1]
+                            +'&scope=noscope&access='+add_rec_prefs[2];
+
+                    window.hWin.HEURIST4.msg.showDialog(url, {height:300, width:620,
+                        padding: '0px',
+                        resizable:false,
+                        title: window.hWin.HR('Default ownership and access for new record'),
+                        callback: function(context){
+
+                            if(context && (context.owner>=0) && context.access && 
+                                (context.access!=add_rec_prefs[2] || context.owner!=add_rec_prefs[1])){
+                                
+                                add_rec_prefs[1] = context.owner;  
+                                add_rec_prefs[2] = context.access;  
+                                
+                                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.owner},
+                                function(response){
+                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                        btn_select_owner.button({'label'
+                                            :'<div style="text-align:left;display:inline-block">'
+                                                +response.data[context.owner]+'<br>'+context.access+'</div>'});
+                                    }       
+                                });                                
+                                
+                                window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);
+                                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
+                            }
+                    
+                        }});
+                
+                /*this.select_owner_addrec.hSelect('open');
                 this.select_owner_addrec.hSelect('menuWidget')
                     .position({my: "right top", at: "right bottom", of: this.btn_select_owner });
+                */    
                 return false;
                     
             }});
@@ -610,7 +653,7 @@ $.widget( "heurist.search", {
             });
         }
         if(!this.select_owner_addrec){
-            
+            /*
             this.select_owner_addrec = window.hWin.HEURIST4.ui.createSelector();
             window.hWin.HEURIST4.ui.createUserGroupsSelect(this.select_owner_addrec, null,  //take groups of current user
                 [{key:0, title:'Everyone (no restriction)'}, 
@@ -637,23 +680,36 @@ $.widget( "heurist.search", {
                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
                 }
             });
-            
+            */
         }
             
-        var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-        if($.isArray(prefs) && prefs.length>1){
-            if(prefs[0]>0) {
-                this.select_rectype_addrec.val(prefs[0]); 
-                var opt = this.select_rectype_addrec.find('option[value="'+prefs[0]+'"]');
+        var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+        if($.isArray(add_rec_prefs) && add_rec_prefs.length>2){
+            if(add_rec_prefs[0]>0) {
+                this.select_rectype_addrec.val(add_rec_prefs[0]); 
+                var opt = this.select_rectype_addrec.find('option[value="'+add_rec_prefs[0]+'"]');
                 this.btn_add_record.button({label: 'Add '+opt.text()});
             }
-            if(parseInt(prefs[1])>=0) {
+           
+            var that = this;
+            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:add_rec_prefs[1]},
+            function(response){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    that.btn_select_owner.button({'label':
+                        '<div style="text-align:left;display:inline-block">'
+                        +response.data[add_rec_prefs[1]]+'<br>'+add_rec_prefs[2]+'</div>'});
+                }       
+            });                                
+            
+            /*
+            if(parseInt(prefs[1])>=0 && this.select_owner_addrec) {
                 this.select_owner_addrec.val(prefs[1]); 
                 
                 var opt = this.select_owner_addrec.find('option[value="'+prefs[1]+'"]');
                 //this.btn_select_owner.button({label:opt.text()});
                 this.btn_select_owner.attr('title', 'Owner: '+opt.text()+'. Click to select other');
             }
+            */
         }
             
         this._showhide_input_prompt();

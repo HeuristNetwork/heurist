@@ -768,7 +768,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             title: window.hWin.HR('ownership'),
             callback: function(context){
 
-                if(context && context.owner && context.access){
+                if(context && context.owner>=0 && context.access){
                     
                     var ele = that._editing.getFieldByName('rec_OwnerUGrpID');
                     var vals = ele.editing_input('getValues');
@@ -1407,7 +1407,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 //default values for ownership and viewability from preferences
                 var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
                 if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
-                    add_rec_prefs = [0, 0, 'viewable', '']; //default to Everyone
+                    add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
                 }
                 
                 if(!(that.options.new_record_params.ro>=0)){
