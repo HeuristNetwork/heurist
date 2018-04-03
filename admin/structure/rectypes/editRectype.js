@@ -784,14 +784,24 @@ function _onPreventChars(event){
         var keyChar = String.fromCharCode(charCode);
         // Old test only allowed specific characters, far too restrictive. New test only restrcts characters which will pose a problem
         // if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
-        if(/^[{}'"\[\]]+$/.test(keyChar)){
+        var name = $(event.target).val();
+        if((name.indexOf('<')>=0 && keyChar=='>') || 
+           (name.indexOf('>')>0 && keyChar=='<')){
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+            if (event.stopPropagation) event.stopPropagation();
+            window.hWin.HEURIST4.msg.showMsgFlash('Both < and > are forbid',700,null,event.target);
+            return false;
+        }else
+        if(/^[{}'".\[\]]+$/.test(keyChar)){
             event.cancelBubble = true;
             event.returnValue = false;
             event.preventDefault();
             if (event.stopPropagation) event.stopPropagation();
             
             if(hasH4()){
-                window.hWin.HEURIST4.msg.showMsgFlash('Restricted characters: [ ] { } \' "',700,null,event.target);
+                window.hWin.HEURIST4.msg.showMsgFlash('Restricted characters: . [ ] { } \' " ',700,null,event.target);
             }
             setTimeout(function(){
                     $(event.target).focus();

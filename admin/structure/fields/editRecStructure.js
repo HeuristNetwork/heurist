@@ -301,8 +301,14 @@ function EditRecStructure() {
                             disableBtns:true,
                             asyncSubmitter:function(fnCallback, oNewValue){
                                 var rec = this.getRecord();
-                                _updateSingleField(rec.getData("rst_ID"), 'rst_DisplayName', 
+                                var swarn = top.HEURIST.util.validateName(oNewValue, "Prompt (display name)")
+                                if(swarn!=""){
+                                    alert(swarn);
+                                    fnCallback(false, oNewValue);
+                                }else{
+                                    _updateSingleField(rec.getData("rst_ID"), 'rst_DisplayName', 
                                             rec.getData("rst_DisplayName"), oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                                }
                             } 
                                 }),
                             

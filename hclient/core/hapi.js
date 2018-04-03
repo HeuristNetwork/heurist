@@ -106,7 +106,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
 
         //remove remark to debug 
-        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
 
         var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());
 
@@ -795,7 +795,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             doRequest:function(request, callback){
                 //todo - verify basic params
                 request['request_id'] = window.hWin.HEURIST4.util.random();
-                request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
+                //request['DBGSESSID'] = '424657986609500001;d=1,p=0,c=0';  //DEBUG parameter
                 _callserver('entityScrud', request, callback);
             },
 

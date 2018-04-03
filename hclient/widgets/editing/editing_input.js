@@ -1713,7 +1713,7 @@ $.widget( "heurist.editing_input", {
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
                 {name:'recID', value:that.options.recID}, //need to verify permissions
-                {name:'DBGSESSID', value:'425944380594800002;d=1,p=0,c=07'},
+                //{name:'DBGSESSID', value:'425944380594800002;d=1,p=0,c=07'},
                 {name:'newfilename', value:newfilename }], //unique temp name
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
     //autoUpload: true,
