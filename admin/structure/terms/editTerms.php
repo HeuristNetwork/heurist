@@ -229,7 +229,9 @@ if(isForAdminOnly("to modify database structure")){
                             <div style="float:left;">
                                 <label class="dtyLabel" style="color: red; margin-top:10px;">
                                     Term (label)</label>
-                                <input id="edName" style="width:350px" onkeyup="editTerms.isChanged();" />
+                                <!-- onkeypress="top.HEURIST.util.onPreventChars(event)" -->
+                                <input id="edName" style="width:350px" 
+                                        onkeyup="editTerms.isChanged();" />
                                 <div style="padding-left:105;padding-top:3px; font-size:smaller;">
                                     The term or label describing the category. The label is the normal<br/>
                                     way of expressing the term. Dropdowns are ordered alphabetically.<br />

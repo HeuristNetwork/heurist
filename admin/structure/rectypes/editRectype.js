@@ -38,13 +38,16 @@ var rectype,
     _keepTitleMask,
     _keepStatus,
     _rectype_icon = '',
-    _selected_fields = null;
+    _selected_fields = null,
+    _this_window;
 
 var _openEditStrucutreAfterClose = false,
     _isIconWasUpdated = false;
 
 
 function init() {
+    
+    _this_window = window;
 
     var query = this.location.search;
 
@@ -446,7 +449,7 @@ function checkIfInteger(evt) {
 //
 function updateRectypeOnServer() {
     if($('#btnSave').is(":disabled")) return;
-    $('#btnSave').attr('disabled','disabled');
+    $('#btnSave').prop('disabled','disabled');
     
     testTitleMask(); //then it calls updateRectypeOnServer_continue
 }
@@ -454,12 +457,14 @@ function updateRectypeOnServer() {
 function updateRectypeOnServer_continue()
 {
     if(!titleMaskIsOk){
-        $('#btnSave').removeAttr('disabled');
+    $('#btnSave').prop('disabled','');
+        //$('#btnSave').removeAttr('disabled');
         alert("Title mask is invalid");
         return;
     }
     if(_rectype_icon==''){
-        $('#btnSave').removeAttr('disabled');
+    $('#btnSave').prop('disabled','');
+        //$('#btnSave').removeAttr('disabled');
         alert("Please select icon for new record type");
         return;
     }
@@ -467,7 +472,8 @@ function updateRectypeOnServer_continue()
     var str = getUpdatedFields();
 
     if(str=="mandatory"){
-        $('#btnSave').removeAttr('disabled');
+    $('#btnSave').prop('disabled','');
+        //$('#btnSave').removeAttr('disabled');
         //do not close the window
 
     }else if(str != null) {
@@ -477,8 +483,6 @@ function updateRectypeOnServer_continue()
             return;
         }
 
-console.log(_selected_fields);        
-        
         // TODO: Change base URL
         var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
         var callback = updateResult;
@@ -506,12 +510,12 @@ console.log(_selected_fields);
             context = {rty_ID:rectypeID, isOpenEditStructure:false };
         }
 
-        window.close(context);
+        _this_window.close(context);
     }
 }
 
 var updateResult = function(context) {
-    $('#btnSave').removeAttr('disabled');
+    $('#btnSave').prop('disabled','');
     top.HEURIST.rectypes.saveStatus = context;
 
     if(!Hul.isnull(context)) {
@@ -557,7 +561,7 @@ var updateResult = function(context) {
                 context.isOpenEditStructure = true;
             }
 
-            window.close(context); //send back new HEURIST strcuture
+            _this_window.close(context); //send back new HEURIST strcuture
         }
     }
 }
@@ -642,6 +646,14 @@ function fromUItoArray(isShowWarn) {
         var rectypeValues = top.HEURIST.rectypes.typedefs[rectypeID].commonFields;
     }
 
+    var swarn = Hul.validateName($('#rty_Name').val(), "Field 'Name'");
+    if(swarn!=''){
+        if(isShowWarn) alert(swarn);
+        document.getElementById("rty_Name").focus();
+        updatedFields = [];
+        return "mandatory";
+    }
+    
 
     var fieldNames = top.HEURIST.rectypes.typedefs.commonFieldNames;
 
@@ -775,43 +787,6 @@ function _onEditMask(){
     });
 }
 
-function _onPreventChars(event){
-
-    event = event || window.event;
-    var charCode = typeof event.which == "number" ? event.which : event.keyCode;
-    if (charCode && charCode > 31)
-    {
-        var keyChar = String.fromCharCode(charCode);
-        // Old test only allowed specific characters, far too restrictive. New test only restrcts characters which will pose a problem
-        // if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
-        var name = $(event.target).val();
-        if((name.indexOf('<')>=0 && keyChar=='>') || 
-           (name.indexOf('>')>0 && keyChar=='<')){
-            event.cancelBubble = true;
-            event.returnValue = false;
-            event.preventDefault();
-            if (event.stopPropagation) event.stopPropagation();
-            window.hWin.HEURIST4.msg.showMsgFlash('Both < and > are forbid',700,null,event.target);
-            return false;
-        }else
-        if(/^[{}'".\[\]]+$/.test(keyChar)){
-            event.cancelBubble = true;
-            event.returnValue = false;
-            event.preventDefault();
-            if (event.stopPropagation) event.stopPropagation();
-            
-            if(hasH4()){
-                window.hWin.HEURIST4.msg.showMsgFlash('Restricted characters: . [ ] { } \' " ',700,null,event.target);
-            }
-            setTimeout(function(){
-                    $(event.target).focus();
-            }, 750);
-            
-            return false;
-        }
-    }
-    return true;
-}
 
 
         //public members
@@ -822,7 +797,7 @@ function _onPreventChars(event){
             },
 
             onPreventChars: function(event) {
-                _onPreventChars(event);
+                return top.HEURIST.util.onPreventChars(event);
             },
             
             onChangeStatus: function(e) {
@@ -846,11 +821,11 @@ function _onPreventChars(event){
                 if(updatedFields.length > 0) {
                     var areYouSure = confirm("Changes were made. By cancelling, all changes will be lost. Are you sure?");
                     if(areYouSure) {
-                        window.close(null);
+                        _this_window.close(null);
                     }
                 }
                 else {
-                    window.close(null);
+                    _this_window.close(null);
                 }
             }
         };

@@ -522,8 +522,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         
                         var content = $dosframe[0].contentWindow;
                         content.alert = function(txt){
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
-                            $dlg.dialog('open');
+                            $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
+                            $dlg_alert.dialog('open');
                             return true;
                         }
                         

@@ -301,13 +301,17 @@ function EditRecStructure() {
                             disableBtns:true,
                             asyncSubmitter:function(fnCallback, oNewValue){
                                 var rec = this.getRecord();
-                                var swarn = top.HEURIST.util.validateName(oNewValue, "Prompt (display name)")
-                                if(swarn!=""){
-                                    alert(swarn);
-                                    fnCallback(false, oNewValue);
+                                if(oNewValue=='') {
+                                    fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
                                 }else{
-                                    _updateSingleField(rec.getData("rst_ID"), 'rst_DisplayName', 
-                                            rec.getData("rst_DisplayName"), oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                                    var swarn = top.HEURIST.util.validateName(oNewValue, "Prompt (display name)")
+                                    if(swarn!=""){
+                                        alert(swarn);
+                                        fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
+                                    }else{
+                                        _updateSingleField(rec.getData("rst_ID"), 'rst_DisplayName', 
+                                                rec.getData("rst_DisplayName"), oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                                    }
                                 }
                             } 
                                 }),
@@ -545,6 +549,7 @@ function EditRecStructure() {
                         '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div>'+
                             '<div class="input-cell">'+
                                 '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" onchange="_onDispNameChange(event)" '+
+                                    'onkeypress="top.HEURIST.util.onPreventChars(event)" '+
                                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
                                 '<span>'+    
                                 // Field width
@@ -723,6 +728,25 @@ function EditRecStructure() {
             //
             _actionInProgress = false;
 
+            _myDataTable.subscribe( 'cellMousedownEvent', function(oArgs){
+                
+                if(_actionInProgress || _isServerOperationInProgress || _isDragEnabled){
+                    return;
+                }
+                if($(oArgs.event.target).is('img')){
+                
+                var column = _myDataTable.getColumn(oArgs.event.target);
+
+                if(!Hul.isnull(column) && column.key === 'rst_NonOwnerVisibility')
+                { 
+                    window.hWin.HEURIST4.msg.showMsgFlash('Please save changes to the field you are currently editing to allow dragging'
+                            ,700,null,oArgs.target);
+                    
+                }
+                }
+            });
+            
+            
             _myDataTable.subscribe( 'cellClickEvent', onCellClickEventHandler );
             
 
@@ -889,7 +913,6 @@ function EditRecStructure() {
             (!Hul.isnull(column) && 
                 (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || column.key === 'addColumn') ))
             { 
-                //if (!Hul.isnull(popupSelect) || _isServerOperationInProgress) console.log('popup or action-in-progress');
                 return; 
             }
 
@@ -1122,7 +1145,7 @@ function EditRecStructure() {
                     if(values[k] !== edt.value){
 
                         if(fieldnames[k]=="rst_DisplayName"){
-                            if(top.HEURIST.util.validateName(edt.value, "Prompt (display name)")!=""){
+                            if(edt.value=='' || top.HEURIST.util.validateName(edt.value, "Prompt (display name)")!=""){
                                 continue;
                             }
                         }
@@ -1810,6 +1833,9 @@ function EditRecStructure() {
                     //fnCallback(false, oNewValue);    
                 }
                 _isServerOperationInProgress = false;
+                
+                dragDropDisable();
+                dragDropEnable();
                 
                 $('.save-btn').removeProp('disabled').css('opacity','1');
             };

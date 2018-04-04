@@ -199,6 +199,7 @@
                     <label class="dtyLabel" style="color:red; margin-top:10px;">
                         <?=($parent_id==0?"Vocabulary name":"Term (label)") ?>
                     </label>
+                    <!-- onkeypress="top.HEURIST.util.onPreventChars(event)" -->
                     <input id="trmName" name="name" style="width:150px;" value="<?=$term_name ?>"
                         title="Enter the term or concise label for the category. Terms pulldown will be alphabetic, use 01, 02 ... to force ordering"/>
                     <div style="padding-left:155;padding-top:3px; font-size: smaller;">

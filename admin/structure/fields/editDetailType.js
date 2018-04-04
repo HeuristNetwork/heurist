@@ -1020,34 +1020,6 @@ function DetailTypeEditor() {
 
     }
 
-    function _onPreventChars(event){
-
-        event = event || window.event;
-        var charCode = typeof event.which == "number" ? event.which : event.keyCode;
-        if (charCode && charCode > 31)
-        {
-            var keyChar = String.fromCharCode(charCode);
-            // Old test only allowed specific characters, far too restrictive. New test only restrcts characters which will pose a problem
-            // if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
-            if(/^[{}'"\[\]]+$/.test(keyChar)){
-                event.cancelBubble = true;
-                event.returnValue = false;
-                event.preventDefault();
-                if (event.stopPropagation) event.stopPropagation();
-                
-                if(hasH4()){
-                    window.hWin.HEURIST4.msg.showMsgFlash('Restricted characters: [ ] { } \' "',700,null,event.target);
-                }
-                setTimeout(function(){
-                        $(event.target).focus();
-                }, 750);
-                
-                return false;
-                
-            }
-        }
-        return true;
-    }
         
     
     //public members
@@ -1066,7 +1038,7 @@ function DetailTypeEditor() {
         },
 
         onPreventChars: function(event) {
-            _onPreventChars(event);
+            return top.HEURIST.util.onPreventChars(event);
         },        
         
         //
