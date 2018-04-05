@@ -103,6 +103,7 @@ $.widget( "heurist.search_faceted", {
         // callbacks
         params: {},
         ispreview: false,
+        showclosebutton: true,
         onclose: null
     },
 
@@ -137,18 +138,18 @@ $.widget( "heurist.search_faceted", {
         .appendTo( this.div_toolbar )
         .button();
         
-        this.btn_reset = $( "<button>", { text: window.hWin.HR("Initial state"), title:window.hWin.HR("Reset all facets to their initial states") })
+        this.btn_reset = $( "<button>", {title:window.hWin.HR("Reset all the filters to their initial states") })
         .appendTo( this.div_toolbar )
-        .button({icons: {primary: "ui-icon-arrowreturnthick-1-w"}, text:false}).hide();
+        .button({label: window.hWin.HR("Reset"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' }).hide();
         
         this.btn_save = $( "<button>", { text: window.hWin.HR("Save state") })
         .appendTo( this.div_toolbar )
         .button().hide(); //@todo
 
-        this.btn_close = $( "<button>", { text: window.hWin.HR("Close"), 
+        this.btn_close = $( "<button>", { 
                     title:window.hWin.HR("Close this facet search and return to the list of saved searches") })
         .appendTo( this.div_toolbar )
-        .button({icons: {secondary: "ui-icon-close"}});
+        .button({icon: "ui-icon-close", iconPosition:'end', label:window.hWin.HR("Close")});
 
         this.btn_close.find('.ui-icon-close').css({'font-size': '1.3em', right: 0});
         
@@ -241,11 +242,11 @@ $.widget( "heurist.search_faceted", {
         if(this.div_title) this.div_title.html(this.options.params.ui_title
                             ?this.options.params.ui_title:this.options.query_name);
 
+                            
         if(this.options.ispreview){
             this.btn_save.hide(); 
             this.btn_close.hide(); 
         }else{
-            
             if(hasHistory) {
                 //if(this.div_title) this.div_title.css('width','45%');
                 this.btn_reset.show()   
@@ -257,7 +258,11 @@ $.widget( "heurist.search_faceted", {
                 this.btn_save.hide(); 
             }
             
-            this.btn_close.show(); 
+            if(this.options.showclosebutton){
+                this.btn_close.show(); 
+            }else{
+                this.btn_close.hide(); 
+            }
         }
 
         this.doRender();
@@ -468,7 +473,7 @@ $.widget( "heurist.search_faceted", {
             this.btn_submit.hide();
        }
        
-        if(this.options.ispreview){
+        if(this.options.ispreview || !this.options.showclosebutton){
             this.btn_close.hide(); 
         }else{
             this.btn_close.show(); 
@@ -1714,6 +1719,7 @@ $.widget( "heurist.search_faceted", {
             
             if(display_mode=='block'){                 
                 f_link_content.css('width',this.facets_list_container.width()*0.6).addClass('truncate');    
+                f_link_content.attr('title',cterm.text);
             }
             
             if(!window.hWin.HEURIST4.util.isempty(currval)){

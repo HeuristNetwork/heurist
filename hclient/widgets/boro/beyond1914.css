@@ -5539,39 +5539,52 @@ html {
     margin: 40px auto 0px auto; }
   .bor-header .bor-header-search {
     width: 100%; } }
-.bor-utility-nav {
+.bor-utility-nav, .top-menu-dropdown {
   background: rgba(38, 38, 38, 0.9);
   border: none;
   border-radius: 0;
   padding-left: 15px;
   padding-right: 15px;
-  position: fixed;
-  width: 100%;
-  z-index: 2;
-  top: 0;
   *background-color: black;
-  background-color: black\9; }
-  .lt-ie9 .bor-utility-nav .bor-sydney-logo {
+  background-color: black\9; 
+}
+.bor-utility-nav{
+  position: fixed;
+  z-index: 2;
+  width: 100%;
+  top: 0;
+}
+.top-menu-dropdown {
+    border: none !important;
+}
+  
+.lt-ie9 .bor-utility-nav .bor-sydney-logo {
     padding: 0; }
-  .bor-utility-nav .bor-nav {
+.bor-utility-nav .bor-nav {
     float: right;
     text-align: right;
     margin-top: 25px;
     margin-bottom: 25px; }
-    .bor-utility-nav .bor-nav ul {
+.bor-utility-nav .bor-nav ul {
       font-size: 16px;
       text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5); }
-      .bor-utility-nav .bor-nav ul li a {
-        color: white; }
-        .bor-utility-nav .bor-nav ul li a:hover, .bor-utility-nav .bor-nav ul li a:focus {
+.bor-utility-nav .bor-nav ul li a,
+.top-menu-dropdown li a {
+        color: white; 
+}
+.bor-utility-nav .bor-nav ul li a:hover, .bor-utility-nav .bor-nav ul li a:focus,
+.top-menu-dropdown li a:hover, .top-menu-dropdown li a:focus
+{
           text-decoration: none;
           color: white;
           background-color: #ce1126;
           -moz-border-radius: 2px;
           -webkit-border-radius: 2px;
-          border-radius: 2px; }
-  .bor-utility-nav .navbar-header .navbar-toggle {
-    border: 0;
+          border-radius: 2px;
+          border-color: #ce1126;
+}
+.bor-utility-nav .navbar-header .navbar-toggle {
+    border: none;
     margin-top: 34px;
     margin-bottom: 34px;
     -webkit-transition: margin 0.15s linear;
@@ -6089,3 +6102,19 @@ h2 .bor-tooltip, .h2 .bor-tooltip {
 @media screen and (max-width: 396px) {
   #html_element {
     overflow: hidden; } }
+
+a.facet_link span:first-child{
+    font-style:normal;
+    color: #428bca;
+    text-decoration: none;   
+}
+a.facet_link span:first-child:hover, a.facet_link span:first-child:focus {
+    font-style:normal;
+    color: #2a6496;
+    text-decoration: underline; 
+}
+a.facet_link span:first-child:focus {
+    outline: thin dotted;
+    outline: 5px auto -webkit-focus-ring-color;
+    outline-offset: -2px;
+}

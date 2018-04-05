@@ -251,6 +251,8 @@ $.widget( "heurist.dh_search", {
                 });
             }
             
+            // for boro layout the container page is hidden initially
+            // need to refresh-init when it becomes visible
             $('.bor-page-search').on("myOnShowEvent", function(event){
                 if( event.target.id == 'bor-page-search'){
                     that._refresh();
@@ -314,7 +316,9 @@ $.widget( "heurist.dh_search", {
 
     },
 
-
+    isInited: function(){
+        return (this.usr_SavedSearch!=null);  
+    },
 
     //
     // redraw list of saved searches
@@ -350,7 +354,7 @@ $.widget( "heurist.dh_search", {
                 $('<button>', {text: this.usr_SavedSearch[svsID][_NAME], 'data-svs-id':svsID })
                 .css({'width':'100%','margin-top':'0.4em'})
                 .button().on("click", function(event){
-                    that._doSearch2( $(this).attr('data-svs-id') );
+                    that.doSearch2( $(this).attr('data-svs-id') );
                 })
                 .appendTo(this.search_list);
                 cnt++;
@@ -358,9 +362,9 @@ $.widget( "heurist.dh_search", {
         }
         
         if(this._isDigitalHarlem && cnt==1){
-            this._doSearch2( this._first_search_in_list );
+            this.doSearch2( this._first_search_in_list );
         }else if(this.options.search_at_init==true || this.options.search_at_init>0){
-            this._doSearch2( this.options.search_at_init==true?this._first_search_in_list:this.options.search_at_init);    
+            this.doSearch2( this.options.search_at_init==true?this._first_search_in_list:this.options.search_at_init);    
         }
                     
                     
@@ -470,7 +474,7 @@ $.widget( "heurist.dh_search", {
      //
      // START SEARCH
      //
-    _doSearch2: function(svsID){
+    doSearch2: function(svsID){
 
         if(!this.usr_SavedSearch[svsID]) return;
         
@@ -507,6 +511,7 @@ $.widget( "heurist.dh_search", {
 
             var noptions= { query_name: this.usr_SavedSearch[svsID][_NAME], 
                 params:facet_params,
+                showclosebutton:this._isDigitalHarlem,
                 onclose:function(event){
                     that.search_pane.hide();
                     that.search_list.show();

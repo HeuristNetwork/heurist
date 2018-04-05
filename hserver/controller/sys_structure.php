@@ -63,7 +63,15 @@
             }
         }
 
-        $response = array("status"=>HEURIST_OK, "data"=> $data );
+                if($mode==4 && @$_REQUEST['lazyload']){
+                    if(count($data["rectypes"])==1){
+                        $response = $data["rectypes"][0]['children'];
+                    }else{
+                        $response = $data["rectypes"];
+                    }
+                }else{
+                    $response = array("status"=>HEURIST_OK, "data"=> $data );
+                }
 
     }               
     

@@ -57,6 +57,7 @@
             $fieldtypes = explode(",",$fieldtypes);
         }
 
+        //loads plain array for rectypes
         $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode==4)?null:$rectypeids, 1); 
         $dbs_lookups = dbs_GetDtLookups();
 
@@ -67,7 +68,7 @@
         
         $rectypeids = (!is_array($rectypeids)?explode(",", $rectypeids):$rectypeids);
 
-        //foreach ($rtypes as $rectypeID=>$rectypeName){
+        //create hierarchy tree 
         foreach ($rectypeids as $rectypeID){
                 $def = __getRecordTypeTree($system, $rectypeID, 0, $mode, $fieldtypes, null);
                 if($def!==null) {
@@ -104,7 +105,7 @@
     }
 
     //
-    //   {rt_id: , rt_name, recID, recTitle, recModified, recURL, ecWootText,
+    //   {rt_id: , rt_name, recID, recTitle, recModified, recURL, recWootText,
     //                  fNNN: 'display name of field', 
     //                  fNNN: array(termfield_name: , id, code:  )  // array of term's subfields
     //                  fNNN: array(rt_name: , recID ...... )       // unconstrained pointer or exact constraint
@@ -341,7 +342,7 @@
             case 'resource': // link to another record type
             case 'relmarker':
 
-                if( ($mode==5 && $recursion_depth<3) || ($mode==4 && $recursion_depth<3) || $recursion_depth<2){
+                if( ($mode==5 && $recursion_depth<3) || ($mode==4 && $recursion_depth<1) || $recursion_depth<2){
 
                     
                     if($reverseRecTypeId!=null){
@@ -357,14 +358,21 @@
                     }else{
 
                             $pref = ($detailType=="resource")?"lt":"rt";
+
+                            $pointerRecTypeId = @$dtValue[$rst_fi['rst_PtrFilteredIDs']];
+                            if($pointerRecTypeId==null) $pointerRecTypeId = '';
+                            $is_required      = ($dtValue[$rst_fi['rst_RequirementType']]=='required');
+                            $rectype_ids = explode(",", $pointerRecTypeId);
+
                              
                             if($mode==4){
+                                if($pointerRecTypeId=="" || count($rectype_ids)==0){ //TEMP
+                                     $dt_title .= ' unconst';
+                                }
+                                
                                 $dt_title = " <span style='font-style:italic'>" . $dt_title . "</span>";
                             }
                             
-                            $pointerRecTypeId = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
-                            $is_required      = ($dtValue[$rst_fi['rst_RequirementType']]=='required');
-                            $rectype_ids = explode(",", $pointerRecTypeId);
                             
                             if($pointerRecTypeId=="" || count($rectype_ids)==0){ //unconstrainded
 
@@ -381,7 +389,11 @@
                                     $res['constraint'] = count($rectype_ids);
                                     $res['children'] = array();
                                 }
-
+                                if($mode==4){
+                                    $res['rt_ids'] = $pointerRecTypeId;
+                                    $res['lazy'] = true;
+                                }else{
+                                
                                 foreach($rectype_ids as $rtID){
                                     $rt_res = __getRecordTypeTree($system, $rtID, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                                     if(count($rectype_ids)==1){//exact one rectype constraint
@@ -393,6 +405,8 @@
                                         array_push($res['children'], $rt_res);
                                         $res['constraint'] = count($rt_res);
                                     }
+                                }
+                                
                                 }
                             
                             }

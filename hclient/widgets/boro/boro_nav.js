@@ -31,7 +31,8 @@ $.widget( "heurist.boro_nav", {
        //WebContent:25, // rectype ID for information pages content
        menu_div:'',   // id of navigation menu div
        entityType:'',
-       entityID:null
+       entityID:null,
+       search_UGrpID:48  //usergroup for searches that will be displayed in search dropdown menu
     },
     
     data_content:{},
@@ -200,7 +201,16 @@ $.widget( "heurist.boro_nav", {
 
                     //add page content from database  
                     ele.html( content );    
-                    
+
+                    //add content of monthly story for home page
+                    if(name.toLowerCase()=='home'){ 
+                        var section = ele.find('#monthly_story_on_home_page');
+                        var story_record_id = section.attr('data-refer-recid');
+                        if(story_record_id>0){
+                            var content_rec = recordset.getById(story_record_id);
+                            section.html(recordset.fld(content_rec, this.DT_EXTENDED_DESCRIPTION));
+                        }
+                    }
                     if(name.toLowerCase()!=='contribute'){
                         //add registration form
                         ele = $('<div>').attr('data-recID', recID).appendTo(ele); 
@@ -225,7 +235,11 @@ $.widget( "heurist.boro_nav", {
         //add two special items - People and Search
         html  = html 
             +'<li><a href="#" class="nav-link" data-id="people">People</a></li>'
-            +'<li><a href="#" class="nav-link" data-id="search">Search</a></li></ul>';
+            +'<li><a href="#" class="nav-link" data-id="search">Search'
+                +'<spane style="position:relative;" class="ui-icon ui-icon-carat-1-s"></span></a></li>'
+            +'<li><a href="#" class="nav-link" data-id="resources">Resources'
+                +'<spane style="position:relative;" class="ui-icon ui-icon-carat-1-s"></span></a></li>'
+            +'</ul>';
         
         menu_ele.html(html);
         
@@ -240,8 +254,13 @@ $.widget( "heurist.boro_nav", {
          
         menu_ele.find('.nav-link').click(function(event){
             
+            
             var recID = $(event.target).attr('data-id');
             window.hWin.HEURIST4.util.stopEvent(event);
+
+            if(recID=='resource' || recID=='search'){
+                return false;   
+            }
 
             var hdoc = $(window.hWin.document);
             
@@ -273,7 +292,107 @@ $.widget( "heurist.boro_nav", {
         
 
         });
+        
+        
+        //drop down menu for resources and search--------------------
+        var myTimeoutId = 0, _hide = function(ele) {
+            myTimeoutId = setTimeout(function() {
+                $( ele ).hide();
+                }, 800);
+            //$( ele ).delay(800).hide();
+        },
+        _show = function(ele, parent) {
+            clearTimeout(myTimeoutId);
 
+            $('.top-menu-dropdown').hide(); //hide other
+            var menu = $( ele )
+            //.css('width', this.btn_user.width())
+            .show()
+            .position({my: "center top", at: "center bottom", of: parent });
+            //$( document ).one( "click", function() { menu.hide(); });
+            return false;
+        };        
+        
+        var resource_menu = $('<ul>'
+        +'<li><a href="#" class="nav-link" data-id="resources_general">General resources</a></li>'
+        +'<li><a href="#" class="nav-link" data-id="resources_education">Education resources</a></li>'
+        +'</ul>')
+                .addClass('top-menu-dropdown').hide()
+                .css({'position':'absolute', 'padding':'5px'})
+                .appendTo( that.document.find('body') )
+                .menu({select: function(event, ui){ 
+                        //that._menuActionHandler(event, ui.item.attr('id'), ui.item.attr('data-logaction'));
+                        //return false; 
+                }});
+            
+        var resource_btn = menu_ele.find('.nav-link[data-id="resources"]');
+        resource_btn.on( {
+            mouseenter : function(){_show(resource_menu, resource_btn)},
+            mouseleave : function(){_hide(resource_menu)}
+        });   
+        resource_menu.on( {
+            mouseenter : function(){_show(resource_menu, resource_btn)},
+            mouseleave : function(){_hide(resource_menu)}
+        });
+             
+                
+        //find faceted search for search menu
+        window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.search_UGrpID},
+            function(response){
+                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    var smenu = '';
+                    for (var svsID in response.data)
+                    {
+                        smenu = smenu + '<li data-search-id="' + svsID 
+                                      + '"><a href="#" class="nav-link">'+ response.data[svsID][_NAME] + '</a></li>';
+                    }
+                    
+                    var search_menu = $('<ul>'+smenu+'</ul>')
+                        .addClass('top-menu-dropdown').hide()
+                        .css({'position':'absolute', 'padding':'5px'})
+                        .appendTo( that.document.find('body') )
+                        .menu({select: function(event, ui){ 
+                                    window.hWin.HEURIST4.util.stopEvent(event);
+                                    //that.history.push({page_name:'search'});
+                                    
+                                    var hdoc = $(window.hWin.document);
+                                    //hide all 
+                                    hdoc.find('#main_pane > .clearfix').hide(); //hide all
+                                    
+                                    var svsID = ui.item.attr('data-search-id');
+                            
+                                    var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');
+                                    if(app1 && app1.widget){
+                                        if($(app1.widget).dh_search('isInited')){
+                                            hdoc.find('.bor-page-search').show();
+                                            $(app1.widget).dh_search('doSearch2', svsID);        
+                                        }else{
+                                            //not inited yet 
+                                            $(app1.widget).dh_search('option', 'search_at_init', svsID);        
+                                            hdoc.find('.bor-page-search').show();
+                                        }
+                                    }              
+                                    
+                                    hdoc.scrollTop(0);
+                            }});
+                            
+                    var search_btn = menu_ele.find('.nav-link[data-id="search"]');
+                    search_btn.on( {
+                        mouseenter : function(){_show(search_menu, search_btn)},
+                        mouseleave : function(){_hide(search_menu)}
+                    });   
+                    search_menu.on( {
+                        mouseenter : function(){_show(search_menu, search_btn)},
+                        mouseleave : function(){_hide(search_menu)}
+                    });
+                            
+                }
+        });
+                
+        
+        //drop down menu for resources and search--------------------END
+        
+        
         //init links to search person by first char
         $('div.bor-pagination > ul.pagination > li > a').click(function(event){
          
