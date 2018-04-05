@@ -1613,8 +1613,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             var DT_PARENT_ENTITY  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
             if( window.hWin.HEURIST4.util.findArrayIndex(DT_PARENT_ENTITY, field_in_recset)<0 && 
-                    (this.options.parententity>0 ||   //parent record id is set already (case: this is addition of new child from search record dialog)
-                    (parentsIds.length>0 && that._isInsert) ))   //current rectype is referenced as a child and this is ADDITION
+                    this.options.parententity>0)    //parent record id is set already (case: this is addition of new child from search record dialog)
+                    //|| (parentsIds.length>0 && that._isInsert) ))   //current rectype is referenced as a child and this is ADDITION
             {
                     field_in_recset.push(DT_PARENT_ENTITY);
             }
