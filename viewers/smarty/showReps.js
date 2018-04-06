@@ -1539,6 +1539,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     //
     function _showInsertPopup( varid, isloop_level, elt ){
 
+        top.HEURIST.insertSelectedVarAsLoop = _insertSelectedVarsAsLoop;
         top.HEURIST.insertVar = isloop_level==2?_insertSelectedVars_GP_repeatable:_insertSelectedVars;
         top.HEURIST.insertModifier = _insertModifier;
 
@@ -1572,7 +1573,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 //show jquery dialog
                 insertPopupID = $(ele).dialog({
                     autoOpen: true,
-                    height: 300,
+                    height: 320,
                     width: 400,
                     modal: false,
                     title: 'Insert field, test or pattern',
@@ -1738,6 +1739,11 @@ this_id       : "term"
         _text = "",
         _prefix = "";
 
+        if(varid==null){
+            //top.HEURIST.util.closePopup(insertPopupID);
+            insertPopupID = null;
+            varid = insert_ID;
+        }
 
         var _nodep = _findNodeById(varid);
         if(_nodep){

@@ -610,7 +610,7 @@ class ReportRecord {
                             if(strlen($res)==0){ //no valid terms
                                 $res = null;
                             }else{
-                                $res = array( $dtname=>$res, $dtname."_originalvalue"=>$origvalues);
+                                $res = array( $dtname=>$res, $dtname."s" =>$origvalues, $dtname."_originalvalue"=>$origvalues);
                             }
 
 
