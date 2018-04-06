@@ -583,6 +583,17 @@ function do_fix_dupe() {
     unset($_SESSION['master_details']); //clear master_details so we don't re-enter this code
     unset($_SESSION['master_rec_id']);
     $_SESSION['finished_merge'] = 1;  // set state variable for next loop
+    
+    //2018-04-06 storage of record type in session is unreliable - fetch it again
+    $master_rectype_id = mysql__select_array_2('SELECT rec_RecTypeID FROM Records where rec_ID='.$master_rec_id);
+    if($master_rectype_id && count($master_rectype_id)>0){
+        $master_rectype_id = $master_rectype_id[0];
+    }
+    
+    $res = mysql_query('select rty_ID, rty_Name from Records left join defRecTypes on rty_ID=rec_RecTypeID where rec_ID in ('.$_REQUEST['bib_ids'].')');
+    
+    
+    
     $dup_rec_ids=array();
     if(in_array($master_rec_id,explode(',',$_REQUEST['bib_ids']))){
         $dup_rec_ids = array_diff(explode(',',$_REQUEST['bib_ids']),array($master_rec_id) );
@@ -620,7 +631,8 @@ function do_fix_dupe() {
     //process keeps - which means find repeatables in master record to delete  all_details - keeps = deletes
     //get array of repeatable detail ids for master
     $master_rep_dt_ids = array();
-    $res = mysql_query('select rst_DetailTypeID from defRecStructure where rst_MaxValues != 1 and rst_RecTypeID = '.$_SESSION['rty_ID']);
+    $res = mysql_query('select rst_DetailTypeID from defRecStructure where rst_MaxValues != 1 and rst_RecTypeID = '
+            .$master_rectype_id); //$_SESSION['rty_ID']
     while ($row = mysql_fetch_array( $res)) {
         array_push($master_rep_dt_ids, $row[0]);
     }
@@ -786,11 +798,11 @@ function do_fix_dupe() {
 
     //try to get the record to update title and hash
     // calculate title, do an update
-    $type =  $_SESSION['rty_ID'];
-    $mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=".$type);
+    //$type =  $_SESSION['rty_ID'];
+    $mask = mysql__select_array("defRecTypes", "rty_TitleMask", "rty_ID=".$master_rectype_id);
     if ( $mask && count($mask) > 0) {
         $mask = $mask[0];
-        $title = fill_title_mask($mask, $master_rec_id, $type);
+        $title = fill_title_mask($mask, $master_rec_id, $master_rectype_id);
         if ($title) {
             mysql_query("update Records set rec_Title = '" . mysql_real_escape_string($title) . "' where rec_ID = $master_rec_id");
         }
