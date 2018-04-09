@@ -314,15 +314,40 @@ $.widget( "heurist.boro_nav", {
         };        
         
         var resource_menu = $('<ul>'
-        +'<li><a href="#" class="nav-link" data-id="resources_general">General resources</a></li>'
-        +'<li><a href="#" class="nav-link" data-id="resources_education">Education resources</a></li>'
+        +'<li data-resource-id="general"><a href="#" class="nav-link">General resources</a></li>'
+        +'<li data-resource-id="education"><a href="#" class="nav-link">Education resources</a></li>'
         +'</ul>')
                 .addClass('top-menu-dropdown').hide()
                 .css({'position':'absolute', 'padding':'5px'})
                 .appendTo( that.document.find('body') )
                 .menu({select: function(event, ui){ 
-                        //that._menuActionHandler(event, ui.item.attr('id'), ui.item.attr('data-logaction'));
-                        //return false; 
+                    
+                                    window.hWin.HEURIST4.util.stopEvent(event);
+                                    //that.history.push({page_name:'search'});
+                                    
+                                    var hdoc = $(window.hWin.document);
+                                    //hide all 
+                                    hdoc.find('#main_pane > .clearfix').hide(); //hide all
+                                    var ele = hdoc.find('#bor-page-resource');
+                                    
+                                    var rep_id = ui.item.attr('data-resource-id');
+                                    $('.bor-page-loading').show();
+                            
+                                    ele.load(window.hWin.HAPI4.baseURL
+                                        +'viewers/smarty/showReps.php?db='+window.hWin.HAPI4.database
+                                        +'&w=a&q=t%3A71%20f%3A29609%3A'
+                                        +(rep_id=='general'?6684:6685)
+                                        +'&h4=1&publish=1&debug=0&template=Beyond%201914%20Resources%20List.tpl',
+                                    function(){
+                                        $('.bor-page-loading').hide();
+                                        ele.show();
+                                    });
+                                        
+                                        
+                                        
+http://heurist.sydney.edu.au/h4-ao/viewers/smarty/showReps.php?db=ExpertNation&w=a&q=t%3A71%20f%3A29609%3A6685&h4=1&publish=1&debug=0&template=Beyond%201914%20Resources%20List.tpl                                        
+                                    hdoc.scrollTop(0);
+                    
                 }});
             
         var resource_btn = menu_ele.find('.nav-link[data-id="resources"]');
