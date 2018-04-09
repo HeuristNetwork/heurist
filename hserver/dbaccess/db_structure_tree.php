@@ -341,8 +341,8 @@
 
             case 'resource': // link to another record type
             case 'relmarker':
-
-                if( ($mode==5 && $recursion_depth<3) || ($mode==4 && $recursion_depth<1) || $recursion_depth<2){
+                                                                //make it 1 for lazy load
+                if( ($mode==5 && $recursion_depth<3) || ($mode==4 && $recursion_depth<3) || $recursion_depth<2){
 
                     
                     if($reverseRecTypeId!=null){
@@ -366,9 +366,11 @@
 
                              
                             if($mode==4){
+                                /*
                                 if($pointerRecTypeId=="" || count($rectype_ids)==0){ //TEMP
                                      $dt_title .= ' unconst';
                                 }
+                                */
                                 
                                 $dt_title = " <span style='font-style:italic'>" . $dt_title . "</span>";
                             }
@@ -389,7 +391,7 @@
                                     $res['constraint'] = count($rectype_ids);
                                     $res['children'] = array();
                                 }
-                                if($mode==4){
+                                if(false &&  $mode==4){  //TEMP
                                     $res['rt_ids'] = $pointerRecTypeId;
                                     $res['lazy'] = true;
                                 }else{

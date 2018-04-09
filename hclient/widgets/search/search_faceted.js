@@ -709,22 +709,27 @@ $.widget( "heurist.search_faceted", {
         return res;                
     }
 
+    // we have a query (that searches main recordtype) it is created once (onReset)
+    // for example {"t": "3"},{"f:1":"$X73105"},{"linked_to:4:15":[{t: "4"},{f:22: "$X47975"}]}
+    // $Xn - is facet values to be substituted in this query
     //
     // 1. substiture Xn variable in query array with value from input form
     // 2. remove branch in query if all variables are empty (except root)
     //
-    ,_fillQueryWithValues: function( q ){
+    //  facet_index_do_not_touch - $Xn will be relaced with $FACET_VALUE - to use on server side for count calculations
+    // 
+    ,_fillQueryWithValues: function( q, facet_index_do_not_touch ){
         
         var _inputs = this._input_fields;
         var that = this;
         var isbranch_empty = true;
             
-        $(q).each(function(idx, predicate){
+        $(q).each(function(idx, predicate){ //loop through all predicates
             
             $.each(predicate, function(key,val)
             {
                 if( $.isArray(val) ) { //|| $.isPlainObject(val) ){
-                     var is_empty = that._fillQueryWithValues(val);
+                     var is_empty = that._fillQueryWithValues(val, facet_index_do_not_touch);
                      isbranch_empty = isbranch_empty && is_empty;
                      
                      if(is_empty){
@@ -732,12 +737,13 @@ $.widget( "heurist.search_faceted", {
                         delete predicate[key];  
                      }
                 }else{
-                    if(typeof val === 'string' && val.indexOf('$X')===0){
+                    if(typeof val === 'string' && val.indexOf('$X')===0){ //replace $xn with facet value
                         
+                        //find facet by variable 
                         var facets = that.options.params.facets;
                         var facet_index, len = facets.length;
                         for (facet_index=0;facet_index<len;facet_index++){
-                            if(facets[facet_index]["var"] == val.substr(2)){
+                            if(facets[facet_index]["var"] == val.substr(2)){ //find facet by variable
 
                                 if(facets[facet_index]['isfacet']==that._FT_INPUT){  //this is direct input
                                      var sel = $(_inputs[val]).editing_input('getValues');
@@ -746,6 +752,10 @@ $.widget( "heurist.search_faceted", {
                                      }else{
                                          facets[facet_index].selectedvalue = null;
                                      }
+                                }else if(facet_index_do_not_touch==facet_index){ //this is for count calculation query
+                                     predicate[key] = '$FACET_VALUE';
+                                     isbranch_empty = false;
+                                     break;
                                 }
                                 
                                 var selval = facets[facet_index].selectedvalue;
@@ -763,6 +773,7 @@ $.widget( "heurist.search_faceted", {
                                 }else{
                                     delete predicate[key];  
                                 }
+                                
                                 break;
                             }
                         }
@@ -795,12 +806,14 @@ $.widget( "heurist.search_faceted", {
     
     ,doSearch : function(){
 
-//console.log(this.options.params.q );
+//console.log('dosearchj');
+//console.log( this.options.params.q );
 
             var query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
             var isform_empty = this._fillQueryWithValues(query);
 
 //console.log('form is empty '+isform_empty);                
+//console.log( query );
             
             if(isform_empty && 
                 window.hWin.HEURIST4.util.isempty(this.options.params.add_filter) && 
@@ -891,6 +904,12 @@ $.widget( "heurist.search_faceted", {
         {
             var field = this.options.params.facets[i];
             if(i>field_index && field['isfacet']!=that._FT_INPUT && field['facet']){
+                
+                if(field['type']=='enum' && field['groupby']=='firstlevel' && 
+                                !window.hWin.HEURIST4.util.isnull(field['selectedvalue'])){
+                        this._redrawFacets({status:window.hWin.HAPI4.ResponseStatus.OK,  facet_index:i}, false );
+                        return;
+                }
                 
                 var subs_value = null;
                 
@@ -991,6 +1010,18 @@ $.widget( "heurist.search_faceted", {
                     }
                     
                 }
+                
+                //this is query to calculate counts for facet values
+                // it is combination of a) currect first query plus ids of result OR first query plus supplementary filters
+                // b) facets[i].query  with replacement of $Xn to value
+                var count_query = window.hWin.HEURIST4.util.mergeHeuristQuery(subs_value,
+                                                 window.hWin.HEURIST4.util.cloneJSON(this.options.params.q).splice(1) );
+                
+                //var count_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q );
+                this._fillQueryWithValues( count_query, i );
+//console.log( 'count_query' );                
+//console.log( count_query );   
+
                         
                 /* alas, ian want to get count on every step
                 if( (!window.hWin.HEURIST4.util.isnull(field['selectedvalue'])) 
@@ -1032,7 +1063,7 @@ $.widget( "heurist.search_faceted", {
         
 //DEBUG console.log(query);
 
-                var request = {q: query, w: 'a', a:'getfacets',
+                var request = {q: query, count_query:count_query, w: 'a', a:'getfacets',
                                      facet_index: i, 
                                      field:  field['id'],
                                      type:   field['type'],
@@ -1043,7 +1074,7 @@ $.widget( "heurist.search_faceted", {
                                      needcount: needcount,         
                                      qname:this.options.query_name,
                                      request_id:this._request_id,
-                                     //DBGSESSID:'425944380594800002;d=1,p=0,c=07', 
+                                     DBGSESSID:'425944380594800002;d=1,p=0,c=07', 
                                      source:this.element.attr('id') }; //, facets: facets
 
                 if(this.options.ispreview){
@@ -1051,15 +1082,17 @@ $.widget( "heurist.search_faceted", {
                 }
                                      
                 // try to find in cache by facet index and query string
-                var hashQuery = window.hWin.HEURIST4.util.hashString(JSON.stringify(request.q));
+                
+                var hashQuery = window.hWin.HEURIST4.util.hashString(JSON.stringify(request.count_query));
                 for (var k=0; k<this.cached_counts.length; k++){
                     if( parseInt(this.cached_counts[k].facet_index) == request.facet_index && 
-                        this.cached_counts[k].q == hashQuery) // && this.cached_counts[k].dt == request.dt)
+                        this.cached_counts[k].count_query == hashQuery) // && this.cached_counts[k].dt == request.dt)
                     {
                         that._redrawFacets(this.cached_counts[k], false);
                         return;
                     }
                 }
+                
 
 //DBG console.log(request);                
                 
@@ -1091,8 +1124,8 @@ $.widget( "heurist.search_faceted", {
                     
 //DEBUG if(response.dbg_query) console.log(response.dbg_query);
                     
-                    if(keep_cache){
-                        response.q = window.hWin.HEURIST4.util.hashString(JSON.stringify(response.q));
+                    if(keep_cache && response.count_query){
+                        response.count_query = window.hWin.HEURIST4.util.hashString(JSON.stringify(response.count_query));
                         this.cached_counts.push(response);
                     }
                     
@@ -1264,7 +1297,8 @@ $.widget( "heurist.search_faceted", {
                                         term_value = term.id;
                                     }
                                     
-                                    if(!window.hWin.HEURIST4.util.isempty(term_value) || !window.hWin.HEURIST4.util.isnull(field.selectedvalue)){                               
+                                    if(!window.hWin.HEURIST4.util.isempty(term_value) || 
+                                        !window.hWin.HEURIST4.util.isnull(field.selectedvalue)){                               
                                     
                                         term.value = term_value;
                                         term.count = 0;
@@ -1575,6 +1609,16 @@ $.widget( "heurist.search_faceted", {
                         }
                         }
                     }
+                    else if(field['type']=='enum' && field['groupby']=='firstlevel' 
+                                && !window.hWin.HEURIST4.util.isnull(field['selectedvalue'])){
+                        
+                        var cterm = field.selectedvalue;
+                        var f_link = this._createFacetLink(facet_index, {text:cterm.text, value:cterm.value, count:'reset'}, 'block');
+                        
+                        var ditem = $("<div>").css({'display':'block',"padding":"0 3px"})
+                                                .addClass('facet-item')
+                                                .append(f_link).appendTo($facet_values);
+                    }
                     else{   //freetext  or enum groupby firstlevel
                         
                         //$facet_values.css('padding-left','5px');
@@ -1708,7 +1752,10 @@ $.widget( "heurist.search_faceted", {
         
         var currval = field.selectedvalue?field.selectedvalue.value:null;
         
-        var f_link = $("<a>",{href:'#', facet_index:facet_index, facet_value:cterm.value, facet_label:cterm.text, step:step})
+        var f_link = $("<a>",{href:'#', facet_index:facet_index, 
+                        facet_value: (cterm.count=='reset')?'':cterm.value, 
+                        facet_label: cterm.text, 
+                        step:step})
                     .addClass("facet_link")
         
         if(window.hWin.HEURIST4.util.isempty(cterm.value)){
@@ -1735,7 +1782,15 @@ $.widget( "heurist.search_faceted", {
             }
         }
         
-        if(cterm.count>0){
+        if(cterm.count=='reset'){
+            
+            var dcount = $('<span>').addClass('badge').text('X').appendTo(f_link);
+            if(display_mode!='inline-block'){
+                 dcount.css({float:'right'});
+            }
+            
+        }
+        else if(cterm.count>0){
             //.css('float','right')
             var dcount = $('<span>').addClass('badge').text(cterm.count).appendTo(f_link);
             if(display_mode!='inline-block'){
@@ -1744,7 +1799,7 @@ $.widget( "heurist.search_faceted", {
             }
         }
         
-        if(!iscurrent){ 
+        if(!iscurrent || cterm.count=='reset'){ 
 
         var that = this;
 

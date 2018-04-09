@@ -96,6 +96,10 @@
     //
     // returns counts for facets for given query
     //
+    //  1) It finds all possible facet values for current query
+    //  2) Calculates counts for every value 
+    // 
+    //
     // @param mixed $system
     // @param mixed $params - array or parameters
     //      q - JSON query array
@@ -120,6 +124,7 @@
             $dt_type     = @$params['type'];
             $step_level  = @$params['step'];
             $fieldid     = $params['field'];
+            $count_query = @$params['count_query'];
             $facet_type =  @$params['facet_type']; //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
             $facet_groupby = @$params['facet_groupby'];  //by first char for freetext, by year for dates, by level for enum
             $vocabulary_id = @$params['vocabulary_id'];  //special case for groupby first level
@@ -138,7 +143,7 @@
             if(!@$params['q']){
                 return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Facet query search request. Missed query parameter");
             }
-
+//error_log(print_r($params,true));
             //get SQL clauses for current query
             $qclauses = get_sql_query_clauses_NEW($mysqli, $params, $currentUser);
 
@@ -200,7 +205,15 @@
 
             }
             else if($dt_type=="enum" && $facet_groupby=='firstlevel' && $vocabulary_id!=null){ 
-            
+                 
+                 $params_enum = null;
+                 if($count_query){
+                     $params_enum = json_decode( json_encode($params), true);
+                 }
+                 
+                 $qclauses = get_sql_query_clauses_NEW($mysqli, $params_enum, $currentUser);
+                
+                
                 //NOTE - it applies for VOCABULARY only (individual selection of terms is not applicable)
                 
                 // 1. get first level of terms using $vocabulary_id 
@@ -222,9 +235,18 @@
                 $data = array();
                 
                 foreach ($terms as $vocab){
-                    $d_where = $details_where.' AND ('.$select_field.' IN ('.implode(',', $vocab).'))';
-                    //count query
-                    $query =  $select_clause.$qclauses['from'].$detail_link.' WHERE '.$qclauses['where'].$d_where;
+                    
+                    
+                     if($params_enum!=null){ //new way
+                         $params_enum['q'] = __assignFacetValue($count_query, implode(',', $vocab) );
+
+                         $qclauses2 = get_sql_query_clauses_NEW($mysqli, $params_enum, $currentUser);
+                         $query =  $select_clause.$qclauses2['from'].' WHERE '.$qclauses2['where'];
+                     }else{
+                        $d_where = $details_where.' AND ('.$select_field.' IN ('.implode(',', $vocab).'))';
+                        //count query
+                        $query =  $select_clause.$qclauses['from'].$detail_link.' WHERE '.$qclauses['where'].$d_where;
+                     }
                     
                     /*if($limit>0){
                         $query = $query.' LIMIT '.$limit;    
@@ -248,7 +270,7 @@
                 }//for
                 return array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], 
                             "request_id"=>@$params['request_id'], //'dbg_query'=>$query,
-                            "facet_index"=>@$params['facet_index'], 'q'=>$params['q'] );
+                            "facet_index"=>@$params['facet_index'], 'q'=>$params['q'], 'count_query'=>$count_query );
                 
             }
             //SLIDER
@@ -364,7 +386,8 @@
                 }
                 $response = array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'], 
                             "request_id"=>@$params['request_id'], //'dbg_query'=>$query,
-                            "facet_index"=>@$params['facet_index'], 'q'=>$params['q'] );
+                            "facet_index"=>@$params['facet_index'], 
+                            'q'=>$params['q'], 'count_query'=>$count_query );
                 $res->close();
             }
 
@@ -375,6 +398,21 @@
         return $response;
     }
 
+    //
+    //
+    //
+    function __assignFacetValue($params, $subs){
+         foreach ($params as $key=>$value){
+             if(is_array($value)){
+                 $params[$key] = __assignFacetValue($value, $subs);
+             }else if($value=='$FACET_VALUE'){
+                 $params[$key] = $subs;
+                 return $params;
+             }
+         }
+         return $params;
+    }
+    
     /**
     * Find all related record IDs for given set record IDs
     *
