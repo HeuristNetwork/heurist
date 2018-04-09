@@ -837,7 +837,8 @@ function prepareIntegerField($field, $k, $check_keyfield_K, &$err_keyfields, &$i
 function parseKMLPlacemark($placemark, &$geom_types){
     
         $wkt = new WKT();  
-        $properties = [];
+        $properties = array();
+        $textnodes = array('#text', 'lookat', 'style', 'styleurl');
 
         foreach ($placemark->childNodes as $child) {
           // Node names are all the same, except for MultiGeometry, which maps to GeometryCollection
@@ -856,7 +857,8 @@ function parseKMLPlacemark($placemark, &$geom_types){
             foreach ($child->childNodes as $data) {
               if ($data->nodeName != '#text') {
                 if ($data->nodeName == 'data') {
-                  $value = $data->getElementsByTagName('value')[0];
+                  $value = $data->getElementsByTagName('value');
+                  $value = $value[0];
                   $properties[$data->getAttribute('name')] = preg_replace('/\n\s+/',' ',trim($value->textContent));
                 }
                 elseif ($data->nodeName == 'schemadata')
@@ -871,7 +873,7 @@ function parseKMLPlacemark($placemark, &$geom_types){
               }
             }
           }
-          elseif (!in_array($node_name, ['#text', 'lookat', 'style', 'styleurl']))
+          elseif (!in_array($node_name, $textnodes))
           {
             $properties[$child->nodeName] = preg_replace('/\n\s+/',' ',trim($child->textContent));
           }
