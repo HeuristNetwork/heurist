@@ -140,7 +140,7 @@ function executeSmartyTemplate($params){
             $qresult = json_decode($params['recordset'], true);    
         }
 
-        //truncate recordset  - limit does not work for publish mode
+        //truncate recordset for output in smarty TAB - limit does not work for publish mode
         if($publishmode==0 && $qresult && array_key_exists('recIDs',$qresult)){
             $recIDs = explode(',', $qresult['recIDs']);
             if($params["limit"]<count($recIDs)){
@@ -150,11 +150,22 @@ function executeSmartyTemplate($params){
 
     }else if(@$params['h4']==1){ //search with h4 search engine and got list of ids
 
-        /*    for future use
-        $params['detail']='ids';
-        $params['vo']='h3';
-        $qresult = recordSearch($system, $params);
-        */    
+        /*    for future use 
+        require_once (dirname(__FILE__).'/../../hserver/System.php');
+        require_once (dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
+        
+        $params['detail'] = 'ids'; // return ids only
+        $params['vo']     = 'h3';  // in h3 format
+        recordSearch($system, $params);
+        $response = array();
+        $system = new System();
+        if( ! $system->init(@$params['db']) ){
+            $response['resultCount'] == 0;
+        }else{    
+            $qresult = recordSearch($system, $params);
+        }
+        */
+        
         $url = "";
         foreach($params as $key=>$value){
             $url = $url.$key."=".urlencode($value)."&";
@@ -510,7 +521,7 @@ function save_report_output2($tpl_source){
 
         echo $tpl_res;
 
-    }else if ($publishmode==1){
+    }else if ($publishmode==1){ //report about success of publishing and where to get it
         
         if($errors!=null){
             header("Content-type: text/html;charset=UTF-8");

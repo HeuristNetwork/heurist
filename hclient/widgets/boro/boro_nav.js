@@ -332,20 +332,23 @@ $.widget( "heurist.boro_nav", {
                                     
                                     var rep_id = ui.item.attr('data-resource-id');
                                     $('.bor-page-loading').show();
-                            
-                                    ele.load(window.hWin.HAPI4.baseURL
+                                    
+                                    
+                                    var repurl = window.hWin.HAPI4.baseURL
+                                            + 'viewers/smarty/updateReportOutput.php?publish=3&mode=html&id='
+                                            + (rep_id=='general'?3:2)
+                                            + '&db='+window.hWin.HAPI4.database;
+                                            
+                                    /*var repurl = window.hWin.HAPI4.baseURL
                                         +'viewers/smarty/showReps.php?db='+window.hWin.HAPI4.database
                                         +'&w=a&q=t%3A71%20f%3A29609%3A'
                                         +(rep_id=='general'?6684:6685)
-                                        +'&h4=1&publish=1&debug=0&template=Beyond%201914%20Resources%20List.tpl',
+                                        +'&h4=1&publish=1&debug=0&template=Beyond%201914%20Resources%20List.tpl'*/                                                          
+                                    ele.load(repurl,
                                     function(){
                                         $('.bor-page-loading').hide();
                                         ele.show();
                                     });
-                                        
-                                        
-                                        
-http://heurist.sydney.edu.au/h4-ao/viewers/smarty/showReps.php?db=ExpertNation&w=a&q=t%3A71%20f%3A29609%3A6685&h4=1&publish=1&debug=0&template=Beyond%201914%20Resources%20List.tpl                                        
                                     hdoc.scrollTop(0);
                     
                 }});

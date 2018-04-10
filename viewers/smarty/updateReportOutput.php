@@ -123,18 +123,31 @@ function doReport($row){
 			}
 		}
 		if(file_exists($outputfile)){
-			$content = file_get_contents($outputfile);
-			if($format=="js" && $ext != $format){
-				$content = str_replace("\n","",$content);
-				$content = str_replace("\r","",$content);
-				$content = str_replace("'","&#039;",$content);
-    			echo "document.write('". $content."');";
-			}else{
-				echo $content;
-			}
-			return;
+            
+            if($row['rps_IntervalMinutes']>0){
+                $dt1 = new DateTime("now");
+                $dt2 = new DateTime();
+                $dt2->setTimestamp(filemtime($outputfile));
+                $interval = $dt1->diff( $dt2 );
+                if($interval->i > $row['rps_IntervalMinutes']){
+                    $publish = 2;
+                }
+            }
+            if($publish == 3){
+            
+			    $content = file_get_contents($outputfile);
+			    if($format=="js" && $ext != $format){
+				    $content = str_replace("\n","",$content);
+				    $content = str_replace("\r","",$content);
+				    $content = str_replace("'","&#039;",$content);
+    			    echo "document.write('". $content."');";
+			    }else{
+				    echo $content;
+			    }
+			    return;
+            }
 		}
-		$publish = 1;
+		$publish = 2;
 	}//publish==3
 
 	$hquery = $row['rps_HQuery'];
