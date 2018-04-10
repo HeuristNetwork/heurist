@@ -70,6 +70,8 @@ $.widget( "heurist.boro_place", $.heurist.resultList, {
 
         this._super( pageno, recordset, is_retained_selection );
 
+        this.element.parent().removeClass('ui-widget-content');
+        
         this.div_content.css('overflow','hidden');
         var newHeight = $(this.div_content)[0].scrollHeight + 100;
         if (newHeight<500) newHeight = 500;

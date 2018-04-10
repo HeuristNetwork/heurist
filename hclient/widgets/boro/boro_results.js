@@ -357,6 +357,11 @@ $.widget( "heurist.boro_results", $.heurist.resultList, {
                 }
             
             }//has values
+            else{
+                var s = window.hWin.HEURIST4.rectypes.names[primary_rt];
+                s = (s=='Person')?'people':s;
+                sinfo.push('Showing list of all '+s+' (no filters).');
+            }
             
             
     }
