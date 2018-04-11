@@ -203,21 +203,23 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
     function _loadMapDocumentById_continue() {    
 
+//console.log('load documents continue');        
+        
         var mapdocument_id =  current_map_document_id;
 
         //find mapdoc data
         var doc = _getMapDocumentDataById(mapdocument_id);
+        var lt = window.hWin.HAPI4.sysinfo['layout'];   
 
         var selBookmakrs = document.getElementById('selMapBookmarks');
         var btnMapRefresh = $("#btnMapRefresh");
         var btnMapEdit = $("#btnMapEdit");
         if( !window.hWin.HEURIST4.util.isnull(doc) ) {
-
+            
             var bounds = null, err_msg_all = '';
 
             map_bookmarks = [];
             window.hWin.HEURIST4.ui.addoption(selBookmakrs, -1, 'bookmarks...');
-
 
             // Longitude,Latitude centrepoint, Initial minor span
             // add initial bookmarks based on long lat  minorSpan
@@ -228,7 +230,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                 var body = $(this.document).find('body');
                 var prop = body.innerWidth()/body.innerHeight();
 
-                if(isNaN(prop)) prop = 1;
+                if(isNaN(prop) || prop==0) prop = 1;
                 
                 if(body.innerWidth()<body.innerHeight()){
                     span_x = doc.minorSpan;
@@ -304,7 +306,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             }else{
                 
                 //show info popup
-                var lt = window.hWin.HAPI4.sysinfo['layout'];   
+                
                 if(lt && lt.indexOf('DigitalHarlem')==0){ //for DigitalHarlem we adds 2 dataset - points and links
                     if(!window.hWin.HEURIST4.util.isempty( doc['description']) ){
                         
@@ -331,11 +333,14 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                         mapping.timelineZoomToRange(map_bookmarks[val]['tmin'],map_bookmarks[val]['tmax']);
                 }
             }
+            
             $('#map_extents').css('visibility','visible');
             selBookmakrs.selectedIndex = 1;
             $(selBookmakrs).change();
 
-            mapping.setTimeMapProperty('centerOnItems', false);
+            mapping.setTimeMapProperty('centerOnItems', false);    
+            
+            var dataset_id = 0;
             
             // Map document layers
             var overlay_index = 1;
@@ -344,8 +349,29 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     if(doc.layers[i].name) doc.layers[i].title = doc.layers[i].name; //use name istead of rec_Title
                     _addLayerOverlay(bounds, doc.layers[i], overlay_index, true);
                     overlay_index++;
+                    //dataset_id = doc.layers[i].dataSource.id
                 }
             }
+
+
+            var map_container = mapping.getMapContainerDiv();
+            if(!map_container.is(':visible')){
+                //console.log('!!!!container is not visible');
+                
+                var checkVisible = setInterval(function(){
+
+                    if(!map_container.is(':visible')) return;
+                    clearInterval(checkVisible); //stop listener
+
+                    $(selBookmakrs).change();
+                    //mapping.autoCenterAndZoom();
+                    //mapping.zoomDataset()
+                    //zoom to map document extent
+                    
+                },1000);                
+            }
+            
+            
             // Top layer - artem: JJ made it wrong
             //_addLayerOverlay(bounds, doc.toplayer, index);
 
@@ -360,6 +386,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             setTimeout(function(){
                 mapping.setTimeMapProperty('centerOnItems', true);    
             }, 5000);
+            
             
         }else{
             window.hWin.HEURIST4.util.setDisabled(btnMapEdit, true);

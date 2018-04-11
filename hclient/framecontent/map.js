@@ -420,6 +420,7 @@ if(_mapdata.limit_warning){
     //
     //
     function _zoomDataset(dataset_id){
+        
         //var dataset = tmap.datasets[dataset_id];
         var mapdata = _getDataset(dataset_id);
         if(mapdata && mapdata.geoextent){
@@ -1963,6 +1964,16 @@ ed_html +
                 return options[key];
             }else{
                 options[key] = value;
+            }
+        },
+        
+        getMapContainerDiv: function(){
+            return $('#'+mapdiv_id);
+        },
+
+        autoCenterAndZoom: function(){
+            if(tmap){
+                tmap.map.autoCenterAndZoom();
             }
         },
         

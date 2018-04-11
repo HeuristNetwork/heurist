@@ -585,7 +585,7 @@ $.widget( "heurist.boro_nav", {
     },
     
     //
-    // searches for person connected to particular Place or attribute
+    // searches for persons connected to particular Place or attribute
     //
     fillConnectedPeople: function(){
         
@@ -605,16 +605,16 @@ $.widget( "heurist.boro_nav", {
             
             request['q'] = 'ids:'+recID;
             request['rules'] = [{"query":"t:24,26,29,33,37 linked_to:25 ", //eventlet,edu inst,mil service,death,occupation
-                        "levels":[{"query":"t:10 linkedfrom:24,29,33,37"}, //persons
+                        "levels":[{"query":"t:10 linkedfrom:24,29,33,37 f:196:4705"}, //persons
                                     //persons vis tertiary and schooling
-                                  {"query":"t:27,31 linked_to:26-97","levels":[{"query":"t:10 linked_to:27,31"}]} ] }];
+                                  {"query":"t:27,31 linked_to:26-97","levels":[{"query":"t:10 linked_to:27,31 f:196:4705"}]} ] }];
                                                                             //or linkedfrom via field 16
-            
+            //{"f:196":"4705"}
         }else if(entType=='institution'){
 
             request['q'] = 'ids:'+recID;  //find institute
             request['rules'] = [{"query":"t:27,31 linked_to:26-97",   //find education records
-                                            "levels":[{"query":"t:10 linked_to:27,31"}]},  //find linked persons
+                                            "levels":[{"query":"t:10 linked_to:27,31 f:196:4705"}]},  //find linked persons
                                 {"query":"t:25 linkedfrom:26-78"}]; //find place
             
         }else if(entType=='tertiary-study'){
@@ -622,12 +622,12 @@ $.widget( "heurist.boro_nav", {
             request['q'] = [{"t":27},{"f:80":recID}];  //tert study
             
             request['rules'] = [{"query":"t:26 linkedfrom:27-97","levels": [{"query":"t:25 linkedfrom:26-78"}]}, //edu inst
-                                {"query":"t:10 linked_to:27-102"}];
+                                {"query":"t:10 linked_to:27-102 f:196:4705"}];
                                 
         }else if(entType=='military-award'){
             //by award term id
             request['q'] = [{"t":28},{"f:98":recID}];  //awards
-            request['rules'] = [{"query":"t:10 linked_to:28-87"}];
+            request['rules'] = [{"query":"t:10 linked_to:28-87 f:196:4705"}];
             
         }else if(entType=='military-service'){
             //by rank and unit term id
@@ -643,7 +643,7 @@ $.widget( "heurist.boro_nav", {
             }
 
             request['q'] = mil_service;
-            request['rules'] = [{"query":"t:10 linked_to:29-88"}];
+            request['rules'] = [{"query":"t:10 linked_to:29-88 f:196:4705"}];
             
             //request['q'] = [{"t":10},{"linked_to:88":mil_service}];
         }else{
@@ -759,7 +759,8 @@ $.widget( "heurist.boro_nav", {
                                 var rec_id = educat[ind];
                                 var record = that.recset.getById(rec_id);
                                 if(record){
-                                    var sDate = that.__getDate(record, [260,9,205]);//year of study
+                                    //202,206 start end date, 93 matricualtion, 9 awarded, 260 study, 10,11 studies
+                                    var sDate = that.__getDate(record, [260,9,206]);//year of study
                                     var sEduInst = that.__getEduInst( record );
                                     res.push(sEduInst+(sDate?' in '+sDate:''));
                                 }
@@ -851,7 +852,26 @@ $.widget( "heurist.boro_nav", {
                         
                         var res = that.getTimelineByPersonAndPlace(person, recID);
                         var timeline = res.timeline;
-                        timeline.sort(function(a,b){return a.year<b.year?-1:1});
+                        timeline.sort(function(a,b){
+                            
+                            if(a.year == b.year){
+                                
+                                if(a.year_end>0 && b.year_end>0){
+                                    return (a.year_end < b.year_end)?-1:1;
+                                }else if (b.year_end>0){ 
+                                    return -1;
+                                }else if(a.date2 && b.date2){
+                                    return a.date2 < b.date2 ?-1:1;
+                                }else if(a.eventTypeID && b.eventTypeID){
+                                    return allowed.indexOf(a.eventTypeID)<allowed.indexOf(b.eventTypeID)?-1:1;
+                                }else{
+                                    return 0;
+                                }
+                                
+                            }else{
+                                return a.year<b.year?-1:1
+                            }
+                        });
                         res = [];
                         for(var k=0; k<timeline.length; k++){
                             if(timeline[k].story) res.push(timeline[k].story);
@@ -1153,7 +1173,7 @@ $.widget( "heurist.boro_nav", {
                     var rec_id = educat[idx];
                     var record = that.recset.getById(rec_id);
                     if(record){
-                        var sDate = that.__getDate(record, [260,9,205]);//year of study
+                        var sDate = that.__getDate(record, [260,9,206]);//year of study
                         
                         //degree, qualification, courses
                         var term_id = that.recset.fld(record, that.DT_DEGREE);
@@ -1181,7 +1201,12 @@ $.widget( "heurist.boro_nav", {
                                     +'<span class="bor-group-date">&nbsp;'+that.__formatDate(sDate)+'</span></li>';
                                     
                         if(placeID==0 || place.ids.indexOf(placeID)>=0){
-                            timeline.push({year:that.__getYear(sDate,birthYear+2), 
+                            
+                            var year_main = that.__getYear(sDate,birthYear+2);
+                            var year_end = that.__getYear(that.__getDate(record, [11,206]), year_main);
+                            
+                            timeline.push({year: year_main, 
+                                    year_end: year_end,
                                     date: that.__getYear(sDate), 
                                     date2: null,
                                     story: (is_awarded?'awarded ':' studied ')+sDegree+(sEduInst?(' at '+sEduInst):''),
@@ -1247,7 +1272,11 @@ $.widget( "heurist.boro_nav", {
                                 enlistedDateOrder = that.__getYear(eventDate.date, ord);
                             }
 
-                            timeline.push({year:that.__getYear(eventDate.date, ord), 
+                            var year_main = that.__getYear(eventDate.date, ord);
+                            var year_end = that.__getYear(eventDate.date_end, year_main);
+                            
+                            timeline.push({year: year_main,
+                                year_end: year_end, 
                                 date: that.__getYear(eventDate.date), 
                                 date2: eventDate.date,
                                 eventTypeID: termID,
@@ -1269,18 +1298,34 @@ $.widget( "heurist.boro_nav", {
                     if(record){
                         var eventDate = that.__getEventDates(record);
                         
-                        var place = that.__getPlace(record, 0);
+                        var place = that.__getPlace(record, 2);
+                        if(place && place.hasGeo){
+                            mapids = mapids.concat(place.ids); 
+                        }
+                       
+                        var sOccupationOrg = '';
+                        /* we does not retrieve orgs
+                        var org_rec_id = that.recset.fld(record, 21);
+                        if(org_rec_id>0){
+                            var org_record = that.recset.getById( org_rec_id ); 
+                            sOccupationOrg = that.recset.fld(org_record, this.DT_NAME);
+                            sOccupationOrg = (sOccupationOrg)?(' ar '+sOccupationOrg):'';
+                        }
+                        */
                         
                         var termID = that.recset.fld(record, 150);
                         var sOccupationTitle = that.__getTerm(termID);
                         
                         if(placeID==0 || place.ids.indexOf(placeID)>=0){
 
-                            timeline.push({year:that.__getYear(eventDate.date, 1920), 
+                            var year_main = that.__getYear(eventDate.date, 1920);
+                            var year_end = that.__getYear(eventDate.date_end, year_main);
+                            
+                            timeline.push({year:year_main, year_end:year_end,  
                                     date: that.__getYear(eventDate.date),
                                     date2: eventDate.date, 
                                     story: 'was '+sOccupationTitle.toLowerCase(),
-                                    description: sOccupationTitle+' '
+                                    description: sOccupationTitle+' '+sOccupationOrg+' '
                                         +(place.link?place.link:'')+' '+eventDate.desc });//', '
                         }
                     }
@@ -1387,7 +1432,11 @@ $.widget( "heurist.boro_nav", {
                                     + (sUnit?' with '+sUnit:'');
                     
                     if(placeID==0 || place.ids.indexOf(placeID)>=0){            
-                        timeline.push({year:that.__getYear(eventDate.date, ord), 
+                        
+                            var year_main = that.__getYear(eventDate.date, ord);
+                            var year_end = that.__getYear(eventDate.date_end, year_main);
+                        
+                        timeline.push({year:year_main, year_end:year_end, 
                             date: that.__getYear(eventDate.date), 
                             date2: eventDate.date,
                             eventTypeID:termID,
@@ -1408,7 +1457,12 @@ $.widget( "heurist.boro_nav", {
             //sort timeline array by year
             timeline.sort(function(a,b){
                 if(a.year==b.year){
-                    if(a.date2 && b.date2){
+                    
+                    if(a.year_end>0 && b.year_end>0){
+                        return (a.year_end < b.year_end)?-1:1;
+                    }else if (b.year_end>0){ 
+                        return -1;
+                    }else if(a.date2 && b.date2){
                         return a.date2 < b.date2 ?-1:1;
                     }else if(a.eventTypeID && b.eventTypeID){
                         return allowed.indexOf(a.eventTypeID)<allowed.indexOf(b.eventTypeID)?-1:1;
@@ -1579,11 +1633,15 @@ $.widget( "heurist.boro_nav", {
                     var nonce = that.recset.fld(record, 38);
                     if(nonce) nonce = nonce[0];
                     
+                    var scnt = (fval.length>1)?('#'+(1+parseInt(idx))):'';
+                    
                     html = html + 
                     '<a class="bor-download" data-type="bor entry pdf" data-name="'
                     + fullName +'" href="'
                     + window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database 
-                    + '&file=' + nonce + '"><span style="display:inline-block" class="ui-icon ui-icon-download"></span> Download entry ( PDF '
+                    + '&file=' + nonce 
+                    + '"><span style="display:inline-block" class="ui-icon ui-icon-download"></span> Download entry '
+                    + scnt + '( PDF '
                     + Math.round(that.recset.fld(record, 67)/1024) +'KB )</a>'
                 }
             }
@@ -1841,7 +1899,7 @@ $.widget( "heurist.boro_nav", {
                 }
 
                 
-                return {date:sDate1,desc:sDate};
+                return {date:sDate1, desc:sDate, date_end:sDate2};
     },
     
     //-----------------------------------------
@@ -1887,7 +1945,7 @@ $.widget( "heurist.boro_nav", {
     },
       
     //      
-    // detail 0 - name, state, country, 1 - state, country
+    // detail 0 - name, state, country, 1 - state, country, 2 - full - include locality
     // returns {ids:[], names, link: }
     //
     // in military service this is repeatable field
@@ -1925,13 +1983,22 @@ $.widget( "heurist.boro_nav", {
                             
                         if(place_rec){
                                 place_ids.push(placeID);
-                                
+              
+                                var locality = this.recset.fld(place_rec, 129); //locality name
                                 var placename = this.recset.fld(place_rec, this.DT_NAME); //place name
                                 var state = this.recset.fld(place_rec, 2); //state
                                 var country = this.__getTerm(this.recset.fld(place_rec, 26));
                                 var res = [];
-                                if(details==0 && country!=placename){
-                                    res.push(placename);
+                                if(details==2){
+                                    if(locality && locality!=placename){
+                                        res.push(locality);
+                                    }
+                                    details = 0;
+                                }
+                                if(details==0){
+                                    if(country!=placename){
+                                        res.push(placename);
+                                    }
                                 }
                                 if(state)res.push(state);
                                 if(country)res.push(country);

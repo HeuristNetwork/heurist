@@ -928,7 +928,7 @@
                         //$params3['detail'] = 'ids';  //no need in details for preliminary results  ???????
                     }
 
-//DEBUg  error_log(print_r($params3,true));                    
+//DEBUg error_log(print_r($params3,true));                    
                     
                     $response = recordSearch($system, $params3);
 
