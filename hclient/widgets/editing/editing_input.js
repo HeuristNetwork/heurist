@@ -393,9 +393,12 @@ $.widget( "heurist.editing_input", {
                     }
                     
                     if(that.detailType=='file'){
-                        $input.fileupload('destroy');
+                        if($input.fileupload('instance')){
+                            $input.fileupload('destroy');
+                        }
+                        var $parent = $input.parents('.input-div');
                         $input.remove();
-                        that.input_cell.find('.input-div').remove();
+                        $parent.remove();
                     }else{
                         if($input.hSelect('instance')!==undefined) $input.hSelect('destroy');
                         
