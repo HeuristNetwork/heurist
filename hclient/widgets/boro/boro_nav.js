@@ -605,7 +605,7 @@ $.widget( "heurist.boro_nav", {
             
             request['q'] = 'ids:'+recID;
             request['rules'] = [{"query":"t:24,26,29,33,37 linked_to:25 ", //eventlet,edu inst,mil service,death,occupation
-                        "levels":[{"query":"t:10 linkedfrom:24,29,33,37 f:196:4705"}, //persons
+                        "levels":[{"query":"t:10 linkedfrom:24,29,33,37 f:196:4705"}, //persons only form UnySyd
                                     //persons vis tertiary and schooling
                                   {"query":"t:27,31 linked_to:26-97","levels":[{"query":"t:10 linked_to:27,31 f:196:4705"}]} ] }];
                                                                             //or linkedfrom via field 16
@@ -1687,7 +1687,9 @@ $.widget( "heurist.boro_nav", {
                     var isScan = (that.recset.fld(record, 'rec_RecTypeID')==144);
 //console.log(record);
                     var stitle = isScan?'Document scan':('Photograph of '+fullName);
-                    var slightbox = (that.recset.fld(record, 64)=='pdf')?'':'data-fancybox="profile-images" data-lightbox="profile-images"';
+                    var ext = that.recset.fld(record, 64);
+                    if(ext==null) ext = '';
+                    var slightbox = (ext.toLowerCase()=='pdf')?'':'data-fancybox="profile-images" data-lightbox="profile-images"';
                     
                     html = html +           
                         '<a class="bor-gallery-link" '+slightbox+' data-caption="'
@@ -1707,7 +1709,7 @@ $.widget( "heurist.boro_nav", {
             }else{
                 html = html + '<p class="help-block">'
                 + 'Unless otherwise noted, these photographs, War Service Records, letters, diaries and cards were sent to the'      
-                + 'University by family and friends during and after World War One. If you have any material to add, please see our '
+                + ' University by family and friends during and after World War One. If you have any material to add, please see our '
                 + '<a href="/contribute" onclick="{window.hWin.boroResolver(event);}">contribute page</a>.</p>';
                
                 
