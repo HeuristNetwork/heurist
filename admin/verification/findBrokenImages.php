@@ -139,7 +139,6 @@
                 }
             }
           
-//http://heurist.sydney.edu.au/h4-ao/admin/verification/findBrokenImages.php?db=ExpertNation          
           
 try{  
 

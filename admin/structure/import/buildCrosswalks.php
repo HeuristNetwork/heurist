@@ -209,12 +209,9 @@ else
         $source_url = $regurl."admin/describe/getDBStructureAsSQL.php?plain=1&db=".$source_db_name.(@$source_db_prefix?"&prefix=".$source_db_prefix:"");
     }
 
-// http://heurist.sydney.edu.au/h4-ao/admin/describe/getDBStructureAsSQL.php?db=johns_Esparoutis_rentals
-
     //TODO: why is the second parameter 60? It's specified as bypasProxy = true
     $data = loadRemoteURLContentSpecial($source_url); // get the structure data
 
-//error_log('result '.$data);//substr($data, 0, 500));
     mysql_connection_insert($tempDBName); // Use temp database
 
 

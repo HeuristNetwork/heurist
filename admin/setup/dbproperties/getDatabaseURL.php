@@ -58,9 +58,9 @@
             }else{
                 $database_url = $data['rec_URL'];
                 
-                // Artem: FOR heurist.sydney.edu.au change to latest h4-ao
+                // Artem: FOR heurist.sydney.edu.au change to latest h4-ao. 14/4/18 Ian changed to "heurist" since the changes requiring this URL redirect are long since past. Almost certainly no longer necessary.
                 if(strpos($database_url, 'heurist.sydney.edu.au/h3/')>0){
-                        $database_url = str_replace( 'heurist.sydney.edu.au/h3/', 'heurist.sydney.edu.au/h4-ao/', $database_url);
+                        $database_url = str_replace( 'heurist.sydney.edu.au/h3/', 'heurist.sydney.edu.au/heurist/', $database_url);
                 }
 
             }
@@ -82,7 +82,7 @@
                 if($database_url==null || $database_url==''){
                     $error_msg = 'Database URL is not set Heurist Master Index for database ID#'.$database_id;
                 }else{
-                    // Artem: FOR heurist.sydney.edu.au change to latest h4-ao
+                // Artem: FOR heurist.sydney.edu.au change to latest h4-ao. 14/4/18 Ian changed to "heurist" since the changes requiring this URL redirect are long since past. Almost certainly no longer necessary.
                     if(strpos($database_url, 'heurist.sydney.edu.au/h3/')>0){
                         $database_url = str_replace( 'heurist.sydney.edu.au/h3/', 'heurist.sydney.edu.au/h4-ao/', $database_url);
                     }

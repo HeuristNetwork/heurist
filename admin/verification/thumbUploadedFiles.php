@@ -59,7 +59,6 @@
             }
             if($res['db_fullpath'] && file_exists($res['res_fullpath'])){
 
-//http://heurist.sydney.edu.au/h4-ao/admin/verification/thumbUploadedFiles.php?db=ExpertNation                
                 if(strpos($res['res_fullpath'],'pdfs_from_BOR')!==false) continue;
                 
                 print $k.'   '.$res['ulf_ID'].'  '.$res['res_fullpath'].' ';         

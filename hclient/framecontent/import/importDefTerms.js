@@ -153,13 +153,7 @@ function hImportDefTerms(_trm_ParentTermID) {
                             _setCurtain( 2 );
                             //alert('loaded! '+file.url);
                             //$.ajax({url:file.deleteUrl, type:'DELETE'});
-                            
-/*
-deleteUrl:"http://127.0.0.1/h4-ao/hserver/utilities/fileUpload.php?file=Book_ansi.txt"
-name:Book_ansi.txt
-url:"http://127.0.0.1/HEURIST_FILESTORE/artem_delete01/scratch/Book_ansi.txt"
-*/                            
-                            
+                                                        
                             
                         });
                     }
