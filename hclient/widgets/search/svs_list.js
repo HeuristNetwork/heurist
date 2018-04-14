@@ -738,7 +738,7 @@ $.widget( "heurist.svs_list", {
 
         var $header = $('<h3 grpid="'+domain+'" class="hasmenu"><span class="ui-icon ui-icon-'+sIcon+'" '
             + 'style="display:inline-block;padding:0 4px"></span><span style="vertical-align:top;">'
-            + name+'</span><span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;">('
+            + name+'</span><span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;"> ('
             + ((sIcon=='user')?'private':'workgroup')
             + ')</span></h3>').css({color:'rgb(142, 169, 185)'}).addClass('tree-accordeon-header');
 

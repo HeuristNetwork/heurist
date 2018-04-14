@@ -83,9 +83,9 @@
     <h3>Bookmarklet</h3>
     <div>
         <label class="header">Drag this link to your browser bookmarks bar</label><b><u>
-                <a id="bookmarklet-link"
-                    onclick="{alert('Heurist Bookmarklet: drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites.');return false;}"
-                    title="Heurist Bookmarklet. Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites."
+                <a style="color: blue;" id="bookmarklet-link"
+                    onclick="{alert('Heurist Bookmarklet <br/><br/>drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites. <br/><br/>Clicking on the bookmarklet link when in a page will give options for creating a new Web page (or other) Heurist record, copying any highlighted text to an appropriate field. It also allows capturing of hyperlinks in the page as new Web page records.');return false;}"
+                    title="Heurist Bookmarklet: Drag this link to your browser bookmarks toolbar, or right-click the link, choose Bookmark This Link, and add the link to your Bookmarks Toolbar or Favorites. "
                     href="#"></a>
             </u></b><label>&nbsp;to allow bookmarking of web pages</label><br><br>
     </div>
@@ -105,9 +105,14 @@
     </div>
 
     <div>
+        <div class="header"><label for="bookmarks_on">Show My Bookmarks in navigation panel<br/><i>Turn on only if using bookmarks in shared database</i></label></div>
+        <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
+    </div>
+
+    <div>
         <div class="header">
             <label for="search_result_pagesize">
-                Page size for search result list
+                Page size for display of search results list
             </label>
         </div>
         <select name="search_result_pagesize" id="search_result_pagesize" class="text ui-widget-content ui-corner-all" style="min-width:50px"
@@ -124,25 +129,22 @@
     <div>
         <div class="header">
             <label for="smarty-output-limit">
-                Limit lines in interactive custom report output<br/><i>only in web interface, not external calls</i>
+                Limit lines in interactive custom report output<br/><i>Heurist interface only, not external calls</i>
             </label>
         </div>
         <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all h3pref" style="min-width:50px"
             title="This limit does not apply to external calls or periodic report generation to file">
             <option value="50">50</option>
             <option value="200">200</option>
-            <option value="500">500</option>
-            <option value="1000">1,000</option>
+            <option value="500">500 (not recommended)</option>
+            <option value="1000">1,000 (not recommended)</option>
             <option value="2000">2,000 (not recommended)</option>
-            <option value="5000">5,000 (not recommended)</option>
-            <option value="10000">10,000 (not recommedned)</option>
-            <option value="20000">20,000 (not recommended)</option>
         </select>
     </div>
 
     <div>
         <div class="header"><label for="search_detail_limit">
-                Limit objects on interactive map/timeline<br/><i>only in web interface, not external calls</i>
+                Limit objects on interactive map/timeline<br/><i>Heurist interface, not external calls. Beware overloading websites with too many objects.</i>
             </label></div>
         <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
             title="This limit does not apply to external calls - make sure you do not overload websites with maps or timelines with too many objects">
@@ -160,26 +162,26 @@
     <!-- ================================================= -->
     <hr />
     <h3>Edit</h3>
+ 
+ <!-- Appears not to have been implemented in new editing functions 2017, possibly reinstate?
+
     <div>
         <div class="header"><label for="tagging-popup">Prompt for tags when saving records<br /><i>if no tags have been set</i></label></div>
         <input type="checkbox" name="tagging-popup" id="tagging-popup" class="text ui-widget-content ui-corner-all h3pref"/>
     </div>
+-->
 
     <div>
         <div class="header"><label for="defaultRecentPointerSearch">Default to recent records search when editing<br />pointer fields <i>(otherwise All Records)</i></label></div>
         <input type="checkbox" name="defaultRecentPointerSearch" id="defaultRecentPointerSearch" class="text ui-widget-content ui-corner-all h3pref"/>
     </div>
 
+<!-- 14/4/18: This does not appear to do anything, besides it should really be replaced by proper indexing using Elastic and specification of composite key for each record type 
     <div>
         <div class="header"><label for="findFuzzyMatches">Check for similar records on creation<br /><i>can slow new-record save</i></label></div>
         <input type="checkbox" name="findFuzzyMatches" id="findFuzzyMatches" class="text ui-widget-content ui-corner-all h3pref"/>
     </div>
-
-    <div>
-        <div class="header"><label for="record-edit-advancedmode">Use full edit mode - shows extra functionality<br /><i>otherwise shows data fields tab only</i></label></div>
-        <input type="checkbox" name="record-edit-advancedmode" id="record-edit-advancedmode" class="text ui-widget-content ui-corner-all h3pref"/>
-    </div>
-
+-->
 
     <!-- ================================================= -->
     <hr />
@@ -190,9 +192,9 @@
                 User interface style / level of user
             </label></div>
         <select name="userCompetencyLevel" id="userCompetencyLevel" class="text ui-widget-content ui-corner-all" style="min-width:300px"
-            title="Determines some aspects of the user interface, from simplified and maximum help for Beginner throguh to leaner, with additional 'raw' functions, for Advanced">
-            <option value="2">Beginner (extra help)</option>
-            <option value="1">Intermediate (normal level)</option>
+            title="Determines some aspects of the user interface, from simplified and maximum help for Beginner through to leaner interface, with additional 'raw' functions, for Advanced">
+            <option value="2">Beginner/intermediate</option>
+            <option value="1">Experienced</option>
             <option value="0">Advanced (obscure functions, command strings)</option>
         </select>
     </div>
@@ -204,15 +206,20 @@
     </div>
 
     <div>
-        <div class="header"><label for="layout_language">Interface language (localisation)</label></div>
+        <div class="header"><label for="layout_language">Interface language <i>(partially implemented)</i></label></div>
         <select name="layout_language" id="layout_language" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
     </div>
 
+    
+    <!-- we don't really want them changing this, can get into trouble, besides popus up UNDER form @14/4/18
     <div>
         <div class="header"><label>Theme (colours &amp; styles)</label></div>
         <div id="layout_theme" style="min-width: 300px;"></div>
+        -->
         <!-- <select name="layout_theme" id="layout_theme" class="text ui-widget-content ui-corner-all"></select> -->
+    <!--
     </div>
+    -->
 
     <!--
     <div>
@@ -220,12 +227,6 @@
         <input type="checkbox" name="help_on" id="help_on" class="text ui-widget-content ui-corner-all"/>
     </div>
     -->
-
-    <div>
-        <div class="header"><label for="bookmarks_on">Show My Bookmarks in navigation panel</label></div>
-        <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
-    </div>
-
 
     <div>
         <div class="header"><label for="mapcluster_on">Map marker clustering</label></div>

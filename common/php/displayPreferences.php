@@ -46,13 +46,14 @@ require_once(dirname(__FILE__)."/../connect/applyCredentials.php");
 /* An array of the properties that may be set, and default values.
 Values may be edited for many of these in admin/profile/editPreferbneces.html
 */
-$prefs = array(
+
+//NOTE: More preferences are set in hclient/core/hapi.js ~line 955
+
+$prefs = array(  
     "help" => "show", // show help texts under fields and in other locations
     "advanced" => "hide", // not sure if this is ever used
     "input-visibility" => "all", // allows hiding of optional fields
-    "action-on-save" => "stay", // used locally in editRercord but usage probably deprecated by changed save/save and close behaviour
     "gigitiser-view" => "", // remembers geo window between calls, blank = world
-    "double-click-action" => "edit", // double clicking on record in search opens edit, 'edit' is the only value ever used
 
     "my-records-searches" => "show", // show the My Records section in the navigation menu
     "all-records-searches" => "show", // show the All records section in the navigation menu
@@ -64,27 +65,19 @@ $prefs = array(
     "record-search-scope" => "r-all",
     "record-search-last" => "", //list of rectypes and last selected records - up to 50
 
+    // Deprecated. only used in search.css and refer to old Version 3 'levels' search
     "search-result-style0" => "list", // default mode of display of results in each level
     "search-result-style1" => "list",
     "search-result-style2" => "list",
     "search-result-style3" => "list",
-    "results-per-page" => 50,
-
+ 
+    // Deprecated. only used in common\js\utilsUI.js referring to old Version 3 scratchpad
     "scratchpad-bottom" => 0, // set by moving and scaling the scratchpad in edit mode
     "scratchpad-right" => 0,
     "scratchpad-width" => 0,
     "scratchpad-height" => 0,
     "scratchpad" => "hide",
 
-    "applicationPanel" => "open",
-    "sidebarPanel" => "open",
-    "leftWidth" => 180,
-    "oldLeftWidth" => 180,
-    "rightWidth" => 360,
-    "oldRightWidth" => 360,
-    "searchWidth" => 360, //never used
-    "oldSearchWidth" => 360, //never used
-    "viewerTab" =>0,
     "viewerCurrentTemplate" =>"",
     "defaultPrintView" => "default",
     "showSelectedOnlyOnMapAndSmarty" => "all", //by default show all records
@@ -92,32 +85,30 @@ $prefs = array(
     
     // Properties which can be set in the Profile > Preferences dialogue
     "userCompetencyLevel" => "beginner", // interface style eg. show advanced functions, help text etc. beginner|intermediate|advanced 
-    // not used "savedSearchDest" => "",  //last saved search destination (workgroup id)
+
     "defaultSearch" => "", // was "tag:Favourites", then sortby:-m after:\"1 week ago\"
-    "searchQueryInBrowser" => "true", // was false, I presume for neatness. But less informative
+    "searchQueryInBrowser" => "true", // was set to false, I presume for neatness. But more informative to have in URL
 
     "favourites" => "Favourites", // standard spelling for default search
-    "loadRelatedOnSearch" => "false", // by default load related records, can be set in Preferences dialogue
-    "defaultRecentPointerSearch" => "true", // when searching for pointers to records, show recent records by default
-    "findFuzzyMatches" => "false", //check similar records on addition
-    "defaultMyBookmarksSearch" => "false", // hitting Enter will do a My Bookmarks search
-    "showMyBookmarks" => "true", // turn on/off My Bookmarks heading in the navigation menu
     
-    // deprcated in version 4
-    "autoSelectRelated" => "false", // autoSelect related records
-    "autoDeselectOtherLevels" => "true", // auto deselct other level before selecting current.
+     "defaultRecentPointerSearch" => "true", // when searching for pointers to records, show recent records by default
+    "findFuzzyMatches" => "false", //check similar records on addition
+
+     "showMyBookmarks" => "true", // turn on/off My Bookmarks heading in the navigation menu
+    
     
     "relationship-optional-fields" => "false", //show optional fields for add relationship dialogue
+
+    // deprecated in 2017 editing, but might still be useful to re-implement
     "tagging-popup" => "false", // popup a tagging dialogue if record saved without any tags -switch on/off in this popup or preferences
-    "showAggregations" => "false", // show link Aggregations under My Bookmarks and All records in teh search navigation menu
+
+    "showAggregations" => "false", // show link 'Aggregations' under My Bookmarks and All records in teh search navigation menu
     "showNavMenuAlways" => "false", // show the navigation menu even when the navigation panel is open
     "showFavouritesSearch" => "false", // ditto for Favourites search
-    "mapbackground" => "", // the background to be used for the Google map in the map tab
     "smarty-output-limit" => "50",   //report output limit for smarty and map
 
-    "record-edit-date" => "", // TODO: what is this for, it is not set in profile
-    "record-edit-advancedmode" => "false", //by default record editing comes up in stripped down 'simple' mode
-    "record-add-showaccess" => "true",     //show access right selectors in add record popup
+    "record-edit-date" => "",               // TODO: what is this for, it is not set in profile
+    "record-add-showaccess" => "true",      //show access right selectors in add record popup
     "record-add-defaults" => ""            //default settings for new record in add record popup
 
     // Notes: to add new preferences, add here, add in editPreferences (if required)
@@ -129,7 +120,7 @@ foreach (get_group_ids() as $gid) {
 
 session_start();
 
-//save preference  SAW - this supports multiple preference saving, need to consolidate tpreference saves on client side
+//save preference  SAW - this supports multiple preference saving, need to consolidate reference saves on client side
 $writeMode = false;
 foreach ($_REQUEST as $property => $value) {
     if (array_key_exists($property, $prefs)) {
