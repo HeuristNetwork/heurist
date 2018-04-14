@@ -116,7 +116,6 @@ class DbSysDatabases extends DbEntityBase
          $query = $query.$this->searchMgr->getOffset()
                         .$this->searchMgr->getLimit();
          */
-//error_log($query);     
 
         $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );
         $res = $this->searchMgr->execute($query, false, $this->config['entityName']);

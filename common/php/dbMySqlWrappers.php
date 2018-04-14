@@ -568,12 +568,10 @@ function updateProgress($mysqli, $session_id, $is_init, $value){
             if($need_close)  $mysqli->close();                     
             return $res[0];
         }else{
-//error_log('>>>>NOT FOUND '.$query);   
         }
 
     }else if($value=='REMOVE'){
         $mysqli->query("DELETE FROM sysSessionProgress where stp_ID=".$session_id);
-//error_log('DELTE '.$mysqli->error.'   '.$mysqli->affected_rows);
     }else{
         //write 
         if($is_init){

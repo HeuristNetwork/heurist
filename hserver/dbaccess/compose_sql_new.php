@@ -350,7 +350,6 @@ class HQuery {
         $sort_fields = array();
         $sort_expr = array();
         
-//error_log(print_r($this->sort_phrases,true)        );
         
         foreach($this->sort_phrases as $subtext){
         
@@ -435,9 +434,7 @@ class HQuery {
             }//switch
         
         }//foreach
-        
-//error_log(print_r($sort_expr,true)        );
-        
+                
         //
         if(count($sort_expr)>0){
             $this->sort_clause = ' ORDER BY '.implode(',',$sort_expr);
@@ -665,7 +662,6 @@ class HPredicate {
         switch (strtolower($this->pred_type)) {
             case 'plain':            //query in old plain text format
 
-//error_log($this->value);
             
                 $query = parse_query($top_query->search_domain, urldecode($this->value), null, null, $top_query->currUserID);
 
@@ -675,7 +671,6 @@ class HPredicate {
                 $where_clause = str_replace('TOPBIBLIO',$tab,$where_clause);  //need to replace for particular level
                 $where_clause = str_replace('TOPBKMK','b',$where_clause);
                 
-//error_log($where_clause);
             
                 return array("where"=>$where_clause);
             case 'type':

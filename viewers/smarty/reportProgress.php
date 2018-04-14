@@ -11,7 +11,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
             updateProgress($mysqli, $_REQUEST['session'], false, $res);
         }else{
             $res = updateProgress($mysqli, $_REQUEST['session'], false, null);
-//error_log(DATABASE.' progress='.$res);
+
         }
         
         $mysqli->close();

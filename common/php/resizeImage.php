@@ -212,7 +212,6 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
                 global $errline_prev, $filename, $file;
                 
-                //error_log('Send email to admin - file is broken it cant be loaded to resize. '.$errstr.' line:'.$errline);
                 //it may report error several times with different messages - send for the first one
                 if($errline_prev!=$errline){
                     

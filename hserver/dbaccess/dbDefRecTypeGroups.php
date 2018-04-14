@@ -127,7 +127,6 @@ class DbDefRecTypeGroups extends DbEntityBase
          $query = $query.$this->searchMgr->getOffset()
                         .$this->searchMgr->getLimit();
         
-//error_log($query);     
 
         $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName']);
         return $res;

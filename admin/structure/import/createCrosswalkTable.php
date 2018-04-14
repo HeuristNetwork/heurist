@@ -247,8 +247,6 @@
                     where rty_ID in (".implode(",", array_keys($rectypesToImport)).") 
                     order by rty_ID";
                     
-//error_log($query);                    
-                    
                 $rtyRes = mysql_query($query); 
                    
                 // For every recordtype, add the structure to a javascript array, to show in a foldout panel

@@ -63,7 +63,6 @@ if(@$_REQUEST["action"]=='step4' || @$_REQUEST["action"]=='step5'){ //case for n
         }
     }
 
-//error_log(print_r($response,true));
     
     header('Content-type: application/json;charset=UTF-8');
     print json_encode($response);

@@ -175,7 +175,6 @@ function getRecordTypeTree($recTypeId, $recursion_depth, $forpurpose=null){
             $details =  @$recstruct['dtFields'];
             
             if(!$details){
-//error_log($rtKey.'  '.print_r($recstruct, true));
                 continue;
             }
             

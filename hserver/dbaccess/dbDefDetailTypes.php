@@ -63,7 +63,6 @@ class DbDefDetailTypes extends DbEntityBase
     */
     public function search(){
         
-//error_log(print_r($this->data,true));        
         $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
 
         $res = $this->searchMgr->validateParams( $this->data );
@@ -146,7 +145,6 @@ class DbDefDetailTypes extends DbEntityBase
          $query = $query.$this->searchMgr->getOffset()
                         .$this->searchMgr->getLimit();
         
-//error_log($query);     
 
         $res = $this->searchMgr->execute($query, $is_ids_only, 'defDetailTypes');
         return $res;

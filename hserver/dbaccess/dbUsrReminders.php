@@ -280,8 +280,7 @@ class DbUsrReminders extends DbEntityBase
                                        .' where ugl_GroupID='.$record['rem_ToWorkgroupID'];
                 }
                 
-                
-//error_log($query);                
+                                
                 $recs = mysql__select_all($mysqli, $query);
                 
                 foreach ($recs as $row)

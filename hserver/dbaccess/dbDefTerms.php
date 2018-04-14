@@ -84,7 +84,6 @@ class DbDefTerms extends DbEntityBase
              
         }
         
-//error_log(print_r($this->data,true));        
         $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
 
         /*

@@ -440,7 +440,6 @@ function generateSchema($projname, $rt_toexport, $rt_geoenabled){
         foreach ($rectyps as $rt) {
             $rst_fields = $rtStructs['typedefs'][$rt]['dtFields'];
             if(!$rst_fields){
-                /*****DEBUG****///error_log("No details defined for RT#".$rt);
                 continue;
             }
 
@@ -598,7 +597,6 @@ function generateSchema($projname, $rt_toexport, $rt_geoenabled){
 
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
         if(!$details){
-            /*****DEBUG****///error_log("1. No details defined for RT#".$rt);
             continue;
         }
 
@@ -1102,7 +1100,6 @@ function generate_UI_Schema($projname, $rt_toexport, $rt_geoenabled){
         //
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
         if(!$details){
-            /*****DEBUG****///error_log("2. No details defined for RT#".$rt."  ".$rtname);
             continue;
         }
 
@@ -1633,7 +1630,6 @@ function generate_Logic($projname, $rt_toexport, $rt_toexport_toplevel, $rt_geoe
 
         $details =  $rtStructs['typedefs'][$rt]['dtFields'];
         if(!$details){
-            /*****DEBUG****///error_log("3. No details defined for RT#".$rt."  ".$rtname);
             continue;
         }
 
@@ -2140,8 +2136,6 @@ function getTermsTree($property, $d_type, $terms){
     $parent = $property->addChild('lookup');
 
     $cnt = createSubTree($parent, $termTree, "");
-
-    //error_log($cnt.'  '.$terms);    
 
     return $cnt;
 }

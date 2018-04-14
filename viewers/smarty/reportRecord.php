@@ -114,8 +114,7 @@ class ReportRecord {
                         if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
                             
                             $record = $this->getRecord($value['RelatedRecID']['rec_ID']);
-                            
-//error_log($value['RelatedRecID']['rec_ID'].'   '.print_r($record,true));                            
+                                                        
                             
                             //add relationship specific variables
                             $record["recRelationType"] = $value['RelTerm'];
@@ -177,7 +176,7 @@ class ReportRecord {
                 // get linked records where current record is source
                 $from_query = 'SELECT rl_TargetID as linkID FROM recLinks '
                     .str_replace('linkID','rl_TargetID',$where).' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID;
-//error_log('from '.$from_query);
+
                 $from_res = mysql_query($from_query);
                 if (mysql_num_rows($from_res) > 0){
                     //find sources
@@ -193,7 +192,7 @@ class ReportRecord {
                     .str_replace('linkID','rl_SourceID',$where).' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID;
 
                 $to_res = mysql_query($to_query);
-//error_log('to '.$to_query);
+
                 if (mysql_num_rows($to_res) > 0) {
                     //find targets
                     while ($row = mysql_fetch_row($to_res)) {
@@ -478,7 +477,7 @@ class ReportRecord {
 
                             $res = array();
                             if(count($dtValue)>0){
-//error_log(print_r($dtValue,true));                            
+                            
                             foreach ($dtValue as $key => $value){
                                 $recordID = $value['id'];
                                 array_push($res, $recordID);
@@ -490,7 +489,7 @@ class ReportRecord {
                                 $res = array( $dtname =>$res[0], $dtname."s" =>$res );
                             }
                             
-//error_log(print_r($res,true));                            
+                            
                             }
                             break;
                             
@@ -519,7 +518,7 @@ class ReportRecord {
                                     }
 
                                     
-    //error_log('relrecid '.$recordID);                                
+                               
                                     $res0 = null;
                                     //get full record info
                                     if(@$this->loaded_recs[$recordID]){
@@ -529,7 +528,7 @@ class ReportRecord {
 
                                         $rectypeID = $res0['recTypeID'];
 
-    //error_log('already loaded '.print_r($res0,true));                                    
+                                      
                                         
                                     }else{
 
@@ -538,7 +537,7 @@ class ReportRecord {
                                         if(true){  //load linked records dynamically
                                             $res0 = getRecordForSmarty($record, $recursion_depth+1, $order_sub); //@todo - need to
                                             $order_sub++;
-    //error_log('load '.print_r($res0,true));                                    
+                                    
                                             
                                         }
                                         if($rectypeID==null && $res0 && @$res0['recRecTypeID']){

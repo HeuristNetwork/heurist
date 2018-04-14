@@ -359,7 +359,7 @@ function resolveFilePath($path){
 function downloadFile($mimeType, $filename, $originalFileName=null){
 
     if (file_exists($filename)) {
-//error_log($mimeType.'   '.$filename);
+
         header('Content-Description: File Transfer');
         $is_zip = false;
         if(!$mimeType || $mimeType == 'application/octet-stream'){

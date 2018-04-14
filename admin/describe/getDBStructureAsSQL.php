@@ -59,10 +59,6 @@ if($res){
 }
 
 
-
-//$r = mysql_query("SELECT DATABASE()") or die(mysql_error());
-//error_log("DATABASE IS ".mysql_result($r,0));    
-
 // TODO: use HEURIST_DBVERSION TO SET THE VERSION HERE
 
 // * IMPORTANT *

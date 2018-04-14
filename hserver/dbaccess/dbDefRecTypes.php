@@ -85,7 +85,6 @@ class DbDefRecTypes extends DbEntityBase
     */
     public function search(){
         
-//error_log(print_r($this->data,true));        
         $this->searchMgr = new dbEntitySearch( $this->system, DbDefRecTypes::$fields);
 
         /*
@@ -177,7 +176,6 @@ class DbDefRecTypes extends DbEntityBase
          $query = $query.$this->searchMgr->getOffset()
                         .$this->searchMgr->getLimit();
         
-//error_log($query);     
 
         $res = $this->searchMgr->execute($query, $is_ids_only);
         return $res;

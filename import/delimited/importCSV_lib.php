@@ -1082,7 +1082,6 @@ function validateImport($mysqli, $imp_session, $params){
     
         $imp_session['validation']['mapped_fields'] = $mapped_fields;
     }
-//error_log(' validation upd:'.$cnt_update_rows.'  to insert '.$cnt_insert_rows);
     
 
     // calculate the number of records to insert, update and insert with existing ids
@@ -1598,7 +1597,6 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 */
 function getWrongRecords($mysqli, $query, $imp_session, $message, $short_message, $fields_checked, $type='error'){
 
-//error_log('valquery: '.$query);
 
     $res = $mysqli->query($query." LIMIT 5000");
     if($res){
@@ -2457,9 +2455,9 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                             @$recordTypeStructure[$field_type][$idx_reqtype] == "required")
                             //!@$details["t:".$field_type][0])
                         {
-//error_log($field_type.' = '.print_r(@$details["t:".$field_type],true));
-                            //$is_valid_newrecord = false;
-                            //break;
+                            //error_log($field_type.' = '.print_r(@$details["t:".$field_type],true));
+                                                        //$is_valid_newrecord = false;
+                                                        //break;
                         }
 
                     }
@@ -2746,8 +2744,6 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_out
         2 //save as it is without verification of record type structure
     );
 
-//error_log('to Add '.print_r($details,true));
-//error_log('ADD REC '.print_r($out,true));
 
     if (@$out['error']) {
 

@@ -429,8 +429,6 @@ function executeSmartyTemplate($params){
 //
 function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 {
-    //error_log($template);
-    //error_log($tpl_source);
     //find fist foreach and insert as first operation
     $offset = strpos($tpl_source,'foreach ($_from as $_smarty_tpl');
     if($offset>0){

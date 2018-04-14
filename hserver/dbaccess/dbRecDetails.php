@@ -407,7 +407,6 @@ class DbRecDetails
         $this->_assignTagsAndReport('limitted',  $limittedRecIDs, $baseTag);
         $this->_assignTagsAndReport('errors',    $sqlErrors, $baseTag);
 
-//error_log('>>>>>'.print_r($this->result_data, true));        
         
         
         return $this->result_data;        
@@ -809,7 +808,6 @@ class DbRecDetails
                     return false;
                 }else{
                     
-//error_log($tag_names);                    
                     $tag_ids = $this->_tagGetByName(array_filter(explode(',', $tag_names)), true, $ugrID);
                 }
             }

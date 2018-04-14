@@ -1872,7 +1872,6 @@ function getAllRelatedRecords($recID, $relnRecID = 0) {
     " where (srcRec.rec_ID = $recID or trgRec.rec_ID = $recID)";
     if ($relnRecID) $query.= " and rels.relnID = $relnRecID";
     
-//error_log($query);    
     $res = mysql_query($query);
     if (!$res || !mysql_num_rows($res)) {
         return array();

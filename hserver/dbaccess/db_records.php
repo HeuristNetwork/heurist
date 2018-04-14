@@ -187,7 +187,7 @@
     */
     function recordSave($system, $record){
 
-//error_log('captcha '.@$_SESSION["captcha_code"].'   '.@$record['Captcha']);
+
         //check capture for newsletter subscription
         if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
             
@@ -1319,7 +1319,7 @@ array_push($errorValues,
                 if($res && @$res['status']==HEURIST_OK){
                 
                 $new_rel_recid = @$res['data']['added'];
-//error_log($rel_recid.'   '.$new_rel_recid);                
+                
                 if($new_rel_recid){
                 
                     //change reference to old record id to new one
@@ -1327,7 +1327,7 @@ array_push($errorValues,
                     .' where dtl_RecID='.$new_rel_recid
                     .' and dtl_Value='.$id   //old record id
                     .' and (dtl_DetailTypeID='.DT_TARGET_RESOURCE.' or dtl_DetailTypeID='.DT_PRIMARY_RESOURCE.')';
-//error_log($query);                  
+                  
                     $res = $mysqli->query($query);
                     if(!$res){
                         $error = 'database error - ' .$mysqli->error;

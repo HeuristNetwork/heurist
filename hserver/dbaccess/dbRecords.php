@@ -42,7 +42,6 @@ class DbRecords extends DbEntityBase
     */
     public function search(){
         
-//error_log('befote '.print_r($this->data, true));        
         $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
 
         $res = null;//$this->searchMgr->execute($query, $is_ids_only, 'recUploadedFiles', $calculatedFields);

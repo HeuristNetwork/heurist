@@ -111,9 +111,7 @@ if(!$system->init(@$_REQUEST['db'])){
         }else if($action=='step3'){ // matching - assign record ids
         
             $res = assignRecordIds($_REQUEST); 
-            
-//error_log(print_r($res,true));            
-        
+                    
         }else if($action=='step4'){ // validate import - check field values
         
             $res = validateImport($_REQUEST);
@@ -851,7 +849,6 @@ function parseKMLPlacemark($placemark, &$geom_types){
             $geometry = $adapter->read($child->ownerDocument->saveXML($child));
             $geometry = $wkt->write($geometry);
             $properties['geometry'] = $geometry;
-//error_log($geometry);            
           }
           elseif ($node_name == 'extendeddata')
           {
@@ -1153,7 +1150,6 @@ function parse_content(){
             $lb = "\r";
         }
 
-//error_log(print_r($content,true));
         //remove spaces
         $content = trim(preg_replace('/([\s])\1+/', ' ', $content));
         
@@ -1535,12 +1531,7 @@ function assignRecordIds($params){
     $disambiguation = array();
     
     if($match_mode == 0){  //find records by mapping
-    
-    //error_log(print_r($imp_session,true));
-    //error_log(print_r($params,true));
-    //$system->addError(HEURIST_INVALID_REQUEST, print_r($params,true));
-    //return false;
-        
+            
         $imp_session = findRecordIds($imp_session, $params);
             
         if(is_array($imp_session)){
@@ -2427,7 +2418,6 @@ function getWrongRecords($query, $imp_session, $message, $short_messsage, $field
 
     global $system;
     $mysqli = $system->get_mysqli();
-//error_log('valquery: '.$query);
 
     $res = $mysqli->query($query." LIMIT 5000");
     if($res){

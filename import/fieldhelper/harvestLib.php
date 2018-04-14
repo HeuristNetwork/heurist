@@ -165,7 +165,7 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
                 }
 
                 if(count($subdirs)>0){
-//error_log(print_r($subdirs,true));                    
+ 
                     doHarvest(array("dirs"=>$subdirs, "exts"=>$mediaExts), $is_report, $imode);
                     if($is_report) flush();
                 }

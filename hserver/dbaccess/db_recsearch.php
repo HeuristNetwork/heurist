@@ -143,7 +143,7 @@
             if(!@$params['q']){
                 return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Facet query search request. Missed query parameter");
             }
-//error_log(print_r($params,true));
+
             //get SQL clauses for current query
             $qclauses = get_sql_query_clauses_NEW($mysqli, $params, $currentUser);
 
@@ -219,7 +219,7 @@
                 // 1. get first level of terms using $vocabulary_id 
                 $first_level = getTermChildren($vocabulary_id, $system, true); //get first level for vocabulary
                 
-//error_log($vocabulary_id.'  '.print_r($first_level, true));                                
+                                
                 
                 // 2.  find all children as plain array  [[parentid, child_id, child_id....],.....]
                 $terms = array();
@@ -228,7 +228,7 @@
                     array_unshift($children, $parentID);
                     array_push($terms, $children);
                 }
-//error_log(print_r($terms, true));                
+               
                 //3.  find distinct count for recid for every set of terms
                 $select_clause = "SELECT count(distinct r0.rec_ID) as cnt ";
                 
@@ -252,7 +252,7 @@
                         $query = $query.' LIMIT '.$limit;    
                     }*/
                     
-//error_log($query);                    
+                 
                     $res = $mysqli->query($query);
                     if (!$res){
                         return $system->addError(HEURIST_DB_ERROR, $savedSearchName
@@ -348,9 +348,7 @@
             */
 
             //
-//DEBUG     facet search
-//if(@$params['debug']) echo $query."<br>";
-//error_log($query);
+
 
             $res = $mysqli->query($query);
             if (!$res){
@@ -998,7 +996,6 @@
                                 if(is_array($ids_party2) && count($ids_party2)>0)
                                 {
 
-//error_log('get related '.$params3['q'].'   '.implode(",",$ids_party2));
                                 
                                 $where = "WHERE (TOPBIBLIO.rec_ID in (select rl_RelationID from recLinks "
                                     ."where (rl_RelationID is not null) and $fld1 in ("
@@ -1118,16 +1115,11 @@
 
         }
         
-//error_log(' Q='.$query);                
-//DEBUG 
-//return $system->addError(HEURIST_INVALID_REQUEST,  'DEBUG:'.$query);
-
-//error_log($istimemap_request.' limit '.$aquery["limit"]);
 
         $res = $mysqli->query($query);
         if (!$res){
             
-//error_log('params '.print_r($params, true));            
+          
             $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.
             ' Search query error on saved search. Parameters:'.print_r($params, true).' Query '.$query, $mysqli->error);
         }else if($is_count_only){
@@ -1276,7 +1268,7 @@
                             
                     $fieldtypes_in_res = array(); //reset
                      
-//error_log('total '.$res_count.'  '.$istimemap_request);                     
+                     
 $loop_cnt=1;                            
                     while ($offset<$res_count){   
                             
@@ -1430,8 +1422,7 @@ $loop_cnt++;
                     }//while offset
                     
                             if($istimemap_request){
-                            //error_log('found count '.count($records));                                   
-                            //error_log('maptime. total '.count($records).'  toclnt='.count($tm_records).' tot_tm='.$istimemap_counter);                                   
+                                                               
                                    $records = $tm_records;
                                    $total_count_rows = $istimemap_counter;
                             }else

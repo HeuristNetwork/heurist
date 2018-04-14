@@ -65,8 +65,6 @@ if (!$serverURL || !$dbReg || !$dbTitle || !$usrEmail || !$usrName || !$usrFirst
     return;
 }
 
-//error_log('>>>>>'.$serverURL);
-
 if(strpos($serverURL,'http://')===false){
     $serverURL = 'http://'.$serverURL;
 }

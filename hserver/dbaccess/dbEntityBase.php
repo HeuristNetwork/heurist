@@ -151,13 +151,12 @@ class DbEntityBase
                 $values[$fieldname] = $record[$fieldname];
             }
             
-//error_log(print_r($values,true));        
 
             //save data
             $ret = mysql__insertupdate($mysqli, 
                                     $this->config['tableName'], $this->fields,
                                     $values );
-//error_log('res on save '.$ret);                                            
+                                            
             if($ret==null){ //it return null for non-numeric primary field
                    $results[] = $record[$this->primaryField];
             }else if(is_numeric($ret)){
@@ -328,11 +327,9 @@ class DbEntityBase
         if(file_exists($entity_file)){
             
            $json = file_get_contents($entity_file);
-//error_log($json);
            
            $this->config = json_decode($json, true);
            
-//error_log($this->config, true);
            
            if(is_array($this->config) && $this->config['fields']){
                

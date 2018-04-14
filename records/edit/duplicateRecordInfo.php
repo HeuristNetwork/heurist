@@ -149,14 +149,14 @@ function duplicateRecordInfo($id, $needDuplicateFile=true) {
 			//add special kind of record - relationships
             $query = 'SELECT rl_RelationID FROM recLinks '
                 .'where (rl_RelationTypeID is not null) and  (rl_SourceID='.$id.' or rl_TargetID='.$id.')';
-//error_log($query);                
+                
 			$refs_res = mysql_query($query);
             if ($refs_res){
             while (($row = mysql_fetch_array($refs_res))){
                 $rel_recid = $row[0];
                 $res = duplicateRecordInfo($rel_recid);
                 $new_rel_recid = @$res['added'];
-//error_log($rel_recid.'   '.$new_rel_recid);                
+                
                 if($new_rel_recid){
                 
                     //change reference to old record id to new one
@@ -164,7 +164,7 @@ function duplicateRecordInfo($id, $needDuplicateFile=true) {
                     .' where dtl_RecID='.$new_rel_recid
                     .' and dtl_Value='.$id
                     .' and (dtl_DetailTypeID='.DT_TARGET_RESOURCE.' or dtl_DetailTypeID='.DT_PRIMARY_RESOURCE.')';
-//error_log($query);                  
+                  
                     mysql_query($query);
                     $rels_count++;   
                 }

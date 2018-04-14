@@ -193,7 +193,7 @@
             }else if($action == 'get_url_content_type'){
         
                 $mimeType = loadRemoteURLContentType(@$_REQUEST['url']); 
-//error_log($mimeType);                
+                
                 if($mimeType!=null && $mimeType!==false){
                     $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
                                 .$mimeType.'"';

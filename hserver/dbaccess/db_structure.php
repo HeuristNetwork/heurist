@@ -198,7 +198,6 @@
                     $rtg_ID = $row[1];
                     if(!@$rtStructs['groups']['groupIDToIndex'][$rtg_ID]){
                         if($rtg_ID>0){
-                            //error_log('Database '.HEURIST_DBNAME.' Definitions error: wrong group id '.$rtg_ID.' for record type '.$row[0]);
                         }
                         
                         $idxs = array_keys($rtStructs['groups']['groupIDToIndex']);

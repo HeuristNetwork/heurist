@@ -294,8 +294,6 @@ function getNextDataSet($splittedData) { // returns and removes the first set of
         $tableNumber = 1;
     }
 
-//error_log(">>>>>DATA ".count($splittedData)."  ".$tableNumber." ".$splittedData[$tableNumber]);
-
     // TODO: this is a horrible approach to splitting out the data. Should be rewritten.
     // Works, so for the moment, "if it ain't broke, don't fix it ..."
     if(count($splittedData) > $tableNumber) { // what the hell does this do? fortunately it is always true!
@@ -386,9 +384,6 @@ function processRecTypes($dataSet) {
             $errorCreatingTables = TRUE;
             echo $errorCreatingReason;
         }
-
-//$r = mysql_query("SELECT DATABASE()") or die(mysql_error());
-//error_log("DATABASE IS ".mysql_result($r,0));
 
     } // END Imported first set of data to temp table: defRectypes
 } // processRecTypes
