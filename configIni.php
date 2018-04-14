@@ -62,8 +62,9 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.5.9"; // sets current program version number, determined by Heurist development lead
+$version = "4.5.10"; // sets current program version number, determined by Heurist development lead
 
+// 4.5.10 14 Apr 18 Rewritten settings functions based on Artem's entity model, improved display of relationships in edit mode, UTM conversion on import/digitiser, clone template databases, correct facet search counts, fixes to child records and titles, permissions fixes, lots of small bug fixing
 // 4.5.9 18 Mar 18 Improve CSV import incl. URLs for file fields, URL and tags export in CSV, UTM import, display reverse relationships inline, clone template databases incl. data, lots of bug fixing and cosmetics
 // 4.5.8 16 Feb 18 HTML5 media player, title masks for child records, improve timeline layout, fixes to editing, major imrovements to CSV import, bulk convert records to children, lots of cosmetics
 // 4.5.7 23 Jan 18 A large number of cosmetic changes and bugfixes particularly to editing function, merging recods 
