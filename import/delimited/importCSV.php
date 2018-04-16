@@ -32,6 +32,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
 
 require_once(dirname(__FILE__).'/importCSV_lib.php');
+
 set_time_limit(0);
 
 $mysqli = mysqli_connection_overwrite(DATABASE);

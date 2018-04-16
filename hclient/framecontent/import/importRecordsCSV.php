@@ -154,7 +154,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         </div>      
         
     
-        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Upload new file (CSV/TSV)</h2>
+        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;" id="lblUploadFile">Upload new file (CSV/TSV)</h2>
             <input type="file" id="uploadFile" style="display:none">
             <div id="btnUploadFile" title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
                 Upload File</div>

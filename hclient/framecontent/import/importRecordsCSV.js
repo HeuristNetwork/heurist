@@ -45,6 +45,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         if(format=='kml'){
             $('#divKmlIntro').show();
             $('.format-csv').hide();
+            $('#lblUploadFile').text('Upload new file (KML)');
             
         }else{
             $('.format-csv').show();
