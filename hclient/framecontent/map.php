@@ -658,9 +658,9 @@ $system->defineConstants();
             </div>
             
             <div style="padding:5px">
-                <label><input type="radio" name="time-label-pos" checked value="0">Label to the left of the bar</label><br>
+                <label><input type="radio" name="time-label-pos" checked value="0">Label within the bar</label><br>
                 <!-- <label><input type="radio" name="time-label-pos" value="1">Label to the right of the bar</label><br> -->
-                <label><input type="radio" name="time-label-pos" value="2">Label on top of the bar</label>
+                <label><input type="radio" name="time-label-pos" value="2">Label above the bar</label>
             </div>
         
             <div style="padding:5px">
