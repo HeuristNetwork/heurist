@@ -42,6 +42,21 @@ session_start();
 
 $do_merge_details = false;
 
+$finished_merge = false; //(@$_REQUEST['finished_merge']==1);
+
+if (@$_SESSION['finished_merge']){
+    unset($_SESSION['finished_merge']);
+    $finished_merge = true;
+}
+//$_SESSION['master_rec_id'] = store the master record id in the session
+if (@$_REQUEST['keep'])  {
+    $master_rec_id = $_REQUEST['keep'];   
+}else{
+    $master_rec_id = @$_REQUEST['master_rec_id']; 
+}
+mysql_connection_select(DATABASE);
+$enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_Type="relationtype") OR (dty_Type="enum")');
+
 if (@$_REQUEST['keep']  &&  @$_REQUEST['duplicate']){  //user has select master and dups- time to merge details
     $do_merge_details = true;
     $_REQUEST['bib_ids'] = join(',',array_merge($_REQUEST['duplicate'],array($_REQUEST['keep']))); //copy only the selected items
@@ -51,13 +66,6 @@ if (@$_REQUEST['keep']  &&  @$_REQUEST['duplicate']){  //user has select master 
     return;
 }
 
-$finished_merge = false;
-if (@$_SESSION['finished_merge']){
-    unset($_SESSION['finished_merge']);
-    $finished_merge = true;
-}
-
-if (@$_REQUEST['keep'])  $_SESSION['master_rec_id'] = $master_rec_id = $_REQUEST['keep']; //store the master record id in the session
 
 if (! @$_REQUEST['bib_ids']) return;
 
@@ -66,7 +74,6 @@ mysql_connection_select(DATABASE);
 
 $bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '1');
 $reference_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', 'dty_Type="resource"');
-$enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_Type="relationtype") OR (dty_Type="enum")');
 
 ?>
 
@@ -152,6 +159,15 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
 
                 <table><tbody id="tb">
                         <?php
+                        
+                        if($master_rec_id>0){
+                            print '<input type="hidden" name="master_rec_id" value="'.$master_rec_id.'">';    
+                        }
+                        if($finished_merge){
+                            print '<input type="hidden" name="finished_merge" value="1">';
+                        }
+                        
+                        
                         print '<input type="hidden" name="bib_ids" value="'.$_REQUEST['bib_ids'].'">';
 
                         $rtyNameLookup = array();
@@ -172,7 +188,7 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
                             print '<tr><td colspan="3" style="text-align: center; font-weight: bold;">'.$temptypes.'</td></tr>';
                         }
                         //save rec type for merging code
-                        if (!@$_SESSION['rty_ID']) $_SESSION['rty_ID'] = @$firstRtyID;
+                        //if (!@$_SESSION['rty_ID']) $_SESSION['rty_ID'] = @$firstRtyID;
                         //get requirements for details
                         $res = mysql_query('select rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_RequirementType, rst_MaxValues from defRecStructure where rst_RecTypeID in ('.join(',',array_keys($rtyNameLookup)).')');
                         $rec_requirements =  array();
@@ -355,13 +371,17 @@ $enum_bdts = mysql__select_assoc('defDetailTypes', 'dty_ID', 'dty_Name', '(dty_T
                                 print '<td style="width: 500px;">';
                                 print '<div style="font-size: 120%;"><a target="edit" href="'.HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$record['rec_ID'].'">'.$record['rec_ID'] . ' ' . '<b>'.$record['rec_Title'].'</b></a> - <span style="background-color: #EEE;">'. $rtyNameLookup[$record['rec_RecTypeID']].'</span></div>';
                                 print '<table>';
-                                if ($is_master) $_SESSION['master_details']=$record['details']; // save master details for processing - signals code to do_fix_dupe
+                                if ($is_master) {
+                                    $master_details = $record['details'];
+                                    // $_SESSION['master_details']=$record['details']; save master details for processing - signals code to do_fix_dupe
+                                }
                                 foreach ($record['details'] as $rd_type => $detail) {
                                     if (! $detail) continue;    //FIXME  check if required and mark it as missing and required
                                     // check to see if the master record already has the same detail with the identical value ignoring leading and trailing spaces
                                     $removeIndices = array();
-                                    if (! $is_master && @$_SESSION['master_details'][$rd_type]){
-                                        $master_details =  $_SESSION['master_details'][$rd_type];
+                                    if (!$is_master && @$master_details[$rd_type]){
+                                        
+                                        $master_details =  $master_details[$rd_type];
                                         foreach ($detail as $i => $d_detail){
                                             
                                             foreach ($master_details as $m_detail){
@@ -578,10 +598,36 @@ function detail_str($rd_type, $rd_val) {
 // ---------------------------------------------- //
 // function to actually fix stuff on form submission
 function do_fix_dupe() {
+    global $master_rec_id, $finished_merge, $enum_bdts;
+    
+    $finished_merge = true;
+    
+    $master_details = array();
+    $res = mysql_query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, '
+      .' if(dtl_Geo is not null, AsWKT(dtl_Geo), null) as dtl_Geo, trm_Label'
+      .' from recDetails  left join defTerms on trm_ID = dtl_Value '
+      .' where dtl_RecID = ' . $master_rec_id . ' order by dtl_DetailTypeID, dtl_ID');
+    while ($row = mysql_fetch_assoc($res)) {
+
+        $type = $row['dtl_DetailTypeID'];
+        
+        if(!in_array($type, array_keys($enum_bdts))){
+               $row['trm_Label'] = null;
+        }
+        
+        if (! array_key_exists($type, $master_details)) {
+            $master_details[$type] = array();
+        }
+                                
+        array_push($master_details[$type], $row);
+    }    
+    
+    /*
     $master_rec_id = $_SESSION['master_rec_id'];
     $master_details = $_SESSION['master_details'];
     unset($_SESSION['master_details']); //clear master_details so we don't re-enter this code
     unset($_SESSION['master_rec_id']);
+    */
     $_SESSION['finished_merge'] = 1;  // set state variable for next loop
     
     //2018-04-06 storage of record type in session is unreliable - fetch it again
