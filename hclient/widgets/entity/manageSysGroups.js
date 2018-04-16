@@ -99,11 +99,11 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchSysGroups(this.options);
 
-        var iheight = 3;
+        var iheight = 5;
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
-        this.searchForm.css({'height':iheight+'em'});
+        this.searchForm.css({'height':iheight+'em',padding:'10px','min-width': '580px'});
         this.recordList.css({'top':iheight+0.4+'em'});
         //init viewer 
         var that = this;
@@ -114,7 +114,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             this.recordList.resultList('option','rendererHeader',
                 function(){
                     sHeader = '<div style="width:60px"></div><div style="width:3em">ID</div>'
-                    +'<div style="width:10em">Name</div>'
+                    +'<div style="width:11em">Name</div>'
                     +'<div style="width:16em;border:none">Description</div>';
 
                     if(that.options.ugl_UserID>0 || that.options.select_mode=='select_roles'){
@@ -324,7 +324,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
         var recTitle = fld2('ugr_ID','4em')
         +fld2('ugr_Name','12em')
-        +fld2('ugr_Description','25em');
+        +fld2('ugr_Description','100%');
         var recTitleHint = '';//recID+' : '+fld('ugr_Description');
 
         var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
@@ -341,7 +341,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
         + '</div>'
-        + '<div class="recordTitle">'
+        + '<div class="recordTitle" style="right:210px">'
         +     recTitle 
         + '</div>';
 
@@ -383,7 +383,8 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                     html = html 
                     + '<div class="rec_actions user-list user-list-edit edit-members" style="right:140px;width:50px;">'
-                    + fld('ugr_Members') + '<span class="ui-icon ui-icon-pencil" style="font-size:0.8em;right:2px"/></div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
+                    + fld('ugr_Members') + '<span class="ui-icon ui-icon-pencil" '
+                    + ' style="font-size:0.8em;float:right;top:2px;right:2px"/></div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
 
                     html = html + '<div class="rec_actions user-list" style="top:4px;width:140px">';
 

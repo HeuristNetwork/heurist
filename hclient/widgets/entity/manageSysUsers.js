@@ -119,7 +119,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
-        this.searchForm.css({'height':iheight+'em'});
+        this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '730px'});
         this.recordList.css({'top':iheight+0.5+'em'});
         //init viewer 
         var that = this;
@@ -131,10 +131,10 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             this.recordList.resultList('option','rendererHeader',
                     function(){
                     var s = '<div style="width:60px"></div><div style="width:3em">ID</div>'
-                +'<div style="width:7em">Name</div>'
-                +'<div style="width:12em;">Full name</div>'
-                +'<div style="width:7em;border:none">Institution/Organisation</div>'
-                +'<div style="position:absolute;right:76px;width:80px;border-left:1px solid gray">'
+                +'<div style="width:8em">Name</div>'
+                +'<div style="width:12em;border:none;">Full name</div>'
+                +'<div style="position:absolute;width:7em;right:270px;border-right:none;border-left:1px solid gray">Institution/Organisation</div>'
+                +'<div style="position:absolute;right:76px;width:90px;border-left:1px solid gray">'
                         +'Membership</div>';
                         
                         if (window.hWin.HAPI4.is_admin()){
@@ -380,11 +380,11 @@ console.log('ON_CRED???');
         //var recTitle = fld2('ugr_ID','3em')+fld2('ugr_Name','10em')+fld('ugr_FirstName')+' '+fld('ugr_LastName');
         var recTitleHint = fld('ugr_Organisation');
         
-        var recTitle = fld2('ugr_ID','3em')
-                    + '<a class="item" style="width:8em" href="mailto:'+fld('ugr_eMail')+'" title="'+fld('ugr_eMail')+'">'
+        var recTitle = fld2('ugr_ID','3.5em')
+                    + '<a class="item" style="width:9.5em" href="mailto:'+fld('ugr_eMail')+'" title="'+fld('ugr_eMail')+'">'
                     + fld('ugr_Name')+'</a>'
-                    + '<div class="item" style="width:15em">'+fld('ugr_FirstName')+' '+fld('ugr_LastName')+'</div>'
-                    + fld2('ugr_Organisation','8em');
+                    + '<div class="item" style="width:  15em">'+fld('ugr_FirstName')+' '+fld('ugr_LastName')+'</div>'
+                    + '<div class="item" style="width:14em;position: absolute;right: 2px;">'+fld('ugr_Organisation')+'</div>';
         
         var recOpacity = (fld('ugr_Enabled')=='y')?1:0.3;
         
@@ -402,7 +402,7 @@ console.log('ON_CRED???');
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);opacity:'+recOpacity+'">'
         + '</div>'
-        + '<div class="recordTitle" title="'+recTitleHint+'">'
+        + '<div class="recordTitle" title="'+recTitleHint+'" style="right:180px">'
         +     recTitle
         + '</div>';
         
@@ -412,21 +412,22 @@ console.log('ON_CRED???');
             var ugl_GroupID = this.searchForm.find('#input_search_group').val(); 
             if(window.hWin.HAPI4.is_admin() && !(ugl_GroupID>0)){  //all groups - show count of groups where user is a member
                 html = html 
-                    + '<div class="rec_actions user-list user-list-edit" style="right:80px;width:50px;" title="Edit participation of user in groups">'
-                    + fld('ugr_Member') + '<span class="ui-icon ui-icon-pencil" style="font-size:0.8em;right:2px"/></div>';
+                    + '<div class="rec_actions user-list user-list-edit" style="right:90px;width:50px;" title="Edit participation of user in groups">'
+                    + fld('ugr_Member') + '<span class="ui-icon ui-icon-pencil" '
+                    + ' style="font-size:0.8em;float:right;top:2px;right:2px"></span></div>';
             }
-            
+
             
             var ugl_GroupID = this.searchForm.find('#input_search_group').val();
                 
             if(ugl_GroupID>0){
-                html = html + '<div class="rec_actions user-list" style="top:4px;width:140px;">'
+                html = html + '<div class="rec_actions user-list" style="top:4px;width:150px;">'
                 if(recID==2 && ugl_GroupID==window.hWin.HAPI4.sysinfo.db_managers_groupid){
                     html = html + '<div style="min-width:78px;text-align:center">admin</div>';
                 }else 
                 if(window.hWin.HAPI4.has_access(ugl_GroupID)){//current user is admin of given group
                     html = html 
-                        + '<select title="Role" style="min-width:70px;text-align:center;margin:0 4px;" class="user-role" data-value="'
+                        + '<select title="Role" style="min-width:70px;text-align:center;margin-right:18px;" class="user-role" data-value="'
                         + fld('ugl_Role')+'">'
                         +'<option>admin</option><option>member</option><option>remove</option></select>';
                     

@@ -92,6 +92,12 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             }
         }else{
             this.searchForm.searchUsrReminders(this.options);
+            
+            
+            var iheight = 6;
+            this.searchForm.css({'height':iheight+'em',padding:'10px'});
+            this.recordList.css({'top':iheight+0.5+'em'});
+            
             this.recordList.resultList('option','show_toolbar',false);
             this.recordList.resultList('option','view_mode','list');
 

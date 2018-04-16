@@ -161,13 +161,14 @@ $.widget( "heurist.mainMenu", {
         .css({'float':'left', 'padding-right':'2em'})
         .appendTo( this.divMainMenu );
 
+        /*
         this.divProfileItems3 = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
         this._initMenu('ProfileH3', this.divProfileItems3);
-
-        /* new entityfeatures
+        */
+        /* new entityfeatures*/
         this.divProfileItems = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
         this._initMenu('Profile', this.divProfileItems);
-        */
+        
         
         if(window.hWin.HAPI4.sysinfo['layout']=='original'){
             this._initMenu('Database');
@@ -177,10 +178,10 @@ $.widget( "heurist.mainMenu", {
         this._initMenu('Help');
         
         this.divMainMenuItems.menu();
-        //new this.divProfileItems.menu();
-        this.divProfileItems3.menu();
+        this.divProfileItems.menu();
+        //this.divProfileItems3.menu();
         
-        this.divProfileItems3.find('.ui-menu-item').css({'padding':'0em !important'});
+        this.divProfileItems.find('.ui-menu-item').css({'padding':'0em !important'});
 
 
         this.divMainMenuItems_lo = $('<ul>')
@@ -322,8 +323,8 @@ $.widget( "heurist.mainMenu", {
         // remove generated elements
         this.btn_Admin.remove();
         this.btn_Profile.remove();
-        //new this.menu_Profile.remove();
-        this.menu_Profile3.remove();
+        this.menu_Profile.remove();
+        //this.menu_Profile3.remove();
         this.btn_Database.remove();
         this.menu_Database.remove();
         this.btn_Import.remove();
@@ -382,9 +383,9 @@ $.widget( "heurist.mainMenu", {
                 //that._onPopupLink
             });
 
-        //}else if(name=='Profile'){
+        }else if(name=='Profile'){
 
-        }else if(name=='ProfileH3'){
+        //}else if(name=='ProfileH3'){
 
             link = $('<a href="#"><span style="display:inline-block;padding-right:20px">Settings</span>' 
             +'<div class="ui-icon-user" style="display:inline-block;font-size:16px;width:16px;line-height:10px;vertical-align:bottom;"></div>'
