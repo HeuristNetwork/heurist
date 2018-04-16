@@ -423,7 +423,7 @@ console.log('ON_CRED???');
             if(ugl_GroupID>0){
                 html = html + '<div class="rec_actions user-list" style="top:4px;width:150px;">'
                 if(recID==2 && ugl_GroupID==window.hWin.HAPI4.sysinfo.db_managers_groupid){
-                    html = html + '<div style="min-width:78px;text-align:center">admin</div>';
+                    html = html + '<div style="min-width:88px;text-align:center">admin</div>';
                 }else 
                 if(window.hWin.HAPI4.has_access(ugl_GroupID)){//current user is admin of given group
                     html = html 
@@ -433,7 +433,7 @@ console.log('ON_CRED???');
                     
                 }else{
                     html = html 
-                        + '<div title="Role" style="min-width:78px;text-align:center">'
+                        + '<div title="Role" style="min-width:88px;text-align:center">'
                         + fld('ugl_Role')+'</div>';
                 }
             }else{

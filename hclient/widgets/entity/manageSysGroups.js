@@ -334,6 +334,10 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
         +'</div>';
 
+        
+        var is_user_roles = (this.options.ugl_UserID>0 || this.options.select_mode=='select_roles');
+
+        
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" data-value="'+ fld('ugl_Role')+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
@@ -341,7 +345,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
         + '</div>'
-        + '<div class="recordTitle" style="right:210px">'
+        + '<div class="recordTitle" style="right:'+(is_user_roles?270:210)+'px">'
         +     recTitle 
         + '</div>';
 

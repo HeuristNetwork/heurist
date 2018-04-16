@@ -1049,7 +1049,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
                 val = recordset.fld(rec, 'rem_Message');
                 if(val.length>30){
-                    val = val.subs(0,30)+'...';
+                    val = val.substring(0,30)+'...';
                 }
                 sContent = 'Reminder to: '+sContent+' '+val;
                 //sContent = 'found :'+recordset.length();
