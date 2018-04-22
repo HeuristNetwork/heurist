@@ -238,6 +238,7 @@ function downloadFile($mimeType, $filename){
             header('access-control-allow-origin: *');
             header('access-control-allow-credentials: true');
         }
+        
         //header('Content-Type: application/octet-stream');
         //force fownload header('Content-Disposition: attachment; filename='.basename($filename));
         header('Content-Transfer-Encoding: binary');

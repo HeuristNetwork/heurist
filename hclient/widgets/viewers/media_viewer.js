@@ -67,13 +67,44 @@ $.widget( "heurist.media_viewer", {
                     var fileURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database //+ (needplayer?'&player=1':'')
                                  + '&file='+obf_recID;
                     
+//console.log(mimeType);                    
                     if(mimeType && mimeType.indexOf('image')===0){
                         
                         var thumbURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID
-                        var $alink = $("<a>",{href: fileURL, target:'_blank'})  // 'data-fancybox':'fb-images' })
+//                        var $alink = $("<a>",{href: fileURL, target:'_blank'})
+                        var $alink = $("<a>",{href: fileURL, 'data-fancybox':'fb-images'})
                             .appendTo($("<div>").css({height:'auto','display':'inline-block','data-caption':title})
                             .appendTo(this.mediacontent));
                             
+                            
+                        $("<img>", {height:200, src: thumbURL, title:title}).appendTo($alink);
+                        
+                    }else if(mimeType && mimeType=='application/pdf'){
+
+                        var fileURL_forembed = window.hWin.HAPI4.baseURL
+                                + 'hserver/dbaccess/file_download.php?db=' 
+                                + window.hWin.HAPI4.database + '&embed=1&file='+obf_recID;
+                                
+                        /* inline html  */
+                        $('<div style="display:none;width:80%;height:90%" id="pdf-viewer">'
+                                + '<object width="100%" height="100%" name="plugin" data="'
+                                + fileURL_forembed
+                                + '" type="application/pdf"></object></div>').appendTo(this.mediacontent);
+                                
+                        var $alink = $("<a>",{href:'javascript:;', 'data-src':'#pdf-viewer', 'data-fancybox':'fb-images'})
+                            .appendTo($("<div>").css({height:'auto','display':'inline-block','data-caption':title})
+                            .appendTo(this.mediacontent));
+                        
+                        /*in iframe
+                        
+                        fileURL = fileURL + '&mode=tag';
+                        
+                        var $alink = $("<a>",{href: fileURL, 'data-type':'iframe', 'data-fancybox':'fb-images'})
+                            .appendTo($("<div>").css({height:'auto','display':'inline-block','data-caption':title})
+                            .appendTo(this.mediacontent));
+                        */    
+                            
+                        var thumbURL = window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database + '&thumb='+obf_recID
                         $("<img>", {height:200, src: thumbURL, title:title}).appendTo($alink);
                         
                     }else{
@@ -86,15 +117,19 @@ $.widget( "heurist.media_viewer", {
 
             this.mediacontent.show();
 
-            /*
-            if($.fancybox){
-                    var container_id = this.mediacontent.attr('id');
-//console.log('>>>>'+this.mediacontent.parent().attr('id'));                    
+            
+            if($.fancybox && $.isFunction($.fancybox)){
                     $.fancybox({parentEl:this.mediacontent.parent().attr('id'), 
+                                selector : 'a[data-fancybox="fb-images"]', 
+                                loop:true});
+/*                
+                    var container_id = this.mediacontent.attr('id');
+                    $.fancybox({
                                 selector : '#'+container_id+' > a[data-fancybox="fb-images"]', 
                                 loop:true});
+*/                                
             }
-            */
+            
             // /\/redirects\/file_download.php\?db=(?:\w+)&id=(?:\w+)$/i});
         }
     }

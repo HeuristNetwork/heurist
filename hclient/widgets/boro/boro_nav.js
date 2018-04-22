@@ -1677,6 +1677,8 @@ $.widget( "heurist.boro_nav", {
             if(!$.isArray(fval2))  fval2 = [];
             fval = fval.concat(fval2)
             
+            var uniqid = 1;
+            
             if($.isArray(fval)){
                 idx = 0;
                 for (idx in fval)
@@ -1689,18 +1691,39 @@ $.widget( "heurist.boro_nav", {
                     var stitle = isScan?'Document scan':('Photograph of '+fullName);
                     var ext = that.recset.fld(record, 64);
                     if(ext==null) ext = '';
-                    var slightbox = (ext.toLowerCase()=='pdf')?'':'data-fancybox="profile-images" data-lightbox="profile-images"';
+                    //var slightbox = (ext.toLowerCase()=='pdf')?' target="_blank"':'data-fancybox="profile-images" data-lightbox="profile-images"';
+                    var slightbox = 'data-fancybox="profile-images" data-lightbox="profile-images"';
+                    if(ext.toLowerCase()=='pdf'){
+                        slightbox = slightbox+' data-src="#pdf-viewer'+uniqid+'"';
+                        href = 'javascript:;';
+                        
+                        var fileURL_forembed = window.hWin.HAPI4.baseURL
+                                + 'hserver/dbaccess/file_download.php?db=' 
+                                + window.hWin.HAPI4.database + '&embed=1&file='+obf[0];
+                                
+                        /* inline html  */
+                        html = html + '<div style="display:none;width:80%;height:90%" id="pdf-viewer'+uniqid+'">'
+                                + '<object width="100%" height="100%" name="plugin" data="'
+                                + fileURL_forembed
+                                + '" type="application/pdf"></object></div>';
+                                
+                        uniqid++;
+                        
+                    }else{
+                        href = window.hWin.HAPI4.baseURL+ '?db=' + window.hWin.HAPI4.database + '&file=' + obf[0];                        
+                    }
+                    //data-src="http://codepen.io/fancyapps/full/jyEGGG/"
                     
                     html = html +           
                         '<a class="bor-gallery-link" '+slightbox+' data-caption="'
                             + (filename==null?'':filename) + '" data-footer="" title="'+ (filename==null?'':filename) +'" href="'
-                            + window.hWin.HAPI4.baseURL+ '?db=' + window.hWin.HAPI4.database 
-                            + '&file=' + obf[0] +'">'
+                            + href +'">'
                             + '<img class="bor-thumbnail" src="' 
                             + window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database 
                             + '&thumb=' + obf[0]
-                            + '" alt="'+stitle+'" style="max-height:150px">'
-                        +'</a>';                    
+                            + '" alt="'+stitle+'" style="max-height:100px;max-width:100px;">'
+                        +'</a>';      
+                                      
                 }
             }
             

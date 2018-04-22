@@ -77,7 +77,8 @@ if($db){
                 </html>
                 <?php
                 exit();
-        }
+                
+        }    
         
         $system->init($db);
 
@@ -172,6 +173,12 @@ if($db){
                             $size = 'width="300"';
                         }
                         print '<img '.$size.' src="'.$filepath.'"/>';
+                 
+                }else if($mimeType=='application/pdf'){
+//error_log($filepath);                 
+                    print '<embed width="100%" height="100%" name="plugin" src="'
+                                .$filepath.'&embed=1'
+                                .'" type="application/pdf" internalinstanceid="9">';
                     
                 }else{
                     //not media - show thumb with download link
@@ -194,7 +201,7 @@ if($db){
 //DEBUG error_log($filepath.'  '.file_exists($filepath).'  '.$mimeType);  
               
                 if(file_exists($filepath)){
-                    downloadFile($mimeType, $filepath, $originalFileName);
+                    downloadFile($mimeType, $filepath, @$_REQUEST['embed']==1?null:$originalFileName);
                 }else if($url){
 //DEBUG error_log('External '.$url);                
                     header('Location: '.$url);  //redirect to URL (external)

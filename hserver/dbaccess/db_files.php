@@ -375,10 +375,12 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
             header('access-control-allow-origin: *');
             header('access-control-allow-credentials: true');
         }
+        
         //header('Content-Type: application/octet-stream');
-        //force download
+        
+        //force download  - important for embed element DO NOT include this atttibute!
         if($originalFileName!=null){
-            header('Content-Disposition: attachment; filename='.$originalFileName); //basename($filename));
+           header('Content-Disposition: attachment; filename='.$originalFileName); //basename($filename));
         }
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
