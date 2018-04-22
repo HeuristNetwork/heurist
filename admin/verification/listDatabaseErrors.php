@@ -377,7 +377,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             <div>
                 <a name="target_types"/>
                 <?php
-                if (count($bibs == 0)) {
+                if (count($bibs) == 0) {
                     print "<h3>All record pointers point to the correct record type</h3>";
                 }
                 else
@@ -941,7 +941,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
 
             <div>
                 <?php
-                if (count($bibs == 0)) {
+                if (count($bibs) == 0) {
                     print "<h3>No extraneous fields (fields not defined in the list for the record type)</h3>";
                 }
                 else
