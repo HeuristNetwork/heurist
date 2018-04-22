@@ -139,7 +139,7 @@ if(!$is_map_popup){
             //
             //
             function printLTime(sdate){
-                var date = new Date(sdate+" UTC");
+                var date = new Date(sdate+"+00:00");
                 document.write((''+date.getHours()).padStart(2, "0")
                         +':'+(''+date.getMinutes()).padStart(2, "0")
                         +':'+(''+date.getSeconds()).padStart(2, "0"));

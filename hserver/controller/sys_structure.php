@@ -52,6 +52,7 @@
             $data["detailtypes"] = dbs_GetDetailTypes($system, $ids, intval(@$_REQUEST['mode']) );
         }
 
+        
         if (@$_REQUEST['rectypes']) {
             $ids = $_REQUEST['rectypes']=='all'?null:$_REQUEST['rectypes'];
             $mode = intval(@$_REQUEST['mode']);
@@ -61,17 +62,19 @@
             }else{
                 $data["rectypes"] = dbs_GetRectypeStructures($system, $ids, $mode );
             }
+        }else{
+            $mode = 0;
         }
 
-                if($mode==4 && @$_REQUEST['lazyload']){
-                    if(count($data["rectypes"])==1){
-                        $response = $data["rectypes"][0]['children'];
-                    }else{
-                        $response = $data["rectypes"];
-                    }
-                }else{
-                    $response = array("status"=>HEURIST_OK, "data"=> $data );
-                }
+        if($mode==4 && @$_REQUEST['lazyload']){
+            if(count($data["rectypes"])==1){
+                $response = $data["rectypes"][0]['children'];
+            }else{
+                $response = $data["rectypes"];
+            }
+        }else{
+            $response = array("status"=>HEURIST_OK, "data"=> $data );
+        }
 
     }               
     
