@@ -61,6 +61,9 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             var title = null;
             var usr_ID = 0;
             
+            if(this.options.title){
+                title = this.options.title;
+            }else
             if(this.options.select_mode=='select_single'){
                title = 'Select Workgroup'; 
             }else
