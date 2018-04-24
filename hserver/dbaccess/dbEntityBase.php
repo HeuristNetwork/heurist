@@ -396,6 +396,7 @@ class DbEntityBase
         }
     }
     
+    //find $tempfile among temporary files in entity folder and return file info
     protected function getTempEntityFile($tempfile){
         $entity_name = $this->config['entityName'];
         
@@ -417,8 +418,6 @@ class DbEntityBase
         }
         return null;
     }
-        
-        
 
     //
     //

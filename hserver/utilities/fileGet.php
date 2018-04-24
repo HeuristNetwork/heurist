@@ -146,10 +146,16 @@ if($filename){ //download from scratch
             }
             $rec_id = 1;    
             $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';    
-            
         }
         
-        if($rec_id>0){
+        if (!($rec_id>0)) {
+            $filename = $rec_id;   
+            if($viewmode=='thumb'){ 
+                $filename = $path.'thumbnail/'.$rec_id;    
+            }else if($viewmode=='icon'){
+                $filename = $path.'icon/'.$rec_id;    
+            }
+        }else{
         
             if($viewmode=='thumb'){
                 $filename = $path.'thumbnail/'.$rec_id.'.png'; 
@@ -164,12 +170,14 @@ if($filename){ //download from scratch
                         break;
                     }
                 }
-            }                  
-            if(file_exists($filename)){
-                download_file($filename, $content_type);
-                exit();
             }
-        }    
+        }   
+                   
+        if(file_exists($filename)){
+            download_file($filename, $content_type);
+            exit();
+        }
+            
         
         //entity id either not defined or requested file doesn't exist
         //editmode: empty gif (0) or add image gif (1) or default icon/thumb for entity (2)
