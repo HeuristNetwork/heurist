@@ -29,12 +29,6 @@
 * @subpackage  Viewers/Map
 * @deprecated
 */
-
-
-	//require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-	//require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
-	//require_once(dirname(__FILE__)."/../../viewers/map/showMapRequest.php");
-    
     require_once (dirname(__FILE__).'/../../hserver/System.php');
     require_once (dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
     
