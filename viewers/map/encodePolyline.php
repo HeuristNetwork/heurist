@@ -61,6 +61,7 @@ function computeLevel($dd)
     }
     return $lev;
 }
+
 function dpEncode($points)
 {
     global $verySmall;
