@@ -277,8 +277,10 @@ $.widget( "heurist.editing_input", {
         
         if(this.options.showclear_button){
             this.element.find('.btn_input_clear').css({'visibility':'visible','max-width':16});
+            this.element.find('.btn_add_term').css({'visibility':'visible','max-width':16});
         }else{
             this.element.find('.btn_input_clear').css({'visibility':'hidden','max-width':0});
+            this.element.find('.btn_add_term').css({'visibility':'hidden','max-width':0});
         }
         
         if(this.options.show_header){
@@ -599,9 +601,9 @@ $.widget( "heurist.editing_input", {
 
                 }});
 
-
+                    
                 var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
-                .addClass('smallicon ui-icon ui-icon-gear')
+                .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
                 .css({'margin-top':'2px'})
                 .appendTo( $inputdiv );
                 //.button({icons:{primary: 'ui-icon-gear'},text:false});
@@ -1669,6 +1671,8 @@ $.widget( "heurist.editing_input", {
                 
                         //url for thumb
                         var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, this.options.recID, 'thumb', 1);
+                        var dt = new Date();
+                        urlThumb = urlThumb+'&ts='+dt.getTime();
                         
                         $input.css({'padding-left':'30px'});
                         $('<span class="ui-icon ui-icon-folder-open"></span>')
@@ -1753,7 +1757,13 @@ $.widget( "heurist.editing_input", {
                         if(file.ulf_ID>0){
                             that.newvalues[$input.attr('id')] = file.ulf_ID;
                         }else{
-                            $input_img.find('img').prop('src', file.thumbnailUrl);
+                            
+                            var urlThumb = window.hWin.HAPI4.getImageUrl(that.configMode.entity, 
+                                        newfilename+'.png', 'thumb', 1);
+                            
+                            // file.thumbnailUrl - is correct but inaccessible for heurist server
+                            // we get image via fileGet.php
+                            $input_img.find('img').prop('src', urlThumb);
                             that.newvalues[$input.attr('id')] = newfilename;
                         }
                         $input.attr('title', file.name);
@@ -2424,7 +2434,7 @@ $.widget( "heurist.editing_input", {
                     //error highlight
                     $(this.inputs[idx]).addClass( "ui-state-error" );
                     //add error message
-                    errorMessage = 'Field is required';
+                    errorMessage = 'Value exceeds max length: '+max_length;
                 }
             }
         }

@@ -453,11 +453,15 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
                 +'<span></span><div class="header" style="padding-left: 16px;">'
-                +'<label for="cb_replace_all">Replace all occurrences</label></div>'
+                +'<label for="cb_replace_all">Replace all values</label></div>'
                 +'<input id="cb_replace_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 4px 0">'
                 +'</div>').change(function(){
-                    
-                    $('#fld-1').editing_input('setDisabled',$(event.target).is(':checked'));
+                                                            
+                    if($(event.target).is(':checked')){
+                        $('#fld-1').hide();    
+                    }else{
+                        $('#fld-1').show();    
+                    }
                     
                 }).appendTo($fieldset);
             
