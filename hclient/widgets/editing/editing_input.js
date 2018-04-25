@@ -214,7 +214,7 @@ $.widget( "heurist.editing_input", {
 
         //values are not defined - assign default value
         var values_to_set;
-
+        
         if( !window.hWin.HEURIST4.util.isArray(this.options.values) ){
             var def_value = this.f('rst_DefaultValue');
             if(window.hWin.HEURIST4.util.isempty(def_value)){

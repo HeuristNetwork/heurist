@@ -101,7 +101,7 @@ function hEditing(_options) {
             }
     }
     
-    function _initEditForm(_recstructure, _recdata){
+    function _initEditForm(_recstructure, _recdata, _is_insert){
         
         wasModified = 0;
         
@@ -276,6 +276,11 @@ function hEditing(_options) {
                             }else{
                                 fields[idx].values = null; //[''];
                             }  
+                            //reset default value - default value for new record only
+                            if(_is_insert!==true && fields[idx]['dtFields']['rst_DefaultValue']){
+                                fields[idx]['dtFields']['rst_DefaultValue']='';   
+                            }
+                            
                         }else{
                         //new record - reset all values    
                             fields[idx].values = null;    
@@ -501,8 +506,8 @@ function hEditing(_options) {
         //
         // create edit form and fill values from given recordset
         //
-        initEditForm: function(_recstructure, _recdata){
-            _initEditForm(_recstructure, _recdata);
+        initEditForm: function(_recstructure, _recdata, _is_insert){
+            _initEditForm(_recstructure, _recdata, _is_insert);
         },
 
         getValue:function(dtID){

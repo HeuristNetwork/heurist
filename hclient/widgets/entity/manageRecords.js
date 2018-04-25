@@ -1776,7 +1776,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 fields[fields.length-1].children = group_fields;
             }
             
-            that._editing.initEditForm(fields, that._currentEditRecordset);
+            that._editing.initEditForm(fields, that._currentEditRecordset, that._isInsert);
             
             that._afterInitEditForm();
 

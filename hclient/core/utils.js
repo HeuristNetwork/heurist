@@ -100,6 +100,16 @@ window.hWin.HEURIST4.util = {
               
               //if(mode !== (ele.prop('disabled')=='disabled')){
               
+              if($(ele).hSelect("instance")!=undefined){              
+                  
+                  if (mode) {
+                    $(ele).hSelect( "disable" );
+                  }else{
+                    $(ele).hSelect( "enable" );    
+                  }
+                  
+                  
+              }else{
                   if (mode) {
                         ele.prop('disabled', 'disabled');
                         ele.addClass('ui-state-disabled');
@@ -107,6 +117,7 @@ window.hWin.HEURIST4.util = {
                         ele.removeProp('disabled');
                         ele.removeClass('ui-state-disabled ui-button-disabled');
                   }
+              }
               
               //}
           });
