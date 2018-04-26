@@ -289,6 +289,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         //return '<div style="display:table;height:2em;width:99%;font-size:0.9em">'
         return __cell('Record title',35)+__cell('Recipient',17)+__cell('Freq',5)
                     +__cell('Date',13)+__cell('Message',30);//+__cell('',12);
+                    
     },
     
     //----------------------
@@ -322,7 +323,8 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
                 + fld2('rem_RecTitle','39ex') + ' ' + recipient 
-                + fld2('rem_Freq','7ex')+fld2('rem_StartDate','14ex')+fld2('rem_Message','40ex');
+                + fld2('rem_Freq','7ex')+fld2('rem_StartDate','14ex')
+                + fld2('rem_Message','40ex;position:absolute;left:500px;bottom:6px');
         
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){

@@ -99,7 +99,7 @@ $.widget( "heurist.manageEntity", {
         // select_multi - several items can be highlighted, chekboxes are visible in list, onselect works only if button prerssed
         select_mode: 'manager', //'select_single','select_multi','manager'
 
-        selectbutton_label: 'Select',  //label for select button @todo remove?? 
+        selectbutton_label: 'Select',  //label for select button
         
         select_return_mode: 'ids', //ids or recordset
         
@@ -705,7 +705,10 @@ $.widget( "heurist.manageEntity", {
                 
             }else {
                 //if(options.in_popup_dialog===false){ 
-                btn_array.push({text:window.hWin.HR('Close'), 
+                var cancelbutton_label = (options['select_mode']=='select_multi' || options['select_mode']=='select_roles')
+                    ?'Cancel':'Close';
+                
+                btn_array.push({text:window.hWin.HR(cancelbutton_label), 
                         click: function() { that.closeDialog(); }}); //use usual close dialog 
             }
             

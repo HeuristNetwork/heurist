@@ -49,7 +49,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         
             if(this.options.select_mode=='manager'){
-            
+           /* 
                 //expand and show tag details and usage
                 this.btn_show_usage = $('<div>').css({'position':'absolute', top:3, right:3}).appendTo(this.element);
                 this.btn_show_usage.css({'min-width':'9m','z-index':2})
@@ -57,16 +57,16 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                                 secondary: "ui-icon-carat-1-w"}});
                         
                 this._on( this.btn_show_usage, {"click": this.showHideUsage});
+            */
             
-            
-                this.searchForm.find('.heurist-helper1').hide();
+                //this.searchForm.find('.heurist-helper1').hide();
                 
                 this._initInlineEditorControls();
                 
             }
 
-            this.searchForm.css('height','3.3em');    
-            this.recordList.css('top','3.3em');    
+            this.searchForm.css({'height':'7em','padding':'10px'});    
+            this.recordList.css('top','7em');    
             
         }
       
@@ -81,6 +81,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         
         if(this.options.list_mode!='compact'){
+            /*
             this._on(this.element, {'competency': function(event, level){
                 var top = 3.3;
                 if(level>0 && this.options.select_mode!='manager'){
@@ -90,6 +91,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 this.recordList.css('top',top+'em');    
                 
             }});
+            */
         }
         
     },
@@ -214,7 +216,9 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         .attr('data-id-acc', groupID).addClass('summary-accordion').appendTo(that.recordList);
                     $('<h3>').text(name).appendTo(acc);
                     
-                    var content = $('<div>').attr('data-id', groupID).addClass('summary-content').appendTo(acc);
+                    var content = $('<div>').attr('data-id', groupID)
+                        .addClass('summary-content ui-heurist-bg-light')
+                        .css('padding','10px').appendTo(acc);
                     //init
                     acc.accordion({
                         collapsible: true,
@@ -236,9 +240,9 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     }
 
                 //ADD button        
-                $('<div class="recordDiv tagDiv">' // style="float:right;"
-                + '<input type="text" style="width:15ex" size="60"/>'
-                + '<div class="rec_action_link" data-key="add" style="visibility:visible !important"/>'
+                $('<div class="recordDiv tagDiv tagDiv-fixed-width" style="display:block;text-decoration:none">'
+                + '<label>Add a tag</label> <input type="text" style="width:15ex" size="60"/>'
+                + '<div class="rec_action_link" data-key="add" style="margin-left:4px;visibility:visible !important"/>'
              /*   
                 + '<div title="Click to add tag" class="rec_action_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="add" >'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-plus"></span><span class="ui-button-text"></span>'
@@ -261,6 +265,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         var records = recordset.getRecords();
         var order = recordset.getOrder();
         var recID, label, groupid, record;
+        
+        var maxlen = {};
 
         for (idx=0;idx<order.length;idx++){
 
@@ -275,11 +281,26 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 
                 var content = this.recordList.find('div[data-id="'+groupid+'"]');
                 
-                var item = '<div  recid="'+recID+'" groupid="'+groupid+'" usage="'+usage+'" class="recordDiv tagDiv"'
+                //var label = label + (usage>0?(' ('+usage+')'):'');
+                
+                var item = '<div  recid="'+recID+'" groupid="'+groupid+'" usage="'+usage
+                            +'" class="recordDiv tagDiv tagDiv-fixed-width"'
                     //(this.options.selection_ids.indexOf(recID)<0?'in-available':'in-selected')+'"
-                            +'><label>'+ label + (usage>0?(' ('+usage+')'):'')
-                            +'</label><div class="rec_action_link" data-key="delete"/>'
+                            +'><label>'+ label
+                            +'</label>'
++('<span class="user-list-edit" style="margin:0 4px;display:'
++ (usage>0?'inline-block':'none')
++';width:3ex;" '
++'title="Search for records marked with this tag">'
++usage
+//+'<span class="ui-icon ui-icon-link" style="font-size:0.8em;float:right;top:2px;right:2px"></span>
++'</span>')                                                  
+                            +'<div class="rec_action_link" data-key="delete" style="float:right"/>'
                             +'</div>';
+                
+                if(!maxlen[groupid] || label.length>maxlen[groupid]) {
+                    maxlen[groupid] = label.length;   
+                }
                         
                 if(this.options.select_mode=='select_multi'){
                     if(this.options.selection_ids.indexOf(recID)<0){
@@ -294,7 +315,18 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 }
                 
             }
+        }//for
+
+        //set min widht by max label width        
+        for (var groupid in maxlen)
+        if(groupid>0){
+            var wd = (maxlen[groupid]<10?10:maxlen[groupid])+8;
+//console.log(groupid+'   '+maxlen[groupid]+' w='+wd+' cnt='+this.recordList.find('div.recordDiv[groupid="'+groupid+'"]').length);
+            this.recordList.find('div.recordDiv[groupid="'+groupid+'"]')
+                .attr('data-wd',wd)
+                .css({'min-width': wd+'ex','max-width': wd+'ex'});
         }
+        
         
             
             //add buttons
@@ -424,7 +456,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                                     item.appendTo( content.find('.available') );
                                 }
                                 
-                            }else if(this.options.select_mode=='select_single'){
+                            }
+                            else if(this.options.select_mode=='select_single'){
 
                                 //this.selectedRecords([recid]);
                                 this.options.selection_ids.push(recid);
@@ -463,12 +496,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         content = content.find('.picked');
                     }
                     
-                    var ele = $('<div class="recordDiv tagDiv" recid="'+recID
+                    var ele = $('<div class="recordDiv tagDiv tagDiv-fixed-width" recid="'+recID
                     +'"><label>'+ fields['tag_Text']
-                    +'</label><div class="rec_action_link" data-key="delete"/>'
+                    +'</label><div class="rec_action_link" data-key="delete" style="float:right"/>'
                     +'</div>')
                             .appendTo(content);
-                
+                            
+                            
                     if(this.options.select_mode=='manager'){
                         var btns = ele.find('div.rec_action_link').button(
                                         {icons: {primary: 'ui-icon-circle-close'}, 
@@ -480,9 +514,23 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 }
                 
             }else{
-                this.recordList.find('div[recid='+recID+'] > label').text(fields['tag_Text']
-                +(fields['tag_Usage']>0?(' ('+fields['tag_Usage']+')'):''));
+                var item = this.recordList.find('div[recid='+recID+']');
                 
+                item.find('label').text(fields['tag_Text']); //set new tagname
+                
+                item.find('span.user-list-edit')
+                    .css('display',usage>0?'inline-block':'none').text(usage);
+
+                    
+                var oldwd = item.attr('data-wd');
+                var wd = fields['tag_Text'].length+9;
+                if(wd>oldwd){ //reset tag width for all items in group
+                    this.recordList.find('div.recordDiv[groupid="'+fields['tag_UGrpID']+'"]')
+                        .attr('data-wd', wd)
+                        .css({'min-width': wd+'ex','max-width': wd+'ex'});
+                }
+                    
+
                 //reload
                 //var recordset = this.getRecordSet([recID]);
                 //this._initEditForm_step4(recordset);
@@ -760,8 +808,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         var that = this;
         
-        this.edit_replace_input = $('<input type="text" style="width:15ex;margin-right:4px" size="60"/>')
-            .css({height:'auto', 'max-height':'200px', 'font-size':'0.9em',
+        this.edit_replace_input = $('<input type="text" style="width:12em;" size="60"/>')
+            .css({height:'auto', 'font-size':'0.9em',
                   cursor:'pointer'})
             .appendTo(this.element).hide();
 

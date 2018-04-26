@@ -69,13 +69,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         // init search header
         this.searchForm.searchRecUploadedFiles(this.options);
-        var iheight = 8;
+        var iheight = 7.4;
         
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 8;
         }
-        this.searchForm.css({'height':iheight+'em'});
-        this.recordList.css({'top':iheight+0.4+'em'});
+        this.searchForm.css({'height':iheight+'em', padding:'10px', 'min-width': '730px'});
+        this.recordList.css({'top':iheight+2+'em'});
         //init viewer 
         var that = this;
         
@@ -242,6 +242,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             }
         }        
                 
+                
+        //hide after edit init btnRecRemove
+        var ele = this._toolbar;
+        ele.find('#btnRecRemove').hide();
                 
     },    
         

@@ -132,8 +132,10 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 this.input_search.parent().hide();
                 this.input_search_path.parent().hide();
                 this.input_search_url.parent().show();
-                this.element.find('span.local').hide();
-                this.element.find('span.external').show();
+                //this.element.find('span.local').hide();
+                //this.element.find('span.external').show();
+                this.element.find('.heurist-helper1 > .local').hide();
+                this.element.find('.heurist-helper1 > .external').show();
 
                 if(this.input_search_url.val()!=''){
                     request['ulf_ExternalFileReference'] = this.input_search_url.val();    
@@ -146,8 +148,8 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 this.input_search_url.parent().hide();
                 this.input_search.parent().show();
                 this.input_search_path.parent().show();
-                this.element.find('span.local').show();
-                this.element.find('span.external').hide();
+                this.element.find('.heurist-helper1 > .local').show();
+                this.element.find('.heurist-helper1 > .external').hide();
                 
                 request['ulf_ExternalFileReference'] = 'NULL';
                 

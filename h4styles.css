@@ -386,8 +386,15 @@ optgroup {
     cursor: pointer;
     border: none;
     background: none !important;
-    margin: 2px;
+    margin: 3px;
+    padding: 3px;
     text-decoration: underline;
+}
+.tagDiv-fixed-width {
+    /*
+    min-width:120px;
+    max-width:120px;
+    */
     /*
     border:1px solid gray;
     border-radius: 4px;
@@ -712,6 +719,9 @@ div .selected_last{
     vertical-align: middle;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+.list .recordDiv .recordTitle2 {
+    left: 54px;
 }
 .icons .recordDiv .recordTitle .inlist, .thumbs .recordDiv .recordTitle .inlist{
     display:none;

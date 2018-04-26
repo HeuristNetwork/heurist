@@ -312,22 +312,25 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         function fld(fldname){
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
-        function fld2(fldname, col_width){
-            swidth = '';
-            if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="width:'+col_width+'"';
+        function fld2(fldname, sstyle, tip_text){
+            
+            if(!window.hWin.HEURIST4.util.isempty(sstyle)){
+                sstyle = ' style="'+sstyle+'"';
+            }else{
+                sstyle = '';
             }
             var val = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
-            return '<div class="item" '+swidth+' title="'+val+'">'+val+'</div>';
+            return '<div class="item" '+sstyle+' title="'+tip_text+'">'+val+'</div>';
         }
 
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
 
         var recID   = fld('ugr_ID');
+        var tip_text = fld('ugr_Description');
 
-        var recTitle = fld2('ugr_ID','4em')
-        +fld2('ugr_Name','12em')
-        +fld2('ugr_Description','100%');
+        var recTitle = fld2('ugr_ID','width:4em', '')
+        +fld2('ugr_Name','width:12em', tip_text)
+        +fld2('ugr_Description','width:100%;position:absolute', tip_text);
         var recTitleHint = '';//recID+' : '+fld('ugr_Description');
 
         var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
@@ -406,7 +409,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                         }else{}*/
                         html = html                      
-                        + '<div title="Role" style="min-width:70px;text-align:center">'
+                        + '<div title="Role" style="min-width:80px;text-align:center">'
                         + fld('ugl_Role')+'</div>';
 
                     }else{

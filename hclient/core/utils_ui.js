@@ -1269,6 +1269,8 @@ window.hWin.HEURIST4.ui = {
     
     //
     // exp_level 2 beginner, 1 intermediate, 0 expert
+    // heurist-helper2  for level>1
+    // heurist-helper1  for level>0
     //
     applyCompetencyLevel: function(exp_level, $context){
 

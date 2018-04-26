@@ -1012,6 +1012,7 @@ $.widget( "heurist.mainMenu", {
                                     var options3 = {
                                         title: 'Allocate imported users to work groups',
                                         select_mode: 'select_roles',
+                                        selectbutton_label: 'Allocate roles',
                                         edit_mode: 'none',
                                         onselect:function(event, data){
                                             if(data && !$.isEmptyObject(data.selection)){

@@ -119,12 +119,12 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchSysUsers(this.options);
         
-        var iheight = 6;
+        var iheight = 7;
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
         this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '730px'});
-        this.recordList.css({'top':iheight+0.5+'em'});
+        this.recordList.css({'top':iheight+0.5+'em', 'min-width': '730px'});
         //init viewer 
         var that = this;
         
@@ -134,7 +134,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             
             this.recordList.resultList('option','rendererHeader',
                     function(){
-                    var s = '<div style="width:60px"></div><div style="width:3em">ID</div>'
+                    var s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
                 +'<div style="width:8em">Name</div>'
                 +'<div style="width:12em;border:none;">Full name</div>'
                 +'<div style="position:absolute;width:7em;right:270px;border-right:none;border-left:1px solid gray">Institution/Organisation</div>'
@@ -406,7 +406,7 @@ console.log('ON_CRED???');
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);opacity:'+recOpacity+'">'
         + '</div>'
-        + '<div class="recordTitle" title="'+recTitleHint+'" style="right:180px">'
+        + '<div class="recordTitle recordTitle2" title="'+recTitleHint+'" style="right:180px">'
         +     recTitle
         + '</div>';
         

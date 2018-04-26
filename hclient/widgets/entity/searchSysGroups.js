@@ -50,7 +50,20 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
         
         this.input_search_role = this.element.find('#input_search_type');
         
+        //hide all help divs except current mode
+        var smode = this.options.select_mode; 
+        if(smode=='manager'){
+            if(this.options.ugl_UserID>0){
+                smode = 'manager_for_user';
+            }else if (window.hWin.HAPI4.is_admin()){
+                smode = 'manager_for_admin';
+            }
+        }
+        this.element.find('.heurist-helper1').find('span').hide();
+        this.element.find('.heurist-helper1').find('span.'+smode+',span.common_help').show();
+        //
         
+        //
         if(this.options.select_mode=='select_roles'){
             this.input_search_role.parent().hide(); //always search any group               
         }else

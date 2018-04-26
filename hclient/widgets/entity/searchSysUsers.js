@@ -34,6 +34,11 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         }
         
         this._super();
+
+        //hide all help divs except current mode
+        var smode = this.options.select_mode; 
+        this.element.find('.heurist-helper1').find('span').hide();
+        this.element.find('.heurist-helper1').find('span.'+smode+',span.common_help').show();
         
         this.btn_add_record = this.element.find('#btn_add_record');
         this.btn_find_record = this.element.find('#btn_find_record');

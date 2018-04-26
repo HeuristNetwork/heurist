@@ -47,6 +47,10 @@ $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
         });
         this._on( this.input_search, { keyup: this.startSearch });
         
+        //hide all help divs except current mode
+        var smode = this.options.select_mode; 
+        this.element.find('.heurist-helper1 > span').hide();
+        this.element.find('.heurist-helper1 > span.'+smode+',span.common_help').show();
         
         if(this.options.use_cache){
             this.startSearchInitial();            
