@@ -390,17 +390,7 @@ optgroup {
     padding: 3px;
     text-decoration: underline;
 }
-.tagDiv-fixed-width {
-    /*
-    min-width:120px;
-    max-width:120px;
-    */
-    /*
-    border:1px solid gray;
-    border-radius: 4px;
-    padding: 2px;
-    */
-}
+
 .tagDiv > label{
     cursor: pointer;
 }

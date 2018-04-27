@@ -976,11 +976,11 @@ function hRecordSet(initdata) {
                             }else
                             if(isnegate[fieldName]){
                                 isOK = (this.fld(record,fieldName).toLowerCase() != request[fieldName]);
-                                break;                            
+                                if(!isOK) break;                            
                             }else 
                             if(isexact[fieldName]){
                                 isOK = (this.fld(record,fieldName).toLowerCase() == request[fieldName]);
-                                break;                            
+                                if(!isOK) break;                            
                             }else
                             if(this.fld(record,fieldName).toLowerCase().indexOf(request[fieldName])<0){
                                 isOK = false;
