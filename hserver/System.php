@@ -789,7 +789,6 @@ error_log(print_r($_REQUEST, true));
             }
         }
         
-
         //get session id from cookes    
         if (@$_COOKIE['heurist-sessionid']) {
             session_id($_COOKIE['heurist-sessionid']);
@@ -799,7 +798,8 @@ error_log(print_r($_REQUEST, true));
             //session_id(sha1(rand()));
             @session_start();
             $session_id = session_id();
-            setcookie('heurist-sessionid', $session_id, 0, '/');//, HEURIST_SERVER_NAME);
+            $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+            setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https );//, HEURIST_SERVER_NAME);
         }
 
         /*
@@ -917,7 +917,8 @@ error_log(print_r($_REQUEST, true));
                 
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
-                $cres = setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/');//, HEURIST_SERVER_NAME);
+                $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+                $cres = setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/', '', $is_https );
             }
             
             session_write_close();
@@ -965,7 +966,10 @@ error_log(print_r($_REQUEST, true));
                         $time = time() + 30*24*60*60;  //30 days
                         $_SESSION[$this->dbname_full]['keepalive'] = true; //refresh time on next entry
                     }
-                    $cres = setcookie('heurist-sessionid', session_id(), $time, '/'); //, HEURIST_SERVER_NAME);
+                
+                    //update cookie expire time
+                    $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+                    $cres = setcookie('heurist-sessionid', session_id(), $time, '/', '', $is_https );
                     if(!$cres){
                     }
 
@@ -1001,7 +1005,9 @@ error_log(print_r($_REQUEST, true));
         
         $this->start_my_session(false);
 
-        $cres = setcookie('heurist-sessionid', "", time() - 3600);
+        //clear     
+        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+        $cres = setcookie('heurist-sessionid', "", time() - 3600, '', $is_https);
         $this->current_User = null;
         //session_destroy();
         
