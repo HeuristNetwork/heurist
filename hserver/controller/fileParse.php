@@ -1397,7 +1397,7 @@ function findRecordIds($imp_session, $params){
                         $search_stmt->bind_result($rec_ID, $rec_Title);
                         
                         //assign parameters for search query
-                        call_user_func_array(array($search_stmt, 'bind_param'), refValues($a_tobind));
+                        call_user_func_array(array($search_stmt, 'bind_param'), referenceValues($a_tobind));
                         $search_stmt->execute();
                         $disamb = array();
                         while ($search_stmt->fetch()) {

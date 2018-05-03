@@ -472,7 +472,7 @@ error_log(print_r($params, true));
 
         $stmt = $mysqli->prepare($query);
         if($stmt){
-            call_user_func_array(array($stmt, 'bind_param'), refValues($params));
+            call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
             if(!$stmt->execute()){
                 $ret = $mysqli->error;
             }else{
@@ -493,7 +493,7 @@ error_log(print_r($params, true));
     * @param    array [$arr] of values
     * @return   array of values or references to values
     */
-    function refValues($arr) {
+    function referenceValues($arr) {
         if (strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
         {
             $refs = array();
