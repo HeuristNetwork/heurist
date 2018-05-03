@@ -1329,13 +1329,14 @@ class HPredicate {
         }
         else {
             
-            if($this->pred_type=='title' || $this->pred_type=='url' || $this->pred_type=='notes'){
+            if($this->pred_type=='title' || $this->pred_type=='url' || $this->pred_type=='notes'
+                || $this->field_type =='date'){
                 $cs_ids = null;
             }else{
                 $cs_ids = getCommaSepIds($this->value);
             }
             
-            if ($cs_ids) {  
+            if ($cs_ids && strpos($cs_ids, ',')>0) {  
             //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
                                 
                 // comma-separated list of defRecTypes ids
