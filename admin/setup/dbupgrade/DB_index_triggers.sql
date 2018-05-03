@@ -13,7 +13,7 @@
 */
 
 /**
-* DB_index_triggers.sql: SQL file to create or update triggers for Heurist_DBs_index databsae - need to be run for all databases on server
+* DB_index_triggers.sql: SQL file to create or update triggers for Heurist_DBs_index database - need to be run for all databases on server
 *
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>

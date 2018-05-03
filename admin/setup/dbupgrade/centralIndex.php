@@ -42,12 +42,13 @@
         return;
     }
     
+    set_time_limit(0); 
+    print 'start execution';
+    
     //1. create and fill central index
     $dir = HEURIST_DIR.'admin/setup/dbupgrade/';
     $filename1 = $dir."DB_index.sql";
     $filename2 = $dir."DB_index_triggers.sql";
-    
-    
     
     if( file_exists($filename1) && file_exists($filename2) ){
     
@@ -95,11 +96,13 @@
         
        print $idx.'  '.$db_name.'<br>';     
        
+       //add entry for database
        $res = mysql_query("delete from `Heurist_DBs_index`.`sysIdentifications` where `sys_Database`='$db_name'");
        if(!$res) {print mysql_error(); break;}
        $res = mysql_query("insert into `Heurist_DBs_index`.`sysIdentifications` select '$db_name' as dbName, s.* from `$db_name`.`sysIdentification` as s");
        if(!$res) {print mysql_error(); break;}
 
+       //add all users for database 
        $res = mysql_query("delete from `Heurist_DBs_index`.`sysUsers` where `sus_Database`='$db_name' AND sus_ID>0");
        if(!$res) {print mysql_error(); break;}
        $res = mysql_query("insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "

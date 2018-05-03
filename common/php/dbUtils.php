@@ -92,6 +92,11 @@ function db_drop($db_name, $verbose = true) { // called in case of failure to re
 
         $sql = "DROP DATABASE IF EXISTS `".$db_name."`";
         if ($mysqli->query($sql)) {
+            
+            //remove from central index database
+            $mysqli->query('DELETE FROM heurist_index.sysUsers WHERE sus_Database=`'.$db_name.'`');
+            $mysqli->query('DELETE FROM heurist_index.sysIdentifications WHERE sys_Database=`'.$db_name.'`');
+            
             $res = true;
         }
         $mysqli->close();
