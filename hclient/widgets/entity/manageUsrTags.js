@@ -297,7 +297,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
 +'</span>')                                                  
                             +'<div class="rec_action_link" data-key="delete" style="float:right"/>'
                             +'</div>';
-                
+               
                 if(!maxlen[groupid] || label.length>maxlen[groupid]) {
                     maxlen[groupid] = label.length;   
                 }
@@ -520,7 +520,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 
                 item.find('span.user-list-edit')
                     .css('display',usage>0?'inline-block':'none').text(usage);
-
                     
                 var oldwd = item.attr('data-wd');
                 var wd = fields['tag_Text'].length+9;
@@ -808,7 +807,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
         var that = this;
         
-        this.edit_replace_input = $('<input type="text" style="width:12em;" size="60"/>')
+        this.edit_replace_input = $('<input type="text" style="width:10em;" size="60"/>')
             .css({height:'auto', 'font-size':'0.9em',
                   cursor:'pointer'})
             .appendTo(this.element).hide();
@@ -1012,8 +1011,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     //
     //
     _hideInlineEditorControls: function(){
-        if(this.edit_replace_input.parent().hasClass('recordDiv')){
-            this.edit_replace_input.parent().find('label').show();
+        
+        var item  = this.edit_replace_input.parent();
+        if(item.hasClass('recordDiv')){
+            item.find('label').show();
+            if(item.attr('usage')>0){
+                item.find('span.user-list-edit').css('display','inline-block');    
+            }
+            item.find('div.rec_action_link').show();
         }
         this.edit_replace_input.hide();
         this.list_div.hide();    
@@ -1029,6 +1034,9 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         this.edit_replace_input.insertBefore(lbl).show();
         lbl.hide();
 
+        item.find('span.user-list-edit').hide();
+        item.find('div.rec_action_link').hide();
+        
         var tagID = item.attr('recid');
         this.edit_replace_input.val(this._getTagLabel(tagID));
         this.edit_replace_input.focus();

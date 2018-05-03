@@ -661,9 +661,12 @@ $.widget( "heurist.search", {
         window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:add_rec_prefs[1]},
         function(response){
             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                
+                var owner = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
+                
                 that.btn_select_owner.button({'label':
                     '<div style="text-align:left;display:inline-block">'
-                    +response.data[add_rec_prefs[1]]+'<br>'+add_rec_prefs[2]+'</div>'});
+                    +response.data[add_rec_prefs[1]]+'<br>'+owner[add_rec_prefs[2]]+'</div>'});
             }       
         });                                
         
