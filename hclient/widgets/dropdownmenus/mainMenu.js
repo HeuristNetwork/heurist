@@ -161,10 +161,6 @@ $.widget( "heurist.mainMenu", {
         .css({'float':'left', 'padding-right':'2em'})
         .appendTo( this.divMainMenu );
 
-        /*
-        this.divProfileItems3 = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
-        this._initMenu('ProfileH3', this.divProfileItems3);
-        */
         /* new entityfeatures*/
         this.divProfileItems = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
         this._initMenu('Profile', this.divProfileItems);
@@ -384,9 +380,7 @@ $.widget( "heurist.mainMenu", {
             });
 
         }else if(name=='Profile'){
-
-        //}else if(name=='ProfileH3'){
-
+            
             link = $('<a href="#"><span style="display:inline-block;padding-right:20px">Settings</span>' 
             +'<div class="ui-icon-user" style="display:inline-block;font-size:16px;width:16px;line-height:10px;vertical-align:bottom;"></div>'
             +'&nbsp;<div class="usrFullName" style="display:inline-block">'
