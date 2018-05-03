@@ -177,7 +177,7 @@ function EditRecStructure() {
                     var fieldType = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
                     var conceptCode = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_ConceptID];
                     
-                    //get rid of garbage help text
+                    /*get rid of garbage help text
                     if (top.HEURIST.util.isnull(aval[fi.rst_DisplayHelpText]) ||
                         aval[fi.rst_DisplayHelpText]=='Please rename to an appropriate heading within each record structure' || 
                         aval[fi.rst_DisplayHelpText].indexOf('Please document the nature of this detail type')==0 ||
@@ -185,7 +185,7 @@ function EditRecStructure() {
                         aval[fi.rst_DisplayHelpText]=='Headings serve to break the data entry form up into sections'){
                             
                         aval[fi.rst_DisplayHelpText]='';
-                    }
+                    }*/
                     
 
                     arr.push([ rst_ID,

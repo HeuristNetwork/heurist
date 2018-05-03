@@ -201,7 +201,8 @@ $.widget( "heurist.editing_input", {
         .appendTo( this.input_cell );
 
         //add prompt
-        var help_text = this.f('rst_DisplayHelpText');
+        var help_text = top.HEURIST4.ui.getRidGarbageHelp(this.f('rst_DisplayHelpText'));
+        
         this.input_prompt = $( "<div>")
         .html( help_text && !this.options.suppress_prompts ?help_text:'' )
         .addClass('heurist-helper1').css('padding-bottom','1em');

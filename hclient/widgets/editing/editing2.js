@@ -250,7 +250,9 @@ function hEditing(_options) {
                     
                     if(fields[idx]['dty_Type']=="separator"){
                         $('<h4>').text(fields[idx]['rst_DisplayName']).addClass('separator').appendTo(fieldContainer);
-                        var div_prompt = $('<div>').text(fields[idx]['rst_DisplayHelpText']).addClass('heurist-helper1').appendTo(fieldContainer);
+                        var div_prompt = $('<div>')
+                            .text(top.HEURIST4.ui.getRidGarbageHelp(fields[idx]['rst_DisplayHelpText']))
+                            .addClass('heurist-helper1').appendTo(fieldContainer);
                         //see applyCompetencyLevel
                         //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
                     }else  
