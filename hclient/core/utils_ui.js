@@ -2033,7 +2033,7 @@ window.hWin.HEURIST4.ui = {
     getRidGarbageHelp: function(help_text){
 
         //get rid of garbage help text
-        if (top.HEURIST.util.isnull(help_text) ||
+        if (window.hWin.HEURIST4.util.isnull(help_text) ||
             help_text.indexOf('Please rename to an appropriate heading')==0 || 
             help_text.indexOf('Please document the nature of this detail type')==0 ||
             help_text=='Another separator field' ||
