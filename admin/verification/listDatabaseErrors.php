@@ -361,7 +361,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 where dty_Type = "resource"
                 and dty_PtrTargetRectypeIDs > 0
             and (INSTR(concat(dty_PtrTargetRectypeIDs,\',\'), concat(rec_RecTypeID,\',\')) = 0)');
-            // it does not work and rec_RecTypeID not in (dty_PtrTargetRectypeIDs)');
+            
             $bibs = array();
             while ($row = mysql_fetch_assoc($res)){
                 $bibs[$row['dtl_RecID']] = $row;

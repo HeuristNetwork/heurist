@@ -52,11 +52,12 @@
         "saveRTG",
         "saveDetailType",
         "saveDT",
+        'checkDtPtr',
         "saveDTG",
         "saveTerms",
         "mergeTerms",
         "deleteTerms",
-        'checkTerm',
+        'checkPtr',
         "deleteDT",
         "deleteRT",
         "deleteRTG",
@@ -337,6 +338,15 @@ else
                 }
                 break;
 
+            case 'checkDtPtr':  //verify usage of recordtype in pointer field
+
+                $rty_ID = @$_REQUEST['rty_ID'];
+                $dty_ID = @$_REQUEST['dty_ID'];
+                $rv = checkDtPtr($rty_ID, $dty_ID);
+
+                break;
+                
+                
                 //------------------------------------------------------------
 
             case 'saveTerms': // Terms

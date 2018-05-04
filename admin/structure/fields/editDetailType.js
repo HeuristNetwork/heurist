@@ -535,7 +535,7 @@ function DetailTypeEditor() {
 
             var args,URL;
 
-            if(type === "fieldsetmarker") {
+            if(type === "fieldsetmarker") { //not used
                 if(Dom.get("dty_FieldSetRecTypeID")) {
                     args = Dom.get("dty_FieldSetRecTypeID").value;
                 }
@@ -547,7 +547,8 @@ function DetailTypeEditor() {
             }
 
             if(args) {
-                URL =  top.HEURIST.baseURL + "admin/structure/rectypes/selectRectype.html?type=" + type + "&ids=" + args+"&db="+_db;
+                URL =  top.HEURIST.baseURL + "admin/structure/rectypes/selectRectype.html?type=" 
+                    + type + "&dtID="+_dtyID+"&ids=" + args+"&db="+_db;
             } else {
                 URL =  top.HEURIST.baseURL + "admin/structure/rectypes/selectRectype.html?type=" + type+"&db="+_db;
             }

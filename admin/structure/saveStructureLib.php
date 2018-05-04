@@ -1616,6 +1616,66 @@
     }
     
     
+    /*
+    
+    check that rectype rty_ID is in use for pointer field dty_ID
+    
+     */   
+    function checkDtPtr($rty_IDs, $dty_ID){
+        global $mysqli;
+        
+        $ret = array();
+        
+        $query = 'select DISTINCT dtl_RecID from recDetails, Records'
+        .' where dtl_DetailTypeID = '.$dty_ID.' and rec_FlagTemporary!=1 '
+        .' and dtl_Value = rec_ID and rec_RecTypeID in ('.$rty_IDs.')';
+        
+        
+error_log($query);        
+        
+        $res = $mysqli->query($query);
+                
+        if ($mysqli->error) {
+            $ret = handleError("SQL error in checkDtPtr retreiving pointer field types which use record types $rty_IDs", $query);
+            return $ret;
+        }else{
+            $recCount = $res->num_rows;
+            if ($recCount>0) { //yes, $rty_ID is in use
+            
+                $rt_Names = getRecTypeNames( explode(',',$rty_IDs) );
+            
+                $ret_message = 'Sorry, you are trying to delete a target record type ('
+                    .implode(', ',$rt_Names)
+                    .') from the record-pointer field. However, this field already points to existing records of this type. '
+                    .'You must delete the target records first before you can delete '
+                    .'the target record type from the record-pointer field.'; 
+                
+                $ret['error_title'] = 'Warning: Record type in use';
+                $recIDs = array();
+                $links = array();
+                
+                while ($row = $res->fetch_row()) {
+                    array_push($recIDs, $row[0]);
+                    if(count($links)<251){
+                        array_push($links, $row[0]);
+                    }
+                }
+                $ret_message = $ret_message.'<br><br>'
+                ."<a href='#' onclick='window.open(\""
+                .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs).'","_blank")\'>'
+                .'Click here</a> to view all the records affected';
+                
+                if(count($links)<count($recIDs)){
+                    $ret_message = $ret_message.' (limited to first 250)';    
+                }
+
+                $ret['error'] = $ret_message;
+            }
+        }
+        
+        return $ret;
+    }
+    
     /**
     * verify whether term is in use in field that uses vocabulry
     * if yes it means it can not be moved into different vocabulary
@@ -1646,8 +1706,11 @@
                     $dtCount = $res->num_rows;
                     if ($dtCount>0) { 
                         $dtyIDs = array();
+                        $dt_labels = array();
+                        
                         while ($row = $res->fetch_row()) {
                             array_push($dtyIDs, $row[0]);
+                            array_push($dt_labels,$row[1]);
                         }
                         
                         $query = 'select rec_ID, rec_RecTypeID  from recDetails, Records '
@@ -1662,28 +1725,52 @@
                             }else{
                                 $recCount = $res->num_rows;
                                 if ($recCount>0) { //yes, $termID is in use
-                                    $labels = getTermLabels(array($termID));
-                                    $ret['warning'] = "Term $termID [{$labels[$termID]}] is used by field(s) in existing record(s) which depend on its current vocabulary. We recommend merging the current vocabulary with the target vocabulary instead. Moving the term would invalidate values in $recCount records.";
+                                    $labels = getTermLabels(array($termID, $vocab_id));
+                                    
+                                    $ret_message = "Term $termID [{$labels[$termID]}] "
+                                    .'cannot currently be moved because it belongs to a vocabulary ('
+                                    .$labels[$vocab_id]
+                                    .') which is used by field '
+                                    .(count($dt_labels)>1 ?'s ('.implode(',',$dt_labels).')':$dt_labels[0])
+                                    ." in $recCount existing record".($recCount>1 ?'s':'')
+                                    .' which depend'.($recCount>1 ?'':'s').' on this vocabulary'
+                                    .'<br><br>We recommend merging the current vocabulary with the target vocabulary instead. ';
+                                    //."<br><br>Moving the term would invalidate values in $recCount records.";
                                     
                                     $ret['error_title'] = 'Warning: Terms in use';
                                     $recIDs = array();
                                     $rtyIDs = array();
+                                    $links = array();
                                     while ($row = $res->fetch_row()) {
                                         array_push($recIDs, $row[0]);
-                                        if(!in_array($row[1], $rtyIDs)) array_push($rtyIDs, $row[1]);
+                                        if(count($links)<251){
+                                            array_push($links, $row[0]);
+                                        }
+                                        
+                                        if(!in_array($row[1], $rtyIDs)) {
+                                            array_push($rtyIDs, $row[1]);   
+                                        }
                                     }
-                                    $ret['warning'] = $ret['warning'].'<br><br>'
+                                    $ret_message = $ret_message.'<br><br>'
                                     ."<a href='#' onclick='window.open(\""
-                                    .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs)."\",\"_blank\")'>Click here</a> to search for all the records which would be affected.";
+                                    .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",", $recIDs).'","_blank")\'>'
+                                    .'Click here</a> to view all the records affected';
+                                    
+                                    if(count($links)<count($recIDs)){
+                                        $ret_message = $ret_message.' (limited to first 250)';    
+                                    }
 
-                                    $ret['warning'] = $ret['warning'].'<br><div style="padding:10px 30px;text-align:left">The following record types would be affected: <ul style="padding-top:5px">';
+                                    $ret_message = $ret_message.'<br><div style="padding:10px 30px;text-align:left">'
+                                    .'The following record types would be affected: <ul style="padding-top:5px">';
                                      $labels = getRecTypeNames($rtyIDs);
                                     
                                      foreach  ($labels as $rty_ID=>$rty_Name)  {
-                                         $ret['warning'] = $ret['warning'].'<li>'.$rty_Name.'</li>';
+                                         $ret_message = $ret_message.'<li>'.$rty_Name.'</li>';
                                      }
                                     
-                                     $ret['warning'] = $ret['warning']."</ul></div>";            
+                                     $ret_message = $ret_message."</ul></div>";            
+                                     
+                                     $ret['error'] = $ret_message;
                                 }
                             }
                     }//$dtCount>0
@@ -1694,10 +1781,10 @@
     }
     
     /**
-    *  verify whether term (and its children) is in use in field definition or record details
+    * verify whether term (and its children) is in use in field definition or record details
     * 
-    * @param mixed $infield
-    * @param mixed $indetails
+    * @param mixed $infield - check usage infield definitions
+    * @param mixed $indetails - check usage in record details
     */
     function isTermInUse($trmID, $infield, $indetails){
         
@@ -1762,14 +1849,20 @@
                     $recCount = $res->num_rows;
                     if ($recCount>0) { // there are records existing of this rectype, need to return error and the recIDs
                         $ret['error'] = "You cannot delete term $trmID. It or its child terms are referenced in $recCount record(s)";
-                        $ret['error_title'] = 'Warning: Terms in use';
+                        $ret['error_title'] = 'Warning: Term in use';
                         $ret['recIDs'] = array();
+                        $links = array();
                         while ($row = $res->fetch_row()) {
                             array_push($ret['recIDs'], $row[0]);
+                            if(count($links)<251) array_push($links, $row[0]);
                         }
                         $ret['error'] = $ret['error']."<br><br>"
                         ."<a href='#' onclick='window.open(\""
-                        .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",",$ret['recIDs'])."\",\"_blank\")'>Click here</a> to retrieve these records";
+                        .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:".implode(",",$links)."\",\"_blank\")'>Click here</a> to view all the records affected";
+                        if(count($links)<count($ret['recIDs'])){
+                            $ret['error'] = $ret['error'].' (limited to first 250)';    
+                        }
+                        
                     }
                 }
         }

@@ -55,6 +55,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 			_myDataTable,
 			_myDataSource,
 			_arr_selection = [],
+            _arr_selection_on_init = [],
 			datatype,  // datatype of parent detailtype: relmarker,resource or fieldsetmarker
 			_callback_func, //callback function for non-window mode
 			_dtyID;
@@ -117,7 +118,9 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 									datatype = top.HEURIST.parameters.type;
 									var sIDs = top.HEURIST.parameters.ids;
 									if (!Hul.isempty(sIDs)) {
+                                        dtyID = top.HEURIST.parameters.dtID;
 										_arr_selection = sIDs.split(',');
+                                        _arr_selection_on_init = sIDs.split(',');
 									}else{
 										_arr_selection = [];
 									}
@@ -268,7 +271,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 					var str1 = top.HEURIST.iconBaseURL + id;
 					var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png";
-					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\"></a></div></div>"
+					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\">``</a></div></div>"
 					elLiner.innerHTML = icon;
 			}},
 								{ key: "name", label: "<u>Name</u>", sortable:true },
@@ -529,11 +532,12 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 	* Empties _arr_selection array
 	*/
 	function _clearSelection(){
-							_arr_selection = [];
-							lblSelect1.innerHTML = "";
-							if(!Hul.isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
-							_updateFilter();
-							return false;
+        
+			_arr_selection = [];
+			lblSelect1.innerHTML = "";
+			if(!Hul.isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
+			_updateFilter();
+			return false;
 	}
 
     /**
@@ -541,7 +545,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
     * fill _arr_selection array with all rectypes
     */
     function _selectAll(){
-                            return false;
+            return false;
     }
     
 	/**
@@ -602,7 +606,42 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 				}
 			});
 	}
+    
+    function _verifyThatRemoved_RecTypes_AreNotInUse(){
+        
+            if(_dtyID>0 && _arr_selection_on_init.length>0){
 
+                var _arr_removed = _arr_selection_on_init.filter(function(id) {return _arr_selection.indexOf(id) < 0;});
+
+                if(_arr_removed.length>0){
+                    // verify whether term is in use in field that uses vocabulry
+                    // if yes it means it can not be moved into different vocabulary
+                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                    var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
+                                (top.HEURIST.database.name?top.HEURIST.database.name:''));
+                    
+                    var params = 'method=checkDtPtr&dty_ID='+ _dtyID
+                    + '&rty_ID=' + _arr_removed.join(',') 
+                    + '&DBGSESSID=425944380594800002;d=1,p=0,c=07'
+                    + "&db="+_db; //encodeURIComponent(
+                    
+                    Hul.getJsonData(baseurl, function(context){
+                        if(!Hul.isnull(context) && !context.error){
+
+                            var res = _arr_selection.join(",");
+
+                            if(_isWindowMode){
+                                window.close(res, _dtyID);
+                            }else if (!Hul.isnull(_callback_func) ) {
+                                _callback_func(res, _dtyID);
+                            }
+
+                        }}, params);    
+                    return true;
+                }
+            }
+            return false;
+    }
 	//
 	//public members
 	//
@@ -621,6 +660,10 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 				 *	Apply form - close this window and returns comma separated list of selected detail types
 				 */
 				returnSelection : function () {
+                        //verify that new selection is correct
+                    
+                        if(_verifyThatRemoved_RecTypes_AreNotInUse()) return;
+                    
 						var res = _arr_selection.join(",");
 
 						if(_isWindowMode){
@@ -629,6 +672,8 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 							_callback_func(res, _dtyID);
 						}
 				},
+                
+                
 				setFilterMode : function (val) {
 					_isFilterMode = val;
 				},
