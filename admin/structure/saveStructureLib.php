@@ -1631,8 +1631,6 @@
         .' and dtl_Value = rec_ID and rec_RecTypeID in ('.$rty_IDs.')';
         
         
-error_log($query);        
-        
         $res = $mysqli->query($query);
                 
         if ($mysqli->error) {
