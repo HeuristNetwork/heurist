@@ -1686,13 +1686,16 @@ $.widget( "heurist.boro_nav", {
                     var record = that.recset.getById(fval[idx]);
                     var filename = that.recset.fld(record, 62);
                     var obf = that.recset.fld(record, 38);
+                    var img_title = that.recset.fld(record, 'rec_Title')
                     var isScan = (that.recset.fld(record, 'rec_RecTypeID')==144);
 //console.log(record);
                     var stitle = isScan?'Document scan':('Photograph of '+fullName);
                     var ext = that.recset.fld(record, 64);
                     if(ext==null) ext = '';
                     //var slightbox = (ext.toLowerCase()=='pdf')?' target="_blank"':'data-fancybox="profile-images" data-lightbox="profile-images"';
-                    var slightbox = 'data-fancybox="profile-images" data-lightbox="profile-images"';
+                    var slightbox = 'data-fancybox="profile-images" data-lightbox="profile-images" '
+                                    +' data-caption="' + (img_title==null?'':img_title) + '"';
+                    
                     if(ext.toLowerCase()=='pdf'){
                         slightbox = slightbox+' data-src="#pdf-viewer'+uniqid+'"';
                         href = 'javascript:;';
@@ -1715,8 +1718,8 @@ $.widget( "heurist.boro_nav", {
                     //data-src="http://codepen.io/fancyapps/full/jyEGGG/"
                     
                     html = html +           
-                        '<a class="bor-gallery-link" '+slightbox+' data-caption="'
-                            + (filename==null?'':filename) + '" data-footer="" title="'+ (filename==null?'':filename) +'" href="'
+                        '<a class="bor-gallery-link" ' + slightbox
+                            + ' data-footer="" title="'+ (img_title==null?'':img_title) +'" href="'
                             + href +'">'
                             + '<img class="bor-thumbnail" src="' 
                             + window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database 
