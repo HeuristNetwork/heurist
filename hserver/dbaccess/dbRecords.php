@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * db access to defTerms table
+    * db access to Records table - NOT IMPLEMENTED
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -56,7 +56,7 @@ class DbRecords extends DbEntityBase
     public function save(){
         
         //$ret = parent::save();
-        $ret = "to be implemented on Wednesday";
+        $ret = "to be implemented";
         return $ret;
     } 
     

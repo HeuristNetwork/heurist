@@ -67,8 +67,9 @@ class TitleMask {
     private static $initialized = false;
 
     private static $fields_correspondence = null;
-    private static $rdt = null;
-    private static $rdr = null;
+    private static $rdt = null;  //detail types array indexed by id,name and concept code
+    private static $rdr = null;  //record detail types
+    //private static $rectypes = null;
     private static $records = null;
 
     public static function initialize($fields_correspondence=null)
@@ -442,7 +443,7 @@ private static function __get_enum_value($enum_id, $enum_param_name)
     $ress = self::$mysqli->query("select trm_id, trm_label, trm_code, concat(trm_OriginatingDBID, '-', trm_IDInOriginatingDB) as trm_conceptid from defTerms where trm_ID = ".$enum_id);
     if($ress){
         $relval = $ress->fetch_assoc();
-        $ret = @$relval['trm_'.strtolower($enum_param_name)];
+        $ret = @$relval['trm_'.mb_strtolower($enum_param_name, 'UTF-8')];
         $ress->close();
     }
 
@@ -571,6 +572,43 @@ private static function __get_dt_field($rt, $search_fieldname, $mode, $result_fi
     return null;
 }
 
+//
+// get rectype id by name, cc or id
+//
+private static function __get_rt_id( $rt_search ){
+    
+        $query = 'SELECT rty_ID, rty_Name, rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes where ';
+        
+        if (strpos($rt_search,'-')>0){
+            $pos = strpos($rt_search,'-');
+            $query = $query . 'rty_OriginatingDBID ='.substr($rt_search,0,$pos)
+                .' AND rty_IDInOriginatingDB ='.substr($rt_search,$pos+1);
+        }else if($rt_search>0){
+            $query = $query . 'rty_ID='.$rt_search;    
+        }else{
+            $query = $query . 'LOWER(rty_Name)="'.mb_strtolower($rt_search, 'UTF-8').'"';    
+        }
+        
+        $res = self::$mysqli->query($query);
+        if($res){
+            $row = $res->fetch_assoc();
+            if($row){
+                
+                if (is_numeric($row['rty_OriginatingDBID']) && $row['rty_OriginatingDBID']>0 &&
+                is_numeric($row['rty_IDInOriginatingDB']) && $row['rty_IDInOriginatingDB']>0) {
+                    $rt_cc = "" . $row['rty_OriginatingDBID'] . "-" . $row['rty_IDInOriginatingDB'];
+                } else if (self::$db_regid>0) {
+                    $rt_cc = "" . self::$db_regid . "-" . $row['rty_ID'];
+                } else {
+                    $rt_cc = $row['rty_ID'];
+                }
+                return array($row['rty_ID'], $rt_cc, $row['rty_Name']);
+            }
+            $res->close();
+        }    
+        return array(0, '');
+}
+
 /*
 * replace title mask tag to value, coded (concept codes) or textual representation
 *
@@ -625,6 +663,9 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             return self::__get_field_value( $rdt_id, $rt, $mode, $rec_id );
         }
     }
+    
+    $parent_field_name = null;
+    $inner_field_name = null;
 
     if (preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
         $parent_field_name = $matches[1];
@@ -690,8 +731,24 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         return "";
     }
 
+    //parent field id and inner field
     if ($rdt_id  &&  $inner_field_name) {
+        
+        //recordttype for pointer field may be defined in mask
+        //it is required to distiguish rt for multiconstrained pointers
+        $inner_rectype = 0;
+        $inner_rectype_name = '';
+        $inner_rectype_cc = '';
+        $pos = strpos($inner_field_name, ".");
+        if ( $pos>0 &&  strpos($inner_field_name, "}") < $pos ) { 
+            $inner_rectype_search = substr($inner_field_name, 1, $pos-2); 
+            list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
+            $inner_field_name = substr($inner_field_name, $pos+1); 
+        }
+
         if($mode==0){ //replace with values
+//[Note title]  [Author(s).{PersonBig}.Family Name] ,  [Author(s).{Organisation}.Full name of organisation] 
+// [2-1]  [2-15.{2-10}.2-1] ,  [2-15.{2-4}.2-1] 
 
             //get values for resource field
             $pointer_ids = self::__get_field_value( $rdt_id, $rt, $mode, $rec_id);
@@ -701,8 +758,11 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 
                 $rec_value = self::__get_record_value($rec_id);
                 if($rec_value){
-                    $rt = $rec_value['rec_RecTypeID'];
-                    $fld_value = self::__fill_field($inner_field_name, $rt, $mode, $rec_id);
+                    $res_rt = $rec_value['rec_RecTypeID']; //resource rt
+                    
+                    if($inner_rectype>0 && $inner_rectype!=$res_rt) continue;
+                    
+                    $fld_value = self::__fill_field($inner_field_name, $res_rt, $mode, $rec_id);
                     if(is_array($fld_value)){
                         //for multiconstraint it may return error since field may belong to different rt
                         return '';//$fld_value; //ERROR
@@ -715,14 +775,16 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             return implode(", ", $res);
 
         }else{ //convert  coded<->human
-
+        
             $inner_rec_type = self::__get_dt_field($rt, $rdt_id, $mode, 'rst_PtrFilteredIDs'); //$rdr[$rt][$rdt_id]['rst_PtrFilteredIDs'];
-            $inner_rec_type = explode(",",$inner_rec_type);
+            $inner_rec_type = explode(",", $inner_rec_type);
             if(count($inner_rec_type)>0){ //constrained
                 $field_not_found = null;
                 foreach ($inner_rec_type as $rtID){
                     $rtid = intval($rtID);
                     if (!$rtid) continue;
+                    if($inner_rectype>0 && $inner_rectype!=$rtid) continue;
+                    
                     $inner_rdt = self::__fill_field($inner_field_name, $rtid, $mode);
                     if(is_array($inner_rdt)){
                         //it may be found in another record type for multiconstaints
@@ -730,9 +792,15 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                     }else if ($inner_rdt) {
 
                         if($mode==1){
-                            $s1 = $rdt_id;
+                            $s1 = $rdt_id; //parent detail id
+                            if($inner_rectype>0){
+                                $s1 = $s1 .'.{'. $inner_rectype_cc.'}';
+                            }
                         }else{
                             $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');
+                            if($inner_rectype>0){
+                                $s1 = $s1 .'.{'. $inner_rectype_name. '}';
+                            }
                         }
                         return $s1. "." .$inner_rdt;
                     }
@@ -741,7 +809,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                     return $field_not_found;
                 }
             }
-            if($mode==1){
+            if($mode==1){  //return concept code
                 $s1 = $rdt_id;
             }else{
                 $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');

@@ -538,6 +538,42 @@ function _titlemask__get_dt_field($rt, $search_fieldname, $mode, $result_fieldna
     return null;
 }
 
+//
+// get rectype id by name, cc or id
+//
+function _titlemask__get_rt_id( $rt_search ){
+    
+        $query = 'SELECT rty_ID, rty_Name, rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes where ';
+        
+        if (strpos($rt_search,'-')>0){
+            $pos = strpos($rt_search,'-');
+            $query = $query . 'rty_OriginatingDBID ='.substr($rt_search,0,$pos)
+                .' AND rty_IDInOriginatingDB ='.substr($rt_search,$pos+1);
+        }else if($rt_search>0){
+            $query = $query . 'rty_ID='.$rt_search;    
+        }else{
+            $query = $query . 'LOWER(rty_Name)="'.mb_strtolower($rt_search, 'UTF-8').'"';    
+        }
+        
+        $res = mysql_query($query);
+        if(!mysql_error()){
+            $row = mysql_fetch_assoc($res);
+            if($row){
+                
+                if (is_numeric($row['rty_OriginatingDBID']) && $row['rty_OriginatingDBID']>0 &&
+                is_numeric($row['rty_IDInOriginatingDB']) && $row['rty_IDInOriginatingDB']>0) {
+                    $rt_cc = "" . $row['rty_OriginatingDBID'] . "-" . $row['rty_IDInOriginatingDB'];
+                } else if (self::$db_regid>0) {
+                    $rt_cc = "" . self::$db_regid . "-" . $row['rty_ID'];
+                } else {
+                    $rt_cc = $row['rty_ID'];
+                }
+                return array($row['rty_ID'], $rt_cc, $row['rty_Name']);
+            }
+        }    
+        return array(0, '');
+}
+
 /*
 * replace title mask tag to value, coded (concept codes) or textual representation
 *
@@ -659,6 +695,19 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
     }
 
     if ($rdt_id  &&  $inner_field_name) {
+        
+        //recordttype for pointer field may be defined in mask
+        //it is required to distiguish rt for multiconstrained pointers
+        $inner_rectype = 0;
+        $inner_rectype_name = '';
+        $inner_rectype_cc = '';
+        $pos = strpos($inner_field_name, ".");
+        if ( $pos>0 &&  strpos($inner_field_name, "}") < $pos ) { 
+            $inner_rectype_search = substr($inner_field_name, 1, $pos-2); 
+            list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = _titlemask__get_rt_id( $inner_rectype_search ); 
+            $inner_field_name = substr($inner_field_name, $pos+1); 
+        }
+        
         if($mode==0){ //replace with values
 
             //get values for resource field
@@ -669,8 +718,11 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
                 $rec_value = _titlemask__get_record_value($rec_id);
                 if($rec_value){
-                    $rt = $rec_value['rec_RecTypeID'];
-                    $fld_value = _titlemask__fill_field($inner_field_name, $rt, $mode, $rec_id);
+                    $res_rt = $rec_value['rec_RecTypeID'];
+                    
+                    if($inner_rectype>0 && $inner_rectype!=$res_rt) continue;
+                    
+                    $fld_value = _titlemask__fill_field($inner_field_name, $res_rt, $mode, $rec_id);
                     if(is_array($fld_value)){   //for multiconstraint it may return error since field may belong to different rt
                         return '';//$fld_value; //ERROR
                     }else if($fld_value) {
@@ -690,6 +742,8 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
                 foreach ($inner_rec_type as $rtID){
                     $rtid = intval($rtID);
                     if (!$rtid) continue;
+                    if($inner_rectype>0 && $inner_rectype!=$rtid) continue;
+                    
                     $inner_rdt = _titlemask__fill_field($inner_field_name, $rtid, $mode);
                     if(is_array($inner_rdt)){
                         //it may be found in another record type for multiconstaints
@@ -698,8 +752,14 @@ function _titlemask__fill_field($field_name, $rt, $mode, $rec_id=null) {
 
                         if($mode==1){
                             $s1 = $rdt_id;
+                            if($inner_rectype>0){
+                                $s1 = $s1 .'.{'. $inner_rectype_cc.'}';
+                            }
                         }else{
                             $s1 = _titlemask__get_dt_field($rt, $rdt_id, $mode, 'originalName');
+                            if($inner_rectype>0){
+                                $s1 = $s1 .'.{'. $inner_rectype_name. '}';
+                            }
                         }
                         return $s1. "." .$inner_rdt;
                     }

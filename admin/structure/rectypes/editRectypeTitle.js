@@ -477,8 +477,9 @@ function EditRectypeTitle() {
         var mask = document.getElementById('rty_TitleMask').value;
         var rec_type = top.HEURIST.parameters.rectypeID;
 
-
+        //verify text title mask    
         var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
+        //var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
         var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -526,7 +527,9 @@ function EditRectypeTitle() {
         var mask = document.getElementById('rty_TitleMask').value;
         //var rec_type = top.HEURIST.parameters.rectypeID;
 
+        //verify text mask 
         var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
+        //var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
         var squery = "rty_id="+_rectypeID+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
@@ -608,6 +611,7 @@ function EditRectypeTitle() {
 
 
         var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
+        //var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
         var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check="+mode;
 
         top.HEURIST.util.sendRequest(baseurl, function(xhr) {
