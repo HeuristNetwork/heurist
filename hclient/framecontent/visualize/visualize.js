@@ -82,7 +82,7 @@ var svg;        // The SVG where the visualisation will be executed on
         settings = $.extend({
             // Custom functions
             getData: $.noop(), // Needs to be overriden with custom function
-            getLineLength: function() { return getSetting(setting_linelength); },
+            getLineLength: function() { return getSetting(setting_linelength,200); },
             
             selectedNodeIds: [],
             onRefreshData: function(){},
@@ -280,14 +280,14 @@ function executeFormula(count, maxCount, maxSize) {
 /** Returns the line length */
 function getLineLength(record) {
 //console.log("Default line length function");
-    return getSetting(setting_linelength);
+    return getSetting(setting_linelength,200);
 }
 
 /** Calculates the line width that should be used */
 function getLineWidth(count) {
 
     count = Number(count);
-    var maxWidth = Number(getSetting(setting_linewidth));
+    var maxWidth = Number(getSetting(setting_linewidth, 3));
     
     if(maxWidth>maxLinkWidth) {maxSize = maxLinkWidth;}
     else if(maxWidth<1) {maxSize = 1;}
@@ -425,7 +425,7 @@ function visualizeData() {
 
     // Lines 
     addMarkerDefinitions(); //markers/arrows on lines
-    addLines("bottom-lines", getSetting(setting_linecolor), 0);
+    addLines("bottom-lines", getSetting(setting_linecolor, '#000'), 0);
     
     addLines("top-lines", "rgba(255, 255, 255, 0.0)", 8.5); //tick transparent line to catch mouse over
 
@@ -537,16 +537,16 @@ var lines = svg.append("svg:g").selectAll("path")
 */
 function addContainer() {
     // Zoom settings
-    var scale = getSetting(setting_scale);
-    var translateX = getSetting(setting_translatex);
-    var translateY = getSetting(setting_translatey);
+    var scale = getSetting(setting_scale,1);
+    var translateX = getSetting(setting_translatex,0);
+    var translateY = getSetting(setting_translatey,0);
     
     var s ='';
     if(isNaN(translateX) || isNaN(translateY) ||  translateX==null || translateY==null ||
         Math.abs(translateX)==Infinity || Math.abs(translateY)==Infinity){
         
-        translateX = 1;
-        translateY = 1;
+        translateX = 0;
+        translateY = 0;
     }
     s = "translate("+translateX+", "+translateY+")";    
     if(!(isNaN(scale) || scale==null || Math.abs(scale)==Infinity)){
@@ -575,11 +575,19 @@ function addContainer() {
 function zoomed() { 
     //keep current setting Translate   
     var translateXY = [];
+    var notDefined = false;
+    var transform = "translate(0,0)";
     if(d3.event.translate !== undefined) {
-        if(!isNaN(d3.event.translate[0])) {           
+        if(isNaN(d3.event.translate[0]) || !isFinite(d3.event.translate[0])) {           
+            d3.event.translate[0] = 0;
+            notDefined = true;
+        }else{
             putSetting(setting_translatex, d3.event.translate[0]); 
         }
-        if(!isNaN(d3.event.translate[1])) {    
+        if(isNaN(d3.event.translate[1]) || !isFinite(d3.event.translate[1])) {           
+            d3.event.translate[1] = 0;
+            notDefined = true;
+        }else{
             putSetting(setting_translatey, d3.event.translate[1]);
         }
 /*    
@@ -597,24 +605,22 @@ function zoomed() {
 console.log('A '+translateXY[0]+','+translateXY[1]);        
 console.log('B '+d3.event.translate);    
 */    
+        transform = "translate("+d3.event.translate+')';
+    }else{
+        notDefined = true;
     }
     
     var scale = d3.event.scale; //Math.pow(d3.event.scale,0.75);
     
-    //keep current setting Scale
-    if(!isNaN(d3.event.scale)){
-        putSetting(setting_scale, scale);
-    }
-   
-    
 //console.log( 'trans='+d3.event.translate );
 //console.log( 'scale='+scale );
     
-    // Transform  d3.event.translate  d3.event.translate
-    var transform = "translate("+d3.event.translate
-            //((d3.event.translate==undefined)?d3.event.translate
-            //                            :(translateXY[0]+','+translateXY[1]))
-                                        +")scale("+scale+")";
+    //keep current setting Scale
+    if(!isNaN(d3.event.scale) && isFinite(d3.event.scale)&& scale!=0){
+        putSetting(setting_scale, scale);
+        transform = transform + "scale("+scale+")";
+    }
+            
     onZoom(transform);
 }  
 
@@ -622,6 +628,7 @@ function onZoom( transform ){
     d3.select("#container").attr("transform", transform);
     
     var scale = this.zoomBehaviour.scale();
+    if(isNaN(scale) || !isFinite(scale) || scale==0) scale = 1;
     
     d3.selectAll(".bottom-lines").style("stroke-width", 
             function(d) { 
@@ -648,6 +655,9 @@ function zoomBtn(zoom_in){
         factor = zoom_in ? 1.3 : 1/1.3,
         target_scale = scale * factor;
 
+    if(isNaN(x) || !isFinit(x)) x = 0;
+    if(isNaN(y) || !isFinit(y)) y = 0;
+        
     // If we're already at an extent, done
     if (target_scale === extent[0] || target_scale === extent[1]) { return false; }
     // If the factor is too much, scale it down to reach the extent exactly
@@ -700,9 +710,9 @@ function addForce() {
 * Adds marker definitions to a container
 */
 function addMarkerDefinitions() {
-    var linetype = getSetting(setting_linetype,'straight');
-    var linelength = getSetting(setting_linelength);
-    var markercolor = getSetting(setting_markercolor);
+    var linetype = getSetting(setting_linetype, 'straight');
+    var linelength = getSetting(setting_linelength, 200);
+    var markercolor = getSetting(setting_markercolor, '#000');
     
     
     
@@ -763,7 +773,7 @@ function addLines(name, color, thickness) {
     // Add the chosen lines [using the linetype setting]
     var lines;
     
-    var linetype = getSetting(setting_linetype,'straight');
+    var linetype = getSetting(setting_linetype, 'straight');
     
     if(true){ //getSetting(setting_linetype) != "straight"){//} == "curved") {
         // Add curved lines
@@ -831,7 +841,7 @@ function tick() {
     var topLines = d3.selectAll(".top-lines"); 
     var bottomLines = d3.selectAll(".bottom-lines");
     
-    var linetype = getSetting(setting_linetype,'straight');
+    var linetype = getSetting(setting_linetype, 'straight');
     if(linetype == "curved") {
         updateCurvedLines(topLines);
         updateCurvedLines(bottomLines);     

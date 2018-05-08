@@ -615,8 +615,15 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
       rect_full.attr("width", maxWidth+4)
             .attr("height", maxHeight);      
       
-      rect_info.attr("width", maxWidth+4)
-            .attr("height", 26);      
+      if(type=='relation'){
+          rect_info.attr("width", maxWidth+4)
+            .attr("height", maxHeight);      
+      }else{
+          rect_info.attr("width", maxWidth+4)
+                .attr("height", 26);      
+          
+      }
+      
       
       if(type=='record'){
 
