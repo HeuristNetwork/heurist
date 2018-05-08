@@ -300,7 +300,7 @@ function EditRectypeTitle() {
                     }
 
                     //term.labelonly = label;
-                    term.full_path = ((parent_full)?parent_full+".":"")+label;
+                    
 
                     if( is_multicontstrained ){
 
@@ -314,13 +314,17 @@ function EditRectypeTitle() {
                             
                             rt_term.label =  '<div style="padding-left:10px;"><b>'+child[k].rt_name + '</b>('+child[0]+')</div>';
                             //rt_term.href = "javascript:void(0)";
+                            term.full_path = ((parent_full)?parent_full+".":"")+label+'.{'+child[k].rt_name+'}';
 
                             var rectypeNode = new YAHOO.widget.TextNode(rt_term, parentNode, false);
+                            
                             
                             __createChildren(rectypeNode, child[k], term.this_id, term.full_path);
                         }
                         
                     }else{
+                        
+                        term.full_path = ((parent_full)?parent_full+".":"")+label;
                         
                          childNode = new YAHOO.widget.TextNode(term, parentNode, false); // Create the node
                          //childNode.enableHighlight = false;
@@ -329,6 +333,8 @@ function EditRectypeTitle() {
                             __createChildren(childNode, child, term.this_id, term.full_path);
                          }
                     }
+                    
+                    
                 }
                 }//for        
         }
