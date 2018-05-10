@@ -571,7 +571,7 @@ function _titlemask__get_rt_id( $rt_search ){
                 return array($row['rty_ID'], $rt_cc, $row['rty_Name']);
             }
         }    
-        return array(0, '');
+        return array(0, '', '');
 }
 
 /*

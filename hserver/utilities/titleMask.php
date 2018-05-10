@@ -606,7 +606,7 @@ private static function __get_rt_id( $rt_search ){
             }
             $res->close();
         }    
-        return array(0, '');
+        return array(0, '', '');
 }
 
 /*
