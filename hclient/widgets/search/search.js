@@ -620,7 +620,9 @@ $.widget( "heurist.search", {
         if(!this.select_rectype_addrec){
 
             this.select_rectype_addrec = window.hWin.HEURIST4.ui.createRectypeSelect();
-            this.select_rectype_addrec.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
+            if(this.select_rectype_addrec.hSelect("instance")!=undefined){
+                this.select_rectype_addrec.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
+            }
 
             var that = this;
             this.select_rectype_addrec.hSelect({change: function(event, data){

@@ -690,6 +690,7 @@ $.widget( "heurist.svs_list", {
 
     },
 
+    //it adds context menu for evey group (tree)    
     _getAddContextMenu: function(groupID){
         var arr_menu = [{title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" },
             {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },

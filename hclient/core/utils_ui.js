@@ -1245,9 +1245,13 @@ window.hWin.HEURIST4.ui = {
             
         }else{
             
+            var parent_ele = $(selObj).parents('.ui-dialog');
+            if(!parent_ele || parent_ele.length==0) parent_ele = $(selObj).parent();
+            
             var menu = $(selObj).hSelect(       
               { style: 'dropdown',
-                appendTo: $(selObj).parent(),
+                position:{collision: "flip"},
+                appendTo: parent_ele,
                 /*positionOptions: {
                     collision: 'none',
                     my: "left top",
@@ -2090,3 +2094,4 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     return li.append( wrapper ).appendTo( ul );
   }
 });
+
