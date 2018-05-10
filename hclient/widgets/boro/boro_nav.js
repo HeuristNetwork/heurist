@@ -2303,15 +2303,16 @@ window.onload = function () {
         
     if (window.history && typeof history.pushState === "function") {
         history.pushState("jibberish", null, null);
-        window.onpopstate = function () {
-            history.pushState('newjibberish', null, null);
-            // Handle the back (or forward) buttons here
-            // Will NOT handle refresh, use onbeforeunload for this.
-            var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_nav');
-            if(app1 && app1.widget){
-                $(app1.widget).boro_nav('stepBack');    
-            }              
-          
+        window.onpopstate = function (event) {
+            
+                history.pushState('newjibberish', null, null);
+                // Handle the back (or forward) buttons here
+                // Will NOT handle refresh, use onbeforeunload for this.
+                var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('boro_nav');
+                if(app1 && app1.widget){
+                    $(app1.widget).boro_nav('stepBack');    
+                }              
+            
         };
     }
     else {
