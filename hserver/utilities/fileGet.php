@@ -1,5 +1,6 @@
 <?php
 /**
+* For Entities (for recUploadFiles see file_download.php)
 * 
 * fileGet.php - 1) get image for given entity, record ID, version and color 
 *               2) get or check file from code folders - tips, help, doc content

@@ -15,7 +15,7 @@
 */
 
 /**
-* UI for record view
+* UI for record view - html wrap fo rendering record info see renderRecordData
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,58 +29,79 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
 */
+require_once(dirname(__FILE__)."/../../hserver/System.php");
+require_once(dirname(__FILE__)."/../../hserver/dbaccess/db_recsearch.php");
 
+$system = new System();
 
-if (array_key_exists('alt', $_REQUEST)) define('use_alt_db', 1);
+define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/findReplacedRecord.php');
+if(!$system->init(@$_REQUEST['db'])){
+    
+    $err = $system->getError();
+    $error_msg = @$err['message']?$err['message']:'';
+    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($error_msg));
+    exit();
+}
 
-mysql_connection_select(DATABASE);
+$mysqli = $system->get_mysqli();
 
-if (@$_REQUEST['bkmk_id']) {
+$rec_id = 0;
+$bkm_ID = 0;
+
+if (@$_REQUEST['bkmk_id']>0) {  //find record by bookmark id
 	$bkm_ID = $_REQUEST['bkmk_id'];
-	$res = mysql_query('select * from usrBookmarks where bkm_ID = ' . $bkm_ID);
-	$bkmk = mysql_fetch_assoc($res);
-	$rec_id = $bkmk['bkm_recID'];
-} else {
+	$rec_id = mysql__select_value($mysqli, 'select * from usrBookmarks where bkm_ID = ' . $bkm_ID);
+    if(!($rec_id>0)){
+        header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Can\'t find record by bookmark ID'));
+    }
+} else {   
 	$rec_id = @$_REQUEST['recID'];
-
-	// check if this bib has been replaced
-	$replacement = get_replacement_bib_id($rec_id);
-	if ($replacement) $rec_id = $replacement;
-	/*
-	if (! $rec_id) {
-		print '<html><body><p>No such resource</p>';
-		print '<p><a href="..">Return to Heurist</a></p></body></html>';
-		return;
-	}
-	*/
-
-	$res = mysql_query('select * from usrBookmarks where bkm_recID = ' . $rec_id . ' and bkm_UGrpID = ' . get_user_id());
-	$bkmk = mysql_fetch_assoc($res);
-	$bkm_ID = $bkmk['bkm_ID'];
+    if(!($rec_id>0)){
+        header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Parameter recID not defined'));
+    }
 }
 
-require_once(dirname(__FILE__).'/testPermissions.php');
-if (! canViewRecord($rec_id)) {
+// check if this record has been replaced (merged)
+$rec_id = recordSearchReplacement($mysqli, $rec_id, 0);
 
-//    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME.'&last_uri='.urlencode(HEURIST_CURRENT_URL));
-//    return;
+//validate permissions
+$rec = mysql__select_row_assoc($mysqli, 
+        'select rec_Title, rec_NonOwnerVisibility, rec_OwnerUGrpID from Records where rec_ID='.$rec_id);
 
-	header('Location: ' . HEURIST_BASE_URL . 'common/html/msgAccessDenied.html?'.$rec_id);
-	return;
+if($rec==null){
+    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Record #'.$rec_id.' not found'));
+    exit();
+}
+
+$hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' ||
+    ($system->get_user_id()>0 && $rec['rec_NonOwnerVisibility'] !== 'hidden') ||    //visible for logged 
+    $system->is_member($rec['rec_OwnerUGrpID']) );   //owner
+
+if(!$hasAccess){
+    header('Location: '.ERROR_REDIR.'&msg='
+        .rawurlencode('You are not a member of the workgroup that owns the Heurist record #'
+        .$rec_id.', and cannot therefore view or edit this information.'));
+    exit();
+}        
+    
+//find bookmark by rec id    
+if(!($bkm_ID>0) && $system->get_user_id()>0 ){ //logged in
+    $bkm_ID = mysql__select_value($mysqli, 'select bkm_ID from usrBookmarks where bkm_recID = ' . $rec_id
+            . ' and bkm_UGrpID = ' . $system->get_user_id());
 }
 
 
-$noclutter = array_key_exists('noclutter', $_REQUEST)? '&amp;noclutter' : '';
+$noclutter = array_key_exists('noclutter', $_REQUEST)? '&noclutter' : '';
 
-$res = mysql_query('select rec_Title from Records where rec_ID = ' . $rec_id);
-$row = mysql_fetch_assoc($res);
-$rec_title = $row['rec_Title'];
+$rec_title = $rec['rec_Title'];
+
+$record_renderer_url = HEURIST_BASE_URL.'records/view/renderRecordData.php?db='
+        .HEURIST_DBNAME.'&'.($bkm_ID>0 ? ('bkmk_id='.$bkm_ID) : ('recID='.$rec_id))
+        .$noclutter;
+
 
 ?>
-
 <html>
 
 <head>
@@ -96,7 +117,7 @@ $rec_title = $row['rec_Title'];
 	<div><h2>Record details</h2></div>
 	<div>
 	<h3><?= htmlspecialchars($rec_title) ?></h3>
-	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?=HEURIST_BASE_URL?>records/view/renderRecordData.php?<?= ($bkm_ID ? ('bkmk_id='.$bkm_ID) : ('recID='.$rec_id)) ?><?= $noclutter ?>"></iframe>
+	<iframe name="viewer" frameborder="0" style="width: 100%;height: 100%;" src="<?php echo $record_renderer_url;?>"></iframe>
 	</div>
 </body>
 </html>

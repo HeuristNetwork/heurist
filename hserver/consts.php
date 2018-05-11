@@ -22,7 +22,7 @@
 */
 
 
-// TODO: Rationalise th duplication of constants across /php/consts.php and /common/connect/initialise.php
+// TODO: Rationalise the duplication of constants across /php/consts.php and /common/connect/initialise.php
 //       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php

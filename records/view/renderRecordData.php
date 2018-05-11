@@ -30,52 +30,49 @@
 * @subpackage  Records/View
 */
 
-
-$_SERVER['REQUEST_URI'] = @$_SERVER['HTTP_REFERER'];	// URI of the containing page
-
-if (array_key_exists('alt', $_REQUEST)) define('use_alt_db', 1);
-
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__)."/../../hserver/System.php");
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 
-mysql_connection_select(DATABASE);
+$system = new System();
 
-require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-require_once(dirname(__FILE__).'/../../records/woot/woot.php');
+define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
 
-require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
+if(!$system->init(@$_REQUEST['db'])){
+    
+    $err = $system->getError();
+    $error_msg = @$err['message']?$err['message']:'';
+    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($error_msg));
+    exit();
+}
+
+//require_once(dirname(__FILE__).'/../../records/woot/woot.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_files.php');
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 
-$rectypesStructure = getAllRectypeStructures();
+$rectypesStructure = dbs_GetRectypeStructures($system); //getAllRectypeStructures(); //get all rectype names
+$terms = dbs_GetTerms($system);//getTerms();
 
-$terms = getTerms();
-
-// get a list of workgroups the user belongs to. - ARTEM - NOT USED
-$ACCESSABLE_OWNER_IDS = mysql__select_array('sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID',
-    'ugl_GroupID',
-    'ugl_UserID=' . get_user_id() . ' and grp.ugr_Type != "user" order by ugl_GroupID');
-if (is_logged_in()) {
-    array_push($ACCESSABLE_OWNER_IDS, get_user_id());
-    if (!in_array(0, $ACCESSABLE_OWNER_IDS)) {
-        array_push($ACCESSABLE_OWNER_IDS, 0);
-    }
+$ACCESSABLE_OWNER_IDS = $system->get_user_group_ids();  ///do we need it??
+if (!in_array(0, $ACCESSABLE_OWNER_IDS)) {
+    array_push($ACCESSABLE_OWNER_IDS, 0);
 }
 
+$rec_id = intval(@$_REQUEST['recID']);
 
 // if we get a record id then see if there is a personal bookmark for it.
-if (@$_REQUEST['recID'] && !@$_REQUEST['bkmk_id']) {
-    $res = mysql_query('select * from usrBookmarks where bkm_recID = '.intval($_REQUEST['recID']).' and bkm_UGrpID = '.get_user_id());
-    if ($res && mysql_num_rows($res)>0) {
-        $row = mysql_fetch_assoc($res);
-        $_REQUEST['bkmk_id'] = $row['bkm_ID'];
-    }
+if ($rec_id>0 && !@$_REQUEST['bkmk_id']) 
+{
+    $bkm_ID = mysql__select_value($system->get_mysqli(),
+                    'select bkm_ID from usrBookmarks where bkm_recID = '
+                        .$rec_id.' and bkm_UGrpID = '.$system->get_user_id());
+}else{
+    $bkm_ID = intval(@$_REQUEST['bkmk_id']);    
 }
-$bkm_ID = intval(@$_REQUEST['bkmk_id']);
-$rec_id = intval(@$_REQUEST['recID']);
+
 
 if(!$is_map_popup){
 ?>
@@ -145,7 +142,7 @@ if(!$is_map_popup){
                         +':'+(''+date.getSeconds()).padStart(2, "0"));
             }
             
-            //
+            // @to reimplement
             //
             function showPlayer(obj, id, url) {
 
@@ -236,6 +233,8 @@ if(!$is_map_popup){
                 }
             }
 
+            // @to reimplement
+            //
             function link_open(link) {
                 <?php if($is_reloadPopup){ ?>
                     this.document.location.href = link.href+'&reloadPopup=1';
@@ -256,7 +255,8 @@ if(!$is_map_popup){
                 ?>
             }
 
-            //on document load
+            /*NOT USED
+            //on document load onLoad="add_sid();"
             function add_sid() {
                 try{
                 if (top.HEURIST  &&  top.HEURIST.search  &&  top.HEURIST.search.results.querySid) {
@@ -272,10 +272,11 @@ if(!$is_map_popup){
                 //$('.mediacontent').yoxview({ skin: "top_menu", allowedUrls: /\?db=(?:\w+)&id=(?:\w+)$/i});
                 
             }
+            */
 
         </script>
     </head>
-    <body class="popup" onLoad="add_sid();">
+    <body class="popup">
 
         <script src="../../records/edit/digitizer/mapViewer.js"></script>
 
@@ -284,13 +285,19 @@ if(!$is_map_popup){
 else{
     print '<div style="font-size:0.8em">';
 }        
-        if ($bkm_ID) {
-            $res = mysql_query('select * from usrBookmarks left join Records on bkm_recID=rec_ID left join defRecTypes on rec_RecTypeID=rty_ID where bkm_ID='.$bkm_ID.' and bkm_UGrpID='.get_user_id().' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
-            $bibInfo = mysql_fetch_assoc($res);
+        if ($bkm_ID>0) {
+            $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
+            'select * from usrBookmarks left join Records on bkm_recID=rec_ID '
+            .'left join defRecTypes on rec_RecTypeID=rty_ID where bkm_ID='
+            .$bkm_ID.' and bkm_UGrpID='.$system->get_user_id()
+            .' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
+            
             print_details($bibInfo);
-        } else if ($rec_id) {
-            $res = mysql_query('select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='.$rec_id.' and not rec_FlagTemporary');
-            $bibInfo = mysql_fetch_assoc($res);
+        } else if ($rec_id>0) {
+            $bibInfo = mysql__select_row_assoc($system->get_mysqli(), 
+            'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
+            .$rec_id.' and not rec_FlagTemporary');
+            
             print_details($bibInfo);
         } else {
             print 'No details found';
@@ -305,9 +312,7 @@ else{
 </html>
 <?php	
  }
- 
 /***** END OF OUTPUT *****/
-
 
 // this functions outputs common info.
 function print_details($bib) {
@@ -318,7 +323,7 @@ function print_details($bib) {
     if(!$is_map_popup){
         print_private_details($bib);
         print_other_tags($bib);
-        print_text_details($bib);
+        //print_text_details($bib);
     }
     
     print_relation_details($bib);
@@ -328,24 +333,19 @@ function print_details($bib) {
 
 // this functions outputs the header line of icons and links for managing the record.
 function print_header_line($bib) {
-    global $is_map_popup;
+    global $is_map_popup, $system;
     
     $rec_id = $bib['rec_ID'];
     $url = $bib['rec_URL'];
     if ($url  &&  ! preg_match('!^[^\\/]+:!', $url))
         $url = 'http://' . $url;
 
-    $res = mysql_query("select dtl_Value from recDetails where dtl_RecID=" . $bib['rec_ID'] . " and dtl_DetailTypeID=347");  //MAGIC NUMBER!!   
-    
-    if($res){
-        $webIcon = @mysql_fetch_row($res);  
-        $webIcon = @$webIcon[0];
-    }else{
-        $webIcon = null;
-    }
+    $webIcon = mysql__select_value($system->get_mysqli(),
+                    'select dtl_Value from recDetails where dtl_RecID='
+                    .$bib['rec_ID'].' and dtl_DetailTypeID=347'); //DT_WEBSITE_ICON); 
     //
 
-    if(is_logged_in()){
+    if($system->has_access()){ //is logged in
         ?>
 
         <div id=recID>ID:<?= htmlspecialchars($rec_id) ?><span class="link"><a id=edit-link class="normal"
@@ -359,7 +359,7 @@ function print_header_line($bib) {
     }
     ?>
 
-    <div class=HeaderRow style="margin-bottom:<?php echo ((@$url)?'20px;':'0px;min-height:0px;');?>">
+    <div class=HeaderRow style="margin-bottom:<?php echo ((@$url)?'20px;':'0px;min-height:0px;'); ?>">
             <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
                 <?= $bib['rec_Title'] ?>
             </h2>
@@ -390,21 +390,25 @@ function print_header_line($bib) {
 
 //this  function displays private info if there is any.
 function print_private_details($bib) {
+    global $system;
 
-    $res = mysql_query('select grp.ugr_Name,grp.ugr_Type,concat(grp.ugr_FirstName," ",grp.ugr_LastName) from Records, '.USERS_DATABASE.'.sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and rec_ID='.$bib['rec_ID']);
+    $row = mysql__select_row($system->get_mysqli(),    
+        'select grp.ugr_Name,grp.ugr_Type,concat(grp.ugr_FirstName," ",grp.ugr_LastName) from Records, '
+            .'sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and rec_ID='.$bib['rec_ID']);
+    
     $workgroup_name = NULL;
     // check to see if this record is owned by a workgroup
-    if ($res && mysql_num_rows($res) > 0) {
-        $row = mysql_fetch_row($res);
+    if ($row!=null) {
         $workgroup_name = $row[1] == 'user'? $row[2] : $row[0];
     }
-    // check for workgroup tags
-    $res = mysql_query('select grp.ugr_Name, tag_Text from usrRecTagLinks left join usrTags on rtl_TagID=tag_ID left join '.USERS_DATABASE.'.sysUGrps grp on tag_UGrpID=grp.ugr_ID left join '.USERS_DATABASE.'.sysUsrGrpLinks on ugl_GroupID=ugr_ID and ugl_UserID='.get_user_id().' where rtl_RecID='.$bib['rec_ID'].' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order');
-    $kwds = array();
-    if($res){
-        while ($row = mysql_fetch_row($res)) array_push($kwds, $row);    
-    }
     
+    // check for workgroup tags
+    $kwds = mysql__select_all($system->get_mysqli(),    
+        'select grp.ugr_Name, tag_Text from usrRecTagLinks left join usrTags on rtl_TagID=tag_ID left join '
+        .'sysUGrps grp on tag_UGrpID=grp.ugr_ID left join sysUsrGrpLinks on ugl_GroupID=ugr_ID and ugl_UserID='
+        .$system->get_user_id().' where rtl_RecID='.$bib['rec_ID']
+        .' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order',0,0);
+        
     if ( $workgroup_name || count($kwds) || $bib['bkm_ID']) {
         ?>
         <div class=detailRowHeader>Private
@@ -475,402 +479,442 @@ function print_private_details($bib) {
         }
 
 
-        //this function outputs the personal information from the bookmark
-        function print_personal_details($bkmk) {
-            $bkm_ID = $bkmk['bkm_ID'];
-            $rec_ID = $bkmk['bkm_RecID'];
-            $tags = mysql__select_array('usrRecTagLinks, usrTags',
-                'tag_Text',
-                "rtl_TagID=tag_ID and rtl_RecID=$rec_ID and tag_UGrpID = ".
-                $bkmk['bkm_UGrpID']." order by rtl_Order");
-            ?>
-            <div class=detailRow>
-                <div class=detailType>Personal Tags</div>
-                <div class=detail>
-                    <?php
-                    if ($tags) {
-                        for ($i=0; $i < count($tags); ++$i) {
-                            if ($i > 0) print '&nbsp; ';
-                            $tag = $tags[$i];
-                            $label = 'Tag "'.$tag.'"';
-                            if (preg_match('/\\s/', $tag)) $tag = '"'.$tag.'"';
-                            print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_BASE_URL.'common/images/magglass_12x11.gif"></a>';
-                        }
-                        if (count($tags)) {
-                            print "<br>\n";
-                        }
-                    }
-                    ?>
-                </div>
-            </div>
+//this function outputs the personal information from the bookmark
+function print_personal_details($bkmk) {
+    global $system;
 
+    $bkm_ID = $bkmk['bkm_ID'];
+    $rec_ID = $bkmk['bkm_RecID'];
+
+
+    $tags = mysql__select_list2($system->get_mysqli(), 'select tag_Text from usrRecTagLinks, usrTags '
+        .'rtl_TagID=tag_ID and rtl_RecID=$rec_ID and tag_UGrpID = '.
+        $bkmk['bkm_UGrpID'].' order by rtl_Order');
+    ?>
+    <div class=detailRow>
+        <div class=detailType>Personal Tags</div>
+        <div class=detail>
             <?php
-        }
+            if ($tags) {
+                for ($i=0; $i < count($tags); ++$i) {
+                    if ($i > 0) print '&nbsp; ';
+                    $tag = $tags[$i];
+                    $label = 'Tag "'.$tag.'"';
+                    if (preg_match('/\\s/', $tag)) $tag = '"'.$tag.'"';
+                    print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" src="'.HEURIST_BASE_URL.'common/images/magglass_12x11.gif"></a>';
+                }
+                if (count($tags)) {
+                    print "<br>\n";
+                }
+            }
+            ?>
+        </div>
+    </div>
+
+    <?php
+}
 
 
-        function print_public_details($bib) {
+function print_public_details($bib) {
+    global $system, $terms, $is_map_popup;
+    
+    $mysqli = $system->get_mysqli();
 
-            global $terms, $is_map_popup;
+    $query = 'select rst_DisplayOrder, dtl_ID, dty_ID,
+        IF(rdr.rst_DisplayName is NULL OR rdr.rst_DisplayName=\'\', dty_Name, rdr.rst_DisplayName) as name,
+        dtl_Value as val,
+        dtl_UploadedFileID,
+        dty_Type,
+        if(dtl_Geo is not null, AsWKT(dtl_Geo), null) as dtl_Geo,
+        if(dtl_Geo is not null, AsWKT(envelope(dtl_Geo)), null) as bd_geo_envelope
+        from recDetails
+        left join defDetailTypes on dty_ID = dtl_DetailTypeID
+        left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
+        and rdr.rst_RecTypeID = '.$bib['rec_RecTypeID'].'
+        where dtl_RecID = ' . $bib['rec_ID'] .'
+        order by rdr.rst_DisplayOrder is null,
+        rdr.rst_DisplayOrder,
+        dty_ID,
+    dtl_ID';      //show null last
 
-            $bds_res = mysql_query('select rst_DisplayOrder, dtl_ID, dty_ID,
-                IF(rdr.rst_DisplayName is NULL OR rdr.rst_DisplayName=\'\', dty_Name, rdr.rst_DisplayName) as name,
-                dtl_Value as val,
-                dtl_UploadedFileID,
-                dty_Type,
-                if(dtl_Geo is not null, AsWKT(dtl_Geo), null) as dtl_Geo,
-                if(dtl_Geo is not null, AsWKT(envelope(dtl_Geo)), null) as bd_geo_envelope
-                from recDetails
-                left join defDetailTypes on dty_ID = dtl_DetailTypeID
-                left join defRecStructure rdr on rdr.rst_DetailTypeID = dtl_DetailTypeID
-                and rdr.rst_RecTypeID = '.$bib['rec_RecTypeID'].'
-                where dtl_RecID = ' . $bib['rec_ID'] .'
-                order by rdr.rst_DisplayOrder is null,
-                rdr.rst_DisplayOrder,
-                dty_ID,
-            dtl_ID');      //show null last
+    $bds = array();
+    $thumbs = array();
 
-            $bds = array();
-            $thumbs = array();
+    $bds_res = $mysqli->query($query);
 
-            if($bds_res)
-            while ($bd = mysql_fetch_assoc($bds_res)) {
+    if($bds_res){
+        while ($bd = $bds_res->fetch_assoc()) {
 
-                if ($bd['dty_ID'] == 603) { //DT_FULL_IMAG_URL
-                    array_push($thumbs, array(
-                        'url' => $bd['val'],
-                        'thumb' => HEURIST_BASE_URL.'common/php/resizeImage.php?db='.HEURIST_DBNAME.'&file_url='.$bd['val']
-                    ));
+            if ($bd['dty_ID'] == 603) { //DT_FULL_IMAG_URL
+                array_push($thumbs, array(
+                    'url' => $bd['val'],
+                    'thumb' => HEURIST_BASE_URL.'common/php/resizeImage.php?db='.HEURIST_DBNAME.'&file_url='.$bd['val']
+                ));
+            }
+
+            if ($bd['dty_Type'] == 'enum') {
+
+                if(array_key_exists($bd['val'], $terms['termsByDomainLookup']['enum'])){
+                    $term = $terms['termsByDomainLookup']['enum'][$bd['val']];
+                    $bd['val'] = output_chunker(getFullTermLabel($terms, $term, 'enum', false));
+                    //$bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
+                }else{
+                    $bd['val'] = "";
                 }
 
-                if ($bd['dty_Type'] == 'enum') {
+            }else if ($bd['dty_Type'] == 'relationtype') {
 
-                    if(array_key_exists($bd['val'], $terms['termsByDomainLookup']['enum'])){
-                        $term = $terms['termsByDomainLookup']['enum'][$bd['val']];
-                        $bd['val'] = output_chunker(getFullTermLabel($terms, $term, 'enum', false));
-                        //$bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
-                    }else{
-                        $bd['val'] = "";
-                    }
+                $term = $terms['termsByDomainLookup']['relation'][$bd['val']];
+                $bd['val'] = output_chunker(getFullTermLabel($terms, $term, 'relation', false));
+                //$bd['val'] = output_chunker($terms['termsByDomainLookup']['relation'][$bd['val']][0]);
 
-                }else if ($bd['dty_Type'] == 'relationtype') {
+            }else if ($bd['dty_Type'] == 'date') {
 
-                    $term = $terms['termsByDomainLookup']['relation'][$bd['val']];
-                    $bd['val'] = output_chunker(getFullTermLabel($terms, $term, 'relation', false));
-                    //$bd['val'] = output_chunker($terms['termsByDomainLookup']['relation'][$bd['val']][0]);
-
-                }else if ($bd['dty_Type'] == 'date') {
-
-                    if($bd['val']==null || $bd['val']==''){
-                        //ignore empty date
-                        continue;
-                    }else{
-                        $bd['val'] = temporalToHumanReadableString($bd['val'], true);
-                        $bd['val'] = output_chunker($bd['val']);
-                    }
-
-                }else if ($bd['dty_Type'] == 'blocktext') {
-                    
-                        $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', output_chunker($bd['val'])));
-                    
-                }else if ($bd['dty_Type'] == 'resource') {
-
-                    $rec_id = intval($bd['val']);
-                    $res = mysql_query('select rec_Title from Records where rec_ID='.$rec_id);
-                    $row = mysql_fetch_row($res);
-                    $bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$rec_id.(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row[0]).'</a>';
-
-                    //find dates
-                    $res = mysql_query('select cast(getTemporalDateString(dtl_Value) as DATETIME), dtl_Value from recDetails where dtl_DetailTypeID in ('
-                            .DT_DATE.','.DT_START_DATE.') and dtl_RecID='.$rec_id);
-                    if($res){
-                        $row = mysql_fetch_row($res); //get first date only
-                        if($row[0]==null){//year
-                            $bd['order_by_date'] = $row[1];
-                        }else{
-                            $bd['order_by_date'] = $row[0];    
-                        }
-                    }
-                    
+                if($bd['val']==null || $bd['val']==''){
+                    //ignore empty date
+                    continue;
+                }else{
+                    $bd['val'] = temporalToHumanReadableString($bd['val'], true);
+                    $bd['val'] = output_chunker($bd['val']);
                 }
-                else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
 
-                    //All works with recUploadedFiles MUST be centralized in uploadFile.php
-                    $filedata = get_uploaded_file_info($bd['dtl_UploadedFileID'], false);
+            }else if ($bd['dty_Type'] == 'blocktext') {
 
-                    if($filedata){
+                $bd['val'] = nl2br(str_replace('  ', '&nbsp; ', output_chunker($bd['val'])));
 
-                        $filedata = $filedata['file'];
-                        $remoteSrc = $filedata['remoteSource'];
+            }else if ($bd['dty_Type'] == 'resource') {
+
+                $rec_id = intval($bd['val']);
+                $rec_title = mysql__select_value($mysqli, 'select rec_Title from Records where rec_ID='.$rec_id);
+                
+                $bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='
+                    .HEURIST_DBNAME.'&recID='.$rec_id.(defined('use_alt_db')? '&alt' : '')
+                    .'" onclick="return link_open(this);">'
+                    .htmlspecialchars($rec_title).'</a>';
+
+                //find dates
+                $row = mysql__select_row($mysqli, 
+                    'select cast(getTemporalDateString(dtl_Value) as DATETIME), dtl_Value '
+                    .'from recDetails where dtl_DetailTypeID in ('
+                    .DT_DATE.','.DT_START_DATE.') and dtl_RecID='.$rec_id );
+                    
+                if($row){
+                    if($row[0]==null){//year
+                        $bd['order_by_date'] = $row[1];
+                    }else{
+                        $bd['order_by_date'] = $row[0];    
+                    }
+                }
+
+            }
+            else if ($bd['dty_Type'] == 'file'  &&  $bd['dtl_UploadedFileID']) {
+
+                //find obfuscated id
+                /*$filedata = mysql__select_row_assoc($mysqli, 
+                    'select ulf_ObfuscatedFileID, '
+                        .'ulf_ExternalFileReference as remoteURL '
+                        .'ulf_OrigFileName as origName,'
+                        .'ulf_FileSizeKB as fileSize,'
+                        .'from recUploadedFiles where ulf_ID='.$bd['dtl_UploadedFileID']);*/
                         
-                        if(strpos($filedata['mimeType'],'audio/')===0 || 
-                           strpos($filedata['mimeType'],'image/')===0 || 
-                           strpos($filedata['mimeType'],'video/')===0){
-                               
-                            //$filedata['URL'] = ;
-                            $filedata['playerURL'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$filedata['nonce'].'&mode=tag';
-                        }
+                $listpaths = fileGetPath_URL_Type($system, $bd['dtl_UploadedFileID']); //see db_files.php
+                if(is_array($listpaths) && count($listpaths)>0){
 
-                        //add to thumbnail list
-                        $isplayer = (array_key_exists('playerURL', $filedata) && $filedata['playerURL']);
-                        if (is_image($filedata) || $isplayer)
-                        {
-                            /*
-                            if($isplayer && is_image($filedata) && is_logged_in()){
-                                $filedata['playerURL'] .= "&annedit=yes";
-                            }
-                            */
-                            
-                            //$filedata standart thumb with 200px image
-                            if(!$is_map_popup && $filedata['URL']!=$filedata['remoteURL']){
-                                $filedata["thumbURL"] =
-                                HEURIST_BASE_URL."common/php/resizeImage.php?maxw=200&maxh=200&".
-                                (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$filedata['nonce'];
-                                $thumb_size = 200;
-                            }else{
-                                $thumb_size = 100;
-                            }
-                            
-                            array_push($thumbs, array(
-                                'id' => $filedata['id'],
-                                'url' => $filedata['URL'],   //download
-                                'mediaType'=>$filedata['mediaType'], 
-                                'mimeType'=>$filedata['mimeType'], 
-                                'thumb_size'=>$thumb_size,
-                                'thumb' => $filedata['thumbURL'],
-                                'player' => $filedata['playerURL'],
-                                'nonce' => $filedata['nonce']
-                                //link to generate player html
-                                //$isplayer?$filedata['playerURL'].(($remoteSrc=='youtube' || $remoteSrc=='gdrive')?"":"&height=60%"):null  
-                            ));
-                        }
+                    $fileinfo = $listpaths[0];
+                    $filepath = $fileinfo[0];  //concat(ulf_FilePath,ulf_FileName fullPath
+                    $url = $fileinfo[1];     //ulf_ExternalFileReference
+                    $mimeType = $fileinfo[2];  //fxm_MimeType
+                    $params = $fileinfo[3];  //ulf_Parameters - not used anymore (for backward capability only)
+                    $originalFileName = $fileinfo[4];
+                    $fileSize = $fileinfo[5]; 
+                    $file_nonce = $fileinfo[6]; //ulf_ObfuscatedFileID
 
-                        if($filedata['URL']==$filedata['remoteURL']){ //remote resource
-                            $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($filedata['URL']).'">'.htmlspecialchars($filedata['URL']).'</a>';
-                        }else{
-                            $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($filedata['URL']).'">'.htmlspecialchars($filedata['origName']).'</a> '.($filedata['fileSize']>0?'[' .htmlspecialchars($filedata['fileSize']) . 'kB]':'');
-                        }
+                    $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
+                    $file_thumbURL  = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&thumb='.$file_nonce;
+                    $file_URL   = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce; //download
+                    
+                    array_push($thumbs, array(
+                        'id' => $bd['dtl_UploadedFileID'],
+                        'url' => $file_URL,   //download
+                        //'mediaType'=>$filedata['mediaType'], 
+                        'params'=>$params,
+                        'mimeType'=>$mimeType, 
+                        'thumb_size'=>200,
+                        'thumb' => $file_thumbURL,
+                        'player' => $file_playerURL,
+                        'nonce' => $file_nonce
+                    ));
+              
+                    if($originalFileName){ 
+                        $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($file_URL).'">'.htmlspecialchars($originalFileName).'</a> '.($fileSize>0?'[' .htmlspecialchars($fileSize) . 'kB]':'');
+                    }else{
+                        $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($file_URL).'">'.htmlspecialchars($file_URL).'</a>';
                     }
+                }
+                
+/*                
+                $filedata = RecUploadedFiles::getFileInfo($bd['dtl_UploadedFileID']);
+                if($filedata){
+
+                    $filedata = $filedata['file'];
+                    $remoteSrc = $filedata['remoteSource'];
+
+                    if(strpos($filedata['mimeType'],'audio/')===0 || 
+                    strpos($filedata['mimeType'],'image/')===0 || 
+                    strpos($filedata['mimeType'],'video/')===0){
+
+                        //$filedata['URL'] = ;
+                        $filedata['playerURL'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$filedata['nonce'].'&mode=tag';
+                    }
+
+                    //add to thumbnail list
+                    $isplayer = (array_key_exists('playerURL', $filedata) && $filedata['playerURL']);
+                    if (is_image($filedata) || $isplayer)
+                    {
+
+                        //$filedata standart thumb with 200px image
+                        if(!$is_map_popup && $filedata['URL']!=$filedata['remoteURL']){
+                            $filedata["thumbURL"] =
+                            HEURIST_BASE_URL."common/php/resizeImage.php?maxw=200&maxh=200&".
+                            (defined('HEURIST_DBNAME') ? "db=".HEURIST_DBNAME."&" : "" )."ulf_ID=".$filedata['nonce'];
+                            $thumb_size = 200;
+                        }else{
+                            $thumb_size = 100;
+                        }
+
+                        array_push($thumbs, array(
+                            'id' => $filedata['id'],
+                            'url' => $filedata['URL'],   //download
+                            'mediaType'=>$filedata['mediaType'], 
+                            'mimeType'=>$filedata['mimeType'], 
+                            'thumb_size'=>$thumb_size,
+                            'thumb' => $filedata['thumbURL'],
+                            'player' => $filedata['playerURL'],
+                            'nonce' => $filedata['nonce']
+                            //link to generate player html
+                            //$isplayer?$filedata['playerURL'].(($remoteSrc=='youtube' || $remoteSrc=='gdrive')?"":"&height=60%"):null  
+                        ));
+                    }
+
+                    if($filedata['URL']==$filedata['remoteURL']){ //remote resource
+                        $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($filedata['URL']).'">'.htmlspecialchars($filedata['URL']).'</a>';
+                    }else{
+                        $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($filedata['URL']).'">'.htmlspecialchars($filedata['origName']).'</a> '.($filedata['fileSize']>0?'[' .htmlspecialchars($filedata['fileSize']) . 'kB]':'');
+                    }
+                }
+*/
+            } else {
+                if (preg_match('/^https?:/', $bd['val'])) {
+                    if (strlen($bd['val']) > 100)
+                        $trim_url = preg_replace('/^(.{70}).*?(.{20})$/', '\\1...\\2', $bd['val']);
+                    else
+                        $trim_url = $bd['val'];
+                    $bd['val'] = '<a href="'.$bd['val'].'" target="_new">'.htmlspecialchars($trim_url).'</a>';
+                } else if ($bd['dtl_Geo'] && preg_match("/^POLYGON\s?[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $bd["bd_geo_envelope"], $poly)) {
+                    list($match, $minX, $minY, $maxX, $maxY) = $poly;
+                    if ($bd["val"] == "l"  &&  preg_match("/^LINESTRING\s?[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",$bd["dtl_Geo"],$matches)) {
+                        list($dummy, $minX, $minY, $maxX, $maxY) = $matches;
+                    }
+                    /*   redundant
+                    $minX = intval($minX*10)/10;
+                    $minY = intval($minY*10)/10;
+                    $maxX = intval($maxX*10)/10;
+                    $maxY = intval($maxY*10)/10;
+                    */
+
+                    switch ($bd["val"]) {
+                        case "p": $type = "Point"; break;
+                        case "pl": $type = "Polygon"; break;
+                        case "c": $type = "Circle"; break;
+                        case "r": $type = "Rectangle"; break;
+                        case "l": $type = "Path"; break;
+                        default: $type = "Unknown";
+                    }
+
+                    if ($type == "Point")
+                        $bd["val"] = "<b>Point</b> ".round($minX,7).", ".round($minY,7);
+                    else
+                        $bd['val'] = "<b>$type</b> X ".round($minX,7).", ".round($maxX,7).
+                        " Y ".round($minY,7).", ".round($maxY,7);
+
+                    $geoimage = "<img class='geo-image' src='".HEURIST_BASE_URL
+                    ."common/images/geo.gif' onmouseout='{if(mapViewer){mapViewer.hide();}}' "
+                    ."onmouseover='{if(mapViewer){mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}}'>&nbsp;";
+
+                    $bd['val'] = $geoimage.$bd['val'];
 
                 } else {
-                    if (preg_match('/^https?:/', $bd['val'])) {
-                        if (strlen($bd['val']) > 100)
-                            $trim_url = preg_replace('/^(.{70}).*?(.{20})$/', '\\1...\\2', $bd['val']);
-                        else
-                            $trim_url = $bd['val'];
-                        $bd['val'] = '<a href="'.$bd['val'].'" target="_new">'.htmlspecialchars($trim_url).'</a>';
-                    } else if ($bd['dtl_Geo'] && preg_match("/^POLYGON\s?[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $bd["bd_geo_envelope"], $poly)) {
-                        list($match, $minX, $minY, $maxX, $maxY) = $poly;
-                        if ($bd["val"] == "l"  &&  preg_match("/^LINESTRING\s?[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",$bd["dtl_Geo"],$matches)) {
-                            list($dummy, $minX, $minY, $maxX, $maxY) = $matches;
-                        }
-                        /*   redundant
-                        $minX = intval($minX*10)/10;
-                        $minY = intval($minY*10)/10;
-                        $maxX = intval($maxX*10)/10;
-                        $maxY = intval($maxY*10)/10;
-                        */
-
-                        switch ($bd["val"]) {
-                            case "p": $type = "Point"; break;
-                            case "pl": $type = "Polygon"; break;
-                            case "c": $type = "Circle"; break;
-                            case "r": $type = "Rectangle"; break;
-                            case "l": $type = "Path"; break;
-                            default: $type = "Unknown";
-                        }
-
-                        if ($type == "Point")
-                            $bd["val"] = "<b>Point</b> ".round($minX,7).", ".round($minY,7);
-                        else
-                            $bd['val'] = "<b>$type</b> X ".round($minX,7).", ".round($maxX,7).
-                            " Y ".round($minY,7).", ".round($maxY,7);
-
-                        $geoimage = "<img class='geo-image' src='".HEURIST_BASE_URL
-                        ."common/images/geo.gif' onmouseout='{if(mapViewer){mapViewer.hide();}}' "
-                        ."onmouseover='{if(mapViewer){mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}}'>&nbsp;";
-
-                        $bd['val'] = $geoimage.$bd['val'];
-
-                    } else {
-                        $bd['val'] = output_chunker($bd['val']);
-                    }
+                    $bd['val'] = output_chunker($bd['val']);
                 }
+            }
 
-                array_push($bds, $bd);
-            }//for
-            
-            
-            //sort array by order_by_date for resource (pointer) details
-            function cmp($a, $b)
-            {
-                if($a['rst_DisplayOrder'] == $b['rst_DisplayOrder']){
-                    
-                    if($a['dty_ID'] == $b['dty_ID']){
-                        
-                        if(@$a['order_by_date']==null ||  @$b['order_by_date']==null){
-                             return ($a['dtl_ID'] < $b['dtl_ID'])?-1:1;    
-                        }else{
-                             return ($a['order_by_date'] < $b['order_by_date']) ? -1 : 1;
-                        }
-                        
-                        
-                    }else{
-                        return ($a['dty_ID'] < $b['dty_ID'])?-1:1;    
-                    }
-                    
-                }else {
-                    return (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
-                }
-            }            
-            usort($bds, "cmp");
+            array_push($bds, $bd);
+    }//for
 
-if($is_map_popup){
-    echo '<div>';  
-}else{  
+        $bds_res->close();
+    }
     
-            //print info about parent record
-            foreach ($bds as $bd) {
-                if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY){
-                    print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
-                        .'<div class=detailType>Parent record</div><div class="detail">'
-                        .' '.$bd['val'].'</div></div>';
-                    break;
+    //sort array by order_by_date for resource (pointer) details
+    function cmp($a, $b)
+    {
+        if($a['rst_DisplayOrder'] == $b['rst_DisplayOrder']){
+
+            if($a['dty_ID'] == $b['dty_ID']){
+
+                if(@$a['order_by_date']==null ||  @$b['order_by_date']==null){
+                    return ($a['dtl_ID'] < $b['dtl_ID'])?-1:1;    
+                }else{
+                    return ($a['order_by_date'] < $b['order_by_date']) ? -1 : 1;
                 }
-            }
-    
-    echo '<div class=detailRowHeader>Shared';
-}
-?>
-            <div class=thumbnail>
-                <?php
-                foreach ($thumbs as $thumb) {
-                    
-                    
-                    
-                    print '<div class=thumb_image>';
-                    /*
-                    if($thumb["mediaType"]=='image' && !$is_map_popup){
-                        //NEW WAY                        
-                        print '<div id="mediarec"'.$thumb['id'].'" style="width:100%,text-align:center,height:auto" class="mediacontent thumbnails">';
-                        print '<div style="height:auto;display:inline-block"><a target="yoxview" href="'
-                        .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['id'].'">';
-                        print '<img src="'.htmlspecialchars($thumb['thumb']).'"/>';
-                        print '</a></div></div>';
-                    }else
-                    */
-                    
-                    if($thumb['player'] && !$is_map_popup){
-                        
-                        if(strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0){
-                            print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;">';
 
-                            print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
-                            print '</div>';    
-                        }else{
-                            print '<img id="img'.$thumb['id'].'" style="width:'.$thumb['thumb_size'].'px" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')">';
-                            print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
-                        }
-                    }else{  //for usual image
-                        print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';
-                    }
-                    print '<br/><div class="download_link">';
-                    if($thumb['player'] && !$is_map_popup){
-                        print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">CLOSE</a>&nbsp;';
-                    }
 
-                    print '<a href="' . htmlspecialchars($thumb['url']) . '" class="external-link" target=_surf class="image_tool">DOWNLOAD</a></div>';
-                    print '</div>';
-                    if($is_map_popup){
-                        print '<br>';
-                        break; //in map popup show the only thumbnail
-                    }
-                };
-                ?>
-            </div>
-            <?php
-            
-            $always_visible_dt = array( //(defined('DT_NAME')?DT_NAME:0),
-                        (defined('DT_NAME')?DT_SHORT_SUMMARY:0),
-                        (defined('DT_NAME')?DT_GEO_OBJECT:0));
-            
-            
-            $prevLbl = null;
-            foreach ($bds as $bd) {
-                if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
-                print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;'
-                    .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
-                    .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
-                    .'</div><div class="detail'
-                    .($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
-                     /* debug
-                    .$bd['rst_DisplayOrder']
-                    .' '.@$bd['order_by_date']
-                    .' '.$bd['dtl_ID']
-                    .' '.$bd['dty_ID']  */
-                    .' '.$bd['val'].'</div></div>';
-                $prevLbl = $bd['name'];
-            }
-            
-            $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']); //get form database in server time
-            if($add_date){
-                $add_date = $add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
-                $add_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
-                            $add_date.'")</script> local)';
             }else{
-                $add_date = false;
+                return ($a['dty_ID'] < $b['dty_ID'])?-1:1;    
             }
-            
-            $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']); //get form database in server time
-            if($mod_date){
-                $mod_date = $mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
-                $mod_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
-                            $mod_date.'")</script> local)';
-            }else{
-                $mod_date = false;
+
+        }else {
+            return (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
+        }
+    }            
+    usort($bds, "cmp");
+
+    if($is_map_popup){
+        echo '<div>';  
+    }else{  
+
+        //print info about parent record
+        foreach ($bds as $bd) {
+            if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY){
+                print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
+                .'<div class=detailType>Parent record</div><div class="detail">'
+                .' '.$bd['val'].'</div></div>';
+                break;
             }
-            if($add_date){
-            ?>
-            <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
-                    <div class=detailType>Added</div><div class=detail>
-                        <?php print $add_date.'  '
-                                .' '.$add_date_local; ?>
-                    </div>
-            </div>
-            <?php
-            }
-            if($mod_date){
-            ?>
-            <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
-                    <div class=detailType>Updated</div><div class=detail>
-                        <?php print $mod_date
-                                .' '.$mod_date_local; ?>
-                    </div>
-            </div>
-            <?php
-            }
-            ?>
-            <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
-                    <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>">
-                    <a target=_blank class="external-link" 
-                            href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML</a>
-                            &nbsp;&nbsp;
-                    <a target=_blank class="external-link" 
-                            href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&fmt=html&db=".HEURIST_DBNAME ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
-            </div>
-                
-           
+        }
+
+        echo '<div class=detailRowHeader>Shared';
+    }
+    ?>
+    <div class=thumbnail>
         <?php
-        // </div>  
-            if($is_map_popup){
-                echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.detailRow\').show();$(event.target).hide()">more ...</a></div></div>';
-                echo '<div class=detailRow>&nbsp;</div>';
+        foreach ($thumbs as $thumb) {
+
+            print '<div class=thumb_image>';
+
+            if($thumb['player'] && !$is_map_popup){
+
+                if(strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0){
+                    print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;">';
+
+                    filePrintPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['url']);
+                    
+                    //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
+                    print '</div>';    
+                }else{
+                    print '<img id="img'.$thumb['id'].'" style="width:'.$thumb['thumb_size'].'px" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')">';
+                    print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
+                }
+            }else{  //for usual image
+                print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';
             }
-            
-echo '</div>';            
+            print '<br/><div class="download_link">';
+            if($thumb['player'] && !$is_map_popup){
+                print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">CLOSE</a>&nbsp;';
+            }
+
+            print '<a href="' . htmlspecialchars($thumb['url']) . '" class="external-link" target=_surf class="image_tool">DOWNLOAD</a></div>';
+            print '</div>';
+            if($is_map_popup){
+                print '<br>';
+                break; //in map popup show the only thumbnail
+            }
+        };
+        ?>
+    </div>
+    <?php
+
+    $always_visible_dt = array( //(defined('DT_NAME')?DT_NAME:0),
+        (defined('DT_NAME')?DT_SHORT_SUMMARY:0),
+        (defined('DT_NAME')?DT_GEO_OBJECT:0));
+
+
+    $prevLbl = null;
+    foreach ($bds as $bd) {
+        if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
+        print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;'
+        .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
+        .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
+        .'</div><div class="detail'
+        .($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
+        /* debug
+        .$bd['rst_DisplayOrder']
+        .' '.@$bd['order_by_date']
+        .' '.$bd['dtl_ID']
+        .' '.$bd['dty_ID']  */
+        .' '.$bd['val'].'</div></div>';
+        $prevLbl = $bd['name'];
     }
 
+    $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']); //get form database in server time
+    if($add_date){
+        $add_date = $add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
+        $add_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
+        $add_date.'")</script> local)';
+    }else{
+        $add_date = false;
+    }
 
-    function print_other_tags($bib) {
+    $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']); //get form database in server time
+    if($mod_date){
+        $mod_date = $mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
+        $mod_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
+        $mod_date.'")</script> local)';
+    }else{
+        $mod_date = false;
+    }
+    if($add_date){
+        ?>
+        <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
+            <div class=detailType>Added</div><div class=detail>
+                <?php print $add_date.'  '
+                .' '.$add_date_local; ?>
+            </div>
+        </div>
+        <?php
+    }
+    if($mod_date){
+        ?>
+        <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
+            <div class=detailType>Updated</div><div class=detail>
+                <?php print $mod_date
+                .' '.$mod_date_local; ?>
+            </div>
+        </div>
+        <?php
+    }
+    ?>
+    <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
+        <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>">
+            <a target=_blank class="external-link" 
+                href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML</a>
+            &nbsp;&nbsp;
+            <a target=_blank class="external-link" 
+            href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&fmt=html&db=".HEURIST_DBNAME ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
+    </div>
+
+
+    <?php
+    // </div>  
+    if($is_map_popup){
+        echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.detailRow\').show();$(event.target).hide()">more ...</a></div></div>';
+        echo '<div class=detailRow>&nbsp;</div>';
+    }
+
+    echo '</div>';            
+}
+
+
+function print_other_tags($bib) {
         ?>
         <div class="detailRow">
             <div class="detailType">Tags</div>
@@ -879,17 +923,123 @@ echo '</div>';
             </div>
         </div>
         <?php
+}
+    
+    
+$relRT = (defined('RT_RELATION')?RT_RELATION:0);
+$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+$relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
+$relTypDT = (defined('DT_RELATION_TYPE') ? DT_RELATION_TYPE : 0);
+$intrpDT = (defined('DT_INTERPRETATION_REFERENCE') ? DT_INTERPRETATION_REFERENCE : 0);
+$notesDT = (defined('DT_SHORT_SUMMARY') ? DT_SHORT_SUMMARY : 0);
+$startDT = (defined('DT_START_DATE') ? DT_START_DATE : 0);
+$endDT = (defined('DT_END_DATE') ? DT_END_DATE : 0);
+$titleDT = (defined('DT_NAME') ? DT_NAME : 0);
+
+/**
+* get related record structure for a give relationship record
+* related = { "recID" => recID,
+*             "RelTermID" => relationTrmID,
+*             "RelTerm" => trmLabel,
+*             "ParentTermID" => parentTrmID,
+*             "RelatedRecID" => linkedRecID,
+*             "InterpRecID" => interpretationRecID,
+*             "Notes" => relationshipNotes,
+*             "Title" => relationshipTitle,
+*             "StartData" => relationshipStartDate,
+*             "EndDate" => relationshipEndDate}
+*
+* @global    int $relTypDT local id of relationtype detailType (magic number)
+* @global    int $relSrcDT local id of source record pointer detailType (magic number)
+* @global    int $relTrgDT local id of target record pointer detailType (magic number)
+* @global    int $intrpDT local id of interpretation record pointer detailType (magic number)
+* @global    int $notesDT local id of notes detailType (magic number)
+* @global    int $startDT local id of start time detailType (magic number)
+* @global    int $endDT local id of end time detailType (magic number)
+* @global    int $titleDT local id of title detailType (magic number)
+* @param     int $recID relationshipRecID to use for related
+* @param     boolean $i_am_primary true if context is "from" record of relationship link
+* @return    object related record structure
+* @todo      change $i_am_primary to useInverseRelation
+*/
+function fetch_relation_details($recID, $i_am_primary) {
+    
+    global $system, $relTypDT, $relSrcDT, $relTrgDT, $intrpDT, $notesDT, $startDT, $endDT, $titleDT;
+    
+    /* get recDetails for the given linked resource and extract all the necessary values */
+    $mysqli = $system->get_mysqli();
+    $res = $mysqli->query('select * from recDetails where dtl_RecID = ' . $recID);
+    
+    $bd = array('recID' => $recID);
+    if($res){
+        while ($row = $res->fetch_assoc()) {
+            
+        switch ($row['dtl_DetailTypeID']) {
+            case $relTypDT: //saw Enum change - added RelationValue for UI
+                if ($i_am_primary) {
+                    $bd['RelTermID'] = $row['dtl_Value'];
+                } else {
+                    $bd['RelTermID'] = reltype_inverse($row['dtl_Value']); // BUG: assumes reltype_inverse returns ID
+                    //TODO: saw this should have a -1 which is different than self inverse and the RelTerm should be "inverse of ". term label requires checking smarty/showReps
+                }
+                $relval = mysql__select_row_assoc($mysqli, 
+                        'select trm_Label, trm_ParentTermID from defTerms where trm_ID = ' . intval($bd['RelTermID']));
+                if($relval!=null){
+                    $bd['RelTerm'] = $relval['trm_Label'];
+                    if ($relval['trm_ParentTermID']) {
+                        $bd['ParentTermID'] = $relval['trm_ParentTermID'];
+                    }
+                }
+                break;
+            case $relTrgDT: // linked resource
+                if (!$i_am_primary) break;
+
+                $bd['RelatedRecID'] = mysql__select_row_assoc($mysqli,
+                                    'select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
+                                    ' from Records where rec_ID = ' . intval($row['dtl_Value']) );
+                break;
+            case $relSrcDT:
+                if ($i_am_primary) break;
+                
+                $bd['RelatedRecID'] = mysql__select_row_assoc($mysqli,
+                                    'select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
+                                    ' from Records where rec_ID = ' . intval($row['dtl_Value']) );
+                
+                break;
+            case $intrpDT:
+                
+                $bd['InterpRecID'] = mysql__select_row_assoc($mysqli,
+                                    'select rec_ID, rec_Title, rec_RecTypeID, rec_URL'.
+                                    ' from Records where rec_ID = ' . intval($row['dtl_Value']) );
+                
+                break;
+            case $notesDT:
+                $bd['Notes'] = $row['dtl_Value'];
+                break;
+            case $titleDT:
+                $bd['Title'] = $row['dtl_Value'];
+                break;
+            case $startDT:
+                $bd['StartDate'] = $row['dtl_Value'];
+                break;
+            case $endDT:
+                $bd['EndDate'] = $row['dtl_Value'];
+                break;
+        }
     }
-    $relRT = (defined('RT_RELATION')?RT_RELATION:0);
-    $relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
-    $relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
+        $res->close();
+    }
+    
+    return $bd;
+}
 
+function print_relation_details($bib) {
 
-    function print_relation_details($bib) {
+        global $system, $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
 
-        global $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
-
-        $from_res = mysql_query('select recDetails.*
+        $mysqli = $system->get_mysqli();
+        
+        $from_res = $mysqli->query('select recDetails.*
             from recDetails
             left join Records on rec_ID = dtl_RecID
             where dtl_DetailTypeID = '.$relSrcDT.
@@ -897,14 +1047,17 @@ echo '</div>';
             ' and dtl_Value = ' . $bib['rec_ID']);        //primary resource
 
 
-        $to_res = mysql_query('select recDetails.*
+        $to_res = $mysqli->query('select recDetails.*
             from recDetails
             left join Records on rec_ID = dtl_RecID
             where dtl_DetailTypeID = '.$relTrgDT.
             ' and rec_RecTypeID = '.$relRT.
             ' and dtl_Value = ' . $bib['rec_ID']);          //linked resource
 
-        if (($from_res==false || mysql_num_rows($from_res) <= 0)  &&  ($to_res==false || mysql_num_rows($to_res) <= 0)) return;
+        if (($from_res==false || $from_res->num_rows <= 0)  &&  
+             ($to_res==false || $to_res->num_rows)){
+               return;  
+        } 
 
         if($is_map_popup){
            print '<div>';
@@ -913,8 +1066,11 @@ echo '</div>';
         }
 
     $accessCondition = (count($ACCESSABLE_OWNER_IDS)>0?'(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
-    (is_logged_in()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")');
-    while ($reln = mysql_fetch_assoc($from_res)) {
+    ($system->has_access()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")');
+    
+    if($from_res){
+    while ($reln = $from_res->fetch_assoc()) {
+        
         $bd = fetch_relation_details($reln['dtl_RecID'], true);
 
         // check related record
@@ -922,10 +1078,13 @@ echo '</div>';
             continue;
         }
         $relatedRecID = $bd['RelatedRecID']['rec_ID'];
-        if (count(mysql__select_array("Records","rec_ID","rec_ID = $relatedRecID and $accessCondition")) == 0) { //related is not accessable
+        
+        if(mysql__select_value($mysqli, 
+            "select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
+            //related is not accessable
             continue;
         }
-
+        
         print '<div class=detailRow>';
         //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
         if(array_key_exists('RelTerm',$bd)){
@@ -945,7 +1104,11 @@ echo '</div>';
         if (@$bd['EndDate']) print ' until ' . htmlspecialchars(temporalToHumanReadableString($bd['EndDate']));
         print '</div></div>';
     }
-    while ($reln = mysql_fetch_assoc($to_res)) {
+    $from_res->close();
+    }
+    if($to_res){
+    while ($reln = $to_res->fetch_assoc()) {
+        
         $bd = fetch_relation_details($reln['dtl_RecID'], false);
 
         // check related record
@@ -953,7 +1116,9 @@ echo '</div>';
             continue;
         }
         $relatedRecID = $bd['RelatedRecID']['rec_ID'];
-        if (count(mysql__select_array("Records","rec_ID","rec_ID = $relatedRecID and $accessCondition")) == 0) { //related is not accessable
+        if(mysql__select_value($mysqli, 
+            "select count(rec_ID) from Records where rec_ID =$relatedRecID and $accessCondition")==0){
+            //related is not accessable
             continue;
         }
 
@@ -976,11 +1141,13 @@ echo '</div>';
         if (@$bd['EndDate']) print ' until ' . htmlspecialchars($bd['EndDate']);
         print '</div></div>';
     }
+        $to_res->close();
+    }
 }
 
 
 function print_linked_details($bib) {
-    global $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
+    global $system, $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
     
     $query = 'select * '.
     'from recDetails '.
@@ -991,11 +1158,14 @@ function print_linked_details($bib) {
     'and dtl_Value = ' . $bib['rec_ID'].' '.
     'and rec_RecTypeID != '.$relRT.' '.
     'and '.(count($ACCESSABLE_OWNER_IDS)>0?'(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
-    ((is_logged_in()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")').
+    (($system->has_access()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")').
     ' ORDER BY rec_RecTypeID, rec_Title');
-    $res = mysql_query($query);
+    
+    $mysqli = $system->get_mysqli();
+    
+    $res = $mysqli->query($query);
 
-    if ($res==false || mysql_num_rows($res) <= 0) return;
+    if ($res==false || $res->num_rows <= 0) return;
     
         if($is_map_popup){
            print '<div>';
@@ -1013,7 +1183,7 @@ function print_linked_details($bib) {
         
         $lbl = 'Linked from';
 
-        while ($row = mysql_fetch_assoc($res)) {
+        while ($row = $res->fetch_assoc()) {
 
             print '<div class=detailRow>';
             print '<div class=detailType>'.$lbl.'</div>';
@@ -1024,9 +1194,12 @@ function print_linked_details($bib) {
 
             $lbl = '';
         }
-    }
+}
 
-    function print_text_details($bib) {
+//
+// functions below for WOOT and Comments are not used
+//
+function print_text_details($bib) {
         $cmts = getAllComments($bib["rec_ID"]);
         $result = loadWoot(array("title" => "record:".$bib["rec_ID"]));
         if (! $result["success"] && count($cmts) == 0) return;
@@ -1044,10 +1217,18 @@ function print_linked_details($bib) {
         print_woot_precis($content, $bib);
         print_threaded_comments($cmts);
         print '</div><br>&nbsp;'; // avoid ugly spacing
-    }
+}
 
+function output_chunker($val) {
+    // chunk up the value so that it will be able to line-break if necessary
+    $val = htmlspecialchars($val);
+    return $val;
+    /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
+    return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);
+    */
+}
 
-    /*
+/*
     loadWoot returns:
 
     {	success
@@ -1103,7 +1284,7 @@ function print_linked_details($bib) {
     [groupId] =>
     [groupName] => ) ) ) ) )
     */
-    function print_woot_precis($content,$bib) {
+function print_woot_precis($content,$bib) {
         if (strlen($content) == 0) return;
         ?>
         <div class=detailRow>
@@ -1125,7 +1306,7 @@ function print_linked_details($bib) {
     }
 
 
-    function print_threaded_comments($cmts) {
+function print_threaded_comments($cmts) {
         if (count($cmts) == 0) return;
         ?>
         <div class=detailRow>
@@ -1193,15 +1374,4 @@ function orderComments($cmts) {
     if (count($orderErrCmts)) $orderedCmtIds = array_merge($orderedCmtIds,$orderErrCmts);
     return $ret;
 }
-
-
-function output_chunker($val) {
-    // chunk up the value so that it will be able to line-break if necessary
-    $val = htmlspecialchars($val);
-    return $val;
-    /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
-    return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);
-    */
-}
-
 ?>

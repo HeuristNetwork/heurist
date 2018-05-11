@@ -1,8 +1,7 @@
 <?php
 
 /**
-* @todo
-* CRUD for files : recUploadedFiles - REPLACE to dbRecUploadedFiles
+* @todo - wrap to class !!!
 
 * file - prefix for functions
 * 
@@ -73,7 +72,7 @@ function fileGetPath_URL_Type($system, $file_ids){
         }
 
         $query = 'select concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
-        .'fxm_MimeType, ulf_Parameters, ulf_OrigFileName from recUploadedFiles '
+        .'fxm_MimeType, ulf_Parameters, ulf_OrigFileName, ulf_FileSizeKB, ulf_ObfuscatedFileID from recUploadedFiles '
         .' left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt where '
         .$query;
 
@@ -403,5 +402,167 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         
 
     }
+}
+
+//
+// output the appropriate html tag to view media content
+//
+function filePrintPlayerTag($fileid, $mimeType, $params, $url, $size=null){ 
+
+    $is_video = (strpos($mimeType,"video/")===0 || strpos($params,"video")!==false);
+    $is_audio = (strpos($mimeType,"audio/")===0 || strpos($params,"audio")!==false);
+    $is_image = (strpos($mimeType,"image/")===0);
+
+    if($url){
+        $filepath = $url;  //external 
+    }else{
+        //to itself
+        $filepath = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&file=".$fileid;
+    }
+    $thumb_url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&thumb=".$fileid;
+
+    if ( $is_video ) {
+
+        if($size==null || $size==''){
+            $size = 'width="640" height="360"';
+        }
+
+        if ($mimeType=='video/youtube' || $mimeType=='video/vimeo'
+        || strpos($url, 'vimeo.com')>0
+        || strpos($url, 'youtu.be')>0
+        || strpos($url, 'youtube.com')>0)
+        {
+
+            $playerURL = getPlayerURL($mimeType, $url);
+
+            print '<iframe '.$size.' src="'.$playerURL.'" frameborder="0" '
+            . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
+
+        }else{
+            $player = HEURIST_BASE_URL."ext/mediaelement/flashmediaelement.swf";
+
+            //preload="none"
+            ?>
+            <video  type="<?php echo $size;?>  controls="controls">
+            <source type="<?php echo $mimeType;?>" src="<?php echo $filepath;?>" />
+            <!-- Flash fallback for non-HTML5 browsers -->
+            <object width="640" height="360" type="application/x-shockwave-flash" data="<?php echo $player;?>">
+            <param name="movie" value="<?php echo $player;?>" />
+            <param name="flashvars" value="controls=true&file=<?php echo $filepath;?>" />
+            <img src="<?php echo $thumb_url;?>" width="320" height="240" title="No video playback capabilities" />
+            </object>
+            </video>
+            <?php   
+            //note: we may remove flash fallback since it is blocked in most modern browsers
+
+        }
+
+    }
+    else if ( $is_audio ) 
+    {
+
+        if ($mimeType=='audio/soundcloud'
+        || strpos($url, 'soundcloud.com')>0)
+        {
+
+            if($size==null || $size==''){
+                $size = 'width="640" height="166"';
+            }
+
+            $playerURL = getPlayerURL($mimeType, $url);
+
+            print '<iframe '.$size.' src="'.$playerURL.'" frameborder="0"></iframe>';                        
+
+        }else{
+            print '<audio controls="controls"><source src="'.$filepath
+            .'" type="'.$mimeType.'"/>Your browser does not support the audio element.</audio>';                        
+        }
+
+    }else 
+        if($is_image){
+
+            // || strpos($url,".jpg")>0 || strpos($url,".jpeg")>0  || strpos($url,".png")>0 || strpos($url,".gif")>0
+
+            if($size==null || $size==''){
+                $size = 'width="300"';
+            }
+            print '<img '.$size.' src="'.$filepath.'"/>';
+
+    }else if($mimeType=='application/pdf'){
+        //error_log($filepath);                 
+        print '<embed width="100%" height="100%" name="plugin" src="'
+        .$filepath.'&embed=1'
+        .'" type="application/pdf" internalinstanceid="9">';
+
+    }else{
+        //not media - show thumb with download link
+        print '<a href="'.$filepath.'" target="_blank"><img src="'.$thumb_url.'"/></a>';
+
+        /*                
+        if($size==null || $size==''){
+        $size = 'width="420" height="345"';
+        }
+        print '<iframe '.$size.' src="'.$filepath.'" frameborder="0"></iframe>';                        
+        */    
+    }
+}           
+
+//
+// get player url for youtube, vimeo, soundcloud
+//
+function getPlayerURL($mimeType, $url){
+    
+    if( $mimeType == 'video/youtube' 
+            || strpos($url, 'youtu.be')>0
+            || strpos($url, 'youtube.com')>0){ //match('http://(www.)?youtube|youtu\.be')
+            
+        $url = 'https://www.youtube.com/embed/'.youtube_id_from_url($url);
+        
+    }else if( $mimeType == 'video/vimeo' || strpos($url, 'viemo.com')>0){
+        
+        $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".$url, false), true);
+        $video_id = @$hash['video_id'];
+        if($video_id>0){
+           $url =  'https://player.vimeo.com/video/'.$video_id;
+        }
+    }else if( $mimeType == 'audio/soundcloud' || strpos($url, 'soundcloud.com')>0){
+    
+        return 'https://w.soundcloud.com/player/?url='.$url
+                .'&amp;auto_play=false&amp;hide_related=false&amp;show_comments=false&amp;show_user=false&amp;'
+                .'show_reposts=false&amp;show_teaser=false&amp;visual=true';
+    } 
+    
+    return $url;
+}
+
+function youtube_id_from_url($url) {
+/*    
+    $pattern = 
+        '%^# Match any youtube URL
+        (?:https?://)?  # Optional scheme. Either http or https
+        (?:www\.)?      # Optional www subdomain
+        (?:             # Group host alternatives
+          youtu\.be/    # Either youtu.be,
+        | youtube\.com  # or youtube.com
+          (?:           # Group path alternatives
+            /embed/     # Either /embed/
+          | /v/         # or /v/
+          | /watch\?v=  # or /watch\?v=
+          )             # End path alternatives.
+        )               # End host alternatives.
+        ([\w-]{10,12})  # Allow 10-12 for 11 char youtube id.
+        $%x'
+        ;
+        
+    //$url = urldecode(rawurldecode($_GET["q"]));
+    $result = preg_match($pattern, $url, $matches);
+    if ($result) {
+        return $matches[1];
+    }
+    return false;
+*/    
+    # https://www.youtube.com/watch?v=nn5hCEMyE-E
+    preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/", $url, $matches);
+    return $matches[1];    
 }
 ?>

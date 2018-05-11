@@ -1,14 +1,18 @@
 <?php
+//@TODO convert to class
 
     /**
     *  Database utilities :   mysql_ - prefix for function
     *
-    *  mysql_connection - establish connection
+    *  mysql__connection - establish connection
     *  mysql__getdatabases4 - get list of databases
     *  mysql__select_assoc2 - returns array  key_column=>val_column for given table
     *  mysql__select_list - returns array of column values
     *  mysql__select_value   - return the first column of first row
     *  mysql__select_row   - returns first row
+    *  mysql__select_row_assoc - returns first row assoc fieldnames
+    *  mysql__select_all
+    *  mysql__duplicate_table_record
     *  mysql__insertupdate
     *  mysql__delete
     *  mysql__begin_transaction
@@ -50,7 +54,7 @@
     *
     * @return a MySQL link identifier on success or array with code and error message on failure.
     */
-    function mysql_connection($dbHost, $dbUsername, $dbPassword){
+    function mysql__connection($dbHost, $dbUsername, $dbPassword){
 
 
         if(null==$dbHost || $dbHost==""){
@@ -170,7 +174,7 @@
         return $matches;
     }
     /**
-    * returns array of column values
+    * returns array of FIRST column values
     */
     function mysql__select_list2($mysqli, $query) {
 
@@ -189,6 +193,7 @@
 
         return $matches;
     }
+    
     function mysql__select_list($mysqli, $table, $column, $condition) {
         $query = "SELECT $column FROM $table WHERE $condition";
         return mysql__select_list2($mysqli, $query);
@@ -231,6 +236,28 @@
         }
         return $result;
     }
+
+    /**
+    * returns first row with assoc field names 
+    *
+    * @param mixed $mysqli
+    * @param mixed $query
+    */
+    function mysql__select_row_assoc($mysqli, $query) {
+        $result = null;
+        if($mysqli){
+            $res = $mysqli->query($query);
+            if($res){
+                $row = $res->fetch_assoc();
+                if($row){
+                    $result = $row;
+                }
+                $res->close();
+            }
+        }
+        return $result;
+    }
+
     
     /**
     * returns all rows as two dimensional array

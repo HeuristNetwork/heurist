@@ -25,28 +25,28 @@
 
 require_once(dirname(__FILE__)."/../../hserver/System.php");
 
+$error_msg = @$_REQUEST['msg'];
+if(!$error_msg){
+    // init main system class
+    $system = new System();
+    $layout_theme = null;
+    $isSystemInited = $system->init(@$_REQUEST['db'], true, false);
 
-// init main system class
-$system = new System();
-$layout_theme = null;
-$isSystemInited = $system->init(@$_REQUEST['db'], true);
-
-if($isSystemInited){
-    $user = $system->getCurrentUser();
-    $layout_theme = @$user['ugr_Preferences']['layout_theme'];
-    $error_msg = @$_REQUEST['msg'];
-    if(!$error_msg){
-        $error_msg = 'Unknown error.';
-    }
-}else{
-    //cannot connect to given database
-    $err = $system->getError();
-    $error_msg = @$err['message'];
-    if(!$error_msg){
-        $error_msg = 'Unknown error. Cannot init Heurist system';
+    if($isSystemInited){
+        $user = $system->getCurrentUser();
+        $layout_theme = @$user['ugr_Preferences']['layout_theme'];
+        if(!$error_msg){
+            $error_msg = 'Unknown error.';
+        }
+    }else{
+        //cannot connect to given database
+        $err = $system->getError();
+        $error_msg = @$err['message'];
+        if(!$error_msg){
+            $error_msg = 'Unknown error. Cannot init Heurist system';
+        }
     }
 }
-
 
 if(!$layout_theme) $layout_theme = 'heurist';
 

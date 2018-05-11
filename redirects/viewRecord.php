@@ -28,18 +28,8 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-
-require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
-
-// Input is of the form .../viewRecord.php?db=mydatabase&recID=3456
-
-$id = @$_REQUEST["recID"];
-
 // Redirect to .../records/view/viewRecord.php
 // TODO: change to use /records/view/renderRecordAsXML.php (XML with parameterisation for human-readable view)
-
-header('Location: '.HEURIST_BASE_URL.'records/view/viewRecord.php?db='.HEURIST_DBNAME.'&recID='.$id);
-
-return;
-
+header('Location: ../records/view/viewRecord.php?'.$_SERVER['QUERY_STRING']);
+exit();
 ?>

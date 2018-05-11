@@ -1,7 +1,7 @@
 <?php
 
 /**
-* getDBStructure.php: returns database definitions (rectypes, details etc.)
+* getDBStructureAsSQL.php: returns database definitions (rectypes, details etc.)
 * as SQL statements ready for INSERT processing
 *
 * @param includeUgrps=1 will output user and group information in addition to definitions

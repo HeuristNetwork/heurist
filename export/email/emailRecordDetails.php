@@ -15,7 +15,7 @@
 */
 
 /**
-* emailRecordDetailsphp, generic function to email a record from a Heurist database (generally to another), AO 2011/06/07
+* emailRecordDetails.php, generic function to email a record from a Heurist database (generally to another), AO 2011/06/07
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson

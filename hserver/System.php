@@ -140,7 +140,7 @@ error_log(print_r($_REQUEST, true));
     //
     private function init_db_connection(){
         
-        $res = mysql_connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+        $res = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
         if ( is_array($res) ){
             //connection to server failed
             $this->addError($res[0], $res[1]);
@@ -711,7 +711,8 @@ error_log(print_r($_REQUEST, true));
     * @param mixed $ug - user ID to check
     */
     public function is_member($ug){
-        return ($ug==0 || $ug==null || $this->get_user_id()==$ug ||  @$this->current_User['ugr_Groups'][$ug]);
+        return ( $ug==0 || $ug==null || in_array($ug, $this->get_user_group_ids()) );  
+        //$this->get_user_id()==$ug ||  @$this->current_User['ugr_Groups'][$ug]);
     }
 
     /**
@@ -747,7 +748,7 @@ error_log(print_r($_REQUEST, true));
         $ugrID = $this->get_user_id();
         
         if(!$requiredLevel || $requiredLevel<1){
-            return ($ugrID>0); 
+            return ($ugrID>0);   //just logged in
         }
         
         return ($requiredLevel==$ugrID ||   //iself 

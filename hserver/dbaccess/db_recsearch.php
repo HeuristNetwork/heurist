@@ -1,4 +1,5 @@
 <?php
+//@TODO convert to class
 
     /**
     * Library to search records
@@ -1574,34 +1575,23 @@ $loop_cnt++;
     
     //
     // find replacement for given record id
-    // 
-    function recordSearchReplacement($mysqli, $rec_id){ //see get_replacement_bib_id in H3
-        
-        while(true){
-            $query = 'select rfw_NewRecID from recForwarding where rfw_OldRecID=' . intval($rec_id);
-            $new_rec_id = mysql__select_value($mysqli, $query);
-            if($new_rec_id>0){
-                $rec_id = $new_rec_id;
+    //
+    function recordSearchReplacement($mysqli, $rec_id, $level=0){
+
+        if($rec_id>0){    
+            $rep_id = mysql__select_value($mysqli, 
+                        'select rfw_NewRecID from recForwarding where rfw_OldRecID=' . intval($rec_id));
+            if($rep_id>0){
+                if($level<10){
+                    return recordSearchReplacement($mysqli, $rep_id, $level++);
+                }else{
+                    return $rep_id;
+                }
             }else{
-                return $rec_id;                
+                return $rec_id;
             }
+        }else{
+            return 0;
         }
-        
-        /*
-        $res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=" . intval($rec_id));
-        $recurseLimit = 10;
-        while (mysql_num_rows($res) > 0) {
-            $row = mysql_fetch_row($res);
-            $rec_id = $row[0];
-            $replaced = true;
-            $res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=" . $rec_id);
-
-            if ($recurseLimit-- === 0) { break; }
-        }
-        */
-
-        return $rec_id;
-    }
-    
-    
+    }    
 ?>

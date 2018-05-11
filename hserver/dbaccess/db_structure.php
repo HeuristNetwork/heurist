@@ -1,5 +1,5 @@
 <?php
-
+//@TODO convert to class
     /**
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -82,7 +82,7 @@
     *                      1 - only structure (@TODO NO NAMES!!!!)
     *                      2 - full, both headers and structures
     */
-    function dbs_GetRectypeStructures($system, $rectypeids=null, $imode) { //$useCachedData = false) {
+    function dbs_GetRectypeStructures($system, $rectypeids=null, $imode=0) { //$useCachedData = false) {
 
 
         if($imode<0 || $imode>2){

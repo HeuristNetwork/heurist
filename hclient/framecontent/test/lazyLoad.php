@@ -105,6 +105,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                                 response.data.rectypes[0].expanded = true;
                             }
 
+console.log(response.data.rectypes);                            
                             //setTimeout(function(){
                             treediv.fancytree({
                                 //extensions: ["filter"],

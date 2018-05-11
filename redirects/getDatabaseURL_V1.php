@@ -21,12 +21,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
-
-require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
-
-header('Location: '.HEURIST_BASE_URL.'admin/setup/dbproperties/getDatabaseURL.php?db='.HEURIST_DBNAME);
-
-return;
-
+header('Location: ../admin/setup/dbproperties/getDatabaseURL.php?'.$_SERVER['QUERY_STRING']);
+exit();
 ?>
