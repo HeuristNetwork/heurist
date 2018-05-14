@@ -22,13 +22,12 @@
 */
 
 ?>
-
 <html>
 
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        
+        <link rel="stylesheet" type="text/css" href="../../h4styles.css" />
         <style type="text/css">
             h3, h3 span {
                 display: inline-block;
@@ -63,7 +62,7 @@
             <h2>Verify Heurist installation</h2>
         </div>
 
-        <div id="page-inner">
+        <div id="page-inner" style="padding-left: 6px;">
             This function verifies the presence of required PHP extensions.
             <!--
             and the location and writeability of folders required by the software.<br /> 
@@ -74,7 +73,7 @@
             TODO: Checks should include: external javascript functions; help system; root file upload directory; index.html in parent. <br /> 
             -->
 
-            <h3>If running within Heurist please run this using the latest instance on your server</h3><br />
+            <br><br><h3>If running within Heurist please run this using the latest instance on your server</h3><br />
             If you use an older instance it may not pick up all requirements for the latest instance.<br/>&nbsp;<br/>
 
             <hr><br />
@@ -105,12 +104,12 @@
             if (extension_loaded("pdo_sqlite")) {print "pdo_sqlite ok<br />";} else {print "pdo_sqlite MISSING, optional, required for FAIMS<br />";}
             if (extension_loaded("exif")) {print "exif ok<br />";} else {print "exif MISSING, optional, required for image file indexing<br />";}
 
-            print "<h3>All loaded extensions:</h3><br />";
+            print "<br><br><h3>All loaded extensions:</h3><br />";
             // TODO: write lsit of loaded extensions out neatly rather than dumping the array
             print_r(get_loaded_extensions());
             ?>
 
-            <br /><hr><br />
+            <br /><br><hr><br />
             Verification complete. Please note any errors listed above.
         </div>
     </body>

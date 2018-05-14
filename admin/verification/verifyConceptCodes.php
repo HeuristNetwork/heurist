@@ -24,28 +24,20 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
+define('OWNER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../common/php/utilsMail.php');
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
-    if (! is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        return;
-    }
-
-    if (!is_admin()) {
-        print "Sorry, you need to be a database owner to be able to modify the database structure";
-        return;
-    }
+$mysqli = $system->get_mysqli();
     
     //1. find all database
     $query = 'show databases';
 
-    $res = mysql_query($query);
-    if (!$res) {  print $query.'  '.mysql_error();  return; }
+    $res = $mysqli->query($query);
+    if (!$res) {  print $query.'  '.$mysqli->error;  return; }
     $databases = array();
-    while (($row = mysql_fetch_row($res))) {
+    while (($row = $res->fetch_row())) {
         if( strpos($row[0], 'hdb_')===0 ){
             //if($row[0]>'hdb_Masterclass_Cookbook')
                 $databases[] = $row[0];
@@ -65,10 +57,10 @@
             .$db_name.'.defRecTypes WHERE  rty_OriginatingDBID>0 AND rty_IDInOriginatingDB>0 '
             .' GROUP BY rty_OriginatingDBID, rty_IDInOriginatingDB HAVING cnt>1';
         
-        $res = mysql_query($query);
-        if (!$res) {  print $query.'  '.mysql_error();  return; }
+        $res = $mysqli->query($query);
+        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
         
-        while (($row = mysql_fetch_row($res))) {
+        while (($row = $res->fetch_row($res))) {
 
                $is_found = true;
                 
@@ -76,9 +68,9 @@
                 .$db_name.'.defRecTypes WHERE  rty_OriginatingDBID='.$row[0].' AND rty_IDInOriginatingDB='.$row[1]
                 .' ORDER BY rty_OriginatingDBID, rty_IDInOriginatingDB';
                 
-               $res2 = mysql_query($query);               
-               if (!$res2) {  print $query.'  '.mysql_error();  return; }
-               while (($row2 = mysql_fetch_row($res2))) {
+               $res2 = $mysqli->query($query);               
+               if (!$res2) {  print $query.'  '.$mysqli->error;  return; }
+               while (($row2 = $res2->fetch_row())) {
                       array_push($rec_types, $row2);
                }
         }
@@ -89,11 +81,11 @@
             .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID>0 AND dty_IDInOriginatingDB>0 '
             .' GROUP BY dty_OriginatingDBID, dty_IDInOriginatingDB HAVING cnt>1';
         
-        $res = mysql_query($query);
-        if (!$res) {  print $query.'  '.mysql_error();  return; }
+        $res = $mysqli->query($query);
+        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
         
         $not_found = true;
-        while (($row = mysql_fetch_row($res))) {
+        while (($row = $res->fetch_row())) {
 
                $is_found = true;
                 
@@ -101,9 +93,9 @@
                 .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID='.$row[0].' AND dty_IDInOriginatingDB='.$row[1]
                 .' ORDER BY dty_OriginatingDBID, dty_IDInOriginatingDB';
                 
-               $res2 = mysql_query($query);               
-               if (!$res2) {  print $query.'  '.mysql_error();  return; }
-               while (($row2 = mysql_fetch_row($res2))) {
+               $res2 = $mysqli->query($query);               
+               if (!$res2) {  print $query.'  '.$mysqli->error;  return; }
+               while (($row2 = $res2->fetch_row())) {
                       array_push($det_types, $row2);
                }
         }
@@ -114,10 +106,10 @@
             .$db_name.'.defTerms WHERE  trm_OriginatingDBID>0 AND trm_IDInOriginatingDB>0 '
             .' GROUP BY trm_OriginatingDBID, trm_IDInOriginatingDB HAVING cnt>1';
         
-        $res = mysql_query($query);
-        if (!$res) {  print $query.'  '.mysql_error();  return; }
+        $res = $mysqli->query($query);
+        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
         
-        while (($row = mysql_fetch_row($res))) {
+        while (($row = $res->fetch_row())) {
 
                $is_found = true;
                 
@@ -125,9 +117,9 @@
                 .$db_name.'.defTerms WHERE  trm_OriginatingDBID='.$row[0].' AND trm_IDInOriginatingDB='.$row[1]
                 .' ORDER BY trm_OriginatingDBID, trm_IDInOriginatingDB';
                 
-               $res2 = mysql_query($query);               
-               if (!$res2) {  print $query.'  '.mysql_error();  return; }
-               while (($row2 = mysql_fetch_row($res2))) {
+               $res2 = $mysqli->query($query);               
+               if (!$res2) {  print $query.'  '.$mysqli->error;  return; }
+               while (($row2 = $res2->fetch_row())) {
                       array_push($terms, $row2);
                }
         }
@@ -156,4 +148,5 @@
         } 
         
     }//while  databases
+    print '[end report]';
 ?>

@@ -31,33 +31,29 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
 
-    define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
-    if(isForAdminOnly("to perform this action")){
-        return;
-    }
+$mysqli = $system->get_mysqli();
 
-    mysql_connection_overwrite(DATABASE);
 
-    $query="delete from sysLocks";
-    $res = mysql_query($query);
-    if (!$res) {
-        die('<p>Invalid query, please report to developers: '.$query.'  Error: '.mysql_error());
-    }
+$query="delete from sysLocks";
+$res = $mysqli->query($query);
+if (!$res) {
+    die('<p>Invalid query, please report to developers: '.$query.'  Error: '.$mysqli->error());
+}
 
-    if (mysql_affected_rows()==0) {
-        print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
-        <h2> There were no database locks to remove</h2>";
-    }
-    else {
-        print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
-        <h2>Database locks have been removed </h2>";
-    }
+print '<html><head><link rel="stylesheet" type="text/css" href="'.PDIR.'h4styles.css" /></head><body class="popup">';
 
-    print "</body>";
-    print "</html>";
+if ($mysqli->affected_rows==0) {
+    print '<h2>There were no database locks to remove</h2>';
+}
+else {
+    print '<h2>Database locks have been removed</h2>';
+}
 
+print "</body>";
+print "</html>";
 ?>
