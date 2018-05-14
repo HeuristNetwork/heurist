@@ -88,7 +88,7 @@ if($db){
 
             $fileinfo = $listpaths[0]; //
             $filepath = $fileinfo[0];  //concat(ulf_FilePath,ulf_FileName as fullPath
-            $url = $fileinfo[1];     //ulf_ExternalFileReference
+            $external_url = $fileinfo[1];     //ulf_ExternalFileReference
             $mimeType = $fileinfo[2];  //fxm_MimeType
             $params = $fileinfo[3];  //ulf_Parameters - not used anymore (for backward capability only)
             $originalFileName = $fileinfo[4];
@@ -96,7 +96,8 @@ if($db){
 
                 
             if( @$_REQUEST['mode']=='tag'){
-                filePrintPlayerTag($fileid, $mimeType, $params, $url);
+                
+                filePrintPlayerTag($fileid, $mimeType, $params, $external_url);
             }
             else  //just download file from heurist server or redirect to original remote url
             {
@@ -107,9 +108,9 @@ if($db){
               
                 if(file_exists($filepath)){
                     downloadFile($mimeType, $filepath, @$_REQUEST['embed']==1?null:$originalFileName);
-                }else if($url){
-//DEBUG error_log('External '.$url);                
-                    header('Location: '.$url);  //redirect to URL (external)
+                }else if($external_url){
+//DEBUG error_log('External '.$external_url);                
+                    header('Location: '.$external_url);  //redirect to URL (external)
                     
                 }else{
 //DEBUG

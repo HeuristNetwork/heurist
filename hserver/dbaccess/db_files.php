@@ -32,7 +32,7 @@
 
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/db_users.php');
-
+require_once (dirname(__FILE__).'/../utilities/utils_file.php');
 
 /**
 * Get file IDs by Obfuscated ID
@@ -49,7 +49,29 @@ function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
     return $res;
 }
 
+/**
+* Get file ID by file $fullname
+*
+* @param mixed $fullname
+*/
+function fileGetByFileName($system, $fullname){
 
+        $path_parts = pathinfo($fullname);
+        $dirname = $path_parts['dirname'].'/';
+        $filename = $path_parts['basename'];
+        
+        // get relative path to db root folder
+        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);
+        
+        $mysqli = $system->get_mysqli();
+      
+        $file_id = mysql__select_value($mysqli, 'select ulf_ID from recUploadedFiles '
+            .'where ulf_FileName = "'.$mysqli->real_escape_string($filename).'" and '
+            .' (ulf_FilePath = "file_uploads/" or ulf_FilePath = "'.$mysqli->real_escape_string($relative_path).'")');
+
+        return $file_id;
+        
+}
 
 /**
 * Get array of local paths, external links, mimetypes and parameters (mediatype and source)
@@ -407,14 +429,14 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 //
 // output the appropriate html tag to view media content
 //
-function filePrintPlayerTag($fileid, $mimeType, $params, $url, $size=null){ 
+function filePrintPlayerTag($fileid, $mimeType, $params, $external_url, $size=null){ 
 
     $is_video = (strpos($mimeType,"video/")===0 || strpos($params,"video")!==false);
     $is_audio = (strpos($mimeType,"audio/")===0 || strpos($params,"audio")!==false);
     $is_image = (strpos($mimeType,"image/")===0);
 
-    if($url){
-        $filepath = $url;  //external 
+    if($external_url){
+        $filepath = $external_url;  //external 
     }else{
         //to itself
         $filepath = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&file=".$fileid;
@@ -428,12 +450,12 @@ function filePrintPlayerTag($fileid, $mimeType, $params, $url, $size=null){
         }
 
         if ($mimeType=='video/youtube' || $mimeType=='video/vimeo'
-        || strpos($url, 'vimeo.com')>0
-        || strpos($url, 'youtu.be')>0
-        || strpos($url, 'youtube.com')>0)
+        || strpos($external_url, 'vimeo.com')>0
+        || strpos($external_url, 'youtu.be')>0
+        || strpos($external_url, 'youtube.com')>0)
         {
 
-            $playerURL = getPlayerURL($mimeType, $url);
+            $playerURL = getPlayerURL($mimeType, $external_url);
 
             print '<iframe '.$size.' src="'.$playerURL.'" frameborder="0" '
             . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
@@ -462,14 +484,14 @@ function filePrintPlayerTag($fileid, $mimeType, $params, $url, $size=null){
     {
 
         if ($mimeType=='audio/soundcloud'
-        || strpos($url, 'soundcloud.com')>0)
+        || strpos($external_url, 'soundcloud.com')>0)
         {
 
             if($size==null || $size==''){
                 $size = 'width="640" height="166"';
             }
 
-            $playerURL = getPlayerURL($mimeType, $url);
+            $playerURL = getPlayerURL($mimeType, $external_url);
 
             print '<iframe '.$size.' src="'.$playerURL.'" frameborder="0"></iframe>';                        
 
@@ -480,8 +502,6 @@ function filePrintPlayerTag($fileid, $mimeType, $params, $url, $size=null){
 
     }else 
         if($is_image){
-
-            // || strpos($url,".jpg")>0 || strpos($url,".jpeg")>0  || strpos($url,".png")>0 || strpos($url,".gif")>0
 
             if($size==null || $size==''){
                 $size = 'width="300"';

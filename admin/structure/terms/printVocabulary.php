@@ -84,7 +84,7 @@ function printTerm($termID, $lvl){
             if($lvl>0 && $parent_id>0){
                 $parent_term = @$terms['termsByDomainLookup'][$domain][$parent_id];
                 if($parent_term){
-                    $parent_term_label = '"'.getFullTermLabel($terms, $parent_term, $domain, false).'"';
+                    $parent_term_label = '"'.getTermFullLabel($terms, $parent_term, $domain, false).'"';
                 }else{
                     $parent_id = '';
                 }
@@ -113,37 +113,4 @@ function printBranch($tree, $lvl){
         printBranch($children, $lvl+1);
     }
 }    
-//@todo - move to db_structure
-function getFullTermLabel($dtTerms, $term, $domain, $withVocab, $parents=null){
-
-    $fi = $dtTerms['fieldNamesToIndex'];
-    $parent_id = $term[ $fi['trm_ParentTermID'] ];
-
-    $parent_label = '';
-
-    if($parent_id!=null && $parent_id>0){
-        $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
-        if($term_parent){
-            if(!$withVocab){
-                $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
-                if(!($parent_id>0)){
-                    return $term[ $fi['trm_Label']];
-                }
-            }
-            
-            if($parents==null){
-                $parents = array();
-            }
-            
-            if(array_search($parent_id, $parents)===false){
-                array_push($parents, $parent_id);
-                
-                $parent_label = getFullTermLabel($dtTerms, $term_parent, $domain, $withVocab, $parents);    
-                if($parent_label) $parent_label = $parent_label.'.';
-            }
-        }    
-    }
-    return $parent_label.$term[ $fi['trm_Label']];
-}
-
 ?>

@@ -40,6 +40,7 @@
     * getTermInTree    
     * getTermByLabel    
     * getTermById
+    * geTermFullLabel
     *
     * INTERNAL FUNCTIONS
     * __getRectypeColNames
@@ -372,6 +373,48 @@
         return $children;
         
     }
+    
+    /**
+    * prints term label including parents term labels
+    * 
+    * @param mixed $dtTerms
+    * @param mixed $term
+    * @param mixed $domain
+    * @param mixed $withVocab
+    * @param mixed $parents
+    */
+    function getTermFullLabel($dtTerms, $term, $domain, $withVocab, $parents=null){
+
+        $fi = $dtTerms['fieldNamesToIndex'];
+        $parent_id = $term[ $fi['trm_ParentTermID'] ];
+
+        $parent_label = '';
+
+        if($parent_id!=null && $parent_id>0){
+            $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
+            if($term_parent){
+                if(!$withVocab){
+                    $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
+                    if(!($parent_id>0)){
+                        return $term[ $fi['trm_Label']];
+                    }
+                }
+                
+                if($parents==null){
+                    $parents = array();
+                }
+                
+                if(array_search($parent_id, $parents)===false){
+                    array_push($parents, $parent_id);
+                    
+                    $parent_label = getTermFullLabel($dtTerms, $term_parent, $domain, $withVocab, $parents);    
+                    if($parent_label) $parent_label = $parent_label.'.';
+                }
+            }    
+        }
+        return $parent_label.$term[ $fi['trm_Label']];
+    }
+
 
     //
     // find tree in term tree

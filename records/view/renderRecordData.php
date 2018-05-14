@@ -61,6 +61,20 @@ if (!in_array(0, $ACCESSABLE_OWNER_IDS)) {
     array_push($ACCESSABLE_OWNER_IDS, 0);
 }
 
+$relRT = ($system->defineConstant('RT_RELATION')?RT_RELATION:0);
+$relSrcDT = ($system->defineConstant('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+$relTrgDT = ($system->defineConstant('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
+$relTypDT = ($system->defineConstant('DT_RELATION_TYPE') ? DT_RELATION_TYPE : 0);
+$intrpDT = ($system->defineConstant('DT_INTERPRETATION_REFERENCE') ? DT_INTERPRETATION_REFERENCE : 0);
+$notesDT = ($system->defineConstant('DT_SHORT_SUMMARY') ? DT_SHORT_SUMMARY : 0);
+$startDT = ($system->defineConstant('DT_START_DATE') ? DT_START_DATE : 0);
+$endDT = ($system->defineConstant('DT_END_DATE') ? DT_END_DATE : 0);
+$titleDT = ($system->defineConstant('DT_NAME') ? DT_NAME : 0);
+$system->defineConstant('DT_GEO_OBJECT');
+$system->defineConstant('DT_PARENT_ENTITY');
+
+
+
 $rec_id = intval(@$_REQUEST['recID']);
 
 // if we get a record id then see if there is a personal bookmark for it.
@@ -486,10 +500,10 @@ function print_personal_details($bkmk) {
     $bkm_ID = $bkmk['bkm_ID'];
     $rec_ID = $bkmk['bkm_RecID'];
 
-
-    $tags = mysql__select_list2($system->get_mysqli(), 'select tag_Text from usrRecTagLinks, usrTags '
-        .'rtl_TagID=tag_ID and rtl_RecID=$rec_ID and tag_UGrpID = '.
-        $bkmk['bkm_UGrpID'].' order by rtl_Order');
+    $query = 'select tag_Text from usrRecTagLinks, usrTags '
+        .'WHERE rtl_TagID=tag_ID and rtl_RecID='.$rec_ID.' and tag_UGrpID = '.
+        $bkmk['bkm_UGrpID'].' order by rtl_Order';
+    $tags = mysql__select_list2($system->get_mysqli(), $query);
     ?>
     <div class=detailRow>
         <div class=detailType>Personal Tags</div>
@@ -556,7 +570,7 @@ function print_public_details($bib) {
 
                 if(array_key_exists($bd['val'], $terms['termsByDomainLookup']['enum'])){
                     $term = $terms['termsByDomainLookup']['enum'][$bd['val']];
-                    $bd['val'] = output_chunker(getFullTermLabel($terms, $term, 'enum', false));
+                    $bd['val'] = output_chunker(getTermFullLabel($terms, $term, 'enum', false));
                     //$bd['val'] = output_chunker($terms['termsByDomainLookup']['enum'][$bd['val']][0]);
                 }else{
                     $bd['val'] = "";
@@ -565,7 +579,7 @@ function print_public_details($bib) {
             }else if ($bd['dty_Type'] == 'relationtype') {
 
                 $term = $terms['termsByDomainLookup']['relation'][$bd['val']];
-                $bd['val'] = output_chunker(getFullTermLabel($terms, $term, 'relation', false));
+                $bd['val'] = output_chunker(getTermFullLabel($terms, $term, 'relation', false));
                 //$bd['val'] = output_chunker($terms['termsByDomainLookup']['relation'][$bd['val']][0]);
 
             }else if ($bd['dty_Type'] == 'date') {
@@ -622,7 +636,7 @@ function print_public_details($bib) {
 
                     $fileinfo = $listpaths[0];
                     $filepath = $fileinfo[0];  //concat(ulf_FilePath,ulf_FileName fullPath
-                    $url = $fileinfo[1];     //ulf_ExternalFileReference
+                    $external_url = $fileinfo[1];     //ulf_ExternalFileReference
                     $mimeType = $fileinfo[2];  //fxm_MimeType
                     $params = $fileinfo[3];  //ulf_Parameters - not used anymore (for backward capability only)
                     $originalFileName = $fileinfo[4];
@@ -635,7 +649,8 @@ function print_public_details($bib) {
                     
                     array_push($thumbs, array(
                         'id' => $bd['dtl_UploadedFileID'],
-                        'url' => $file_URL,   //download
+                        //'url' => $file_URL, //download
+                        'external_url' => $external_url,      //external url
                         //'mediaType'=>$filedata['mediaType'], 
                         'params'=>$params,
                         'mimeType'=>$mimeType, 
@@ -806,7 +821,7 @@ function print_public_details($bib) {
                 if(strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0){
                     print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;">';
 
-                    filePrintPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['url']);
+                    filePrintPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']);
                     
                     //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
                     print '</div>';    
@@ -821,8 +836,11 @@ function print_public_details($bib) {
             if($thumb['player'] && !$is_map_popup){
                 print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">CLOSE</a>&nbsp;';
             }
+            
+            $url = $thumb['external_url']?$thumb['external_url']:(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
 
-            print '<a href="' . htmlspecialchars($thumb['url']) . '" class="external-link" target=_surf class="image_tool">DOWNLOAD</a></div>';
+            print '<a href="' . htmlspecialchars($url) 
+                                . '" class="external-link" target=_surf class="image_tool">DOWNLOAD</a></div>';
             print '</div>';
             if($is_map_popup){
                 print '<br>';
@@ -833,9 +851,7 @@ function print_public_details($bib) {
     </div>
     <?php
 
-    $always_visible_dt = array( //(defined('DT_NAME')?DT_NAME:0),
-        (defined('DT_NAME')?DT_SHORT_SUMMARY:0),
-        (defined('DT_NAME')?DT_GEO_OBJECT:0));
+    $always_visible_dt = array(DT_SHORT_SUMMARY, DT_GEO_OBJECT);
 
 
     $prevLbl = null;
@@ -926,16 +942,6 @@ function print_other_tags($bib) {
 }
     
     
-$relRT = (defined('RT_RELATION')?RT_RELATION:0);
-$relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
-$relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
-$relTypDT = (defined('DT_RELATION_TYPE') ? DT_RELATION_TYPE : 0);
-$intrpDT = (defined('DT_INTERPRETATION_REFERENCE') ? DT_INTERPRETATION_REFERENCE : 0);
-$notesDT = (defined('DT_SHORT_SUMMARY') ? DT_SHORT_SUMMARY : 0);
-$startDT = (defined('DT_START_DATE') ? DT_START_DATE : 0);
-$endDT = (defined('DT_END_DATE') ? DT_END_DATE : 0);
-$titleDT = (defined('DT_NAME') ? DT_NAME : 0);
-
 /**
 * get related record structure for a give relationship record
 * related = { "recID" => recID,
