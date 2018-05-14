@@ -376,7 +376,7 @@ error_log(print_r($_REQUEST, true));
 
         }
         else{
-            //path has defaul name
+            //path has default name
             
             $install_path = 'HEURIST/'; //$this->getInstallPath();
             $dir_Filestore = "HEURIST_FILESTORE/";
@@ -732,6 +732,18 @@ error_log(print_r($_REQUEST, true));
     */
     public function is_admin(){
         return ( $this->has_access( $this->get_system('sys_OwnerGroupID') ) );
+    }
+    
+    /**
+    * check if current user is system administrator
+    */
+    public function is_system_admin(){
+        if ($this->get_user_id()>0){
+            $user = user_getById($this->mysqli, $this->get_user_id());
+            retrun (defined('HEURIST_MAIL_TO_ADMIN') && (@$user['ugr_eMail']==HEURIST_MAIL_TO_ADMIN));    
+        }else{
+            return false;
+        }
     }
     
    /**

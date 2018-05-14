@@ -24,32 +24,40 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
-
-    if (! is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        return;
-    }
-
-    $rv = array();
+require_once (dirname(__FILE__).'/../../hserver/System.php');
 
     header('Content-type: text/javascript');
+    
+    $rv = array();
 
-    if (!is_admin()) {
-        $rv['error'] = "Sorry, you need to be a database owner to be able to modify the database structure";
-        print json_format($rv);
+    // init main system class
+    $system = new System();
+
+    if(!$system->init(@$_REQUEST['db'])){
+        $response = $system->getError();
+        print json_encode($response);
         return;
     }
+    
+    //$response = array("status"=>HEURIST_OK, "data"=> $res);
+
+    if (!$system->is_dbowner()) {
+        $response = $system->addError(HEURIST_REQUEST_DENIED,
+                     'To perform this action you must be logged in as Database Owner');
+        print json_encode($response);
+        return;
+    }
+
+    $mysqli = $system->get_mysqli();
+
     
     $data = null;
     if(@$_REQUEST['data']){
         $data = json_decode(urldecode(@$_REQUEST['data']), true);
     }else{
-        $rv['error'] = "Data not defined! Wrong request.";
-        print json_format($rv);
+        $response = $system->addError(HEURIST_INVALID_REQUEST,
+                     'Data not defined! Wrong request.');
+        print json_encode($response);
         return;
     }
 
@@ -65,9 +73,9 @@
                 if(unlink($file)) array_push($res, $file);
             }
         }
-        $rv['result'] = $res;
-        print json_format($rv);   
-        exit;
+        $response = array("status"=>HEURIST_OK, "data"=> $res);
+        print json_encode($response);
+        exit();
     }
     
     //------------------------------------------------------
@@ -78,15 +86,16 @@
     }
     if(is_array($regs_to_remove) && count($regs_to_remove)>0){
 
-        mysql_query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$regs_to_remove).')');
-        if (mysql_error()) {
-            $rv['error'] = "Cannot delete entries from recUploadedFiles. mySQL error: " . mysql_error();
-            print json_format($rv);
+        $mysqli->query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$regs_to_remove).')');
+        if ( $mysqli->error ) {
+            $response = $system->addError(HEURIST_DB_ERROR, 
+                'Cannot delete entries from recUploadedFiles. mySQL error: '.$mysqli->error);
         }else{
-            $rv['result'] = $regs_to_remove;
-            print json_format($rv);
+            $response = array("status"=>HEURIST_OK, "data"=> $regs_to_remove);
+            
         }
-        exit;
+        print json_encode($response);
+        exit();
     }    
     
     /*
@@ -104,23 +113,27 @@
     // remove missed files
     $file_ids = @$data['files_notfound'];
     if(is_array($file_ids) && count($file_ids)>0){
-        mysql_query('delete from recDetails where dtl_UploadedFileID in ('.implode(',',$file_ids).')');
-        if (mysql_error()) {
-            $rv['error'] = "Cannot delete entries from recDetails. mySQL error: " . mysql_error();
-            print json_format($rv);
-            return;
+
+        $mysqli->query('delete from recDetails where dtl_UploadedFileID in ('.implode(',',$file_ids).')');
+        if ($mysqli->error) {
+            $response = $system->addError(HEURIST_DB_ERROR, 
+                'Cannot delete entries from recDetails. mySQL error: '.$mysqli->error);
+        }else{
+            $mysqli->query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$file_ids).')');
+            if ($mysqli->error) {
+                $response = $system->addError(HEURIST_DB_ERROR, 
+                    'Cannot delete entries from recUploadedFiles. mySQL error: '.$mysqli->error);
+            }else{
+                $response = array("status"=>HEURIST_OK, "data"=> $file_ids);        
+            }
         }
-        mysql_query('delete from recUploadedFiles where ulf_ID in ('.implode(',',$file_ids).')');
-        if (mysql_error()) {
-            $rv['error'] = "Cannot delete entries from recUploadedFiles. mySQL error: " . mysql_error();
-            print json_format($rv);
-            return;
-        }
-        $rv['result'] = $file_ids;
-        print json_format($rv);
-        exit;
+        
+        print json_encode($response);
+        exit();
     }
     
-    $rv['error'] = "Wrong parameters. No data defined";
     print json_format($rv);
+    $response = $system->addError(HEURIST_INVALID_REQUEST,
+                                'Wrong parameters. No data defined');
+    print json_encode($response);
 ?>

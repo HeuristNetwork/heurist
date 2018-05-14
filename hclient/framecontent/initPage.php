@@ -31,7 +31,7 @@ if(defined('IS_INDEX_PAGE')){
     //if PDIR is defined this script is main (root)
     define('ERROR_REDIR','hserver/utilities/list_databases.php');
 }else{
-    if(!defined('PDIR')) define('PDIR','../../');
+    if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css
     define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
 }
 

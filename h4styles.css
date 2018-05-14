@@ -944,6 +944,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     width: auto;
 }
 
+
 /* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon
 Remove the jQuery UI Icon
 Remove the jQuery UI Text Indent
@@ -1570,3 +1571,24 @@ option {padding-left:15px;}
     font-size:10px;
 }
 
+P {
+    color: #333333;
+    font-size: 11px;
+    line-height: 21px;
+}
+A:link {
+    /*color: #6A7C99;*/
+    text-decoration: none;
+}
+A:hover {
+    text-decoration: underline;
+}
+body.popup {
+    padding: 10px;
+}
+.banner {
+    padding: 6px;
+}
+body.popup table{
+    font-size:11px;   
+}

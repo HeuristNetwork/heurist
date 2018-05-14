@@ -24,13 +24,10 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+    define('MANAGER_REQUIRED',1);   
+    define('PDIR','../../');  //need for proper path to js and css    
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-
-    if(isForAdminOnly("to perform this action")){
-        return;
-    }
+    require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
     $fuzziness = intval($_REQUEST['fuzziness']);
     if (! $fuzziness) $fuzziness = 10;
@@ -41,81 +38,78 @@
     $recsGivenNames = array();
     $dupeDifferences = array();
 
-    mysql_connection_insert(DATABASE);
-
-
-    $res = mysql_query('select snd_SimRecsList from recSimilarButNotDupes');
-    while ($row = mysql_fetch_assoc($res)){
-        array_push($dupeDifferences,$row['snd_SimRecsList']);
-    }
+    $mysqli = $system->get_mysqli();
+    
+    $dupeDifferences = mysql__select_list2($mysqli, 'select snd_SimRecsList from recSimilarButNotDupes');
 
     if (@$_REQUEST['dupeDiffHash']){
         foreach($_REQUEST['dupeDiffHash'] as $diffHash){
             if (! in_array($diffHash,$dupeDifferences)){
                 array_push($dupeDifferences,$diffHash);
-                $res = mysql_query('insert into recSimilarButNotDupes values("'.$diffHash.'")');
+                
+                $res = $mysqli->query('insert into recSimilarButNotDupes values("'.$diffHash.'")');
             }
         }
     }
 
-    mysql_connection_select(DATABASE);
-    //mysql_connection_select("`heuristdb-nyirti`");   //for debug
-    //FIXME  allow user to select a single record type
-    //$res = mysql_query('select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and      \
-    //dtl_DetailTypeID=160 where rec_RecTypeID != 52 and rec_RecTypeID != 55 and not rec_FlagTemporary order by rec_RecTypeID desc');
 
     $crosstype = false;
     $personMatch = false;
 
-    $relRT = (defined('RT_RELATION')?RT_RELATION:0);
-    $perRT = (defined('RT_PERSON')?RT_PERSON:0);
-    $surnameDT = (defined('DT_GIVEN_NAMES')?DT_GIVEN_NAMES:0);
-    $titleDT = (defined('DT_NAME')?DT_NAME:0);
+    $relRT = ($system->defineConstant('RT_RELATION')?RT_RELATION:0);
+    $perRT = ($system->defineConstant('RT_PERSON')?RT_PERSON:0);
+    $surnameDT = ($system->defineConstant('DT_GIVEN_NAMES')?DT_GIVEN_NAMES:0);
+    $titleDT = ($system->defineConstant('DT_NAME')?DT_NAME:0);
 
     if (@$_REQUEST['crosstype']){
         $crosstype = true;
     }
     if (@$_REQUEST['personmatch']){
         $personMatch = true;
-        $res = mysql_query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$surnameDT where rec_RecTypeID = $perRT and not rec_FlagTemporary order by rec_ID desc");    //Given Name
-        while ($row = mysql_fetch_assoc($res)) {
-            $recsGivenNames[$row['rec_ID']] = $row['dtl_Value'];
-        }
-        $res = mysql_query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$titleDT where rec_RecTypeID = $perRT and not rec_FlagTemporary order by dtl_Value asc");    //Family Name
+        
+        $recsGivenNames = mysql__select_assoc2($mysqli, "select rec_ID, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$surnameDT where rec_RecTypeID = $perRT and not rec_FlagTemporary order by rec_ID desc");
+
+        $res = $mysqli->query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$titleDT where rec_RecTypeID = $perRT and not rec_FlagTemporary order by dtl_Value asc");    //Family Name
 
     } else{
-        $res = mysql_query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$titleDT where rec_RecTypeID != $relRT and not rec_FlagTemporary order by rec_RecTypeID desc");
+        $res = $mysqli->query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$titleDT where rec_RecTypeID != $relRT and not rec_FlagTemporary order by rec_RecTypeID desc");
     }
 
-    $rectypes = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', '1');
+    //rectype names
+    $rectypes = mysql__select_assoc2($mysqli, 'select rty_ID, rty_Name from defRecTypes'); 
 
-    while ($row = mysql_fetch_assoc($res)) {
-        if ($personMatch){
-            if($row['dtl_Value']) $val = $row['dtl_Value'] . ($recsGivenNames[$row['rec_ID']]? " ". $recsGivenNames[$row['rec_ID']]: "" );
-        }else {
-            if ($row['rec_Title']) $val = $row['rec_Title'];
-            else $val = $row['dtl_Value'];
-        }
-        $mval = metaphone(preg_replace('/^(?:a|an|the|la|il|le|die|i|les|un|der|gli|das|zur|una|ein|eine|lo|une)\\s+|^l\'\\b/i', '', $val));
-
-        if ($crosstype || $personMatch) { //for crosstype or person matching leave off the type ID
-            $key = ''.substr($mval, 0, $fuzziness);
-        } else {
-            $key = $row['rec_RecTypeID'] . '.' . substr($mval, 0, $fuzziness);
-        }
-
-        $typekey = $rectypes[$row['rec_RecTypeID']];
-
-        if (! array_key_exists($key, $bibs)) $bibs[$key] = array(); //if the key doesn't exist then make an entry for this metaphone
-        else { // it's a dupe so process it
-            if (! array_key_exists($typekey, $dupes)) $dupes[$typekey] = array();
-            if (!array_key_exists($key,$dupekeys))  {
-                $dupekeys[$key] =  1;
-                array_push($dupes[$typekey],$key);
+    if($res){
+        while ($row = $res->fetch_assoc()) {
+            if ($personMatch){
+                if($row['dtl_Value']) $val = $row['dtl_Value'] 
+                                . ($recsGivenNames[$row['rec_ID']]? " "
+                                . $recsGivenNames[$row['rec_ID']]: "" );
+            }else {
+                if ($row['rec_Title']) $val = $row['rec_Title'];
+                else $val = $row['dtl_Value'];
             }
+            $mval = metaphone(preg_replace('/^(?:a|an|the|la|il|le|die|i|les|un|der|gli|das|zur|una|ein|eine|lo|une)\\s+|^l\'\\b/i', '', $val));
+
+            if ($crosstype || $personMatch) { //for crosstype or person matching leave off the type ID
+                $key = ''.substr($mval, 0, $fuzziness);
+            } else {
+                $key = $row['rec_RecTypeID'] . '.' . substr($mval, 0, $fuzziness);
+            }
+
+            $typekey = $rectypes[$row['rec_RecTypeID']];
+
+            if (! array_key_exists($key, $bibs)) $bibs[$key] = array(); //if the key doesn't exist then make an entry for this metaphone
+            else { // it's a dupe so process it
+                if (! array_key_exists($typekey, $dupes)) $dupes[$typekey] = array();
+                if (!array_key_exists($key,$dupekeys))  {
+                    $dupekeys[$key] =  1;
+                    array_push($dupes[$typekey],$key);
+                }
+            }
+            // add the record to bibs
+            $bibs[$key][$row['rec_ID']] = array('type' => $typekey, 'val' => $val);
         }
-        // add the record to bibs
-        $bibs[$key][$row['rec_ID']] = array('type' => $typekey, 'val' => $val);
+        $res->close();
     }
 
     ksort($dupes);
@@ -128,8 +122,10 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Find Duplicate Records</title>
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
+        <style>
+            A:link, A:visited {color: #6A7C99;}
+        </style>
     </head>
 
     <body class="popup">
@@ -147,7 +143,7 @@
             }
         </script>
 
-        <div class="banner"><h2>Find Duplicate Records</h2></div>
+        <div class="banner"><h2 style="padding:10px">Find Duplicate Records</h2></div>
         <div id="page-inner" style="overflow:auto;padding-left: 20px;">
 
             <form>
@@ -178,7 +174,7 @@
                 <br />with many matching results. Increasing value above will reduce the number of matches.
                 <br />
                 <br />
-                <input type="checkbox" name="crosstype" id="crosstype" value=1 <?= $crosstype ? "checked" : "" ?>  onclick="form.submit();"> Do record matching across record types<br />
+                <input type="checkbox" name="crosstype" id="crosstype" value=1 <?= $crosstype ? "checked" : "" ?>  onclick="form.submit();"> Do record matching across record types<br /><br />
                 <input type="checkbox" name="personmatch" id="personmatch" value=1   onclick="form.submit();"> Do person matching by surname first <br />
 
                 <?php
@@ -195,7 +191,7 @@
                         }
                     }
 
-                    print '<p><hr><div><p>There are <b>' . $cnt . '</b> potential groups of duplicates</div>';
+                    print '<p><br /><hr><br /><div><p>There are <b>' . $cnt . '</b> potential groups of duplicates</div>';
 
                     print "<p><b>ignore in future</b> eliminates the group from future checks. To set this for several groups, ".
                     "check the boxes and then click any of the <b>ignore in future</b> links.".
@@ -208,7 +204,7 @@
                             sort($diffHash,SORT_ASC);
                             $diffHash = join(',',$diffHash );
                             if (in_array($diffHash,$dupeDifferences)) continue;
-                            print '<div>';
+                            print '<div style="padding: 10px 20px;">';
                             print '<input type="checkbox" name="dupeDiffHash[]" '.
                             'title="Check to idicate that all records in this set are unique." id="'.$key.
                             '" value="' . $diffHash . '">&nbsp;&nbsp;';
@@ -223,16 +219,16 @@
                             print '&nbsp;&nbsp;&nbsp;&nbsp;<a href="#"  onclick="setAsNonDuplication()">ignore in future</a>';
 
                             print '</div>';
-                            print '<ul>';
+                            print '<ul style="padding: 10px 30px;">';
                             foreach ($bibs[$key] as $rec_id => $vals) {
-                                $res = mysql_query('select rec_URL from Records where rec_ID = ' . $rec_id);
-                                $row = mysql_fetch_assoc($res);
+                                $recURL = mysql__select_value($mysqli, 'select rec_URL from Records where rec_ID = ' . $rec_id);
+                                
                                 print '<li>'.($crosstype ? $vals['type'].'&nbsp;&nbsp;' : '').
                                 '<a target="_new" href="'.HEURIST_BASE_URL.'records/view/viewRecord.php?db='.HEURIST_DBNAME.
                                 '&saneopen=1&recID='.$rec_id.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
-                                if ($row['rec_URL'])
+                                if ($recURL)
                                     print '&nbsp;&nbsp;&nbsp;<span style="font-size: 70%;">(<a target="_new" href="'.
-                                    $row['rec_URL'].'">' . $row['rec_URL'] . '</a>)</span>';
+                                    $recURL.'">' . $recURL . '</a>)</span>';
                                 print '</li>';
                             }
                             print '</ul>';

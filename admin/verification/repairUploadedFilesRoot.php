@@ -14,6 +14,8 @@
     */
 
     /**
+    * ONE TIME utility
+    * 
     * Correct file paths in recUploadFiles table, find missed and orphaned images
     *
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>

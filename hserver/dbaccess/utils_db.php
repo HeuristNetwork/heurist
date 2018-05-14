@@ -531,7 +531,9 @@ error_log(print_r($params, true));
     }
 
     /**
-    * Returns values from sysIdentification
+    * Returns values from sysIdentification 
+    * 
+    * @todo move to specific entity class
     *
     * @param mixed $mysqli
     */
