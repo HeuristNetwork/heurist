@@ -19,6 +19,8 @@
 * sets metadata in record and details.
 * This file is called by registerDB.php
 * ONLY ALLOW IN HEURIST Master Index database
+* 
+* returns new id  or 0,error messahe
 *
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
@@ -36,15 +38,25 @@
 // TODO: We may need to hobble/delete some of the functionality on Heurist_Master_Index to avoid people
 // creating unwanted records or importing random crap into it
 
+if(@$_REQUEST["db"]!='Heurist_Master_Index'){
+    echo '0,This script allowed for Master Index database only';
+    return;
+}
 
-$dbID = 0;
-$error = "";
-require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
-require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
+require_once (dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_mail.php');
+
+    // init main system class
+    $system = new System();
+
+    if(!$system->init(@$_REQUEST['db'])){
+        $response = $system->getError();
+        echo '0,'.$response[0]['message'];
+        return;
+    }
+
 
 $indexdb_user_id = 0; // Flags problem if not reset
-$returnData = ''; // String returned to caller, contains dbID or 0, and error message (if any)
 
 // Get parameters passed from registration request
 // @ preceding $_REQUEST avoids errors, sets Null if parameter missing
@@ -94,48 +106,47 @@ define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (co
 // By allocating users on the database based on email address we can allow them to edit their own registrations
 // but they can't touch anyone else's
 
-mysql_connection_insert("hdb_Heurist_Master_Index"); // hard-coded master index for the Heurist constellation
-// database is located at Heurist.sydney.edu.au (2015 on) and accessed via .../h4 version
+$mysqli = $system->get_mysqli();
 
 // Find the registering user in the index database, make them the owner of the new record
 $usrEmail = strtolower(trim($usrEmail));
-$res = mysql_query("select ugr_ID, ugr_Name, ugr_Password, ugr_FirstName, ugr_LastName from sysUGrps where lower(ugr_eMail)='".$usrEmail."'");
-$indexdb_user_id = null;
+
+$indexdb_user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_eMail)="'.$usrEmail.'"');
 
 // Check if the email address is recognised as a user name
 // Added 19 Jan 2012: we also use email for ugr_Name and it must be unique, so check it has not been used
-if(($res) && (mysql_num_rows($res) == 0)) { // no user found on email, try querying on user name
-
-    $res = mysql_query("select ugr_ID, ugr_Name, ugr_Password, ugr_FirstName, ugr_LastName from sysUGrps where lower(ugr_Name)='".$usrEmail."'");
+if(!($indexdb_user_id>0)) { // no user found on email, try querying on user name
+    $indexdb_user_id = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where lower(ugr_Name)="'.$usrEmail.'"');
 }
-if($res) { // query OK, now see if we have found the user
-    if(mysql_num_rows($res) == 0) { // did not find the user, create a new one and pass back login info
-        $res = mysql_query("insert into sysUGrps (`ugr_Name`, `ugr_Password`, `ugr_eMail`, `ugr_Enabled`, `ugr_FirstName`, `ugr_lastName`)
-            VALUES  ('$usrEmail','$usrPassword','$usrEmail','y','$usrFirstName','$usrLastName')");
-        // Note: we use $usrEmail as user name because the person's name may be repeated across many different users of
-        // different databases eg. there are lots of johnsons, which will cause insert statement to fail as ugr_Name is unique.
-        if($res) { 	// New user created successfully
-            $indexdb_user_id = mysql_insert_id();
-            header('Location: ' . HEURIST_BASE_URL . '/common/connect/login.php?db=' . HEURIST_DBNAME . (isset($last_uri) ? '&last_uri=' . urlencode($last_uri) : '')); // TODO: Change to HEURIST_BASE_URL
-        } else { // Unable to create the new user
-            $error = "Unable to write new user in Heurist master index database\n" .
-            "Please contact <a href=mailto:info@heuristNetwork.org>Heurist developers</a> for advice";
-            $returnData = $dbID . "," . $error;
-            echo $returnData; // if you can't set up user it isn't worth trying to register the database''
-        }
-    } else { // existing user
-        $row = mysql_fetch_row($res);
-        $indexdb_user_id = $row[0]; // set the user ID for the user in the index database, everything else is known
+
+if(!($indexdb_user_id>0)) { // did not find the user, create a new one and pass back login info
+    
+    // Note: we use $usrEmail as user name because the person's name may be repeated across many different users of
+    // different databases eg. there are lots of johnsons, which will cause insert statement to fail as ugr_Name is unique.
+    
+    $indexdb_user_id = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr_', 
+        array(
+            'ugr_Name'=>$usrEmail,
+            'ugr_Password'=>$usrPassword,
+            'ugr_eMail'=>$usrEmail,
+            'ugr_Enabled'=>'y',
+            'ugr_FirstName'=>$usrFirstName,
+            'ugr_LastName'=>$usrLastName,
+        )
+    );
+    
+    if(!($indexdb_user_id>0)) { // Unable to create the new user
+        echo '0,Unable to write new user in Heurist master index database<br>'.
+            'Please contact <a href=mailto:info@heuristNetwork.org>Heurist developers</a> for advice';   
+        return;
     }
+
+}
 
     // TODO: It seems like the user ID is not being set properly,
     //       at least that seems to be indicated by the fact that the mailout comes with indexdb_user_id=0
 
-} else {// error trying to find usergroup in UGrps table
-    $error = "Unable to execute search for user in Heurist master index database\n" . "Please contact <a href=mailto:info@heuristNetwork.org>Heurist developers</a> for advice";
-    $returnData = $dbID . "," . $error;
-    echo $returnData; // if you can't set up user it isn't worth trying to register the database
-}
+
 
 // write the core database record describing the database to be registered and allocate registration ID
 // This is not a fully valid Heurist record, we let the edit form take care of that
@@ -143,35 +154,60 @@ if($res) { // query OK, now see if we have found the user
 // TODO: Would be good to have a recaptcha style challenge otherwise can be called repeatedly
 // with slight URL variations to spawn multiple registrations of dummy databases
 
-$res = mysql_query("select rec_ID, rec_Title from Records where `rec_URL`='$serverURL'");
+$dbID = mysql__select_value($mysqli, "select rec_ID from Records where `rec_URL`='$serverURL'");
 
-if(mysql_num_rows($res) == 0) { // new registration
-    $res = mysql_query("insert into Records
-        (rec_URL, rec_Added, rec_Title, rec_RecTypeID, rec_AddedByImport, rec_OwnerUGrpID, rec_NonOwnerVisibility,rec_Popularity)
-        VALUES  ('".mysql_real_escape_string($serverURL)."', now(), '".mysql_real_escape_string($dbTitle).
-        "', " . HEURIST_DB_DESCRIPTOR_RECTYPE . ", 0, $indexdb_user_id, 'public', 99)"); //visibility was 'viewable'
-    if (!$res) { // Unable to allocate a new ID
-        $error = "Cannot write record in Heurist master index database\nThe URL may have been registered with a previous database.\n" . "Please contact <a href=mailto:info@heuristNetwork.org>Heurist developers</a> for advice";
-        $returnData = $dbID . "," . $error;
-        echo $returnData;
-    } else { // core database record created OK
-        $dbID = mysql_insert_id();
-        $returnData = $dbID;
+if($dbID>0) { 
+    
+    echo $dbID;
+    
+}else{// new registration
+
+    $dbID = mysql__insertupdate($mysqli, 'Records', 'rec_', 
+        array(
+            'rec_URL'=>$mysqli->real_escape_string($serverURL),
+            'rec_Added'=>date('Y-m-d H:i:s'),
+            'rec_Title'=>$mysqli->real_escape_string($dbTitle),
+            'rec_RecTypeID'=> HEURIST_DB_DESCRIPTOR_RECTYPE,
+            'rec_AddedByImport'=>0,
+            'rec_OwnerUGrpID'=>$indexdb_user_id,
+            'rec_NonOwnerVisibility'=>'public',
+            'rec_Popularity'=>99,
+        )
+    );
+    
+    if($dbID>0){
+        
+        $system->defineConstant('DT_NAME');
 
         //Write the database title into the details, further data will be entered by the Heurist form
-        $res = mysql_query("insert into recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('$dbID', ".DT_NAME.", '".mysql_real_escape_string($dbTitle)."')");
+        mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
+            array(
+                'dtl_RecID'=>$dbID,
+                'dtl_DetailTypeID'=>DT_NAME,
+                'dtl_Value'=>$mysqli->real_escape_string($dbTitle)
+            )
+        );
 
         //Write db version as detail
         if($dbVersion){
-            $update = "insert into recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('$dbID', 335, '$dbVersion')";
-            $res = mysql_query($update);
+            mysql__insertupdate($mysqli, 'recDetails', 'dtl_', 
+                array(
+                    'dtl_RecID'=>$dbID,
+                    'dtl_DetailTypeID'=>335,
+                    'dtl_Value'=>$dbVersion
+                )
+            );
         }
 
         // Write the record bookmark into the bookmarks table. This allos the user registering the database
         // to see thir lsit of databases as My Bookmarks
-        $res = mysql_query("insert into usrBookmarks
-            (bkm_UGrpID,bkm_RecID) VALUES ('$indexdb_user_id','$dbID')");
-
+        mysql__insertupdate($mysqli, 'usrBookmarks', 'bkm_', 
+            array(
+                'bkm_UGrpID'=>$indexdb_user_id,
+                'bkm_RecID'=>$dbID
+            )
+        );
+        
 
         //send email to administrator about new database registration
         $email_text =
@@ -184,23 +220,22 @@ if(mysql_num_rows($res) == 0) { // new registration
         "Go to the address below to review the database:\n".
         $serverURL;
 
-        $dbowner_Email = get_dbowner_email();
+        $dbowner = user_getDbOwner($this->mysqli);
+        $dbowner_Email = $dbowner['ugr_eMail'];
         $email_title = 'Database registration ID: '.$dbID.'. User ['.$indexdb_user_id.']';
 
         sendEmail($dbowner_Email, $email_title, $email_text, null);
         //END email -----------------------------------
 
+        
+        echo $dbID;
+    }else{
+        $error = 'Cannot write record in Heurist master index database<br>'
+        .'The URL may have been registered with a previous database.<br>'
+        .'Please contact <a href=mailto:info@heuristNetwork.org> Heurist developers</a> for advice';
+        echo '0,'. $error;
+    }
 
-    }
-} else {
-    // existing registration - used to update title, but this is now handled by metadata edit form
-    // This should now not be called any more
-    // just incase there was a problem let's return the id.
-    $dbID = mysql_fetch_assoc($res);
-    if (@$dbID && array_key_exists("rec_ID",$dbID)) {
-        $returnData = $dbID["rec_ID"];
-    }
+
 }
-
-echo $returnData;
 ?>

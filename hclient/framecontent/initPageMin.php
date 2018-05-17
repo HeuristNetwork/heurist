@@ -51,13 +51,14 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning)); 
     exit();
 
-
 }else if(defined('MANAGER_REQUIRED') && !$system->is_admin() ){ //A member should also be able to create and open database
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Administrator of group \'Database Managers\''));
     exit();
+    
 }else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
     header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Database Owner'));
     exit();
+    
 }
 
 //$system->defineConstants(); //init constants for record and field types
