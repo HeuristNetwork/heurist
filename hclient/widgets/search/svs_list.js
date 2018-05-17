@@ -504,6 +504,19 @@ $.widget( "heurist.svs_list", {
                             .attr('grpid',  groupID).addClass('svs-acordeon')
                             .append( this._defineHeader(name, groupID))
                             .append( this._defineContent(groupID) ));
+                        
+                        //get descriptiopn for user    
+                        window.hWin.HAPI4.SystemMgr.user_get( { UGrpID: groupID},
+                            function(response){
+                                var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
+                                if(success){
+                                    that.element.find('div[grpid='+response.data['ugr_ID']+']').attr('title',
+                                        that.options.edit_data = response.data['ugr_Description']);
+                                }else{
+                                    //window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                                }
+                            }
+                        );
                     }
             }
             
