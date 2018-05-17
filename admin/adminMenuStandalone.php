@@ -51,7 +51,7 @@ if (array_key_exists('mode', $_REQUEST)) {
             $url = $url . "&rtID=" . $rtID;
         }
     } else if ($mode == "properties2") { // show advanced properties
-        $url = "setup/dbproperties/editSysIdentificationAdvanced.php?db=" . HEURIST_DBNAME;
+        $url = "setup/dbproperties/editSysIdentificationAll.php?db=" . HEURIST_DBNAME;
     }
 } // end direct access to administration page functions
 ?>
@@ -188,22 +188,6 @@ if (array_key_exists('mode', $_REQUEST)) {
                             menuEntry('','Delete all records','setup/dboperations/clearCurrentDB.php?db='.HEURIST_DBNAME,
                                 'Clear all data (records, values, attached files) from the current database. '.
                                 'Database atructure - record types, fields, terms, constraints - is unaffected');
-
-
-                            /* Transferred to Manasge tab on home page late 2016
-                            menuEntry('---','Register database','setup/dbproperties/registerDB.php?db='.HEURIST_DBNAME,
-                            'Register this database with the Heurist Master Index - '.
-                            'this makes the structure (but not data) available for import by other databases');
-
-                            menuEntry('','Properties','setup/dbproperties/editSysIdentification.php?db='.HEURIST_DBNAME,
-                            'Edit the internal metadata describing the database and set some global behaviours. '.
-                            'Recommended to provide a self-documenting database');
-
-                            menuEntry('','Advanced properties','setup/dbproperties/editSysIdentificationAdvanced.php?db='.HEURIST_DBNAME,
-                            'Edit advanced behaviours, including special file paths and parameters '.
-                            'for harvesting email from external servers');
-
-                            */
 
                             menuEntry('','Rollback','rollback/rollbackRecords.php?db=',
                             'Selectively roll back the data in the database to a specific date and time)');

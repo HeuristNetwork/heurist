@@ -82,7 +82,7 @@ if(!is_admin()){
    The email server must support IMAP.</p>
 
 
-<p><a href="../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=<?=HEURIST_DBNAME?>&popup=2">
+<p><a href="../../admin/setup/dbproperties/editSysIdentificationAll.php?db=<?=HEURIST_DBNAME?>&popup=2">
 	   Configure connection to IMAP mail server</a> (per-database)</p>
 
 <p>This function allows a member of the Database Managers of a Heurist database to set up an email
