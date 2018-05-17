@@ -129,7 +129,7 @@ function get_config_bytes($val) {
 
 <!-- STEP 1 upload data/select session -->    
 <div style="width:100%; height:100%;" id="divStep1">
-    <div class="ent_header" style="height:28em;padding:20px;">
+    <div class="ent_header" style="height:29.3em;padding:20px;">
     
         
         <div id="divCsvIntro" style="padding:0 20 20 20" class="format-csv">
@@ -173,7 +173,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         <div id="btnUploadData"  class="format-csv"
             title="Upload content of text area below to server side and use it as source for CSV/TSV import operation">Upload Data</div>
     </div>
-    <div class="ent_content_full" style="top:29em;width:100%;">
+    <div class="ent_content_full" style="top:33em;width:100%;">
         <textarea id="sourceContent" style="height:100%;width:100%;resize:none;" class="format-csv"></textarea>
     </div>
 </div>

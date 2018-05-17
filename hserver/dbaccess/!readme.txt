@@ -29,3 +29,23 @@ Updated:     18 Oct 2015
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+
+db_files.php  - working with recUploadedFiles download by id, print player tag, get file info  -> static class RecFile
+
+db_users.php - access sysUGrps              -> static class   DbUsers::
+
+
+db_structure.php - loads db structure info       -> static class DbStructure
+
+                   verify structure info values  -> static class DbValidate
+
+                   whole db actions: clone, create, dump -> static class DbUtils
+
+utils_db.php  - mysqli wrapper                   -> static class MySQL:: or extend  $mysqli ?
+utils_db_load_script.php  - run dump script
+
+---
+
+file_download.php - interface to get file -> move to controller
+rt_icon.php - rectype and term icons  -> move to controller, merge with fileGet.php

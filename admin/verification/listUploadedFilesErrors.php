@@ -29,7 +29,6 @@ define('PDIR','../../');  //need for proper path to js and css
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_files.php');
-require_once(dirname(__FILE__).'/../../hserver/utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../../import/fieldhelper/harvestLib.php');
 
 $mysqli = $system->get_mysqli();

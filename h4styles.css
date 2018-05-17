@@ -1585,10 +1585,23 @@ A:hover {
 }
 body.popup {
     padding: 10px;
+    background-color:white;
 }
-.banner {
+.banner, body.popup #page-inner {
     padding: 6px;
 }
 body.popup table{
     font-size:11px;   
+}
+body.popup h3 {
+    color: #DC8501;
+    font-size: 12px;    
+    height: auto;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    margin: 10px 0 0 0;
+}
+.separator_row {
+    height: 1px;
+    border-bottom: 1px solid #A4B4CB;
 }

@@ -60,7 +60,7 @@ $mysqli = $system->get_mysqli();
         $res = $mysqli->query($query);
         if (!$res) {  print $query.'  '.$mysqli->error;  return; }
         
-        while (($row = $res->fetch_row($res))) {
+        while (($row = $res->fetch_row())) {
 
                $is_found = true;
                 
