@@ -1,4 +1,5 @@
 <?php
+//NOT USED
 
 /**
 * getDBFolders.php: returns zip archive with content of some folders from upload directory 

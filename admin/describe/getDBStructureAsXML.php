@@ -21,21 +21,19 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
 header("Content-Type: application/xml");
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-
 // Normally jsut outputs definitions, this will include users/groups
-$includeUgrps=@$_REQUEST["includeUgrps"];    // returns null if not set
+$includeUgrps = @$_REQUEST["includeUgrps"];    // returns null if not set
 
-// Deals with all the database connections stuff
+$sysinfo = $system->get_system();
+$db_version = $sysinfo['sys_dbVersion'].'.'.$sysinfo['sys_dbSubVersion'].'.'.$sysinfo['sys_dbSubSubVersion'];
 
-mysql_connection_select(DATABASE);
-if(mysql_error()) {
-    die("Could not get database structure from given database source: MySQL error - unable to connect to database.");
-}
+define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
+
+$mysqli = $system->get_mysqli();
 
 // * IMPORTANT *
 // UPDATE THE FOLLOWING WHEN DATABASE FORMAT IS CHANGED:
@@ -63,7 +61,7 @@ print "\n<HeuristProgVersion>".HEURIST_VERSION."</HeuristProgVersion>";
 // *** MOST IMPORTANT ***
 // ** Check this on structure import to make sure versions match **
 // However use of XML tags should allow import even if structure has evolved
-print "\n<HeuristDBVersion>".HEURIST_DBVERSION."</HeuristDBVersion>";
+print "\n<HeuristDBVersion>".$db_version."</HeuristDBVersion>";
 
 
 // TODO: Also need to output general properties of the database set in Structure > Properties / dvanced Properties
@@ -77,10 +75,12 @@ print "\n<HeuristDBVersion>".HEURIST_DBVERSION."</HeuristDBVersion>";
 print "\n\n<RecTypeGroups>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRecTypeGroupsFields.inc'; // sets value of $flds
 $query = "select $flds from defRecTypeGroups";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defRecTypeGroups';   // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</RecTypeGroups>";
 
 // ------------------------------------------------------------------------------------------
@@ -89,10 +89,12 @@ print "</RecTypeGroups>";
 print "\n\n<DetailTypeGroups>";
 include HEURIST_DIR.'admin/structure/crosswalk/defDetailTypeGroupsFields.inc'; // sets value of $flds
 $query = "select $flds from defDetailTypeGroups";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defDetailTypeGroups'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</DetailTypeGroups>";
 
 // ------------------------------------------------------------------------------------------
@@ -101,10 +103,12 @@ print "</DetailTypeGroups>";
 print "\n\n<Ontologies>";
 include HEURIST_DIR.'admin/structure/crosswalk/defOntologiesFields.inc'; // sets value of $flds
 $query = "select $flds from defOntologies";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defOntologies'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</Ontologies>";
 
 // ------------------------------------------------------------------------------------------
@@ -113,10 +117,12 @@ print "</Ontologies>";
 print "\n\n<Terms>";
 include HEURIST_DIR.'admin/structure/crosswalk/defTermsFields.inc'; // sets value of $flds
 $query = "select $flds from defTerms";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defTerms';  // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) {   @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) {   @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</Terms>";
 
 
@@ -126,10 +132,12 @@ print "</Terms>";
 print "\n\n<RecordTypes>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRecTypesFields.inc'; // sets value of $flds
 $query = "select $flds from defRecTypes";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defRecTypes'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</RecordTypes>";
 
 
@@ -139,10 +147,12 @@ print "</RecordTypes>";
 print "\n\n<DetailTypes>";
 include HEURIST_DIR.'admin/structure/crosswalk/defDetailTypesFields.inc'; // sets value of $flds
 $query = "select $flds from defDetailTypes";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defDetailTypes';  // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</DetailTypes>";
 
 
@@ -152,10 +162,12 @@ print "</DetailTypes>";
 print "\n\n<RecordStructures>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRecStructureFields.inc'; // sets value of $flds
 $query = "select $flds from defRecStructure";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defRecStructure'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</RecordStructures>";
 
 // ------------------------------------------------------------------------------------------
@@ -164,10 +176,12 @@ print "</RecordStructures>";
 print "\n\n<RelationConstraints>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRelationshipConstraintsFields.inc'; // sets value of $flds
 $query = "select $flds from defRelationshipConstraints";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defRelationshipConstraints'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</RelationConstraints>";
 
 // ------------------------------------------------------------------------------------------
@@ -176,10 +190,12 @@ print "</RelationConstraints>";
 print "\n\n<FileExtToMimeTypes>";
 include HEURIST_DIR.'admin/structure/crosswalk/defFileExtToMimetypeFields.inc'; // sets value of $flds
 $query = "select $flds from defFileExtToMimetype";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defFileExtToMimetype'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</FileExtToMimeTypes>";
 
 // ------------------------------------------------------------------------------------------
@@ -190,10 +206,12 @@ include HEURIST_DIR.'admin/structure/crosswalk/defTranslationsFields.inc'; // se
 $query = "select $flds from defTranslations where trn_Source in
 ('rty_Name', 'dty_Name', 'ont_ShortName', 'vcb_Name', 'trm_Label', 'rst_DisplayName', 'rtg_Name')";
 // filters to only definition (not data) translations - add others as required
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defTranslations'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</Translations>";
 
 // ------------------------------------------------------------------------------------------
@@ -202,10 +220,12 @@ print "</Translations>";
 print "\n\n<CalcFunctions>";
 include HEURIST_DIR.'admin/structure/crosswalk/defCalcFunctionsFields.inc'; // sets value of $flds
 $query = "select $flds from defCalcFunctions";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defCalcFunctions'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</CalcFunctions>";
 
 // ------------------------------------------------------------------------------------------
@@ -214,10 +234,12 @@ print "</CalcFunctions>";
 print "\n\n<Crosswalks>";
 include HEURIST_DIR.'admin/structure/crosswalk/defCrosswalkFields.inc'; // sets value of $flds
 $query = "select $flds from defCrosswalk";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defCrosswalk'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</Crosswalks>";
 
 // ------------------------------------------------------------------------------------------
@@ -226,10 +248,12 @@ print "</Crosswalks>";
 print "\n\n<Languages>";
 include HEURIST_DIR.'admin/structure/crosswalk/defLanguagesFields.inc'; // sets value of $flds
 $query = "select $flds from defLanguages";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defLanguages';  // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</Languages>";
 
 // ------------------------------------------------------------------------------------------
@@ -238,10 +262,12 @@ print "</Languages>";
 print "\n\n<URLPrefixes>";
 include HEURIST_DIR.'admin/structure/crosswalk/defURLPrefixesFields.inc'; // sets value of $flds
 $query = "select $flds from defURLPrefixes";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'defURLPrefixes';  // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { @print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</URLPrefixes>";
 
 // ------------------------------------------------------------------------------------------
@@ -253,7 +279,7 @@ if (!$includeUgrps) {
     return;
 }
 
-if (! is_admin()) {
+if (! $system->is_admin() ) {
     print "\n\n<!-- You do not have sufficient privileges to list users and groups -->";
     print "\n</hml_structure>";
     return;
@@ -264,10 +290,12 @@ if (! is_admin()) {
 print "\n\n<UserGroups>";
 include HEURIST_DIR.'admin/structure/crosswalk/sysUGrpsFields.inc'; // sets value of $flds
 $query = "select $flds from sysUGrps";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'sysUGrps'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</UserGroups>";
 
 // ------------------------------------------------------------------------------------------
@@ -276,10 +304,12 @@ print "</UserGroups>";
 print "\n\n<UserGroupLinks>";
 include HEURIST_DIR.'admin/structure/crosswalk/sysUsrGrpLinksFields.inc'; // sets value of $flds
 $query = "select $flds from sysUsrGrpLinks";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'sysUsrGrpLinks'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</UserGroupLinks>";
 
 // ------------------------------------------------------------------------------------------
@@ -288,10 +318,12 @@ print "</UserGroupLinks>";
 print "\n\n<UserHyperlinkFilters>";
 include HEURIST_DIR.'admin/structure/crosswalk/usrHyperlinkFiltersFields.inc'; // sets value of $flds
 $query = "select $flds from usrHyperlinkFilters";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'usrHyperlinkFilters'; // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</UserHyperlinkFilters>";
 
 // ------------------------------------------------------------------------------------------
@@ -300,10 +332,12 @@ print "</UserHyperlinkFilters>";
 print "\n\n<UserTags>";
 include HEURIST_DIR.'admin/structure/crosswalk/usrTagsFields.inc'; // sets value of $flds
 $query = "select $flds from UsrTags";
-$res = mysql_query($query);
+$res = $mysqli->query($query);
 $fmt = 'UsrTags';  // update format if fields added
 print "\n\n<!-- $flds -->";
-while ($row = mysql_fetch_assoc($res)) { print_row($row, $fmt, $flds); }
+while ($row = $res->fetch_assoc()) { print_row($row, $fmt, $flds); }
+$res->close();
+
 print "</UserTags>";
 
 
@@ -314,9 +348,10 @@ print '\n</hml_structure>'; // end of file
 // --------------------------------------------------------------------------------------
 
 function html_escape($s) {
-    // TODO: 6/6/14 - we used mysql_real_escape_string because we were producing SQL.
+    global $mysqli;
+    // TODO: 6/6/14 - we used $mysqli->real_escape_string because we were producing SQL.
     //       Now we are producing XML, we should revise this to appropriate escaping
-    return(htmlspecialchars(mysql_real_escape_string($s)));
+    return(htmlspecialchars($mysqli->real_escape_string($s)));
 } // html_escape
 
 function print_row($row,$fmt,$flds) {
