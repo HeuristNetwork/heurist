@@ -79,7 +79,7 @@
                     "dtFields":{
                         "dty_Type":"resource",
                         "rst_DisplayName":"Mime type:",
-                        "rst_DisplayHelpText": "Type of resourse", 
+                        "rst_DisplayHelpText": "Type of resource", 
                         "rst_FieldConfig": {"entity":"defFileExtToMimetype"},
                         "rst_RequirementType":"required",
                         "rst_DisplayWidth":30

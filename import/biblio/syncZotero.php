@@ -838,7 +838,7 @@ function getResourceMapping($dt_code, $rt_id, $arr=null){
 }
 
 /**
-* add to list of resourse record pointers
+* add to list of resource record pointers
 *
 * @param mixed $unresolved
 * @param mixed $key

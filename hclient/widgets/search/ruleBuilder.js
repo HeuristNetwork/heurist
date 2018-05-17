@@ -587,7 +587,7 @@ $.widget( "heurist.ruleBuilder", {
     _generateQuery: function(){
 
     this.options.query = '';
-    //query is possible if there is at least on resourse or relmarker field
+    //query is possible if there is at least one record pointer or relmarker field
     if(this._arr_fields.length>0) {
 
     var rt_target = '';

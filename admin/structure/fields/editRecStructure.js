@@ -604,7 +604,7 @@ function EditRecStructure() {
                         '<label style="min-width: 60px;width: 60px;" for="incValue_'+rst_ID+'_1">Default&nbsp;Value:</label>'+
                         '<div id="termsDefault_'+rst_ID+'" style="display:inline-block;padding-right:1em"><input id="ed'+rst_ID+'_rst_DefaultValue" title="Select or enter the default value to be inserted automatically into new records"/></div>'+
                         '<input type="radio" id="incValue_'+rst_ID+'_2" name="incValue_'+rst_ID+'" value="1"  title="'+incrementTip+'" onchange="onIncrementModeChange('+rst_ID+')">'+
-                        '<label  style="min-width: 120px;width: 120px;" for="incValue_'+rst_ID+'_2" title="'+incrementTip+'">Increament value by 1</label>'+
+                        '<label  style="min-width: 120px;width: 120px;" for="incValue_'+rst_ID+'_2" title="'+incrementTip+'">Increment value by 1</label>'+
                         '</span>'
                         :'<div style="padding-left:50px;display:inline-block">'+
                         '<label class="input-header-cell" for="ed'+rst_ID+'_rst_DefaultValue">Default&nbsp;Value:</label>'+
