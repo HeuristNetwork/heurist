@@ -75,7 +75,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     // init main system class
     $system = new System();
 
-    if(!$system->init('Heurist_Master_Index'){
+    if(!$system->init('Heurist_Master_Index')){
         $response = $system->getError();
         print json_encode($response);
         return;

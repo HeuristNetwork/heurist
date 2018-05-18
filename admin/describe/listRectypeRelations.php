@@ -23,22 +23,20 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once (dirname(__FILE__) . '/../../common/connect/applyCredentials.php');
-    require_once (dirname(__FILE__) . '/../../common/php/getRecordInfoLibrary.php');
-
-    // Although the relationships are part of record strucutre, this also outputs the actual counts, hence login
-    if (!is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME);
-        return;
-    }
+    define('LOGIN_REQUIRED',1);   
+    define('PDIR','../../');  //need for proper path to js and css    
+    
+    require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+    require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
 
     if(@$_REQUEST['action']=='relations'){$showRelationships=1;} else {$showRelationships=0;};
     if(@$_REQUEST['action']=='simple'){$showSimpleFields=1;} else {$showSimpleFields=0;};
     if(@$_REQUEST['action']=='all'){$showRelationships=1;$showSimpleFields=1;};
 
-    mysql_connection_select(DATABASE);
-    $rtStructs = getAllRectypeStructures(true);
-    $rtTerms = getTerms(true);
+    $mysqli = $system->get_mysqli();
+
+    $rtStructs = dbs_GetRectypeStructures($system,null,2);
+    $rtTerms = dbs_GetTerms($system);
     $rtTerms = $rtTerms['termsByDomainLookup']['relation'];
 
     $idx_dt_type = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
@@ -79,12 +77,13 @@
                 }
 
                 if($rt_cnt>0){
-                    $res = mysql_query($query);
+                    $res = $mysqli->query($query);
                     if ($res) {
-                        while (($row = mysql_fetch_array($res))) {
+                        while (($row = $res->fetch_row())) {
                             $rels[$row[0]] = array(@$rels[$row[0]]?'y':'n', $row[1]);
                             $cnt = $cnt+$row[1];
                         }
+                        $res->close();
                     }
                 }
 
@@ -122,9 +121,9 @@
                 }
 
                 if($rt_cnt>0){
-                    $res = mysql_query($query);
+                    $res = $mysqli->query($query);
                     if ($res) {
-                        while (($row = mysql_fetch_array($res))) {
+                        while (($row = $res->fetch_row())) {
                             $pt_rt_id = $row[0];
                             if($isconstrainded<1 && !@$rels[$pt_rt_id]){
                                 $rels[$pt_rt_id] = array('n', 0, array());
@@ -135,6 +134,7 @@
                                 $cnt = $cnt + $row[2];
                             }
                         }
+                        $res->close();
                     }
                 }
 
@@ -147,12 +147,13 @@
                 // output simple fields listing
                 $query = "select count(recDetails.dtl_ID) from Records r1, recDetails "
                 ."where r1.rec_RecTypeID=$rt_id and dtl_RecID=r1.rec_ID and dtl_DetailTypeID=$dt_id";
-                $res = mysql_query($query);
+                $res = $mysqli->query($query);
                 $cnt = 0;
                 if ($res) {
-                    while (($row = mysql_fetch_array($res))) {
+                    while (($row = $res->fetch_row())) {
                         $cnt = $row[0];
                     }
+                    $res->close();
                 }
                 if(count($details)==0){
                     $rt_cnt = get_rt_usage($rt_id);
@@ -169,8 +170,8 @@
     }
 
     function get_rt_usage($rt_id){
-        $res = mysql__select_array("Records","count(*)","rec_RecTypeID=".$rt_id);
-        return $res[0];
+        global $mysqli;
+        return mysql__select_value($mysqli, 'select count(*) from Records where rec_RecTypeID='.$rt_id);
     }
 
 ?>
@@ -183,7 +184,8 @@
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        
         <link rel="icon" href="../../favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
 

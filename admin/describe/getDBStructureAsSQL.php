@@ -34,7 +34,7 @@ $isHTML = (@$_REQUEST["plain"]!=1); //no html
 // TO DO: filter for reserved and approved definitions only if this is set
 
 
-$sysinfo = $system->get_s57ystem();
+$sysinfo = $system->get_system();
 $db_version = $sysinfo['sys_dbVersion'].'.'.$sysinfo['sys_dbSubVersion'].'.'.$sysinfo['sys_dbSubSubVersion'];
 
 define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
