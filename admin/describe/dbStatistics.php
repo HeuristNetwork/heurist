@@ -19,49 +19,45 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-//require_once(dirname(__FILE__).'/../../configIni.php');
-
-if(isForAdminOnly("to get information on all databases on this server")){
-    return;
-}
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
+    
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
 set_time_limit(0); //no limit
 
-mysql_connection_select();
-$dbs = mysql__getdatabases(true);
+$mysqli = $system->get_mysqli();
+$dbs = mysql__getdatabases4($mysqli, true);
 
-$usrEmail = mysql__select_val('select ugr_eMail from sysUGrps where ugr_ID = '.get_user_id());
-$sysadmin = (defined('HEURIST_MAIL_TO_ADMIN') && ($usrEmail==HEURIST_MAIL_TO_ADMIN));
-//$sysadmin = is_systemadmin();
-//$sysadmin = true; // Force system admin rights
+$sysadmin = $system->is_system_admin();
+
+// Force system admin rights
+/*
 if($sysadmin){
     startMySession();
     $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin'] = '1';
     session_write_close();
 }
+*/
 
 /**
 * Selects the value after a query
 * @param mixed $query Query to execute
 */
 function mysql__select_val($query) {
-    $res = mysql_query($query);
-    if (!$res) {
-        return 0;
-    }
-
-    $row = mysql_fetch_array($res);
-    if($row){
-        return $row[0];
-    }else{
-        0;
-    }
+    global $mysqli;
+    
+    $res = mysql__select_value($mysqli, $query);
+    if ($res==null) $res = 0;
+    
+    return $res;
 }
 
 /**
 * Calculates the directory size
 * @param mixed $dir Directory to check
+* 
+* @todo move to utilities/utils_file.php
 */
 function dirsize($dir)
 {
@@ -114,21 +110,21 @@ function dirsize($dir)
         <script src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 
         <!-- Heurist CSS -->
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 
         <!-- jQuery UI -->
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css">
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        
+        <link rel="stylesheet" type="text/css" href="<?echo $cssLink;?>">
         <!-- link rel="stylesheet" type="text/css" href="../../external/jquery/jquery-ui-1.10.2/themes/base/jquery.ui.dialog.css" -->
     </head>
 
     <body class="popup yui-skin-sam">
         <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
         <div id="page-inner">
-            <?php echo "System admin: <a class='dotted-link' href='mailto:" .$sysAdminEmail. "'>" .$sysAdminEmail. "</a>"; ?>
-            <?php if($sysadmin) { ?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button> <?php } ?>
+            <?php echo "System admin: <a class='dotted-link' href='mailto:" .HEURIST_MAIL_TO_ADMIN. "'>" .HEURIST_MAIL_TO_ADMIN. "</a>"; ?>
+            <?php if($sysadmin) { ?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button><br><br> <?php } ?>
             <div id="tabContainer"></div>
         </div>
 
@@ -149,7 +145,7 @@ function dirsize($dir)
 
                     <div class="progress-bar">
                         <span class="progress">0/0</span>
-                        <progress class="bar" value="0" max="100"></progress>
+                        <div class="bar" value="0" max="100"></div>
                     </div>
                 </div>
 
@@ -197,7 +193,8 @@ function dirsize($dir)
                     $sysadmin."']";
 
                     $com = ",\n";
-
+                    $i++;
+                    //if($i>100) break;
                 }//foreach
                 ?>
             ];
@@ -233,7 +230,7 @@ function dirsize($dir)
                 */
                 { key: "date_mod", label: "Modified", sortable:true},
                 { key: "date_login", label: "Access", sortable:true},
-                { key: "owner", label: "Owner", formatter: function(elLiner, oRecord, oColumn, oData){
+                { key: "owner", label: "Owner", width:200, formatter: function(elLiner, oRecord, oColumn, oData){
                     elLiner.innerHTML = "<div style='max-width:100px' class='three-lines' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
                 }}
                 <?php if($sysadmin) { ?>
@@ -319,7 +316,7 @@ function dirsize($dir)
                         return false;
                     }
 
-                    // Verificate user
+                    // Verify user
                     $("#db-verification").dialog({
                         autoOpen: false,
                         modal: true,
@@ -381,6 +378,10 @@ function dirsize($dir)
                     $(".progress").text(count+"/"+databases.length);
                     $(".bar").attr("value", (count*100/databases.length));
                 }
+                
+                $(document).ready(function() {
+                   $('button').button();
+                });                
             </script>
             <?php } ?>
     </body>

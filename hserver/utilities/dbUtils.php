@@ -70,14 +70,14 @@ class DbUtils {
     //
     // set Origin ID for rectype, detail and term defintions
     //
-    public static function register($dbID){
+    public static function databaseRegister($dbID){
 
         self::initialize();
         
         $res = true;
 
         if($dbID>0){
-
+                    $mysqli = self::$mysqli;
                     //@todo why 3 actions for every table????? 
                     $result = 0;
                     $res = $mysqli->query("update defRecTypes set rty_OriginatingDBID='$dbID' ".
@@ -118,6 +118,48 @@ class DbUtils {
                     $res = ($result==0);
         }
         return $res;
+    }    
+    
+    //
+    // set Origin ID for rectype, detail and term defintions
+    //
+    public static function databaseDrop( $verbose=true ){
+
+        self::initialize();
+
+        if(self::databaseDump()) {
+            // Create DELETED_DATABASES directory if needed
+            $folder = HEURIST_FILESTORE_ROOT."DELETED_DATABASES/";
+            folderCreate($folder, true);
+
+            // Zip $source to $file
+            $source = HEURIST_FILESTORE_DIR;  //current database upload folder
+            $destination = $folder.HEURIST_DBNAME."_".time().".zip";
+                    
+            if(zip($source, null, $destination, $verbose)) {
+                // Delete from MySQL database
+                $mysqli = self::$mysqli;
+                $mysqli->query('DROP DATABASE '.HEURIST_DBNAME_FULL);
+                $mysqli->close();
+                if($verbose) echo "<br/>Database ".HEURIST_DBNAME." has been dropped";
+                
+                // Delete $source folder
+                folderDelete($source);
+                if($verbose) echo "<br/>Folder ".$source." has been deleted";
+                
+                // Delete from central index
+                $mysqli->query('DELETE FROM `heurist_index`.`sysIdentifications` WHERE sys_Database="hdb_'.$db.'"');
+                $mysqli->query('DELETE FROM `heurist_index`.`sysUsers` WHERE sus_Database="hdb_'.$db.'"');
+                
+                return true;
+            }else{
+                if($verbose) echo "<br/>Failed to zip ".$source." to ".$destination;
+            }
+        }else{
+            if($verbose) echo "<br/>Failed to dump database ".$db." to a .sql file";
+        }
+        return false;
+
     }    
     
 }

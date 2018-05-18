@@ -74,6 +74,28 @@
         return true;
     }
    
+    /**
+    * put your comment there...
+    * 
+    * @param mixed $dir
+    */
+    function folderDelete($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (filetype($dir."/".$object) == "dir") {
+                        deleteFolder($dir."/".$object); //delte files
+                    } else {
+                        unlink($dir."/".$object);
+                    }
+                }
+            }
+            reset($objects);
+            rmdir($dir); //delete folder itself
+        }
+    }
+   
     
     //
     //
@@ -171,6 +193,114 @@
             || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
             ? './'.$path : $path;
     }
+    
+/**
+* Zips everything in a directory
+*
+* @param mixed $source       Source folder or array of folders
+* @param mixed $destination  Destination file
+*/
+function zip($source, $folders, $destination, $verbose=true) {
+    if (!extension_loaded('zip')) {
+        echo "<br/>PHP Zip extension is not accessible";
+        return false;
+    }
+    if (!file_exists($source)) {
+        echo "<br/>".$source." is not found";
+        return false;
+    }
+
+
+    $zip = new ZipArchive();
+    if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
+        if($verbose) echo "<br/>Failed to create zip file at ".$destination;
+        return false;
+    }
+
+
+    $source = str_replace('\\', '/', realpath($source));
+
+    if (is_dir($source) === true) {
+
+
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+
+        foreach ($files as $file) {
+            $file = str_replace('\\', '/', $file);
+
+            // Ignore "." and ".." folders
+            if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
+                continue;
+
+            // Determine real path
+            $file = realpath($file);
+
+            //ignore files that are not in list of specifiede folders
+            $is_filtered = true;
+            if( is_array($folders) ){
+
+                $is_filtered = false;
+                foreach ($folders as $folder) {
+                    if( strpos($file, $source."/".$folder)===0 ){
+                        $is_filtered = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!$is_filtered) continue;
+
+            if (is_dir($file) === true) { // Directory
+                $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+            }
+            else if (is_file($file) === true) { // File
+                $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+            }
+        }
+    } else if (is_file($source) === true) {
+        $zip->addFromString(basename($source), file_get_contents($source));
+    }
+
+    // Close zip and show output if verbose
+    $numFiles = $zip->numFiles;
+    $zip->close();
+    $size = filesize($destination) / pow(1024, 2);
+
+    if($verbose) {
+        echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
+        echo "<br/>The zip file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+    }
+    return true;
+}
+
+function unzip($zipfile, $destination, $entries=null){
+
+    if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
+
+        $zip = new ZipArchive;
+        if ($zip->open($zipfile) === TRUE) {
+
+            /*debug to find proper name in archive 
+            for($i = 0; $i < $zip->numFiles; $i++) { 
+            $entry = $zip->getNameIndex($i);
+            error_log( $entry );
+            }*/
+            if($entries==null){
+                $zip->extractTo($destination, array());
+            }else{
+                $zip->extractTo($destination, $entries);
+            }
+            $zip->close();
+            return true;
+        } else {
+            return false;
+        }
+
+    }else{
+        return false;
+    }
+}
+    
         
 //-----------------------  LOAD REMOTE CONTENT (CURL)
 //

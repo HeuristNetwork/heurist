@@ -1504,7 +1504,7 @@ option {padding-left:15px;}
     opacity: 1;
 }
 
-
+    
 .recordList > .table_header{
     height: 1.2em;
     width: 100%;
@@ -1605,3 +1605,4 @@ body.popup h3 {
     height: 1px;
     border-bottom: 1px solid #A4B4CB;
 }
+.dotted-link { border-bottom: 1px dotted #6A7C99;}

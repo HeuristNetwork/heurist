@@ -740,7 +740,7 @@ error_log(print_r($_REQUEST, true));
     public function is_system_admin(){
         if ($this->get_user_id()>0){
             $user = user_getById($this->mysqli, $this->get_user_id());
-            retrun (defined('HEURIST_MAIL_TO_ADMIN') && (@$user['ugr_eMail']==HEURIST_MAIL_TO_ADMIN));    
+            return (defined('HEURIST_MAIL_TO_ADMIN') && (@$user['ugr_eMail']==HEURIST_MAIL_TO_ADMIN));    
         }else{
             return false;
         }

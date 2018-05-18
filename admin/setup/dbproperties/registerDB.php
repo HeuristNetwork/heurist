@@ -24,7 +24,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-define('OWNER_REQUIRED',1);   
+define('OWNER_REQUIRED', 1);   
 define('PDIR','../../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
@@ -338,7 +338,7 @@ function registerDatabase() {
                         // Update original DB ID and original db code for all existing record types, fields and terms
                         // which don't have them (meaning that they were defined within this database)
                         // Record types
-                        $result = DbUtils::register( $dbID );
+                        $result = DbUtils::databaseRegister( $dbID );
                         
                         if (!$result) {
                             echo '<div class=wrap><div class="ui-state-error">Unable to set all values for originating DB information for '.HEURIST_DBNAME.' - one of the update queries failed</div></div>';

@@ -21,12 +21,14 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
+//require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+//require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
 
-/** Db check */
+require_once(dirname(__FILE__).'/../../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/DbUtils.php');
 
-if(!is_systemadmin()) {
+/** Access check */
+if(!$system->is_system_admin()) {
     header('HTTP/1.0 401 Unauthorized');
     echo "You must be logged in as a system administrator to delete databases";
     exit();
@@ -39,25 +41,31 @@ if(isset($_POST['password'])) {
     // Password in configIni.php must be at least 6 characters
     if(strlen($passwordForDatabaseDeletion) > 6) {
         $comparison = strcmp($pw, $passwordForDatabaseDeletion);  // Check password
-        if($comparison == 0) {
-            // Correct password, check if db is set
-            if(isset($_POST['database'])) {
-                // "Delete" database
-                $db = $_POST['database']; 
-                db_delete($db); // dbUtils.php
+        if($comparison == 0) { // Correct password
 
-            }else{
-                // Authorization call
-                header('HTTP/1.0 200 OK');
-                echo "Correct password";    
-            }    
+            $system = new System();
+            $isSystemInited  = false;
+            if(@$_REQUEST['database']){
+                //if database is defined then connect to given database
+                $isSystemInited = $system->init(@$_REQUEST['database']);
+            }
 
+            /** Db check */
+            if(!$isSystemInited){
+                header('HTTP/1.0 401 Unauthorized');
+                echo "Can not init database connection";
+                exit();
+            }
+
+            DbUtils::databaseDrop(false);
+            
+            
+            db_delete($db); // dbUtils.php
         }else{
             // Invalid password
             header('HTTP/1.0 401 Unauthorized');
             echo "Invalid password";
         }    
-
     }else{
         header('HTTP/1.0 406 Not Acceptable');
         echo "Password in configIni.php must be at least 6 characters";  
