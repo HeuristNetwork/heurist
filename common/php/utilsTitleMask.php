@@ -563,8 +563,8 @@ function _titlemask__get_rt_id( $rt_search ){
                 if (is_numeric($row['rty_OriginatingDBID']) && $row['rty_OriginatingDBID']>0 &&
                 is_numeric($row['rty_IDInOriginatingDB']) && $row['rty_IDInOriginatingDB']>0) {
                     $rt_cc = "" . $row['rty_OriginatingDBID'] . "-" . $row['rty_IDInOriginatingDB'];
-                } else if (self::$db_regid>0) {
-                    $rt_cc = "" . self::$db_regid . "-" . $row['rty_ID'];
+                } else if (HEURIST_DBID>0) {
+                    $rt_cc = "" . HEURIST_DBID . "-" . $row['rty_ID'];
                 } else {
                     $rt_cc = $row['rty_ID'];
                 }
