@@ -73,7 +73,7 @@ $.widget( "heurist.dh_maps", {
             window.hWin.HAPI4.RecordMgr.search(request,
                 function(response) {
 
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         that._resultset = new hRecordSet(response.data);
                     }else{
                         that._resultset = null;

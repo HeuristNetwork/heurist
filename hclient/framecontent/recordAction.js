@@ -725,7 +725,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('body > div:not(.loading)').show();
             $('body > #ui-datepicker-div').hide();
             $('.loading').hide();
-            var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
+            var  success = (response.status == window.hWin.ResponseStatus.OK);
             if(success){
                 $('#div_parameters').hide();
                 

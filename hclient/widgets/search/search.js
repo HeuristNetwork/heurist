@@ -475,7 +475,7 @@ $.widget( "heurist.search", {
                                 
                                 window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.owner},
                                 function(response){
-                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
                                         btn_select_owner.button({'label'
                                             :'<div style="text-align:left;display:inline-block">'
                                                 +response.data[context.owner]+'<br>'+context.access+'</div>'});
@@ -662,7 +662,7 @@ $.widget( "heurist.search", {
         var that = this;
         window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:add_rec_prefs[1]},
         function(response){
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 
                 var owner = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
                 

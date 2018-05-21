@@ -83,7 +83,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 uploadWidget.click();    
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr({
-                                    status:window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED,
+                                    status:window.hWin.ResponseStatus.REQUEST_DENIED,
                                     message:'Administrator permissions are required'});    
                             }
                         });
@@ -122,7 +122,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 //!!! $('#upload_form_div').show();                
                 pbar_div.hide();       //hide progress bar
                 response = response.result;
-                if(response.status==window.hWin.HAPI4.ResponseStatus.OK){  //after upload
+                if(response.status==window.hWin.ResponseStatus.OK){  //after upload
                     var data = response.data;
                     $.each(data.files, function (index, file) {
                         if(file.error){
@@ -408,7 +408,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         if( !window.hWin.HAPI4.is_admin() ){
             window.hWin.HEURIST4.msg.showMsgErr({
-                status:window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED,
+                status:window.hWin.ResponseStatus.REQUEST_DENIED,
                 message:'Administrator permissions are required'});    
             return;
         }
@@ -423,7 +423,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), true);
         window.hWin.HAPI4.EntityMgr.doRequest({a:'delete', entity:'sysImportFiles', recID:recID},
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             if(is_current==true){
                                 $('#selImportId > option[value="'+recID+'"]').remove();
                                 
@@ -460,7 +460,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                         
                             //clear selectors
                             $('#dependencies_preview').empty();
@@ -590,7 +590,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                
                             window.hWin.HAPI4.parseCSV(request, function( response ){
                                 
-                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
                                     //and render sequence
                                     _renderRectypeSequence();
                                 }else{
@@ -867,7 +867,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
             
             //that.loadanimation(false);
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
 
                 var rectypes = response.data;
                 uniq_fieldnames = [];
@@ -1962,7 +1962,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             window.hWin.HAPI4.parseCSV(request, function( response ){
                 
                 //that.loadanimation(false);
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                 
                     var response = response.data;
                     
@@ -2026,7 +2026,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             window.hWin.HAPI4.parseCSV(request, function( response ){
                 
                 //that.loadanimation(false);
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                 
                     upload_file_name = response.data.filename; //filename only
                     $('#csv_encoding').val('UTF-8');
@@ -2117,7 +2117,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     
                     _showStep(2);                    
                     //that.loadanimation(false);
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
 
 
                         //something went wrong - index fields have wrong values, problem with encoding or column number mismatch
@@ -2615,7 +2615,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             window.hWin.HAPI4.parseCSV(request, 
                     function(response){
                         
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             
                             _showStep(3);
                             
@@ -2793,7 +2793,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         window.hWin.HEURIST4.util.sendRequest(url, request, null, 
                 function(response){
                     
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         
                         _showStep(4);
                         
@@ -2947,7 +2947,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         window.hWin.HEURIST4.util.sendRequest(url, request, null, 
                 function(response){
                     
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         
                         _showStep(5);
                         
@@ -3157,7 +3157,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $dlg.find('.loading').hide();
                             $dlg.find('.ent_wrapper').show();
                             
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                             
                                     var response = response.data;
                                     
@@ -3614,7 +3614,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             var recIDs = response.data;
                             trm_ParentTermID = Number(recIDs[0]);
                             _importNewTerms($dlg, dt_id, newvalues, trm_ParentTermID, 'Auto-added terms', callback);
@@ -3728,12 +3728,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             //that.loadanimation(true);
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
 
                         var recIDs = response.data;
                         
                         window.hWin.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 
                                 window.hWin.HEURIST4.terms = response.data.terms;
                                 window.hWin.terms = response.data.terms;
@@ -3779,7 +3779,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             window.hWin.HAPI4.parseCSV(request, function(response){
                 
                 //that.loadanimation(false);
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     
                     var i, response = response.data, res = '<table>';
                     

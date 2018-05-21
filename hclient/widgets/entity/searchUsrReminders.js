@@ -84,7 +84,7 @@ $.widget( "heurist.searchUsrReminders", $.heurist.searchEntity, {
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
                                 {recordset:new hRecordSet(response.data), request:request} );
                         }else{

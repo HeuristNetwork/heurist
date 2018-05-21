@@ -211,7 +211,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
             window.hWin.HAPI4.RecordMgr.search(request, function( response ){
                 //that.loadanimation(false);
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     that._trigger( "onresult", null, 
                         {recordset:new hRecordSet(response.data), request:request} );
                 }else{

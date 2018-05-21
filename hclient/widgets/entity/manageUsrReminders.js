@@ -71,7 +71,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
                     
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 var recset = new hRecordSet(response.data);
                                 if(recset.length()>0){
                                     that.updateRecordList(null, {recordset:recset});
@@ -173,7 +173,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         window.hWin.HEURIST4.msg.showMsgFlash(that.options.entity.entityTitle+' '+window.hWin.HR('has been sent'));
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);

@@ -172,7 +172,7 @@ $.widget( "heurist.profile_edit", {
                 var that = this;
                 window.hWin.HAPI4.SystemMgr.user_get( { UGrpID: this.options.ugr_ID},
                     function(response){
-                        var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
+                        var  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
                             that.options.edit_data = response.data;
                             if(that.options.edit_data && that.options.edit_data['ugr_ID']==that.options.ugr_ID){
@@ -356,7 +356,7 @@ $.widget( "heurist.profile_edit", {
 
                 window.hWin.HAPI4.SystemMgr.user_save( that.options.edit_data,
                     function(response){
-                        var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
+                        var  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
                             if(that.options.isdialog){
                                 that.edit_form.dialog("close");

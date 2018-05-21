@@ -519,11 +519,13 @@ window.hWin.HEURIST4.util = {
 
     //
     // we have to reduce the usage to minimum. Need to implement method in hapi via central controller
-    // this method is used for call H3 scripts in H4 code
+    // this method is used 
+    // 1) for call H3 scripts in H4 code
+    // 2) in case hapi is not inited 
     //
     sendRequest: function(url, request, caller, callback){
-
-        if(!request.db){
+        
+        if(!request.db && window.hWin && window.hWin.HAPI4){
             request.db = window.hWin.HAPI4.database;
         }
 
@@ -536,11 +538,15 @@ window.hWin.HEURIST4.util = {
             cache: false,
             error: function(jqXHR, textStatus, errorThrown ) {
                 if(callback){
+                    
+                    var UNKNOWN_ERROR = (window.hWin)
+                            ?window.hWin.ResponseStatus.UNKNOWN_ERROR:'unknown';
+                    
                     if(caller){
-                        callback(caller, {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR,
+                        callback(caller, {status:UNKNOWN_ERROR,
                                 message: jqXHR.responseText });
                     }else{
-                        callback({status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR,
+                        callback({status:UNKNOWN_ERROR,
                                 message: jqXHR.responseText });
                     }
                 }

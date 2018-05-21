@@ -53,7 +53,7 @@ function hSearchMinimalDigitalHarlem() {
 
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response) {
-                if(response.status != window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status != window.hWin.ResponseStatus.OK){
                     callback( null );
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     return;
@@ -176,7 +176,7 @@ function hSearchMinimalDigitalHarlem() {
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response) {
 
-                if(response.status != window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status != window.hWin.ResponseStatus.OK){
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     return;
                 }

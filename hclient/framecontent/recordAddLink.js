@@ -40,7 +40,7 @@ function onPageInit(success) //callback function of hAPI initialization
         // find both records details
         var request = {q:'ids:'+source_ID+','+target_ID,w:'a',f:'detail'};
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 var resdata = new hRecordSet(response.data);
         
                 //add SELECT and fill it with values
@@ -724,7 +724,7 @@ function hRecordAddLink() {
         var request = {q:'ids:'+rec_id, w:'e',f:'detail'};  //w=e everything including temporary
         
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 var resdata = new hRecordSet(response.data);
         
                 //add SELECT and fill it with values
@@ -926,7 +926,7 @@ function hRecordAddLink() {
             var hWin = window.hWin;
             
             function __callBack(response){
-                    if(response.status == hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == hWin.ResponseStatus.OK){
                         if(requests[idx].a=='s'){
                             res.relation_recID = response.data; //add rec id
                         }

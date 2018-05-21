@@ -204,7 +204,7 @@ $system->defineConstants();
             
             window.hWin.HAPI4.RecordMgr.search({q: q, rules:rules, w: "a", detail:(rules?'detail':'timemap'), l:3000},
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         //console.log("onMapInit response");
                         //console.log(response);
 

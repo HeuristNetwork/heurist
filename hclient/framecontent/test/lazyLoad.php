@@ -99,7 +99,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     fieldtypes:allowed_fieldtypes},  //ART20150810 this.options.params.fieldtypes.join() },
 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                 
                             if(response.data.rectypes) {
                                 response.data.rectypes[0].expanded = true;

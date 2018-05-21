@@ -303,7 +303,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                             window.hWin.HEURIST4.msg.sendCoverallToBack();
                                             
                                             btn.css('display','inline-block');  //restore button visibility
-                                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                            if(response.status == window.hWin.ResponseStatus.OK){
                                                 window.hWin.HEURIST4.msg.showMsgFlash(
                                                     window.hWin.HR('Record has been duplicated'));
                                                 var new_recID = ''+response.data.added;
@@ -666,7 +666,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 //resolve user id to name
                 window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_AddedByUGrpID')},
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             panel.find('#recAddedBy').text(response.data[that._getField('rec_AddedByUGrpID')]);
                         }
                 });
@@ -779,7 +779,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         
                         window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.owner},
                             function(response){
-                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
                                     panel.find('#recOwner').html(response.data[context.owner]);
                                 }
                             });
@@ -802,7 +802,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //
             window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_OwnerUGrpID')},
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         panel.find('#recOwner').text(response.data[that._getField('rec_OwnerUGrpID')]);
                     }
             });
@@ -892,7 +892,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 /*            
                 window.hWin.HAPI4.RecordMgr.search_related({ids:this._currentEditID}, //direction: -1}, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                                     
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -945,7 +945,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             panel.empty();
                             var recs = (response.data && response.data.records)?response.data.records:[];
                             
@@ -984,7 +984,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //resolve user id to name
             window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_AddedByUGrpID')},
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         panel.find('#recAddedBy').text(response.data[that._getField('rec_AddedByUGrpID')]);
                     }
             });
@@ -1022,7 +1022,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var that = this;                                                
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             var recordset = new hRecordSet(response.data);
                             that._renderSummaryReminders(recordset, panel);
                         }
@@ -1116,7 +1116,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var that = this;                                                
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             var recordset = new hRecordSet(response.data);
                             that._renderSummaryBookmarks(recordset, panel);
                         }
@@ -1224,7 +1224,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                         
                                         window.hWin.HAPI4.EntityMgr.doRequest(request, 
                                             function(response){
-                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                if(response.status == window.hWin.ResponseStatus.OK){
                                                 }
                                             });
                                         //update panel
@@ -1520,7 +1520,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var that = this;
         
-        if(response==null || response.status == window.hWin.HAPI4.ResponseStatus.OK){
+        if(response==null || response.status == window.hWin.ResponseStatus.OK){
             
             //response==null means reload/refresh edit form
             
@@ -1916,7 +1916,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request2, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             
                             that._saveEditAndClose( fields, afterAction );
                         }
@@ -1951,7 +1951,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             
                             that._editing.setModified(false); //reset modified flag after save
                             

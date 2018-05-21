@@ -295,7 +295,7 @@ $.widget( "heurist.svs_list", {
 
             window.hWin.HAPI4.SystemMgr.ssearch_get( null,
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
                         that._refresh();
                     }
@@ -332,7 +332,7 @@ $.widget( "heurist.svs_list", {
         var request = { data:JSON.stringify(treeData) };
         window.hWin.HAPI4.SystemMgr.ssearch_savetree( request, function(response){
 
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupToSave].modified = response.data;
                 
                 if($.isFunction(callback)) callback.call(this);
@@ -385,7 +385,7 @@ $.widget( "heurist.svs_list", {
 
             window.hWin.HAPI4.SystemMgr.ssearch_gettree( {}, function(response){
 
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     try {
                         //1. remove nodes that refers to missed search
                         //it returns null if leaf is not found
@@ -508,7 +508,7 @@ $.widget( "heurist.svs_list", {
                         //get descriptiopn for user    
                         window.hWin.HAPI4.SystemMgr.user_get( { UGrpID: groupID},
                             function(response){
-                                var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
+                                var  success = (response.status == window.hWin.ResponseStatus.OK);
                                 if(success){
                                     that.element.find('div[grpid='+response.data['ugr_ID']+']').attr('title',
                                         that.options.edit_data = response.data['ugr_Description']);
@@ -601,7 +601,7 @@ $.widget( "heurist.svs_list", {
             window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs: this.options.allowed_svsIDs,
                 UGrpID: this.options.allowed_UGrpID},
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         that.allowed_svsIDs = response.data;
                         that._updateAccordeonAsListOfButtons();
                     }
@@ -780,7 +780,7 @@ $.widget( "heurist.svs_list", {
 
         window.hWin.HAPI4.SystemMgr.ssearch_gettree( {UGrpID:groupID}, function(response){
 
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 var newdata = {};
                 try {
                     var newdata = $.parseJSON(response.data);
@@ -1010,7 +1010,7 @@ $.widget( "heurist.svs_list", {
                             
                             window.hWin.HAPI4.SystemMgr.ssearch_save(request,
                                 function(response){
-                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
 
                                         window.hWin.HAPI4.currentUser.usr_SavedSearch[mod_node.key][_GRPID] = newGroupID;
                                         data.otherNode.tree._id = node.tree._id;
@@ -1391,7 +1391,7 @@ $.widget( "heurist.svs_list", {
 
         window.hWin.HAPI4.SystemMgr.ssearch_save(request,
             function(response){
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
 
                     var svsID = response.data;
 
@@ -1680,7 +1680,7 @@ $.widget( "heurist.svs_list", {
 
             window.hWin.HAPI4.SystemMgr.ssearch_delete({ids:svsID, UGrpID: svs[2]},
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
 
                         //remove from UI
                         callback.apply(this);

@@ -178,7 +178,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     var recset = new hRecordSet(response.data);
                     if(recset.length()>0){                                                                      
                         that._filterTreeView(recset);
@@ -425,7 +425,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //that.loadanimation(true);
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             if(callback && $.isFunction(callback)){
                                 callback();                                
                             }

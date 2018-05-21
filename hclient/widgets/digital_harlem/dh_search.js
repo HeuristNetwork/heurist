@@ -118,7 +118,7 @@ $.widget( "heurist.dh_search", {
             //perform search
             
             window.hWin.HAPI4.RecordMgr.search(request, function(response){
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     var resdata = new hRecordSet(response.data);
                     //add SELECT and fill it with values
                     var smenu = '', idx;
@@ -305,7 +305,7 @@ $.widget( "heurist.dh_search", {
 
             window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.UGrpID},
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         that.usr_SavedSearch = response.data;
                         that._refresh();
                     }

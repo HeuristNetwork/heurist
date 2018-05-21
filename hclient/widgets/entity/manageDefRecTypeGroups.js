@@ -218,7 +218,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 //that.loadanimation(true);
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             //that._afterSaveEventHandler( recID, fields );
                             that.btnApplyOrder.hide();
                         }else{

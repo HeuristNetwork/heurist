@@ -199,7 +199,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                     window.hWin.HAPI4.RecordMgr.minmax({ rt:recordtype , dt:detailid },
                         function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
 
                                 var val0 = parseFloat(response.data.min);
                                 var valmax = parseFloat(response.data.max);

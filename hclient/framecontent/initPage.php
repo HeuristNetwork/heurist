@@ -111,40 +111,9 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
     var _time_debug = new Date().getTime() / 1000;
     var _time_start = _time_debug;
     //console.log('ipage start');
-
-    //find heurist object in parent windows or init new one if current window is a top most
-    function _detectHeurist( win ){
-        if(win.HEURIST4){ //defined
-            return win;
-        }
-
-        try{
-            win.parent.document;
-        }catch(e){
-            // not accessible - this is cross domain
-            return win;
-        }
-        if (win.top == win.self) {
-            //we are in frame and this is top most window and Heurist is not defined
-            //lets current window will be heurist window
-            return window;
-        }else{
-            return _detectHeurist( win.parent );
-        }
-    }
-    //detect wether this window is top most or inside frame
-    window.hWin = _detectHeurist(window);
-
-    /*if (window.top != window.self) {
-    //this is frame
-    } else {
-    //top most window
-    window.h4win = window.top;
-    }*/
-
-
 </script>
 
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <?php
 if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     ?>
@@ -276,7 +245,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                 }
 
                 window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         window.hWin.HEURIST4.rectypes = response.data.rectypes;
                         window.hWin.HEURIST4.terms = response.data.terms;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;

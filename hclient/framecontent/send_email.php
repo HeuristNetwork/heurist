@@ -26,7 +26,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/utils_mail.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/utils_mail.php');
 
 // POST request
 if(isset($_POST['data'])) {
@@ -78,30 +78,8 @@ if(isset($_POST['data'])) {
     }
 
   </style>
-  <script>
-    //find heurist object in parent windows or init new one if current window is a top most
-    function _detectHeurist( win ){
-        if(win.HEURIST4){ //defined
-            return win;
-        }
-
-        try{
-            win.parent.document;
-        }catch(e){
-            // not accessible - this is cross domain
-            return win;
-        }
-        if (win.top == win.self) {
-            //we are in frame and this is top most window and Heurist is not defined
-            //lets current window will be heurist window
-            return window;
-        }else{
-            return _detectHeurist( win.parent );
-        }
-    }
-    //detect wether this window is top most or inside frame
-    window.hWin = _detectHeurist(window);
-  </script>
+  
+  <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>  
 </head>
 
 <body class="ui-heurist-bg-light" onload="setup()">

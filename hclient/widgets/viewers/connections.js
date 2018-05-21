@@ -218,7 +218,7 @@ $.widget( "heurist.connections", {
             var callback = function(response)
             {
                 var resdata = null;
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     // Store relationships
 //console.log("Successfully retrieved relationship data!", response.data);
                     that.option("relations", response.data);

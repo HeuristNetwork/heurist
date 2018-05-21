@@ -144,7 +144,7 @@ if (! window.hWin.HEURIST4.ajax) window.hWin.HEURIST4.ajax = {
             
                 var obj;
                 if(xhr.responseText==""){
-                    obj = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, 
+                    obj = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
                             message: "No response from server at "+url+", please try again later" };
                 }else{
                     
@@ -152,14 +152,14 @@ if (! window.hWin.HEURIST4.ajax) window.hWin.HEURIST4.ajax = {
                         obj = $.parseJSON(xhr.responseText);
                     }
                     catch (err) {
-                        obj = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, 
+                        obj = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
                                 message: "Server at "+url+" responded with incorrectly structured data. Excerpt of data: "+xhr.responseText.substring(0,250)};
                     }
                     
                     /*
                     var obj = window.hWin.HEURIST4.ajax.evalJson(xhr.responseText);
                     if(!obj) {
-                        obj = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, 
+                        obj = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
                                 message: "Server at "+url+" responded with incorrectly structured data. Excerpt of data: "+xhr.responseText.substring(0,250)};
                     }*/
                 }

@@ -982,7 +982,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         that._afterDeleteEvenHandler(tagID); //remove old tag
                         
                         var usage = response.data;

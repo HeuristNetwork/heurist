@@ -1030,7 +1030,7 @@ $.widget( "heurist.manageEntity", {
                         
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
 
                             var recID = response.data[0];
                             fields[ that.options.entity.keyField ] = (''+recID);
@@ -1108,7 +1108,7 @@ $.widget( "heurist.manageEntity", {
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
 
                             var recID = that._currentEditID;
                             if(that.options.use_cache){
@@ -1317,7 +1317,7 @@ $.widget( "heurist.manageEntity", {
                     
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 var recordset = new hRecordSet(response.data);
                                 that._initEditForm_step4(recordset);
                             }else{

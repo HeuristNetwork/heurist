@@ -188,7 +188,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                                         
                                         window.hWin.HAPI4.EntityMgr.doRequest(request, 
                                             function(response){
-                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                if(response.status == window.hWin.ResponseStatus.OK){
                                                 }
                                             });
                                         //update panel

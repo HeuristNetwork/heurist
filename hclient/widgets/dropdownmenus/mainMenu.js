@@ -905,7 +905,7 @@ $.widget( "heurist.mainMenu", {
                 //save preferences in session
                 window.hWin.HAPI4.SystemMgr.save_prefs(request,
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
 
                             var prefs = window.hWin.HAPI4.currentUser['ugr_Preferences'];
                             var ask_reload = (prefs['layout_language'] != request['layout_language'] ||
@@ -1033,7 +1033,7 @@ $.widget( "heurist.mainMenu", {
 
                                             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                                                 function(response){             
-                                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                    if(response.status == window.hWin.ResponseStatus.OK){
                                                         window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
                                                     }else{
                                                         window.hWin.HEURIST4.msg.showMsgErr(response);      
@@ -1068,7 +1068,7 @@ $.widget( "heurist.mainMenu", {
 
         window.hWin.HAPI4.SystemMgr.logout(
             function(response){
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     window.hWin.HAPI4.setCurrentUser(null);
                     $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
                     that._refresh();

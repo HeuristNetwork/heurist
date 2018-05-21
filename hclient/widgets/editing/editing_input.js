@@ -579,7 +579,7 @@ $.widget( "heurist.editing_input", {
                     //select term by image
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 var recset = new hRecordSet(response.data);
                                 if(recset.length()>0){                                  
                                 
@@ -1746,7 +1746,7 @@ $.widget( "heurist.editing_input", {
             $progress_dlg.dialog( "close" );
         
             response = response.result;
-            if(response.status==window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status==window.hWin.ResponseStatus.OK){
                 var data = response.data;
 
                 $.each(data.files, function (index, file) {
@@ -1951,7 +1951,7 @@ $.widget( "heurist.editing_input", {
                               var child_rec_to_delete = that.newvalues[input_id];
                               window.hWin.HAPI4.RecordMgr.remove({ids: child_rec_to_delete}, 
                                 function(response){
-                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
                                         
                                         var delcnt = response.data.deleted.length, msg = '';
                                         if(delcnt>1){
@@ -2047,7 +2047,7 @@ $.widget( "heurist.editing_input", {
                     if(!sTitle){
                         window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "e", f:"header"},  //search for temp also
                             function(response){
-                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
                                     ele.empty();
 
                                     var recordset = new hRecordSet(response.data);

@@ -777,7 +777,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     fieldtypes:['enum','freetext',"year","date","integer","float","resource","relmarker"]},  //ART20150810 this.options.params.fieldtypes.join() },
 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
 
                             //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
                             /*
@@ -1493,7 +1493,7 @@ $.widget( "heurist.search_faceted_wiz", {
         //
         window.hWin.HAPI4.SystemMgr.ssearch_save(request,
             function(response){
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
 
                     var svsID = response.data;
 

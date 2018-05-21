@@ -782,7 +782,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     },
     collectionOnUpdate: function(that, results) {
         if(!Hul.isnull(results)){
-            if(results.status == window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR){
+            if(results.status == window.hWin.ResponseStatus.UNKNOWN_ERROR){
                 window.hWin.HEURIST4.msg.showMsgErr(results.message);
             }else{
                 that._collection = Hul.isempty(results.ids)?[]:results.ids;

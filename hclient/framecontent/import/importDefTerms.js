@@ -139,7 +139,7 @@ function hImportDefTerms(_trm_ParentTermID) {
     // add: function (e, data) {  data.submit(); },
     done: function (e, response) {
             response = response.result;
-            if(response.status==window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status==window.hWin.ResponseStatus.OK){
                 var data = response.data;
                 $.each(data.files, function (index, file) {
                     if(file.error){
@@ -315,7 +315,7 @@ function hImportDefTerms(_trm_ParentTermID) {
                         window.hWin.HAPI4.parseCSV(request, function( response ){
 
                             //that.loadanimation(false);
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
 
                                 _parseddata = response.data;
                                 
@@ -469,12 +469,12 @@ function hImportDefTerms(_trm_ParentTermID) {
                 //that.loadanimation(true);
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
 
                             var recIDs = response.data;
                             
                             window.hWin.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
-                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
                                 /*    
                             window.hWin.HEURIST4.msg.showMsgDlg(recIDs.length
                                 + ' term'

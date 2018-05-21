@@ -147,7 +147,7 @@ $.widget( "heurist.recordDetails", {
                     /* todo replace to entity
                     window.hWin.HAPI4.RecordMgr.tag_get({recIDs:this.recIDloaded, UGrpID:'all'},
                         function(response) {
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
 
                                 if(that.options.recID == response.data['recIDs']){ //not outdated
 

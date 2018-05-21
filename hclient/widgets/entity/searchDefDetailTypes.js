@@ -43,7 +43,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         window.hWin.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
                         'entity':'defDetailTypeGroups','dtg_ID':that.options.filter_groups},
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             var groups = new hRecordSet(response.data).makeKeyValueArray('dtg_Name');
                             
                             if(window.hWin.HEURIST4.util.isempty(that.options.filter_groups)){
@@ -108,7 +108,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
                                 {recordset:new hRecordSet(response.data), request:request} );
                         }else{

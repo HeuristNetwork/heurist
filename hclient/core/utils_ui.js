@@ -1579,7 +1579,7 @@ window.hWin.HEURIST4.ui = {
                             window.hWin.HAPI4.RecordMgr.search(query_request, 
                             function( response ){
                                 //that.loadanimation(false);
-                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
                                     
                                     var recset = new hRecordSet(response.data);
                                     if(recset.length()>0){
@@ -1943,7 +1943,7 @@ window.hWin.HEURIST4.ui = {
         
         window.hWin.HAPI4.EntityMgr.doRequest(request,
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             
                             var groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
                             

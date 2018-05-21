@@ -216,7 +216,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         //request server to detect content type
                         that._previousURL = res[0];
                         window.hWin.HAPI4.SystemMgr.get_url_content_type(res[0], function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 var ext = response.data;
                                 var ele2 = that._editing.getFieldByName('ulf_MimeExt');
                                 ele2.editing_input('setValue', ext );

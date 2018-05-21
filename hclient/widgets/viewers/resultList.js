@@ -1862,7 +1862,7 @@ $.widget( "heurist.resultList", {
     _onGetFullRecordData: function( response, rec_toload ){
 
         this.loadanimation(false);
-        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+        if(response.status == window.hWin.ResponseStatus.OK){
 
             if(response.data.pageno==this.current_page) { //response.data.queryid==this.current_page || 
 

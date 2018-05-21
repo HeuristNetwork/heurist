@@ -80,7 +80,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
                 loading_mapdoc_list = false;
                     
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     var resdata = new hRecordSet(response.data);
 
                     var mapdocs = '';
@@ -1069,7 +1069,7 @@ map.data.addListener('mouseover', function(event) {
             //console.log("QUERY RESPONSE:");
             //console.log(response);
 
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
 
             source.recordset = hRecordSet(response.data);
             source.recordset.setMapEnabled( true );
@@ -1137,7 +1137,7 @@ map.data.addListener('mouseover', function(event) {
                     /*
                     window.hWin.HAPI4.RecordMgr.search(request,
                     function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
 
                     source.recordset = hRecordSet(response.data);
                     source.recordset.setMapEnabled( true );
