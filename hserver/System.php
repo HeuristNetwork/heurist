@@ -518,14 +518,10 @@ error_log(print_r($_REQUEST, true));
     public function set_dbname_full($db, $dbrequired=true){
         
         if($db){
-            if(strpos($db, HEURIST_DB_PREFIX)===0){
-                $this->dbname_full = $db;
-                $this->dbname = substr($db,strlen(HEURIST_DB_PREFIX));
-            }else{
-                $this->dbname = $db;
-                $db = HEURIST_DB_PREFIX.$db;
-                $this->dbname_full = $db;
-            }
+            
+            //list($this->dbname_full, $this->dbname) = DbUtils::databaseGetNames($db
+            list($this->dbname_full, $this->dbname ) = mysql__get_names( $db );
+            
         }else{
             $this->dbname = null;
             $this->dbname_full = null;
@@ -554,7 +550,7 @@ error_log(print_r($_REQUEST, true));
     */
     public function addError($status, $message='', $sysmsg=null) {
 
-        if($status==HEURIST_REQUEST_DENIED){
+        if($status==HEURIST_REQUEST_DENIED && $sysmsg==null){
             $sysmsg = $this->get_user_id();
         }else if($status==HEURIST_DB_ERROR){
             error_log('DATABASE ERROR :'.HEURIST_DBNAME.'  '.$message.($sysmsg?'. System message:'.$sysmsg:''));

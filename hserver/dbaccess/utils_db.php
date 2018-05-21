@@ -86,10 +86,12 @@
     function mysql__usedatabase($mysqli, $dbname){
         
         if($dbname){
+            
+            list($database_name_full, $database_name) = mysql__get_names( $dbname );
 
-            $success = $mysqli->select_db($dbname);
+            $success = $mysqli->select_db($database_name_full);
             if(!$success){
-                return array(HEURIST_INVALID_REQUEST, "Could not open database ".$dbname);
+                return array(HEURIST_INVALID_REQUEST, "Could not open database ".$database_name);
             }
 
             $mysqli->query('set character set "utf8"');
@@ -97,6 +99,26 @@
 
         }
         return true;
+    }
+
+    //
+    // get database name with and without hdb prefix
+    //
+    function mysql__get_names( $db=null ){
+    
+        if($db==null){
+            $database_name = HEURIST_DBNAME;
+            $database_name_full = HEURIST_DBNAME_FULL;
+        }else{
+            if(strpos($db, HEURIST_DB_PREFIX)===0){
+                $database_name_full = $db;
+                $database_name = substr($db,strlen(HEURIST_DB_PREFIX));
+            }else{
+                $database_name = $db;
+                $database_name_full = HEURIST_DB_PREFIX.$db;
+            }
+        }
+        return array($database_name_full, $database_name);
     }
     
     

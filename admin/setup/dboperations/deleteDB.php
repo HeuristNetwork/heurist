@@ -1,4 +1,5 @@
 <?php                                                
+//@TODO json responce 
 
 /**
 * deleteDB.php: delete multiple databases. Called by dbStatistics.php (for system admin only)
@@ -27,12 +28,10 @@
 require_once(dirname(__FILE__).'/../../../hserver/System.php');
 require_once(dirname(__FILE__).'/../../../hserver/utilities/DbUtils.php');
 
-/** Access check */
-if(!$system->is_system_admin()) {
-    header('HTTP/1.0 401 Unauthorized');
-    echo "You must be logged in as a system administrator to delete databases";
-    exit();
-}
+$res = false;
+
+$system = new System();
+
 
 /** Password check */
 if(isset($_POST['password'])) {
@@ -42,37 +41,46 @@ if(isset($_POST['password'])) {
     if(strlen($passwordForDatabaseDeletion) > 6) {
         $comparison = strcmp($pw, $passwordForDatabaseDeletion);  // Check password
         if($comparison == 0) { // Correct password
-
-            $system = new System();
-            $isSystemInited  = false;
+        
             if(@$_REQUEST['database']){
-                //if database is defined then connect to given database
-                $isSystemInited = $system->init(@$_REQUEST['database']);
-            }
+                
+                //if database to be deleted is not current - only system admin can do it
+                $isSystemInited = $system->init(@$_REQUEST['db']); //need to verify credentials for current database
 
-            /** Db check */
-            if(!$isSystemInited){
-                header('HTTP/1.0 401 Unauthorized');
-                echo "Can not init database connection";
-                exit();
+                /** Db check */
+                if(!$isSystemInited){
+                    $system->addError(HEURIST_DB_ERROR, 'Can not init database connection to '.@$_REQUEST['db']);
+                }else{
+                    if($system->is_system_admin() || 
+                            ($_REQUEST['database']==$_REQUEST['db'] && $system->is_dbowner()) )
+                    {
+                        $res = DbUtils::databaseDrop(false, $_REQUEST['database']);    
+                    }else{
+                        $system->addError(HEURIST_REQUEST_DENIED, 
+                            'You must be logged in as a system administrator or database owner to delete database',1);
+                    }
+                }
+            }else{
+                $res = true; //password correct
             }
-
-            DbUtils::databaseDrop(false);
-            
-            
-            db_delete($db); // dbUtils.php
         }else{
             // Invalid password
-            header('HTTP/1.0 401 Unauthorized');
-            echo "Invalid password";
+            $system->addError(HEURIST_REQUEST_DENIED, 'Invalid password');
         }    
     }else{
-        header('HTTP/1.0 406 Not Acceptable');
-        echo "Password in configIni.php must be at least 6 characters";  
+        $system->addError(HEURIST_SYSTEM_CONFIG, 'Password in configIni.php must be at least 6 characters');
     }
-
-    exit(); 
+}else{
+    //password not defined
+    $system->addError(HEURIST_INVALID_REQUEST, 'Password not specified');
 }
 
-echo "Invalid request";
+if(is_bool($res) && !$res){
+    $response = $system->getError();
+}else{
+    $response = array("status"=>HEURIST_OK, "data"=> $res);
+}
+    
+header('Content-type: text/javascript');
+print json_encode($response);
 ?>

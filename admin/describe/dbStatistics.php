@@ -1,4 +1,6 @@
 <?php
+//@TODO replace YUI dataTable to jQuery 
+
 /**
 * dbStatistics: shows a sortable list of databases on the server and their usage (record counts, access dates etc.)
 *
@@ -54,6 +56,8 @@ function mysql__select_val($query) {
 }
 
 /**
+* NOT USED HERE
+* 
 * Calculates the directory size
 * @param mixed $dir Directory to check
 * 
@@ -109,15 +113,19 @@ function dirsize($dir)
         <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css">
         <script src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 
-        <!-- Heurist CSS -->
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-
         <!-- jQuery UI -->
         <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
         
+        <!-- Heurist CSS -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
         <link rel="stylesheet" type="text/css" href="<?echo $cssLink;?>">
-        <!-- link rel="stylesheet" type="text/css" href="../../external/jquery/jquery-ui-1.10.2/themes/base/jquery.ui.dialog.css" -->
+
+        <!-- Heurist JS -->
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+
     </head>
 
     <body class="popup yui-skin-sam">
@@ -133,7 +141,7 @@ function dirsize($dir)
          ?>
             <!-- Database verification dialog -->
             <div id="db-verification" title="Verification" style="display: none">
-                <div>
+                <div id="div-pw">
                     <span>Deletion password:</span>
                     <input id="db-password" type="password" placeholder="password">
                     <button id="pw-check" onclick="checkPassword()">Submit</button>
@@ -320,7 +328,7 @@ function dirsize($dir)
                     $("#db-verification").dialog({
                         autoOpen: false,
                         modal: true,
-                        width: "90%"
+                        width: '550px'
                     })
                     .dialog("open");
 
@@ -333,21 +341,27 @@ function dirsize($dir)
                 function checkPassword() {
                     var submit = document.getElementById("pw-check");
                     submit.disabled = true;
-
-                    // Authenticate user
+                    
                     this.password = document.getElementById("db-password").value;
-                    $.post( '<?php echo HEURIST_BASE_URL; ?>admin/verification/deleteDB.php',
-                         {password: password}, function(response) {
-                        // Succesful, post requests to delete databases
-                        submit.parentNode.removeChild(submit);
-                        $("#authorized").slideDown(500);
-                        updateProgress(0);
-                        postDeleteRequest(0);
-                    }).fail(function(jqXHR, textStatus, errorThrown) {
-                        // Invalid
-                        alert(jqXHR.status + ": " + jqXHR.responseText);
-                        submit.disabled = false;
-                    });
+                    
+                    var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
+                    var request = {password: password, db:window.hWin.HEURIST4.util.getUrlParameter('db')};
+                    
+                    // Authenticate user
+                    window.hWin.HEURIST4.util.sendRequest(url, request, null,
+                        function(response){
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                submit.parentNode.removeChild(submit);
+                                $("#div-pw").hide();
+                                $("#authorized").slideDown(500);
+                                updateProgress(0);
+                                postDeleteRequest(0);
+                            }else{
+                                submit.disabled = false;
+                                window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                            }
+                        }
+                    );
                 }
 
                 /**
@@ -356,14 +370,40 @@ function dirsize($dir)
                 function postDeleteRequest(i) {
                     if(i < databases.length) {
                         // Delete database
-                        $.post("<?php echo HEURIST_BASE_URL; ?>admin/verification/deleteDB.php", {password: password, database: databases[i]}, function(response) {
-                            //alert(response);
-                            $("#authorized").append("<div>"+response+"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
+                        if(window.hWin.HEURIST4.util.getUrlParameter('db')==databases[i]){
+
+                            $("#authorized").append("<div>Current db "+databases[i] 
+                            +" is skipped</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
                             postDeleteRequest(i+1);
                             updateProgress(i+1);
-                        }).fail(function(jqXHR, textStatus, errorThrown) {
-                            alert(textStatus);
-                        });
+                            
+                        }else{
+                        
+                            var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
+                            var request = {password: password, 
+                                DBGSESSID:'425944380594800002;d=1,p=0,c=07',
+                                           db: window.hWin.HEURIST4.util.getUrlParameter('db'),
+                                           database: databases[i]};
+                        
+                            window.hWin.HEURIST4.util.sendRequest(url, request, null,
+                                function(response){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                        $("#authorized").append("<div>"+databases[i]
+                                        +"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
+                                        postDeleteRequest(i+1);
+                                        updateProgress(i+1);
+                                    }else{
+                                        
+                                        var msg = window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                                        
+                                        $("#authorized").append('<div class="ui-state-error" style="padding:4px;">'
+                                                    +databases[i]+' '+msg +"</div>");
+                                        
+                                    }
+                                }
+                            );
+                        }
+                        
                     }else{
                         // All post-requests have finished.
                         $("#authorized").append("<div style='margin-top: 10px'>The selected databases have been deleted!</div>");
@@ -380,6 +420,10 @@ function dirsize($dir)
                 }
                 
                 $(document).ready(function() {
+                    
+                    if(!window.hWin.HR){
+                        window.hWin.HR = function(token){return token};
+                    }
                    $('button').button();
                 });                
             </script>

@@ -85,7 +85,7 @@
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
                     if (filetype($dir."/".$object) == "dir") {
-                        deleteFolder($dir."/".$object); //delte files
+                        folderDelete($dir."/".$object); //delte files
                     } else {
                         unlink($dir."/".$object);
                     }
