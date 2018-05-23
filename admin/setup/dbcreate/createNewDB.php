@@ -387,7 +387,7 @@ if($registrationRequired) //show registration dialog at once
 
             <div id="createDBForm" style="padding-top:5px;">
 
-                <h2 style="padding:0 0 0 10px;">Creating new database on server</h2>
+                <h3 style="padding:0 0 0 10px;">Creating new database on server</h3>
                 
                         <input type="hidden" id="url_template" name="url_template">
                         <input type="hidden" id="exemplar" name="exemplar">

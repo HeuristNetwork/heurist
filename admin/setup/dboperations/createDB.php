@@ -123,6 +123,8 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!=@$_REQU
         $reg_url = @$_REQUEST['url_template'];  //NOT USED
         $exemplar_db = @$_REQUEST['exemplar'];
         $dataInsertionSQLFile = null;
+        
+        $warnings = array();
     
         if( $exemplar_db ){ //create database from exemplar
             
