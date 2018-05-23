@@ -202,6 +202,7 @@ if (! is_logged_in()) {
                 print "<p><b>Folders to scan :</b> $mediaFolders<p>";
                 print "<p><b>Extensions to scan:</b> $mediaExts<p>";
 
+//@todo change to entity dialog                
                 print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1'>".
                 "Click here to set media folders (database file directory descendants scanned by default)</a><p>";
 

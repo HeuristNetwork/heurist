@@ -1,4 +1,5 @@
 <?php
+//@TODO to hclient
 
 /**
 * registerDB.php - Registers the current database with Heurist_Master_Index database, 
@@ -29,7 +30,6 @@ define('PDIR','../../../');  //need for proper path to js and css
 
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../../hserver/utilities/DbUtils.php');
-
 
 if(strpos(HEURIST_BASE_URL, '//localhost')>0 ||  strpos(HEURIST_BASE_URL, '//127.0.0.1')>0){
 

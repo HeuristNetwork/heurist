@@ -159,19 +159,22 @@ if($filename){ //download from scratch
         }else{
         
             if($viewmode=='thumb'){
-                $filename = $path.'thumbnail/'.$rec_id.'.png'; 
+                $filename = $path.'thumbnail/'.$rec_id; 
             }else if($viewmode=='icon'){
-                $filename = $path.'icon/'.$rec_id.'.png';    
+                $filename = $path.'icon/'.$rec_id;    
             }else{
-                $exts = array('png','jpg','jpeg','gif');
-                foreach ($exts as $ext){
-                    if(file_exists($path.$rec_id.'.'.$ext)){
-                        $content_type = 'image/'.$ext;
-                        $filename = $path.$rec_id.'.'.$ext;
-                        break;
-                    }
+                $filename = $path.$rec_id;
+            }
+            
+            $exts = array('png','jpg','jpeg','gif');
+            foreach ($exts as $ext){
+                if(file_exists($filename.'.'.$ext)){
+                    $content_type = 'image/'.$ext;
+                    $filename = $filename.'.'.$ext;
+                    break;
                 }
             }
+            
         }   
                    
         if(file_exists($filename)){

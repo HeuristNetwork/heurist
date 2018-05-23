@@ -104,6 +104,7 @@ class System {
                         define('HEURIST_DBNAME', $this->dbname);
                         define('HEURIST_DBNAME_FULL', $this->dbname_full);
                     }
+                    
 
                     //@todo  - test upload and thumb folder exist and writeable
                     if(!$this->initPathConstants()){
@@ -338,45 +339,26 @@ error_log(print_r($_REQUEST, true));
     //------------------------- END RT DT CONSTANTS --------------------
 
     //
-    // $dbname - shortname (without prefix)
     //
-    public function initPathConstants($dbname=null){
-
-        global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
-        if(!$dbname) $dbname = HEURIST_DBNAME;
-
-        //path is defined in configIni
+    //
+    public function getFileStoreRootFolder(){
+        
+        global $defaultRootFileUploadPath;
+        
         if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
-
-
+            
             if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
                 $defaultRootFileUploadPath.= "/"; // append trailing /
             }
+            
             if ( !strpos($defaultRootFileUploadPath,":/") && $defaultRootFileUploadPath != "/" && !preg_match("/^\/[^\/]/", $defaultRootFileUploadPath)) {
                 //check for leading /
                 $defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
             }
-
-            if(!defined('HEURIST_FILESTORE_ROOT')){
-                define('HEURIST_FILESTORE_ROOT', $defaultRootFileUploadPath );
-            }
             
-            if(!defined('HEURIST_FILESTORE_DIR')){
-                define('HEURIST_FILESTORE_DIR', $defaultRootFileUploadPath . $dbname . '/');
-            }
+            return $defaultRootFileUploadPath;
             
-
-            if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
-                return false;
-            }
-
-            define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
-
-
-
-        }
-        else{
-            //path has default name
+        }else{
             
             $install_path = 'HEURIST/'; //$this->getInstallPath();
             $dir_Filestore = "HEURIST_FILESTORE/";
@@ -385,12 +367,52 @@ error_log(print_r($_REQUEST, true));
             if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
             
             
+            return  $documentRoot . $install_path . $dir_Filestore;
+            
+        }
+    }
+    
+    //
+    // $dbname - shortname (without prefix)
+    //
+    public function initPathConstants($dbname=null){
+
+        global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
+
+        if(!$dbname) $dbname = HEURIST_DBNAME;
+        
+        $upload_root = $this->getFileStoreRootFolder();
+
+        //path is defined in configIni
+        if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
+
             if(!defined('HEURIST_FILESTORE_ROOT')){
-                define('HEURIST_FILESTORE_ROOT', $documentRoot . $install_path . $dir_Filestore );
+                define('HEURIST_FILESTORE_ROOT', $upload_root );
             }
             
             if(!defined('HEURIST_FILESTORE_DIR')){
-                define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
+                define('HEURIST_FILESTORE_DIR', $upload_root . $dbname . '/');
+            }
+
+            if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
+                return false;
+            }
+
+            define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
+
+        }
+        else{
+            //path has default name
+            
+            $install_path = 'HEURIST/'; //$this->getInstallPath();
+            $dir_Filestore = "HEURIST_FILESTORE/";
+
+            if(!defined('HEURIST_FILESTORE_ROOT')){
+                define('HEURIST_FILESTORE_ROOT', $upload_root);
+            }
+            
+            if(!defined('HEURIST_FILESTORE_DIR')){
+                define('HEURIST_FILESTORE_DIR', $upload_root . $dbname . '/');
             }
             if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
                 return false;

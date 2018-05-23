@@ -1194,7 +1194,7 @@ if(is_array($imp_session)){
                 $('#upload_form_div').show();                
                 pbar_div.hide();
                 response = response.result;
-                if(response.status==window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status==window.hWin.ResponseStatus.OK){
                     var data = response.data;
                     $.each(data.files, function (index, file) {
                         if(file.error){

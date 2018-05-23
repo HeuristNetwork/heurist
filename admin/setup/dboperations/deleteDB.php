@@ -1,6 +1,4 @@
 <?php                                                
-//@TODO json responce 
-
 /**
 * deleteDB.php: delete multiple databases. Called by dbStatistics.php (for system admin only)
 *               note that deletion of current database is handled separately by deleteCurrentDB.php which calls dbUtils.php
@@ -21,9 +19,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
-//require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-//require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
 
 require_once(dirname(__FILE__).'/../../../hserver/System.php');
 require_once(dirname(__FILE__).'/../../../hserver/utilities/DbUtils.php');

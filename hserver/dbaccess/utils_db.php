@@ -5,6 +5,10 @@
     *  Database utilities :   mysql_ - prefix for function
     *
     *  mysql__connection - establish connection
+    *  mysql__usedatabase
+    *  mysql__create_database
+    *  mysql__drop_database
+    * 
     *  mysql__getdatabases4 - get list of databases
     *  mysql__select_assoc2 - returns array  key_column=>val_column for given table
     *  mysql__select_list - returns array of column values
@@ -99,6 +103,38 @@
 
         }
         return true;
+    }
+    
+    //
+    //
+    //
+    function mysql__create_database( $mysqli, $db_name ){
+
+        $res = false;
+
+        // Avoid illegal chars in db
+        if (preg_match('[\W]', $db_name)){
+            $res = array(HEURIST_INVALID_REQUEST, 
+                'Only letters, numbers and underscores (_) are allowed in the database name');
+        }else{
+            // Create database
+            $sql = "CREATE DATABASE `".$db_name."`";
+            if ($mysqli->query($sql)) {
+                $res = true;
+            } else {
+                $res = array(HEURIST_DB_ERROR, 
+                        'Unable to create database '.$db_name.' SQL error: '.$mysqli->error);
+            }
+        }
+        return $res;
+    }
+    
+    //
+    //
+    //
+    function mysql__drop_database( $mysqli, $db_name ){
+
+        return $mysqli->query('DROP DATABASE '.$db_name);
     }
 
     //

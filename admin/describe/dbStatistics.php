@@ -381,7 +381,6 @@ function dirsize($dir)
                         
                             var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
                             var request = {password: password, 
-                                DBGSESSID:'425944380594800002;d=1,p=0,c=07',
                                            db: window.hWin.HEURIST4.util.getUrlParameter('db'),
                                            database: databases[i]};
                         

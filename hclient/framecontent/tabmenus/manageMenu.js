@@ -121,10 +121,11 @@ function hmanageMenu() {
         $('#menulink-database-browse').click(
             function(event){
                 
+                $('#frame_container_div').css('top',20).empty();
                 window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', {
                     select_mode:'select_single',
-                    //isdialog: false,
-                    //container: ,
+                    isdialog: false,
+                    container: $('#frame_container_div'),
                     onselect:function(event, data){
 
                         if(data && data.selection && data.selection.length==1){
@@ -205,7 +206,11 @@ function hmanageMenu() {
     }
     
     function __load_frame_content(url){
-        var frm = $('#frame_container');
+        var frm = $('#frame_container').css('top',0);
+        if(frm.length==0){
+            $('#frame_container_div').empty();
+            frm = $('<iframe id="frame_container"></iframe>').appendTo($('#frame_container_div'));
+        }
         frm.hide();
         frm.parent().css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         frm.on('load', function(){

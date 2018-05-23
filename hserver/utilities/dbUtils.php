@@ -127,7 +127,7 @@ class DbUtils {
     //
     // set Origin ID for rectype, detail and term defintions
     //
-    public static function databaseDrop( $verbose=false, $database_name=null ){
+    public static function databaseDrop( $verbose=false, $database_name=null, $withoutArchive=false ){
 
         self::initialize();
         
@@ -147,10 +147,10 @@ class DbUtils {
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
             if($verbose) echo '<br>'.$msg;
         }else
-        if(DbUtils::databaseDump( $verbose, $database_name )) {
+        if($withoutArchive || DbUtils::databaseDump( $verbose, $database_name )) {
             // Create DELETED_DATABASES directory if needed
             $folder = HEURIST_FILESTORE_ROOT."DELETED_DATABASES/";
-            if(!folderCreate($folder, true)){
+            if(!$withoutArchive && !folderCreate($folder, true)){
                 $system->addError(HEURIST_SYSTEM_CONFIG, 'Can not create folder for deleteted databases');                
                 return false;
             }
@@ -159,11 +159,11 @@ class DbUtils {
             $source = HEURIST_FILESTORE_ROOT.$database_name.'/'; //HEURIST_FILESTORE_DIR;  database upload folder
             $destination = $folder.$database_name."_".time().".zip";
                     
-            if(zip($source, null, $destination, $verbose)) {
-                // Delete from MySQL database
-                
-                $res = $mysqli->query('DROP DATABASE '.$database_name_full);
-                if (!$res){
+            if($withoutArchive || zip($source, null, $destination, $verbose)) {
+
+                // Delete database from MySQL server
+                if(!mysql__drop_database($mysqli, $database_name_full)){
+                    
                     $msg = 'Error on database drop '.$database_name;
                     self::$system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
                     if($verbose) echo '<br/>'.$msg;
@@ -177,8 +177,8 @@ class DbUtils {
                 if($verbose) echo "<br/>Folder ".$source." has been deleted";
                 
                 // Delete from central index
-                $mysqli->query('DELETE FROM `heurist_index`.`sysIdentifications` WHERE sys_Database="'.$database_name_full.'"');
-                $mysqli->query('DELETE FROM `heurist_index`.`sysUsers` WHERE sus_Database="'.$database_name_full.'"');
+                $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysIdentifications` WHERE sys_Database="'.$database_name_full.'"');
+                $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysUsers` WHERE sus_Database="'.$database_name_full.'"');
                 
                 return true;
             }else{
@@ -322,7 +322,117 @@ class DbUtils {
 
         return true;
     }
+  
+    //    
+    //create new empty heurist database
+    //
+    public static function databaseCreate($database_name){
+
+        self::initialize();
+        
+        list($database_name_full, $database_name) = mysql__get_names( $database_name );
+        
+        $mysqli = self::$mysqli;
+        
+        $res = mysql__create_database($mysqli, $database_name_full);
+        
+        if (is_array($res)){
+            self::$system->addError($res[0], $res[1]); //can't create
+        }else
+        if(db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql")){
+
+            // echo_flush ('OK');
+            // echo_flush ("<p>Add Referential Constraints ");
+
+            if(db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
+
+                // echo_flush ('OK');
+                // echo_flush ("<p>Add Procedures and Triggers ");
+
+                if(db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
+
+                    // echo_flush ('OK');
+                    return true;
+                }else{
+                    self::$system->addError(HEURIST_DB_ERROR, 'Can not add procedures and triggers');
+                }
+            }else{
+                self::$system->addError(HEURIST_DB_ERROR, 'Can not add referential constraints');
+            }
+        }else{
+            self::$system->addError(HEURIST_DB_ERROR, 'Can not create database tables');
+        }
+        //fail
+        mysql__drop_database($mysqli, $database_name_full);
+        return false;
+    }
+        
+    //
+    // create if not exists set of folders for given database
+    //
+    public static function databaseCreateFolders($database_name){
+
+        list($database_name_full, $database_name) = mysql__get_names( $database_name );
+        
+        $upload_root = self::$system->getFileStoreRootFolder();
+        
+        // Create a default upload directory for uploaded files eg multimedia, images etc.
+        $database_folder = $upload_root.$database_name.'/';
+
+        if (folderCreate($database_folder, true)){
+            folderAddIndexHTML( $database_folder ); //add index file to block directory browsing
+        }else{
+            return array('Database root folder. Please check/create directory by hand. Consult Heurist helpdesk if needed');
+        }
+
+        $warnings = array();
+        
+        if(folderRecurseCopy( HEURIST_DIR."admin/setup/rectype-icons", $database_folder."rectype-icons" )){
+            
+            folderAddIndexHTML($database_folder."rectype-icons"); // index file to block directory browsing
+        }else{
+            $warnings[] = "Unable to create/copy record type icons folder rectype-icons to $database_folder";
+        }
+
+        if(folderRecurseCopy( HEURIST_DIR."admin/setup/smarty-templates", $database_folder."smarty-templates" )){
+            
+            folderAddIndexHTML($database_folder."smarty-templates"); // index file to block directory browsing
+        }else{
+            $warnings[] = "Unable to create/copy smarty-templates folder to $database_folder";
+        }
+
+        if(folderRecurseCopy( HEURIST_DIR."admin/setup/xsl-templates", $database_folder."xsl-templates" )){
+            
+            folderAddIndexHTML($database_folder."xsl-templates"); // index file to block directory browsing
+        }else{
+            $warnings[] = "Unable to create/copy xsl-templates folder to $database_folder";
+        }
+
+        if(folderRecurseCopy( HEURIST_DIR."documentation_and_templates", $database_folder."documentation_and_templates" )){
+            
+            folderAddIndexHTML($database_folder."documentation_and_templates"); // index file to block directory browsing
+        }else{
+            $warnings[] = "Unable to create/copy documentation folder to $database_folder";
+        }
+
+        // Create all the other standard folders required for the database
+        // index.html files are added by createFolder to block index browsing
+        $warnings[] = folderCreate2($database_folder. '/filethumbs', 'used to store thumbnails for uploaded files', true);
+        $warnings[] = folderCreate2($database_folder. '/file_uploads','used to store uploaded files by default');
+        $warnings[] = folderCreate2($database_folder. '/scratch', 'used to store temporary files');
+        $warnings[] = folderCreate2($database_folder. '/hml-output', 'used to write published records as hml files', true);
+        $warnings[] = folderCreate2($database_folder. '/html-output', 'used to write published records as generic html files', true);
+        $warnings[] = folderCreate2($database_folder. '/generated-reports', 'used to write generated reports');
+        $warnings[] = folderCreate2($database_folder. '/backup', 'used to write files for user data dump');
+        $warnings[] = folderCreate2($database_folder. '/term-images', 'used for images illustrating terms');
+        
+        //remove empty warns
+        $warnings = array_filter($warnings, function($value) { return $value !== ''; });
+
+        return $warnings;
+    }
     
+
     
 }
 

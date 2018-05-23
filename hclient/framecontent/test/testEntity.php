@@ -287,6 +287,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
 */
                 }else{//on this page
 
+                    options.isdialog = false;
                     options.container = '#main_div';
 /*                
                     var widgetname = 'manage'+entity,

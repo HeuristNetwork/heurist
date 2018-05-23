@@ -69,7 +69,7 @@ define ('TESTMODE', false);           // Set to true to process the file without
 
 
 // Database configuration
-function db_script($db_name, $filename, $verbose = true){
+function db_script($db_name, $filename, $verbose = false){
     
 $db_server   = HEURIST_DBSERVER_NAME;
 $db_username = ADMIN_DBUSERNAME;
@@ -156,7 +156,7 @@ if (!$error && !function_exists('version_compare'))
 
 // Check if mysql extension is available
 
-if (!$error && !function_exists('mysql_connect'))
+if (!$error && !function_exists('mysqli_connect_error'))
 { echo ("<p class=\"error\">There is no mySQL extension available in your PHP installation. Sorry!</p>\n");
   $error=true;
 }
@@ -167,25 +167,36 @@ do_action ('script_runs');
 // Connect to the database, set charset and execute pre-queries
 
 if (!$error && !TESTMODE)
-{ $dbconnection = @mysql_connect($db_server,$db_username,$db_password);
-  if ($dbconnection)
-    $db = mysql_select_db($db_name);
-  if (!$dbconnection || !$db)
-  { echo ("<p class=\"error\">Database connection failed due to ".mysql_error()."</p>\n");
+{ 
+   $mysqli = new mysqli($db_server,$db_username,$db_password);
+  if (!$mysqli){
+
+    echo ("<p class=\"error\">Database connection failed due to ".mysqli_connect_error()."</p>\n");
     echo ("<p>Edit the database settings in your configuration file, or contact your system administrator.</p>\n");
     $error=true;
+      
+  }else{
+    $success = $mysqli->select_db($db_name);
+    
+      if (!$success)
+      { 
+        echo ("<p class=\"error\">Database connection failed due to ".$mysqli->error."</p>\n");
+        echo ("<p>Edit the database settings in your configuration file, or contact your system administrator.</p>\n");
+        $error=true;
+      }
   }
+    
   if (!$error && $db_connection_charset!=='')
-    @mysql_query("SET NAMES $db_connection_charset", $dbconnection);
+    $mysqli->query("SET NAMES $db_connection_charset");
 
   if (!$error && isset ($pre_query) && sizeof ($pre_query)>0)
   { reset($pre_query);
     foreach ($pre_query as $pre_query_value)
-    {	if (!@mysql_query($pre_query_value, $dbconnection))
+    {	if (!$mysqli->query($pre_query_value))
     	{ 
             echo ("<p class=\"error\">Error with pre-query.</p>\n");
       	    echo ("<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n");
-      	    echo ("<p>MySQL: ".mysql_error()."</p>\n");
+      	    echo ("<p>MySQL: ".$mysqli->error."</p>\n");
       	    $error=true;
       	    break;
         }
@@ -193,7 +204,7 @@ if (!$error && !TESTMODE)
   }
 }
 else
-{ $dbconnection = false;
+{ $mysqli = false;
 }
 
 do_action('database_connected');
@@ -287,11 +298,11 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
   if (!$error && $_REQUEST["start"]==1 && $csv_insert_table != "" && $csv_preempty_table)
   {
     $query = "DELETE FROM `$csv_insert_table`";
-    if (!TESTMODE && !mysql_query(trim($query), $dbconnection))
+    if (!TESTMODE && !$mysqli->query(trim($query)))
     { 
         echo ("<p class=\"error\">Error when deleting entries from $csv_insert_table.</p>\n");
         echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
-        echo ("<p>MySQL: ".mysql_error()."</p>\n");
+        echo ("<p>MySQL: ".$mysqli->error."</p>\n");
         $error=true;
     }
   }
@@ -452,11 +463,11 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
 // DIAGNOSTIC
 // echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
 
-        if (!TESTMODE && !mysql_query($query, $dbconnection))
+        if (!TESTMODE && !$mysqli->query($query))
         { 
             echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline)."</p>\n");
             echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
-            $errorMsg = mysql_error();
+            $errorMsg = $mysqli->error;
             echo ("<p>MySQL: ".$errorMsg."</p>\n");
             if(strpos($errorMsg,'Duplicate column')===false){
                 $error = true;
@@ -599,7 +610,7 @@ skin_close();
 if ($error && TESTMODE)
   echo ("<p class=\"centr\"><a href=\"".$_SERVER["PHP_SELF"]."\">Start from the beginning</a> (DROP the old tables before restarting)</p>\n");
 
-if ($dbconnection) mysql_close($dbconnection);
+if ($mysqli) $mysqli->close();
 if ($file && !$gzipmode) fclose($file);
 else if ($file && $gzipmode) gzclose($file);
 

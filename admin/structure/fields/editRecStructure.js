@@ -2712,7 +2712,7 @@ function onStatusChange(evt){
                     
                     window.hWin.HAPI4.SystemMgr.action_password({action:'ReservedChanges', password:value},
                         function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK && response.data=='ok'){
+                            if(response.status == window.hWin.ResponseStatus.OK && response.data=='ok'){
                                 $(el).attr('data-original', ''); //reset to warining once
                                 el.value = new_value;
                             }else{
@@ -3001,7 +3001,7 @@ function onCreateChildIfRecPtr(event,rst_ID, rty_ID){
                         };
                         
                         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                            if(response.status == hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == hWin.ResponseStatus.OK){
                                 //show report
 
 var link = '<a target="blank" href="'+window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&q=ids:';

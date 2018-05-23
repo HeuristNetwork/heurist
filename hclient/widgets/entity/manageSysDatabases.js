@@ -61,9 +61,11 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
                 );
         
         
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parents('.ui-dialog')); 
+        if(this.options.isdialog){
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parents('.ui-dialog')); 
+        }
         
-console.log('ssss');
+
         var that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
             function(response){

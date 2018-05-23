@@ -25,11 +25,11 @@
 
 require_once(dirname(__FILE__)."/../../hserver/System.php");
 
+$layout_theme = null;
 $error_msg = @$_REQUEST['msg'];
 if(!$error_msg){
     // init main system class
     $system = new System();
-    $layout_theme = null;
     $isSystemInited = $system->init(@$_REQUEST['db'], true, false);
 
     if($isSystemInited){

@@ -47,11 +47,12 @@ require_once(dirname(__FILE__)."/../initPage.php");
             <h3><span class="ui-icon ui-iconalign ui-icon-database"></span>DATABASE</h3>
             <div>
                 <ul>
-                    <li><a href="common/connect/getListOfDatabases.php?v=4" name="auto-popup" class="portrait h3link"
-                        onClick="{return false;}" data-nologin="1" data-logaction="dbOpen"
+                    <li><a href="#" id="menulink-database-browse"
+                        data-nologin="1" data-logaction="dbOpen"
                         title="Open and login to another Heurist database - current database remains open">
                         Open</a>
                     </li>
+                    
 
                     <li><a href="admin/setup/dbcreate/createNewDB.php" name="auto-popup" class="large h3link"
                         onClick="{return false;}" data-logaction="dbNew"
@@ -59,11 +60,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         New</a>
                     </li>
                     
-                    <li class="admin-only">
-                        <a href="admin/setup/dbproperties/editSysIdentificationAll.php" name="auto-popup" class="portrait h3link"
-                            onclick= "{return false;}" data-logaction="dbProperties"
-                            title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
-                            Properties</a>
+                    <li><a href="#" id="menulink-database-properties"
+                        data-nologin="1" data-logaction="dbProperties"
+                        title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
+                        Properties</a>
                     </li>
                     
                     <li class="admin-only">
@@ -74,19 +74,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     </li>
 
 <!--                    
-                    <li>---- H4 ----</li>                    
-                    
-                    <li><a href="#" id="menulink-database-browse"
-                        data-nologin="1" data-logaction="dbOpen"
-                        title="Open and login to another Heurist database - current database remains open">
-                        Open</a>
-                    </li>
-                    
-                    <li><a href="#" id="menulink-database-properties"
-                        data-nologin="1" data-logaction="dbProperties"
-                        title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
-                        Properties</a>
-                    </li>
+
 -->                    
                 </ul>
             </div>
@@ -244,7 +232,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
         </div>
 
     </div>
-    <div style="left:281px;right:0;top:0;bottom:20;position:absolute;overflow:auto;padding:20px 10px 0 0;">
+    <div id="frame_container_div" 
+        style="left:281px;right:0;top:0;bottom:20;position:absolute;overflow:auto;padding:20px 10px 0 0;">
         <iframe id="frame_container">
         </iframe>
     </div>

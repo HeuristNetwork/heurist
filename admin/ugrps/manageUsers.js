@@ -670,7 +670,7 @@ elLiner.innerHTML = '<a href="#kickoff_user"><img src="../../common/images/cross
             error: function( jqXHR, textStatus, errorThrown ) {
                 alert(textStatus);
                 /*if(callback){
-                    callback({status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR,
+                    callback({status:window.hWin.ResponseStatus.UNKNOWN_ERROR,
                         message: jqXHR.responseText });
                 }
                 //message:'Error connecting server '+textStatus});

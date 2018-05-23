@@ -20,7 +20,24 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
+    
+    /*
+    folderExists
+    folderCreate
+    folderDelete
+    
+    folderCreate2
+    folderAddIndexHTML
+    folderRecurseCopy
+    
+    fileCopy
+    fileSave
+    
+    getRelativePath
+    
+    zip
+    unzip
+    */
 
     // 1 - OK
     // -1  not exists
@@ -73,6 +90,54 @@
 
         return true;
     }
+   
+   
+    /**
+    * create folder, check write permissions, add index.html, write htaccess 
+    * 
+    * @param mixed $folder
+    * @param mixed $message
+    * @param mixed $allowWebAccess
+    */
+    function folderCreate2($folder, $message, $allowWebAccess=false){
+        
+        $swarn = '';
+        
+        if (folderCreate($folder, true)){
+        
+            folderAddIndexHTML( $folder );
+            
+            if($allowWebAccess){
+                //copy htaccess
+                $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'/.htaccess');
+                if(!$res){
+                    $swarn = "Cannot copy htaccess file for folder $folder<br>";
+                }
+            }
+            
+        }else{
+            $swarn = 'Unable to create folder '. $folder .'  '.$message.'<br>';
+        }
+        return $swarn;
+    }   
+    
+    /**
+    * add index.html to folder
+    * 
+    * @param mixed $directory
+    */
+    function folderAddIndexHTML($folder) {
+        
+        $filename = $folder."/index.html";
+        if(!file_exists($filename)){
+            $file = fopen($filename,'x');
+            if ($file) { // returns false if file exists - don't overwrite
+                fwrite($file,"Sorry, this folder cannot be browsed");
+                fclose($file);
+            }
+        }
+    }
+    
    
     /**
     * put your comment there...
@@ -194,6 +259,55 @@
             ? './'.$path : $path;
     }
     
+    
+/**
+* copy folder recursively
+*
+* @param mixed $src
+* @param mixed $dst
+* @param array $folders - zero level folders to copy
+*/
+function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_files_in_root=true) {
+    $res = false;
+
+    $src =  $src . ((substr($src,-1)=='/')?'':'/');
+
+    $dir = opendir($src);
+    if($dir!==false){
+
+        if (file_exists($dst) || @mkdir($dst, 0777, true)) {
+
+            $res = true;
+
+            while(false !== ( $file = readdir($dir)) ) {
+                if (( $file != '.' ) && ( $file != '..' )) {
+                    if ( is_dir($src . $file) ) {
+
+                        if($folders==null || count($folders)==0 || in_array($src.$file.'/',$folders))
+                        {
+                            if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
+                            {
+                                $res = folderRecurseCopy($src.$file, $dst . '/' . $file, null, $file_to_copy, true);
+                                if(!$res) break;
+                            }
+                        }
+
+                    }
+                    else if($copy_files_in_root && ($file_to_copy==null || $src.$file==$file_to_copy)){
+                        copy($src.$file,  $dst . '/' . $file);
+                        if($file_to_copy!=null) return false;
+                    }
+                }
+            }
+        }
+        closedir($dir);
+
+    }
+
+    return $res;
+}        
+    
+//------------------------------------------    
 /**
 * Zips everything in a directory
 *

@@ -81,7 +81,13 @@ function hAPI(_db, _oninit) { //, _currentUser
         }else{}*/
         // Get current user if logged in, and global database settings
         // see usr_info.php sysinfo method  and then system->getCurrentUserAndSysInfo
-        that.SystemMgr.sys_info( _oninit );
+        if(that.database){
+            that.SystemMgr.sys_info( _oninit );
+        }else{
+            if(_oninit){
+                _oninit(false);
+            }
+        }
 
     }
 
@@ -105,7 +111,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
 
         //remove remark to debug 
-        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());

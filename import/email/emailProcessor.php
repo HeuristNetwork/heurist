@@ -523,6 +523,7 @@ function printEmail($email){
 
             }
         }catch(Exception $e){
+//@todo change to entity dialog            
             echo '<b>Processing failed with the following message: '.$e->getMessage().'</b>';
             echo "<p>If the user name and password or IMAP server details are incorrect, you may get 'Login aborted'</p>";
             echo "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."' target='_blank'>

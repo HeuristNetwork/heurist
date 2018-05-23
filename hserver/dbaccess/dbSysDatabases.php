@@ -144,8 +144,8 @@ class DbSysDatabases extends DbEntityBase
                     $db_list['order'][$idx] = null;
                     unset($db_list['order'][$idx]);
                     //remove from index database
-                    $mysqli->query('DELETE FROM heurist_index.sysUsers WHERE sus_Database=`'.$database.'`');
-                    $mysqli->query('DELETE FROM heurist_index.sysIdentifications WHERE sys_Database=`'.$database.'`');
+                    $mysqli->query('DELETE FROM Heurist_DBs_index.sysUsers WHERE sus_Database=`'.$database.'`');
+                    $mysqli->query('DELETE FROM Heurist_DBs_index.sysIdentifications WHERE sys_Database=`'.$database.'`');
 error_log('fix central index = '.$database);                    
                 }
             }
