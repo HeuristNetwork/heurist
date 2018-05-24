@@ -101,30 +101,39 @@ function recognizeMimeTypeFromURL($mysqli, $url){
             $needrefresh = false;
             $mimeType = null;
             
-            $url = strtolower($url);
+            $url2 = strtolower($url);
             
-            if(strpos($url, 'soundcloud.com')!==false){
+            if(strpos($url2, 'soundcloud.com')!==false){
                 $mimeType  = 'audio/soundcloud';
                 $extension = 'soundcloud';
                 $force_add = "('soundcloud','audio/soundcloud', '0','','Soundcloud','')";
-            }else if(strpos($url, 'vimeo.com')!==false){
+            }else if(strpos($url2, 'vimeo.com')!==false){
                 $mimeType  = 'video/vimeo';
                 $extension = 'vimeo';
                 $force_add = "('vimeo','video/vimeo', '0','','Vimeo Video','')";
-            }else  if(strpos($url, 'youtu.be')!==false || strpos($url, 'youtube.com')!==false){
+            }else  if(strpos($url2, 'youtu.be')!==false || strpos($url2, 'youtube.com')!==false){
                 $mimeType  = 'video/youtube';
                 $extension = 'youtube';
                 $force_add = "('youtube','video/youtube', '0','','Youtube Video','')";
             }else{
                 //get extension from url - unreliable
-                /*$ap = parse_url($r_value);
+                $ap = parse_url($url2);
                 if( array_key_exists('path', $ap) ){
                     $path = $ap['path'];
                     if($path){
                         $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
                     }
-                }    */
-                $mimeType = loadRemoteURLContentType($url); 
+                }   
+                if($extension){ //check
+                    $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_Extension="'
+                            .$mimeType.'"';
+                    $extension = mysql__select_array2($mysqli, $ext_query);
+                }
+                if($extension==null){
+                    $mimeType = loadRemoteURLContentType($url); 
+                }else{
+                    $extension = $extension[0]; 
+                }
             }
             
             if($mimeType!=null && $mimeType!==false){
