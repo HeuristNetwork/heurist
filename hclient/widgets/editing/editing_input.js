@@ -2308,6 +2308,14 @@ $.widget( "heurist.editing_input", {
         return res;
     },
 
+    
+    //
+    //
+    //
+    getConfigMode: function(){
+        return this.configMode;
+    },
+    
     //
     //
     //

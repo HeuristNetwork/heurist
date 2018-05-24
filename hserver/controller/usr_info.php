@@ -191,15 +191,10 @@
 
                 
             }else if($action == 'get_url_content_type'){
-        
-                $mimeType = loadRemoteURLContentType(@$_REQUEST['url']); 
                 
-                if($mimeType!=null && $mimeType!==false){
-                    $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
-                                .$mimeType.'"';
-                    $extension = mysql__select_value($mysqli, $ext_query);
-                    return ($extension!=null)?$extension:false; 
-                }
+                $url = @$_REQUEST['url'];
+                
+                $res = recognizeMimeTypeFromURL($mysqli, $url);
                 
             } else {
 

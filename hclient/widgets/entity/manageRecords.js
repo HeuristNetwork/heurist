@@ -2077,11 +2077,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     +'<hr style="margin-top: 10px;width:250px">'
              +'</div>'
              +'<div style="float:right;padding: 20px 40px 0px 0px;font-weight: bold;">'
-                +'<span class="btn-config6" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Send bug report</span>'
-                +'<span class="btn-config7 ui-icon ui-icon-bug smallicon"></span>'
-                
                 +'<span class="btn-config4" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Modify structure</span>'
                 +'<span class="btn-config5 ui-icon ui-icon-gear smallicon"></span>'
+
+                +'<span class="btn-config6" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Bug report</span>'
+                +'<span class="btn-config7 ui-icon ui-icon-bug smallicon"></span>'
              +'</div>').insertBefore(this.editForm.first('fieldset'));
 
 

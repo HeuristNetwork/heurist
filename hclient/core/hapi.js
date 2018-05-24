@@ -766,6 +766,15 @@ function hAPI(_db, _oninit) { //, _currentUser
                     );
                 }
             },
+            
+            //
+            // reset entity data that forces reload from server on next reequest
+            //
+            clearEntityData: function(entityName){
+                if(!$.isEmptyObject(entity_data[entityName])){
+                    entity_data[entityName] = {};
+                }
+            },
 
             //load entire entity data and store it in cache (applicable for entities with count < ~1500)
             getEntityData:function(entityName, force_reload, callback){

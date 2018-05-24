@@ -204,22 +204,42 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             var that = this;
             var ele = that._editing.getFieldByName('ulf_ExternalFileReference');
             ele.editing_input('option', 'change', function(){
+            
+                var ele = that._editing.getFieldByName('ulf_ExternalFileReference');    
              
+                if (ele.editing_input('instance')==undefined) return;
+                
                 //auto detect extension of external service
-                var res = ele.editing_input('getValues'); 
-                var ext = window.hWin.HEURIST4.util.getMediaServerFromURL(res[0]);
-                if(ext==null && !window.hWin.HEURIST4.util.isempty(res[0])){
+                var curr_url = ele.editing_input('getValues'); 
+                // remarked since we need to check it on server side
+                //var ext = window.hWin.HEURIST4.util.getMediaServerFromURL(res[0]);
+                //if(ext==null && !window.hWin.HEURIST4.util.isempty(res[0])){
+                if( !window.hWin.HEURIST4.util.isempty(curr_url[0])  && curr_url[0]!=that._previousURL ){    
+
+                    that._previousURL = curr_url[0];
                     
-                    ext = window.hWin.HEURIST4.util.getFileExtension(res[0]);
+                    var ext = window.hWin.HEURIST4.util.getFileExtension(curr_url[0]);
                     
-                    if(window.hWin.HEURIST4.util.isempty(ext) && res[0]!=that._previousURL){
+                    //can't get ext from url
+                    if(window.hWin.HEURIST4.util.isempty(ext)){
                         //request server to detect content type
-                        that._previousURL = res[0];
-                        window.hWin.HAPI4.SystemMgr.get_url_content_type(res[0], function(response){
+                        window.hWin.HAPI4.SystemMgr.get_url_content_type(curr_url[0], function(response){
                             if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                                var ext = response.data;
+                                var ext = response.data.extension;
                                 var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+                                
+                                if(response.data.needrefresh){
+                                    var cfg = ele2.editing_input('getConfigMode');
+                                    window.hWin.HAPI4.EntityMgr.clearEntityData( cfg.entity );
+                                }
+                                
                                 ele2.editing_input('setValue', ext );
+                                
+                                if(ext=='bin'){
+                                    window.hWin.HEURIST4.msg.showMsgDlg('Can not retrieve content type for given url '
+                                    +' or mimetype is not found among allowed types.'
+                                        +' Generic mimetype is selected. Please select or add mimetype manaully');
+                                }
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr('Can not retrieve content type for given url.'
                                 +' Please enter it manaully');
@@ -228,9 +248,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         that.onEditFormChange();
                         return;
                     }
+                    
+                    var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+                    var curr_ext = ele2.editing_input('getValues');
+                    if(curr_ext[0]!=ext){
+                        ele2.editing_input('setValue', ext );
+                    }
                 }
-                var ele2 = that._editing.getFieldByName('ulf_MimeExt');
-                ele2.editing_input('setValue', ext );
                 that.onEditFormChange();
             });
         }else{

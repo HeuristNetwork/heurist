@@ -87,12 +87,67 @@ function mysql__select_array3($mysqli, $query, $withindex=true) {
 }
 
 
-// original is in h4/utilities/utils_file.php
+// original is in h4/utilities/utils_file.php and in db_svs.php
 //
 // alternative2: get_headers()
 // alternative3: https://stackoverflow.com/questions/37731544/get-mime-type-by-url
 // for local file use mime_content_type
 //
+function recognizeMimeTypeFromURL($mysqli, $url){ 
+                   
+            //special cases for well known resources
+            $force_add = null;
+            $extension = null;
+            $needrefresh = false;
+            $mimeType = null;
+            
+            $url = strtolower($url);
+            
+            if(strpos($url, 'soundcloud.com')!==false){
+                $mimeType  = 'audio/soundcloud';
+                $extension = 'soundcloud';
+                $force_add = "('soundcloud','audio/soundcloud', '0','','Soundcloud','')";
+            }else if(strpos($url, 'vimeo.com')!==false){
+                $mimeType  = 'video/vimeo';
+                $extension = 'vimeo';
+                $force_add = "('vimeo','video/vimeo', '0','','Vimeo Video','')";
+            }else  if(strpos($url, 'youtu.be')!==false || strpos($url, 'youtube.com')!==false){
+                $mimeType  = 'video/youtube';
+                $extension = 'youtube';
+                $force_add = "('youtube','video/youtube', '0','','Youtube Video','')";
+            }else{
+                //get extension from url - unreliable
+                /*$ap = parse_url($r_value);
+                if( array_key_exists('path', $ap) ){
+                    $path = $ap['path'];
+                    if($path){
+                        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                    }
+                }    */
+                $mimeType = loadRemoteURLContentType($url); 
+            }
+            
+            if($mimeType!=null && $mimeType!==false){
+                $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
+                            .$mimeType.'"';
+                $f_extension = mysql__select_array2($mysqli, $ext_query);
+                
+                if($f_extension==null && $force_add!=null){
+                    $mysqli->query('insert into defFileExtToMimetype ('
+        .'`fxm_Extension`,`fxm_MimeType`,`fxm_OpenNewWindow`,`fxm_IconFileName`,`fxm_FiletypeName`,`fxm_ImagePlaceholder`'
+                    .') values '.$force_add);
+                    $needrefresh = true;
+                }else{
+                    $extension = $f_extension[0];
+                }
+            }
+            //if extension not found apply bin: application/octet-stream - generic mime type
+            if($extension==null) $extension = 'bin';   
+            $res = array('extension'=>$extension, 'needrefresh'=>$needrefresh);
+            
+            return $res;
+}
+
 function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
 
     if(!function_exists("curl_init"))  {
@@ -2308,39 +2363,10 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                                 }else{
                                     //otherwise register as new 
                                     
-                                    $extension = null;
                                     //detect mime type
+                                    $extension = recognizeMimeTypeFromURL($mysqli, $r_value);
+                                    $extension = $extension['extension']; //always returns - at least 'bin'
 
-                                    $rname = strtolower($r_value);
-                                    if(strpos($rname, 'youtu.be')!==false || strpos($rname, 'youtube.com')!==false){
-                                        $extension = 'youtube';
-                                    }else if(strpos($rname, 'vimeo.com')!==false){
-                                        $extension = 'vimeo';
-                                    }else if(strpos($rname, 'soundcloud.com')!==false){
-                                        $extension = 'soundcloud';            
-                                    }else{
-                                            //get extension from url - unreliable
-                                            $ap = parse_url($r_value);
-                                            if( array_key_exists('path', $ap) ){
-                                                $path = $ap['path'];
-                                                if($path){
-                                                    $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-                                                }
-                                            }
-                                    }
-   
-                                    if(!$extension){   
-                                        $mimeType = loadRemoteURLContentType($r_value);
-                                        if($mimeType!=null && $mimeType!==false){
-                                            $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
-                                                        .$mimeType.'"';
-                                            $extension = mysql__select_array2($mysqli, $ext_query);
-                                            if(is_array($extension) & count($extension)>0){
-                                                $extension = $extension[0];
-                                            }
-                                        }
-                                    }
-                                    
                                     if($extension){   
                                             //add to table
                                             $ulf_ID = mysql__insertupdate($mysqli, 'recUploadedFiles', 'ulf', 
