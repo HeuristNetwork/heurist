@@ -2069,20 +2069,21 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         if(this.element.find('.chb_opt_fields').length==0){  //not inited yet
             
-            $('<div style="display:inline-block;text-align:left;padding:10px 0px 5px 35px;">'
+            $('<div style="display:table;min-width:575px;width:100%">'
+             +'<div style="display:table-cell;text-align:left;padding:10px 0px 5px 35px;">'
                     +'<label><input type="checkbox" class="chb_show_help" '
                         +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
                     +'<label><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
                     +'<hr style="margin-top: 10px;width:250px">'
              +'</div>'
-             +'<div style="float:right;padding: 20px 40px 0px 0px;font-weight: bold;">'
+             +'<div style="display:table-cell;text-align:right;padding: 10px 40px 0px 0px;font-weight: bold;">'
                 +'<span class="btn-config4" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Modify structure</span>'
                 +'<span class="btn-config5 ui-icon ui-icon-gear smallicon"></span>'
 
                 +'<span class="btn-config6" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Bug report</span>'
                 +'<span class="btn-config7 ui-icon ui-icon-bug smallicon"></span>'
-             +'</div>').insertBefore(this.editForm.first('fieldset'));
+             +'</div></div>').insertBefore(this.editForm.first('fieldset'));
 
 
 
