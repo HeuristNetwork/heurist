@@ -475,8 +475,12 @@ function hRecordAddLink() {
                         terms_dis = details[fi_term_dis],
                         currvalue = null;
                     
-                    window.hWin.HEURIST4.ui.createTermSelectExt($('#rec'+party+'_sel_'+dty).get(0), 
-                            'relation', terms, terms_dis, currvalue, null, false, true);    
+                    //window.hWin.HEURIST4.ui.createTermSelectExt($('#rec'+party+'_sel_'+dty).get(0), 
+                    //        'relation', terms, terms_dis, currvalue, null, false, true);    
+                            
+                    window.hWin.HEURIST4.ui.createTermSelectExt2($('#rec'+party+'_sel_'+dty).get(0),
+                        {datatype:'relation', termIDTree:terms, headerTermIDsList:terms_dis,
+                            defaultTermID:currvalue, topOptions:null, needArray:false, useHtmlSelect:true});
                     
                 }else{
                     $('#rec'+party+'_sel_'+dty).hide();   //hide relatiion type selector

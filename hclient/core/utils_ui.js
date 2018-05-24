@@ -1246,7 +1246,21 @@ window.hWin.HEURIST4.ui = {
         }else{
             
             var parent_ele = $(selObj).parents('.ui-dialog');
-            if(!parent_ele || parent_ele.length==0) parent_ele = $(selObj).parent();
+            if(!parent_ele || parent_ele.length==0) {
+                /*
+                var sel = $(selObj)[0];
+                if(sel.ownerDocument != document){ //inside iframe
+                
+                    var pwin = (sel.ownerDocument.parentWindow || sel.ownerDocument.defaultView);
+                    var parent_dlg_id = pwin.frameElement.getAttribute("parent-dlg-id");
+                    parent_ele = $('#'+parent_dlg_id).parent();    
+                }                
+                //parent dialog not found
+                if(parent_ele.length==0)
+                */
+                    parent_ele = $(selObj).parent();   
+                
+            }
             
             var menu = $(selObj).hSelect(       
               { style: 'dropdown',
