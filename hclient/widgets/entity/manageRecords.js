@@ -1619,56 +1619,63 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     field_in_recset.push(DT_PARENT_ENTITY);
             }
             
-            var addhead = 0;
-            //Add inward relationship fields
-            //1. scan all other record structures
-            //2. find relmarker feidls that targets current rectypes
-            //3. add fake field into structure
-            var rt, already_added = {};
-            for(rt in rectypes.typedefs)
-            if(rt>0 && rt!=rectypeID){
-                for(dt_ID in rectypes.typedefs[rt].dtFields)
-                if(dt_ID>0 && rectypes.typedefs[rt].dtFields[dt_ID][fi_type]=='relmarker'){
-                    
-                    //this field can be already added - in this case we need just extend constraints
-                    if(already_added[dt_ID]>=0){
-                        s_fields[already_added[dt_ID]][fi_ptrs].push(rt);
-                        continue;
-                    }
-                    
-                    var ptr = rectypes.typedefs[rt].dtFields[dt_ID][fi_ptrs];
-                    if(window.hWin.HEURIST4.util.isempty(ptr)){ 
-                        //skip unconstrined
-                        continue;
-                    }else{
-                        ptr = ptr.split(',')
-                        if(window.hWin.HEURIST4.util.findArrayIndex(rectypeID, ptr)<0){
+            //Disabled 2018-05-17
+            //reasons:
+            //they are extremely confusing for the uninitiated (and even for those in the know); 
+            //you can't control them easily b/c they are set in another record type; 
+            $is_enabled_inward_relationship_fields = false;
+            if($is_enabled_inward_relationship_fields){            
+                var addhead = 0;
+                //Add inward relationship fields
+                //1. scan all other record structures
+                //2. find relmarker feidls that targets current rectypes
+                //3. add fake field into structure
+                var rt, already_added = {};
+                for(rt in rectypes.typedefs)
+                if(rt>0 && rt!=rectypeID){
+                    for(dt_ID in rectypes.typedefs[rt].dtFields)
+                    if(dt_ID>0 && rectypes.typedefs[rt].dtFields[dt_ID][fi_type]=='relmarker'){
+                        
+                        //this field can be already added - in this case we need just extend constraints
+                        if(already_added[dt_ID]>=0){
+                            s_fields[already_added[dt_ID]][fi_ptrs].push(rt);
                             continue;
                         }
-                    }
-                    //this relmarker suits us
-                    
-                    if(addhead==0){                    
-                        var rfr = that._getFakeRectypeField(999999);
-                        rfr[fi_name] = 'Inward (reverse) relationships not included in fields above';
-                        rfr[fi_help] = 'These relationships target the current record but are not defined '
-                                    +'in a relationship marker field for this record type. They do not, '   
-                                    +'therefore, display in the relationship marker fields above (if any).';
-                        rfr[fi_type] = 'separator';
-                        rfr[fi_order] = 1000;
-                        s_fields.push(rfr);
-                    }
-                    addhead++;
-                    
-                    var rfr = window.hWin.HEURIST4.util.cloneJSON(rectypes.typedefs[rt].dtFields[dt_ID]);
-                    rfr['dt_ID'] = dt_ID;
-                    rfr[fi_reqtype] = 'optional';
-                    rfr[fi_order] = 1000+addhead;
-                    rfr[fi_ptrs] = [rt];
-                    
-                    already_added[dt_ID] = s_fields.length;
-                    s_fields.push(rfr);
                         
+                        var ptr = rectypes.typedefs[rt].dtFields[dt_ID][fi_ptrs];
+                        if(window.hWin.HEURIST4.util.isempty(ptr)){ 
+                            //skip unconstrined
+                            continue;
+                        }else{
+                            ptr = ptr.split(',')
+                            if(window.hWin.HEURIST4.util.findArrayIndex(rectypeID, ptr)<0){
+                                continue;
+                            }
+                        }
+                        //this relmarker suits us
+                        
+                        if(addhead==0){                    
+                            var rfr = that._getFakeRectypeField(999999);
+                            rfr[fi_name] = 'Inward (reverse) relationships not included in fields above';
+                            rfr[fi_help] = 'These relationships target the current record but are not defined '
+                                        +'in a relationship marker field for this record type. They do not, '   
+                                        +'therefore, display in the relationship marker fields above (if any).';
+                            rfr[fi_type] = 'separator';
+                            rfr[fi_order] = 1000;
+                            s_fields.push(rfr);
+                        }
+                        addhead++;
+                        
+                        var rfr = window.hWin.HEURIST4.util.cloneJSON(rectypes.typedefs[rt].dtFields[dt_ID]);
+                        rfr['dt_ID'] = dt_ID;
+                        rfr[fi_reqtype] = 'optional';
+                        rfr[fi_order] = 1000+addhead;
+                        rfr[fi_ptrs] = [rt];
+                        
+                        already_added[dt_ID] = s_fields.length;
+                        s_fields.push(rfr);
+                            
+                    }
                 }
             }
             
