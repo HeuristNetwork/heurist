@@ -27,67 +27,42 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../../');  //need for proper path to js and css    
 
-// User must be system administrator or admin of the owners group for this database
-require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-
-if(isForAdminOnly("to modify database structure")){
-    return;
-}
+require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 ?>
-<html>
-    <head>
 
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>Record Types / Field Definitions</title>
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
 
-        <link rel="icon" href="../../../favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+<!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
 
-        <!-- YUI -->
-        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
-        
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
-        <!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+<!-- DATATABLE DEFS -->
+<link type="text/css" rel="stylesheet" href="../../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+<!-- datatable Dependencies -->
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+<!-- Source files -->
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+<!-- END DATATABLE DEFS-->
+<!-- PAGINATOR -->
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
+<!-- END PAGINATOR -->
 
-        <!-- DATATABLE DEFS -->
-        <link type="text/css" rel="stylesheet" href="../../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
-        <!-- datatable Dependencies -->
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
-        <!-- Source files -->
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
-        <!-- END DATATABLE DEFS-->
+</head>
+<body class="popup yui-skin-sam">
 
-        <!-- PAGINATOR -->
-        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
-        <!-- END PAGINATOR -->
+    <script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
+    <script type="text/javascript" src="../../../common/js/tabDragDrop.js"></script>
+    <script type="text/javascript" src="manageRectypes.js"></script>
 
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-
-        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
-
-    </head>
-
-    <body class="popup yui-skin-sam">
-
-        <script src="../../../common/php/displayPreferences.php"></script>
-        <script src="../../../common/php/getMagicNumbers.php"></script>
-        <script src="../../../common/php/loadCommonInfo.php"></script>
-
-        <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-        <script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
-        <script type="text/javascript" src="../../../common/js/tabDragDrop.js"></script>
-        <script type="text/javascript" src="manageRectypes.js"></script>
-
-        <div>
+<div>
 <?php
 if(@$_REQUEST['popup']!=1){
 ?>    
@@ -97,7 +72,7 @@ if(@$_REQUEST['popup']!=1){
 ?>    
             <div id="page-inner" style="top:20;">
             
-                <h4>Use this function to build and extend your database by adding and modifying record (entity) types. 
+                <h4 style="line-height:2ex;padding:5px 0">Use this function to build and extend your database by adding and modifying record (entity) types. 
                 <br/>Allows the re-use of existing fields for consistency across entity types, as well as the creation of entirely new fields. 
                 <br/>New databases are pre-populated with a range of useful record types and term (category) vocabularies.</h4>
                 <!--
@@ -126,6 +101,6 @@ if(@$_REQUEST['popup']!=1){
                     </script>
                 </div>
             </div>
-        </div>
-    </body>
+</div>
+</body>
 </html>

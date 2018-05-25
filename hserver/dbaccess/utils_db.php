@@ -18,6 +18,7 @@
     *  mysql__select_all
     *  mysql__duplicate_table_record
     *  mysql__insertupdate
+    *  mysql__exec_param_query
     *  mysql__delete
     *  mysql__begin_transaction
     *
@@ -554,23 +555,49 @@ error_log(print_r($params, true));
 }
 */
 
+        $result = mysql__exec_param_query($mysqli, $query, $params);
+        
+        if($result==true && $primary_field_type=='integer'){
+            $result = ($isinsert) ?$mysqli->insert_id :$rec_ID;
+        }//for non-numeric it returns null
+        
+        return $result;
+    }
 
-        $stmt = $mysqli->prepare($query);
-        if($stmt){
-            call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
-            if(!$stmt->execute()){
-                $ret = $mysqli->error;
-            }else{
-                if($primary_field_type=='integer'){
-                    $ret = ($isinsert)?$stmt->insert_id:$rec_ID;
-                }//for non-numeric it returns null
+    //
+    //
+    //
+    function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
+
+        if ($params == null || count($params) < 1) {// not parameterised
+            if ($result = $mysqli->query($query)) {
+
+                $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                
+            } else {
+                $result = $mysqli->error;
+                if ($result == "") {
+                   $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                }
             }
-            $stmt->close();
-        }else{
-            $ret = $mysqli->error;
+        }else{        
+            
+            $stmt = $mysqli->prepare($query);
+            if($stmt){
+                call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
+                if(!$stmt->execute()){
+                    $result = $mysqli->error;
+                }else{
+                    $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                    //$result = $stmt->insert_id ?$stmt->insert_id :$mysqli->affected_rows;
+                }
+                $stmt->close();
+            }else{
+                $result = $mysqli->error;
+            }
         }
 
-        return $ret;
+        return $result;
     }
     /**
     * converts array of values to array of value references for PHP 5.3+

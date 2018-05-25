@@ -36,6 +36,8 @@
     * 
     * TERMS RELATED FUNCTION - to be public methods, 
     * they work with global $terms array - need to be defined by dbs_GetTerms before call these methods
+    * getTermOffspringList
+    * getTermTopMostParent
     * getTermChildren
     * getTermInTree    
     * getTermByLabel    
@@ -286,6 +288,93 @@
         return $rectype;
     }
 
+    
+/**
+* get rectype constraint structure with lookups by target and term id index by srcID
+* constraints = array( [recID | any] => array(
+*                          byTerm => array(
+*                              [trmID|any] => array([trgID|any] => array(
+*                                                          limit => $max
+*                                                          [,addsTo => parentTrmID]))
+*                              [,offspring =>array(trmID[,trmID])),
+*                          byTarget => array(
+*                              [trgID|any] => array([trmID|any] => array(
+*                                                          limit => $max,
+*                                                          notes => $notes
+*                                                          [,addsTo => parentTrmID])))))
+* where $max can be "unlimited" or any positive integer with 0 meaning not allowed
+* addsTo atttemps to handle child terms with out specific constraints, they effectively
+* inherit the parents limit.
+* @return    object constraint structure
+* @uses      getTermOffspringList()
+*/
+function dbs_GetRectypeConstraint($system) {
+    
+    $query = "select rcs_SourceRectypeID as srcID,
+    rcs_TermID as trmID,
+    rcs_TargetRectypeID as trgID,
+    rcs_TermLimit as max,
+    rcs_Description as notes,
+    trm_Depth as level,
+    if(trm_ChildCount > 0, true, false) as hasChildren
+    from defRelationshipConstraints
+    left join defTerms on rcs_TermID = trm_ID
+    order by rcs_SourceRectypeID is null,
+    rcs_SourceRectypeID,
+    trm_Depth,
+    rcs_TermID is null,
+    rcs_TermID,
+    rcs_TargetRectypeID is null,
+    rcs_TargetRectypeID";
+    
+    $mysqli = $system->get_mysqli();
+     
+    $res = $mysqli->query($query);
+    $cnstrnts = array();
+    while ($row = $res->fetch_assoc()) {
+        //        $srcID = (@$row['srcID'] === null ? "".'0' : $row['srcID']);
+        //        $trmID = (@$row['trmID'] === null ? "".'0' : $row['trmID']);
+        //        $trgID = (@$row['trgID'] === null ? "".'0' : $row['trgID']);
+        //        $max = (@$row['max'] === null ? '' : $row['max']);
+        $srcID = (@$row['srcID'] === null ? "any" : $row['srcID']);
+        $trmID = (@$row['trmID'] === null ? "any" : $row['trmID']);
+        $trgID = (@$row['trgID'] === null ? "any" : $row['trgID']);
+        $max = (@$row['max'] === null ? 'unlimited' : $row['max']);
+        $notes = $row['notes'];
+        $hasChildren = $row['hasChildren'];
+        if (!@$cnstrnts[$srcID]) {//first instance of this recType as source, create structure
+            $cnstrnts[$srcID] = array('byTerm' => array(), 'byTarget' => array());
+        }
+        if (!@$cnstrnts[$srcID]['byTerm'][$trmID]) {//first instance of this recType as target, create structure
+            $cnstrnts[$srcID]['byTerm'][$trmID] = array($trgID => array('limit' => $max));
+        }
+        if (!@$cnstrnts[$srcID]['byTarget'][$trgID]) {//first instance of this recType as bytarget target, create structure
+            $cnstrnts[$srcID]['byTarget'][$trgID] = array($trmID => array('limit' => $max, "notes" => $notes));
+        } else if (!@$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]) {
+            $cnstrnts[$srcID]['byTarget'][$trgID][$trmID] = array('limit' => $max, "notes" => $notes);
+        }
+        if (!@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]) {//new target for term lookup
+            $cnstrnts[$srcID]['byTerm'][$trmID][$trgID] = array('limit' => $max);
+        }
+        if (@$cnstrnts[$srcID]['byTerm'][$trmID][$trgID]['addsTo']) {
+            $cnstrnts[$srcID]['byTerm'][$trmID][$trgID]['limit'] = $max;
+        }
+        if (@$cnstrnts[$srcID]['byTarget'][$trgID][$trmID]['addsTo']) {
+            $cnstrnts[$srcID]['byTarget'][$trgID][$trmID]['limit'] = $max;
+        }
+        $offspring = $trmID && $trmID !== "any" && $hasChildren ? getTermOffspringList($mysqli, $trmID) : null;
+        if ($offspring) {
+            $cnstrnts[$srcID]['byTerm'][$trmID]['offspring'] = $offspring;
+            foreach ($offspring as $childTermID) { // point all offspring to inherit from term
+                $cnstrnts[$srcID]['byTerm'][$childTermID][$trgID] = array('addsTo' => $trmID);
+                $cnstrnts[$srcID]['byTarget'][$trgID][$childTermID] = array('addsTo' => $trmID);
+            }
+        }
+    }
+    $res->close();
+    return $cnstrnts;
+}
+   
 
     /**
     * Get term structure with trees from relation and enum domains
@@ -350,6 +439,61 @@
     // to public method ------>
     
     /**
+    * returns array list of all terms under a given term
+    * @param     int $termID
+    * @param     boolean $getAllDescentTerms determines whether to recurse and retrieve children of children (default = true)
+    * @return    array  of term IDs
+    */
+    function getTermOffspringList($mysqli, $termID, $parentlist = null) {
+        
+        if($parentlist==null) $parentlist = array($termID);
+        $offspring = array();
+        if ($termID) {
+            $res = $mysqli->query("select * from defTerms where trm_ParentTermID=$termID");
+            if ($res && $res->num_rows>0 ) { //child nodes exist
+                while ($row = $res->fetch_assoc()) { // for each child node
+                
+                    $subTermID = $row['trm_ID'];
+                    if(array_search($subTermID, $parentlist)===false){
+                        array_push($offspring, $subTermID);
+                        array_push($parentlist, $subTermID);
+                        $offspring = array_merge($offspring, getTermOffspringList($mysqli, $subTermID, $parentlist));
+                    }else{
+                        error_log('Database '.DATABASE.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
+                    }
+                }
+            }
+        }
+        return $offspring;
+    }
+    
+
+    //
+    //
+    //
+    function getTermTopMostParent($mysqli, $termId, $terms=null){
+        
+        if(!$terms) $terms = array($termId); //to prevent recursion
+
+        $query = "select trm_ParentTermID from defTerms where trm_ID = ".$termId;
+
+        $parentId = mysql__select_value($mysqli, $query);
+        
+        if($parentId>0){
+            
+            if(in_array($parentId, $terms)){
+                return $termId;
+            }else{
+                array_push($terms, $parentId[0]);
+                return getTermTopMostParent($mysqli, $parentId[0], $terms);
+            }
+        }else{
+            return $termId;
+        }
+    }
+        
+    
+    /**
     * return all term children as plain array
     * 
     * @param mixed $system
@@ -373,6 +517,7 @@
         return $children;
         
     }
+    
     
     /**
     * prints term label including parents term labels
@@ -708,7 +853,7 @@
     *         2 - full, both headers and structures
     *         3 - ids only
     */
-    function dbs_GetDetailTypes($system, $dettypeids=null, $imode){
+    function dbs_GetDetailTypes($system, $dettypeids=null, $imode=2){
 
         $mysqli = $system->get_mysqli();
         $dbID = $system->get_system('sys_dbRegisteredID');

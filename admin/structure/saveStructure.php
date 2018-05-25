@@ -30,40 +30,37 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-    define('ISSERVICE',1);
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-    require_once('saveStructureLib.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
+require_once('saveStructureLib.php');
 
-    $rv = array();
+$system = new System();
 
-    if (!is_admin()) {
-        error_exit("Sorry, you need to be a database owner to be able to modify the database structure");
-    }
+$rv = array();
 
-    $legalMethods = array(
-        "saveRectype",
-        "saveRT",
-        "saveRTS",
-        "deleteRTS",
-        "saveRTC",
-        "deleteRTC",
-        "saveRTG",
-        "saveDetailType",
-        "saveDT",
-        'checkDtPtr',
-        "saveDTG",
-        "saveTerms",
-        "mergeTerms",
-        "deleteTerms",
-        'checkPtr',
-        "deleteDT",
-        "deleteRT",
-        "deleteRTG",
-        "deleteDTG",
-        "checkDTusage"
-    );
+$legalMethods = array(
+    "saveRectype",
+    "saveRT",
+    "saveRTS",
+    "deleteRTS",
+    "saveRTC",
+    "deleteRTC",
+    "saveRTG",
+    "saveDetailType",
+    "saveDT",
+    'checkDtPtr',
+    "saveDTG",
+    "saveTerms",
+    "mergeTerms",
+    "deleteTerms",
+    'checkPtr',
+    "deleteDT",
+    "deleteRT",
+    "deleteRTG",
+    "deleteDTG",
+    "checkDTusage"
+);
 
 $method = @$_REQUEST['method'];
 if ($method && !in_array($_REQUEST['method'],$legalMethods)) {
@@ -71,18 +68,30 @@ if ($method && !in_array($_REQUEST['method'],$legalMethods)) {
 }
 
 if(!$method){
-  error_exit("Invalid call to saveStructure, there is no valid 'method' parameter");
+    error_exit('Invalid call to saveStructure, there is no valid "method" parameter');
 }
 else
 {
+
+        if( !$system->init(@$_REQUEST['db']) ){
+            error_exit();
+        }
+
+        if(!$system->is_admin()){
+            $system->addError(HEURIST_REQUEST_DENIED, 
+                'To perform this action you must be logged in as Administrator of group \'Database Managers\'');
+            error_exit();
+        }
+    
+        $mysqli = $system->get_mysqli();
+    
+    
         $data = @$_REQUEST['data'];
         //decode and unpack data
         if($data){
             $data = json_decode(urldecode(@$_REQUEST['data']), true);
         }
-        $mysqli = mysqli_connection_overwrite(DATABASE); // mysqli
-        mysql_connection_overwrite(DATABASE); // need for getRecordInfoLibrary
-
+        
         switch ($method) {
 
 
@@ -119,7 +128,7 @@ else
                     }
                 }
 
-                $rv['rectypes'] = getAllRectypeStructures(false);
+                $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
 
                 break;
 
@@ -141,9 +150,9 @@ else
                 foreach ($data['rectype']['defs'] as $rtyID => $rt) {
                     array_push($rv['result'], updateRecStructure($dtFieldNames, $rtyID, $rt));
                 }
-                $rv['rectypes'] = getAllRectypeStructures();
-                $rv['detailTypes'] = getAllDetailTypeStructures();
-                $rv['terms'] = getTerms();
+                $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
+                $rv['detailtypes'] = dbs_GetDetailTypes($system);
+                $rv['terms'] = dbs_GetTerms($system);
                 break;
 
             case 'deleteRTS':
@@ -156,8 +165,8 @@ else
                 }else{
                     $rv = deleteRecStructure($rtyID, $dtyID);
                     if (!array_key_exists('error', $rv)) {
-                        $rv['rectypes'] = getAllRectypeStructures();
-                        $rv['detailTypes'] = getAllDetailTypeStructures();
+                        $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
+                        $rv['detailtypes'] = dbs_GetDetailTypes($system);
                     }
                 }
                 break;
@@ -183,7 +192,7 @@ else
                         array_push($rv['result'], deleteRelConstraint($srcID, $trgID, $terms_todel));
                     }
 
-                    $rv['constraints'] = getAllRectypeConstraint();//getAllRectypeStructures();
+                    $rv['constraints'] = dbs_GetRectypeConstraint($system);//dbs_GetRectypeStructures($system, null, 2);
 
                 }
                 break;
@@ -200,7 +209,7 @@ else
                 }else{
                     $rv = deleteRelConstraint($srcID, $trgID, $trmID);
                     if (!array_key_exists('error', $rv)) {
-                        $rv['constraints'] = getAllRectypeConstraint();//getAllRectypeStructures();
+                        $rv['constraints'] = dbs_GetRectypeConstraint($system);//dbs_GetRectypeStructures($system, null, 2);
                     }
                 }
                 break;
@@ -215,7 +224,7 @@ else
                 }else{
                     $rv = deleteRecType($rtyID);
                     if (!array_key_exists('error',$rv)) {
-                        $rv['rectypes'] = getAllRectypeStructures();
+                        $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
                     }
                 }
                 break;
@@ -230,15 +239,16 @@ else
                     error_exit("Invalid data structure sent with saveRectypeGroup method call to saveStructure.php");
                 }
                 $colNames = $data['rectypegroups']['colNames'];
+                $rv['groups'] = array();
                 foreach ($data['rectypegroups']['defs'] as $rtgID => $rt) {
                     if ($rtgID == -1) {    // new rectype group
-                        array_push($rv, createRectypeGroups($colNames, $rt));
+                        array_push($rv['groups'], createRectypeGroups($colNames, $rt));
                     }else{
-                        array_push($rv, updateRectypeGroup($colNames, $rtgID, $rt));
+                        array_push($rv['groups'], updateRectypeGroup($colNames, $rtgID, $rt));
                     }
                 }
                 if (!array_key_exists('error',$rv)) {
-                    $rv['rectypes'] = getAllRectypeStructures();
+                    $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
                 }
                 break;
 
@@ -250,7 +260,7 @@ else
                 }
                 $rv = deleteRectypeGroup($rtgID);
                 if (!array_key_exists('error',$rv)) {
-                    $rv['rectypes'] = getAllRectypeStructures();
+                    $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
                 }
                 break;
 
@@ -270,7 +280,7 @@ else
                     }
                 }
                 if (!array_key_exists('error',$rv)) {
-                    $rv['detailTypes'] = getAllDetailTypeStructures();
+                    $rv['detailtypes'] = dbs_GetDetailTypes($system);
                 }
                 break;
 
@@ -282,7 +292,7 @@ else
                 }
                 $rv = deleteDettypeGroup($dtgID);
                 if (!array_key_exists('error',$rv)) {
-                    $rv['detailTypes'] = getAllDetailTypeStructures();
+                    $rv['detailtypes'] = dbs_GetDetailTypes($system);
                 }
                 break;
 
@@ -311,7 +321,7 @@ else
                     }
                 }
 
-                $rv['detailTypes'] = getAllDetailTypeStructures();
+                $rv['detailtypes'] = dbs_GetDetailTypes($system);
                 break;
 
             case 'checkDTusage': //used in editRecStructure to prevent detail type delete
@@ -333,7 +343,7 @@ else
                 }else{
                     $rv = deleteDetailType($dtyID);
                     if (!array_key_exists('error',$rv)) {
-                        $rv['detailTypes'] = getAllDetailTypeStructures();
+                        $rv['detailtypes'] = dbs_GetDetailTypes($system);
                     }
                 }
                 break;
@@ -385,7 +395,7 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
                     }
                     // slows down the performance, but we need the updated terms because Ian wishes to update terms
                     // while selecting terms while editing the field type
-                    $rv['terms'] = getTerms();
+                    $rv['terms'] = dbs_GetTerms($system);
                 }
                 
                 break;
@@ -407,7 +417,7 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
                     $rv = $ret;
                 }else{
                     $rv['result'] = $ret;
-                    $rv['terms'] = getTerms();
+                    $rv['terms'] = dbs_GetTerms($system);
                 }
                 
 
@@ -431,7 +441,7 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
                         $rv = $ret;
                     }else{
                         $rv['result'] = $ret;
-                        $rv['terms'] = getTerms();
+                        $rv['terms'] = dbs_GetTerms($system);
                     }
                 }
                 break;
@@ -446,20 +456,34 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
 }//$method!=null
 
 
+if($rv['error']){
+    $response = $system->addError(HEURIST_ERROR, $rv['error']);
+}else{
+    $response = array("status"=>HEURIST_OK, "data"=>$rv);
+}
+
 ob_start(); 
-echo json_encode($rv);
+echo json_encode($response);
 $output = gzencode(ob_get_contents(),6); 
 ob_end_clean(); 
+
 header('Content-Encoding: gzip');
 header('Content-type: text/javascript; charset=utf-8');
 echo $output; 
 unset($output);
 
-//old home-made version  print json_format($rv);
 
+//
+//
+//
 function error_exit($msg){
     header('Content-type: text/javascript; charset=utf-8');
-    print json_format(array('error'=>$msg));
+    
+    if($msg){
+        $system->addError(HEURIST_INVALID_REQUEST, $msg);
+    }
+
+    print json_format( $system->getError() );
     exit();
 }
 ?>

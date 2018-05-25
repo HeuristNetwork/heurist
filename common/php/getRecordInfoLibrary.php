@@ -802,6 +802,7 @@ function getRectypeConstraints($rectypeID) {
     }
     return $cnstrnts;
 }
+
 /**
 * get rectype constraint structure with lookups by target and term id index by srcID
 * constraints = array( [recID | any] => array(

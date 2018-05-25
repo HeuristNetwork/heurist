@@ -2047,7 +2047,27 @@ window.hWin.HEURIST4.ui = {
         }
         
         return help_text;        
-    }
+    },
+    
+    
+    getMousePos: function(e){
+
+        var posx = 0;
+        var posy = 0;
+        if (!e) var e = window.event;
+        if (e.pageX || e.pageY)     {
+            posx = e.pageX;
+            posy = e.pageY;
+        }
+        else if (e.clientX || e.clientY)     {
+            posx = e.clientX
+            + document.documentElement.scrollLeft;
+            posy = e.clientY
+            + document.documentElement.scrollTop;
+        }
+
+        return [posx, posy];
+    },
     
     
 }//end ui

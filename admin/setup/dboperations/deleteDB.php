@@ -43,9 +43,7 @@ if(isset($_POST['password'])) {
                 $isSystemInited = $system->init(@$_REQUEST['db']); //need to verify credentials for current database
 
                 /** Db check */
-                if(!$isSystemInited){
-                    $system->addError(HEURIST_DB_ERROR, 'Can not init database connection to '.@$_REQUEST['db']);
-                }else{
+                if($isSystemInited){
                     if($system->is_system_admin() || 
                             ($_REQUEST['database']==$_REQUEST['db'] && $system->is_dbowner()) )
                     {
