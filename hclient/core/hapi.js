@@ -82,7 +82,14 @@ function hAPI(_db, _oninit) { //, _currentUser
         }else{}*/
         // Get current user if logged in, and global database settings
         // see usr_info.php sysinfo method  and then system->getCurrentUserAndSysInfo
-        that.SystemMgr.sys_info( _oninit );
+        if(that.database){
+            that.SystemMgr.sys_info( _oninit );
+        }else{
+            if(_oninit){
+                _oninit(false);
+            }
+        }
+
 
     }
 
