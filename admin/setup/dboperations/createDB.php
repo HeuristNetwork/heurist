@@ -40,17 +40,25 @@ $system = new System();
 
 
 /** Password check */
-if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!=@$_REQUEST['password'] )
+if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
+    $passwordForDatabaseCreation!=@$_REQUEST['create_pwd'] )
 {
     //password not defined
-    $system->addError(HEURIST_REQUEST_DENIED, 'Invalid password');
+    $system->addError(HEURIST_ERROR, 'Invalid password');
     
 }else{
     if(@$_REQUEST['dbname']){
 
         $isSystemInited = $system->init(@$_REQUEST['db'], false);
-        $mysqli = null;
-
+        
+        if(!$isSystemInited){
+            print json_encode($system->getError());
+            exit();
+        }
+        
+        $mysqli = $system->get_mysqli();
+        
+/*
         if($isSystemInited){
             $mysqli = $system->get_mysqli();
         }else{
@@ -63,13 +71,9 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!=@$_REQU
                 $mysqli = $dbcon;     
             }
         }
-
-        if($mysqli==null){ //cannot connect to database server
-            print json_encode($system->getError());
-            exit();
-        }
+*/
         
-        $isNewUserRegistration = !$isSystemInited || !$system->has_access();
+        $isNewUserRegistration = !$system->has_access();
         
         if($isNewUserRegistration) { //this is creation+registration
 
@@ -78,13 +82,15 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!=@$_REQU
             //check capture
             if (@$_SESSION["captcha_code"] && $_SESSION["captcha_code"] != $captcha_code) {
                 
-                $system->addError(HEURIST_REQUEST_DENIED, 'Are you a bot? Please enter the correct answer to the challenge question');
+                $system->addError(HEURIST_ACTION_BLOCKED, 
+                    'Are you a bot? Please enter the correct answer to the challenge question');
                 print json_encode($system->getError());
                 exit();
             }
             if (@$_SESSION["captcha_code"]){
                 unset($_SESSION["captcha_code"]);
             }
+            unset($_REQUEST['ugr_Captcha']);
 
             $firstName = getUsrField('ugr_FirstName');
             $lastName = getUsrField('ugr_LastName');
@@ -93,7 +99,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!=@$_REQU
             $password = getUsrField('ugr_Password');
             if($firstName=='' || $lastName=='' || $eMail=='' || $name=='' || $password==''){
                 
-                $system->addError(HEURIST_INVALID_REQUEST, 'Mandatory data for your registration profile '
+                $system->addError(HEURIST_ACTION_BLOCKED, 'Mandatory data for your registration profile '
                     .'(first and last name, email, password) are not completed. Please fill out registration form');
                 print json_encode($system->getError());
                 exit();
@@ -118,6 +124,17 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!=@$_REQU
         
         $database_name = $uName . trim($_REQUEST['dbname']);
         $database_name_full = HEURIST_DB_PREFIX . $database_name; // all databases have common prefix then user prefix
+        
+        //verify that database with such name already exists
+        $dblist = mysql__select_list2($mysqli, 'show databases');
+        if ( array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
+                $system->addError(HEURIST_ERROR, 
+                        'Database with name '.$database_name_full.' aready exists. Try different name');
+                print json_encode($system->getError());
+                exit();
+        }
+        
+        
 
         //get path to registered db template and download coreDefinitions.txt
         $reg_url = @$_REQUEST['url_template'];  //NOT USED
@@ -131,7 +148,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!=@$_REQU
         }else if($reg_url){ //load db structure from registered database - NOT USED
             
             
-        }else if(false){ //set to false to debug workfloaw without actual db creation
+        }else if(true){ //set to false to debug workflow without actual db creation
             
             $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
             $templateFoldersContent = 'NOT DEFINED'; //it is used for tempalate database only
@@ -197,7 +214,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!=@$_REQU
             
             $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', $user_record);
             if($ret!=2){
-                array_push($warnings, 'Can not set owner user');                
+                array_push($warnings, 'Can not set owner user. '.$ret);                
             }
             
             //add default saved searches and tree
@@ -205,7 +222,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!=@$_REQU
                         
             $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>1, 'ugr_NavigationTree'=>$navTree ));
             if($ret!=1){
-                array_push($warnings, 'Can not set navigation tree for group 1');                
+                array_push($warnings, 'Can not set navigation tree for group 1. '.$ret);                
             }
             
 

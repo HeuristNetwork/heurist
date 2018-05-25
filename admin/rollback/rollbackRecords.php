@@ -30,20 +30,21 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+    define('MANAGER_REQUIRED',1);   
+    define('PDIR','../../');  //need for proper path to js and css    
+    
+    require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-
-    if(isForAdminOnly("to rollback the database")){
-       return;
-    }
 ?>
 <html>
 	<head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-	    <link rel="stylesheet" type="text/css" href="../../common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-
+        
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        
+        <link rel="icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+        
          <style>
               #form { width: 500px; margin:5px }
               #form input[type=text], #form textarea { width: 100% }
@@ -58,7 +59,9 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
               .detail-row.shade .insert { background-color: #88ee88 }
          </style>
 
-         <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+         
          <script type="text/javascript">
 	        $(function () {
 		        $(".record .detail-row:even").addClass("shade");
@@ -81,10 +84,11 @@ if (FALSE) {
             <div>Please advise Heurist developers if rollback is critical to your use of Heurist</div>
 
             <?php
+/* @TODO replae with H4            
             require_once(dirname(__FILE__)."/../../search/getSearchResults.php");
             require_once(dirname(__FILE__)."/../../common/php/getRecordInfoLibrary.php");
             require_once(dirname(__FILE__)."/rollbackRecordsFuncs.php");
-
+*/
             $ids = @$_REQUEST["ids"];
             $date = @$_REQUEST["date"];
             $rollback = @$_REQUEST["rollback"];

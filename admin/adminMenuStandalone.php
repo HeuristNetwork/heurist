@@ -194,7 +194,7 @@ if (array_key_exists('mode', $_REQUEST)) {
 
                             */
 
-                            menuEntry('','Rollback','rollback/rollbackRecords.php?db=',
+                            menuEntry('','Rollback','rollback/rollbackRecords.php?db='.HEURIST_DBNAME,
                             'Selectively roll back the data in the database to a specific date and time)');
                         }
                         ?>

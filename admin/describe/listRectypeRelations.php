@@ -186,8 +186,8 @@
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
         
-        <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+        <link rel="icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
         <style type="text/css">
             body {

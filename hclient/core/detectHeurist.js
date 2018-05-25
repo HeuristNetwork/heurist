@@ -28,7 +28,8 @@ if(!window.hWin.ResponseStatus){
             INVALID_REQUEST: "invalid",    // The Request provided was invalid.
             NOT_FOUND: "notfound",         // The requested object not found.
             OK: "ok",                      // The response contains a valid Result.
-            REQUEST_DENIED: "denied",      // The webpage is not allowed to use the service.
+            REQUEST_DENIED: "denied",      // The webpage is not allowed to use the service. User permissions.
+            ACTION_BLOCKED: "blocked",     // No enough rights or action is blocked by constraints
             DB_ERROR: "database",          // A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
             UNKNOWN_ERROR: "unknown",      // A request could not be processed due to a server error. The request may succeed if you try again.
             SYSTEM_CONFIG: "syscfg", // System NON-fatal configuration. Contact system admin

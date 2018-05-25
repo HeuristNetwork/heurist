@@ -100,27 +100,30 @@ class System {
                         return false;
                     }
                     
-                    if(!defined('HEURIST_DBNAME')){
-                        define('HEURIST_DBNAME', $this->dbname);
-                        define('HEURIST_DBNAME_FULL', $this->dbname_full);
-                    }
+                    if($this->dbname_full){
                     
+                        if(!defined('HEURIST_DBNAME')){
+                            define('HEURIST_DBNAME', $this->dbname);
+                            define('HEURIST_DBNAME_FULL', $this->dbname_full);
+                        }
+                        
 
-                    //@todo  - test upload and thumb folder exist and writeable
-                    if(!$this->initPathConstants()){
-                        $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
-                            "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
-                            "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
+                        //@todo  - test upload and thumb folder exist and writeable
+                        if(!$this->initPathConstants()){
+                            $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
+                                "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
+                                "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
 
-                        return false;
+                            return false;
+                        }
+
+                        $this->login_verify( false ); //load user info from session
+                        if($this->get_user_id()>0){
+                            //set current user for stored procedures (log purposes)
+                            $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
+                        }
+                        
                     }
-
-                    $this->login_verify( false ); //load user info from session
-                    if($this->get_user_id()>0){
-                        //set current user for stored procedures (log purposes)
-                        $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
-                    }
-                    
                     // consts
                     // @todo constants inited once in initPage for index (main) page only
                     // $this->defineConstants();    
