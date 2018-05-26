@@ -200,7 +200,6 @@ if(@$_REQUEST['output']=='csv'){
 }else{
 
     header('Content-type: application/json;charset=UTF-8');
-    //DEBUG error_log('RESP'.json_encode($response)); 
     print json_encode($response);
 }
 exit();

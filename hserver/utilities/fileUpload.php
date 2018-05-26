@@ -58,7 +58,7 @@ if($system->init(@$_REQUEST['db'])){
 }
 
 if($response!=null){
-    header('Content-type: application/json');
+    header('Content-type: application/json;charset=UTF-8');
     print json_encode($response);
     exit();
 }
@@ -201,7 +201,7 @@ if($response!=null){
     if($response==null){
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
-    header('Content-type: application/json');
+    header('Content-type: application/json;charset=UTF-8');
     print json_encode($response);
     
 

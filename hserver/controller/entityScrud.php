@@ -97,7 +97,7 @@
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
     
-    header('Content-type: application/json'); //'text/javascript');
+    header('Content-type: application/json;charset=UTF-8'); //'text/javascript');
     print json_encode($response);
     exit();
 ?>

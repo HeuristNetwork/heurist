@@ -27,6 +27,7 @@ require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 class DbDefRecTypes extends DbEntityBase 
 {
+    
     //remove
     function __construct( $system, $data ) {
        $this->system = $system;
@@ -58,7 +59,8 @@ class DbDefRecTypes extends DbEntityBase
     'rty_ShowDescriptionOnEditForm'=>'bool2',
     'rty_Modified'=>'date',
     'rty_LocallyModified'=>'bool2'
-    );
+    ); 
+    
     }
     
 
@@ -85,7 +87,7 @@ class DbDefRecTypes extends DbEntityBase
     */
     public function search(){
         
-        $this->searchMgr = new dbEntitySearch( $this->system, DbDefRecTypes::$fields);
+        $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
 
         /*
         if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
@@ -141,7 +143,7 @@ class DbDefRecTypes extends DbEntityBase
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = implode(',', DbDefRecTypes::$fields );
+            $this->data['details'] = implode(',', $this->fields );
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -150,7 +152,7 @@ class DbDefRecTypes extends DbEntityBase
         
         //validate names of fields
         foreach($this->data['details'] as $fieldname){
-            if(!@DbDefRecTypes::$fields[$fieldname]){
+            if(!@$this->fields[$fieldname]){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
                 return false;
             }            

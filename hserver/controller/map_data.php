@@ -408,16 +408,14 @@ if( $system->init(@$_REQUEST['db']) ){
 
     $system->defineConstants();
     // Get all Map Documents
-    $documents = getMapDocuments($system, @$_REQUEST['id']);
+    $response = array("status"=>HEURIST_OK, "data"=>getMapDocuments($system, @$_REQUEST['id']));
 
-    // Return the response object as JSON
-    header('Content-type: application/json');
-    print json_encode($documents);
 }else {
     // Show construction error
-    echo $system->getError();
+    $response = $system->getError();
 }
 
-exit();
-
+// Return the response object as JSON
+header('Content-type: application/json;charset=UTF-8');
+print json_encode($response);
 ?>

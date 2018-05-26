@@ -55,7 +55,7 @@ id - record id
     
         $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$term_id;
         if (@$_REQUEST['checkmode']=='1'){
-            header('Content-type: text/javascript');
+            header('Content-type: application/json;charset=UTF-8');
             if(file_exists($filename)){
                 print '{"res":"ok"}';
             }else{

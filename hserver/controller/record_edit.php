@@ -91,7 +91,7 @@
         }
     }
 
-    header('Content-type: text/javascript');
-    print json_encode($response);
-    exit();
+// Return the response object as JSON
+header('Content-type: application/json;charset=UTF-8');
+print json_encode($response);
 ?>

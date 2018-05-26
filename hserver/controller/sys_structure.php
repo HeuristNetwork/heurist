@@ -95,7 +95,7 @@ echo json_encode($response);
 $output = gzencode(ob_get_contents(),6); 
 ob_end_clean(); 
 header('Content-Encoding: gzip');
-header('Content-type: text/javascript');
+header('Content-type: application/json;charset=UTF-8');
 echo $output; 
 unset($output);   
 ?>

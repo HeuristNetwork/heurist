@@ -217,6 +217,6 @@
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
         
-    header('Content-type: text/javascript');
-    print json_encode($response);
+header('Content-type: application/json;charset=UTF-8');
+print json_encode($response);
 ?>
