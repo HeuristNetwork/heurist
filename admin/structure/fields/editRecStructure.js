@@ -38,10 +38,26 @@ var popupSelect = null;
 var Dom = YAHOO.util.Dom,
 Event = YAHOO.util.Event,
 DDM = YAHOO.util.DragDropMgr,
-Hul = top.HEURIST.util;
+Hul = window.hWin.HEURIST4.util;
 
 
-top.HEURIST.database.id = 1; //temp
+window.hWin.HEURIST4.util.validateName = function(name, lbl){
+      
+            var swarn = "";
+            var regex = /[\[\].\$]+/;
+            var name = name.toLowerCase();
+            if( name=="id" || name=="modified" || name=="rectitle"){
+                   swarn = lbl+", you defined, is a reserved word. Please try an alternative";
+            //}else if (name.indexOf('.')>=0 ) {  //regex.test(name)
+            }else if (name!=''  && !(/^[^.'"}{\[\]]+$/.test(name))) {
+                   swarn = lbl+" contains . [ ] { } ' \" restricted characters which are not permitted in this context. Please use alphanumeric characters.";
+            }else if (name.indexOf('<')>=0 && name.indexOf('<')< name.indexOf('>') ) {
+                   swarn = lbl+" contains '<>' characters which are not permitted in this context. Please use alphanumeric characters.";
+            }
+            return swarn;
+};
+
+
 
 function EditRecStructure() {
 
@@ -103,19 +119,12 @@ function EditRecStructure() {
     */
     function _init() {
         
-        if(!top.HEURIST.rectypes && window.hWin && window.hWin.HEURIST4){
-            top.HEURIST.rectypes = window.hWin.HEURIST4.rectypes;
-            top.HEURIST.detailTypes = window.hWin.HEURIST4.detailtypes;
-            top.HEURIST.terms = window.hWin.HEURIST4.terms;
-        }
 
-        db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-            (top.HEURIST.database.name?top.HEURIST.database.name:''));
+        db = window.hWin.HAPI4.database;
 
         // read GET parameters
         if (location.search.length > 1) {
-            window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-            rty_ID = window.HEURIST.parameters.rty_ID;
+            rty_ID = Hul.getUrlParameter('rty_ID', location.search);
         }
         _refreshTitleAndIcon();
         
@@ -136,8 +145,8 @@ function EditRecStructure() {
             if(Hul.isnull(rty_ID)) { return; }
 
             // take list of detail types from HEURIST DB
-            var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
-            var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+            var typedef = window.hWin.HEURIST4.rectypes.typedefs[rty_ID];
+            var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
 
             if(Hul.isnull(typedef)){
                 alert("Internal error: Record type ID "+rty_ID+" does not exist. Please report as bug.");
@@ -146,7 +155,7 @@ function EditRecStructure() {
             }
 
 
-            _rty_Status = typedef[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_Status];
+            _rty_Status = typedef[ window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_Status];
             _isReserved = (_rty_Status==='reserved'); // || (_rty_Status==='approved');
 
             //clear _updatedDetails and _updatedFields
@@ -174,25 +183,14 @@ function EditRecStructure() {
                     var statusLock;
                     var aval = _dts[rst_ID];
 
-                    var fieldType = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
-                    var conceptCode = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_ConceptID];
+                    var fieldType = window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type];
+                    var conceptCode = window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID];
                     
-                    /*get rid of garbage help text
-                    if (top.HEURIST.util.isnull(aval[fi.rst_DisplayHelpText]) ||
-                        aval[fi.rst_DisplayHelpText]=='Please rename to an appropriate heading within each record structure' || 
-                        aval[fi.rst_DisplayHelpText].indexOf('Please document the nature of this detail type')==0 ||
-                        aval[fi.rst_DisplayHelpText]=='Another separator field' ||
-                        aval[fi.rst_DisplayHelpText]=='Headings serve to break the data entry form up into sections'){
-                            
-                        aval[fi.rst_DisplayHelpText]='';
-                    }*/
-                    
-
                     arr.push([ rst_ID,
                         rst_ID,
                         rst_ID,
                         Number(aval[fi.rst_DisplayOrder]),
-                        top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Name], //field name
+                        window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Name], //field name
                         aval[fi.rst_DisplayName],
                         fieldType, //field type
                         aval[fi.rst_RequirementType],
@@ -304,7 +302,7 @@ function EditRecStructure() {
                                 if(oNewValue=='') {
                                     fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
                                 }else{
-                                    var swarn = top.HEURIST.util.validateName(oNewValue, "Prompt (display name)")
+                                    var swarn = window.hWin.HEURIST4.util.validateName(oNewValue, "Prompt (display name)")
                                     if(swarn!=""){
                                         alert(swarn);
                                         fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
@@ -341,7 +339,7 @@ function EditRecStructure() {
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var type = oRecord.getData("dty_Type");
                         if(type!=='separator'){
-                            elLiner.innerHTML = top.HEURIST.detailTypes.lookups[type];
+                            elLiner.innerHTML = window.hWin.HEURIST4.detailtypes.lookups[type];
                             if(type=='resource' && oRecord.getData("rst_CreateChildIfRecPtr")==1){
                                     elLiner.innerHTML = elLiner.innerHTML + ' (child)';     
                             }
@@ -459,7 +457,7 @@ function EditRecStructure() {
                         if (reqtype && reqtype.length > 0){
                             var type = oRecord.getData("dty_Type");
                             if( type=='enum' ){
-                                var term = top.HEURIST.terms.termsByDomainLookup['enum'][reqtype];
+                                var term = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][reqtype];
                                 if(term){
                                     reqtype = term[0].substring(0,15);
                                 }
@@ -531,7 +529,7 @@ function EditRecStructure() {
                         //var rst_values = obj.data.getData('rst_values');
                         var ccode = obj.data.getData("conceptCode");
                         
-                        var fieldType = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
+                        var fieldType = window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type];
                         var allowEditBaseFieldType = (fieldType=='enum' || fieldType=='resource' || fieldType=='relmarker' || fieldType=='relationtype');
                         var allowIncrement = (fieldType=='freetext') || (fieldType=='integer') || (fieldType=='float');
                         
@@ -549,7 +547,7 @@ function EditRecStructure() {
                         '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div>'+
                             '<div class="input-cell">'+
                                 '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" onchange="_onDispNameChange(event)" '+
-                                    'onkeypress="top.HEURIST.util.onPreventChars(event)" '+
+                                    'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" '+
                                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
                                 '<span>'+    
                                 // Field width
@@ -773,23 +771,20 @@ function EditRecStructure() {
                 var rst_ID = oRecord.getData("rst_ID");
 
                 // result listener for delete operation
-                function __updateAfterDelete(context) {
+                function __updateAfterDelete(response) {
 
-                    if(!Hul.isnull(context)){
+                    if(response.status == window.hWin.ResponseStatus.OK){
 
                         _myDataTable.deleteRow(oRecord.getId(), -1);
 
-                        top.HEURIST.rectypes = context.rectypes;
-                        top.HEURIST.detailTypes = context.detailTypes;
-                        
-                        if(top.hWin && top.hWin.HEURIST4){
-                            top.hWin.HEURIST4.rectypes = context.rectypes;
-                            top.hWin.HEURIST4.detailtypes = context.detailTypes;
-                        }
+                        window.hWin.HEURIST4.rectypes = response.rectypes;
+                        window.hWin.HEURIST4.detailtypes = response.detailtypes;
 
                         if(_myDataTable.getRecordSet().getLength()<1){
                             $("#recStructure_toolbar").show();
                         }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                     _isServerOperationInProgress = false;
                 }
@@ -813,16 +808,16 @@ function EditRecStructure() {
                            return;
                     }
 
-                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                    var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
 
-                    function _onCheckEntries(context)
+                    function _onCheckEntries(response)
                     {
-                        if(!Hul.isnull(context))
-                        {
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            
                             var dty_name = oRecord.getData('dty_Name');
 
                             var sWarn;
-                            if(context[rty_ID]){
+                            if(response.data[rty_ID]){
                                 sWarn = "This field #"+rst_ID+" '"+dty_name+"' is utilised in the title mask. If you delete it you will need to edit the title mask in the record type definition form (click on the pencil icon for the record type after exiting this popup).\n\n Do you still wish to delete this field?";
                                 var r=confirm(sWarn);
                             }else{
@@ -835,18 +830,22 @@ function EditRecStructure() {
                                 _doExpliciteCollapse(null ,false); //force collapse this row
 
                                 var callback = __updateAfterDelete;
-                                var params = "method=deleteRTS&db="+db+"&rtyID="+rty_ID+"&dtyID="+rst_ID;
+                                var request = {method:'deleteRTS', db:window.hWin.HAPI4.database, rtyID:rty_ID, dtyID:rst_ID};
                                 _isServerOperationInProgress = true;
-                                Hul.getJsonData(baseurl, callback, params);
+                                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback); 
                             }
-
-                        }
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }                                        
                     }
 
+                    
                     var callback = _onCheckEntries;
-                    var params = "method=checkDTusage&db="+db+"&rtyID="+rty_ID+"&dtyID="+rst_ID;
-                    top.HEURIST.util.getJsonData(baseurl, callback, params);
+                    var request = {method:'checkDTusage', db:window.hWin.HAPI4.database, rtyID:rty_ID, dtyID:rst_ID};
 
+                    window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback); 
+                    
                 }
             });
 
@@ -1110,8 +1109,8 @@ function EditRecStructure() {
     * (if order was changes it affects all types)
     */
     function _fromUItoArray(_rst_ID){
-        var arrStrucuture = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
-        var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames;
+        var arrStrucuture = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;
+        var fieldnames = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames;
 
         // gather data for given recstructure type
         function __setFor(__rst_ID){
@@ -1145,7 +1144,7 @@ function EditRecStructure() {
                     if(values[k] !== edt.value){
 
                         if(fieldnames[k]=="rst_DisplayName"){
-                            if(edt.value=='' || top.HEURIST.util.validateName(edt.value, "Prompt (display name)")!=""){
+                            if(edt.value=='' || window.hWin.HEURIST4.util.validateName(edt.value, "Prompt (display name)")!=""){
                                 continue;
                             }
                         }
@@ -1221,7 +1220,7 @@ function EditRecStructure() {
         }
 
         //saves back to HEURIST
-        top.HEURIST.rectypes.typedefs[rty_ID].dtFields = arrStrucuture;
+        window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields = arrStrucuture;
     }//end of _doExpliciteCollapse
 
     /**
@@ -1245,25 +1244,25 @@ function EditRecStructure() {
     */
     function _fromArrayToUI(rst_ID, isAll)
     {
-        var findex = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+        var findex = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
 
-        var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames,
-        values = top.HEURIST.rectypes.typedefs[rty_ID].dtFields[rst_ID],
-        rst_type = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[findex.dty_Type],
+        var fieldnames = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames,
+        values = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[rst_ID],
+        rst_type = window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[findex.dty_Type],
         selstatus = Dom.get('ed'+rst_ID+'_rst_Status'),
-        dbId = Number(top.HEURIST.database.id);
+        dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
 
         //find original dbid
-        var original_dbId = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_OriginatingDBID];
+        var original_dbId = values[window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_OriginatingDBID];
         if(Hul.isnull(original_dbId)){
             //if original dbid is not defined for this field, we take it from common(header) of rectype
-            //			original_dbId = top.HEURIST.rectypes.typedefs[rty_ID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_OriginatingDBID];
+            //			original_dbId = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_OriginatingDBID];
             if(Hul.isnull(original_dbId)){
                 original_dbId = dbId;
             }
         }
 
-        var status = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_Status];
+        var status = values[window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_Status];
         var isReserved = (status === "reserved");// || status === "approved");
 
         // Reserved can only be set on database controleld by the Heurist group, identified by DBID<1000
@@ -1280,13 +1279,13 @@ function EditRecStructure() {
         }
         
         //store to show warning for reserved field
-        $('#ed'+rst_ID+'_rst_RequirementType').attr('data-original', values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType]);
+        $('#ed'+rst_ID+'_rst_RequirementType').attr('data-original', values[window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType]);
         $(selstatus).attr('data-original', status);
 
         if(rst_type === "separator"){
 
             $('#ed'+rst_ID+'_rst_RequirementType_separator').attr('checked',
-            values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType]=='forbidden');
+            values[window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType]=='forbidden');
         }else{
             $('#ed'+rst_ID+'_rst_RequirementType_separator').parents('.input-row').hide();  
             //.parentNode.parentNode.style.display = "block";  
@@ -1322,14 +1321,14 @@ function EditRecStructure() {
 
                         /* Ian's request - no more filtering. ARTEM. WTF??? Why hardcode index again????!!!
                         recreateTermsPreviewSelector(rst_type,
-                        (Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[9]:edt2.value),//dty_JsonTermIDTree
-                        (Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[10]:edt.value),//dty_TermIDTreeNonSelectableIDs
+                        (Hul.isempty(edt2.value)?window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[9]:edt2.value),//dty_JsonTermIDTree
+                        (Hul.isempty(edt.value)?window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[10]:edt.value),//dty_TermIDTreeNonSelectableIDs
                         edt_def.value);
                         */
-                        var allTerms = (Hul.isempty(edt2.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[findex.dty_JsonTermIDTree]:edt2.value);
-                        var disabledTerms = (Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[findex.dty_TermIDTreeNonSelectableIDs]:edt.value);
-                        var _dtyID = top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[findex['dty_ID']];
-                        if(_dtyID==top.HEURIST.magicNumbers['DT_RELATION_TYPE']){ //specific behaviour
+                        var allTerms = (Hul.isempty(edt2.value)?window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[findex.dty_JsonTermIDTree]:edt2.value);
+                        var disabledTerms = (Hul.isempty(edt.value)?window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[findex.dty_TermIDTreeNonSelectableIDs]:edt.value);
+                        var _dtyID = window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[findex['dty_ID']];
+                        if(_dtyID == window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']){ //specific behaviour
                             allTerms = 0;
                             disabledTerms = "";
                         }
@@ -1355,10 +1354,10 @@ function EditRecStructure() {
 
                         /* Ian's request - no more filtering
                         recreateRecTypesPreview(rst_type,
-                        (Hul.isempty(edt.value)?top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[11]:edt.value) ); //dty_PtrTargetRectypeIDs
+                        (Hul.isempty(edt.value)?window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[11]:edt.value) ); //dty_PtrTargetRectypeIDs
                         */
                         recreateRecTypesPreview(rst_type,
-                            top.HEURIST.detailTypes.typedefs[rst_ID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs]);
+                            window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs]);
 
                         // IAN's request 2013-02-14
                         var edt_def = Dom.get('ed'+rst_ID+'_rst_DefaultValue');
@@ -1475,11 +1474,11 @@ function EditRecStructure() {
 
         //find seprator field type ID that is not yet added to this record strucuture
         var ft_separator_id =  null;
-        var ft_separator_group =  top.HEURIST.detailTypes.groups[0].id;
-        var dtypes = top.HEURIST.detailTypes.typedefs;
-        var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
-        var fnames = top.HEURIST.detailTypes.typedefs.commonFieldNames;
-        var recDetTypes = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
+        var ft_separator_group =  window.hWin.HEURIST4.detailtypes.groups[0].id;
+        var dtypes = window.hWin.HEURIST4.detailtypes.typedefs;
+        var fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
+        var fnames = window.hWin.HEURIST4.detailtypes.typedefs.commonFieldNames;
+        var recDetTypes = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;
 
         var ind, k = 1;
         for (ind in dtypes){
@@ -1554,7 +1553,7 @@ function EditRecStructure() {
                                 ft_separator_id = ""+Math.abs(Number(item));
 
                                 //refresh the local heurist
-                                top.HEURIST.detailTypes = context.detailTypes;
+                                window.hWin.HEURIST4.detailtypes = context.detailTypes;
 
                                 _doExpliciteCollapse(null, true);
                                 _addDetails(ft_separator_id, index_toinsert);
@@ -1565,7 +1564,7 @@ function EditRecStructure() {
             }
 
             //
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = _addNewSeparator;
             var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
             Hul.getJsonData(baseurl, callback, params);
@@ -1592,7 +1591,7 @@ function EditRecStructure() {
             return;
         }
 
-        var recDetTypes = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
+        var recDetTypes = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;
 
         //new odetail type
         if(Hul.isnull(recDetTypes)){
@@ -1600,9 +1599,9 @@ function EditRecStructure() {
         }
 
         var data_toadd = [];
-        var detTypes = top.HEURIST.detailTypes.typedefs,
-        fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex,
-        rst = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+        var detTypes = window.hWin.HEURIST4.detailtypes.typedefs,
+        fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex,
+        rst = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
 
         //find max order and index to insert
         var recs = _myDataTable.getRecordSet();
@@ -1708,7 +1707,7 @@ function EditRecStructure() {
         }//end for
 
         if(data_toadd.length>0){
-            top.HEURIST.rectypes.typedefs[rty_ID].dtFields = recDetTypes;
+            window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields = recDetTypes;
 
             _myDataTable.addRows(data_toadd, index_toinsert);
 
@@ -1759,7 +1758,7 @@ function EditRecStructure() {
                 if(_updatedDetails.indexOf(data.rst_ID)<0){
                     _updatedDetails.push(data.rst_ID);
                 }
-                top.HEURIST.rectypes.typedefs[rty_ID].dtFields[data.rst_ID][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder] = i;
+                window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[data.rst_ID][window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder] = i;
                 isChanged = true;
             }
             neworder.push(data.rst_ID);
@@ -1767,12 +1766,12 @@ function EditRecStructure() {
 
         if(isChanged){
             //index if field rst_DisplayOrder
-            var field_index = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder;
+            var field_index = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder;
 
             if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(field_index)<0){
                 _updatedFields.push(field_index);
             }
-            top.HEURIST.rectypes.dtDisplayOrder[rty_ID] = neworder;
+            window.hWin.HEURIST4.rectypes.dtDisplayOrder[rty_ID] = neworder;
             _saveUpdates(false);
         }
         
@@ -1817,14 +1816,10 @@ function EditRecStructure() {
      
             var updateResult = function(context){
                 if(!Hul.isnull(context)){
-                    var win = top;
-                    win.HEURIST.rectypes = context.rectypes;
-                    win.HEURIST.detailTypes = context.detailTypes;
-                        if(win.hWin && win.hWin.HEURIST4){
-                            win.hWin.HEURIST4.rectypes = context.rectypes;
-                            win.hWin.HEURIST4.detailtypes = context.detailTypes;
-                            win.hWin.HEURIST4.terms = context.terms;
-                        }
+
+                    window.hWin.HEURIST4.rectypes = context.rectypes;
+                    window.hWin.HEURIST4.detailtypes = context.detailtypes;
+                    window.hWin.HEURIST4.terms = context.terms;
     
                     editStructure._structureWasUpdated = true;
                     
@@ -1842,7 +1837,7 @@ function EditRecStructure() {
             
             $('.save-btn').prop('disabled', 'disabled').css('opacity','0.3');
             
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = updateResult;
             var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
 
@@ -1882,7 +1877,7 @@ function EditRecStructure() {
                 defs: {}
             }};
             //fill array of updated fieldnames
-            var fieldnames = top.HEURIST.rectypes.typedefs.dtFieldNames;
+            var fieldnames = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames;
             if(Hul.isnull(_updatedFields)){ //all fields are updated
                 _updatedFields = [];
                 for(k=0; k<fieldnames.length; k++){
@@ -1895,7 +1890,7 @@ function EditRecStructure() {
                 }
             }
             orec.rectype.defs[rty_ID] = {common:[], dtFields:{}};
-            var typedefs = top.HEURIST.rectypes.typedefs[rty_ID].dtFields;
+            var typedefs = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;
             //loop through updated details
             for(k=0; k<_updatedDetails.length; k++){
                 var dt_id = _updatedDetails[k];
@@ -1933,13 +1928,10 @@ function EditRecStructure() {
         if(!Hul.isnull(str)){
             var updateResult = function(context){
                 if(!Hul.isnull(context)){
-                    top.HEURIST.rectypes = context.rectypes;
-                    top.HEURIST.detailTypes = context.detailTypes;
-                        if(top.hWin && top.hWin.HEURIST4){
-                            top.hWin.HEURIST4.rectypes = context.rectypes;
-                            top.hWin.HEURIST4.detailtypes = context.detailTypes;
-                            top.hWin.HEURIST4.terms = context.terms;
-                        }
+                    
+                    window.hWin.HEURIST4.rectypes = context.rectypes;
+                    window.hWin.HEURIST4.detailtypes = context.detailtypes;
+                    window.hWin.HEURIST4.terms = context.terms;
                     
                     editStructure._structureWasUpdated = true;
                 }
@@ -1948,7 +1940,7 @@ function EditRecStructure() {
                     window.close(editStructure._structureWasUpdated);
                 }
             };
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = updateResult;
             var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
             _isServerOperationInProgress = true;
@@ -1964,8 +1956,8 @@ function EditRecStructure() {
     */
     function _checkForRequired(){
         
-        var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
-        var fi = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+        var typedef = window.hWin.HEURIST4.rectypes.typedefs[rty_ID];
+        var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
         var _dts = typedef.dtFields;
 
         //only for this group and visible in UI
@@ -1988,51 +1980,55 @@ function EditRecStructure() {
     */
     function _checkForTitleMask(callback)
     {
-        var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
-        var maskvalue = typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
+        var typedef = window.hWin.HEURIST4.rectypes.typedefs[rty_ID];
+        var mask = typedef.commonFields[ window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
+        
+        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
 
-        var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
-        var squery = "rty_id="+rty_ID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db+"&check=1";
+        var request = {rty_id:rty_ID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+            function (response) {
+                if(response.status != window.hWin.ResponseStatus.OK || response.message){
 
-        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-            var obj = xhr.responseText;
-            if(obj==="" || obj==="\n"){
-                if(callback){
-                    callback.call();
-                }
-            }else{
-                //alert('It appears that you removed some field(s) that are in use in the title mask. Please edit the title mask to correct it. '+obj);
-                var ele = document.getElementById("dlgWrongTitleMask");
+                    var ele = document.getElementById("dlgWrongTitleMask");
 
+                    var $dlg_warn = Hul.popupTinyElement(window, ele,
+                        { "no-titlebar": false, "no-close": false, width: 400, height:160 });
 
-                var $dlg_warn = Hul.popupTinyElement(window, ele,
-                    { "no-titlebar": false, "no-close": false, width: 400, height:160 });
-
-                $(ele).find("#dlgWrongTitleMask_closeBtn").click(function(){
-                    if($dlg_warn!=null){
-                        $dlg_warn.dialog('close');
+                    $(ele).find("#dlgWrongTitleMask_closeBtn").click(function(){
+                        if($dlg_warn!=null){
+                            $dlg_warn.dialog('close');
+                        }
+                        _doEditTitleMask(true);
+                    });
+                    
+                }else{ //correct mask
+                    if(callback){
+                        callback.call();
                     }
-                    _doEditTitleMask(true);
-                });
-
+                }                                        
             }
+        );
 
-            }, squery);
     }
 
 
     //show edit title mask
     function _doEditTitleMask(is_onexit){
-        if(is_onexit) top.HEURIST.util.closePopupLast();
-        //top.HEURIST.util.closePopup(warningPopupID);
+        
+        //@todo if(is_onexit) top.HEURIST.util.closePopupLast();
+        
         warningPopupID = null;
-        //top.HEURIST.util.closePopupAll();
-        var typedef = top.HEURIST.rectypes.typedefs[rty_ID];
-        var maskvalue = typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
+        
+        var typedef = window.hWin.HEURIST4.rectypes.typedefs[rty_ID];
+        var maskvalue = typedef.commonFields[ window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
 
-        Hul.popupURL(top, top.HEURIST.baseURL +
-            "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db,
-            {
+        var sURL = window.hWin.HAPI4.baseURL +
+            "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID
+            +"&mask="+encodeURIComponent(maskvalue)+"&db="+window.hWin.HAPI4.database;
+            
+        window.hWin.HEURIST4.msg.showDialog(sURL, {    
                 "close-on-blur": false,
                 "no-resize": true,
                 title: 'Record Type Title Mask Edit',
@@ -2050,7 +2046,7 @@ function EditRecStructure() {
     }
 
     function _onAddFieldAtIndex(e, isSectionHeader){
-        e = top.HEURIST.util.stopEvent(e);
+        e = window.hWin.HEURIST4.util.stopEvent(e);
         var targ = e.target;
         var rst_ID = targ.getAttribute("rst_ID")
 
@@ -2070,15 +2066,15 @@ function EditRecStructure() {
 
     //Ian decided to remove this feature -however it may be helpful in another place
     var onMenuClick = function (eventName, eventArgs, subscriptionArg){
-        var clonearr = top.HEURIST.util.cloneObj(subscriptionArg);
+        var clonearr =  window.hWin.HEURIST4.util.cloneJSON(subscriptionArg);
         var fname = clonearr.shift();
         var args = clonearr;
-        top.HEURIST.util.executeFunctionByName(fname, window, args);
+        //@todo top.HEURIST.util.executeFunctionByName(fname, window, args);
     }
 
     function _addFieldMenu(e){
 
-        e = top.HEURIST.util.stopEvent(e);
+        e = window.hWin.HEURIST4.util.stopEvent(e);
         var targ = e.target;
         var rst_ID = targ.getAttribute("rst_ID")
 
@@ -2216,7 +2212,7 @@ function EditRecStructure() {
                 }
 
                 //@todo update rst_values directly
-                top.HEURIST.rectypes.typedefs[rty_ID].dtFields[data.rst_ID][top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder] = i;
+                window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[data.rst_ID][window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder] = i;
                 /*
                 var ed_name = 'ed'+data.rst_ID+'_rst_DisplayOrder';
                 var edt = Dom.get(ed_name);
@@ -2230,12 +2226,12 @@ function EditRecStructure() {
 
         if(isChanged){
             //index if field rst_DisplayOrder
-            var field_index = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder;
+            var field_index = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder;
 
             if(!Hul.isnull(_updatedFields) && _updatedFields.indexOf(field_index)<0){
                 _updatedFields.push(field_index);
             }
-            top.HEURIST.rectypes.dtDisplayOrder[rty_ID] = neworder;
+            window.hWin.HEURIST4.rectypes.dtDisplayOrder[rty_ID] = neworder;
 
             dragDropDisable();
             dragDropEnable();
@@ -2380,15 +2376,15 @@ function EditRecStructure() {
     
     
     function _refreshTitleAndIcon(){
-        var recTypeIcon  = top.HEURIST.iconBaseURL+rty_ID+'&t='+(new Date()).getTime();
+        var recTypeIcon  = window.hWin.HAPI4.iconBaseURL+rty_ID+'&t='+(new Date()).getTime();
         var formTitle = document.getElementById('recordTitle');
         //formTitle.innerHTML = '';
         formTitle.innerHTML = "<div class=\"rectypeIconHolder\" style=\"background-image:url("+
-                recTypeIcon+")\"></div><span class=\"recTypeName\">"+top.HEURIST.rectypes.names[rty_ID]+"</span>"+
+                recTypeIcon+")\"></div><span class=\"recTypeName\">"+window.hWin.HEURIST4.rectypes.names[rty_ID]+"</span>"+
                 hToolBar;
         
-        var fi  = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
-        var rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
+        var fi  = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex;
+        var rectype = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields;
 
         document.getElementById('rty_TitleMask').value = rectype[fi.rty_TitleMask];
         document.getElementById('rty_Description').innerHTML = rectype[fi.rty_Description];
@@ -2409,12 +2405,12 @@ function EditRecStructure() {
 
         var parentRecordTypes = []; //result
         
-        var fieldIndexMap = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex;
+        var fieldIndexMap = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
         //var dtyFieldNamesIndexMap = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
         
         childRecordType = ''+childRecordType; //must be strig otherwise indexOf fails
         
-        var rtyID, dtyID, allrectypes = top.HEURIST.rectypes.typedefs;
+        var rtyID, dtyID, allrectypes = window.hWin.HEURIST4.rectypes.typedefs;
         for (rtyID in allrectypes)
         if(rtyID>0){
 
@@ -2510,8 +2506,7 @@ function EditRecStructure() {
         },
 
         closeWarningPopup: function(){
-            top.HEURIST.util.closePopupLast();
-            //top.HEURIST.util.closePopup(warningPopupID);
+            //top.HEURIST.util.closePopupLast();
             warningPopupID = null;
         },
 
@@ -2588,12 +2583,14 @@ function onAddNewDetail(index_toinsert){
         //var pos = this.window.offset();
         // x: pos.left+$(window).width(),
         // y: pos.top,
-        var dim = top.HEURIST.util.innerDimensions(top);
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-            (top.HEURIST.database.name?top.HEURIST.database.name:''));
-        popupSelect = Hul.popupURL(window, top.HEURIST.baseURL +
-            "admin/structure/fields/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+db,
-            {	"close-on-blur": false,
+        var body = $(window.hWin.document).find('body');
+        var dim = {h:body.innerHeight(), w:body.innerWidth()};
+            
+        var sURL = window.hWin.HAPI4.baseURL +
+            "admin/structure/fields/selectDetailType.html?rty_ID="+editStructure.getRty_ID()+"&db="+window.hWin.HAPI4.database;
+        
+        window.hWin.HEURIST4.msg.showDialog(sURL, {    
+                "close-on-blur": false,
                 "no-resize": false,
                 title: 'Add Field', // or Section Header
                 height: dim.h*0.9,
@@ -2629,12 +2626,10 @@ function onDefineNewType(index_toinsert){
     {
         editStructure.doExpliciteCollapse(null, true);
 
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-            (top.HEURIST.database.name?top.HEURIST.database.name:''));
-        var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db;
+        var sURL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editDetailType.html?db="+window.hWin.HAPI4.database;
 
-        popupSelect = Hul.popupURL(top, url,
-            {	"close-on-blur": false,
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+            	"close-on-blur": false,
                 "no-resize": false,
                 title: 'Edit field type',
                 height: 700,
@@ -2643,7 +2638,7 @@ function onDefineNewType(index_toinsert){
 
                     if(!Hul.isnull(context)){
                         //refresh the local heurist
-                        top.HEURIST.detailTypes = context.detailTypes;
+                        window.hWin.HEURIST4.detailtypes = context.detailTypes;
 
                         //new field type to be added
                         var dty_ID = Math.abs(Number(context.result[0]));
@@ -2684,7 +2679,7 @@ function onUpdateStructureOnServer(needClose)
 */
 function onStatusChange(evt){
     
-    var dbId = Number(top.HEURIST.database.id);
+    var dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
     
     if(dbId>=1000) return;
 
@@ -2772,8 +2767,8 @@ function onReqtypeChange(evt){
     if (status === "reserved"){
         
         /*var rty_ID = editStructure.getRty_ID();
-        var values = top.HEURIST.rectypes.typedefs[rty_ID].dtFields[rst_ID];    
-        var curr_value = values[top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType];     */
+        var values = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[rst_ID];    
+        var curr_value = values[window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType];     */
         var curr_value = $(el).attr('data-original');
         var new_value = el.value;
         if(new_value=='forbidden' || new_value=='hidden'){
@@ -3070,10 +3065,10 @@ sMsg = sMsg
 function onCreateChildIfRecPtrInfo(evt){
   evt.preventDefault();
     
-  top.HEURIST.util.popupElement(
-                hasH4()?top:window.hWin, 
-                document.getElementById('info_rst_CreateChildIfRecPtr'),
-                {title:'Creation of records as children',height:300});
+  window.hWin.HEURIST4.msg.showElementAsDialog({
+      element:document.getElementById('info_rst_CreateChildIfRecPtr'),
+      title:'Creation of records as children',height:300}
+  );
     
   return false;
 }
@@ -3127,7 +3122,12 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
                 parent.removeChild(parent.childNodes[0]);
             }
 
-            el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, datatype, _defvalue, isdefselector);
+            //el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, datatype, _defvalue, isdefselector);
+            el_sel = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
+                    {datatype:datatype, termIDTree:allTerms, headerTermIDsList:disabledTerms,
+                     defaultTermID:_defvalue, topOptions:null, needArray:false, useHtmlSelect:false});
+            el_sel = el_sel[0];
+            
             el_sel.id = 'ed'+rst_ID+'_rst_DefaultValue';
             el_sel.style.backgroundColor = bgcolor;
             el_sel.onchange =  onchangehandler;
@@ -3159,7 +3159,7 @@ function recreateRecTypesPreview(type, value) {
         var arr = value.split(","),
         ind, dtName;
         for (ind in arr) {
-            dtName = top.HEURIST.rectypes.names[arr[ind]];
+            dtName = window.hWin.HEURIST4.rectypes.names[arr[ind]];
             if(!txt) {
                 txt = dtName;
             }else{
@@ -3181,7 +3181,7 @@ function recreateRecTypesPreview(type, value) {
 
 function _onDispNameChange(event){
     var name = event.target.value;
-    var swarn = top.HEURIST.util.validateName(name, "Prompt (display name)");
+    var swarn = window.hWin.HEURIST4.util.validateName(name, "Prompt (display name)");
     if(swarn){
         alert(swarn);
     }
@@ -3195,20 +3195,20 @@ function _onAddEditFieldType(dty_ID, rty_ID){
     //show warning first
     
     //find all records that reference this type
-    var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
+    var aUsage = window.hWin.HEURIST4.detailtypes.rectypeUsage[dty_ID];
     if(!Hul.isnull(aUsage)){
 
         textTip = '';
         var k;
         for (k in aUsage) {
             if(rty_ID!=aUsage[k]){
-                //textTip = textTip + '<li>'+aUsage[k]+'  '+top.HEURIST.rectypes.names[aUsage[k]]+'</li>';
-                textTip = textTip + aUsage[k]+'  '+top.HEURIST.rectypes.names[aUsage[k]]+'\n';
+                //textTip = textTip + '<li>'+aUsage[k]+'  '+window.hWin.HEURIST4.rectypes.names[aUsage[k]]+'</li>';
+                textTip = textTip + aUsage[k]+'  '+window.hWin.HEURIST4.rectypes.names[aUsage[k]]+'\n';
             }
         }
         if(textTip!=''){
         
-            var detname = top.HEURIST.detailTypes.names[dty_ID];
+            var detname = window.hWin.HEURIST4.detailtypes.names[dty_ID];
             if(detname.length>40) { detname = detname.substring(0,40)+"..."; }
 
             textTip = //'<b>Warning: Use with care</b><br>'
@@ -3224,14 +3224,11 @@ function _onAddEditFieldType(dty_ID, rty_ID){
     }    
     
     
-    
-    
-    var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-        (top.HEURIST.database.name?top.HEURIST.database.name:''));
-    var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db+ "&detailTypeID="+dty_ID; //existing
+    var sURL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editDetailType.html?db="
+        +window.hWin.HAPI4.database+ "&detailTypeID="+dty_ID; //existing
 
-    top.HEURIST.util.popupURL(top, url,
-        {   "close-on-blur": false,
+    window.hWin.HEURIST4.msg.showDialog(sURL, {
+           "close-on-blur": false,
             "no-resize": false,
             height: 680,
             width: 840,
@@ -3244,31 +3241,31 @@ function _onAddEditFieldType(dty_ID, rty_ID){
                     /*if user changes group in popup need update both  old and new group tabs
                     var grpID_old = -1;
                     if(Number(context.result[0])>0){
-                    grpID_old = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7];
+                    grpID_old = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields[7];
                     }*/
 
                     //refresh the local heurist
-                    top.HEURIST.detailTypes = context.detailTypes;
+                    window.hWin.HEURIST4.detailtypes = context.detailTypes;
                     _cloneHEU = null;
                     
                     editStructure._structureWasUpdated = true; //no access  to top object
                     
-                    var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+                    var fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
 
-                    var rst_type = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_Type];
+                    var rst_type = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields[fi.dty_Type];
                     //update
                     if(rst_type === "enum" || rst_type === "relmarker" || rst_type === "relationtype"){
                         recreateTermsPreviewSelector(dty_ID, rst_type,
-                            top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_JsonTermIDTree],
-                            top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_TermIDTreeNonSelectableIDs], null);
+                            window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields[fi.dty_JsonTermIDTree],
+                            window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields[fi.dty_TermIDTreeNonSelectableIDs], null);
                     }
                     if(rst_type === "relmarker" || rst_type === "resource"){
                         recreateRecTypesPreview(dty_ID,
-                            top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[fi.dty_PtrTargetRectypeIDs]); //rst_type, null);
+                            window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields[fi.dty_PtrTargetRectypeIDs]); //rst_type, null);
                     }
 
                     /*detect what group
-                    var grpID = top.HEURIST.detailTypes.typedefs[dty_ID].commonFields[7];
+                    var grpID = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields[7];
 
                     _removeTable(grpID, true);
                     if(grpID_old!==grpID){
@@ -3286,17 +3283,15 @@ function _onAddEditFieldType(dty_ID, rty_ID){
 
 function onEditRecordType(){
 
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-            (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            
-        var url = top.HEURIST.baseURL 
+        var sURL = window.hWin.HAPI4.baseURL 
                     + "admin/structure/rectypes/editRectype.html?supress=1&db="
-                    + db+"&rectypeID="+editStructure.getRty_ID();
+                    + window.hWin.HAPI4.database +"&rectypeID="+editStructure.getRty_ID();
 
-        var dim = Hul.innerDimensions(top);                    
+        var body = $(window.hWin.document).find('body');
+        var dim = {h:body.innerHeight(), w:body.innerWidth()};
         
-        popupSelect = Hul.popupURL(top, url,
-            {   "close-on-blur": false,
+    window.hWin.HEURIST4.msg.showDialog(sURL, {
+                "close-on-blur": false,
                 "no-resize": false,
                 title:'Edit Record Type',
                 height: dim.h*0.9,
@@ -3305,13 +3300,8 @@ function onEditRecordType(){
             callback: function(context) {
 
                 if(!Hul.isnull(context) && context.result){
-
                      //refresh the local heurist
-                     top.HEURIST.rectypes = context.rectypes;
-                        if(top.hWin && top.hWin.HEURIST4){
-                            top.hWin.HEURIST4.rectypes = context.rectypes;
-                        }
-                     //var _rtyID = Number(context.result[0]);
+                    window.hWin.HEURIST4.rectypes = context.rectypes;
                 }
                 //refresh icon, title, mask
                 editStructure.refreshTitleAndIcon();
@@ -3323,4 +3313,3 @@ function onEditRecordType(){
         
         return false;
 }
-

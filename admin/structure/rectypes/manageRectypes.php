@@ -55,12 +55,48 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
 <!-- END PAGINATOR -->
 
+<link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+<link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+<link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+
+<style>
+.yui-skin-sam .yui-dt td {
+    margin: 0;
+    padding: 0;
+    border: none;
+    text-align: left;
+}
+.yui-skin-sam .yui-dt tr.separator, .yui-skin-sam .yui-dt tr.separator td.yui-dt-asc, .yui-skin-sam .yui-dt tr.separator td.yui-dt-desc, .yui-skin-sam .yui-dt tr.separator td.yui-dt-asc, .yui-skin-sam .yui-dt tr.separator td.yui-dt-desc {
+    font-style: italic;
+    font-weight: bold;
+    font-size: 1.4em;
+}
+</style>
+
+        <script type="text/javascript" src="manageRectypes.js"></script>
+        
+        <script type="text/javascript">
+            
+            function onPageInit(success){
+                
+                if(!success) return;
+                
+                window.rectypeManager = new RectypeManager();
+                window.rectypeManager.init()
+
+                window.onbeforeunload = function () {
+                    var changed = rectypeManager.hasChanges();
+                    if (changed) return "You have made changes.  If you continue, all changes will be lost.";
+                }
+            }
+        </script>
+        
+
 </head>
 <body class="popup yui-skin-sam">
 
     <script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
     <script type="text/javascript" src="../../../common/js/tabDragDrop.js"></script>
-    <script type="text/javascript" src="manageRectypes.js"></script>
 
 <div>
 <?php
@@ -91,14 +127,6 @@ if(@$_REQUEST['popup']!=1){
                 <input id="yui-history-field" type="hidden">
 
                 <div id="modelTabs" class="yui-navset yui-navset-top">
-                    <script	 type="text/javascript">
-                        rectypeManager = new RectypeManager();
-                        YAHOO.util.Event.addListener(window, "load", rectypeManager.init());
-                        window.onbeforeunload = function () {
-                            var changed = rectypeManager.hasChanges();
-                            if (changed) return "You have made changes.  If you continue, all changes will be lost.";
-                        }
-                    </script>
                 </div>
             </div>
 </div>

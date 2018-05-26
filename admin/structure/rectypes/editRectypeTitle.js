@@ -480,17 +480,22 @@ function EditRectypeTitle() {
      */
     function _doTest()
     {
-        var mask = document.getElementById('rty_TitleMask').value;
-        var rec_type = top.HEURIST.parameters.rectypeID;
-
         //verify text title mask    
-        var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
-        //var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
-        var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
+        var mask = document.getElementById('rty_TitleMask').value;
+        var rectypeID = top.HEURIST.parameters.rectypeID;
 
-        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-                var obj = xhr.responseText;
-                if(obj==="" || obj==="\n"){
+        var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
+
+        var request = {rty_id:rectypeID, mask:mask, db:db, check:1}; //verify titlemask
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+            function (response) {
+                if(response.status != window.hWin.ResponseStatus.OK || response.message){
+
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    
+                }else{
+                    
                     var sel = Dom.get("listRecords");
                     if (sel.selectedIndex>0){
 
@@ -503,11 +508,10 @@ function EditRectypeTitle() {
                     }else{
                         alert('Select a record from the pulldown to test your title mask');
                     }
-                }else{
-                    alert(obj);
-                }
-
-            }, squery);
+                }                                        
+            }
+        );
+        
     }
 
     /**
@@ -529,24 +533,22 @@ function EditRectypeTitle() {
             return;
         }
         
-        
-        var mask = document.getElementById('rty_TitleMask').value;
-        //var rec_type = top.HEURIST.parameters.rectypeID;
-
         //verify text mask 
-        var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
-        //var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
-        var squery = "rty_id="+_rectypeID+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
+        var mask = document.getElementById('rty_TitleMask').value;
+        var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
 
-        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-               var obj = xhr.responseText;
-               if(obj==="" || obj==="\n"){
+        var request = {rty_id:_rectypeID, mask:mask, db: window.hWin.HAPI4.database, check:1}; //verify titlemask
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+            function (response) {
+                if(response.status != window.hWin.ResponseStatus.OK || response.message){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }else{
                     _doSave_Step2_SaveRectype();
-               }else{
-                    alert(obj);
-               }
-
-            }, squery);
+                }                                        
+            }
+        );
+        
     }
     /**
     * Second step - update record type definition
@@ -610,26 +612,27 @@ function EditRectypeTitle() {
     function _doCanonical(mode){
 
         var mask = (mode==2)?document.getElementById('rty_TitleMask').value :document.getElementById('rty_CanonincalMask').value;
-        var rec_type = top.HEURIST.parameters.rectypeID;
+        var rectypeID = top.HEURIST.parameters.rectypeID;
+        
+        var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
 
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-            (top.HEURIST.database.name?top.HEURIST.database.name:''));
+        var request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+            function (response) {
+                if(response.status != window.hWin.ResponseStatus.OK || response.message){
 
-
-        var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
-        //var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
-        var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check="+mode;
-
-        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-                var obj = xhr.responseText;
-
-                if(mode==2){
-                    document.getElementById('rty_CanonincalMask').value = obj;
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    
                 }else{
-                    document.getElementById('rty_TitleMask').value = obj;
-                }
-            }, squery);
-
+                    if(mode==2){
+                        document.getElementById('rty_CanonincalMask').value = obj;
+                    }else{
+                        document.getElementById('rty_TitleMask').value = obj;
+                    }
+                }                                        
+            }
+        );        
     }
 
     //

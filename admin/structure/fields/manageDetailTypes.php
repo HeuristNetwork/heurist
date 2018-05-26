@@ -31,19 +31,11 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../../');  //need for proper path to js and css    
 
-// User must be system administrator or admin of the owners group for this database
-require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-
-    if(isForAdminOnly("to modify database structure")){
-        return;
-    }
+require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 ?>
-<html>
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		<title>Manage Field Types</title>
-
 		<!-- YUI -->
 		<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 		<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
@@ -80,17 +72,32 @@ require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 	cursor:auto !important;
 }
 		</style>
+        
+        <script src="manageDetailTypes.js"></script>
+        
+        <script type="text/javascript">
+            
+            function onPageInit(success){
+                
+                if(!success) return;
+                
+                window.detailTypeManager = new DetailTypeManager();
+                window.detailTypeManager.init()
+                
+                window.onbeforeunload = function () {
+                        var changed = detailTypeManager.hasChanges();
+                        if (changed) return "You have made changes.  If you continue, all changes will be lost.";
+                }
+            
+            }
+        </script>
+        
 	</head>
 
 	<body class="popup yui-skin-sam">
 
-		<script src="../../../common/js/utilsLoad.js"></script>
-		<script src="../../../common/php/displayPreferences.php"></script>
-		<script src="../../../common/php/loadCommonInfo.php"></script>
 		<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
         <script type="text/javascript" src="../../../common/js/tabDragDrop.js"></script>
-		<script src="manageDetailTypes.js"></script>
-
 
 	<div id="delete-message" style="display:none;">
 		<div id="delete-message-text" style="position:absolute;left:0;right:0;top:26;bottom:0;padding:15px;overflow:auto;"></div>
@@ -122,17 +129,6 @@ if(@$_REQUEST['popup']!=1){
 
 			<div id="modelTabs" class="yui-navset yui-navset-top">
 
-				<script  type="text/javascript">
-					detailTypeManager = new DetailTypeManager();
-					YAHOO.util.Event.addListener(window, "load", detailTypeManager.init());
-
-					// prevents exit if there are changes
-	//
-					window.onbeforeunload = function () {
-						var changed = detailTypeManager.hasChanges();
-		if (changed) return "You have made changes.  If you continue, all changes will be lost.";
-					}
-				</script>
 			</div>
 			</div>
 		</div>

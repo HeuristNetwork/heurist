@@ -2069,6 +2069,47 @@ window.hWin.HEURIST4.ui = {
         return [posx, posy];
     },
     
+    //
+    // prevents entering restricted characters
+    //
+    preventChars: function(event){
+
+        event = event || window.event;
+        var charCode = typeof event.which == "number" ? event.which : event.keyCode;
+        if (charCode && charCode > 31)
+        {
+            var keyChar = String.fromCharCode(charCode);
+            // Old test only allowed specific characters, far too restrictive. New test only restrcts characters which will pose a problem
+            // if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
+            var sWarn = '';
+            
+            var value = $(event.target).val();
+            if((value.indexOf('<')>=0 && keyChar=='>') || 
+               (value.indexOf('>')>0 && keyChar=='<')){
+                   sWarn = 'Both < and > are forbid';
+            }else
+            if(/^[{}'".\[\]]+$/.test(keyChar)){
+                sWarn = 'Restricted characters: . [ ] { } \' " ';
+            }
+            
+            if(sWarn!=''){
+                event.returnValue = false;
+                var trg = event.target;
+                
+                window.hWin.HEURIST4.util.stopEvent(event);
+                
+                window.hWin.HEURIST4.msg.showMsgFlash(sWarn,700,null, trg);
+                setTimeout(function(){
+                        $(trg).focus();
+                }, 750);
+                
+                return false;
+            }
+        }
+        return true;
+    },    
+    
+    
     
 }//end ui
 

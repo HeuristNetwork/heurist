@@ -602,8 +602,8 @@ function RectypeManager() {
 
                                 var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
                                 var callback = _updateAfterDelete;
+
                                 var request = {method:'deleteRT',db:window.hWin.HAPI4.database,rtyID:rectypeID};
-                                
                                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
                                 
 
@@ -751,8 +751,8 @@ function RectypeManager() {
             var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'_2');
             if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick;
 
-            var body = $(top.document).find('body');
-            var dim = {h:body.innerHeight(), w:body.innerWidth()},
+            var body = $(window.hWin.document).find('body');
+            var dim = {h:body.innerHeight(), w:body.innerWidth()};
 
             btnAddRecordType = Dom.get('btnImportFromDb'+grpID);
             btnAddRecordType.onclick = function(){
@@ -1130,13 +1130,14 @@ function RectypeManager() {
         var sURL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editRecStructure.html?db="+window.hWin.HAPI4.database+"&rty_ID="+rty_ID;
         //this.location.replace(URL);
 
-        //!!!!  var dim = Hul.innerDimensions(top);
+        var body = $(window.hWin.document).find('body');
+        var dim = {h:body.innerHeight(), w:body.innerWidth()};
 
         window.hWin.HEURIST4.msg.showDialog( sURL, {
                 "close-on-blur": false,
                 "no-resize": false,
                 title: 'RECORD STRUCTURE',
-                //height: dim.h*0.9,
+                height: dim.h*0.9,
                 width: 860,
                 "no-close": true,
                 closeCallback: function(){ alert('kiki'); },
@@ -1196,12 +1197,14 @@ function RectypeManager() {
         }else{
             url = url + "&groupID="+rtg_ID; //new one
         }
-        //!!! var dim = Hul.innerDimensions(top);
+        var body = $(window.hWin.document).find('body');
+        var dim = {h:body.innerHeight(), w:body.innerWidth()};
+
         window.hWin.HEURIST4.msg.showDialog( url, {
                 "close-on-blur": false,
                 "no-resize": false,
                 title:'Edit Record Type',
-                //height: dim.h*0.9,
+                height: dim.h*0.9,
                 width: 800,
                 callback: function(context) {
                     if(!Hul.isnull(context)){
@@ -1612,7 +1615,6 @@ function icon_refresh(rectypeID) {
         var d = new Date();
         curtimestamp = d.getTime(); //getMilliseconds();
 
-        var db = window.hWin.HAPI4.database;
         var imgIcon = "#icon" + rectypeID;
         var img = $(imgIcon);
         if(img){

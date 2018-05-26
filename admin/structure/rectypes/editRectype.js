@@ -1,4 +1,4 @@
-
+    
 /**
 * filename: explanation
 *
@@ -19,12 +19,11 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-var Hul = top.HEURIST.util;
+var Hul = window.hWin.HEURIST4.util;
 
-var rectypeID = Hul.getUrlParameter('rectypeID', this.location.search);
+var rectypeID = window.hWin.HEURIST4.util.getUrlParameter('rectypeID', location.search);
 
-var db = (top.HEURIST.parameters && top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-                        (top.HEURIST.database.name?top.HEURIST.database.name:''));
+var db = window.hWin.HAPI4.database;
 
 
 
@@ -61,7 +60,7 @@ function init() {
                             // 2: rectype with given ID not found, error
     if(rectypeID) { // Existing rectype, so load with values
         try {
-            rectype = top.HEURIST.rectypes.typedefs[rectypeID].commonFields; // If succeeds, rectype with ID from URL exists, fill form with values
+            rectype = window.hWin.HEURIST4.rectypes.typedefs[rectypeID].commonFields; // If succeeds, rectype with ID from URL exists, fill form with values
             setRtyValues();
         } catch(e) { // Invalid rectypeID, create empty form, and show error message
             newRectypeCode = 2;
@@ -99,11 +98,11 @@ function init() {
 */
 function _select_fields(continue_save){
 
-    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeSelFields.php?db=" + db;
+    var sURL = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/editRectypeSelFields.html";
 
     var that = this;
     
-    Hul.popupURL(top, sURL, {
+    window.hWin.HEURIST4.msg.showDialog(sURL, {
             "close-on-blur": false,
             "no-resize": false,
             height: 500, //(mode==0?200:250),
@@ -133,14 +132,14 @@ function _upload_icon(mode) {
         if(mode==3){
             if(context){  //icon from library
                var img = document.getElementById('imgIcon2');
-               img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/16px/" + context;
+               img.src = window.hWin.HAPI4.baseURL + "admin/setup/iconLibrary/16px/" + context;
                img.width = 16;
                img.height = 16;
             } 
         }else{  //uploaded
                var img = document.getElementById('imgIcon');
                if(!img) img = document.getElementById('imgIcon2');
-               img.src = top.HEURIST.iconBaseURL + rectypeID + '&t='+ (new Date()).getTime();
+               img.src = window.hWin.HAPI4.iconBaseURL + rectypeID + '&t='+ (new Date()).getTime();
                img.width = 16;
                img.height = 16;
         }
@@ -151,7 +150,7 @@ function _upload_icon(mode) {
             if(context){
                _rectype_icon = context;   //name  of icon from library
                var img = document.getElementById('imgThumb2');
-               img.src = top.HEURIST.baseURL + "admin/setup/iconLibrary/64px/" + context;
+               img.src = window.hWin.HAPI4.baseURL + "admin/setup/iconLibrary/64px/" + context;
                img.width = 64;
                img.height = 64;
             }
@@ -159,7 +158,7 @@ function _upload_icon(mode) {
             _rectype_icon = 'set';
             var img = document.getElementById('imgThumb');
             if(!img) img = document.getElementById('imgThumb2');
-            img.src = top.HEURIST.iconBaseURL + 'thumb/th_' + rectypeID + '.png&t='+ (new Date()).getTime();
+            img.src = window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&t='+ (new Date()).getTime();
             img.width = 64;
             img.height = 64;
         }
@@ -167,11 +166,11 @@ function _upload_icon(mode) {
     }
 
 
-    var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="
+    var sURL = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="
             + db + "&mode="+mode+"&rty_ID="+rectypeID
             + "&rty_Name=" + document.getElementById("rty_Name").value;
 
-    Hul.popupURL(top, sURL, {
+    window.hWin.HEURIST4.msg.showDialog(sURL, {
             "close-on-blur": false,
             "no-resize": false,
             height: 500, //(mode==0?200:250),
@@ -216,7 +215,7 @@ function setRtyValues() {
         document.getElementById("rty_ID").innerHTML = rectypeID;
         try {
 
-            var sURL = top.HEURIST.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="
+            var sURL = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/uploadRectypeIcon.php?db="
             + db + "&mode=4&rty_ID="+rectypeID;
             $.get( sURL, function(response){
             
@@ -227,13 +226,13 @@ function setRtyValues() {
                     document.getElementById("rectypeIcon").innerHTML =
                     "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(0)\" title=\"Click to change icon\">"+
                     "<img id=\"imgIcon\" src=\""+
-                    top.HEURIST.iconBaseURL + rectypeID + "&t=" + curtimestamp +
+                    window.hWin.HAPI4.iconBaseURL + rectypeID + "&t=" + curtimestamp +
                     "\" width=\"16\" height=\"16\"></a>";
 
                     document.getElementById("rectypeThumb").innerHTML =
                     "<a href=\"javascript:void(0)\" onClick=\"editRectypeEditor.upload_icon(1)\" title=\"Click to change thumbnail\">"+
                     "<img id=\"imgThumb\" src=\""+
-                    top.HEURIST.iconBaseURL + "thumb/th_" + rectypeID + ".png&t=" + curtimestamp +
+                    window.hWin.HAPI4.iconBaseURL + "thumb/th_" + rectypeID + ".png&t=" + curtimestamp +
                     "\" width=\"64\" height=\"64\"></a>";
                 }else{
                     _rectype_icon = '';
@@ -247,7 +246,7 @@ function setRtyValues() {
         } catch(e) {
             alert(e);
         }
-        var fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
+        var fi = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex;
 
         if(Hul.isempty(rectype[fi.rty_ConceptID])){
             document.getElementById("div_rty_ConceptID").innerHTML = '';
@@ -296,8 +295,8 @@ function getStatus() {
     var disable_status = false,
     disable_fields = false,
     selstatus = document.getElementById("rty_Status"),
-    fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex,
-    dbId = Number(top.HEURIST.database.id);
+    fi = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex,
+    dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
 
     var original_dbId = (rectype)?Number(rectype[fi.rty_OriginatingDBID]):dbId;
     if(Hul.isnull(original_dbId)) {original_dbId = dbId;}
@@ -365,7 +364,7 @@ function getTypes() {
     optionDummy.text = "dummy";
 
     if(rectype) {
-        switch(top.HEURIST.rectypes.typedefs[rectypeID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_Type]) {
+        switch(window.hWin.HEURIST4.rectypes.typedefs[rectypeID].commonFields[window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_Type]) {
             case "normal":
                 typesDropdown[0].selected = "1";
                 break;
@@ -386,17 +385,17 @@ function getGroups() {
     index = 0,
     rtg_ID;
 
-    for (index in top.HEURIST.rectypes.groups){
+    for (index in window.hWin.HEURIST4.rectypes.groups){
         if(!isNaN(Number(index))) {
-            rtg_ID = top.HEURIST.rectypes.groups[index].id;
+            rtg_ID = window.hWin.HEURIST4.rectypes.groups[index].id;
 
             optn = document.createElement("option");
-            optn.text = top.HEURIST.rectypes.groups[index].name;
+            optn.text = window.hWin.HEURIST4.rectypes.groups[index].name;
             optn.value = rtg_ID;
 
             groupDropdown.options.add(optn);
             if(rectype) {
-                if(rtg_ID == top.HEURIST.rectypes.typedefs[rectypeID].commonFields[top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID]) {
+                if(rtg_ID == window.hWin.HEURIST4.rectypes.typedefs[rectypeID].commonFields[window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID]) {
                     selectedIndex = index;
                     var existingGroup = true;
                 }
@@ -484,7 +483,7 @@ function updateRectypeOnServer_continue()
         }
 
         // TODO: Change base URL
-        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
         var callback = updateResult;
         var params = "method=saveRT&db="+db+"&definit="+
         (document.getElementById("definit").checked?1:0)+
@@ -516,7 +515,7 @@ function updateRectypeOnServer_continue()
 
 var updateResult = function(context) {
     $('#btnSave').prop('disabled','');
-    top.HEURIST.rectypes.saveStatus = context;
+    window.hWin.HEURIST4.rectypes.saveStatus = context;
 
     if(!Hul.isnull(context)) {
 
@@ -572,7 +571,9 @@ var updateResult = function(context) {
  */
 function editRecStructure()
 {
-    Hul.popupURL(top, top.HEURIST.baseURL + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID, {
+   var sURL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
+        
+   window.hWin.HEURIST4.msg.showDialog(sURL, {     
             "close-on-blur": false,
             "no-resize": false,
             title: 'RECORD STRUCTURE',
@@ -603,7 +604,7 @@ function getUpdatedFields() {
                 defs: {}
         }};
         //fill array of updated fieldnames
-        var fieldNames = top.HEURIST.rectypes.typedefs.commonFieldNames;
+        var fieldNames = window.hWin.HEURIST4.rectypes.typedefs.commonFieldNames;
         var values = [];
         for(k = 0; k < updatedFields.length; k++) {
             oRectype.rectype.colNames.common.push(fieldNames[updatedFields[k]]);
@@ -618,7 +619,6 @@ function getUpdatedFields() {
         }
 
         var str = JSON.stringify(oRectype);
-        //var str = YAHOO.lang.JSON.stringify(oRectype);
 
         return str;
     }
@@ -643,7 +643,7 @@ function fromUItoArray(isShowWarn) {
         rectypeID = -1;
         var rectypeValues = [];
     } else {
-        var rectypeValues = top.HEURIST.rectypes.typedefs[rectypeID].commonFields;
+        var rectypeValues = window.hWin.HEURIST4.rectypes.typedefs[rectypeID].commonFields;
     }
 
     var swarn = Hul.validateName($('#rty_Name').val(), "Field 'Name'");
@@ -655,7 +655,7 @@ function fromUItoArray(isShowWarn) {
     }
     
 
-    var fieldNames = top.HEURIST.rectypes.typedefs.commonFieldNames;
+    var fieldNames = window.hWin.HEURIST4.rectypes.typedefs.commonFieldNames;
 
     var index;
     for(index = 0; index < fieldNames.length; index++) {
@@ -729,9 +729,8 @@ function testTitleMask()
 {
     if(!rectypeID || rectypeID < 0){
         var val = "record [ID]";
-        if(document.getElementById("definit").checked &&
-            top.HEURIST.magicNumbers && top.HEURIST.magicNumbers['DT_NAME']){
-            val = "["+top.HEURIST.detailTypes.names[top.HEURIST.magicNumbers['DT_NAME']]+"]";
+        if(document.getElementById("definit").checked && window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']){
+            val = "["+window.hWin.HEURIST4.detailtypes.names[window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']]+"]";
         }
 
         document.getElementById("rty_TitleMask").value = val
@@ -741,23 +740,23 @@ function testTitleMask()
     }else{
 
         var mask = document.getElementById("rty_TitleMask").value;
+        
+        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
 
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-            (top.HEURIST.database.name?top.HEURIST.database.name:''));
-
-        var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
-        var squery = "rty_id="+rectypeID+"&mask="+mask+"&db="+db+"&check=1"; //verify titlemask
-
-        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-                var obj = xhr.responseText;
-                if(obj!="" && obj.match(/\S/)){
+        var request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+            function (response) {
+                if(response.status != window.hWin.ResponseStatus.OK || response.message){
                     titleMaskIsOk = false;
-                    alert("Title Mask verification:\n"+obj);
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }else{
                     titleMaskIsOk = true;
                     updateRectypeOnServer_continue();
-                }
-            }, squery);
+                }                                        
+            }
+        );
+
     }
 }
 
@@ -772,9 +771,10 @@ function _onEditMask(){
 
     var maskvalue = document.getElementById("rty_TitleMask").value;
 
-    Hul.popupURL(top, top.HEURIST.baseURL +
-        "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db,
-        {
+   var sURL = window.hWin.HAPI4.baseURL +
+        "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rectypeID+"&mask="+encodeURIComponent(maskvalue)+"&db="+db;
+        
+   window.hWin.HEURIST4.msg.showDialog(sURL, {     
             "close-on-blur": false,
             "no-resize": true,
             height: 800,
@@ -797,7 +797,7 @@ function _onEditMask(){
             },
 
             onPreventChars: function(event) {
-                return top.HEURIST.util.onPreventChars(event);
+                return window.hWin.HEURIST4.ui.preventChars(event);
             },
             
             onChangeStatus: function(e) {
@@ -833,7 +833,7 @@ function _onEditMask(){
         return that;
 };
 /*var structureFrame = document.getElementById("structureFrame");
-var URL = top.HEURIST.baseURL + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
+var URL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+rectypeID;
 structureFrame.src = URL;
 */
 
@@ -865,10 +865,10 @@ function _showInfoToolTip(event) {
     if(!Hul.isnull(rectypeID)){
         if(Hul.isnull(textTip)) {
 
-            var recname = top.HEURIST.rectypes.names[rectypeID];
+            var recname = window.hWin.HEURIST4.rectypes.names[rectypeID];
             if(recname.length>40) { recname = recname.substring(0,40)+"..."; }
             //find all records that reference this type
-            var details = top.HEURIST.rectypes.typedefs[rectypeID].dtFields;
+            var details = window.hWin.HEURIST4.rectypes.typedefs[rectypeID].dtFields;
             textTip = '<h3>'+recname+'</h3>'+
             '<b>Fields:</b><ul>';
 

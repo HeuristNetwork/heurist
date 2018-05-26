@@ -33,7 +33,6 @@
 require_once(dirname(__FILE__).'/../../../hserver/System.php');
 require_once(dirname(__FILE__).'/../../../hserver/dbaccess/db_structure.php');
 
-header('Content-type: text/javascript; charset=utf-8');
 
 $res = false;
 
@@ -104,5 +103,7 @@ if(res){
 }else{   
     $response = $system->getError();
 }
-print json_format( $response );
+
+header('Content-type: text/javascript; charset=utf-8');
+print json_encode( $response );
 ?>

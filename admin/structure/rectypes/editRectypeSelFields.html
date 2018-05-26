@@ -15,7 +15,7 @@
     */
 
     /**
-    * editRectypeSelFields.php
+    * editRectypeSelFields.html
     * select initial set of fields for new record type
     *
     * @author      Tom Murtagh
@@ -30,26 +30,13 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-
-    define('SAVE_URI', 'disabled');
-
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
-
-    if (!is_admin()) return;//TOD change this for just admin and return msg. Is probably only called where user is admin
-
-
 ?>
 <html>
     <head>
 
         <title>Select fields for new record type</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/admin.css">
-
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
         
         <script>
             function closewin(){
@@ -69,35 +56,46 @@
                 
                 window.close({fields:fields, reqs:reqs});
             }
+            
+            $(document).ready(function() {
+                
+                $('button').button();
+                
+                var fields = [window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_START_DATE'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_END_DATE'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_CREATOR']];
+                
+                var _checked = 'checked';
+                var tbl =$('#field_list'); 
+                
+                for(var idx=0; idx< fields.length; idx++){
+                    var dty_ID = fields[idx];
+                    _checked = ''
+                    
+            $('<tr><td style="padding:10px" align="center"><input type="checkbox" class="ids" data-id="'+dty_ID+'" '+_checked
+            +'></td>'
+            +'<td align="center"><input type="checkbox" class="reqs" data-id="'+dty_ID+'" '+_checked+'></td>'
+            +'<td style="padding-left:20px">'+window.hWin.HEURIST4.detailtypes.names[dty_ID]+'</td></tr>').appendTo(tbl);
+                    
+                    _checked = ''
+                }
+            });
         </script>
+        
+        <script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
     </head>
 
     <body class="popup">
     
     <p>Please select at least one of the following commonly-used fields to pre-populate this record type and indicate which will be Required fields (you can easily change or delete these fields later):</p>
     <div style="width:100%;text-align:center;pading:10px">
-        <table style="margin:auto;width:50%">
+        <table style="margin:auto;width:50%" id="field_list">
             <tr><th align="center">Use</th><th>Req</th><th align="left" style="padding-left:20px">Name</th></tr>
             
-<?php
- $fields = array(DT_NAME, DT_SHORT_SUMMARY, DT_THUMBNAIL, DT_GEO_OBJECT, DT_START_DATE, DT_END_DATE, DT_CREATOR);
- 
- $dt = getAllDetailTypeStructures();
- $dt = $dt['names'];
- $checked = 'checked';
- 
- foreach ($fields as $dty_ID){
-     if(isset($dty_ID) && $dty_ID>0){
-         
-     ?>
-            <tr><td style="padding:10px" align="center"><input type="checkbox" class='ids' data-id=<? echo '"'.$dty_ID.'" '.$checked;?>></td>
-            <td align="center"><input type="checkbox" class='reqs' data-id=<? echo '"'.$dty_ID.'" '.$checked;?>></td>
-            <td style="padding-left:20px"><?php echo $dt[$dty_ID];?></td></tr>
-     <?php
-        $checked = '';
-     }
- }
-?>            
         </table>
         <br><br>
         <button onclick="closewin()">Select</button>

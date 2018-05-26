@@ -272,14 +272,18 @@ else
                     error_exit("Invalid data structure sent with saveDetailTypeGroup method call to saveStructure.php");
                 }
                 $colNames = $data['dettypegroups']['colNames'];
+                $rv['groups'] = array();
+                
                 foreach ($data['dettypegroups']['defs'] as $dtgID => $rt) {
                     if ($dtgID == -1) {    // new dettype group
-                        array_push($rv, createDettypeGroups($colNames, $rt));
+                        $resp = createDettypeGroups($colNames, $rt);
                     }else{
-                        array_push($rv, updateDettypeGroup($colNames, $dtgID, $rt));
+                        $resp = updateDettypeGroup($colNames, $dtgID, $rt);
                     }
+                    
+                    array_push($rv['groups'], $resp);
                 }
-                if (!array_key_exists('error',$rv)) {
+                if (!array_key_exists('error', $rv['groups'])) {
                     $rv['detailtypes'] = dbs_GetDetailTypes($system);
                 }
                 break;
