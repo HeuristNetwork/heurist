@@ -468,14 +468,14 @@ function updateRectypeOnServer_continue()
         return;
     }
 
-    var str = getUpdatedFields();
+    var oRec = getUpdatedFields();
 
     if(str=="mandatory"){
     $('#btnSave').prop('disabled','');
         //$('#btnSave').removeAttr('disabled');
         //do not close the window
 
-    }else if(str != null) {
+    }else if(oRec != null) {
         
         if( !(rectypeID > 0) && _selected_fields==null) {
             _select_fields( updateRectypeOnServer_continue );
@@ -485,19 +485,21 @@ function updateRectypeOnServer_continue()
         // TODO: Change base URL
         var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
         var callback = updateResult;
-        var params = "method=saveRT&db="+db+"&definit="+
-        (document.getElementById("definit").checked?1:0)+
-        "&data=" + encodeURIComponent(str);
+        
+        var request = {method:'saveRT', 
+            db:window.hWin.HAPI4.database, 
+            data: oRec,            
+            definit: document.getElementById("definit").checked?1:0};
         
         if(_selected_fields!=null){
-            params = params + '&newfields='+encodeURIComponent(JSON.stringify(_selected_fields));
+            request['newfields'] = _selected_fields;
         }
 
         if(!(rectypeID>0)){   //assign for new                                          
-            params = params + '&icon='+ encodeURIComponent(_rectype_icon);
+            request['icon'] = _rectype_icon;
         }
 
-        Hul.getJsonData(baseurl, callback, params);
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
 
     } else { //nothing changed
 
@@ -513,18 +515,18 @@ function updateRectypeOnServer_continue()
     }
 }
 
-var updateResult = function(context) {
+var updateResult = function(response) {
     $('#btnSave').prop('disabled','');
-    window.hWin.HEURIST4.rectypes.saveStatus = context;
+    //window.hWin.HEURIST4.rectypes.saveStatus = context; //????
 
-    if(!Hul.isnull(context)) {
+    if(response.status == window.hWin.ResponseStatus.OK){
 
         var error = false;
         var report = "";
 
-        for(var ind in context.result)
+        for(var ind in response.result)
         if(ind!=undefined){
-            var item = context.result[ind];
+            var item = response.result[ind];
             if(isNaN(item)){
                 alert("An error occurred: " + item);
                 error = true;
@@ -545,7 +547,7 @@ var updateResult = function(context) {
                 // this alert is a pain  alert("Record type with ID " + report + " was succesfully "+ss);
             }
 
-            context.changeTitleMask = false;
+            response.changeTitleMask = false;
             /* art 2014-05-26 - now it updates in editRectypeTitle
             if(rectypeID>0 &
                 document.getElementById("rty_TitleMask").value !== _keepTitleMask){
@@ -557,12 +559,14 @@ var updateResult = function(context) {
             
             if(_openEditStrucutreAfterClose){
                 //editRecStructure();
-                context.isOpenEditStructure = true;
+                response.isOpenEditStructure = true;
             }
 
-            _this_window.close(context); //send back new HEURIST strcuture
+            _this_window.close(response); //send back new HEURIST strcuture
         }
-    }
+    }else{
+        window.hWin.HEURIST4.msg.showMsgErr(response);
+    }                                        
 }
 
 
@@ -618,9 +622,9 @@ function getUpdatedFields() {
             oRectype.rectype.defs[rectypeID][0].common.push(values[val]);
         }
 
-        var str = JSON.stringify(oRectype);
+        //var str = JSON.stringify(oRectype);
 
-        return str;
+        return oRectype;
     }
     else {
         return null;

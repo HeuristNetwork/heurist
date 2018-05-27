@@ -34,23 +34,18 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
 
-define('SEARCH_VERSION', 1);
+    //require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
+    $system = new System();
+    if( !$system->init(@$_REQUEST['db']) ){
+        header('Content-type: application/json;charset=UTF-8');
+        echo json_encode( array("error"=>'Can not connect to database') );
+        exit();
+    }
 
-require_once(dirname(__FILE__).'/../../common/config/initialise.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
-require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-
-
-    mysql_connection_overwrite(DATABASE);
-    //was mysql_connection_select(DATABASE);
-
-    //load definitions (USE CACHE)
-    $rtStructs = getAllRectypeStructures(true);
-    //$dtStructs = getAllDetailTypeStructures(true);
-    //$dtTerms = getTerms(true);
-    //$first_record = null;  //to obtain names of record header fields
+    $rtStructs = dbs_GetRectypeStructures($system, null, 2);
 
     $resVars = array();
     //$resVarsByType = array();
@@ -67,8 +62,9 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
               array_push($resVars, $res);
         }        
         
-        header("Content-type: text/javascript");
-        echo json_format($resVars, true);
+        header('Content-type: application/json;charset=UTF-8');
+        print json_encode($resVars);
+        
         
     }else{
     
@@ -83,14 +79,15 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
         $rectypeID = @$_REQUEST['rty_id'];
         $res = getRecordTypeTree($rectypeID, 0);
         
-        header("Content-type: text/javascript");
-        echo json_format( array("vars"=>$res,
+        header('Content-type: application/json;charset=UTF-8');
+        echo json_encode( array("vars"=>$res,
                                 "records"=>$qresult["records"]), true);
 
     }else{
 
             if(!array_key_exists('records',$qresult)){
-                echo "Empty query. Cannot generate template";
+                header('Content-type: application/json;charset=UTF-8');
+                echo json_encode( array("error"=>'Empty query. Cannot generate template') );
                 exit();
             }
 
@@ -116,8 +113,8 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
                 }
             }
 
-            header("Content-type: text/javascript");
-            echo json_format($resVars, true);
+            header('Content-type: application/json;charset=UTF-8');
+            echo json_encode($resVars, true);
     }
     }
 

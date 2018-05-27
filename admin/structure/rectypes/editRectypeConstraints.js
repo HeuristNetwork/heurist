@@ -599,7 +599,7 @@ elLiner.innerHTML = '<a href="#delete_term"><img src="../../../common/images/cro
 						rectypeValSelect.appendChild(grp);
 						firstInGroup = false;
 					}
-					Hul.addoption(rectypeValSelect, recTypeID, rectypes.names[recTypeID]);
+					window.hWin.HEURIST4.ui.addoption(rectypeValSelect, recTypeID, rectypes.names[recTypeID]);
 				}
 			}
 		}

@@ -191,15 +191,15 @@ function DetailTypeEditor() {
             
             var el = Dom.get("dty_Type");
 
-            Hul.addoption(el, _dty_Type, window.hWin.HEURIST4.detailtypes.lookups[_dty_Type]);
+            window.hWin.HEURIST4.ui.addoption(el, _dty_Type, window.hWin.HEURIST4.detailtypes.lookups[_dty_Type]);
             el.disabled = false;
 
             if(_dty_Type=='float' || _dty_Type=='date'){
-                Hul.addoption(el, 'freetext', window.hWin.HEURIST4.detailtypes.lookups['freetext']);
+                window.hWin.HEURIST4.ui.addoption(el, 'freetext', window.hWin.HEURIST4.detailtypes.lookups['freetext']);
             }else if(_dty_Type=='freetext'){
-                Hul.addoption(el, 'blocktext', window.hWin.HEURIST4.detailtypes.lookups['blocktext']);
+                window.hWin.HEURIST4.ui.addoption(el, 'blocktext', window.hWin.HEURIST4.detailtypes.lookups['blocktext']);
             }else if(_dty_Type=='blocktext'){
-                Hul.addoption(el, 'freetext', window.hWin.HEURIST4.detailtypes.lookups['freetext']);
+                window.hWin.HEURIST4.ui.addoption(el, 'freetext', window.hWin.HEURIST4.detailtypes.lookups['freetext']);
             }else{
                 el.disabled = true;
             }
@@ -229,7 +229,7 @@ function DetailTypeEditor() {
     function _addOptionReserved(){
         var selstatus = Dom.get("dty_Status");
         if(selstatus.length<4){
-            Hul.addoption(selstatus, 'reserved','reserved');
+            window.hWin.HEURIST4.ui.addoption(selstatus, 'reserved','reserved');
         }
     }
 
@@ -282,7 +282,7 @@ function DetailTypeEditor() {
         var el_sel = $('#selVocab').get(0);
         $(el_sel).empty();
 
-        Hul.addoption(el_sel, -1, 'select...');
+        window.hWin.HEURIST4.ui.addoption(el_sel, -1, 'select...');
         
         //add to temp array
         var vocabs = [];
@@ -297,7 +297,7 @@ function DetailTypeEditor() {
 
         for(var idx in vocabs) { // For every term in first levet of tree
             if(vocabs[idx]){
-                Hul.addoption(el_sel, vocabs[idx].key, vocabs[idx].title);
+                window.hWin.HEURIST4.ui.addoption(el_sel, vocabs[idx].key, vocabs[idx].title);
                 if(Number(vocabs[idx].key)==vocabId){
                     sel_index = el_sel.length-1;
                 }
@@ -597,7 +597,7 @@ function DetailTypeEditor() {
                 dtg_ID = window.hWin.HEURIST4.detailtypes.groups[index].id;
                 var grpName = window.hWin.HEURIST4.detailtypes.groups[index].name;
 
-                Hul.addoption(el, dtg_ID, grpName);
+                window.hWin.HEURIST4.ui.addoption(el, dtg_ID, grpName);
             }
         } //for
     }
@@ -610,13 +610,13 @@ function DetailTypeEditor() {
         text,
         value;
 
-        Hul.addoption(el, "", "-- Select data type --");
+        window.hWin.HEURIST4.ui.addoption(el, "", "-- Select data type --");
 
         for (value in window.hWin.HEURIST4.detailtypes.lookups){
             if(!Hul.isnull(Number(value))) {
                 if(!(value==="relationtype" || value==="year" || value==="boolean" || value==="integer")){
                     text = window.hWin.HEURIST4.detailtypes.lookups[value];
-                    Hul.addoption(el, value, text);
+                    window.hWin.HEURIST4.ui.addoption(el, value, text);
                 }
             }
         } //for
@@ -817,20 +817,20 @@ function DetailTypeEditor() {
     *
     * @param context - data from server
     */
-    function _updateResult(context) {
+    function _updateResult(response) {
         $('#btnSave').removeAttr('disabled');
 
-        if(!Hul.isnull(context)){
-
+        if(response.status == window.hWin.ResponseStatus.OK){
+        
             var error = false,
             report = "",
             ind;
 
-            for(ind in context.result){
+            for(ind in response.result){
                 if( !Hul.isnull(ind) ){
-                    var item = context.result[ind];
+                    var item = response.result[ind];
                     if(isNaN(item)){
-                        Hul.showError(item);
+                        window.hWin.HEURIST4.msg.showMsgErr(item);
                         error = true;
                     }else{
                         _dtyID = Number(item);
@@ -850,8 +850,10 @@ function DetailTypeEditor() {
                 }else{
                     // this alert is a pain: alert("Field type with ID " + report + " was succesfully "+ss);
                 }
-                window.close(context); //send back new HEURIST strcuture
+                window.close(response); //send back new HEURIST strcuture
             }
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr(response);
         }
     }
 
@@ -907,8 +909,10 @@ function DetailTypeEditor() {
             // 3. sends data to server
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = _updateResult;
-            var params = "method=saveDT&db="+_db+"&data=" + encodeURIComponent(str);
-            Hul.getJsonData(baseurl, callback, params);
+            
+            var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+            
         } else {
             window.close(null);
         }

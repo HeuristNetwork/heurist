@@ -216,12 +216,12 @@ function DetailTypeManager() {
                 sel.remove(0);
             }
 
-            Hul.addoption(sel, "-1", "new group");
+            window.hWin.HEURIST4.ui.addoption(sel, "-1", "new group");
 
             var i;
             for (i in _groups){
                 if(i!==undefined){
-                    Hul.addoption(sel, _groups[i].value, _groups[i].text);
+                    window.hWin.HEURIST4.ui.addoption(sel, _groups[i].value, _groups[i].text);
                 }
             } // for
 
@@ -519,7 +519,7 @@ function DetailTypeManager() {
                                     dt.deleteRow(oRecord.getId(), -1);
                                     _deleted.push( dty_ID );
                                     // alert is a pain alert("Field type #"+dty_ID+" was deleted");
-                                    window.hWin.HEURIST4.detailtypes = response.detailTypes;
+                                    window.hWin.HEURIST4.detailtypes = response.detailtypes;
                                     _cloneHEU = null;
                                     
                                 }else{
@@ -839,20 +839,20 @@ function DetailTypeManager() {
     //
     // after saving a bunch of field types
     //
-    function _updateResult(context) {
+    function _updateResult(response) {
 
-        if(!Hul.isnull(context)){
+        if(response.status == window.hWin.ResponseStatus.OK){
 
             var error = false,
             report = "",
             ind;
 
-            for(ind in context.result)
+            for(ind in response.result)
             {
                 if(!Hul.isnull(ind)){
-                    var item = context.result[ind];
+                    var item = response.result[ind];
                     if(isNaN(item)){
-                        Hul.showError(item);
+                        window.hWin.HEURIST4.msg.showMsgErr(item);
                         error = true;
                     }else{
                         detailTypeID = Number(item);
@@ -872,8 +872,10 @@ function DetailTypeManager() {
                 //window.setTimeout(function(){alwin.hide();}, 1000);
                 _clearGroupAndVisibilityChanges(false);
             }
-            window.hWin.HEURIST4.detailtypes = context.detailTypes;
+            window.hWin.HEURIST4.detailtypes = response.detailtypes;
             _cloneHEU = null;
+        }else{
+             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
     }
 
@@ -1007,7 +1009,7 @@ function DetailTypeManager() {
                         }
 
                         //refresh the local heurist
-                        window.hWin.HEURIST4.detailtypes = context.detailTypes;
+                        window.hWin.HEURIST4.detailtypes = context.detailtypes;
                         _cloneHEU = null;
 
                         //detect what group
@@ -1073,10 +1075,10 @@ function DetailTypeManager() {
             {
                 //for new - add new tab
                 if(!Hul.isnull(response.groups['0'].error)){
-                    Hul.showError(response.groups['0']);
+                    window.hWin.HEURIST4.msg.showMsgErr(response.groups['0']);
                 }else{
                     var ind;
-                    window.hWin.HEURIST4.detailtypes = response.detailTypes;
+                    window.hWin.HEURIST4.detailtypes = response.detailtypes;
                     _cloneHEU = null;
 
                     if(Number(grpID)<0){
@@ -1202,7 +1204,7 @@ function DetailTypeManager() {
                             myDTDrags[id].unreg();
                             delete myDTDrags[id];
                         }
-                        window.hWin.HEURIST4.detailtypes = response.detailTypes;
+                        window.hWin.HEURIST4.detailtypes = response.detailtypes;
 
                         //remove tab from tab view and select 0 index
                         _groups.splice(ind, 1);

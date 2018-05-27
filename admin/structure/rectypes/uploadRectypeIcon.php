@@ -31,12 +31,13 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 
-    define('SAVE_URI', 'disabled');
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
 
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../common/php/imageLibrary.php');
+require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../../common/php/imageLibrary.php');
 
-    if (!is_admin()) return;//TOD change this for just admin and return msg. Is probably only called where user is admin
+$mysqli = $system->get_mysqli();
 
     $rt_id = intval(@$_REQUEST['trm_ID']);
     if($rt_id>0){

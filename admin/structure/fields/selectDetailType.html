@@ -70,6 +70,7 @@
         END OVERLAYS -->
 
         <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
         <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>  -->
 
         <style type="text/css">
@@ -98,12 +99,24 @@
                 text-overflow: ellipsis;
             }
         </style>
+        
+        
+        <script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
+        <script type="text/javascript" src="selectDetailType.js"></script>
+        
+        <script type="text/javascript">
+            $(document).ready(function() {
+                window.selectDetailType = new SelectDetailType();
+            });
+            function onApply(){
+                    window.selectDetailType.apply();
+            }
+        </script>
+        
+        <script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
     </head>
 
     <body class="popup yui-skin-sam" style="overflow: scroll;">
-        <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-        <script src="../../../common/php/loadCommonInfo.php"></script>
-        <script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
         <script type="text/javascript" src="selectDetailType.js"></script>
 
         <div id="filtertoolbar">
@@ -170,19 +183,6 @@
         </div>
 
         <div id="tabContainer">
-            <script  type="text/javascript">
-                function init(){
-                    window.selectDetailType = new  SelectDetailType();
-                }
-                function onApply(){
-                    window.selectDetailType.apply();
-                }
-                //
-                //  starts initialization on load completion of this window
-                //
-                //YAHOO.util.Event.onDOMReady(init);
-                YAHOO.util.Event.addListener(window, "load", init);
-            </script>
         </div>
 
         <div id="tb_bottom" style="height:30">

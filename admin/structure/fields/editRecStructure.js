@@ -1229,7 +1229,7 @@ function EditRecStructure() {
     function _optionReserved(selstatus, isAdd){
         if(selstatus){
             if(isAdd && selstatus.length<4){
-                Hul.addoption(selstatus, "reserved", "reserved");
+                window.hWin.HEURIST4.ui.addoption(selstatus, "reserved", "reserved");
             }else if (!isAdd && selstatus.length===4){
                 selstatus.length=3;
                 //selstaus.remove(3);
@@ -1535,39 +1535,43 @@ function EditRecStructure() {
             var str = YAHOO.lang.JSON.stringify(oDetailType);
 
 
-            function _addNewSeparator(context) {
+            function _addNewSeparator(response) {
 
-                if(!Hul.isnull(context)){
-
+                if(response.status == window.hWin.ResponseStatus.OK){
+    
                     var error = false,
                     report = "",
                     ind;
 
-                    for(ind in context.result){
+                    for(ind in response.result){
                         if( !Hul.isnull(ind) ){
-                            var item = context.result[ind];
+                            var item = response.result[ind];
                             if(isNaN(item)){
-                                Hul.showError(item);
+                                window.hWin.HEURIST4.msg.showMsgErr(item);
                                 error = true;
                             }else{
                                 ft_separator_id = ""+Math.abs(Number(item));
 
                                 //refresh the local heurist
-                                window.hWin.HEURIST4.detailtypes = context.detailTypes;
+                                window.hWin.HEURIST4.detailtypes = response.detailtypes;
 
                                 _doExpliciteCollapse(null, true);
                                 _addDetails(ft_separator_id, index_toinsert);
                             }
                         }
                     }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
             }
 
             //
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = _addNewSeparator;
-            var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
-            Hul.getJsonData(baseurl, callback, params);
+            
+            var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+            
 
         }
     }
@@ -1814,18 +1818,18 @@ function EditRecStructure() {
             
             var str = YAHOO.lang.JSON.stringify(orec);            
      
-            var updateResult = function(context){
-                if(!Hul.isnull(context)){
+            var updateResult = function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
 
-                    window.hWin.HEURIST4.rectypes = context.rectypes;
-                    window.hWin.HEURIST4.detailtypes = context.detailtypes;
-                    window.hWin.HEURIST4.terms = context.terms;
+                    window.hWin.HEURIST4.rectypes = response.rectypes;
+                    window.hWin.HEURIST4.detailtypes = response.detailtypes;
+                    window.hWin.HEURIST4.terms = response.terms;
     
                     editStructure._structureWasUpdated = true;
                     
                     //fnCallback(true, oNewValue);
                 }else{
-                    //fnCallback(false, oNewValue);    
+                    //window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
                 _isServerOperationInProgress = false;
                 
@@ -1839,9 +1843,11 @@ function EditRecStructure() {
             
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = updateResult;
-            var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
-
-            Hul.getJsonData(baseurl, callback, params);           
+            
+            var request = {method:'saveRTS', db:window.hWin.HAPI4.database, data:orec};
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+            
+            
          }else{
             //fnCallback(true, oNewValue); 
          }
@@ -1901,10 +1907,10 @@ function EditRecStructure() {
                 }
                 orec.rectype.defs[rty_ID].dtFields[_updatedDetails[k]] = vals;
             }
-            var str = YAHOO.lang.JSON.stringify(orec);
-            return str;
+            //var str = YAHOO.lang.JSON.stringify(orec);
+            return orec;
         }else{
-            return null;
+            return {};
         }
     }
 
@@ -1916,7 +1922,7 @@ function EditRecStructure() {
     */
     function _saveUpdates(needClose)
     {
-        var str = _getUpdates();
+        var orec = _getUpdates();
         //if(str!=null)	alert(str);  //you can check the strcuture here
         //clear all trace of changes
         _clearUpdates();
@@ -1925,13 +1931,15 @@ function EditRecStructure() {
         btnSaveOrder.style.display = "none";
         btnSaveOrder.style.visibility = "hidden";
 
-        if(!Hul.isnull(str)){
-            var updateResult = function(context){
-                if(!Hul.isnull(context)){
+        if(!$.isEmptyObject(orec)){
+            
+            var updateResult = function(response){
+                
+                if(response.status == window.hWin.ResponseStatus.OK){
                     
-                    window.hWin.HEURIST4.rectypes = context.rectypes;
-                    window.hWin.HEURIST4.detailtypes = context.detailtypes;
-                    window.hWin.HEURIST4.terms = context.terms;
+                    window.hWin.HEURIST4.rectypes = response.rectypes;
+                    window.hWin.HEURIST4.detailtypes = response.detailtypes;
+                    window.hWin.HEURIST4.terms = response.terms;
                     
                     editStructure._structureWasUpdated = true;
                 }
@@ -1942,9 +1950,11 @@ function EditRecStructure() {
             };
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = updateResult;
-            var params = "method=saveRTS&db="+db+"&data=" + encodeURIComponent(str);
+            
             _isServerOperationInProgress = true;
-            Hul.getJsonData(baseurl, callback, params);
+            var request = {method:'saveRTS', db:window.hWin.HAPI4.database, data:orec};
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+            
 
         }else if(needClose){
             window.close();
@@ -3245,7 +3255,7 @@ function _onAddEditFieldType(dty_ID, rty_ID){
                     }*/
 
                     //refresh the local heurist
-                    window.hWin.HEURIST4.detailtypes = context.detailTypes;
+                    window.hWin.HEURIST4.detailtypes = context.detailtypes;
                     _cloneHEU = null;
                     
                     editStructure._structureWasUpdated = true; //no access  to top object

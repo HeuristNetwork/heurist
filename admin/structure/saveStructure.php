@@ -481,13 +481,13 @@ unset($output);
 //
 //
 function error_exit($msg){
-    header('Content-type: text/javascript; charset=utf-8');
     
+    header('Content-type: application/json;charset=UTF-8');
     if($msg){
         $system->addError(HEURIST_INVALID_REQUEST, $msg);
     }
 
-    print json_format( $system->getError() );
+    print json_encode( $system->getError() );
     exit();
 }
 ?>
