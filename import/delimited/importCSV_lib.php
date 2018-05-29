@@ -21,7 +21,7 @@
 */
 
 require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
-require_once(dirname(__FILE__)."/../../admin/verification/valueVerification.php");
+require_once(dirname(__FILE__)."/../../admin/verification/verifyValue.php");
 require_once('UTMtoLL.php');
 require_once('GpointConverter.php');
 
@@ -1674,17 +1674,17 @@ function validateEnumerations($mysqli, $query, $imp_session, $fields_checked, $d
 
                     $is_termid = false;
                     if(ctype_digit($r_value2)){ //value is numeric try to compare with trm_ID
-                        $is_termid = isValidTerm( $dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id);
+                        $is_termid = VerifyValue::isValidTerm( $dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id);
                     }
 
                     if($is_termid){
                         $term_id = $r_value;
                     }else{
                         //strip accents on both sides
-                        $term_id = isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id, true );
+                        $term_id = VerifyValue::isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id, true );
                      
                         if(!$term_id){
-                            $term_id = isValidTermCode($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
+                            $term_id = VerifyValue::isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
                         }
                     }
 
@@ -1760,7 +1760,7 @@ function validateResourcePointers($mysqli, $query, $imp_session, $fields_checked
                 $r_value2 = trim($r_value);
                 if($r_value2!=""){
 
-                    if (!isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id ))
+                    if (!VerifyValue::isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id ))
                     {//not found
                         $is_error = true;
                         array_push($newvalue, "<font color='red'>".$r_value."</font>");
@@ -2241,23 +2241,23 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                                 if($r_value!=""){
 
                                     if(ctype_digit($r_value)
-                                    && isValidTerm( $ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type)){
+                                    && VerifyValue::isValidTerm( $ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type)){
 
                                         $value = $r_value;
                                     }
 
                                     if($value == null){
                                         //stip accents on both sides
-                                        $value = isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type, true );
+                                        $value = VerifyValue::isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type, true );
                                     }
                                     if(!($value>0)){
-                                        $value = isValidTermCode($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
+                                        $value = VerifyValue::isValidTermCode($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type );
                                     }
                                 }
                             }
                             else if($fieldtype_type == "resource"){
 
-                                if(!isValidPointer(null, $r_value, $field_type)){
+                                if(!VerifyValue::isValidPointer(null, $r_value, $field_type)){
                                      $value  = null;
                                 }else{
                                      $value = $r_value;

@@ -49,7 +49,7 @@
     require_once(dirname(__FILE__)."/../../common/php/utilsTitleMask.php");
 
     // 26/3/14 Functions to index record being saved using Elastic Search (Lucene)
-    require_once(dirname(__FILE__)."/../../records/index/elasticSearchFunctions.php");
+    require_once(dirname(__FILE__)."/../../records/index/elasticSearch.php");
 
 
     if (! is_logged_in()) {
@@ -67,7 +67,7 @@
     mysql_query("commit");
 
     // 26/3/14 Add record to index in Elastic Search (Lucene)
-    updateRecordIndexEntry (HEURIST_DBNAME, @$_REQUEST["type"], @$_REQUEST["id"]);
+    ElasticSearch::updateRecordIndexEntry (HEURIST_DBNAME, @$_REQUEST["type"], @$_REQUEST["id"]);
 
     print json_format($out);
 

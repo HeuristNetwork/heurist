@@ -25,19 +25,24 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+ini_set('max_execution_time', 0);
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+define('MANAGER_REQUIRED',1);
+define('PDIR','../../');  //need for proper path to js and css    
+
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+
+$mysqli = $system->get_mysqli();
+
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
-require_once('valueVerification.php');
+require_once('verifyValue.php');
+require_once('verifyFieldTypes.php');
 
-require_once('getFieldTypeDefinitionErrors.php');
 
 if(@$_REQUEST['data']){
     $lists = json_decode($_REQUEST['data'], true);
 }else{
-    $lists = getInvalidFieldTypes(@$_REQUEST['rt']);
+    $lists = getInvalidFieldTypes(@$_REQUEST['rt']); //in getFieldTypeDefinitionErrors.php
     if(!@$_REQUEST['show']){
         if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0 && count($lists["rt_contraints"])==0){
             $lists = array();
@@ -50,10 +55,8 @@ $dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
 $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
 ?>
-
 <html>
     <head>
-
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
         <script type=text/javascript>
@@ -76,7 +79,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
         <script type=text/javascript>
 
-            var Hul = top.HEURIST.util;
+            var Hul = window.hWin.HEURIST4.util;
 
             function open_selected() {
                 var cbs = document.getElementsByName('bib_cb');
@@ -90,32 +93,38 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 var link = document.getElementById('selected_link');
                 if (!link)
                     return false;
-                link.href = '<?=HEURIST_BASE_URL?>?db=<?= HEURIST_DBNAME?>&w=all&q=ids:' + ids;
+                link.href = '<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids;
                 return true;
             }
 
             function onEditFieldType(dty_ID){
 
-                var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
+                var sURL = "<?=HEURIST_BASE_URL?>admin/structure/fields/editDetailType.html?db=<?= HEURIST_DBNAME?>";
                 if(dty_ID>0){
-                    url = url + "&detailTypeID="+dty_ID; //existing
+                    sURL = sURL + "&detailTypeID="+dty_ID; //existing
                 }else{
                     return;
                 }
 
-                top.HEURIST.util.popupURL(top, url,
-                    {   "close-on-blur": false,
+                var body = $(window.hWin.document).find('body');
+                var dim = {h:body.innerHeight(), w:body.innerWidth()};
+
+                window.hWin.HEURIST4.msg.showDialog(sURL, {
+                        "close-on-blur": false,
                         "no-resize": false,
-                        height: 680,
-                        width: 840,
+                        height: dim.h*0.9,
+                        width: 860,
                         callback: function(context) {
                         }
                 });
             }
         </script>
 
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        <!--
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        -->
         <style type="text/css">
             h3, h3 span {
                 display: inline-block;
@@ -162,10 +171,6 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
             <!-- CHECK FOR FIELD TYPE ERRORS -->
 
-            <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-            <script type="text/javascript" src="../../common/php/loadCommonInfo.php"></script>
-
-
             <?php
             flush_buffers();
             
@@ -175,8 +180,6 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 ?>
                 <script>
                     function repairFieldTypes(){
-
-                        
 
                         var dt = [
                             <?php
@@ -195,23 +198,20 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                             }
                         ?>];
 
-                        var str = JSON.stringify(dt);
+                        //var str = JSON.stringify(dt);
 
-                        var baseurl = top.HEURIST.baseURL + "admin/verification/repairFieldTypes.php";
-                        //var callbackFunc = _callback;
-                        var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
-                        top.HEURIST.util.getJsonData(baseurl, function(context){
+                        var baseurl = '<?=HEURIST_BASE_URL?>admin/verification/repairFieldTypes.php';
+                        var request = {db:'<?=HEURIST_DBNAME?>', data:dt};
+                        
+                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response){
                             //console.log('result '+context);
-                            if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
-                                top.HEURIST.util.showError(null);
+                            if(response.status == window.hWin.ResponseStatus.OK)
+                            {
+                                window.hWin.HEURIST4.msg.showMsgDlg(response['result'], null, 'Auto repair');
                             }else{
-                                if(top.HEURIST4 && top.HEURIST4.msg){
-                                    top.HEURIST4.msg.showMsgDlg(context['result'], null, 'Auto repair');
-                                }else{
-                                    alert(context['result']);    
-                                }
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
-                        }, params);
+                        });
                     }
                 </script>
 
@@ -254,20 +254,9 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             }
             ?>
 
-
-
-
             <!-- CHECK DATA CONSISTENCY -->
 
-            <?php
-
-            mysql_connection_select(DATABASE);
-
-            ?>
-
-
             <hr />
-
 
             <!-- Record pointers which point to non-existant records -->
 
@@ -281,16 +270,16 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 left join Records b on b.rec_ID = d.dtl_Value and b.rec_FlagTemporary!=1
                 where dt.dty_Type = "resource"
                 and b.rec_ID is null';
-                $res = mysql_query( $query );
+                $res = $mysqli->query( $query );
                 if(! $res )
                 {
                     print "<div class='error'>Cannot delete invalid pointers from Records.</div>";
                 }else{
-                    $wasdeleted = mysql_affected_rows();
+                    $wasdeleted = $mysqli->affected_rows;
                 }
             }
 
-            $res = mysql_query('select dtl_RecID, dty_Name, a.rec_Title
+            $res = $mysqli->query('select dtl_RecID, dty_Name, a.rec_Title
                 from recDetails
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join Records a on a.rec_ID = dtl_RecID and a.rec_FlagTemporary!=1
@@ -300,7 +289,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             and b.rec_ID is null');
             $bibs = array();
             $ids = array();
-            while ($row = mysql_fetch_assoc($res)) {
+            while ($row = $res->fetch_assoc()) {
                 array_push($bibs, $row);
                 $ids[$row['dtl_RecID']] = 1;
             }
@@ -353,7 +342,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             }
             
             //Record pointers which point to the wrong type of record
-            $res = mysql_query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name
+            $res = $mysqli->query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name
                 from defDetailTypes
                 left join recDetails on dty_ID = dtl_DetailTypeID
                 left join Records on rec_ID = dtl_Value and rec_FlagTemporary!=1
@@ -363,7 +352,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             and (INSTR(concat(dty_PtrTargetRectypeIDs,\',\'), concat(rec_RecTypeID,\',\')) = 0)');
             
             $bibs = array();
-            while ($row = mysql_fetch_assoc($res)){
+            while ($row = $res->fetch_assoc()){
                 $bibs[$row['dtl_RecID']] = $row;
             }
             
@@ -415,13 +404,13 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
 
             
             if(@$_REQUEST['fixempty']=="1"){
-                mysql_query('SET SQL_SAFE_UPDATES=0');
-                mysql_query('delete d.* from recDetails d, defDetailTypes, Records a '
+                $mysqli->query('SET SQL_SAFE_UPDATES=0');
+                $mysqli->query('delete d.* from recDetails d, defDetailTypes, Records a '
 .'where (dtl_ID>0) and (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
             and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');                
                
-               $wascorrected = mysql_affected_rows();     
-               mysql_query('SET SQL_SAFE_UPDATES=1');
+               $wascorrected = $mysqli->affected_rows;     
+               $mysqli->query('SET SQL_SAFE_UPDATES=1');
             }else{
                 $wascorrected = 0;
             }
@@ -429,15 +418,15 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
             $total_count_rows = 0;
             
             //find all fields with faulty dates
-            $res = mysql_query('select dtl_ID, dtl_RecID, a.rec_Title, dty_Name, dty_Type
+            $res = $mysqli->query('select dtl_ID, dtl_RecID, a.rec_Title, dty_Name, dty_Type
                 from recDetails, defDetailTypes, Records a
                 where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
             and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');
 
             
-            $fres = mysql_query('select found_rows()');
+            $fres = $mysqli->query('select found_rows()');
             if($fres){
-                $total_count_rows = mysql_fetch_row($fres);
+                $total_count_rows = $res->fetch_assoc();
                 if(count($total_count_rows)>0){
                     $total_count_rows = $total_count_rows[0];    
                 }
@@ -475,7 +464,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                 
                 $ids = array();
                 
-                while ($row = mysql_fetch_assoc($res)){
+                while ($row = $res->fetch_assoc()){
                     ?>
                     <tr>
                         <td><input type=checkbox name="recCB6" value=<?= $row['dtl_RecID'] ?>></td>
@@ -505,7 +494,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             // ----- Fields of type "Date" with  wrong values -------------------
 
             //find all fields with faulty dates
-            $res = mysql_query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_Title
+            $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_Title
                 from recDetails, defDetailTypes, Records a
                 where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
             and (dty_Type = "date") and (dtl_Value is not null)');
@@ -514,7 +503,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             $bibs = array();
             $ids  = array();
             $dtl_ids = array();
-            while ($row = mysql_fetch_assoc($res)){
+            while ($row = $res->fetch_assoc()){
 
                 if(!($row['dtl_Value']==null || $row['dtl_Value']=='')){ //empty dates are not allowed
                     //parse and validate value
@@ -532,9 +521,9 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                 if(@$_REQUEST['fixdates']=="1"){
 
                     if($row['new_value']){
-                        mysql_query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
+                        $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
                     }else{
-                        mysql_query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
+                        $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
                     }
 
                     $wascorrected++;
@@ -610,17 +599,17 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                 left join defTerms b on b.trm_ID = d.dtl_Value
                 where dt.dty_Type = "enum" or  dt.dty_Type = "relmarker"
                 and b.trm_ID is null';
-                $res = mysql_query( $query );
+                $res = $mysqli->query( $query );
                 if(! $res )
                 {
-                    print "<div class='error'>Cannot delete invalid term values from Records. SQL error: ".mysql_error()."</div>";
+                    print "<div class='error'>Cannot delete invalid term values from Records. SQL error: ".$mysqli->error."</div>";
                 }else{
-                    $wasdeleted = mysql_affected_rows();
+                    $wasdeleted = $mysqli->affected_rows;
                 }
             }
 
             //find non existing term values
-            $res = mysql_query('select dtl_ID, dtl_RecID, dty_Name, a.rec_Title
+            $res = $mysqli->query('select dtl_ID, dtl_RecID, dty_Name, a.rec_Title
                 from recDetails
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join Records a on a.rec_ID = dtl_RecID
@@ -631,7 +620,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             $bibs = array();
             $ids  = array();
             $dtl_ids = array();
-            while ($row = mysql_fetch_assoc($res)){
+            while ($row = $res->fetch_assoc()){
                 array_push($bibs, $row);
                 $ids[$row['dtl_RecID']] = 1;
                 array_push($dtl_ids, $row['dtl_ID']);
@@ -690,7 +679,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             <a name="expected_terms"/>
             <?php
 
-            $res = mysql_query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, rec_RecTypeID, rty_Name, trm_Label
+            $res = $mysqli->query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, rec_RecTypeID, rty_Name, trm_Label
                 from Records, recDetails left join defTerms on dtl_Value=trm_ID, defDetailTypes, defRecTypes
                 where rec_ID = dtl_RecID and dty_ID = dtl_DetailTypeID and (dty_Type = "enum" or  dty_Type = "relmarker")
                 and dtl_Value is not null and rec_RecTypeID=rty_ID and rec_FlagTemporary!=1
@@ -705,11 +694,11 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             $bibs = array();
             $ids = array();
             $is_first = true;
-            while ($row = mysql_fetch_assoc($res)){ 
+            while ($row = $res->fetch_assoc()){ 
                 //verify value
                 if(  !in_array($row['dtl_ID'], $dtl_ids) &&  //already non existant
                 trim($row['dtl_Value'])!="" &&
-                isInvalidTerm($row['dty_JsonTermIDTree'], $row['dty_TermIDTreeNonSelectableIDs'], $row['dtl_Value'], $row['dty_ID'] ))
+                !VerifyValue::isValidTerm($row['dty_JsonTermIDTree'], $row['dty_TermIDTreeNonSelectableIDs'], $row['dtl_Value'], $row['dty_ID'] ))
                 {
                     if($is_first){
                         $is_first = false;
@@ -770,7 +759,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             <a name="single_value"/>
             <?php
 
-            $res = mysql_query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
+            $res = $mysqli->query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
                 from recDetails, Records, defRecStructure
                 where rec_ID = dtl_RecID  and rec_FlagTemporary!=1 
                 and rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
@@ -780,7 +769,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
 
             $bibs = array();
             $ids = array();
-            while ($row = mysql_fetch_assoc($res)){
+            while ($row = $res->fetch_assoc()){
                 array_push($bibs, $row);
                 $ids[$row['dtl_RecID']] = 1;
             }
@@ -845,7 +834,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             <a name="required_fields"/>
             <?php
 
-            $res = mysql_query("select rec_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title, dty_Type
+            $res = $mysqli->query("select rec_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title, dty_Type
                 from Records
                 left join defRecStructure on rst_RecTypeID = rec_RecTypeID
                 left join recDetails on rec_ID = dtl_RecID and rst_DetailTypeID = dtl_DetailTypeID
@@ -856,7 +845,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
 
             $bibs = array();
             $ids = array();
-            while ($row = mysql_fetch_assoc($res)){
+            while ($row = $res->fetch_assoc()){
                 array_push($bibs, $row);
                 $ids[$row['rec_ID']] = $row;
             }
@@ -922,7 +911,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             <a name="nonstandard_fields"></a>
             <?php
 
-            $res = mysql_query("select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title
+            $res = $mysqli->query("select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title
                 from Records
                 left join recDetails on rec_ID = dtl_RecID
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
@@ -932,7 +921,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
 
             $bibs = array();
             $ids = array();
-            while ($row = mysql_fetch_assoc($res)){
+            while ($row = $res->fetch_assoc()){
                 array_push($bibs, $row);
                 $ids[$row['rec_ID']] = $row;
             }
@@ -1000,7 +989,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 <h3>The database structure is cross-checked against the core and bibliographic definitions curated by the Heurist team</h3>
                 <?php
                     $_REQUEST['verbose'] = 1;
-                    $_REQUEST['filter_exact']  = DATABASE;
+                    $_REQUEST['filter_exact']  = HEURIST_DBNAME_FULL;
                     include(dirname(__FILE__).'/verifyForOrigin.php');
                 ?>
             </div>

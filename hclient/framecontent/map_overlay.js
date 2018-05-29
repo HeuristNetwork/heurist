@@ -161,23 +161,29 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         if(current_map_document_id>0)
         {
 
-            var api = window.hWin.HAPI4.baseURL + "hserver/controller/map_data.php?db=" + window.hWin.HAPI4.database+'&id='+current_map_document_id;
-            $.getJSON(api, function(_data) {
-                map_data = _data;
-                // define bookmark by default
-                if(map_data && map_data.length > 0) {
-                    if(map_data[0].bookmarks==null){
-                        map_data[0].bookmarks = [];
+            var baseurl = window.hWin.HAPI4.baseURL + 'hserver/controller/map_data.php';
+            var request = {db:window.hWin.HAPI4.database, id:current_map_document_id};
+            
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response) {
+                
+                if(response.status == window.hWin.ResponseStatus.OK){
+                
+                    map_data = response.data;
+                    // define bookmark by default
+                    if(map_data && map_data.length > 0) {
+                        if(map_data[0].bookmarks==null){
+                            map_data[0].bookmarks = [];
+                        }
+                        map_data[0].bookmarks.push([window.hWin.HR('World'),-80,90,-30,50,1800,2050]); //default
+                        _loadMapDocumentById_continue();
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr('Map document #'+current_map_document_id+' not found');
                     }
-                    map_data[0].bookmarks.push([window.hWin.HR('World'),-80,90,-30,50,1800,2050]); //default
-                    _loadMapDocumentById_continue();
+                
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr('Map document #'+current_map_document_id+' not found');
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
-            }).fail(function( jqxhr, textStatus, error ) {
-                var msg = "Map Document API call failed: " + textStatus + ", " + error;
-                console.log(msg);
-                window.hWin.HEURIST4.msg.showMsgErr(msg);
+                
             });
 
         }

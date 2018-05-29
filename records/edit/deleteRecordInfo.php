@@ -32,7 +32,7 @@
 
 
 require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
-require_once(dirname(__FILE__)."/../../records/index/elasticSearchFunctions.php");
+require_once(dirname(__FILE__)."/../../records/index/elasticSearch.php");
 
 //
 // important: transaction/rollback must performed in caller of this function
@@ -116,7 +116,8 @@ function deleteRecord($id, $needDeleteFile=true) {
 			mysql_query('delete from Records where rec_ID = ' . $id);
 			if (mysql_error()) { $error = "database error - " . mysql_error(); break; }
 			$deleted = mysql_affected_rows();
-            deleteRecordIndexEntry(DATABASE, $recTypeID, $id);
+            
+            ElasticSearch::deleteRecordIndexEntry(HEURIST_DBNAME, $rectype, $id);
             
 			mysql_query('delete from usrReminders where rem_RecID = ' . $id);
 			if (mysql_error()) { $error = "database error - " . mysql_error(); break; }

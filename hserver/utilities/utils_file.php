@@ -702,5 +702,11 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     
     return array('csv_linebreak'=>$csv_linebreak, 'csv_delimiter'=>$csv_delimiter, 'csv_enclosure'=>$csv_enclosure);
 }
-    
+
+function flush_buffers($start=true){
+    //ob_end_flush();
+    @ob_flush();
+    @flush();
+    if($start) @ob_start();
+}
 ?>

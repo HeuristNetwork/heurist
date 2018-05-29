@@ -25,33 +25,13 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-    
-    if(!@$_REQUEST['db']){
-        $_REQUEST['db'] = 'Heurist_Bibliographic';    
-    }
-    
-    if(!@$_REQUEST['verbose']){
-        require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-        require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-        require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-        require_once('valueVerification.php');
-    }
-    
+    if(!@$_REQUEST['db']) $_REQUEST['db'] = 'Heurist_Bibliographic';
 
-    if (! is_logged_in()) {
-        //header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        print "Sorry, you need to be logged in to be able to access this function";
-        return;
-    }
-
-    if (!is_admin()) {
-        if(!@$_REQUEST['verbose'])
-            print "Sorry, you need to be a database owner to be able to modify the database structure";
-        return;
-    }
-    
     
     if(@$_REQUEST['verbose']!=1){
+        
+        define('OWNER_REQUIRED',1);   
+        require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         // <li>optrectypes=1    test for presence of missing record types not referenced by a pointer field</li>
 ?>  
 <html>
@@ -78,6 +58,7 @@
     $test_optfields = (@$_REQUEST['optfields']==1);
     $test_recfields = (@$_REQUEST['recfields']==1);
     
+    $mysqli = $system->get_mysqli();
     
 
     $filter = @$_REQUEST['filter_exact'];
@@ -89,10 +70,10 @@
         //1. find all database
         $query = 'show databases';
 
-        $res = mysql_query($query);      
-        if (!$res) {  print $query.'  '.mysql_error();  return; }
+        $res = $mysqli->query($query);      
+        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
         $databases = array();
-        while (($row = mysql_fetch_row($res))) {
+        while (($row = $res->fetch_assoc())) {
             if( strpos($row[0], 'hdb_')===0 && ($filter=="all" || strpos($row[0], $filter)===0)){
                 //if($row[0]>'hdb_Masterclass_Cookbook')
                     $databases[] = $row[0];
@@ -121,9 +102,9 @@
     
     foreach ($origin_dbs as $db_name=>$ids){
         
-        mysql_connection_select($db_name);
+        mysql__usedatabase($mysqli, $db_name);
         
-        resetGlobalTermsArrays();
+        VerifyValue::reset();
         $all_terms = getTerms();
         $ti_dbid = $all_terms['fieldNamesToIndex']['trm_OriginatingDBID'];
         $ti_oid = $all_terms['fieldNamesToIndex']['trm_IDInOriginatingDB'];
@@ -143,12 +124,10 @@
         }
 
         //all codes in this database    
-        $rty_Codes = mysql__select_assoc('defRecTypes', 'rty_ID', 
-                'CONCAT(rty_OriginatingDBID,"-",rty_IDInOriginatingDB) as rty_Code', '1=1');
-        $rty_Names_temp = mysql__select_assoc('defRecTypes', 'CONCAT(rty_OriginatingDBID,"-",rty_IDInOriginatingDB) as rty_Code',
-                'rty_Name', '1=1');
+        $rty_Codes = mysql__select_assoc2($mysqli, 'select rty_ID, CONCAT(rty_OriginatingDBID,"-",rty_IDInOriginatingDB) as rty_Code FROM defRecTypes');
+        $rty_Names_temp = mysql__select_assoc2($mysqli, 'select rty_Name, CONCAT(rty_OriginatingDBID,"-",rty_IDInOriginatingDB) as rty_Code FROM defRecTypes');
                 
-        $rty_IDs = mysql__select_array('defRecTypes', 'rty_ID', $where);
+        $rty_IDs = mysql__select_list($mysqli, 'defRecTypes', 'rty_ID', $where);
         $rty_IDs_ToCheck = array();
         
         foreach($rty_IDs as $rty_ID){
@@ -166,11 +145,11 @@
         .'from defRecStructure, defDetailTypes  where dty_ID=rst_DetailTypeID AND rst_RecTypeID in ('
                 .implode(',',$rty_IDs_ToCheck).')';
     
-        $res = mysql_query($query);
-        if (!$res) {  print $query.'  '.mysql_error();  return; }
+        $res = $mysqli->query($query);
+        if (!$res) {  print $query.'  '.$mysqli->error;  return; }
         
         //gather fields ids, pointer constraints, vocabs/terms - as concept codes
-        while (($row = mysql_fetch_assoc($res))) {
+        while (($row = $res->fetch_assoc())) {
             
              $rty_Code = $rty_Codes[$row['rst_RecTypeID']];
              $dty_Code = $row['dty_OriginatingDBID'].'-'.$row['dty_IDInOriginatingDB'];
@@ -199,7 +178,7 @@
                  
                  $domain = $row['dty_Type']=='enum'?'enum':'relation';
                  
-                 $terms = getAllowedTerms($row['dty_JsonTermIDTree'], null, $row['dty_ID']);
+                 $terms = VerifyValue::getAllowedTerms($row['dty_JsonTermIDTree'], null, $row['dty_ID']);
                  $codes = array();
                  foreach($terms as $trm_id){
                      $term = $all_terms['termsByDomainLookup'][$domain][$trm_id];
@@ -229,11 +208,11 @@
     
     foreach ($databases as $idx=>$db_name){
         
-        mysql_connection_select($db_name);
+        mysql__usedatabase($mysqli, $db_name);
        
         $smsg = ""; 
         
-        resetGlobalTermsArrays();        
+        VerifyValue::reset();
         $all_terms = getTerms(false);
         $constraints2 = array(); //per detail
         $terms_codes2 = array(); //per detail
@@ -243,11 +222,9 @@
         $fileds_missed_rectypes = array(); 
         
         //find all rty-codes
-        $rty_Codes2 = mysql__select_assoc('defRecTypes', 'rty_ID', 
-                'CONCAT(rty_OriginatingDBID,"-",rty_IDInOriginatingDB) as rty_Code', '1=1');
+        $rty_Codes2 =  mysql__select_assoc2($mysqli,'SELECT rty_ID, CONCAT(rty_OriginatingDBID,"-",rty_IDInOriginatingDB) as rty_Code FROM defRecTypes');
         //find all term codes
-        $trm_Codes2 = mysql__select_assoc('defTerms', 'trm_ID', 
-                'CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB) as trm_Code', '1=1');
+        $trm_Codes2 =  mysql__select_assoc2($mysqli,'SELECT trm_ID, CONCAT(trm_OriginatingDBID,"-",trm_IDInOriginatingDB) as trm_Code FROM defTerms');
         
 
         //loop by rectypes        
@@ -262,10 +239,10 @@
             //check for unexpected concept code by name
             $rty_Name = $rty_Names[$rty_Code];
             $query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB '
-            .' FROM defRecTypes WHERE rty_Name="'.mysql_real_escape_string($rty_Name).'"';
-            $res = mysql_query($query);
-            if (!$res) {  print $db_name.'  '.$query.'  '.mysql_error();  return; }
-            $row = mysql_fetch_row($res);
+            .' FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
+            $res = $mysqli->query($query);
+            if (!$res) {  print $db_name.'  '.$query.'  '.$mysqli->error;  return; }
+            $row = $res->fetch_assoc();
             if($row){
                 if($row[0]!=$db_id || $row[1]!=$orig_id){
                    $msg_error = $msg_error."<p style='padding-left:20px'>name = $rty_Name : Unexpected concept ID ".$row[0].'-'.$row[1].'</p>';
@@ -279,13 +256,13 @@
             .'where rty_ID=rst_RecTypeID AND dty_ID=rst_DetailTypeID AND rty_OriginatingDBID='
             .$db_id.' AND rty_IDInOriginatingDB='.$orig_id;
         
-            $res = mysql_query($query);
-            if (!$res) {  print $db_name.'  '.$query.'  '.mysql_error();  return; }
+            $res = $mysqli->query($query);
+            if (!$res) {  print $db_name.'  '.$query.'  '.$mysqli->error;  return; }
             
             $fields2 = array();      //per record type
             
             //gather fields ids, pointer constraints, vocabs/terms - as concept codes
-            while (($row = mysql_fetch_assoc($res))) {
+            while (($row = $res->fetch_assoc())) {
 
                  $rty_Name = $row['rty_Name'];
                  $dty_Code = $row['dty_OriginatingDBID'].'-'.$row['dty_IDInOriginatingDB'];
@@ -307,7 +284,7 @@
                      
                      $domain = $row['dty_Type']=='enum'?'enum':'relation';
                      
-                     $terms = getAllowedTerms($row['dty_JsonTermIDTree'], null, $row['dty_ID']);
+                     $terms = VerifyValue::getAllowedTerms($row['dty_JsonTermIDTree'], null, $row['dty_ID']);
                      
                      $codes = array();
                      if(is_array($terms)){

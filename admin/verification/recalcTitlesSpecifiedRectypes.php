@@ -20,46 +20,43 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+set_time_limit(0);
 
-    if (! is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        return;
-    }
+define('MANGER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
 
-    if (! is_admin()) {
-        print "You must be a HEURIST administrator to use this page.";
-        return;
-    }
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/titleMask.php');
+
 
     if(@$_REQUEST['recTypeIDs']) {
         $recTypeIds = $_REQUEST['recTypeIDs'];
     }else{
-        print "You must specify a record type (?recTypeIDs=55) or a set of record types (?recTypeIDs=55,174,175) to use this page.";
+        header('Location: '.ERROR_REDIR.'&msg='
+            .rawurlencode('You must specify a record type (?recTypeIDs=55) or a set of record types (?recTypeIDs=55,174,175) to use this page.'));
+        exit();        
     }
 
-    require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
-
-
-    mysql_connection_overwrite(DATABASE);
-
-
-    $res = mysql_query(
-        "select rec_ID, rec_Title, rec_RecTypeID from Records where ! rec_FlagTemporary and rec_RecTypeID in ($recTypeIds) order by rand()");
-    $recs = array();
-
-    while ($row = mysql_fetch_assoc($res)) {
-        $recs[$row['rec_ID']] = $row;
+$mysqli = $system->get_mysqli();
+    
+$res = $mysqli->query("select rec_ID, rec_Title, rec_RecTypeID from Records where ! rec_FlagTemporary and rec_RecTypeID in ($recTypeIds) order by rand()");
+$recs = array();
+if($res){
+    while ($row = $res->fetch_assoc() ) {
+            $recs[$row['rec_ID']] = $row;
     }
+    $res->close();
+}
+    
+$names = mysql__select_assoc2($mysqli, 'select rty_ID, rty_Name from  defRecTypes WHERE rty_ID in ('.$recTypeIds.')');
 
-    $rt_names = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_Name', 'rty_ID in ('.$recTypeIds.')');
+$masks = mysql__select_assoc2($mysqli, 'select rty_ID, rty_TitleMask from  defRecTypes WHERE rty_ID in ('.$recTypeIds.')');
 
-    $masks = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_TitleMask', 'rty_ID in ('.$recTypeIds.')');
-    $updates = array();
-    $blank_count = 0;
-    $repair_count = 0;
-    $processed_count = 0;
+
+$updates = array();
+$blank_count = 0;
+$repair_count = 0;
+$processed_count = 0;
 
 ?>
 
@@ -67,7 +64,7 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Recalculation of composite record titles</title>
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
     </head>
 
     <body class="popup">
@@ -130,7 +127,9 @@
                 }
 
                 $mask = $masks[$rec['rec_RecTypeID']];
-                $new_title = trim(fill_title_mask($mask, $rec_id, $rec['rec_RecTypeID']));
+                $new_title = TitleMask::execute($mask, $rec['rec_RecTypeID'], 0, $rec_id, _ERR_REP_WARN);
+                $new_title = trim($new_title);
+                
                 ++$processed_count;
                 $rec_title = trim($rec['rec_Title']);
                 if ($new_title && $rec_title && $new_title == $rec_title && strstr($new_title, $rec_title) )  continue;
@@ -180,7 +179,8 @@
 
                 $i = 0;
                 foreach ($updates as $rec_id => $new_title) {
-                    mysql_query('update Records set rec_Modified=rec_Modified, rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
+                    $mysqli->query('update Records set rec_Modified=rec_Modified, rec_Title="'.
+                            $mysqli->real_escape_string($new_title).'" where rec_ID='.$rec_id);
                     ++$i;
                     if ($rec_id % $step_uiupdate == 0) {
                         print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";

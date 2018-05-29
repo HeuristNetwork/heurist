@@ -35,7 +35,7 @@
 */
 
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
+require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../common/php/utilsMail.php');
 require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php');
@@ -419,7 +419,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     // Index new database for Elasticsearch
     //TODO: Needs error report, trap error and warn or abort clone
-    buildAllIndices($newname); // ElasticSearch uses full database name including prefix
+    ElasticSearch::buildAllIndices($newname); // ElasticSearch uses full database name including prefix
 
     // Copy the images and the icons directories
     //TODO: Needs error report, trap error and warn or abort clone

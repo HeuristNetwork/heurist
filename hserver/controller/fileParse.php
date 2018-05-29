@@ -2491,13 +2491,13 @@ function validateEnumerations($query, $imp_session, $fields_checked, $dt_id, $fi
 
                     $is_termid = false;
                     if(ctype_digit($r_value2)){
-                        $is_termid = isValidTerm( $dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id);
+                        $is_termid = VerifyValue::isValidTerm( $dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id);
                     }
 
                     if($is_termid){
                         $term_id = $r_value;
                     }else{
-                        $term_id = isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
+                        $term_id = VerifyValue::isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
                     }
 
                     if (!$term_id)
@@ -2576,7 +2576,7 @@ function validateResourcePointers( $query, $imp_session, $fields_checked, $dt_id
                 $r_value2 = trim($r_value);
                 if($r_value2!=""){
 
-                    if (!isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id ))
+                    if (!VerifyValue::isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id ))
                     {//not found
                         $is_error = true;
                         array_push($newvalue, "<font color='red'>".$r_value."</font>");

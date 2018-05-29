@@ -1091,7 +1091,7 @@ function findByConceptCode($ccode, $entities, $idx_ccode, $sall=false){
 
 
 
-//
+// REPLACE with db_structure function
 // get terms from json string
 //
 function getTermsFromFormat($formattedStringOfTermIDs, $domain) {

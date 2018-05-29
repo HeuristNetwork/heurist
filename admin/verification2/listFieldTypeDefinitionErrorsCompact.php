@@ -1,5 +1,5 @@
 <?php
-
+//@TODO NOT USED
 /*
 * Copyright (C) 2005-2016 University of Sydney
 *
@@ -33,8 +33,13 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+define('PDIR','../../');  //need for proper path to js and css    
 
-require_once('getFieldTypeDefinitionErrors.php');
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once('verifyFieldTypes.php');
+
+$mysqli = $system->get_mysqli();
+
 
 if(@$_REQUEST['data']){
     $lists = json_decode($_REQUEST['data'], true);
@@ -77,14 +82,6 @@ $dtysWithInvalidRectypeConstraint = $lists["rt_contraints"];
             <script>
                 function repairFieldTypes(){
 
-                    function _callback(context){
-                        if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
-                            top.HEURIST.util.showError(null);
-                        }else{
-                            alert(context['result']);
-                        }
-                    }
-
                     var dt = [
                         <?php
                         $isfirst = true;
@@ -104,10 +101,21 @@ $dtysWithInvalidRectypeConstraint = $lists["rt_contraints"];
 
                     var str = JSON.stringify(dt);
 
-                    var baseurl = top.HEURIST.baseURL + "admin/verification/repairFieldTypes.php";
                     var callback = _callback;
-                    var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
-                    top.HEURIST.util.getJsonData(baseurl, callback, params);
+                    
+                    var baseurl = '<?=HEURIST_BASE_URL?>admin/verification/repairFieldTypes.php';
+                    var request = {db:'<?=HEURIST_DBNAME?>', data:str};
+                    
+                    window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(context){
+                        if(window.hWin.HEURIST4.util.isnull(context) || 
+                           window.hWin.HEURIST4.util.isnull(context['result']))
+                        {
+                                window.hWin.HEURIST4.msg.showMsgErr('Can not repair field type');
+                        }else{
+                                window.hWin.HEURIST4.msg.showMsgDlg(context['result'], null, 'Auto repair');
+                        }
+                    });
+                    
                 }
             </script>
 

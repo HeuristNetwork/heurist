@@ -26,40 +26,40 @@
     */
 require_once (dirname(__FILE__).'/../../hserver/System.php');
 
-    header('Content-type: text/javascript');
-    
-    $rv = array();
+header('Content-type: text/javascript');
 
-    // init main system class
-    $system = new System();
+$rv = array();
 
-    if(!$system->init(@$_REQUEST['db'])){
-        $response = $system->getError();
-        print json_encode($response);
-        return;
-    }
-    
-    //$response = array("status"=>HEURIST_OK, "data"=> $res);
+// init main system class
+$system = new System();
 
-    if (!$system->is_dbowner()) {
-        $response = $system->addError(HEURIST_REQUEST_DENIED,
-                     'To perform this action you must be logged in as Database Owner');
-        print json_encode($response);
-        return;
-    }
+if(!$system->init(@$_REQUEST['db'])){
+    $response = $system->getError();
+    print json_encode($response);
+    return;
+}
 
-    $mysqli = $system->get_mysqli();
+//$response = array("status"=>HEURIST_OK, "data"=> $res);
 
-    
-    $data = null;
-    if(@$_REQUEST['data']){
-        $data = json_decode(urldecode(@$_REQUEST['data']), true);
-    }else{
-        $response = $system->addError(HEURIST_INVALID_REQUEST,
-                     'Data not defined! Wrong request.');
-        print json_encode($response);
-        return;
-    }
+if (!$system->is_dbowner()) {
+    $response = $system->addError(HEURIST_REQUEST_DENIED,
+                 'To perform this action you must be logged in as Database Owner');
+    print json_encode($response);
+    return;
+}
+
+$mysqli = $system->get_mysqli();
+
+
+$data = null;
+if(@$_REQUEST['data']){
+    $data = json_decode(urldecode(@$_REQUEST['data']), true);
+}else{
+    $response = $system->addError(HEURIST_INVALID_REQUEST,
+                 'Data not defined! Wrong request.');
+    print json_encode($response);
+    return;
+}
 
     //------------------------------------------------------
     //Remove non-registred files

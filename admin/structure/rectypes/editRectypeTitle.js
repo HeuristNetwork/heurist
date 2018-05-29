@@ -571,20 +571,22 @@ function EditRectypeTitle() {
                 _defs[_rectypeID] = [{common:[newvalue],dtFields:[]}];
                 var oRectype = {rectype:{colNames:{common:["rty_TitleMask"],dtFields:[]},
                             defs:_defs}}; //{_rectypeID:[{common:[newvalue],dtFields:[]}]}
-                var str = JSON.stringify(oRectype);
+                //var str = JSON.stringify(oRectype);
                 
                 var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
                 var callback = _updateTitleMask;// updateResult;
-                var params = "method=saveRT&db="+_db+"&data=" + encodeURIComponent(str);
-                Hul.sendRequest(baseurl, function(xhr) {
-                    _updateTitleMask();
-                    /*var obj = xhr.responseText;
-                    if(obj===""){
-                        _updateTitleMask();
-                    }else{
-                        alert(obj);
-                    }*/
-                }, params);                                
+                
+                var request = {method:'saveRT', db:window.hWin.HAPI4.database, data:oRectype }; //styep
+                
+                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+                    function (response) {
+                        if(response.status == window.hWin.ResponseStatus.OK ){
+                            _updateTitleMask();        
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }                
+                );
             }else{
                 window.close(newvalue);
             }                    
@@ -642,7 +644,7 @@ function EditRectypeTitle() {
     }
 
     //
-    // utility function - TODO: move to HEURIST.utils
+    // utility function - TODO: move to HEURIST4.ui
     //
     function insertAtCursor(myField, myValue) {
         //IE support

@@ -3,6 +3,8 @@
     /**
     * listDuplicateRecords.php: Lists groups of potential duplicated and allows various actions -
     * ignoring groups in future, merging group members, editing records
+    * 
+    * see admin menu
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

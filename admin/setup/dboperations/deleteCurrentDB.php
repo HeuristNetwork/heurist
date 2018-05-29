@@ -22,7 +22,7 @@
 
 
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
+require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
 
 if(isForOwnerOnly("to delete a database")){
@@ -83,7 +83,7 @@ if(isForOwnerOnly("to delete a database")){
                         } else {
                             // Remove from Elasticsearch
                             print "<p>Removing indexes, calling deleteIndexForDatabase with parameter $dbname<br /><br /></p>";
-                            deleteIndexForDatabase($dbname);  //Deleting all Elasticsearch indexes
+                            ElasticSearch::deleteIndexForDatabase($dbname);  //Deleting all Elasticsearch indexes
                             ?>
                             <h2>Database <b><?=$dbname?></b> has been deleted</h2>
                             <p>Associated files stored in upload subdirectories <b><?=$uploadPath?></b> <br/> have ben moved to <?=HEURIST_UPLOAD_ROOT?>DELETED_DATABASES.</p>

@@ -16,6 +16,8 @@
     /**
     * Write out corrected version of field definitions
     *
+    * see listDatabaseErrors
+    * 
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @copyright   (C) 2005-2016 University of Sydney
     * @link        http://HeuristNetwork.org
@@ -25,31 +27,41 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once (dirname(__FILE__).'/../../hserver/System.php');
 
-    if (! is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        return;
-    }
+header('Content-type: application/json;charset=UTF-8');
 
-    $rv = array();
+$rv = array();
 
-    header('Content-type: text/javascript');
+// init main system class
+$system = new System();
 
-    if (!is_admin()) {
-        $rv['error'] = "Sorry, you need to be a database owner to be able to modify the database structure";
-        print json_format($rv);
-        return;
-    }
+if(!$system->init(@$_REQUEST['db'])){
+    $response = $system->getError();
+    print json_encode($response);
+    exit();
+}
+if (!$system->is_admin()) {
+    $response = $system->addError(HEURIST_REQUEST_DENIED,
+                 'To perform this action you must be logged in  as Administrator of group \'Database Managers\'');
+    print json_encode($response);
+    exit();
+}
+    
+$mysqli = $system->get_mysqli();
+    
+
+$rv = array();
+    
 
     $data = null;
     if(@$_REQUEST['data']){
-        $data = json_decode(urldecode(@$_REQUEST['data']), true);
+        $data = $_REQUEST['data']; //json_decode(urldecode(@$_REQUEST['data']), true);
     }else{
-        $rv['error'] = "Data not defined!"; // TODO: Explain what this means and what do to about it ...
-        print json_format($rv);
-        return;
+        $response = $system->addError(HEURIST_INVALID_REQUEST,
+                     'Data not defined');
+        print json_encode($response);
+        exit();
     }
 
     $k = 0;
@@ -73,15 +85,18 @@
 
         $k++;
 
-        $res = mysql_query($query);
-        if (mysql_error()) {
-            $rv['error'] = "SQL error updating field type ".$dt_id.": ".mysql_error();
-            print json_format($rv);
-            return;
+        $res = $mysqli->query($query);
+        if ($mysqli->error) {
+            $response = $system->addError(HEURIST_DB_ERROR,
+                         'SQL error updating field type '.$dt_id, $mysqli->error);
+            print json_encode($response);
+            exit();
         }
 
     }//for
 
-    $rv['result'] = $k." field".($k>1?"s have":" has")." been repaired. If you have unsaved data in an edit form, save your changes and reload the page to apply revised/corrected field definitions";
-    print json_format($rv);
+print json_encode(array('status'=>HEURIST_OK,
+ 'result'=>  $k." field".($k>1?"s have":" has")
+    ." been repaired. If you have unsaved data in an edit form, save your changes and reload the page to apply revised/corrected field definitions"
+ ));
 ?>

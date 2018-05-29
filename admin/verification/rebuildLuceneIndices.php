@@ -3,6 +3,8 @@
     /**
     * rebuildLuceneIndices.php: Rebuilds all Lucence (Elastic Search) indices for the database
     *
+    * from admin menu
+    * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2016 University of Sydney
@@ -20,31 +22,33 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+    define('PDIR','../../');  //need for proper path to js and css    
 
-    require_once(dirname(__FILE__).'/../../records/index/elasticSearchFunctions.php');
-
-    if(isForAdminOnly("to rebuild the Lucene indices")){
-        return;
-    }
-
-    mysql_connection_overwrite(DATABASE);
-    if(mysql_error()) {
-        die("MySQL error - unable to connect to database, MySQL error: "+mysql_error());
-    }
-
-    print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
-    Rebuilding Lucene indices for all tables ... ";
-
-    $code = buildAllIndices(HEURIST_DBNAME);
-    if ($code ==0) {
-        print "<html><head><link rel=stylesheet href='../../common/css/global.css'></head><body class='popup'>
-        <h2> Database indices have been rebuilt, please check for errors above</h2>";
-    } else {
-        die('<p>Failed to rebuild indices, please consult Heurist support team (error code: ' + $code + ')</p>');
-    }
-
-    print "</body>";
-    print "</html>";
-
+    require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+    require_once(dirname(__FILE__).'/../../records/index/elasticSearch.php');
 ?>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Check Invalid Characters</title>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+    </head>
+
+    <body class="popup">
+        <div class="banner"><h2>Rebuilding Lucene indices for all tables</h2></div>
+        <div id="page-inner" style="overflow:auto;padding-left: 6px;">
+            <div>
+                This function rebuilds lucene indices
+                <br />&nbsp;<hr />
+            </div>
+<?php
+
+    $code = ElasticSearch::buildAllIndices(HEURIST_DBNAME);
+    if ($code ==0) {
+        print('<div>Database indices have been rebuilt, please check for errors above</div>');
+    } else {
+        print('<div class="ui-state-error">Failed to rebuild indices, please consult Heurist support team (error code: '.$code.')</div>');
+    }
+?>
+    </body>
+</html>

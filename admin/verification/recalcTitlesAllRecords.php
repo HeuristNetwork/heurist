@@ -28,40 +28,39 @@
     * TODO: Massive redundancy: This is pretty much identical code to recalcTitlesSopecifiedRectypes.php and should be 
     * combined into one file, or call the same functions to do the work
     */
+set_time_limit(0);
 
+define('MANGER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/titleMask.php');
 
-    if(isForAdminOnly("to rebuild titles")){
-        return;
-    }
-
-    set_time_limit(0);
+$mysqli = $system->get_mysqli();
     
-    mysql_connection_overwrite(DATABASE);
-
-    require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php'); //?db='.HEURIST_DBNAME);
-
-    $res = mysql_query('select rec_ID, rec_Title, rec_RecTypeID from Records where !rec_FlagTemporary order by rand()');
-    $recs = array();
-    while ($row = mysql_fetch_assoc($res)) {
-        $recs[$row['rec_ID']] = $row;
+$res = $mysqli->query('select rec_ID, rec_Title, rec_RecTypeID from Records where !rec_FlagTemporary order by rand()');
+$recs = array();
+if($res){
+    while ($row = $res->fetch_assoc() ) {
+            $recs[$row['rec_ID']] = $row;
     }
+    $res->close();
+}
+    
+$masks = mysql__select_assoc2($mysqli, 'select rty_ID, rty_TitleMask from  defRecTypes');
 
+$updates = array();
+$blank_count = 0;
+$repair_count = 0;
+$processed_count = 0;
 
-    $masks = mysql__select_assoc('defRecTypes', 'rty_ID', 'rty_TitleMask', '1');
-    $updates = array();
-    $blank_count = 0;
-    $repair_count = 0;
-    $processed_count = 0;
-
-    ob_start();
+ob_start();
 ?>
-
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+
         <script type="text/javascript">
             function update_counts(processed, blank, repair, changed) {
                 if(changed==null || changed==undefined){
@@ -82,8 +81,6 @@
             }
         </script>
 
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
     </head>
     
     <body class="popup">
@@ -131,8 +128,11 @@
                     }
 
                     $mask = $masks[$rec['rec_RecTypeID']];
-                    $new_title = trim(fill_title_mask($mask, $rec_id, $rec['rec_RecTypeID']));
+                    
+                    $new_title = TitleMask::execute($mask, $rec['rec_RecTypeID'], 0, $rec_id, _ERR_REP_WARN);
                     ++$processed_count;
+                    
+                    
                     $rec_title = trim($rec['rec_Title']);
                     if ($new_title && $rec_title && $new_title == $rec_title && strstr($new_title, $rec_title) )  continue;
 
@@ -180,7 +180,8 @@
                     
                     $i = 0;
                     foreach ($updates as $rec_id => $new_title) {
-                        mysql_query('update Records set rec_Modified=rec_Modified, rec_Title="'.mysql_real_escape_string($new_title).'" where rec_ID='.$rec_id);
+                        $mysqli->query('update Records set rec_Modified=rec_Modified, rec_Title="'.
+                            $mysqli->real_escape_string($new_title).'" where rec_ID='.$rec_id);
                         ++$i;
                         if ($rec_id % $step_uiupdate == 0) {
                             print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
@@ -190,15 +191,16 @@
                     foreach ($reparables as $rec_id) {
                         $rec = $recs[$rec_id];
                         if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
-                            $has_detail_160 = (mysql_num_rows(mysql_query(
-                                "select dtl_ID from recDetails where dtl_DetailTypeID = $titleDT and dtl_RecID =". $rec_id)) > 0);
+                            $has_detail_160 = mysql__select_value($mysqli, 
+                                "select dtl_ID from recDetails where dtl_DetailTypeID = $titleDT and dtl_RecID =". $rec_id);
                             //touch the record so we can update it  (required by the heuristdb triggers)
-                            mysql_query('update Records set rec_RecTypeID=1 where rec_ID='.$rec_id);
+                            $mysqli->query('update Records set rec_RecTypeID=1 where rec_ID='.$rec_id);
                             if ($has_detail_160) {
-                                mysql_query('update recDetails set dtl_Value="' .
+                                $mysqli->query('update recDetails set dtl_Value="' .
                                     $rec['rec_Title'] . "\" where dtl_DetailTypeID = $titleDT and dtl_RecID=".$rec_id);
                             }else{
-                                mysql_query('insert into recDetails (dtl_RecID, dtl_Value) VALUES(' .$rec_id . ','.$rec['rec_Title'] . ')');
+                                $mysqli->query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
+                                    .$rec_id . ','. $titleDT  .',"'.$rec['rec_Title'] . '")');
                             }
                         }
                     }

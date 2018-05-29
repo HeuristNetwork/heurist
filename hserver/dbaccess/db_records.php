@@ -36,6 +36,7 @@
     require_once (dirname(__FILE__).'/db_structure.php');
     require_once (dirname(__FILE__).'/db_recsearch.php');
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
+    require_once (dirname(__FILE__).'/../../records/index/elasticSearch.php');
 
     $recstructures = array();
     $detailtypes   = array();
@@ -549,7 +550,7 @@
                 if ($mysqli->error) break;
                 array_push($deleted, $id);
                
-//ELASTIC todo !!!!1   deleteRecordIndexEntry(DATABASE, $recTypeID, $id);
+                ElasticSearch::deleteRecordIndexEntry(HEURIST_DBNAME, $rectype, $id);
                 
                 $mysqli->query('delete from usrReminders where rem_RecID = ' . $id);
                 if ($mysqli->error) break;
@@ -863,43 +864,60 @@
     * @param mixed $recID
     * @param mixed $rectype
     */
-    function recordUpdateTitle($system, $recID, $rectype, $recTitleDefault)
+    function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
     {
         
         $mysqli = $system->get_mysqli();
-
-        if(!(isset($rectype) && $rectype>0)){
-            $rectype = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID=".$recID);
-            if(!($rectype>0)){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot get record for title mask update. Rec#'.$recID);
-                return false;
-            }
+        
+        $mask = null;
+        $rectype = null;
+        
+        if(is_int($rectype_or_mask) && $rectype_or_mask>0){
+            $rectype = $rectype_or_mask;
+        }else if($rectype_or_mask!=null){
+            $mask = $rectype_or_mask;
         }
         
-        $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".$rectype);
-        if(!$mask){
-            $system->addError(HEURIST_DB_ERROR, 'Cannot get title mask for record type', $mysqli->error);
-            return false;
+        if($mask == null){
+
+            if(!(isset($rectype) && $rectype>0)){
+                $rectype = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID=".$recID);
+                if(!($rectype>0)){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot get record for title mask update. Rec#'.$recID);
+                    return false;
+                }
+            }
+            
+            $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".$rectype);
+            if(!$mask){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot get title mask for record type', $mysqli->error);
+                return false;
+            }
+        
         }
 
 
-        $new_title = TitleMask::fill($recID);
+        $new_title = TitleMask::fill($recID, $mask);
         
         if($new_title==null && $recTitleDefault!=null) $new_title = $recTitleDefault;
+        
 
         if ($new_title) {
-            $query = "UPDATE Records set rec_Title=? where rec_ID=".$recID;
+            $new_title = trim($new_title);
+            if($new_title!=''){
+                $query = "UPDATE Records set rec_Title=? where rec_ID=".$recID;
 
-            $stmt = $mysqli->prepare($query);
+                $stmt = $mysqli->prepare($query);
 
-            $stmt->bind_param('s', $new_title);
-            if(!$stmt->execute()){
-                $syserror = $mysqli->error;
+                $stmt->bind_param('s', $new_title);
+                if(!$stmt->execute()){
+                    $syserror = $mysqli->error;
+                    $stmt->close();
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $syserror);
+                    return false;
+                }
                 $stmt->close();
-                $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $syserror);
-                return false;
             }
-            $stmt->close();
         }
 
         return $new_title;
@@ -1166,45 +1184,6 @@ array_push($errorValues,
 
     } //END prepareDetails
 
-    /**
-    * check that rectype is valid for given detail (constrained pointer)
-    *
-    * @param mixed $mysqli
-    * @param mixed $rectype_tocheck  - rectype to be verified
-    * @param mixed $dtyID  - detail type id
-    * @param mixed $rectype - for rectype
-    */
-    function isValidRectype($system, $rectype_tocheck, $dtyID, $rectype)
-    {
-        global $recstructures, $detailtypes;
-
-        $rectype_ids = null;
-
-        $recstr = dbs_GetRectypeStructure($system, $recstructures, $rectype);
-
-        if($recstr && @$recstr['dtFields'][$dtyID])
-        {
-            $val = $recstr['dtFields'][$dtyID];
-            $idx = $recstructures['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
-            $rectype_ids = $val[$idx]; //constraint for pointer
-        }else{
-            //detail type may be not in rectype structure
-
-            $dtype = getDetailType($system, $detailtypes, $dtyID);
-            if ($dtype) {
-                $idx = $detailtypes['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
-                $rectype_ids = @$dtype[$idx];
-            }
-        }
-
-        if($rectype_ids){
-            $allowed_rectypes = explode(",", $rectype_ids);
-            return in_array($rectype_tocheck, $allowed_rectypes);
-        }
-
-        return true;
-    }
-
     //
     //
     //
@@ -1354,12 +1333,53 @@ array_push($errorValues,
     }
     
     
-    // @todo move terms function in the separate
+    // @todo all these functions are duplicated in VerifyValue and db_structure
 
+    /**
+    * check that rectype is valid for given detail (constrained pointer)
+    *
+    * @param mixed $mysqli
+    * @param mixed $rectype_tocheck  - rectype to be verified
+    * @param mixed $dtyID  - detail type id
+    * @param mixed $rectype - for rectype
+    */
+    function isValidRectype($system, $rectype_tocheck, $dtyID, $rectype)
+    {
+        global $recstructures, $detailtypes;
+
+        $rectype_ids = null;
+
+        $recstr = dbs_GetRectypeStructure($system, $recstructures, $rectype);
+
+        if($recstr && @$recstr['dtFields'][$dtyID])
+        {
+            $val = $recstr['dtFields'][$dtyID];
+            $idx = $recstructures['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+            $rectype_ids = $val[$idx]; //constraint for pointer
+        }else{
+            //detail type may be not in rectype structure
+
+            $dtype = getDetailType($system, $detailtypes, $dtyID);
+            if ($dtype) {
+                $idx = $detailtypes['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
+                $rectype_ids = @$dtype[$idx];
+            }
+        }
+
+        if($rectype_ids){
+            $allowed_rectypes = explode(",", $rectype_ids);
+            return in_array($rectype_tocheck, $allowed_rectypes);
+        }
+
+        return true;
+    }
+
+    
+    
     //
     // get terms from json string
     //
-    function getTermsFromFormat($formattedStringOfTermIDs, $domain) {
+    function getTermsFromFormat2($formattedStringOfTermIDs, $domain) {
 
         global $terms;
 
@@ -1417,7 +1437,7 @@ array_push($errorValues,
     }
 
     //
-    //
+    //   see getTermTopMostParent in db_structure
     //
     function getTopMostTermParent($term_id, $domain, $topmost=null)
     {
@@ -1475,13 +1495,13 @@ array_push($errorValues,
 
             $allowed_terms = null;
 
-            $terms = getTermsFromFormat($terms_ids, $domain);
+            $terms = getTermsFromFormat2($terms_ids, $domain); //parse
 
             if (($cntTrm = count($terms)) > 0) {
                 if ($cntTrm == 1) { //vocabulary
                     $terms = getTermsByParent($terms[0], $domain);
                 }else{
-                    $nonTerms = getTermsFromFormat($terms_none, $domain);
+                    $nonTerms = getTermsFromFormat2($terms_none, $domain);
                     if (count($nonTerms) > 0) {
                         $terms = array_diff($terms, $nonTerms);
                     }

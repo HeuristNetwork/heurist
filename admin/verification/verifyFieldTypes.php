@@ -15,7 +15,11 @@
 */
 
 /**
-* brief description of file
+* Verify dty_JsonTermIDTree dty_TermIDTreeNonSelectableIDs dty_PtrTargetRectypeIDs
+* for terms and rectype existance
+* 
+* see listDatabaseErrors.php
+* 
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -29,28 +33,23 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-
 $TL = array();
 $RTN = array();
 
 function getInvalidFieldTypes($rectype_id){
 
-    global $TL, $RTN;
-
-    mysql_connection_select(DATABASE);
+    global $TL, $RTN, $mysqli;
 
     // lookup detail type enum values
     $query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID, trm_Code FROM defTerms';
-    $res = mysql_query($query);
-    while ($row = mysql_fetch_assoc($res)) {
+    $res = $mysqli->query($query);
+    while ($row = $res->fetch_assoc()) {
         $TL[$row['trm_ID']] = $row;
     }
     //record type name
     $query = 'SELECT rty_ID, rty_Name FROM defRecTypes';
-    $res = mysql_query($query);
-    while ($row = mysql_fetch_assoc($res)) {
+    $res = $mysqli->query($query);
+    while ($row = $res->fetch_assoc()) {
         $RTN[$row['rty_ID']] = $row['rty_Name'];
     }
 
@@ -76,9 +75,9 @@ function getInvalidFieldTypes($rectype_id){
     "or (dty_Type in ('relmarker','resource') and dty_PtrTargetRectypeIDs is not null)";
 
 
-    $res = mysql_query($query);
+    $res = $mysqli->query($query);
     if($res)
-    while ($row = mysql_fetch_assoc($res)) {
+    while ($row = $res->fetch_assoc()) {
         $DTT[$row['dty_ID']] = $row;
     }
 
@@ -118,12 +117,16 @@ function getInvalidFieldTypes($rectype_id){
                 $dtysWithInvalidRectypeConstraint[$dtyID]['validRectypeConstraint'] = $validRectypes;
             }
         }
-    }//for
+    }//for   
 
-    return array("terms"=>$dtysWithInvalidTerms, "terms_nonselectable"=>$dtysWithInvalidNonSelectableTerms, "rt_contraints"=>$dtysWithInvalidRectypeConstraint);
+    return array("terms"=>$dtysWithInvalidTerms, 
+                 "terms_nonselectable"=>$dtysWithInvalidNonSelectableTerms, 
+                 "rt_contraints"=>$dtysWithInvalidRectypeConstraint);
 }
 
+//
 // function that translates all term ids in the passed string to there local/imported value
+//
 function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     global $TL;
     $invalidTermIDs = array();
@@ -134,6 +137,8 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     $isvocabulary = false;
     $pos = strpos($formattedStringOfTermIDs,"{");
 
+    //@todo similar code in getTermsFromFormat
+    
     if ($pos!==false){ //}is_numeric($pos) && $pos>=0) {
 
         $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
@@ -187,6 +192,9 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     return array($invalidTermIDs, $validStringOfTerms);
 }
 
+//
+//
+//
 function createValidTermTree($termTree, $invalidTermIDs){
     $validStringOfTerms = "";
     $res = "";
@@ -202,7 +210,9 @@ function createValidTermTree($termTree, $invalidTermIDs){
     return ($res=="")?"": substr($res,0,-1);
 }
 
+//
 // function that check the existaance of all rectype ids in the passed string
+//
 function getInvalidRectypes($formattedStringOfRectypeIDs) {
     global $RTN;
     $invalidRectypeIDs = array();

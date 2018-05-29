@@ -345,6 +345,4 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth, $forpurpose=null){
 
     return $res;
 }
-
-
 ?>

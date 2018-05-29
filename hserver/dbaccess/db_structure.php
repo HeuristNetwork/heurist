@@ -40,9 +40,11 @@
     * getTermTopMostParent
     * getTermChildren
     * getTermInTree    
-    * getTermByLabel    
+    * getTermByLabel  
+    * getTermByCode  
     * getTermById
-    * geTermFullLabel
+    * getTermFullLabel
+    * getTermListAll
     *
     * INTERNAL FUNCTIONS
     * __getRectypeColNames
@@ -559,6 +561,27 @@ function dbs_GetRectypeConstraint($system) {
         }
         return $parent_label.$term[ $fi['trm_Label']];
     }
+    
+    //
+    // get tree for domain
+    //
+    function getTermListAll($mysqli, $termDomain){
+        
+        $terms = array();
+        $res = $mysqli->query('SELECT * FROM defTerms
+            where (trm_Domain="'.$termDomain.'") and (trm_ParentTermId=0 or trm_ParentTermId is NULL)');
+
+        if ($res && $res->num_rows) { //child nodes exist
+            while ($row = $res->fetch_assoc()) { // for each child node
+                array_push($terms, $row['trm_ID']);
+                if (true){ //ARTEM: trm_ChildCount is not reliable   }$row['trm_ChildCount'] > 0 && $getAllDescentTerms) {
+                    $terms = array_merge($terms, getTermOffspringList( $mysqli, $row['trm_ID'] ));
+                }
+            }
+        }else{
+        }
+        return $terms;        
+    }
 
 
     //
@@ -615,7 +638,7 @@ function dbs_GetRectypeConstraint($system) {
 
         $list = $terms['termsByDomainLookup'][$domain];
         foreach($list as $term_id => $term){
-            if(strcasecmp($term_label, $term[$idx])==0){
+            if(strcasecmp($term_label, $term[$idx][0])==0){
                 return $term_id;
             }
         }
@@ -623,6 +646,28 @@ function dbs_GetRectypeConstraint($system) {
         return null;
     }
 
+    //
+    // to public method
+    //
+    function getTermByCode($term_code, $domain)
+    {
+        global $terms;
+
+        $idx = $terms['fieldNamesToIndex']['trm_Label'];
+
+        $list = $terms['termsByDomainLookup'][$domain];
+        foreach($list as $term_id => $term){
+            if(strcasecmp($term_label, $term[$idx])==0){
+                return $term_id;
+            }
+        }
+
+        return null;
+    }
+    
+    // 
+    //
+    //
     function getTermById($term_id, $field='trm_Label'){
 
         global $terms;
@@ -647,6 +692,30 @@ function dbs_GetRectypeConstraint($system) {
         }
 
         return null;
+    }
+    
+    
+    //
+    // get term ids from json string - parse values in dty_JsonTermIDTree dty_TermIDTreeNonSelectableIDs
+    //
+    // similar functions are in importRectype
+    function getTermsFromFormat() {
+
+        if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
+            return array();
+        }
+
+        if (strpos($formattedStringOfTermIDs,"{")!== false) {
+            $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
+            if (strrpos($temp,":") == strlen($temp)-1) {
+                $temp = substr($temp,0, strlen($temp)-1);
+            }
+            $termIDs = explode(":",$temp);
+        } else {
+            $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
+            $termIDs = explode(",",$temp);
+        }
+        return $termIDs;        
     }
 
     //-----------------------------------------------------------------------------------------------

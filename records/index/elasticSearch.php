@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * elasticSearchFunctions.php: Functions to interact with ElasticSearch
+    * elasticSearch.php: Functions to interact with ElasticSearch
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -41,14 +41,16 @@
     each of the functions below, to make sure the systems are synchronized at all times.
 
 
-    FUNCTION CALLS:
+    PUBLIC METHODS:
 
     updateRecordIndexEntry() -> whenever a record is written (new or updated, from record edit or record import or record recode)
     - saveRecord.php
     - saveRecordDetails.php
+    - @todo - add into new db_record.php
 
     deleteRecordIndexEntry() -> whenever a record is saved with a different type (editRecord)
     - deleteRecordInfo.php
+    - db_record.php
 
     deleteIndexForDatabase -> whenever a database is deleted (admin actions)
     - clearCurrentDB.php
@@ -61,11 +63,29 @@
     - rebuildLuceneIndices.php
 
     */
+    
+// it is assumed that $system is already inited    
+class ElasticSearch {
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once('elasticSearchHelper.php');
+     /**
+     * Construct won't be called inside this class and is uncallable from
+     * the outside. This prevents instantiating this class.
+     * This is by purpose, because we want a static class.
+     */
+    private function __construct() {}    
+    private static $mysqli = null;
+    private static $initialized = false;
 
 
+    private static function initialize()
+    {
+        if (self::$initialized)
+            return;
+
+        global $system;
+        self::$mysqli = $system->get_mysqli();    
+        self::$initialized = true;
+    }
 
     // ****************************************************************************************************************
     /**
@@ -75,19 +95,23 @@
     * @param int $recTypeID  The record type ID of the record being indexed
     * @return bool True if successful
     */
-    function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
+    public static function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
+        
         if(isElasticUp()) {
+            
+            self::initialize();                        
+            
             $record = new stdClass();
 
             // Retrieve record level data
-            $query="SELECT rec_URL,rec_Added,rec_Modified,rec_Title,rec_RecTypeID,rec_AddedByUGrpID,rec_AddedByImport,rec_Popularity,".
+            $query = "SELECT rec_URL,rec_Added,rec_Modified,rec_Title,rec_RecTypeID,rec_AddedByUGrpID,rec_AddedByImport,rec_Popularity,".
             "rec_FlagTemporary,rec_OwnerUGrpID,rec_NonOwnerVisibility,rec_URLLastVerified,rec_URLErrorMessage,rec_URLExtensionForMimeType ".
             "from Records where rec_ID=$recID"; // omits scratchpad
-            $res = mysql_query($query);
+            $res = self::$mysqli->query($query);
 
             // Check if query has succeed
             if ($res) {
-                $row = mysql_fetch_array($res); // Fetch record data
+                $row = $res->fetch_row(); // Fetch record data
 
                 // Construct record
                 $record->URL            = $row[0];
@@ -108,27 +132,29 @@
                 // Check if recTypeID has changed
                 if($record->RecTypeID != $recTypeID) {
                     // Delete index for old record type before updating index for new record type
-                    deleteRecordIndexEntry($dbName, $recTypeID, $recID);
+                    self::deleteRecordIndexEntry($dbName, $recTypeID, $recID);
                 }
+                $res->close();
             } else {
-                error_log("[elasticSearchFunctions.php] updateRecordIndexEntry --> record query failed: $query");
+                error_log("[elasticSearch.php] updateRecordIndexEntry --> record query failed: $query");
                 return false;
             }
 
             // Retrieve detail level data
             $query = "SELECT dtl_DetailTypeID,dtl_Value,dtl_UploadedFileID,dtl_Geo from recDetails where dtl_RecID=$recID";
-            $res = mysql_query($query);
+            $res = self::$mysqli->query($query);
 
             // Check if query has succeeded
             if ($res) {
                 // Append detail level data to record
-                while (($row = mysql_fetch_array($res))) {
+                while (($row = $res->fetch_row())) {
                     // Detail ID is used as key, together with dtl_Value, dtl_UploadedFileID and dtl_Geo
                     // TODO: should use dtl_Value OR dtl_UploadedFileID OT dtl_Geo according to detail type
                     $record->$row[0] = $row[1].$row[2].$row[3];
                 }
+                $res->close();
             }else{
-                error_log("[elasticSearchFunctions.php] updateRecordIndexEntry --> details query failed: $query");
+                error_log("[elasticSearch.php] updateRecordIndexEntry --> details query failed: $query");
                 return false;
             }
 
@@ -138,7 +164,7 @@
 
             // Check if created
             if(checkElasticResponse($json, 'created')) {
-                checkElasticSync();
+                self::checkElasticSync();
                 return true;
             }
         }
@@ -161,8 +187,9 @@
     * @param int $recID     The record to be deleted from the index
     * @return bool True if successful
     */
-    function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
+    public static function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
         if(isElasticUp()) {
+            
             // Delete record from ElasticSearch
             $address = getElasticAddress($dbName, $recTypeID, $recID);
             $query = new stdClass();
@@ -170,7 +197,7 @@
 
             // Check if acknowledged
             if(checkElasticResponse($json, 'acknowledged')) {
-                checkElasticSync();
+                self::checkElasticSync();
                 return true;
             }
         }
@@ -185,7 +212,7 @@
     * @param int $recTypeID The record type ID of the record being deleted from the index
     * @return bool True if successfully deleted RecType from index.
     */
-    function deleteIndexForRectype ($dbName, $recTypeID) {
+    private static function deleteIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
             // Delete record from ElasticSearch
             $address = getElasticAddress($dbName, $recTypeID);
@@ -194,7 +221,7 @@
 
             // Check if acknowledged
             if(checkElasticResponse($json, 'acknowledged')) {
-                checkElasticSync();
+                self::checkElasticSync();
                 return true;
             }
         }
@@ -208,8 +235,9 @@
     * @param string $dbName The name of the Heurist database, excluding prefix
     * @return bool True if successfully deleted complete index from ElasticSearch.
     */
-    function deleteIndexForDatabase ($dbName) {
+    public static function deleteIndexForDatabase ($dbName) {
         if(isElasticUp()) {
+            
             // Delete record from ElasticSearch
             $address = getElasticAddress($dbName);
             $query = new stdClass();
@@ -217,7 +245,7 @@
 
             // Check if acknowledged
             if(checkElasticResponse($json, 'acknowledged')) {
-                checkElasticSync();
+                self::checkElasticSync();
                 return true;
             }
         }
@@ -234,21 +262,25 @@
     */
     function buildIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
-            deleteIndexForRectype ($dbName, $recTypeID); // clear the existing index
+            
+            self::initialize();                        
+            
+            self::deleteIndexForRectype ($dbName, $recTypeID); // clear the existing index
 
             $query = "SELECT rec_ID FROM Records WHERE rec_RecTypeID = $recTypeID";
-            $res = mysql_query($query);
+            $res = self::$mysqli->query($query);
 
             if ($res) {
-                while (($row = mysql_fetch_array($res))) { // fetch records
+                while (($row = $res->fetch_row())) { // fetch records
                     // Update all records while successful
-                    if(!updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/)) {
+                    if(!self::updateRecordIndexEntry ($dbName, $recTypeID, $row[0]/*recID*/)) {
                         return false;
                     }
                 }
+                $res->close();
                 return true;
             }else{
-                error_log("[elasticSearchFunctions.php] buildIndexForRectype --> invalid query: $query");
+                error_log("[elasticSearch.php] buildIndexForRectype --> invalid query: $query");
             }
         }
         return false;
@@ -261,22 +293,22 @@
     * @param string $dbName The name of the Heurist database, excluding prefix
     * @return bool True if OK, false if Error
     */
-    function buildAllIndices ($dbName, $print=true) {
+    public static function buildAllIndices ($dbName, $print=true) {
         if(isElasticUp()) {
             if ($print)
                 print "Building all Elasticsearch indices for: $dbName<br />";
 
             $query = "SELECT MAX(rec_RecTypeID) FROM Records WHERE 1";
-            $res = mysql_query($query);
+            $res = self::$mysqli->query($query);
             $count = 0;
 
             if ($res) {
-                $row = mysql_fetch_array($res);
+                $row = $res->fetch_row();
                 $maxRecTypeID = $row[0];
 
                 // Index all record types that exist
                 for ($i = 1; $i <= $maxRecTypeID; $i++) {
-                    if(buildIndexForRectype ($dbName, $i)) {
+                    if(self::buildIndexForRectype ($dbName, $i)) {
                         $count++;
                     }
                 }
@@ -284,12 +316,79 @@
                 if ($print)
                     print "ElasticSearch indices have successfully been built for $count record types.";
 
+                $res->close();
                 return true;
             }else{
-                error_log("[elasticSearchFunctions.php] buildAllIndices --> invalid query: $query");
+                error_log("[elasticSearch.php] buildAllIndices --> invalid query: $query");
             }
         }
         return false;
     } // buildAllIndices
+    
+    /**
+     * Checks if ElasticSearch is synchronised, called by functions in elasticSearch.php
+     */
+    private static function checkElasticSync($dbName) {
+        
+        self::initialize();  
+        // 1. Retrieve highest MySQL timestamp
+        $mysqlTimestamp = self::getHighestMySqlTimestamp();
 
+        // 2. Retrieve highest Elastic timestamp
+        $elasticTimestamp = self::getHighestElasticTimestamp($dbName);
+
+        // 3. Compare timestamps
+        if($mysqlTimestamp != NULL && $elasticTimestamp != NULL) {
+            if(strcmp($mysqlTimestamp, $elasticTimestamp) !== 0) {
+                // The timestamps are not equal. Note that ElasticSearch indexing takes ~100ms.
+                //error_log("[elasticSearchHelper.php] mysqlTimestamp: $mysqlTimestamp & elasticTimestamp: $elasticTimestamp are not equal.");
+            }
+        }
+    }
+    
+    /**
+     * Attempts to retrieve the highest rec_Modified timestamp in the MySql database
+     * @return null|string Null, or timestamp in the following form: 2017-05-16 11:26:52
+     */
+    private static function getHighestMySqlTimestamp() {
+
+        $res = mysql__select_value(self::$mysqli, 'SELECT MAX(rec_Modified) FROM Records');
+        
+        if ($res) {
+            return $res; // Gets the rec_Modified value from the first row.
+        } else {
+            error_log("[elasticSearchHelper.php] getHighestMySqlTimestamp failed - query: $query");
+        }
+        return NULL;
+    }
+
+    /**
+     * Attempts to retrieve the highest rec_Modified timestamp in the Elastic instance
+     * @return null|string Null, or timestamp in the following form: 2017-05-16 11:26:52
+     */
+    private static function getHighestElasticTimestamp($dbName) {
+        $address = getElasticAddress($dbName) . '/_search?size=1';
+        $query = '{
+                    "query": {
+                        "match_all": {}
+                    },
+                    "sort": {
+                        "Modified.raw": {
+                            "order" : "desc"
+                        }
+                    }
+                  }';
+        $json = postElastic($address, json_decode($query));
+
+        if ($json != NULL) {
+            $response = json_decode($json);
+            return $response->hits->hits[0]->_source->Modified; // Gets the Modified value from the first hit.
+        }else{
+            error_log("[elasticSearchHelper.php] getHighestElasticTimestamp failed - query: $query");
+        }
+
+        return NULL;
+    }    
+    
+}
 ?>

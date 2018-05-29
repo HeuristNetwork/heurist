@@ -21,7 +21,7 @@
     */
 
     require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
+    require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
     require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
 
     if(isForOwnerOnly("to clear a database")){
@@ -244,7 +244,7 @@
                 } else {
                     // Remove from ElasticSearch
                     print "<br/><br/>Removing indexes, calling deleteIndexForDatabase with parameter $dbname";
-                    deleteIndexForDatabase($fulldbname); // ElasticSearch uses full database name with prefix
+                    ElasticSearch::deleteIndexForDatabase($fulldbname); // ElasticSearch uses full database name with prefix
 
                     print "<br/><br/>Record data, bookmarks and tags have been deleted from <b>$dbname</b><br/>";
                     print "Database structure (record types, fields, terms, constraints etc.) and users have not been affected.";
