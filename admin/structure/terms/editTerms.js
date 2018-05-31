@@ -920,7 +920,7 @@ function EditTerms() {
             if(Hul.isempty(sName)){
                 swarn = "The term cannot be blank (the standard code, description and image are optional)"
             }else {
-                //IJ 2014-04-09 swarn = Hul.validateName(sName, "Field 'Display Name'");
+                //IJ 2014-04-09 swarn = window.hWin.HEURIST4.ui.validateName(sName, "Field 'Display Name'");
             }
             if(swarn!=""){
                 alert(swarn);

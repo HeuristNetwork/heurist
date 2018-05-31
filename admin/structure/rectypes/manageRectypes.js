@@ -208,7 +208,8 @@ function RectypeManager() {
                     id: grpID,
                     label: "<label title='Drag tab to reposition. Use [+/-] tab to add, rename or delete tabs'>"+grpName+"</label>",
                     content:
-                    ('<div><br>&nbsp;&nbsp;<b>'+ grpDescription + '</b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + 
+                    ('<div><br>&nbsp;&nbsp;<b><span id="grp'+grpID+'_Desc">'
+                        + grpDescription + '</span></b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + 
                         '<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:50px;">'+
 
                         // These are useless clutter. Filter by name was text, active only was checkbox
@@ -583,31 +584,34 @@ function RectypeManager() {
                         if(iUsage<1){
                             if(_needToSaveFirst()) { return; }
 
-                            var value = confirm("Do you really want to delete record type # "+rectypeID+" '"+oRecord.getData('name')+"' ?");
-                            if(value) {
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                "Do you really want to delete record type # "+rectypeID+" '"+oRecord.getData('name')+"' ?"
+                                , function(){ 
+                                    
+                                    function _updateAfterDelete(response) {
+                                        if(response.status == window.hWin.ResponseStatus.OK){
+                                            
+                                            dt.deleteRow(oRecord.getId(), -1);
+                                            //this alert is a pain alert("Record type #"+rectypeID+" was deleted");
+                                            _refreshClientStructure(response.data);
+                                            _cloneHEU = null;
+                                            
+                                        }else{
+                                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                                        }                                        
+                                    }
 
-                                function _updateAfterDelete(response) {
-                                    if(response.status == window.hWin.ResponseStatus.OK){
-                                        
-                                        dt.deleteRow(oRecord.getId(), -1);
-                                        //this alert is a pain alert("Record type #"+rectypeID+" was deleted");
-                                        _refreshClientStructure(response.data);
-                                        _cloneHEU = null;
-                                        
-                                    }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                                    }                                        
-                                }
 
+                                    var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+                                    var callback = _updateAfterDelete;
 
-                                var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
-                                var callback = _updateAfterDelete;
+                                    var request = {method:'deleteRT',db:window.hWin.HAPI4.database,rtyID:rectypeID};
+                                    window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+                                    
+                                    
+                                }, 
+                                {title:'Confirm',yes:'Continue',no:'Cancel'});
 
-                                var request = {method:'deleteRT',db:window.hWin.HAPI4.database,rtyID:rectypeID};
-                                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
-                                
-
-                            }
                         }//iUsege<1
                     }
 
@@ -735,18 +739,21 @@ function RectypeManager() {
 
             var btnAddRecordType = Dom.get('btnAddRecordType'+grpID);
             btnAddRecordType.onclick = function (e) {
-                if(confirm('Before defining new record (entity) types we suggest importing suitable '+
+                
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                'Before defining new record (entity) types we suggest importing suitable '+
                 'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
                 'Those with registration IDs less than 1000 are templates curated by the Heurist team. '
-                +'\n\n'
+                +'<br><br>'
 +'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are' 
 +'optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.'                
-                
-                +'\n\nUse:  Manage tab > Structure > Browse templates')){
+                +'<br><br>Use:  Manage tab > Structure > Browse templates'                
+                , function(){
                     var currentTabIndex = tabView.get('activeIndex');
                     var grpID = tabView.getTab(currentTabIndex).get('id');
                     _onAddEditRecordType(0, grpID);
-                }
+                }, {title:'Confirm',yes:'Continue',no:'Cancel'});
+
             };
             var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'_2');
             if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick;
@@ -1002,12 +1009,14 @@ function RectypeManager() {
     //
     function _needToSaveFirst(){
         if(_updatesCnt>0){
-            var r = confirm("You have made changes. Before new edit you have to save them. Save?");
-            if (r) {
-                _updateRecordTypeOnServer(null);
-            }else{
-                _clearGroupAndVisibilityChanges(true);
-            }
+
+            var buttons  = {yes:function(){_updateRecordTypeOnServer(null)},
+                             no:function(){ _clearGroupAndVisibilityChanges(true)}};
+            
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'You have made changes. Before new edit you have to save them. Save?'
+                , buttons, {title:'Confirm',yes:'Yes',no:'No'});
+
             return true;
         }else{
             return false;
@@ -1080,9 +1089,11 @@ function RectypeManager() {
     //
     function _duplicateType(rectypeID) {
 
-            var value = confirm("Do you really want to duplicate record type # "+rectypeID+"?"); //" '"+rt_name+"' ?");
-            if(value) {
-
+        window.hWin.HEURIST4.msg.showMsgDlg(
+        "Do you really want to duplicate record type # "+rectypeID+"?"
+        , function(){ 
+                
+        
                 function _editAfterDuplicate(response) {
 
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -1108,7 +1119,6 @@ function RectypeManager() {
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }                                        
-
                 }
 
 
@@ -1118,7 +1128,7 @@ function RectypeManager() {
                 
                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
 
-            }
+        }, {title:'Confirm',yes:'Continue',no:'Cancel'});
     }
 
 
@@ -1351,7 +1361,7 @@ function RectypeManager() {
                         
                         //insert new group at the beginning of tabview
 
-                        grpID = response.groups['0'].result;
+                        grpID = response.data.groups['0'].result;
                         ind = _groups.length;
                         _addNewTab(0, grpID, name, description);
                         _updateOrderAfterDrag();
@@ -1366,6 +1376,8 @@ function RectypeManager() {
                                 var el = tab._getLabelEl();
                                 el.innerHTML = "<label title='"+description+"'>"+name+"</label>";
                                 _groups[ind].text = name;
+                                $('#grp'+grpID+'_Desc').text(description);
+                                
                                 break;
                         }}
                         tabView.set("activeIndex", ind);
@@ -1378,7 +1390,7 @@ function RectypeManager() {
         }
 
 
-        if(!Hul.isnull(str)){
+        if(!$.isEmptyObject(orec)){
 
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = _updateOnSaveGroup;
@@ -1456,52 +1468,57 @@ function RectypeManager() {
             {
             alert("This group contains record types. Please move them to another group before deleting.");
         }else{
-            var r=confirm("Confirm the deletion of group '"+grp.name+"'");
-            if (r) {
-                var ind;
-                //
-                function _updateAfterDeleteGroup(response) {
+            
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                "Confirm the deletion of group '"+grp.name+"'"
+                , function(){ 
                     
-                    if(response.status == window.hWin.ResponseStatus.OK){
+                    var ind;
+                    //
+                    function _updateAfterDeleteGroup(response) {
                         
-                        //remove tab from tab view and select 0 index
-                        var id = _groups[ind].value;
-                        if (myDTDrags[id]) {
-                            myDTDrags[id].unreg();
-                            delete myDTDrags[id];
-                        }
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            //remove tab from tab view and select 0 index
+                            var id = _groups[ind].value;
+                            if (myDTDrags[id]) {
+                                myDTDrags[id].unreg();
+                                delete myDTDrags[id];
+                            }
 
-                        _groups.splice(ind, 1);
-                        arrTables.splice(ind, 1);
-                        arrDataSources.splice(ind, 1);
+                            _groups.splice(ind, 1);
+                            arrTables.splice(ind, 1);
+                            arrDataSources.splice(ind, 1);
 
-                        tabView.removeTab(tabView.getTab(ind));
-                        tabView.set("activeIndex", 0);
-                        _refreshClientStructure(response.data);
-                        
-                        _cloneHEU = null;
+                            tabView.removeTab(tabView.getTab(ind));
+                            tabView.set("activeIndex", 0);
+                            _refreshClientStructure(response.data);
+                            
+                            _cloneHEU = null;
 
-                        _refreshAllTables();
-                        
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }                                        
-                }
+                            _refreshAllTables();
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }                                        
+                    }
 
-                //1. find index of tab to be removed
-                for (ind in _groups){
-                    if(!Hul.isnull(ind) && Number(_groups[ind].value)===Number(grpID)){
+                    //1. find index of tab to be removed
+                    for (ind in _groups){
+                        if(!Hul.isnull(ind) && Number(_groups[ind].value)===Number(grpID)){
 
-                        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
-                        var callback = _updateAfterDeleteGroup;
-                        
-                        var request = {method:'deleteRTG', db:window.hWin.HAPI4.database, rtgID:grpID };
-                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
-                        
-                        break;
-                }}
-
-            }
+                            var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+                            var callback = _updateAfterDeleteGroup;
+                            
+                            var request = {method:'deleteRTG', db:window.hWin.HAPI4.database, rtgID:grpID };
+                            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+                            
+                            break;
+                    }}
+                    
+                    
+                }, {title:'Confirm',yes:'Continue',no:'Cancel'});
+                
         }
 
     }

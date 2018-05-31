@@ -1581,7 +1581,6 @@ P {
     line-height: 21px;
 }
 A:link {
-    /*color: #6A7C99;*/
     text-decoration: none;
 }
 A:hover {
@@ -1602,6 +1601,11 @@ body.popup {
 body.popup table{
     font-size:11px;   
 }
+/*
+body.popup A:link {
+    color: #6A7C99;    
+}
+*/
 body.popup h3 {
     color: #DC8501;
     font-size: 12px;    

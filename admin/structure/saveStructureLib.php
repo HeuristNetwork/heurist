@@ -256,8 +256,8 @@ copy_IconAndThumb_FromLibrary
 
 				//delete temporary records
 				$query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=1";
-                $recIds = mysql__select_list($mysqli, $query);
-                recordDelete($syste, $recIds);
+                $recIds = mysql__select_list2($mysqli, $query);
+                recordDelete($system, $recIds);
                                 
 				/* @todo old h3 code to delete
                 $res = $mysqli->query($query); 
@@ -491,7 +491,7 @@ copy_IconAndThumb_FromLibrary
 		$ret = 0;
 		if($mask){
                 $parameters = array("");
-				$val = TitleMask::execute($mask, $rtyID, 1, $null, _ERR_REP_SILENT);//make coded
+				$val = TitleMask::execute($mask, $rtyID, 1, null, _ERR_REP_SILENT);//make coded
 
                 $parameters = addParam($parameters, "s", $val);
 
@@ -593,11 +593,12 @@ copy_IconAndThumb_FromLibrary
 	//
 	function addDefaultFieldForNewRecordType($rtyID, $newfields)
 	{
+            global $system;
 
-			$dt = getAllDetailTypeStructures();
+			$dt = dbs_GetDetailTypes($system);
 			$dt = $dt['typedefs'];
 
-			$rv = getAllRectypeStructures();
+			$rv = dbs_GetRectypeStructures($system, null, 2);
 			$dtFieldNames = $rv['typedefs']['dtFieldNames'];
 
 			$di = $dt['fieldNamesToIndex'];
@@ -605,7 +606,7 @@ copy_IconAndThumb_FromLibrary
 
 			$data = array();
             
-            if($newfields){
+            if(is_string($newfields)){
                         $newfields = json_decode(urldecode($newfields), true);
             }
             
@@ -621,7 +622,7 @@ copy_IconAndThumb_FromLibrary
                 }
                 
                 $fields = $newfields['fields'];
-                $reqs   = $newfields['reqs'];
+                $reqs   = @$newfields['reqs']?$newfields['reqs']:array();
                 
                 $data['dtFields'] = array();
                 

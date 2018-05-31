@@ -74,6 +74,8 @@ function DetailTypeManager() {
     //
     function _init()
     {
+        window.hWin.HEURIST4.detailtypes.rectypeUsage = {};
+        
         var ind = 0,
         dtg_ID,
         index;
@@ -250,6 +252,8 @@ function DetailTypeManager() {
     //
     function initTabContent(tab){
 
+console.log('!!!!');
+        
         var dtg_ID = tab.get('id');
         //alert('init>>>>'+dtg_ID);
 
@@ -519,7 +523,7 @@ function DetailTypeManager() {
                                     dt.deleteRow(oRecord.getId(), -1);
                                     _deleted.push( dty_ID );
                                     // alert is a pain alert("Field type #"+dty_ID+" was deleted");
-                                    window.hWin.HEURIST4.detailtypes = response.detailtypes;
+                                    window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                                     _cloneHEU = null;
                                     
                                 }else{
@@ -847,10 +851,10 @@ function DetailTypeManager() {
             report = "",
             ind;
 
-            for(ind in response.result)
+            for(ind in response.data.result)
             {
                 if(!Hul.isnull(ind)){
-                    var item = response.result[ind];
+                    var item = response.data.result[ind];
                     if(isNaN(item)){
                         window.hWin.HEURIST4.msg.showMsgErr(item);
                         error = true;
@@ -872,7 +876,7 @@ function DetailTypeManager() {
                 //window.setTimeout(function(){alwin.hide();}, 1000);
                 _clearGroupAndVisibilityChanges(false);
             }
-            window.hWin.HEURIST4.detailtypes = response.detailtypes;
+            window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
             _cloneHEU = null;
         }else{
              window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -1074,18 +1078,18 @@ function DetailTypeManager() {
             if(response.status == window.hWin.ResponseStatus.OK)
             {
                 //for new - add new tab
-                if(!Hul.isnull(response.groups['0'].error)){
-                    window.hWin.HEURIST4.msg.showMsgErr(response.groups['0']);
+                if(!Hul.isnull(response.data.groups['0'].error)){
+                    window.hWin.HEURIST4.msg.showMsgErr(response.data.groups['0']);
                 }else{
                     var ind;
-                    window.hWin.HEURIST4.detailtypes = response.detailtypes;
+                    window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                     _cloneHEU = null;
 
                     if(Number(grpID)<0){
 
                         _refreshAllTables();
 
-                        grpID = response.groups['0'].result;
+                        grpID = response.data.groups['0'].result;
                         ind = _groups.length;
                         _addNewTab(ind, grpID, name, description);
                         dragDropEnable();
@@ -1113,7 +1117,8 @@ function DetailTypeManager() {
 
         //alert(str);
 
-        if(!Hul.isnull(str)) {
+        if(!$.isEmptyObject(orec)){
+            
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = _updateOnSaveGroup;
             
@@ -1204,7 +1209,7 @@ function DetailTypeManager() {
                             myDTDrags[id].unreg();
                             delete myDTDrags[id];
                         }
-                        window.hWin.HEURIST4.detailtypes = response.detailtypes;
+                        window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
 
                         //remove tab from tab view and select 0 index
                         _groups.splice(ind, 1);

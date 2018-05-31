@@ -1,4 +1,5 @@
 <?php
+//@TODO  1) similat method in db_structure 2) compose tree data on client side
 
 /*
 * Copyright (C) 2005-2016 University of Sydney
@@ -36,6 +37,7 @@
 
 require_once(dirname(__FILE__).'/../../hserver/System.php');
 require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
 
     //require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
     $system = new System();
@@ -44,6 +46,8 @@ require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
         echo json_encode( array("error"=>'Can not connect to database') );
         exit();
     }
+    
+    $system->defineConstant('DT_PARENT_ENTITY');
 
     $rtStructs = dbs_GetRectypeStructures($system, null, 2);
 
@@ -72,7 +76,8 @@ require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
     $isvarname = ($mode=='varsonly');
 
     $_REQUEST['limit'] = 100;
-    $qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based on GET request
+    $qresult = recordSearch($system, $_REQUEST);
+    //OLD loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based on GET request
     
     if($isvarname){
 
@@ -81,18 +86,18 @@ require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
         
         header('Content-type: application/json;charset=UTF-8');
         echo json_encode( array("vars"=>$res,
-                                "records"=>$qresult["records"]), true);
+                                "recordset"=>@$qresult['data']), true);
 
     }else{
 
-            if(!array_key_exists('records',$qresult)){
+            if(@$qresult['status'] != HEURIST_OK || !@$qresult['data']["records"]){
                 header('Content-type: application/json;charset=UTF-8');
                 echo json_encode( array("error"=>'Empty query. Cannot generate template') );
                 exit();
             }
 
             //convert to array that will assigned to smarty variable
-            $records =  $qresult["records"];
+            $records =  $qresult['data']["records"];
 
             $recTypes = array();
 

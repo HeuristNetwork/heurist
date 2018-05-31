@@ -796,6 +796,19 @@ error_log(print_r($params, true));
         return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
     }    
 
+    function  trim_lower_accent($item){
+        return mb_strtolower(stripAccents($item));
+    }
+
+    function  trim_lower_accent2(&$item, $key){
+        $item = trim_lower_accent($item);
+    }
+
+    function mb_strcasecmp($str1, $str2, $encoding = null) {
+        if (null === $encoding) { $encoding = mb_internal_encoding(); }
+        return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
+    }
+
     //
     // $rec_IDs - may by csv string or array 
     // return array of integers

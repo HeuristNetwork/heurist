@@ -82,13 +82,18 @@ else
                 'To perform this action you must be logged in as Administrator of group \'Database Managers\'');
             error_exit();
         }
+        
+        define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
+        $system->defineConstant('DT_NAME');
+        $system->defineConstant('DT_SHORT_SUMMARY');
+    
     
         $mysqli = $system->get_mysqli();
     
     
         $data = @$_REQUEST['data'];
         //decode and unpack data
-        if($data){
+        if(is_string($data)){
             $data = json_decode(urldecode(@$_REQUEST['data']), true);
         }
         
@@ -460,7 +465,7 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
 }//$method!=null
 
 
-if($rv['error']){
+if(@$rv['error']){
     $response = $system->addError(HEURIST_ERROR, $rv['error']);
 }else{
     $response = array("status"=>HEURIST_OK, "data"=>$rv);
@@ -481,6 +486,7 @@ unset($output);
 //
 //
 function error_exit($msg){
+    global $system;
     
     header('Content-type: application/json;charset=UTF-8');
     if($msg){

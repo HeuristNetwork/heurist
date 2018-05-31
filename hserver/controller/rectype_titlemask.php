@@ -43,7 +43,7 @@ if( $system->init(@$_REQUEST['db']) ){
             
             $rectypeID = @$_REQUEST['rty_id'];
             $mask = @$_REQUEST['mask'];
-            $check_mode = $_REQUEST["check"];
+            $check_mode = @$_REQUEST["check"];
             
             $invalid_mask = null;
             $response = null;

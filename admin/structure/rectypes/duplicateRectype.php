@@ -95,7 +95,7 @@ if( $system->init(@$_REQUEST['db']) ){
     }
 }
     
-if(res){ 
+if($res){ 
     $rv['id'] = $new_rt_id;
     $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
     $response = array("status"=>HEURIST_OK, "data"=>$rv);

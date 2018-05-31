@@ -470,7 +470,7 @@ function updateRectypeOnServer_continue()
 
     var oRec = getUpdatedFields();
 
-    if(str=="mandatory"){
+    if(oRec=="mandatory"){
     $('#btnSave').prop('disabled','');
         //$('#btnSave').removeAttr('disabled');
         //do not close the window
@@ -524,9 +524,9 @@ var updateResult = function(response) {
         var error = false;
         var report = "";
 
-        for(var ind in response.result)
+        for(var ind in response.data.result)
         if(ind!=undefined){
-            var item = response.result[ind];
+            var item = response.data.result[ind];
             if(isNaN(item)){
                 alert("An error occurred: " + item);
                 error = true;
@@ -547,6 +547,8 @@ var updateResult = function(response) {
                 // this alert is a pain  alert("Record type with ID " + report + " was succesfully "+ss);
             }
 
+            response = response.data;
+            
             response.changeTitleMask = false;
             /* art 2014-05-26 - now it updates in editRectypeTitle
             if(rectypeID>0 &
@@ -650,7 +652,7 @@ function fromUItoArray(isShowWarn) {
         var rectypeValues = window.hWin.HEURIST4.rectypes.typedefs[rectypeID].commonFields;
     }
 
-    var swarn = Hul.validateName($('#rty_Name').val(), "Field 'Name'");
+    var swarn = window.hWin.HEURIST4.ui.validateName($('#rty_Name').val(), "Field 'Name'");
     if(swarn!=''){
         if(isShowWarn) alert(swarn);
         document.getElementById("rty_Name").focus();

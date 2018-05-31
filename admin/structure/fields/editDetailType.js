@@ -766,7 +766,7 @@ function DetailTypeEditor() {
         if(dt_name==="") {
             swarn = "Name is mandatory field"
         }else{
-            swarn = Hul.validateName(dt_name, "Field 'Default field type name'");
+            swarn = window.hWin.HEURIST4.ui.validateName(dt_name, "Field 'Default field type name'");
         }
         if(swarn!=""){
             if(isShowWarn) 

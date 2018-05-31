@@ -2069,6 +2069,23 @@ window.hWin.HEURIST4.ui = {
         return [posx, posy];
     },
     
+    
+    validateName: function(name, lbl){
+      
+            var swarn = "";
+            var regex = /[\[\].\$]+/;
+            var name = name.toLowerCase();
+            if( name=="id" || name=="modified" || name=="rectitle"){
+                   swarn = lbl+", you defined, is a reserved word. Please try an alternative";
+            //}else if (name.indexOf('.')>=0 ) {  //regex.test(name)
+            }else if (name!=''  && !(/^[^.'"}{\[\]]+$/.test(name))) {
+                   swarn = lbl+" contains . [ ] { } ' \" restricted characters which are not permitted in this context. Please use alphanumeric characters.";
+            }else if (name.indexOf('<')>=0 && name.indexOf('<')< name.indexOf('>') ) {
+                   swarn = lbl+" contains '<>' characters which are not permitted in this context. Please use alphanumeric characters.";
+            }
+            return swarn;
+    },
+        
     //
     // prevents entering restricted characters
     //

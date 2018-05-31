@@ -83,6 +83,8 @@ function EditRectypeTitle() {
 
     function _onGenerateVars(context){
 
+console.log(context);
+        
         if(!Hul.isnull(context))
             {
             if(context===false || !context['vars']){
@@ -137,14 +139,12 @@ function EditRectypeTitle() {
                 sel.remove(1);
             }
 
-            var _recs = context['records'];
-
-            var i;
-            for (i in _recs){
-                if(i!==undefined){
-                    window.hWin.HEURIST4.ui.addoption(sel, _recs[i].rec_ID, _recs[i].rec_Title);
-                }
-            } // for
+            var recordset = new hRecordSet(context.recordset);
+            var recs = recordset.getRecords();
+            for(var rec_ID in recs) 
+            if(rec_ID>0){
+                window.hWin.HEURIST4.ui.addoption(sel, rec_ID, recordset.fld(recs[rec_ID], 'rec_Title'));
+            }
 
             sel.selectedIndex = 0;
         }
@@ -499,9 +499,8 @@ function EditRectypeTitle() {
                     if (sel.selectedIndex>0){
 
                         var rec_id = sel.value;
-                        squery = "rty_id="+rec_type+"&rec_id="+rec_id+"&mask="+encodeURIComponent(mask)+"&db="+_db;
                         
-                        var request2 = {rty_id:rec_type, rec_id:rec_id, mask:mask, db:window.hWin.HAPI4.database}; //verify titlemask
+                        var request2 = {rty_id:rectypeID, rec_id:rec_id, mask:mask, db:window.hWin.HAPI4.database}; //verify titlemask
                         window.hWin.HEURIST4.util.sendRequest(baseurl, request2, null,
                             function (response) {
                                 if(response.status == window.hWin.ResponseStatus.OK){

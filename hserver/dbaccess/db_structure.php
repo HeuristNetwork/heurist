@@ -699,7 +699,7 @@ function dbs_GetRectypeConstraint($system) {
     // get term ids from json string - parse values in dty_JsonTermIDTree dty_TermIDTreeNonSelectableIDs
     //
     // similar functions are in importRectype
-    function getTermsFromFormat() {
+    function getTermsFromFormat( $formattedStringOfTermIDs ) {
 
         if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
             return array();

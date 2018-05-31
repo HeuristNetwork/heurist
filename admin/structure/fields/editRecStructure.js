@@ -40,25 +40,6 @@ Event = YAHOO.util.Event,
 DDM = YAHOO.util.DragDropMgr,
 Hul = window.hWin.HEURIST4.util;
 
-
-window.hWin.HEURIST4.util.validateName = function(name, lbl){
-      
-            var swarn = "";
-            var regex = /[\[\].\$]+/;
-            var name = name.toLowerCase();
-            if( name=="id" || name=="modified" || name=="rectitle"){
-                   swarn = lbl+", you defined, is a reserved word. Please try an alternative";
-            //}else if (name.indexOf('.')>=0 ) {  //regex.test(name)
-            }else if (name!=''  && !(/^[^.'"}{\[\]]+$/.test(name))) {
-                   swarn = lbl+" contains . [ ] { } ' \" restricted characters which are not permitted in this context. Please use alphanumeric characters.";
-            }else if (name.indexOf('<')>=0 && name.indexOf('<')< name.indexOf('>') ) {
-                   swarn = lbl+" contains '<>' characters which are not permitted in this context. Please use alphanumeric characters.";
-            }
-            return swarn;
-};
-
-
-
 function EditRecStructure() {
 
     var _className = "EditRecStructure",
@@ -302,7 +283,7 @@ function EditRecStructure() {
                                 if(oNewValue=='') {
                                     fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
                                 }else{
-                                    var swarn = window.hWin.HEURIST4.util.validateName(oNewValue, "Prompt (display name)")
+                                    var swarn = window.hWin.HEURIST4.ui.validateName(oNewValue, "Prompt (display name)")
                                     if(swarn!=""){
                                         alert(swarn);
                                         fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
@@ -777,8 +758,8 @@ function EditRecStructure() {
 
                         _myDataTable.deleteRow(oRecord.getId(), -1);
 
-                        window.hWin.HEURIST4.rectypes = response.rectypes;
-                        window.hWin.HEURIST4.detailtypes = response.detailtypes;
+                        window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                        window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
 
                         if(_myDataTable.getRecordSet().getLength()<1){
                             $("#recStructure_toolbar").show();
@@ -1144,7 +1125,7 @@ function EditRecStructure() {
                     if(values[k] !== edt.value){
 
                         if(fieldnames[k]=="rst_DisplayName"){
-                            if(edt.value=='' || window.hWin.HEURIST4.util.validateName(edt.value, "Prompt (display name)")!=""){
+                            if(edt.value=='' || window.hWin.HEURIST4.ui.validateName(edt.value, "Prompt (display name)")!=""){
                                 continue;
                             }
                         }
@@ -1543,9 +1524,9 @@ function EditRecStructure() {
                     report = "",
                     ind;
 
-                    for(ind in response.result){
+                    for(ind in response.data.result){
                         if( !Hul.isnull(ind) ){
-                            var item = response.result[ind];
+                            var item = response.data.result[ind];
                             if(isNaN(item)){
                                 window.hWin.HEURIST4.msg.showMsgErr(item);
                                 error = true;
@@ -1553,7 +1534,7 @@ function EditRecStructure() {
                                 ft_separator_id = ""+Math.abs(Number(item));
 
                                 //refresh the local heurist
-                                window.hWin.HEURIST4.detailtypes = response.detailtypes;
+                                window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
 
                                 _doExpliciteCollapse(null, true);
                                 _addDetails(ft_separator_id, index_toinsert);
@@ -1821,9 +1802,9 @@ function EditRecStructure() {
             var updateResult = function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    window.hWin.HEURIST4.rectypes = response.rectypes;
-                    window.hWin.HEURIST4.detailtypes = response.detailtypes;
-                    window.hWin.HEURIST4.terms = response.terms;
+                    window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                    window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
+                    window.hWin.HEURIST4.terms = response.data.terms;
     
                     editStructure._structureWasUpdated = true;
                     
@@ -1937,9 +1918,9 @@ function EditRecStructure() {
                 
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
-                    window.hWin.HEURIST4.rectypes = response.rectypes;
-                    window.hWin.HEURIST4.detailtypes = response.detailtypes;
-                    window.hWin.HEURIST4.terms = response.terms;
+                    window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                    window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
+                    window.hWin.HEURIST4.terms = response.data.terms;
                     
                     editStructure._structureWasUpdated = true;
                 }
@@ -3191,7 +3172,7 @@ function recreateRecTypesPreview(type, value) {
 
 function _onDispNameChange(event){
     var name = event.target.value;
-    var swarn = window.hWin.HEURIST4.util.validateName(name, "Prompt (display name)");
+    var swarn = window.hWin.HEURIST4.ui.validateName(name, "Prompt (display name)");
     if(swarn){
         alert(swarn);
     }
