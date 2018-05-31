@@ -105,7 +105,7 @@
         mysql__usedatabase($mysqli, $db_name);
         
         VerifyValue::reset();
-        $all_terms = getTerms();
+        $all_terms = dbs_GetTerms($system);
         $ti_dbid = $all_terms['fieldNamesToIndex']['trm_OriginatingDBID'];
         $ti_oid = $all_terms['fieldNamesToIndex']['trm_IDInOriginatingDB'];
         

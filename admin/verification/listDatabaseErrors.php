@@ -31,12 +31,16 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
 
 $mysqli = $system->get_mysqli();
 
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once('verifyValue.php');
 require_once('verifyFieldTypes.php');
+
+
+$system->defineConstant('DT_RELATION_TYPE');
 
 
 if(@$_REQUEST['data']){
@@ -59,6 +63,13 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        
         <script type=text/javascript>
 
             function open_selected_by_name(sname) {
@@ -75,11 +86,6 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 window.open('<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids, '_blank');
                 return false;
             }
-        </script>
-
-        <script type=text/javascript>
-
-            var Hul = window.hWin.HEURIST4.util;
 
             function open_selected() {
                 var cbs = document.getElementsByName('bib_cb');
@@ -118,13 +124,13 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                         }
                 });
             }
+            
+            
+            $(document).ready(function() {
+                $('button').button();
+            });
         </script>
 
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-        <!--
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-        -->
         <style type="text/css">
             h3, h3 span {
                 display: inline-block;
@@ -132,6 +138,9 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             }
             Table tr td {
                 line-height:2em;
+            }
+            A:link {
+                color: #6A7C99;    
             }
         </style>
 
@@ -990,7 +999,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 <?php
                     $_REQUEST['verbose'] = 1;
                     $_REQUEST['filter_exact']  = HEURIST_DBNAME_FULL;
-                    include(dirname(__FILE__).'/verifyForOrigin.php');
+                    //include(dirname(__FILE__).'/verifyForOrigin.php');
                 ?>
             </div>
             

@@ -56,7 +56,7 @@ class VerifyValue {
     // clear all global variables
     // it is required in case database switch
     //
-    private static function reset(){
+    public static function reset(){
         self::$dtyIDDefs = array();  //list of allowed terms for particular detail type ID
         self::$dtyIDDefs_labels = array();
         self::$dtyIDDefs_codes = array();
@@ -272,25 +272,5 @@ public static function isValidPointer($constraints, $rec_id, $dtyID ){
     return $isvalid;
 }
 
-}
-
-//
-//
-//
-function stripAccents($stripAccents){
-    return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
-}
-
-function  trim_lower_accent($item){
-    return mb_strtolower(stripAccents($item));
-}
-
-function  trim_lower_accent2(&$item, $key){
-    $item = trim_lower_accent($item);
-}
-
-function mb_strcasecmp($str1, $str2, $encoding = null) {
-    if (null === $encoding) { $encoding = mb_internal_encoding(); }
-    return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
 }
 ?>
