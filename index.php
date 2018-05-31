@@ -140,13 +140,14 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                
                 if(!success) return;
                 
-                // OLD H3 stuff
+                /* OLD H3 stuff
                 if(window.HEURIST && window.HAPI4.baseURL){
                     window.HEURIST.baseURL  = window.HAPI4.baseURL;
                     window.HEURIST.loadScript(window.HAPI4.baseURL+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
                     window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
                     window.HEURIST.database = {  name: window.HAPI4.database };
                 }
+                */
                 
                 //
                 // cfg_widgets and cfg_layouts are defined in layout_default.js

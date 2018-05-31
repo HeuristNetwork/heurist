@@ -128,7 +128,11 @@ var cfg_layouts = [
                       name: 'Manage<span class="ui-icon ui-icon-gears" style="display:inline-block;font-size:24px;margin-left:14px;margin-top:-0.2em;width:24px;height:24px;vertical-align:middle;"></span>',
                       dragable:false,
                       options:{url: 'hclient/framecontent/tabmenus/manageMenu.php?db=[dbname]', isframe:true}}
-                        //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0, 'min-width':'75em'}}             
+                    ,{appid:'h4_static', 
+                      name: 'Admin<span class="ui-icon ui-icon-gears" style="display:inline-block;font-size:24px;margin-left:14px;margin-top:-0.2em;width:24px;height:24px;vertical-align:middle;"></span>',
+                      dragable:false,
+                      closable:false,
+                      options:{url: 'hclient/framecontent/tabmenus/adminMenu.php?db=[dbname]', isframe:true}}
                     ,{appid:'h4_static', 
                     name: 'Add Data<span class="ui-icon ui-icon-addtodb-28" style="display:inline-block;margin-left:14px;vertical-align:middle;"></span>',
                         dragable:false,

@@ -1030,7 +1030,7 @@ function hLayout(args) {
             _initLayoutFree(layout, $container);
 
             
-            //speical styles case for default layout
+            //special styles case for default layout
             //@todo - definition of styles for tab control via layuot_default.js
             var tabb = $container.find('div[layout_id="main_header_tab"]');
             if(tabb.length>0){
@@ -1077,7 +1077,7 @@ function hLayout(args) {
                             
                 lis.each(function(idx,item){
                     
-                    if(idx==2) $(item).css({width:'300px'});
+                   if(idx == lis.length-1) $(item).css({width:'300px'});
                    //$(item).css({width:((idx+1)*100+'px')});
                    $(item).css({'z-index': count_lis - idx});
                    $(item).attr('data-zkeep', count_lis - idx);
@@ -1086,6 +1086,16 @@ function hLayout(args) {
                        //'padding-left':'12px', 
                        $(item).css({'margin-left':'-12px', 'border-left':'none'});
                    }
+                   
+                   if(idx==1){
+                       $(item).hide();
+                       
+                       $('<span class="ui-icon ui-icon-close" title="Close this tab" '
+                       +'style="font-size: 16px;width:24px;height:24px;position:absolute;right:10;top:20;z-index:2;cursor:pointer"></span>')
+                       .click(function(){ $(item).hide(); $(tabb).tabs({active:0}); })
+                       .appendTo($(item));
+                   }
+                   
                 });
                 
                 tabheader.parent().css({

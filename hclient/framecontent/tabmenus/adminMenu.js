@@ -22,24 +22,11 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hmanageMenu() {
-    var _className = "manageMenu",
+function hadminMenu() {
+    var _className = "adminMenu",
     _version   = "0.4";
 
-    //
-    // show db structure visualization in popup dialog
-    //
-    function _showDbSummary(){
-
-        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
-
-        var body = $(top.document).find('body');
-        var dim = {h:body.innerHeight(), w:body.innerWidth()};
-
-        window.hWin.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary',} );
-
-    }
-    
+   
     //
     //
     //
@@ -156,20 +143,6 @@ function hmanageMenu() {
 
         $('#menulink-database-register').click(
         
-        );
-        
-        $('#menulink-database-admin').click(
-            function(){
-                var tabb = $(window.hWin.document).find('div[layout_id="main_header_tab"]');
-                var ele = tabb.find('ul > li');
-                ele = $(ele[1]);
-                if( ele.is(':visible')){
-                    ele.hide();
-                }else{
-                    ele.show();
-                    //setTimeout(function(){$(tabb).tabs({active:1})},1000);
-                }
-            }
         );
         
         

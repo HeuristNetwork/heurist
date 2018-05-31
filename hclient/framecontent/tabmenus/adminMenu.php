@@ -50,27 +50,27 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <li><a href="#" id="menulink-database-browse"
                         data-nologin="1" data-logaction="dbOpen"
                         title="Open and login to another Heurist database - current database remains open">
-                        Open</a>
+                        Clone</a>
                     </li>
                     
 
                     <li><a href="admin/setup/dbcreate/createNewDB.php" name="auto-popup" class="large h3link"
                         onClick="{return false;}" data-logaction="dbNew"
-                        title="Create a new database on the current server - essential structure elements are populated automatically">
-                        New</a>
+                        title="Delete entire database">
+                        Delete</a>
                     </li>
                     
                     <li><a href="#" id="menulink-database-properties"
                         data-nologin="1" data-logaction="dbProperties"
-                        title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
-                        Properties</a>
+                        title="Delete all records">
+                        Empty</a>
                     </li>
                     
                     <li class="admin-only">
                         <a href="admin/setup/dbproperties/registerDB.php" name="auto-popup" class="portrait h3link"
                             onclick= "{return false;}" data-logaction="dbRegister"
                             title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
-                            Register</a>
+                         Rollback</a>
                     </li>
 
 <!--                    
@@ -87,10 +87,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <!-- database name is appended automatically by auto-popup -->
 
                     <li>
-                        <a href="admin/structure/rectypes/manageRectypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
+                        <a href="admin/structure/fields/manageDetailTypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
                             onClick="{return false;}" id="linkEditRectypes" data-logaction="stManage"
                             title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
-                            Modify</a>
+                            Manage base field types</a>
                     </li>
 
                     <li>
@@ -98,14 +98,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             data-logaction="stVis"
                             onClick="{return false;}"  id="linkDatabaseSummary"
                             title="Visualise the internal connections between record types in the database and add connections (record pointers and relationshi markers) between them">
-                            Visualise</a>
+                            Simple fields schema</a>
                     </li>
                     
                     <li>
                         <a href="admin/structure/import/selectDBForImport.php" name="auto-popup" class="verylarge h3link refresh_structure"
                             onClick="{return false;}" data-logaction="stAcquire"
                             title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
-                            Browse templates</a>
+                            Relationships schema</a>
                     </li>
 
                     <!-- Remarked temporarely 2016-05-11
@@ -132,7 +132,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             name="auto-popup" class="verylarge h3link refresh_structure info_link"
 
                             title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
-                            Manage terms</a>
+                            Combined schema</a>
                     </li>
 
                     <!-- Adding Manage relation types menu -->
@@ -140,7 +140,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         <a  href="admin/structure/terms/editTerms.php?treetype=relation" name="auto-popup" class="verylarge h3link refresh_structure info_link"
                             data-logaction="stRelations"
                             title="Browse and edit the relationship types"  onclick= "{return false;}">
-                            Manage relationship types</a>
+                           Structure (XML)</a>
                     </li>
 
                     <li>
@@ -148,7 +148,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             data-logaction="stRebuildTitles"
                             onClick="{return false;}"
                             title="Rebuilds the constructed record titles listed in search results, for all records">
-                            Rebuild record titles</a>
+                            Structure (SQL)</a>
                     </li>
                     
                     <li>
@@ -156,17 +156,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             data-logaction="stVerify"
                             onClick="{return false;}"
                             title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
-                            Verify</a>
+                            Define mime types</a>
                     </li>
 
-                    <li id="menu-database-refresh">
-                        <a href="#" id="menulink-database-refresh"
-                            data-logaction="stRefresh"
-                            onClick="{return false;}" data-nologin="1"
-                            title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
-                            Refresh</a>
-                    </li>
-                    
                     <!--
                     <li><a href="javascript:void(0)"
                     onClick="{/*window.hWin.HEURIST4.util.reloadStrcuture()*/;}"
@@ -177,28 +169,17 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 </ul>
             </div>
         </div>
+
         <div class="accordion_pnl">
-            <h3 class="top-menu-only">ANALYSE</h3>
-            <div>
-                <ul>
-                    <li class="top-menu-only">
-                        <a href="viewers/crosstab/crosstabs.php" name="auto-popup" class="verylarge currentquery h3link"
-                            title="Tabulate one, two or three variables for the current query, with optional percentages, row and column totals" >
-                            Crosstabs analysis</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="accordion_pnl">
-            <h3><span class="ui-icon ui-iconalign ui-icon-gears"></span>ADMINISTRATION</h3>
+            <h3><span class="ui-icon ui-iconalign ui-icon-gears"></span>UTILITIES</h3>
             <div>
                 <ul>
                     <li class="admin-only">
                         <a  href="#" id="menulink-database-admin"
                             data-logaction="adminFull"
+                            onclick="{window.open(window.hWin.HAPI4.baseURL+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}"
                             title="Full set of database administration functions, utilities and special project extensions">
-                            Advanced functions &amp; utilities</a>
-<!-- onclick="{window.open(window.hWin.HAPI4.baseURL+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}" -->                            
+                            Verify title masks</a>
                     </li>
                     <li class="admin-only">
                         <a href="export/dbbackup/exportMyDataPopup.php?inframe=1" name="auto-popup" class="portrait h3link"
