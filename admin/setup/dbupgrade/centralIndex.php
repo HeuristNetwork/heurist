@@ -30,6 +30,7 @@
 define('MANAGER_REQUIRED',1);   
 define('PDIR','../../../');  //need for proper path to js and css    
 
+$need_create_index_database = false;
 $need_recreate_triggers = false;
     
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
@@ -50,7 +51,7 @@ if (!$system->is_system_admin()) {
     
     if( file_exists($filename1) && file_exists($filename2) ){
     
-        if(true){
+        if($need_create_index_database){
             print 'Create index database and fill it<br>';
             if(!executeScript(HEURIST_DBNAME_FULL, $filename1)){
                 exit;

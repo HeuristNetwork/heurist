@@ -227,9 +227,9 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             
 
             //register in cetral index
-            mysql_query('insert into `Heurist_DBs_index`.`sysIdentifications` select "'
+            $mysqli->query('insert into `Heurist_DBs_index`.`sysIdentifications` select "'
                     .$database_name_full.'" as dbName, s.* from `sysIdentification` as s');
-            mysql_query("insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "
+            $mysqli->query("insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "
                     .'values("'.$user_record['ugr_eMail'].'","'.$database_name_full.'","owner")');
             
             $fullName = $user_record['ugr_FirstName'].' '.$user_record['ugr_LastName'];

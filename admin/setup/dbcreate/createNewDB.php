@@ -268,7 +268,11 @@ if($registrationRequired) //show registration dialog at once
                                     $('#div_warnings').html(response.warnings.join('<br><br>')).show();
                                     $('#div_login_info').hide();
                                 }
-                                    
+                                   
+                                //clear local list of databases   
+                                if(window.hWin && window.hWin.HAPI4){
+                                    window.hWin.HAPI4.EntityMgr.emptyEntityData('sysDatabases');
+                                }    
                                 
                             }else{
                                 $("#createDBForm").show();
