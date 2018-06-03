@@ -76,7 +76,6 @@ function hadminMenu() {
 
                 if(ele.hasClass('h3link')){
                     href = window.hWin.HAPI4.baseURL + href;
-                    //h3link class on menus implies location of older (vsn 3) code
                 }
                 
                 ele.attr('href', href).click(
@@ -97,54 +96,16 @@ function hadminMenu() {
 
         menu.find('.top-menu-only').hide();
         
-        $('#menulink-database-refresh').click(
-            function(event){
-                window.hWin.HAPI4.SystemMgr.get_defs_all( true, top.document);
-                event.preventDefault();
-                return false;
-            }
-        );
         
-        $('#menulink-database-browse').click(
-            function(event){
-                
-                $('#frame_container_div').css('top',20).empty();
-                window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', {
-                    select_mode:'select_single',
-                    isdialog: false,
-                    container: $('#frame_container_div'),
-                    onselect:function(event, data){
-
-                        if(data && data.selection && data.selection.length==1){
-                            var db = data.selection[0];
-                            if(db.indexOf('hdb_')===0) db = db.substr(4);
-                            window.open( window.hWin.HAPI4.baseURL + '?db=' + db, '_blank');
-                        }
-                                                
-                    }
-                });
-                event.preventDefault();
-                return false;
-            }
-        );
-        
-        $('#menulink-database-properties').click(
+        $('#menulink-mimetypes').click(
             function(event){
         
-                window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
+                window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',
+                        {edit_mode:'inline', width:900});
                 event.preventDefault();
                 return false;
             }        
         );
-
-        $('#menulink-database-new').click(
-        
-        );
-
-        $('#menulink-database-register').click(
-        
-        );
-        
         
 /*
         $('#menulink-database-admin').click( //.attr('href', 

@@ -23,7 +23,7 @@ if(!defined('PDIR')) define('PDIR','../../../');
 */
 require_once(dirname(__FILE__)."/../initPage.php");
 ?>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/tabmenus/manageMenu.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/tabmenus/adminMenu.js"></script>
 
 <script type="text/javascript">
     var editing;
@@ -31,9 +31,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
     // Callback function on initialization
     function onPageInit(success){
         if(success){
-
-            var manageMenu = new hmanageMenu();
-
+            var manageMenu = new hadminMenu();
             var $container = $("<div>").appendTo($("body"));
         }
     }
@@ -87,77 +85,51 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <!-- database name is appended automatically by auto-popup -->
 
                     <li>
-                        <a href="admin/structure/fields/manageDetailTypes.php" name="auto-popup" class="verylarge h3link refresh_structure "
+                        <a href="admin/structure/fields/manageDetailTypes.php" name="auto-popup" class="h3link"
                             onClick="{return false;}" id="linkEditRectypes" data-logaction="stManage"
-                            title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
+                            title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
                             Manage base field types</a>
                     </li>
 
                     <li>
-                        <a href="hclient/framecontent/visualize/databaseSummary.php" name="auto-popup" class="large h3link"
-                            data-logaction="stVis"
-                            onClick="{return false;}"  id="linkDatabaseSummary"
-                            title="Visualise the internal connections between record types in the database and add connections (record pointers and relationshi markers) between them">
+                        <a href="admin/describe/listRectypeRelations.php?action=simple" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts">
                             Simple fields schema</a>
                     </li>
-                    
                     <li>
-                        <a href="admin/structure/import/selectDBForImport.php" name="auto-popup" class="verylarge h3link refresh_structure"
-                            onClick="{return false;}" data-logaction="stAcquire"
-                            title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
+                        <a href="admin/describe/listRectypeRelations.php?action=relations" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Display/print a listing of the record types and their pointer and relationship fields, including usage counts">
                             Relationships schema</a>
                     </li>
-
-                    <!-- Remarked temporarely 2016-05-11
                     <li>
-                    <a href="admin/structure/import/annotatedTemplate.php" name="auto-popup" class="verylarge h3link refresh_structure"
-                    onClick="{return false;}"
-                    title="Browse documented record type templates on HeuristNetwork.org and selectively import into the current database">
-                    Acquire from templates</a>
-                    </li>
-                    -->
-
-                    <!-- Removed Ian 13 feb 16: this function is likely to confuse, better to have less in front page menus
-                    <li>
-                    <a href="admin/structure/fields/manageDetailTypes.php" name="auto-popup" class="verylarge h3link refresh_structure"
-                    onClick="{return false;}"
-                    title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
-                    Manage base field types</a>
-                    </li>
-                    -->
-
-                    <li>
-                        <a id= "manage_terms" href="admin/structure/terms/editTerms.php?treetype=enum" 
-                            data-logaction="stTerms"
-                            name="auto-popup" class="verylarge h3link refresh_structure info_link"
-
-                            title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
+                        <a href="admin/describe/listRectypeRelations.php?action=all" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Display/print a listing of the record types and all fields, including usage counts">
                             Combined schema</a>
                     </li>
 
-                    <!-- Adding Manage relation types menu -->
                     <li>
-                        <a  href="admin/structure/terms/editTerms.php?treetype=relation" name="auto-popup" class="verylarge h3link refresh_structure info_link"
-                            data-logaction="stRelations"
-                            title="Browse and edit the relationship types"  onclick= "{return false;}">
+                        <a  href="admin/describe/getDBStructureAsXML.php" name="auto-popup" class="h3link"
+                            target="_blank" onClick="{return false;}"
+                            title="Lists the record type and field definitions in XML format (HML - Heurist Markup Language)">
                            Structure (XML)</a>
                     </li>
 
                     <li>
-                        <a href="admin/verification/recalcTitlesAllRecords.php" name="auto-popup" class="verylarge h3link"
-                            data-logaction="stRebuildTitles"
+                        <a href="admin/describe/getDBStructureAsSQL.php?pretty=1" name="auto-popup" class="h3link"
                             onClick="{return false;}"
-                            title="Rebuilds the constructed record titles listed in search results, for all records">
+                            title="Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)">
                             Structure (SQL)</a>
                     </li>
                     
-                    <li>
-                        <a href="admin/verification/listDatabaseErrorsInit.php" name="auto-popup" class="verylarge h3link"
-                            data-logaction="stVerify"
-                            onClick="{return false;}"
-                            title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
-                            Define mime types</a>
+                    <li><a href="#" id="menulink-mimetypes"
+                        data-nologin="1" 
+                        title="Define the relationship between file extension and mime type for uploaded and externally referenced files">
+                        Define mime types</a>
                     </li>
+
 
                     <!--
                     <li><a href="javascript:void(0)"

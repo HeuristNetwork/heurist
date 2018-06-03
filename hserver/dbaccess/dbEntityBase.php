@@ -143,21 +143,26 @@ class DbEntityBase
         
         foreach($this->records as $rec_idx => $record){
             
+            //$primary_field_type = 'integer';
+            
             //exclude virtual fields
             $fieldvalues = $record;
             $values = array();
             foreach($this->fields as $fieldname=>$field_config){
                 if(@$field_config['dty_Role']=='virtual' || !array_key_exists($fieldname, $record)) continue;
                 $values[$fieldname] = $record[$fieldname];
+                
+                /*if(@$field_config['dty_Role']=='primary'){
+                    $primary_field_type = $field_config['dty_Type']; 
+                }*/
             }
             
-
             //save data
             $ret = mysql__insertupdate($mysqli, 
                                     $this->config['tableName'], $this->fields,
                                     $values );
                                             
-            if($ret==null){ //it return null for non-numeric primary field
+            if($ret==true || $ret==null){ //it return true for non-numeric primary field
                    $results[] = $record[$this->primaryField];
             }else if(is_numeric($ret)){
                    $this->records[$rec_idx][$this->primaryField] = $ret;

@@ -25,7 +25,7 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     
     _init: function() {
         
-        this.options.width = 570;
+        if(isNaN(this.options.width)) this.options.width = 570;
         this.options.height = 600;
 
         this._super();
@@ -66,6 +66,7 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
             function(response){
                 that._cachedRecordset = response;
                 that.recordList.resultList('updateResultSet', response);
+                that._selectAndEditFirstInRecordset(response);
             });
             
         this._on( this.searchForm, {
@@ -120,6 +121,25 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
                 //there is n filter feature in this form - thus, show list directly
             }
             this.recordList.resultList('updateResultSet', data.recordset, data.request);
+            this._selectAndEditFirstInRecordset(data.recordset); 
+        }
+    },
+    
+    filterRecordList: function(event, request){
+        var subset = this._super(event, request);
+        this._selectAndEditFirstInRecordset(subset);
+       
+    },
+    
+    _selectAndEditFirstInRecordset:function(subset){
+        
+        if(subset && subset.length()>0 && this.options.edit_mode=='inline'){
+                
+                var rec_ID = subset.getOrder()[0];
+                
+                this.recordList.resultList('setSelected', [rec_ID]);
+                this.selectedRecords([rec_ID]);
+                this._onActionListener(null, {action:'edit'}); //default action of selection
         }
     },
     

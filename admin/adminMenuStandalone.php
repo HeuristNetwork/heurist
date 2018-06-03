@@ -246,8 +246,8 @@ if (array_key_exists('mode', $_REQUEST)) {
                         ?>
                         <li>
                             <a href="describe/getDBStructureAsXML.php?db=<?=HEURIST_DBNAME?>"
-                                target="_blank"
-                                title="Lists the record type and field definitions in XML format (HML - Heurist Markup Language)">
+                                target="_blank"Lists the record type and field definitions in XML format (HML - Heurist Markup Language)
+                                title="">
                                 Structure (XML) <img src="../common/images/external_link_16x16.gif"
                                 width="12" height="12" border="0" title="XML Structure"
                                 </a>
