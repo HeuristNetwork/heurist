@@ -111,14 +111,17 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     </li>
 
                     <li>
-                        <a  href="admin/describe/getDBStructureAsXML.php" name="auto-popup" class="h3link"
-                            target="_blank" onClick="{return false;}"
+                        <a  href="admin/describe/getDBStructureAsXML.php" name="auto-popup"  class="h3link"
+                            target="_blank"
                             title="Lists the record type and field definitions in XML format (HML - Heurist Markup Language)">
-                           Structure (XML)</a>
+                           Structure (XML)
+                            <img src="<?php echo PDIR;?>common/images/external_link_16x16.gif"
+                                    width="12" height="12" border="0">
+                           </a>
                     </li>
 
                     <li>
-                        <a href="admin/describe/getDBStructureAsSQL.php?pretty=1" name="auto-popup" class="h3link"
+                        <a href="admin/describe/getDBStructureAsSQL.php?pretty=1"  name="auto-popup" class="h3link"
                             onClick="{return false;}"
                             title="Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)">
                             Structure (SQL)</a>
@@ -146,40 +149,85 @@ require_once(dirname(__FILE__)."/../initPage.php");
             <h3><span class="ui-icon ui-iconalign ui-icon-gears"></span>UTILITIES</h3>
             <div>
                 <ul>
-                    <li class="admin-only">
-                        <a  href="#" id="menulink-database-admin"
-                            data-logaction="adminFull"
-                            onclick="{window.open(window.hWin.HAPI4.baseURL+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank'); return false;}"
-                            title="Full set of database administration functions, utilities and special project extensions">
-                            Verify title masks</a>
-                    </li>
-                    <li class="admin-only">
-                        <a href="export/dbbackup/exportMyDataPopup.php?inframe=1" name="auto-popup" class="portrait h3link"
-                            data-logaction="adminArchive"
-                            onclick= "{return false;}"
-                            title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
-                            Create data archive package</a>
-                    </li>
-
-                                        <li>
-                        <a href="applications/faims/exportFAIMS.php" name="auto-popup" class="verylarge h3link"
-                            data-logaction="stFAIMS"
+                
+                    <li>
+                        <a href="admin/verification/listDuplicateRecords.php?fuzziness=10" name="auto-popup" class="h3link"
                             onClick="{return false;}"
-                            title="Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported">
-                            Build tablet app</a>
+                            title="Fuzzy search to identify records which might contain duplicate data">
+                            Find duplicate records
+                        </a>
                     </li>
-
-                    <!--
-                        TEMPORARILY REMOVED. TODO: SOMETHING IS WRONG 3/7/2014 WITH THE EXPORT FUNCTION,
-                        IT OPENS UP THE EXPORT MODULE FORM AND WON'T CLOSE THE RECORD TYPE SELECTION POPUP
-                    <li class="admin-only">
-                        <a href="applications/faims/exportTDar.php" name="auto-popup" class="portrait h3link"
-                            onclick= "{return false;}"
-                            title="Export the current database as tables, files and metadata directly into a specified tDAR repository">
-                            Export to tDAR repository</a>
+                    <li>
+                        <a href="admin/verification/rebuildLuceneIndices.php" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Rebuilds the Lucene indices used by Elastic Search, for all record types - no result if Elastic server not specified in configuration">
+                            Rebuild Lucene index
+                        </a>
                     </li>
-                    -->
-                    
+                    <li>
+                        <a href="hserver/utilities/recreateRecLinks.php" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Rebuild the cache of pointers and relationship records, which is used to speed search/filter actions">
+                            Rebuild relationships cache
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin/verification/checkRectypeTitleMask.php?check=1" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Check correctness of each Record Type\'s title mask with respect to field definitions">
+                            Verify title masks
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin/verification/checkXHTML.php" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Check the wysiwyg text fields in records/blog entries for structural errors">
+                            Verify wysiwyg texts
+                        </a>
+                    </li>
+                    <li>
+                        <a href="verification/checkInvalidChars.php" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Check the text fields in records entries for invalid characters">
+                            Fix invalid characters
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin/verification/listUploadedFilesErrors.php" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Find errors in database uploaded files">
+                            Verify uploaded files 
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin/verification/verifyConceptCodes.php" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Find duplications of concept codes in all databases">
+                            Verify concept codes
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?=HEURIST_BASE_URL?>?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
+                            title="Show bookmarked records which you have not tagged">
+                             Bookmarks w/o tags
+                                <img src="<?php echo PDIR;?>common/images/external_link_16x16.gif"
+                                    width="12" height="12" border="0" alt="Search showing bookmarks without tags">
+                        </a>
+                    </li>
+                    <li>
+                        <a href="" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="">
+                            
+                        </a>
+                    </li>
+                    <li>
+                        <a href="" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="">
+                            
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

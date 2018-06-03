@@ -557,7 +557,7 @@ error_log(print_r($params, true));
 
         $result = mysql__exec_param_query($mysqli, $query, $params);
         
-        if($result==true && $primary_field_type=='integer'){
+        if($result==true){ //&& $primary_field_type=='integer'
             $result = ($isinsert) ?$mysqli->insert_id :$rec_ID;
         }//for non-numeric it returns null
         
