@@ -167,7 +167,9 @@ function hmanageMenu() {
                     ele.hide();
                 }else{
                     ele.show();
-                    //setTimeout(function(){$(tabb).tabs({active:1})},1000);
+                    //$(tabb).tabs({active:1});
+                    //$(tabb).tabs('option','active',1);
+                    ele.find('a')[0].click();
                 }
             }
         );

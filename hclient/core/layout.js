@@ -1088,12 +1088,17 @@ function hLayout(args) {
                    }
                    
                    if(idx==1){
-                       $(item).hide();
+                       //DEBUG $(item).hide();
                        
                        $('<span class="ui-icon ui-icon-close" title="Close this tab" '
                        +'style="font-size: 16px;width:24px;height:24px;position:absolute;right:10;top:20;z-index:2;cursor:pointer"></span>')
-                       .click(function(){ $(item).hide(); $(tabb).tabs({active:0}); })
+                       .click(function(){ 
+                            $(item).hide(); 
+                            if($(tabb).tabs("option", "active")==1) $(tabb).tabs({active:0}); 
+                       })
                        .appendTo($(item));
+                       
+                       //$(item).attr('admintab',1);
                    }
                    
                 });

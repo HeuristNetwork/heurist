@@ -166,6 +166,7 @@ if($filename){ //download from scratch
                 $filename = $path.$rec_id;
             }
             
+            
             $exts = array('png','jpg','jpeg','gif');
             foreach ($exts as $ext){
                 if(file_exists($filename.'.'.$ext)){

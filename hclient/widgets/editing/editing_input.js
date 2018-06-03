@@ -628,9 +628,7 @@ $.widget( "heurist.editing_input", {
                         //    if(context=="ok") {
                         afterclose: function(){
                             if(true){ //always reload term list after this popup
-                                window.hWin.HEURIST4.terms = window.hWin.HEURIST.terms;
                                 $input = that._recreateSelector($input, true);
-                                
                                 $input.change( __onTermChange );
                                 
                                 __showHideSelByImage();
@@ -651,7 +649,6 @@ $.widget( "heurist.editing_input", {
                         //class:'ui-heurist-bg-light',
                         callback: function(editedTermTree, editedDisabledTerms){
                             if(editedTermTree || editedDisabledTerms) {
-                                window.hWin.HEURIST4.terms = window.hWin.HEURIST.terms;
                                 
                                 that.options['dtFields']['rst_FilteredJsonTermIDTree'] = editedTermTree;
                                 that.options['dtFields']['rst_TermIDTreeNonSelectableIDs'] = editedDisabledTerms

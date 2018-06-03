@@ -430,21 +430,6 @@ function toggleAll(disable, reserved) {
     typesDropdown.disabled = disable;
 }
 
-
-/* NOT USED see Hul.validate Validate value inserted into input field. In this case, make sure it's an integer
-function checkIfInteger(evt) {
-    if((evt.keyCode) != 9) {
-        var theEvent = evt || window.event;
-        var key = theEvent.keyCode || theEvent.which;
-        key = String.fromCharCode(key);
-        var regex = /[0-9]|\./;
-        if( !regex.test(key) ) {
-            theEvent.returnValue = false;
-            theEvent.preventDefault();
-        }
-    }
-}*/
-
 //
 function updateRectypeOnServer() {
     if($('#btnSave').is(":disabled")) return;

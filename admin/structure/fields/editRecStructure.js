@@ -534,11 +534,11 @@ function EditRecStructure() {
                                 // Field width
                                 '<span><label style="min-width:65px;width:65px">Field width:</label>'+
                                 '<input id="ed'+rst_ID+'_rst_DisplayWidth" '+
-                                    'title="Display width of this field in the data entry form (does not limit maximum data length)" style="width:40" size="4" onkeypress="Hul.validate(event)"/>'+
+                                    'title="Display width of this field in the data entry form (does not limit maximum data length)" style="width:40" size="4" onkeypress="window.hWin.HEURIST4.ui.preventNonNumeric(event)"/>'+
                                 '</span>'+
                                 '<span id="span'+rst_ID+'_rst_DisplayHeight"><label style="min-width:35px;width:35px">&nbsp;Height:</label>'+
                                 '<input id="ed'+rst_ID+'_rst_DisplayHeight" '+
-                                    'title="Display height in rows of this field in the data entry form" style="width:40" size="4" onkeypress="Hul.validate(event)"/>'+
+                                    'title="Display height in rows of this field in the data entry form" style="width:40" size="4" onkeypress="window.hWin.HEURIST4.ui.preventNonNumeric(event)"/>'+
                                 '</span>'+
                                 '</span>'+
                             '</div></div>'+
@@ -596,7 +596,7 @@ function EditRecStructure() {
                         '<span id="ed'+rst_ID+'_spanMinValue" style="display:none;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
                         '<input id="ed'+rst_ID+
                         '_rst_MinValues" title="Minimum number of values which are required in data entry" style="width:20px" size="2" '+
-                        'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span>'+
+                        'onblur="onRepeatValueChange(event)" onkeypress="window.hWin.HEURIST4.ui.preventNonNumeric(event)"/></span>'+
                         '</div></div>'+
                         
                         // Repeatability
@@ -613,7 +613,7 @@ function EditRecStructure() {
                         '<span id="ed'+rst_ID+'_spanMaxValue"><label class="input-header-cell">Maximum&nbsp;values:</label>'+
                         '<input id="ed'+rst_ID+
                         '_rst_MaxValues" title="Maximum number of values which are permitted in data entry" style="width:20px; text-align:center;" size="2" '+
-                        'onblur="onRepeatValueChange(event)" onkeypress="Hul.validate(event)"/></span>'+
+                        'onblur="onRepeatValueChange(event)" onkeypress="window.hWin.HEURIST4.ui.preventNonNumeric(event)"/></span>'+
                         '</div>'+
                         '</div>'+
 

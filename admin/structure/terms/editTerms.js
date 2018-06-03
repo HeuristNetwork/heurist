@@ -19,8 +19,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
-
 var TAB_WIDTH = 350;
 // EditTerms object
 var editTerms;
@@ -59,7 +57,7 @@ function getParentId(_node){
 }
 
 //aliases
-var Hul = top.HEURIST.util;
+var Hul = window.hWin.HEURIST4.util;
 
 /**
 * EditTerms - class for pop-up window to edit terms
@@ -77,7 +75,6 @@ function EditTerms() {
     _parentNode,
     _currentDomain,
     treetype = null,
-    _db,
     _isWindowMode=false,
     _isSomethingChanged=false,
     _affectedVocabs = [],
@@ -92,26 +89,22 @@ function EditTerms() {
     */
     function _init (){
 
+        _isWindowMode = !Hul.isnull(window.hWin.HEURIST4.util.getUrlParameter('popup', location.search));
 
+        _vocabulary_toselect = window.hWin.HEURIST4.util.getUrlParameter('vocabid', location.search);
 
-        top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-
-        _isWindowMode = !Hul.isnull(top.HEURIST.parameters.popup);
-
-        _vocabulary_toselect = top.HEURIST.parameters.vocabid;
-
-        treetype = top.HEURIST.parameters.treetype;
-        if (!top.HEURIST.util.isempty(treetype)){
+        treetype = window.hWin.HEURIST4.util.getUrlParameter('treetype', location.search);
+        if (!window.hWin.HEURIST4.util.isempty(treetype)){
             treetype = (treetype == 'enum')?'terms':'relationships';
         }
 
         var initdomain = 0;
+        
+        var domain = window.hWin.HEURIST4.util.getUrlParameter('domain', location.search);
 
-        if(top.HEURIST.parameters.domain=='relation' && top.HEURIST.util.isempty(treetype)) {
-            if(top.HEURIST.util.isempty(treetype)) initdomain  = 1;
+        if(domain=='relation' && window.hWin.HEURIST4.util.isempty(treetype)) {
+            if(window.hWin.HEURIST4.util.isempty(treetype)) initdomain  = 1;
         }
-
-        _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
 
         if (!(treetype == "terms" || treetype == "relationships")){
             treetype = "terms";
@@ -346,7 +339,7 @@ function EditTerms() {
                     $('#termImage').html(
                     '<a href="javascript:void(0)" onClick="{editTerms.showFileUploader()}" title="Click to change image">'+
                     '<img id="imgThumb" style="max-width: 380px;" src="'+
-                    top.HEURIST.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp +
+                    window.hWin.HAPI4.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp +
                     '"></a>');
                     $('#termImage').css({display:'inline-block'});
                     $('#btnClearImage').css({display:'inline-block'});
@@ -392,7 +385,7 @@ function EditTerms() {
 
                 $('#divInverseType').css({display: (_currentDomain=="relation")?"block":"none"});
 
-                var dbId = Number(top.HEURIST.database.id),
+                var dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
                 original_dbId = Number(node.data.original_db),
                 status = node.data.status;
 
@@ -564,8 +557,9 @@ function EditTerms() {
         });
         //$("#resSearchInverse").dblclick(_SelectInverse());
         //show confirmation dialog
-        $_dialogbox = Hul.popupElement(top, ele,
+        $_dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog(
             {
+                element: ele,   
                 "close-on-blur": false,
                 "no-resize": true,
                 title: 'Set As Inverse',
@@ -639,14 +633,11 @@ function EditTerms() {
 
         var $_dialogbox;
 
-        var _updateResult = function(context){
+        var _updateResult = function(response){
 
-            if(!Hul.isnull(context) && !context.error){
+            if(response.status == window.hWin.ResponseStatus.OK){
 
-                top.HEURIST.terms = context.terms;
-                if(top.hWin && top.hWin.HEURIST4){
-                    top.hWin.HEURIST4.terms = context.terms;
-                }
+                window.hWin.HEURIST4.terms = response.data.terms;
                 
                 /*_isSomethingChanged = true;
                 document.getElementById ('div_btnAddChild').style.display = "inline-block";
@@ -665,6 +656,8 @@ function EditTerms() {
                     _fillTreeView((ind===0)?_termTree1:_termTree2);
                 }
                 */
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         };
 
@@ -686,188 +679,30 @@ function EditTerms() {
             defs: {}
         }};
         oTerms.terms.defs[retain_nodeid] = [
-            trmLabel,
-            $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
-            $(top.document).find('input:radio[name="rbMergeCode"]:checked').val() ];
+            trmLabel,             
+            $(top.document).find('input:checkbox[id^="rbMergeDescr"]:checked').val(),
+            $(top.document).find('input:checkbox[id^="rbMergeCode"]:checked').val() ];
 
-        var str = JSON.stringify(oTerms);
-
+        //var str = JSON.stringify(oTerms);
         //alert(str);
 
-        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
         var callback = _updateResult;
-        var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
-        Hul.getJsonData(baseurl, callback, params);
+        var request = {method:'mergeTerms', 
+            db:window.hWin.HAPI4.database, 
+            data: oTerms,            
+            retain: retain_nodeid,
+            merge: nodeid};
 
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);       
 
-        if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);
+        // if($_dialogbox) window.hWin.HEURIST4.util.closePopup($_dialogbox.id);
         $_dialogbox = null;
         //};
-
-
-        /*var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
-        fi = top.HEURIST.terms.fieldNamesToIndex;
-
-        var arTerm = termsByDomainLookup[nodeid];
-        $('#lblTerm_toMerge').html(arTerm[fi.trm_Label]+' ['.fontsize(1)+arTerm[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
-
-        var arTerm2 = termsByDomainLookup[retain_nodeid];
-        $('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
-
-        $('#lblMergeLabel1').text(arTerm2[fi.trm_Label]);
-
-
-        /*  if(Hul.isempty(arTerm[fi.trm_Label])){
-        $('#mergeLabel2').hide();
-        }else{
-        $('#mergeLabel2').show();
-        $('#lblMergeLabel2').html(arTerm[fi.trm_Label]);
-        $('#rbMergeLabel2').val(arTerm[fi.trm_Label]);
-        } */
-
-
-        /***  Check and Description Buttons-- if "Neither" - disable both buttons and show <none> in both
-        if "One" - select the one and disable the other and show <none> in the empty one
-        if "Both" - Select the first one and the other
-
-
-        if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  &&
-        (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
-        $('#mergeCode1').show();
-        $('#mergeCode2').show();
-        $('#mergeDescr1').show();
-        $('#mergeDescr2').show();
-        $('input[name ="rbMergeCode"]').attr('disabled', 'disabled');
-        $('input[name ="rbMergeDescr"]').attr('disabled', 'disabled' );
-        $('#lblMergeCode2').html('&#60;none&#62;');
-        $('#rbMergeCode2').val('&#60;none&#62;');
-        $('#lblMergeCode1').html('&#60;none&#62;');
-        $('#rbMergeCode1').val('&#60;none&#62;');
-        $('#lblMergeDescr1').html('&#60;none&#62;');
-        $('#rbMergeDescr1').val('&#60;none&#62;');
-        $('#lblMergeDescr2').html('&#60;none&#62;');
-        $('#rbMergeDescr2').val('&#60;none&#62;');
-        }
-        else if((!Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Code])))
-        {
-        $('#mergeCode1').show();
-        $('#mergeCode2').show();
-        $('#mergeDescr1').show();
-        $('#mergeDescr2').show();
-        $('#rbMergeCode1').attr('disabled', 'disabled');
-        $("#rbMergeCode2").attr('checked', 'checked');
-        $('#rbMergeDescr1').attr('disabled', 'disabled');
-        $("#rbMergeDescr2").attr('checked', 'checked');
-        $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-        $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
-        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-        $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
-        }
-        else if((Hul.isempty(arTerm[fi.trm_Code])) && (!Hul.isempty(arTerm2[fi.trm_Code]))
-        && (!Hul.isempty(arTerm2[fi.trm_Description])))
-        {
-        $('#mergeCode1').show();
-        $('#mergeCode2').show();
-        $('#mergeDescr1').show();
-        $('#mergeDescr2').show();
-        $('#rbMergeCode2').attr('disabled', 'disabled');
-        $("rbMergeCode1").attr('checked', 'checked');
-        $('#rbMergeDescr2').attr('disabled', 'disabled');
-        $("#rbMergeDescr1").attr('checked', 'checked');
-        $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
-        $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
-        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-        $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
-        }
-        else
-        {
-        $('#mergeCode1').show();
-        $('#mergeCode2').show();
-        $('#mergeDescr1').show();
-        $('#mergeDescr2').show();
-        $('input[name ="rbMergeCode"]').removeAttr( "disabled" );
-        $('input[name ="rbMergeCode"]').attr('checked', 'checked');
-        $('input[name ="rbMergeDescr"]').removeAttr( "disabled" );
-        $('input[name ="rbMergeDescr"]').attr('checked', 'checked');
-        $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
-        $('#rbMergeCode1').val(arTerm2[fi.trm_Code]);
-        $('#lblMergeCode2').html(arTerm[fi.trm_Code]);
-        $('#rbMergeCode2').val(arTerm[fi.trm_Code]);
-        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-        $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
-        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-        $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
-        }
-
-
-        /*if((Hul.isempty(arTerm[fi.trm_Description]))){
-        $('#mergeDescr2').hide();
-
-        $('#lblMergeDescr2')
-        $('#rbMergeDescr2').val('&#60;none&#62;');;
-        }else{
-        $('#mergeDescr2').show();
-        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
-        $('#rbMergeDescr2').val(arTerm[fi.trm_Description]);
-        } */
-
 
         //var arTerm2 = termsByDomainLookup[retain_nodeid];
 
         //$('#lblTerm_toRetain').html(arTerm2[fi.trm_Label]+' ['.fontsize(1)+arTerm2[fi.trm_ConceptID].fontsize(1) +']'.fontsize(1));
-
-        //$('#lblTerm_toRetain').html(' ['+arTerm2[fi.trm_ConceptID]+']').style.fontSize= "x-small";
-        /*   if(Hul.isempty(arTerm2[fi.trm_Label])){
-        $('#mergeLabel2').hide();
-        $('#lblMergeLabel1').html(arTerm[fi.trm_Label]);
-        $('#rbMergeLabel1').val(arTerm[fi.trm_Label]);
-        }else{
-        $('#lblMergeLabel1').html(arTerm2[fi.trm_Label]);
-        $('#rbMergeLabel1').val(arTerm2[fi.trm_Label]);
-        } */
-        /* if(Hul.isempty(arTerm2[fi.trm_Code])){
-        $('#mergeCode2').hide();
-        $('#lblMergeCode1').html('&#60;none&#62;');
-        $('#rbMergeCode1').val('&#60;none&#62;');
-
-
-        }else{
-
-        $('#lblMergeCode1').html('&#60;none&#62;');
-        $('#rbMergeCode1').val('&#60;none&#62;');
-
-        }
-        if(Hul.isempty(arTerm2[fi.trm_Description])){
-        $('#mergeDescr2').hide();
-        $('#lblMergeDescr1').html(arTerm[fi.trm_Description]);
-        $('#rbMergeDescr1').val(arTerm[fi.trm_Description]);
-        }else{
-        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
-        $('#rbMergeDescr1').val(arTerm2[fi.trm_Description]);
-        } *
-
-
-        $('#lblRetainId').html(retain_nodeid);
-        $('#lblMergeId').html(nodeid);
-
-        //fill elements of con
-        var ele = document.getElementById('divTermMergeConfirm');
-
-        $("#btnMergeCancel").click(function(){$_dialogbox.remove();});//if($_dialogbox) top.HEURIST.util.closePopup($_dialogbox.id);});
-        $("#btnMergeOK").click(function(){_updateOnServer; $_dialogbox.remove(); });
-
-
-
-        //show confirmation dialog
-        $_dialogbox = Hul.popupElement(top, ele,
-        {
-        "close-on-blur": false,
-        "no-resize": true,
-        title: 'Select values to be retained',
-        height: 310,
-        width: 560
-        }); */
-
 
     }
 
@@ -1075,22 +910,20 @@ function EditTerms() {
         //PLEASE NOTE use "node.label' for YUI TREE INSTEAD OF 'term.label'
         oTerms.terms.defs[term.id] = [term.label, term.inverseid, term.description, term.domain, term.parent_id, term.status, term.termcode ];
 
-        var str = JSON.stringify(oTerms);
+        //var str = JSON.stringify(oTerms);
 
-        if(!Hul.isnull(str)) {
+            var _updateResult = function(response){
 
-            var _updateResult = function(context){
-
-                if(!Hul.isnull(context)){
+                if(response.status == window.hWin.ResponseStatus.OK){
 
                     var error = false,
                     report = "",
                     ind;
 
-                    for(ind in context.result)
+                    for(ind in response.data.result)
                     {
                         if(!Hul.isnull(ind)){
-                            var item = context.result[ind];
+                            var item = response.data.result[ind];
                             if(isNaN(item)){
                                 Hul.showError(item);
                                 error = true;
@@ -1099,7 +932,7 @@ function EditTerms() {
                                 if(term.id != item){ //new term
                                     term.id = item;
                                     //find vocab term (top level)
-                                    //top.HEURIST.treesByDomain
+                                    //HEURIST4.treesByDomain
                                     var topnode = _findTopLevelForId(term.parent_id);
                                     if (!Hul.isnull(topnode)) {
                                         var vocab_id = topnode.data.id;
@@ -1152,10 +985,7 @@ function EditTerms() {
 
                     if(!error) {
                         
-                        top.HEURIST.terms = context.terms;
-                        if(top.hWin && top.hWin.HEURIST4){
-                            top.hWin.HEURIST4.terms = context.terms;
-                        }
+                        window.hWin.HEURIST4.terms = response.data.terms;
 
                         _isSomethingChanged = true;
                         document.getElementById ('div_btnAddChild').style.display = "inline-block";
@@ -1215,14 +1045,22 @@ function EditTerms() {
                         main_callback.call(this, !error);    
                     }
                 }
+                
+                
+                else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }                                        
+                
             };
 
             //
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-            var callback = _updateResult;
-            var params = "method=saveTerms&data=" + encodeURIComponent(str)+"&db="+_db;
-            Hul.getJsonData(baseurl, callback, params);
-        }
+        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+        var callback = _updateResult;
+        var request = {method:'saveTerms', 
+            db:window.hWin.HAPI4.database, 
+            data: oTerms};        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+
     }
 
     /**
@@ -1264,14 +1102,12 @@ function EditTerms() {
                 document.getElementById ('deleteMessage').style.display = "block";
                 document.getElementById ('formEditor').style.display = "none";
 
-                function __updateAfterDelete(context) {
+                function __updateAfterDelete(response) {
 
-                    if(!Hul.isnull(context) && !context['error']){
+                    if(response.status == window.hWin.ResponseStatus.OK){
 
-                        top.HEURIST.terms = context.terms;
-                        if(top.hWin && top.hWin.HEURIST4){
-                            top.hWin.HEURIST4.terms = context.terms;
-                        }
+                        window.hWin.HEURIST4.terms = response.data.terms;
+                        
                         //remove from tree
                         var term_id = _currentNode?_currentNode.data.id:0;
                         var term_id2 = nodeToDelete.data.id;
@@ -1286,14 +1122,18 @@ function EditTerms() {
                         _isSomethingChanged = true;
                     }else{
                         document.getElementById ('formEditor').style.display = "block";
+                        
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                     document.getElementById ('deleteMessage').style.display = "none";
                 }
 
-                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
                 var callback = __updateAfterDelete;
-                var params = "method=deleteTerms&trmID=" + _currentNode.data.id+"&db="+_db;
-                Hul.getJsonData(baseurl, callback, params);
+                
+                var request = {method:'deleteTerms', trmID:_currentNode.data.id, db:window.hWin.HAPI4.database};
+                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback); 
+                
             }else{
                 
                         var term_id = _currentNode?_currentNode.data.id:0;
@@ -1322,7 +1162,7 @@ function EditTerms() {
             alert("Sorry, the top level of the tree is a vocabulary (hierarchical list of terms). Vocabularies cannot be moved or merged.");
             return;
         }
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+        var db = window.hWin.HAPI4.database;
         var nodeid = _currentNode.data.id;
 
         //_keepCurrentParent = _getNextSiblingId(_currentNode);
@@ -1330,14 +1170,13 @@ function EditTerms() {
         _keepCurrentParent = _currentNode.data.parent_id;
 
 
-        var url = top.HEURIST.baseURL +
+        var sURL = window.hWin.HAPI4.baseURL +
         "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+nodeid+"&mode=0&db="+db;
         if(keep_target_newparent_id){
-            url = url + "&parent=" + keep_target_newparent_id;
+            sURL = sURL + "&parent=" + keep_target_newparent_id;
         }
 
-        Hul.popupURL(top, url,
-            {
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
                 "close-on-blur": false,
                 "no-resize": true,
                 height: 500,
@@ -1369,8 +1208,8 @@ function EditTerms() {
     }
 
     function _getTermLabel(domain, term_id){
-        var trm = top.HEURIST.terms.termsByDomainLookup[domain][term_id];
-        return (trm)?trm[top.HEURIST.terms.fieldNamesToIndex.trm_Label]:'';
+        var trm = window.hWin.HEURIST4.terms.termsByDomainLookup[domain][term_id];
+        return (trm)?trm[window.hWin.HEURIST4.terms.fieldNamesToIndex.trm_Label]:'';
     }
 
     /**
@@ -1386,7 +1225,7 @@ function EditTerms() {
             alert("Sorry, the top level of the tree is a vocabulary (hierarchical list of terms). Vocabularies cannot be moved or merged.");
             return;
         }
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+        var db = window.hWin.HAPI4.database;
         var retain_nodeid = _currentNode.data.id;
 
         //_keepCurrentParent = _getNextSiblingId(_currentNode);
@@ -1394,7 +1233,7 @@ function EditTerms() {
         _keepCurrentParent = _currentNode.data.parent_id;
 
 
-        var url = top.HEURIST.baseURL +
+        var sURL = window.hWin.HAPI4.baseURL +
         "admin/structure/terms/selectTermParent.html?domain="+_currentDomain+"&child="+retain_nodeid+"&mode=1&db="+db;
         /*if(keep_target_newparent_id){
         url = url + "&parent=" + keep_target_newparent_id;
@@ -1403,8 +1242,7 @@ function EditTerms() {
         var name_with_path = _getTermLabel(_currentDomain, _keepCurrentParent) + ' - '
         + _getTermLabel(_currentDomain, retain_nodeid);
 
-        Hul.popupURL(top, url,
-            {
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
                 "close-on-blur": false,
                 "no-resize": true,
                 title: 'Merge into: '+name_with_path,
@@ -1553,7 +1391,7 @@ function EditTerms() {
                 term_ID = _currentNode.data.parent_id;
             }
 
-            var sURL = top.HEURIST.baseURL + "admin/structure/terms/printVocabulary.php?db="+ _db
+            var sURL = window.hWin.HAPI4.baseURL + "admin/structure/terms/printVocabulary.php?db="+ window.hWin.HAPI4.database
             + '&domain=' + _currentDomain + '&trm_ID=' + term_ID;
 
             window.open(sURL, '_blank');
@@ -1571,16 +1409,11 @@ function EditTerms() {
             var term_id = (isRoot)?0:_currentNode.data.id;
             var term_label = (isRoot)?'root vocabulary':_currentNode.data.label;
 
-            /* old way
-            var sURL = top.HEURIST.baseURL + "admin/structure/terms/editTermsImport.php?db="+ _db +
-            "&parent="+term_id+
-            "&domain="+_currentDomain;
-            */
-
-            var sURL = top.HEURIST.baseURL + "hclient/framecontent/import/importDefTerms.php?db="+ _db +
+            var sURL = window.hWin.HAPI4.baseURL + "hclient/framecontent/import/importDefTerms.php?db="
+            + window.hWin.HAPI4.database +
             "&trm_ID="+term_id;
 
-            Hul.popupURL(top, sURL, {
+            window.hWin.HEURIST4.msg.showDialog(sURL, {
                 "close-on-blur": false,
                 "no-resize": false,
                 title: 'Import Terms for '+term_label,
@@ -1588,7 +1421,7 @@ function EditTerms() {
                 //width: 500,
                 height: 460,
                 width: 800,
-                'context_help':top.HEURIST.baseURL+'context_help/defTerms.html #import',
+                'context_help':window.hWin.HAPI4.baseURL+'context_help/defTerms.html #import',
                 callback: _import_complete
             });
 
@@ -1610,12 +1443,12 @@ function EditTerms() {
             }
 
 
-            top.HEURIST.terms = context.terms;
+            window.hWin.HEURIST4.terms = context.terms;
             
             var res = context.result,
             ind,
             parentNode = (context.parent===0)?_currTreeView.getRoot():_currentNode, //??????
-            fi = top.HEURIST.terms.fieldNamesToIndex;
+            fi = window.hWin.HEURIST4.terms.fieldNamesToIndex;
 
             if(res.length>0){
 
@@ -1626,7 +1459,7 @@ function EditTerms() {
 
                         if(!isNaN(termid))
                         {
-                            var arTerm = top.HEURIST.terms.termsByDomainLookup[_currentDomain][termid];
+                            var arTerm = window.hWin.HEURIST4.terms.termsByDomainLookup[_currentDomain][termid];
                             if(!Hul.isnull(arTerm)){
                                 var term = {}; //new Object();
                                 term.id = termid;
@@ -1667,8 +1500,8 @@ function EditTerms() {
         //_affectedVocabs
 
         //1. find the affected fieldtypes
-        var fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex,
-        allTerms = top.HEURIST.terms.treesByDomain[_currentDomain],
+        var fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex,
+        allTerms = window.hWin.HEURIST4.terms.treesByDomain[_currentDomain],
         dty_ID, ind, td, deftype,
         arrRes = [],
         _needtype = (_currentDomain==='enum')?'enum':'relationtype';   //relmarker???
@@ -1703,17 +1536,18 @@ function EditTerms() {
         }
 
         //2. loop
-        for (dty_ID in top.HEURIST.detailTypes.typedefs) {
+        for (dty_ID in window.hWin.HEURIST4.detailtypes.typedefs) {
 
             if(!isNaN(Number(dty_ID)))
             {
-                td = top.HEURIST.detailTypes.typedefs[dty_ID];
+                td = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID];
                 deftype = td.commonFields;
 
                 if(deftype[fi["dty_Type"]]===_needtype){
 
-                    var fldTerms = Hul.expandJsonStructure(deftype[fi["dty_JsonTermIDTree"]]);
+                    var fldTerms = deftype[fi["dty_JsonTermIDTree"]]; //Hul.expandJsonStructure(
                     //check if one these terms are child of affected vocab
+                    fldTerms = (typeof fldTerms == "string" && !Hul.isempty(fldTerms)) ? $.parseJSON(fldTerms) : null;
                     if(!Hul.isnull(fldTerms)) {
 
                         if(__loopForFieldTerms(fldTerms)){
@@ -1744,7 +1578,7 @@ function EditTerms() {
             for(ind=0; ind<arrRes.length; ind++){
 
                 dty_ID = arrRes[ind];
-                td = top.HEURIST.detailTypes.typedefs[dty_ID];
+                td = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID];
                 deftype = td.commonFields;
 
                 var _div = document.createElement("div");
@@ -1772,16 +1606,21 @@ function EditTerms() {
             parentdiv.removeChild(el_sel);
         }
 
-        allTerms = Hul.expandJsonStructure(allTerms);
-        disabledTerms = Hul.expandJsonStructure(disabledTerms);
-
-        el_sel = Hul.createTermSelect(allTerms, disabledTerms, _currentDomain, null);
-        el_sel.id = "selector"+dty_ID;
-        el_sel.style.backgroundColor = "#cccccc";
-        el_sel.width = 180;
-        el_sel.style.maxWidth = '180px';
-        el_sel.onchange =  _preventSel;
-        parentdiv.appendChild(el_sel);
+        //allTerms = Hul.expandJsonStructure(allTerms);
+        //disabledTerms = Hul.expandJsonStructure(disabledTerms);
+        //el_sel = Hul.createTermSelect(allTerms, disabledTerms, _currentDomain, null);
+        
+        $input = window.hWin.HEURIST4.ui.createTermSelectExt2(el_sel,
+                {datatype:_currentDomain, termIDTree:allTerms, headerTermIDsList:disabledTerms,
+                    defaultTermID:null, topOptions:false, supressTermCode:true, useHtmlSelect:false});
+        
+        
+        $input.attr('id',"selector"+dty_ID).css({'max-wdith':'180px',width:'180px'}).appendTo($(parentdiv));
+        //el_sel.style.backgroundColor = "#cccccc";
+        //el_sel.width = 180;
+        //el_sel.style.maxWidth = '180px';
+        //el_sel.onchange =  _preventSel;
+        //parentdiv.appendChild(el_sel);
     }
 
     /**
@@ -1793,18 +1632,19 @@ function EditTerms() {
     function _onSelectTerms(event){
 
         var dty_ID = event.target.id.substr(6);
-        var td = top.HEURIST.detailTypes.typedefs[dty_ID],
+        var td = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID],
         deftype = td.commonFields,
-        fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+        fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
 
         var type = deftype[fi.dty_Type];
         var allTerms = deftype[fi.dty_JsonTermIDTree];
         var disTerms = deftype[fi.dty_TermIDTreeNonSelectableIDs];
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+        var db = window.hWin.HAPI4.database;
 
-        Hul.popupURL(top, top.HEURIST.baseURL +
-            "admin/structure/terms/selectTerms.html?dtname="+dty_ID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db,
-            {
+        var sURL = window.hWin.HAPI4.baseURL +
+            "admin/structure/terms/selectTerms.html?dtname="+dty_ID+"&datatype="+type+"&all="+allTerms+"&dis="+disTerms+"&db="+db;
+            
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
                 "close-on-blur": false,
                 "no-resize": true,
                 height: 500,
@@ -1820,21 +1660,21 @@ function EditTerms() {
 
                         _oDetailType.detailtype.defs[dty_ID] = {common:[editedTermTree, editedDisabledTerms]};
 
-                        var str = JSON.stringify(_oDetailType);
+                        //var str = JSON.stringify(_oDetailType);
 
-                        function _updateResult(context) {
+                        function _updateResult(response) {
 
-                            if(!Hul.isnull(context)){
+                            if(response.status == window.hWin.ResponseStatus.OK){
 
                                 /* @todo move this to the separate function */
                                 var error = false,
                                 report = "",
                                 ind;
 
-                                for(ind in context.result)
+                                for(ind in response.data.result)
                                 {
                                     if(!Hul.isnull(ind)){
-                                        var item = context.result[ind];
+                                        var item = response.data.result[ind];
                                         if(isNaN(item)){
                                             Hul.showError(item);
                                             error = true;
@@ -1852,16 +1692,20 @@ function EditTerms() {
                                     deftype[fi.dty_TermIDTreeNonSelectableIDs] = editedDisabledTerms;
                                     _recreateSelector(dty_ID, editedTermTree, editedDisabledTerms, null);
                                 }
-                            }
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }                                        
                         }//end internal function
 
-                        if(!Hul.isnull(str)) {
 
-                            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-                            var callback = _updateResult;
-                            var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
-                            Hul.getJsonData(baseurl, callback, params);
-                        }
+
+                        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+                        var callback = _updateResult;
+                        
+                        var request = {method:'saveDT', 
+                            db:window.hWin.HAPI4.database, 
+                            data: _oDetailType};
+                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
 
                     }
                 }
@@ -1873,11 +1717,19 @@ function EditTerms() {
 
         if(_currentNode===null) return;
 
-        var baseurl = top.HEURIST.iconBaseURL + _currentNode.data.id + "&ent=term&deletemode=1";
-        Hul.getJsonData(baseurl, function(context){
+        //window.hWin.HAPI4.iconBaseURL
+        var baseurl = window.hWin.HAPI4.baseURL + 'hserver/dbaccess/rt_icon.php';
+        var request = {
+            id:_currentNode.data.id,
+            db:window.hWin.HAPI4.database,
+            ent:'term',
+            deletemode:1
+        }
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(context){
             if(!Hul.isnull(context) && !context.error){
                 if(context.res=='ok'){
-                    $('#termImage').find('img').prop('src', top.HEURIST.baseURL + 'hclient/assets/100x100click.png');
+                    $('#termImage').find('img').prop('src', window.hWin.HAPI4.baseURL + 'hclient/assets/100x100click.png');
                 }
             }
             }, null);
@@ -1890,8 +1742,8 @@ function EditTerms() {
         var $input_img = $('#termImage');
 
         $input.fileupload({
-            url: top.HEURIST.baseURL +  'hserver/utilities/fileUpload.php',
-            formData: [ {name:'db', value: _db},
+            url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php',
+            formData: [ {name:'db', value: window.hWin.HAPI4.database},
                 {name:'entity', value:'terms'},
                 {name:'newfilename', value: document.getElementById ('edId').value }],
             acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
@@ -1908,7 +1760,7 @@ function EditTerms() {
                 $input_img.removeClass('loading');
                 $input_img.find('img').show();
                 response = response.result;
-                if(response.status=='ok'){
+                if(response.status==window.hWin.ResponseStatus.OK){
                     var data = response.data;
                     $.each(data.files, function (index, file) {
                         if(file.error){
@@ -1916,7 +1768,7 @@ function EditTerms() {
                             //window.hWin.HEURIST4.msg.showMsgErr(file.error);
                         }else{
                             var curtimestamp = (new Date()).getMilliseconds();
-                            var url = top.HEURIST.iconBaseURL + document.getElementById ('edId').value+ "&ent=term&t=" + curtimestamp
+                            var url = window.hWin.HAPI4.iconBaseURL + document.getElementById ('edId').value+ "&ent=term&t=" + curtimestamp
                             $input_img.find('img').prop('src', url); //file.url);
                         }
                     });
@@ -1937,22 +1789,6 @@ function EditTerms() {
         var merge_term = node.data;
         var retain_term =retain_node.data;
         
-        var _updateResult = function(context){
-            if(!Hul.isnull(context) && !context.error){
-
-                top.HEURIST.terms = context.terms;
-                if(top.hWin && top.hWin.HEURIST4){
-                    top.hWin.HEURIST4.terms = context.terms;
-                }
-                
-                while(node.hasChildren())
-                {
-                    node.getFirstChild().moveTo(retain_node, hitMode);
-                }
-                $(node.span).hide();                
-            }
-        };
-
         // var _updateOnServer = function(){
 
         var trmLabel = retain_term.label;// $(top.document).find('input:radio[name="rbMergeLabel"]:checked').val();
@@ -1972,19 +1808,35 @@ function EditTerms() {
         }};
         oTerms.terms.defs[retain_nodeid] = [
             trmLabel,
-            $(top.document).find('input:radio[name="rbMergeDescr"]:checked').val(),
-            $(top.document).find('input:radio[name="rbMergeCode"]:checked').val()];
+            $(top.document).find('input:checkbox[id^="rbMergeDescr"]:checked').val(),
+            $(top.document).find('input:checkbox[id^="rbMergeCode"]:checked').val() ];
 
-        var str = JSON.stringify(oTerms);
 
-        //alert(str);
+        var _updateResult = function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
 
-        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                window.hWin.HEURIST4.terms = response.data.terms;
+                
+                while(node.hasChildren())
+                {
+                    node.getFirstChild().moveTo(retain_node, hitMode);
+                }
+                $(node.span).hide();                
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        };
+            
+        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
         var callback = _updateResult;
-        var params = "method=mergeTerms&data=" + encodeURIComponent(str)+"&retain="+retain_nodeid+"&merge="+nodeid+"&db="+_db;
-        
-        Hul.getJsonData(baseurl, callback, params);
 
+        var request = { method:'mergeTerms', 
+        //DBGSESSID:'425944380594800002;d=1,p=0,c=07',
+            data:oTerms, 
+            db:window.hWin.HAPI4.database, 
+            retain:retain_nodeid, 
+            merge:nodeid };        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
     }
 
     function verifyLibrariesLoaded()
@@ -2013,9 +1865,9 @@ function EditTerms() {
         var  treedata = [];
         var termid,
         first_node,
-        treesByDomain = top.HEURIST.terms.treesByDomain[_currentDomain],
-        termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
-        fi = top.HEURIST.terms.fieldNamesToIndex;
+        treesByDomain = window.hWin.HEURIST4.terms.treesByDomain[_currentDomain],
+        termsByDomainLookup = window.hWin.HEURIST4.terms.termsByDomainLookup[_currentDomain],
+        fi = window.hWin.HEURIST4.terms.fieldNamesToIndex;
 
         //first level terms
         for (termid in treesByDomain)
@@ -2300,17 +2152,35 @@ function EditTerms() {
             if(data.hitMode==='over'){
 
                 function displayPopUpContents(cbCode1,cbCode2,cbDescr1,cbDescr2){
+                    
+                    $('#divTermMergeConfirm').find('input.merge-cb')
+                                                .prop('checked',false)
+                                                .removeAttr('disabled')
+                                                .click(function(e){
+                                                    var eid = $(e.target).attr('id');
+                                                    var nn = eid.substring(0,eid.length-1);
+                                                    var opid = (eid[eid.length-1]==1) ?2:1;
+                                                    var oele = $(top.document).find('#'+nn+opid);
+                                                    if(oele.val()!=''){
+                                                        oele.prop('checked', !$(e.target).is(':checked'));
+                                                    }
+                                                })
+                                                .val('');
+                    $('#divTermMergeConfirm').find('label.merge-cb')
+                                                .css('color','black');
+                    
                     if(cbCode1){
-                        $('#rbMergeCode1').attr('checked', 'checked');
-                        $('#lblMergeCode1').html(arTerm2[fi.trm_Code]);
+                        $('#rbMergeCode1').prop('checked', true).val(cbCode1);
+                        $('#lblMergeCode1').html(cbCode1);
                     }
                     else{
                         $('#rbMergeCode1').attr('disabled', 'disabled');
                         $('#lblMergeCode1').css({'color':'gray','font-size':'0.8em'}).html('&#60;none&#62;');
                     }
                     if(cbCode2){
-                        $("#rbMergeCode2").attr('checked', 'checked');
-                        $('#lblMergeCode2').html((arTerm[fi.trm_Code]));
+                        if(!cbCode1) $("#rbMergeCode2").prop('checked', true);
+                        $("#rbMergeCode2").val(cbCode2)
+                        $('#lblMergeCode2').html(cbCode2);
                     }
                     else{
                         $("#rbMergeCode2").attr('disabled', 'disabled');
@@ -2318,16 +2188,17 @@ function EditTerms() {
                     }
                     if(cbDescr1)
                     {
-                        $('#rbMergeDescr1').attr('checked', 'checked');
-                        $('#lblMergeDescr1').html(arTerm2[fi.trm_Description]);
+                        $('#rbMergeDescr1').prop('checked', true).val(cbDescr1);
+                        $('#lblMergeDescr1').html(cbDescr1);
                     }
                     else{
                         $('#rbMergeDescr1').attr('disabled', 'disabled');
                         $('#lblMergeDescr1').css({'color':'gray','font-size':'0.8em'}).html('&#60;none&#62;');
                     }
                     if(cbDescr2){
-                        $("#rbMergeDescr2").attr('checked', 'checked');
-                        $('#lblMergeDescr2').html(arTerm[fi.trm_Description]);
+                        if(!cbDescr1) $("#rbMergeDescr2").prop('checked', true);
+                        $("#rbMergeDescr2").val(cbDescr2)
+                        $('#lblMergeDescr2').html(cbDescr2);
                     }
                     else{
                         $("#rbMergeDescr2").attr('disabled', 'disabled');
@@ -2337,8 +2208,8 @@ function EditTerms() {
                 }
 
 
-                var termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
-                fi = top.HEURIST.terms.fieldNamesToIndex;
+                var termsByDomainLookup = window.hWin.HEURIST4.terms.termsByDomainLookup[_currentDomain],
+                fi = window.hWin.HEURIST4.terms.fieldNamesToIndex;
                 var merge_node = data.otherNode.data;
                 var retain_node = node.data;
 
@@ -2355,6 +2226,9 @@ function EditTerms() {
                 if "Both" - Select the first one and the other
 
                 ***/
+                displayPopUpContents(arTerm2[fi.trm_Code],arTerm[fi.trm_Code],
+                                arTerm2[fi.trm_Description],arTerm[fi.trm_Description]);
+                /*
                 if((Hul.isempty(arTerm[fi.trm_Code])) && (Hul.isempty(arTerm2[fi.trm_Code]))  &&
                     (Hul.isempty(arTerm[fi.trm_Description])) && (Hul.isempty(arTerm2[fi.trm_Description]))){
                     displayPopUpContents(false,false,false,false);
@@ -2416,7 +2290,7 @@ function EditTerms() {
                                                         {
                                                             displayPopUpContents(false,false,false,true);
                                                         }
-
+                */
                 var ele = document.getElementById('divTermMergeConfirm');
                 $("#moveText").html("Move "+ "<b>" +data.otherNode.data.label+"</b> under <b>"+node.data.label
                     +"</b>");
@@ -2425,8 +2299,9 @@ function EditTerms() {
                     
                 $('#divInsertAsChild').css('display', (isVocabulary)?'none':'block');
                 //show confirmation dialog
-                $_dialogbox = Hul.popupElement(top, ele,
+                $_dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog(
                     {
+                         element: ele,
                         "close-on-blur": false,
                         "no-resize": true,
                         close: function(){
@@ -2438,7 +2313,7 @@ function EditTerms() {
                         title: 'Select values to be retained',
                         height: 440,
                         width: 600
-                });
+                    });
                 
                 
                 //$_dialogbox.find("#moveBtnCancel").click(function(){ $_dialogbox.dialog($_dialogbox).dialog("close"); });
@@ -2554,28 +2429,31 @@ function EditTerms() {
                         
                         // verify whether term is in use in field that uses vocabulry
                         // if yes it means it can not be moved into different vocabulary
-                        var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-                        var params = "method=checkTerm&termID=" + data.otherNode.data.id + "&db="+_db;
-                        Hul.getJsonData(baseurl, function(context){
-                        if(!Hul.isnull(context) && !context.error){
-                            
-                            if(context.warning){
-                                if(hasH4()){
-                                    //msg = {message:context.warning, error_title:context.error_title};
-                                    //window.hWin.HEURIST4.msg.showMsgErr(msg);
-                                    window.hWin.HEURIST4.msg.showMsgDlg(context.warning, function(){
+                        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+                        
+                        var request = {method:'checkTerm', 
+                            db:window.hWin.HAPI4.database, 
+                            termID: data.otherNode.data.id};
+
+                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
+                        function (response){
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                
+                                if(response.data.warning){
+                                    
+                                    window.hWin.HEURIST4.msg.showMsgDlg(response.data.warning, function(){
                                         __proceed(true);
-                                    },{title:context.error_title, yes:'Proceed'})
+                                    },{title:response.data.error_title, yes:'Proceed'})
+                                    
                                 }else{
-                                    if (confirm(context.warning)) {
-                                        __proceed(true);
-                                    }
+                                    __proceed(true);
                                 }
+                                
                             }else{
-                                __proceed(true);
-                            }
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }                                        
                             
-                        }}, params);
+                        }, params);
                         
                     }else{
                         __proceed(false);
@@ -2633,7 +2511,7 @@ function EditTerms() {
 
             var $input = $('#new_term_image');
             $input.fileupload('option','formData',
-                [ {name:'db', value: _db},
+                [ {name:'db', value: window.hWin.HAPI4.database},
                     {name:'entity', value:'terms'},
                     {name:'newfilename', value: document.getElementById ('edId').value }]);
 

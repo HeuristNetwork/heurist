@@ -30,13 +30,13 @@
 */
 $(document).ready(function() {
 	
-        widnow.hWin.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
+        window.hWin.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
                         'Field data type: Record pointer', 
-                        widnow.hWin.HAPI4.baseURL+'context_help/field_data_types.html #resource',
+                        window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #resource',
                         { my: "left top", at: "left top", of:$(window.frameElement)}, true); 
-        widnow.hWin.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
+        window.hWin.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
                         'Field data type: Relationship marker', 
-                        widnow.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
+                        window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
                         { my: "left top", at: "left top", of:$(window.frameElement)}, true); 
 
 	

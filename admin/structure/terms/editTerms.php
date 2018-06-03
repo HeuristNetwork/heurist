@@ -1,5 +1,4 @@
 <?php
-
 /**
 * editTerms.php: add/edit/delete terms. Treeveiew on the left side with tabview to select domain: enum or relation
 * form to edit term on the right side
@@ -21,17 +20,11 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../../');  //need for proper path to js and css    
 
-// User must be system administrator or admin of the owners group for this database
-require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-
-if(isForAdminOnly("to modify database structure")){
-    return;
-}
+require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 ?>
-
-
-
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -48,10 +41,10 @@ if(isForAdminOnly("to modify database structure")){
         <link rel="stylesheet" type="text/css" href="../../../ext/fancytree/skin-themeroller/ui.fancytree.css" />
         <script type="text/javascript" src="../../../ext/fancytree/jquery.fancytree-all.min.js"></script>
         <!-- <script type="text/javascript" src="https://github.com/mar10/fancytree/src/jquery.fancytree.wide.js"></script> -->
-
-
+<!--
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+-->        
         <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
         <style type="text/css">
             .dtyField {
@@ -144,17 +137,13 @@ if(isForAdminOnly("to modify database structure")){
         </style>
     </head>
 
-    <body class="popup yui-skin-sam">
-
-        <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
-        <script src="../../../common/php/loadCommonInfo.php"></script>
+    <body class="popup">
 
         <script type="text/javascript" src="editTerms.js"></script>
 
         <div class="ent_wrapper"> <!-- style="top:0px"-->
             <div class="ent_header" id="divBanner" style="height:3em;border:none;">
-                <h2></h2>
+                <h2 style="line-height:25px"></h2>
                 <label style="padding:14px 0px;font-size:14px;font-weight:bold">Vocabularies</label>
             </div>
             <div class="ent_content_full" style="overflow:hidden;top:5em">
@@ -166,8 +155,7 @@ if(isForAdminOnly("to modify database structure")){
             
                <div style="margin-left:2px; margin-top:15px;">
                     <span class="ui-icon ui-icon-arrowthick-1-w" style="font-size:18px;color:gray"></span>
-                    <input id="btnAddRoot1" type="button"
-                        value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
+                    <input type="button" value="Add Vocabulary" id="btnAddRoot1" onClick="{editTerms.doAddChild(true)}"/>
                     <span style="margin-left:10px;"> (adds a new root to the tree)</span>
                 </div>
                 <!-- Navigation: Search form to do partial match search on terms in the tree -->
@@ -188,8 +176,7 @@ if(isForAdminOnly("to modify database structure")){
                 </h2>
 
                 <div style="margin-left:10px;display:none">
-                    <input id="btnAddRoot2" type="button"
-                        value="Add Vocabulary" onClick="{editTerms.doAddChild(true)}"/>
+                    <input type="button" value="Add Vocabulary" id="btnAddRoot2" onClick="{editTerms.doAddChild(true)}"/>
                     <span style="margin-top:5px; margin-left:10px; display:none" > (add a new root to the tree)</span>
                 </div>
 
@@ -279,7 +266,7 @@ if(isForAdminOnly("to modify database structure")){
                         </div>
                         <div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term</label>
                             <input id="edInverseTerm" readonly="readonly" style="width:250px;background-color:#DDD;"/>
-                            <input id="btnInverseSetClear" type="button" value="clear" style="width:45px"/>
+                            <input type="button" value="clear" id="btnInverseSetClear" style="width:45px"/>
                         </div>
                         <input id="edInverseTermId" type="hidden"/>
 
@@ -320,10 +307,10 @@ if(isForAdminOnly("to modify database structure")){
                         -->
                         <div style="display:inline-block; margin-top:30px;width:90%;">
                             <span style="visibility:hidden;">
-                            <input id="btnImport" type="button" value="Import"
+                            <input type="button" value="Import" id="btnImport"
                                 title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"
                                 onClick="{editTerms.doImport(false)}"/>
-                            <input id="btnExport" type="button" value="Export"
+                            <input type="button" value="Export" id="btnExport"
                                 title="EXPORT this vocabulary to a text file"
                                 onClick="{editTerms.doExport(false)}"/>
                             <!-- <input id="btnSetParent" type="button" value="Move"
@@ -338,19 +325,19 @@ if(isForAdminOnly("to modify database structure")){
                                 onClick="{editTerms.doDelete()}" />
                             </span>
                             
-                            <input id="btnSave" class="btn_Save" type="button" value="Save changes to this term"
-                                style="margin-left:80px;font-style: bold !important; color:black; display:none"
+                            <input type="button" value="Save changes to this term" id="btnSave" class="btn_Save"
+                                style="margin-left:80px;font-style: bold !important; color:black;"
                                 title=" "
-                                onClick="{editTerms.doSave()}" />
+                                onClick="{editTerms.doSave()}"/>
 
-                            <span id = "Saved" style="display:none;"><button id="btnSaved" type="button"
+                            <span id = "Saved" style="display:none;"><input type="button" value="Saved..." id="btnSaved"
                                 style="border-radius: 6px; background-color:gray;margin-left:5px;font-style: bold !important;  color:black; display:none;"
-                                title=" ">Saved...</button></span>
+                                title=" "/></span>
 
                             <div id='div_btnAddChild' style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
-                                    <input id="btnAddChild" type="button"
+                                    <input type="button" value="Add Child" id="btnAddChild"
                                          title="Add a child term (a term hierarchichally below the current vocabulary or term)"
-                                         value="Add Child"
+                                         value=""
                                          onClick="{editTerms.doAddChild(false)}"/>
                             </div>
                         </div>
@@ -368,8 +355,7 @@ if(isForAdminOnly("to modify database structure")){
 
                     <div style="margin-left:10px; padding-top:15px; width:600px;; padding-left:30px">
                         <label>Relationship type:</label>
-                        <input id="btnChangeVocab" type="button" style="display:inline-block"
-                            value="Change Vocabulary" />
+                        <input type="button" value="Change Vocabulary" id="btnChangeVocab" style="display:inline-block"/>
 
                         <span>
                             <select style="background-color:buttonface; font-weight:bold; color:#666; width:200px" id="trm_relationtype" >
@@ -387,7 +373,7 @@ if(isForAdminOnly("to modify database structure")){
                         <p>You have added terms to the term tree. Since terms are chosen individually for each field,
                         you will need to update your selection for enumerated fields using these terms.
                         <p align="center">
-                            <input id="btnUpdateFieldTypes" type="button" value="Update Field Types" onClick="{editTerms.showFieldUpdater()}" />
+                            <input type="button" value="Update Field Types" id="btnUpdateFieldTypes" onClick="{editTerms.showFieldUpdater()}"/>
                         </p>
                     </div>
 
@@ -408,7 +394,7 @@ if(isForAdminOnly("to modify database structure")){
                             <label class="dtyLabel" style="width:30px;">Find:</label>
                             <input id="edSearchInverse" style="width:70px" /><br/> <!--onkeyup="{doSearch(event)}" Better to add in js file to allow events recognise other ja funnctions-->
                             type 3 or more letters<br/><br/>select inverse from list
-                            <input id="btnSelect2" type="button" value="and Set As Inversed" /> <!-- "onClick="{editTerms.doSelectInverse()}" -->
+                            <input type="button" value="and Set As Inversed" id="btnSelect2"/> <!-- "onClick="{editTerms.doSelectInverse()}" -->
                         </div>
                         <div style="display:inline-block;">
                             <select id="resSearchInverse" size="5" style="width:320px" ></select><!--ondblclick="{editTerms.doSelectInverse()}"-->
@@ -419,8 +405,10 @@ if(isForAdminOnly("to modify database structure")){
 
                 <div id="divApply" style="margin-left:10px; margin-top:15px; text-align:left; display: block;">
                     Warning: if a field uses individually selected terms, new terms must be selected in record structure edit
-                    to appear in data entry dropdown. If field uses a vocabulary, new terms are added automatically.<p>
-                        <input type="button" id="btnApply1" style="float:right;" value="Close window" onclick="editTerms.applyChanges();" /></p>
+                    to appear in data entry dropdown. If field uses a vocabulary, new terms are added automatically.
+                    <p>
+                        <input type="button" value="Close window" id="btnApply1" style="float:right;" onclick="editTerms.applyChanges();"/>
+                    </p>
                 </div>
 
             </div>
@@ -431,7 +419,7 @@ if(isForAdminOnly("to modify database structure")){
 
         <div id="divMessage" style="display:none;height:80px;text-align: center; ">
             <div id="divMessage-text" style="text-align:left;width:280px;color:red;font-weight:bold;margin:10px;"></div>
-            <button onclick="{top.HEURIST.util.closePopupLast();}">Close</button>
+            <input type="button" value="Close" onclick="{top.HEURIST.util.closePopupLast();}"/>
         </div>
 
 
@@ -441,7 +429,7 @@ if(isForAdminOnly("to modify database structure")){
                 <br/>
                 <h2 style="width: 300px;display: inline-block;">Insert as child</h2>
                 <div style="float:right;margin-right:30px">
-                    <input id="moveBtn" type="button" value="Move"
+                    <input type="button" value="Move" id="moveBtn"
                         title=""  style="width:70px"/>
                 </div>
                 <div>
@@ -455,8 +443,7 @@ if(isForAdminOnly("to modify database structure")){
             <br/>
             <h2 style="width: 200px;display: inline-block;">Merge</h2>
             <div style="margin-right:30px;float:right;">
-                <input id="btnMergeOK" type="button" value="Merge"
-                    title=""  style="width:70px"/>
+                <input type="button" value="Merge" id="btnMergeOK" title=""  style="width:70px"/>
             </div>
             <br/><br/>
             <table border="0" cellpadding="2px;">
@@ -493,29 +480,29 @@ if(isForAdminOnly("to modify database structure")){
                 <tr>
                     <td><br>Standard Code:</td>
                     <td><br>
-                        <input id="rbMergeCode1" type="checkbox" name="rbMergeCode"/> <!-- initially was checked="checked"-->
-                        <label for="rbMergeCode1" id="lblMergeCode1"></label>
+                        <input id="rbMergeCode1" type="checkbox" name="rbMergeCode" class="merge-cb"/> <!-- initially was checked="checked"-->
+                        <label for="rbMergeCode1" id="lblMergeCode1" class="merge-cb"></label>
                     </td>
                 </tr>
                 <tr id="mergeCode2">
                     <td>&nbsp;</td>
                     <td>
-                        <input id="rbMergeCode2" type="checkbox" name="rbMergeCode"/>
-                        <label for="rbMergeCode2" id="lblMergeCode2" ></label>
+                        <input id="rbMergeCode2" type="checkbox" name="rbMergeCode" class="merge-cb"/>
+                        <label for="rbMergeCode2" id="lblMergeCode2"  class="merge-cb"></label>
                     </td>
                 </tr>
 
                 <tr>
                     <td>Description:</td>
-                    <td><input id="rbMergeDescr1" type="checkbox" name="rbMergeDescr"/> <!-- initially was checked="checked"-->
-                        <label for="rbMergeDescr1" id="lblMergeDescr1"></label>
+                    <td><input id="rbMergeDescr1" type="checkbox" name="rbMergeDescr" class="merge-cb"/> <!-- initially was checked="checked"-->
+                        <label for="rbMergeDescr1" id="lblMergeDescr1" class="merge-cb"></label>
                     </td>
                 </tr>
                 <tr id="mergeDescr2">
                     <td>&nbsp;</td>
                     <td>
-                        <input id="rbMergeDescr2" type="checkbox" name="rbMergeDescr"/>
-                        <label for="rbMergeDescr2" id="lblMergeDescr2"></label>
+                        <input id="rbMergeDescr2" type="checkbox" name="rbMergeDescr" class="merge-cb"/>
+                        <label for="rbMergeDescr2" id="lblMergeDescr2" class="merge-cb"></label>
                     </td>
                 </tr>
 
@@ -572,7 +559,7 @@ if(isForAdminOnly("to modify database structure")){
             -->
             
             <div style="margin-right:30px;float:right;">
-                    <input id="btnMergeCancel" type="button" value="Cancel"
+                    <input type="button" value="Cancel" id="btnMergeCancel"
                         title=""  style="width:70px; padding-left:10px"/>
                     <!-- input id="moveBtnCancel" type="button" value="Cancel"
                                 title=""  style="width:70px; padding-left:10px"/ -->
@@ -584,13 +571,16 @@ if(isForAdminOnly("to modify database structure")){
 
         <div id=move_mergeTerms style="display:none ">
             <div id="mergeText" style="font-weight:bold;">Are you sure you want to Merge terms?</div>
-            <input id="mergeBtn" type="button" value="Merge" title="" style="width:70px"/>
-            <input id="cancelBtn" type="button" value="Cancel" title="" style="width:70px; margin:2px"/>
+            <input type="button" value="Merge" id="mergeBtn" style="width:70px"/>
+            <input type="button" value="Cancel" id="cancelBtn" title="" style="width:70px; margin:2px"/>
         </div>
         <input type="file" id="new_term_image" style="display:none"/>
 
         <script  type="text/javascript">
-            $( document ).ready( function(){ editTerms = new EditTerms();} );
+            $( document ).ready( function(){ 
+                    $('input[type="button"]').button().css({'background-color':'#ddd','text-transform':'uppercase'});
+                    editTerms = new EditTerms();
+            } );
         </script>
 
     </body>
