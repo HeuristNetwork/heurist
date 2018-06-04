@@ -21,7 +21,8 @@
 require_once(dirname(__FILE__)."/../../hserver/System.php");
 
 if(!defined('PDIR')) define('PDIR','../../'); //need for js scripts
-define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
+
+define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
 
 $error_msg = '';
 $isSystemInited = false;
@@ -35,10 +36,8 @@ if(@$_REQUEST['db']){
 }
 
 if(!$isSystemInited){
-        $err = $system->getError();
-        $error_msg = @$err['message']?$err['message']:'';
-        header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($error_msg));
-        exit();
+    include ERROR_REDIR;
+    exit();
 }
 
 $login_warning = 'To perform this action you must be logged in';
@@ -48,19 +47,16 @@ $login_warning = 'To perform this action you must be logged in';
 // define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning)); 
-    exit();
-
+    $message = $login_warning;
 }else if(defined('MANAGER_REQUIRED') && !$system->is_admin() ){ //A member should also be able to create and open database
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Administrator of group \'Database Managers\''));
-    exit();
-    
+    $message = $login_warning.' as Administrator of group \'Database Managers\'';
 }else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Database Owner'));
-    exit();
-    
+    $message = $login_warning.' as Database Owner';
 }
-
+if(isset($message)){
+    include ERROR_REDIR;
+    exit();
+}
 //$system->defineConstants(); //init constants for record and field types
 
 $user = $system->getCurrentUser();

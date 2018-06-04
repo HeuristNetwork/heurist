@@ -1,12 +1,7 @@
 <?php
 
 /**
-* Error page. Either system cannot be inited (db connecction, failure with configuration),
-* or wrong set of parameters has been provided.
-*
-* Notes:
-* 1) for main page, the redirection goes to list_databases.php that allows to select different database
-* 2) for non-page requests (api calls) error is returned in json
+* Information page
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -22,60 +17,72 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+if(!defined('PDIR')) define('PDIR','../../');
 
 require_once(dirname(__FILE__)."/../../hserver/System.php");
 
-$layout_theme = null;
-$error_msg = @$_REQUEST['msg'];
-if(!$error_msg){
-    // init main system class
-    $system = new System();
-    $isSystemInited = $system->init(@$_REQUEST['db'], true, false);
+//variable is_error can be defined as global
+if(!isset($is_error)){
+    $is_error = true;
+}
 
-    if($isSystemInited){
-        $user = $system->getCurrentUser();
-        $layout_theme = @$user['ugr_Preferences']['layout_theme'];
-        if(!$error_msg){
-            $error_msg = 'Unknown error.';
+//variable message can be defined as global
+if(!isset($message)){
+    if( @$_REQUEST['error'] ){
+        $message = $_REQUEST['error'];
+    }else if( @$_REQUEST['message'] ){
+        $message = $_REQUEST['message'];
+        $is_error = false;
+    }else{ 
+        //take error message from system
+        if(isset($system)){
+            $err = $system->getError();
+            $message = @$err['message'];
         }
-    }else{
-        //cannot connect to given database
-        $err = $system->getError();
-        $error_msg = @$err['message'];
-        if(!$error_msg){
-            $error_msg = 'Unknown error. Cannot init Heurist system';
-        }
+        
+    }
+    if(!$message){
+        $message ='Unknown error.';
     }
 }
 
-if(!$layout_theme) $layout_theme = 'heurist';
+if(isset($system) && $system->is_inited()){
+    $user = $system->getCurrentUser();
+    $layout_theme = @$user['ugr_Preferences']['layout_theme'];
+}
+if(!isset($layout_theme)) $layout_theme = 'heurist';
+
 
 if($layout_theme=="heurist" || $layout_theme=="base"){
     //default BASE or HEURIST theme
-    $cssLink = '../../ext/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
+    $cssLink = PDIR.'ext/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
 }else{
     //load one of standard themes from jquery web resource
     $cssLink = 'https://code.jquery.com/ui/1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
 }
+
+
 ?>
 <html>
     <head>
-        <title><?=HEURIST_TITLE?></title>
+        <title><?echo defined('HEURIST_TITLE')?HEURIST_TITLE:"Heurist"; ?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-        <link rel=icon href="../../favicon.ico" type="image/x-icon">
+        <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
         <link rel="stylesheet" href="<?php echo $cssLink;?>" />
-        <link rel="stylesheet" type="text/css" href="../../h4styles.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css">
     </head>
     <body style="padding:44px;" class="ui-heurist-header1">
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">
 
             <div class="logo" style="background-color:#2e3e50;width:100%"></div>
 
-            <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
-                <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span>
-                <?php echo $error_msg;?>
+            <div class="<?php echo ($is_error)?'ui-state-error':''; ?>" 
+                style="width:90%;margin:auto;margin-top:10px;padding:10px;">
+                <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
+                      style="float: left; margin-right:.3em;font-weight:bold"></span>
+                <?php echo $message;?>
             </div>
         </div>
     </body>

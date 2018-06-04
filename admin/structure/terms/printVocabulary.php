@@ -74,7 +74,7 @@
      
     if($error){
         print $error;
-        //header('Location: '.dirname(__FILE__).'/../../../hclient/framecontent/errorPage.php?msg='.$error);
+        //header('Location: '.dirname(__FILE__).'/../../../hclient/framecontent/infoPage.php?message='.$error);
     }
 
 function printTerm($termID, $lvl){

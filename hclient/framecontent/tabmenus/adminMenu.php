@@ -23,7 +23,7 @@ if(!defined('PDIR')) define('PDIR','../../../');
 */
 require_once(dirname(__FILE__)."/../initPage.php");
 ?>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/tabmenus/adminMenu.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/tabmenus/tabMenu.js"></script>
 
 <script type="text/javascript">
     var editing;
@@ -31,7 +31,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
     // Callback function on initialization
     function onPageInit(success){
         if(success){
-            var manageMenu = new hadminMenu();
+            var menu = new hTabMenu();
             var $container = $("<div>").appendTo($("body"));
         }
     }
@@ -45,35 +45,30 @@ require_once(dirname(__FILE__)."/../initPage.php");
             <h3><span class="ui-icon ui-iconalign ui-icon-database"></span>DATABASE</h3>
             <div>
                 <ul>
-                    <li><a href="#" id="menulink-database-browse"
-                        data-nologin="1" data-logaction="dbOpen"
-                        title="Open and login to another Heurist database - current database remains open">
-                        Clone</a>
+                    <li><a href="setup/dboperations/cloneDatabase.php"  name="auto-popup" class="h3link"
+                        title="Clones an identical database from the currrent database with all data, users, attached files, templates etc.">
+                        Clone database</a>
                     </li>
                     
 
-                    <li><a href="admin/setup/dbcreate/createNewDB.php" name="auto-popup" class="large h3link"
-                        onClick="{return false;}" data-logaction="dbNew"
-                        title="Delete entire database">
-                        Delete</a>
+                    <li><a href="setup/dboperations/deleteCurrentDB.php" name="auto-popup" class="h3link"
+                        onClick="{return false;}"
+                        title="Delete the current database completely - cannot be undone, although data is copied to a backup which could be reloaded by a system administrator">
+                        Delete entire database</a>
                     </li>
                     
-                    <li><a href="#" id="menulink-database-properties"
-                        data-nologin="1" data-logaction="dbProperties"
-                        title="Delete all records">
-                        Empty</a>
+                    <li><a href="admin/setup/dboperations/clearCurrentDB.php" name="auto-popup" class="h3link"
+                        onClick="{return false;}"
+                        title="Clear all data (records, values, attached files) from the current database. Database structure - record types, fields, terms, constraints - is unaffected">
+                        Delete all records</a>
                     </li>
                     
                     <li class="admin-only">
-                        <a href="admin/setup/dbproperties/registerDB.php" name="auto-popup" class="portrait h3link"
-                            onclick= "{return false;}" data-logaction="dbRegister"
-                            title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
+                        <a href="admin/rollback/rollbackRecords.php" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Selectively roll back the data in the database to a specific date and time">
                          Rollback</a>
                     </li>
-
-<!--                    
-
--->                    
                 </ul>
             </div>
         </div>
@@ -84,9 +79,16 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 <ul>
                     <!-- database name is appended automatically by auto-popup -->
 
+                    <li style="display:none;">
+                        <a href="common/html/msgWelcomeAdmin.html" name="auto-popup" class="h3link active-link"
+                            onClick="{return false;}"
+                            title="">
+                            Welcome</a>
+                    </li>
+                    
                     <li>
                         <a href="admin/structure/fields/manageDetailTypes.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}" id="linkEditRectypes" data-logaction="stManage"
+                            onClick="{return false;}" data-logaction="stManage"
                             title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
                             Manage base field types</a>
                     </li>
@@ -111,12 +113,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     </li>
 
                     <li>
-                        <a  href="admin/describe/getDBStructureAsXML.php" name="auto-popup"  class="h3link"
+                        <a  href="<?=HEURIST_BASE_URL?>admin/describe/getDBStructureAsXML.php?db=<?=HEURIST_DBNAME?>"
                             target="_blank"
                             title="Lists the record type and field definitions in XML format (HML - Heurist Markup Language)">
                            Structure (XML)
-                            <img src="<?php echo PDIR;?>common/images/external_link_16x16.gif"
-                                    width="12" height="12" border="0">
                            </a>
                     </li>
 
@@ -133,14 +133,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         Define mime types</a>
                     </li>
 
-
-                    <!--
-                    <li><a href="javascript:void(0)"
-                    onClick="{/*window.hWin.HEURIST4.util.reloadStrcuture()*/;}"
-                    title="Click to refresh the internal working memory - use to resynchronise if newly added structure elements do not show up" >
-                    Refresh</a>
-                    </li>
-                    -->
                 </ul>
             </div>
         </div>
@@ -210,22 +202,75 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         <a href="<?=HEURIST_BASE_URL?>?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
                             title="Show bookmarked records which you have not tagged">
                              Bookmarks w/o tags
-                                <img src="<?php echo PDIR;?>common/images/external_link_16x16.gif"
-                                    width="12" height="12" border="0" alt="Search showing bookmarks without tags">
                         </a>
                     </li>
                     <li>
-                        <a href="" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="">
-                            
+                        <a href="<?=HEURIST_BASE_URL?>?q=_BROKEN_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
+                            title="Show records with URLs which point to a non-existant or otherwise faulty address - this only works if nightly verification is turned ON in Database > Properties">
+                             Broken URLs
                         </a>
                     </li>
                     <li>
-                        <a href="" name="auto-popup" class="h3link"
+                        <a href="<?=HEURIST_BASE_URL?>?q=_NOTLINKED_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
+                            title="Show records with no outgoing or incoming pointers (includes records without any relationships)">
+                             Records without links
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="admin/verification/verifyInstallation.php" name="auto-popup" class="h3link"
                             onClick="{return false;}"
-                            title="">
-                            
+                            title="Verifies that all required JS libraries, other components and directories are in expected locations">
+                            Verify installation
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="admin/verification/removeDatabaseLocks.php" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">
+                            Clear database locks
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin/describe/dbStatistics.php" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Size and usage statistics for all Heurist databases on this server">
+                           Database usage statistics (all dbs - slow) 
+                        </a>
+                    </li>
+                    <li>
+                        <a href="admin/verification/fileLinkingError.php" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            title="Find uploaded file records which point at non-existent files for all Heurist databases on this server">
+                            File linking errors
+                        </a>
+                    </li>
+                    <li>
+                        <!-- import/direct/getRecordsFromDB.php -->
+                        <a href="#" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            style="text-decoration:line-through"
+                            title="Import records directly from one database to another, mapping record types, fields types and terms">
+                            Inter-database transfer
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+            
+        <div class="accordion_pnl">
+            <h3><span class="ui-icon ui-iconalign ui-icon-gears"></span>FAIMS</h3>
+            <div>
+                <ul>
+                
+                    <li>
+                        <!-- applications/faims/syncFAIMS.php -->
+                        <a href="#" name="auto-popup" class="h3link"
+                            onClick="{return false;}"
+                            style="text-decoration:line-through"
+                            title="Import structure and data into the current Heurist database from a FAIMS module tarball or direct from FAIMS server database">
+                            Import module + data
                         </a>
                     </li>
                 </ul>

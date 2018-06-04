@@ -33,8 +33,8 @@ require_once(dirname(__FILE__).'/../../../hserver/utilities/DbUtils.php');
 
 if(strpos(HEURIST_BASE_URL, '//localhost')>0 ||  strpos(HEURIST_BASE_URL, '//127.0.0.1')>0){
 
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode( 
-        'Impossible to register database running on local server '.HEURIST_BASE_URL)); 
+    $message = 'Impossible to register database running on local server '.HEURIST_BASE_URL;
+    include dirname(__FILE__).'/../../../hclient/framecontent/infoPage.php';    
     exit();
 }
 

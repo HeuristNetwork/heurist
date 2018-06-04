@@ -71,7 +71,7 @@ if ($database_id>0) {
     }
     
     if(isset($error_msg)){
-        header('Location: ../hclient/framecontent/errorPage.php?msg='.rawurlencode($error_msg));
+        header('Location:../hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg));
         exit();
     }
 

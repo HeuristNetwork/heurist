@@ -317,11 +317,11 @@ function isForAdminOnly($message="", $redirect=true)
 function outWarning($role, $message){
     
 /* Version 3 Artem: using our standard error page */
-define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
+define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/infoPage.php?db='.@$_REQUEST['db']);
 
 $message = 'It appears you have insufficient access rights '.(($message)?$message:'for this operation');
 
-header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($message));
+header('Location: '.ERROR_REDIR.'&error='.rawurlencode($message));
 
 /* Version 2 Mitema: using third party "toaster" widget
     <html>

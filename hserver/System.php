@@ -517,7 +517,7 @@ error_log(print_r($_REQUEST, true));
     /**
     * Returns true if system is inited ccorretly and db connection is established
     */
-    public function is_inted(){
+    public function is_inited(){
         return $this->is_inited;
     }
 

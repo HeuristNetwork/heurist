@@ -42,7 +42,9 @@ $mysqli = $system->get_mysqli();
 $query="delete from sysLocks";
 $res = $mysqli->query($query);
 if (!$res) {
-    die('<p>Invalid query, please report to developers: '.$query.'  Error: '.$mysqli->error());
+    $message = 'Invalid query, please report to developers: '.$query.'  Error: '.$mysqli->error();
+    include dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+    exit();
 }
 
 print '<html><head><link rel="stylesheet" type="text/css" href="'.PDIR.'h4styles.css" /></head><body class="popup">';

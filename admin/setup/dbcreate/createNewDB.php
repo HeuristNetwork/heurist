@@ -40,12 +40,9 @@ $system = new System();
 $current_user = null;
 
 if(@$_REQUEST['db']){
-    define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
     //if database is defined then connect to given database
     if(!$system->init(@$_REQUEST['db'])){
-        $err = $system->getError();
-        $error_msg = @$err['message']?$err['message']:'';
-        header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($error_msg));
+        include dirname(__FILE__).'/../../../hclient/framecontent/infoPage.php';
         exit();
     }
     $registrationRequired = false;

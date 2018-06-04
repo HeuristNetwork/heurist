@@ -96,7 +96,7 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
                     //@todo all this stuff should be implemented on client side since header is not static content anymore  
 
                     // Put record types & counts in the table
-                    if($system->is_inted()){
+                    if($system->is_inited()){
                         $res = $system->get_mysqli()->query($query);
                         $stats = array();
                         

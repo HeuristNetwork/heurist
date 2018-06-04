@@ -34,13 +34,8 @@ require_once(dirname(__FILE__)."/../../hserver/dbaccess/db_recsearch.php");
 
 $system = new System();
 
-define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
-
 if(!$system->init(@$_REQUEST['db'])){
-    
-    $err = $system->getError();
-    $error_msg = @$err['message']?$err['message']:'';
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($error_msg));
+    include dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
     exit();
 }
 

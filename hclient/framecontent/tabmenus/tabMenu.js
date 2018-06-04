@@ -1,10 +1,5 @@
 /**
-* Class to search and select record 
-* It can be converted to widget later?
-* 
-* @param rectype_set - allowed record types for search, otherwise all rectypes will be used
-* @returns {Object}
-* @see editing_input.js
+* Menu with accordion for tab menues
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -22,24 +17,11 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hmanageMenu() {
-    var _className = "manageMenu",
+function hTabMenu() {
+    var _className = "TabMenu",
     _version   = "0.4";
 
-    //
-    // show db structure visualization in popup dialog
-    //
-    function _showDbSummary(){
-
-        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
-
-        var body = $(top.document).find('body');
-        var dim = {h:body.innerHeight(), w:body.innerWidth()};
-
-        window.hWin.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary',} );
-
-    }
-    
+   
     //
     //
     //
@@ -65,16 +47,23 @@ function hmanageMenu() {
         parentdiv.find('li').addClass('ui-menu-item').css('background','#99ABBA !important');
 
         parentdiv.find('li').each(function(idx,item){
-            $('<div class="svs-contextmenu ui-icon ui-icon-arrowthick-1-e"></div>').appendTo($(item));
+            
+            var li_icon = 'ui-icon-popup';
+            var $link = $(item).find('a');
+            if($link.attr('target')=='_blank'){
+                li_icon = 'ui-icon-extlink';
+            }else if($link.attr('name')=="auto-popup"){
+                li_icon = 'ui-icon-arrowthick-1-e';
+            }
+            
+            $('<div class="svs-contextmenu ui-icon '+li_icon+'"></div>').appendTo($(item));
         });
-
 
         _initLinks(parentdiv);
 
-        //$('#frame_container').attr('src', window.hWin.HAPI4.baseURL+'admin/structure/rectypes/manageRectypes.php?db='+window.hWin.HAPI4.database);           }
         // defaults to open the record type editing (config/build structure) when Manage tab is selected
         $(parentdiv[1]).accordion('option', 'active', 0); //STRUCTURE
-        $('#linkEditRectypes').click();
+        $('a.active-link').click();
     }
     
     
@@ -89,7 +78,6 @@ function hmanageMenu() {
 
                 if(ele.hasClass('h3link')){
                     href = window.hWin.HAPI4.baseURL + href;
-                    //h3link class on menus implies location of older (vsn 3) code
                 }
                 
                 ele.attr('href', href).click(
@@ -110,8 +98,21 @@ function hmanageMenu() {
 
         menu.find('.top-menu-only').hide();
         
+        
+        $('#menulink-mimetypes').click(
+            function(event){
+        
+                window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',
+                        {edit_mode:'inline', width:900});
+                event.preventDefault();
+                return false;
+            }        
+        );
+        
+        
         $('#menulink-database-refresh').click(
             function(event){
+                window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, top.document);
                 event.preventDefault();
                 return false;
@@ -173,17 +174,7 @@ function hmanageMenu() {
                 }
             }
         );
-        
-        
-/*
-        $('#menulink-database-admin').click( //.attr('href', 
-            function(event){
-                window.hWin.open(window.hWin.HAPI4.baseURL+'admin/adminMenuStandalone.php?db='+window.hWin.HAPI4.database, '_blank');
-                event.preventDefault();
-                return false;
-            }
-        );
-*/        
+       
     }
     
     

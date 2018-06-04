@@ -799,7 +799,11 @@ function hAPI(_db, _oninit) { //, _currentUser
             },
             
             emptyEntityData:function(entityName){
-                entity_data[entityName] = {};
+                if(entityName){
+                    entity_data[entityName] = {};    
+                }else{
+                    entity_data = {};
+                }
             },
 
             doRequest:function(request, callback){

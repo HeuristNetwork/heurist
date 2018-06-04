@@ -32,8 +32,10 @@ if(defined('IS_INDEX_PAGE')){
     define('ERROR_REDIR','hserver/utilities/list_databases.php');
 }else{
     if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css
-    define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
+    define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
 }
+
+
 
 $error_msg = '';
 $isSystemInited = false;
@@ -47,13 +49,7 @@ if(@$_REQUEST['db']){
 }
 
 if(!$isSystemInited){
-    if(defined('IS_INDEX_PAGE')){
-        require (ERROR_REDIR);
-    }else{
-        $err = $system->getError();
-        $error_msg = @$err['message']?$err['message']:'';
-        header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($error_msg));
-    }
+    include ERROR_REDIR;
     exit();
 }
 
@@ -64,15 +60,18 @@ $login_warning = 'To perform this action you must be logged in';
 // define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
-    //header('Location: '.ERROR_REDIR); //'&msg='.rawurlencode($login_warning)); //No Need to show error message when login is required, login page ia already rendered
+    //No Need to show error message when login is required, login popup will be shown
+    //$message = $login_warning
+    //include ERROR_REDIR;
     exit();
-
 
 }else if(defined('MANAGER_REQUIRED') && !$system->is_admin() ){ //A member should also be able to create and open database
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Administrator of group \'Database Managers\''));
+    $message = $login_warning.' as Administrator of group \'Database Managers\'';
+    include ERROR_REDIR;
     exit();
 }else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Database Owner'));
+    $message = $login_warning.' as Database Owner';
+    include ERROR_REDIR;
     exit();
 }
 
