@@ -1094,6 +1094,10 @@ console.log('tileloaded 2');
                       maxZoom: parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 15))};   //The maximum zoom level that a marker can be part of a cluster.
             }
             
+            var lt = window.hWin.HAPI4.sysinfo['layout'];  
+            if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0)){
+                useMarkerClusterer = false;
+            }
 
             // Initialize TimeMap
             tmap = TimeMap.init({
