@@ -78,6 +78,7 @@ if($recTypeID==RT_ADDRESS){
                                     <?php echo getTermById( getFieldValue($records_placeroles, $roleID, DT_PLACE_USAGE_TYPE) ); ?>&nbsp;on&nbsp;
                                     <?php echo $date_out; ?>
                                     <em>(<?php echo getFieldValue($records_placeroles, $roleID, DT_EXTENDED_DESCRIPTION); ?>)</em>
+                                    <br><br>Owner:<?php echo getTermById( getFieldValue($records_placeroles, $roleID, DT_PERSON_RACE) ); ?>
                                 </li>
                                 <?php
                                 
@@ -95,7 +96,8 @@ if($recTypeID==RT_ADDRESS){
                         }
                         ?>
 
-                    </ul></p>
+                    </ul>
+                </p>
 
                 <br />
 
