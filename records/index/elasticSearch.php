@@ -63,6 +63,7 @@
     - rebuildLuceneIndices.php
 
     */
+require_once("elasticSearchHelper.php");
     
 // it is assumed that $system is already inited    
 class ElasticSearch {
@@ -321,6 +322,8 @@ class ElasticSearch {
             }else{
                 error_log("[elasticSearch.php] buildAllIndices --> invalid query: $query");
             }
+        }else{
+           print "ElasticSearch indices have successfully been built for $count record types."; 
         }
         return false;
     } // buildAllIndices

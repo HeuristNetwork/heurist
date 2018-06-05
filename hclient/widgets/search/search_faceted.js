@@ -1545,14 +1545,18 @@ $.widget( "heurist.search_faceted", {
                                     }
                                     if(field['type']=="date"){
                                         try{
-                                           min = (new Date(min)).format(date_format);
+                                           var tDate = new TDate((new Date(min)).toISOString());
+                                           min = tDate.toString(date_format);
+                                           //(new Date(min)).format(date_format);
                                            //min = moment(min).format(date_format);
                                         }catch(err) {
                                            min = ""; 
                                         }
                                         try{
+                                           var tDate = new TDate((new Date(max)).toISOString());
+                                           max = tDate.toString(date_format);
                                             //max = moment(max).format(date_format);
-                                            max = (new Date(max)).format(date_format);
+                                            //max = (new Date(max)).format(date_format);
                                         }catch(err) {
                                             max = ""; 
                                         }
