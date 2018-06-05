@@ -941,7 +941,8 @@ var TDate = function (strDate) {
         setTimezoneOffset: function (str) {
             var h = str.match(/^\s*(?:UTC|GMT)?([\+|\-])(\d\d):?(\d\d)?/);
             if (!h || !h[0] || !h[2] || h[2] > 23 || h[3] > 59) {
-                throw " TDate exception - invalid string supplied to setTimezone() - " + str;
+                _tzOffset = '00:00';
+                //throw " TDate exception - invalid string supplied to setTimezone() - " + str;
             } else {
                 _tzOffset = ( ( h[1] === "-" ? "-" : "+") + h[2] + (h[3] ? h[3] : "") );
                 if(_tzOffset && _tzOffset.length>0 && _tzOffset.indexOf(":")<0){
