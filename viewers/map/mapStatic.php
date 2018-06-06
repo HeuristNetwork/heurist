@@ -15,10 +15,13 @@
 */
 
 /**
+* mapStatic.php
+* 
 * return static google map image with feature either by record Id or by geovalue
 * 
 * 2018-04-24 rewritten for H4. It uses geoPHP and Simplify to prepare coordinates for encoding
-* @todo - move to other mapping code into separate folder
+* 
+* used in smarty output and mapViewer.js
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2016 University of Sydney

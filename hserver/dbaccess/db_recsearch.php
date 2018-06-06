@@ -1163,7 +1163,7 @@
                     }
                     $res->close();
 
-                    if(@$params['vo']=='h3'){ //output version
+                    if(@$params['vo']=='h3'){ //output version used in showReps.php (where else???)
                         $response = array('resultCount' => $total_count_rows,
                                           'recordCount' => count($records),
                                           'recIDs' => implode(',', $records) );
@@ -1540,19 +1540,6 @@ $loop_cnt++;
 
     }
 
-
-    function _loadRecordDetails( $system, $record_ids){
-
-    }
-    
-    //
-    // pickup only timemap enabled records
-    //
-    function _getTimemapRecords($res){
-        
-        
-    }
-
     //backward capability - remove as soon as old uploadFileOrDefineURL get rid of use
     function fileParseParameters($params){
         $res = array();
@@ -1593,5 +1580,133 @@ $loop_cnt++;
         }else{
             return 0;
         }
-    }    
+    } 
+    
+//------------------------
+    function recordSearchByID($system, $id) 
+    {
+        $mysqli = $system->get_mysqli();
+        $record = mysql__select_row_assoc( $mysqli, 
+            "select rec_ID,
+            rec_RecTypeID,
+            rec_Title,
+            rec_URL,
+            rec_ScratchPad,
+            rec_OwnerUGrpID,
+            rec_NonOwnerVisibility,
+            rec_URLLastVerified,
+            rec_URLErrorMessage,
+            rec_Added,
+            rec_Modified,
+            rec_AddedByUGrpID,
+            rec_Hash
+            from Records
+            where rec_ID = $id");
+        if ($record) {
+            recordSearchDetails($system, $record);
+        }
+        return $record;
+    }
+
+    //
+    // load details for given record
+    //    
+    function recordSearchDetails($system, &$record) {
+
+        $recID = $record["rec_ID"];
+        $squery =
+        "select dtl_ID,
+        dtl_DetailTypeID,
+        dtl_Value,
+        AsWKT(dtl_Geo) as dtl_Geo,
+        dtl_UploadedFileID,
+        dty_Type,
+        rec_ID,
+        rec_Title,
+        rec_RecTypeID,
+        rec_Hash
+        from recDetails
+        left join defDetailTypes on dty_ID = dtl_DetailTypeID
+        left join Records on rec_ID = dtl_Value and dty_Type = 'resource'
+        where dtl_RecID = $recID";
+
+        $mysqli = $system->get_mysqli();
+        $res = $mysqli->query($squery);
+
+        $details = array();
+        if($res){
+        while ($rd = $res->fetch_assoc()) {
+            // skip all invalid value
+            if (( !$rd["dty_Type"] === "file" && $rd["dtl_Value"] === null ) ||
+                (($rd["dty_Type"] === "enum" || $rd["dty_Type"] === "relationtype") && !$rd["dtl_Value"])) {
+                continue;
+            }
+
+            if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
+
+            $detailValue = null;
+
+            switch ($rd["dty_Type"]) {
+                case "freetext": case "blocktext":
+                case "float":
+                case "date":
+                case "enum":
+                case "relationtype":
+                case "integer": case "boolean": case "year": case "urlinclude": // these shoudl no logner exist, retained for backward compatibility
+                    $detailValue = $rd["dtl_Value"];
+                    break;
+
+                case "file":
+
+                    $detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], false);
+
+                    break;
+
+                case "resource":
+                    $detailValue = array(
+                        "id" => $rd["rec_ID"],
+                        "type"=>$rd["rec_RecTypeID"],
+                        "title" => $rd["rec_Title"],
+                        "hhash" => $rd["rec_Hash"]
+                    );
+                    break;
+
+                case "geo":
+                    if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
+                        $detailValue = array(
+                            "geo" => array(
+                                "type" => $rd["dtl_Value"],
+                                "wkt" => $rd["dtl_Geo"]
+                            )
+                        );
+                    }
+                    break;
+
+                case "separator":    // this should never happen since separators are not saved as details, skip if it does
+                case "relmarker":    // relmarkers are places holders for display of relationships constrained in some way
+                default:
+                    continue;
+            }
+
+            if ($detailValue) {
+                $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
+            }
+        }
+
+            $res->close();
+        }
+        $record["details"] = $details;
+    }
+
+    //
+    // load personal tags (current user) for given record ID
+    //
+    function recordSearchPersonalTags($system, $rec_ID) {
+
+        $mysqli = $system->get_mysqli();
+        
+        return mysql__select_list2($mysqli, 
+            'SELECT tag_Text FROM usrRecTagLinks, usrTags WHERE '
+            ."tag_ID = rtl_TagID and tag_UGrpID= ".$system->get_user_id()." and rtl_RecID = $rec_ID order by rtl_Order");        
+    }       
 ?>

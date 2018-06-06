@@ -190,8 +190,8 @@ if ($reccount>0)
         $thubURL = getThumbnailURL($row[0]);
 
 
-        $url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
-        $uid = HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+        $url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL."viewers/record/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+        $uid = HEURIST_BASE_URL."viewers/record/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
         $uniq_id++;
 
         $date_published = date("r", strtotime(($row[5]==null)? $row[6] : $row[5]));

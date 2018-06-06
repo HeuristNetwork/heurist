@@ -438,7 +438,10 @@ error_log(print_r($_REQUEST, true));
         
         define('HEURIST_TERM_ICON_DIR', HEURIST_FILESTORE_DIR . 'term-icons/');
         define('HEURIST_TERM_ICON_URL', HEURIST_FILESTORE_URL . 'term-icons/');
-
+        
+        define('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_FILESTORE_DIR . 'smarty-templates/');
+        folderCreate(HEURIST_SMARTY_TEMPLATES_DIR, true);
+        
         define('HEURIST_SCRATCH_DIR', HEURIST_FILESTORE_DIR . 'scratch/');
         folderCreate(HEURIST_SCRATCH_DIR, true);
 

@@ -1174,7 +1174,7 @@ $.widget( "heurist.resultList", {
                     recInfoUrl = this._currentRecordset.fld( this._currentRecordset.getById(selected_rec_ID), 'rec_InfoFull' );
                 }
                 if( !recInfoUrl ){
-                    recInfoUrl = window.hWin.HAPI4.baseURL + "records/view/renderRecordData.php?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
+                    recInfoUrl = window.hWin.HAPI4.baseURL + "viewers/record/renderRecordData.php?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
                 }
 
                 window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { width: 700, height: 800, title:'Record Info'});

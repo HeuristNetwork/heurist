@@ -95,34 +95,9 @@ if(!$is_map_popup){
         <!-- script type="text/javascript" src="../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js"></script>
         <script type="text/javascript" src="../../records/files/initViewer.js"></script -->
         <script type="text/javascript" src="../../common/js/hintDiv.js"></script> <!-- for mapviewer roolover -->
-<!--
-        <script type="text/javascript" src="../../ext/yoxview/yoxview-init.js"></script>
--->        
+        <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
+
         <script type="text/javascript">
-
-            //find heurist object in parent windows or init new one if current window is a top most
-            function _detectHeurist( win ){
-                if(win.HEURIST4){ //defined
-                    return win;
-                }
-
-                try{
-                    win.parent.document;
-                }catch(e){
-                    // not accessible - this is cross domain
-                    return win;
-                }    
-                if (win.top == win.self) { 
-                    //we are in frame and this is top most window and Heurist is not defined 
-                    //lets current window will be heurist window
-                    return window;
-                }else{
-                    return _detectHeurist( win.parent );
-                }
-            }
-            //detect wether this window is top most or inside frame
-            window.hWin = _detectHeurist(window);
-        
         
             function zoomInOut(obj,thumb,url) {
                 var thumb = thumb;
@@ -287,8 +262,11 @@ if(!$is_map_popup){
     </head>
     <body class="popup">
 
-        <script src="../../records/edit/digitizer/mapViewer.js"></script>
-
+        <script type="text/javascript" src="../../viewers/map/mapViewer.js"></script>
+        <script>
+            baseURL = "<?=HEURIST_BASE_URL?>viewers/map/mapStatic.php?width=300&height=300&db=<?=HEURIST_DBNAME?>";
+        </script>
+    
         <?php
 } //$is_map_popup
 else{
@@ -596,7 +574,7 @@ function print_public_details($bib) {
                 $rec_id = intval($bd['val']);
                 $rec_title = mysql__select_value($mysqli, 'select rec_Title from Records where rec_ID='.$rec_id);
                 
-                $bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='
+                $bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
                     .HEURIST_DBNAME.'&recID='.$rec_id.(defined('use_alt_db')? '&alt' : '')
                     .'" onclick="return link_open(this);">'
                     .htmlspecialchars($rec_title).'</a>';
@@ -816,7 +794,7 @@ function print_public_details($bib) {
                 if(strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0){
                     print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;">';
 
-                    filePrintPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']);
+                    filePrintPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']); //see db_files
                     
                     //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
                     print '</div>';    
@@ -1096,7 +1074,7 @@ function print_relation_details($bib) {
             if(true || $is_map_popup){  
                 print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
             }
-            print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+            print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
         } else {
             print htmlspecialchars($bd['Title']);
         }
@@ -1133,7 +1111,7 @@ function print_relation_details($bib) {
             if(true || $is_map_popup){  
                 print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
             }
-            print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
+            print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
         } else {
             print htmlspecialchars($bd['Title']);
         }
@@ -1190,7 +1168,7 @@ function print_linked_details($bib) {
             print '<div class=detailType>'.$lbl.'</div>';
             print '<div class="detail'.($is_map_popup?' truncate':'').'">';
             print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
-            print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
+            print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
             print '</div></div>';
 
             $lbl = '';

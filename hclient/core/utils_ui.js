@@ -1664,7 +1664,7 @@ window.hWin.HEURIST4.ui = {
                 dwidth = usrPreferences.width;
                 */
             }else{
-                url = url + 'records/view/renderRecordData.php?db='+window.hWin.HAPI4.database
+                url = url + 'viewers/record/renderRecordData.php?db='+window.hWin.HAPI4.database
                 +'&recID='+ rec_ID;
                                                         
                 dtitle = 'Record Info';

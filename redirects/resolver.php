@@ -80,7 +80,7 @@ if ($database_id>0) {
 if($database_url!=null){ //redirect to resolver for another database
     $redirect = $database_url.'&recID='.$recid.'&fmt'.$format;
 }else if($format=='html'){
-    $redirect = '../records/view/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
+    $redirect = '../viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
 }else if($format=='edit'){
     //todo include resolver recordSearchReplacement
     $redirect = '../hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'];

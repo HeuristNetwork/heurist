@@ -17,11 +17,9 @@
 * 
 * requires
 * common/js/hintDiv.js (popup div)
+* need to define baseURL!!!
 *
-* for dynaminc map viewer it requires
-* records/edit/digitizer/digitizer.js
-*   viewer/map/mapping.js
-*   jquery   
+* used in rendereRecordData.php
 * 
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -35,13 +33,15 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/Map  
 */
-
+var baseURL = '';
+if(window.hWin && window.hWin.HAPI4){
+    baseURL = window.hWin.HAPI4.baseURL+"viewers/map/mapStatic.php?width=300&height=300&db="+window.hWin.HAPI4.database;
+}
 
 function MapViewer() {
 
 	//private members
 	var _className = "MapViewer";
-
     							//id                               content
 	var hintDiv = new HintDiv('mapPopup', 300, 300, '<div id="map_viewer" style="width:100%;height:100%;"></div>');
 
@@ -66,7 +66,7 @@ function MapViewer() {
 			}
 			var d = new Date().getTime()
 
-			var surl = top.HEURIST.baseURL+"viewers/map/showMapUrl.php?width=300&height=300&db="+top.HEURIST.database.name+"&t="+d;
+			var surl = baseURL+"&t="+d;
 
 			if(value){
 				surl = surl + "&value="+encodeURIComponent(value);

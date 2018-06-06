@@ -230,7 +230,7 @@ if (FALSE) {
 			            return 'geo: ' . $val["geo"]["type"] . ': [' . substr($val["geo"]["wkt"], 0, 30) . ' ... ]';
 		            }
 		            else if (array_key_exists("id", $val)) {
-			            return '=> [' . $val["id"] . '] <a href="'.HEURIST_BASE_URL.'records/view/viewRecord.php?recID=' . $val["id"] . '&amp;db='.HEURIST_DBNAME.'">' . $val["title"] . '</a>';
+			            return '=> [' . $val["id"] . '] <a href="'.HEURIST_BASE_URL.'viewers/record/viewRecord.php?recID=' . $val["id"] . '&amp;db='.HEURIST_DBNAME.'">' . $val["title"] . '</a>';
 		            }
 	            } else {
 		            return $val;

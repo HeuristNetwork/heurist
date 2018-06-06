@@ -1630,7 +1630,7 @@ console.log('tileloaded 2');
                         html =  item.opts.info; //3. content already defined
                     }
                 }else{
-                    popupURL = window.hWin.HAPI4.baseURL + 'records/view/renderRecordData.php?mapPopup=1&recID='
+                    popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
                             +item.opts.recid+'&db='+window.hWin.HAPI4.database;
                     
                     //html =  bubble_header + item.opts.info + '</div>'; //predefined content

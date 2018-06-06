@@ -28,8 +28,8 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-// Redirect to .../records/view/viewRecord.php
+// Redirect to .../viewers/record/viewRecord.php
 // TODO: change to use /records/view/renderRecordAsXML.php (XML with parameterisation for human-readable view)
-header('Location: ../records/view/viewRecord.php?'.$_SERVER['QUERY_STRING']);
+header('Location: ../viewers/record/viewRecord.php?'.$_SERVER['QUERY_STRING']);
 exit();
 ?>

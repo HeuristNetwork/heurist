@@ -226,7 +226,7 @@
                                 $recURL = mysql__select_value($mysqli, 'select rec_URL from Records where rec_ID = ' . $rec_id);
                                 
                                 print '<li>'.($crosstype ? $vals['type'].'&nbsp;&nbsp;' : '').
-                                '<a target="_new" href="'.HEURIST_BASE_URL.'records/view/viewRecord.php?db='.HEURIST_DBNAME.
+                                '<a target="_new" href="'.HEURIST_BASE_URL.'viewers/record/viewRecord.php?db='.HEURIST_DBNAME.
                                 '&saneopen=1&recID='.$rec_id.'">'.$rec_id.': '.htmlspecialchars($vals['val']).'</a>';
                                 if ($recURL)
                                     print '&nbsp;&nbsp;&nbsp;<span style="font-size: 70%;">(<a target="_new" href="'.
