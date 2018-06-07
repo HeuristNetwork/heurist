@@ -20,21 +20,15 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+$mode = $_REQUEST['mode'];
+if($mode!='serve'){ // OK to serve tempalte files without login
+    define('LOGIN_REQUIRED',1);
+}
+define('PDIR','../../');  //need for proper path to js and css    
 
-    define('ISSERVICE',1);
-
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-
-
-    $mode = $_REQUEST['mode'];
-
-    if (! is_logged_in() && ! $mode=='serve') { // OK to serve tempalte files without login
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        //header('Content-type: text/html; charset=utf-8');
-        return;
-    }
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/conceptCode.php');
 
 
     $dir = HEURIST_SMARTY_TEMPLATES_DIR;
@@ -63,7 +57,7 @@
                     
                     $res = saveTemplate($template_body, $template_file);
 
-                    print json_format($res);
+                    print json_encode($res);
                     break;
 
                 case 'delete':
@@ -76,7 +70,7 @@
                     }
 
                     header("Content-type: text/javascript");
-                    print json_format(array("ok"=>$mode));
+                    print json_encode(array("ok"=>$mode));
 
                     break;
 
@@ -86,8 +80,7 @@
                 
                     break;
                 case 'serve':
-                    // TODO: convert template file to global concept IDs and serve up to caller
-
+                    // convert template file to global concept IDs and serve up to caller
                     smartyLocalIDsToConceptIDs($template_file);
                     break;
 
@@ -97,7 +90,7 @@
         catch(Exception $e)
         {
             header("Content-type: text/javascript");
-            print json_format(array("error"=>$e->getMessage()));
+            print json_encode(array("error"=>$e->getMessage()));
         }
 
     }
@@ -171,8 +164,7 @@
             }
         }
         header("Content-type: text/javascript");
-
-        print json_format( $results, true );
+        print json_encode( $results, true );
     }
 
 
@@ -189,10 +181,13 @@
             print file_get_contents($dir.$filename);
         }else{
             header("Content-type: text/javascript");
-            print json_format(array("error"=>"file not found"));
+            print json_encode(array("error"=>"file not found"));
         }
     }
     
+    //
+    //
+    //
     function getUniqueTemplateName($template_file){
 
         global $dir;
@@ -325,7 +320,7 @@
                             if($mode==0){
                                 $localID = $code;
                                 if(strpos($localID,"_")===false){
-                                    $conceptCode = getDetailTypeConceptID($localID);
+                                    $conceptCode = ConceptCode::getDetailTypeConceptID($localID);
                                     $part = $prefix.str_replace("-","_",$conceptCode).$suffix;
                                 }
                             }else{
@@ -334,7 +329,7 @@
                                 if(strpos($conceptCode,"_")!==false){
                                     $conceptCode = str_replace("_","-",$conceptCode);
                                     
-                                    $localID = getDetailTypeLocalID($conceptCode);
+                                    $localID = ConceptCode::getDetailTypeLocalID($conceptCode);
                                     if($localID==null){
                                         //local code not found - it means that this detail is not in this database
                                         array_push($not_found_details, $conceptCode);
@@ -381,7 +376,9 @@
     * @param mixed $filename - name of template file
     */
     function smartyLocalIDsToConceptIDs($filename){
-        global $dir, $dbID;
+        global $dir, $system;
+        
+        $dbID = $system->get_system('sys_dbRegisteredID');
         
         if(!$dbID){
              $res = array("error"=>"Database must be registered to allow translation of local template to global template");    
@@ -394,7 +391,7 @@
         
         if(is_array($res)){
             header("Content-type: text/javascript");
-            print json_format($res);
+            print json_encode($res);
         }else{
             header('Content-type: html/text');
             header('Content-disposition: attachment; filename='.str_replace(".tpl",".gpl",$filename));                
@@ -444,7 +441,7 @@
         //header("Content-type: text/javascript");
         header('Content-type: application/json');
         print json_encode($res);
-        //print json_format($res);
+        //print json_encode($res);
     }
 
     if (! function_exists('array_str_replace')) {

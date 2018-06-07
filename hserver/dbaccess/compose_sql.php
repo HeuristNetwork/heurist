@@ -2933,26 +2933,4 @@ if (@$_REQUEST['a']) $q .= 'any:"' . $_REQUEST['a'] . '" ';
 $_REQUEST['q'] = $q;
 }
 */
-
-//
-// returns null if some of csv is not integer
-//
-function getCommaSepIds($value)
-{
-    if(substr($value, -1) === ','){
-        //remove last comma
-        $value = substr($value,0,-1);
-    }
-
-    $a = explode(',', $value);
-    $n = array_map('intval', $a);
-    
-    if(!array_diff($a, $n)){
-        return $value;
-    }else{
-        return null;
-    }
-    
-    
-}
 ?>

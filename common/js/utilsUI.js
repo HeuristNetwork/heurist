@@ -2328,11 +2328,11 @@ if (! top.HEURIST.util) top.HEURIST.util = {
         }
         return e;
     },
-/**
-* onclick handler that solves the Safari issue of not responding to onclick
-*
-* @param ele
-*/
+    /**
+    * onclick handler that solves the Safari issue of not responding to onclick
+    *
+    * @param ele
+    */
     clickworkaround: function(ele)
     {
         if(navigator.userAgent.indexOf('Safari')>0){

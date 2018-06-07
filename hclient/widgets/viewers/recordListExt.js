@@ -189,23 +189,15 @@ $.widget( "heurist.recordListExt", {
                 }
             }
 
+/*
 
-            /* art2304
-            if(query_string_main.toLowerCase().indexOf('sortby')>=0){  //keep order for smarty output
-            top.HEURIST.currentQuery_all_ = query_string_main;
-            }else{
-            top.HEURIST.currentQuery_all_ = top.HEURIST.currentQuery_all
-            }*/
+            window.hWin.HEURIST4.currentQuery_all  = query_string_main+'&h4=1'; //query_string_all;
+            window.hWin.HEURIST4.currentQuery_sel  = query_string_sel;
+            window.hWin.HEURIST4.currentQuery_main = query_string_main;
 
-            if(top.HEURIST){
-                top.HEURIST.currentQuery_all  = query_string_main+'&h4=1'; //query_string_all;
-                top.HEURIST.currentQuery_sel  = query_string_sel;
-                top.HEURIST.currentQuery_main = query_string_main;
-
-                top.HEURIST.currentQuery_sel_waslimited = false;
-                top.HEURIST.currentQuery_all_waslimited = false;
-            }
-
+            window.hWin.HEURIST4.currentQuery_sel_waslimited = false;
+            window.hWin.HEURIST4.currentQuery_all_waslimited = false;
+*/
             var showReps = this.dosframe[0].contentWindow.showReps;
             if(showReps){
                 //@todo - reimplement - send on server JSON with list of record IDs
@@ -258,6 +250,9 @@ $.widget( "heurist.recordListExt", {
         }
     },
 
+    //
+    // limit: -1 means no limits
+    //
     _checkRecordsetLengthAndRunSmartyReport: function(limit){
 
         var showReps = this.dosframe[0].contentWindow.showReps;
@@ -274,23 +269,15 @@ $.widget( "heurist.recordListExt", {
             */
 
             var tot_cnt = this.options.recordset.length();
-            if(top.HEURIST){
-                top.HEURIST.totalQueryResultRecordCount = tot_cnt;
-            }
-                
 
             recIDs_list = this.options.recordset.getIds(limit);
-            recordset = {"resultCount":tot_cnt, "recordCount":recIDs_list.length, "recIDs":recIDs_list.join(',')};
+            recordset = {"resultCount":tot_cnt, "recordCount":recIDs_list.length, "recIDs":recIDs_list};
 
         }else{
-            if(top.HEURIST){
-                top.HEURIST.totalQueryResultRecordCount = 0;
-            }
-            
-            recordset = {"resultCount":0,"recordCount":0,"recIDs":""};
+            recordset = {"resultCount":0,"recordCount":0,"recIDs":[]};
         }
 
-        showReps.assignRecordset(recordset);
+        showReps.assignRecordsetAndQuery(recordset, this._query_request);
         showReps.processTemplate();
     },
     
@@ -304,9 +291,7 @@ $.widget( "heurist.recordListExt", {
         if (this.options.recordset!=null) {
 
             var tot_cnt = this.options.recordset.length();
-            if(top.HEURIST){
-                top.HEURIST.totalQueryResultRecordCount = tot_cnt;
-            }
+            window.hWin.HEURIST4.totalQueryResultRecordCount = tot_cnt;
 
             recIDs_list = this.options.recordset.getIds();//limit
 
@@ -320,9 +305,8 @@ $.widget( "heurist.recordListExt", {
                                                 "recIDs":recIDs_list.join(','), 'first_rt':rectype_first};
 
         }else{
-            if(top.HEURIST){
-                top.HEURIST.totalQueryResultRecordCount = 0;
-            }
+            window.hWin.HEURIST4.totalQueryResultRecordCount = 0;
+            
             recordset = {"resultCount":0,"recordCount":0,"recIDs":""};
         }
 

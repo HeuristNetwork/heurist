@@ -1,20 +1,25 @@
 <?php
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
+    require_once(dirname(__FILE__).'/../../hserver/System.php');
+
+    $res = '';
 
     if(@$_REQUEST['db'] && @$_REQUEST['session']){
         
+        $system = new System();
+        if($system->init($_REQUEST['db'], true, false)){
         
-        $mysqli = mysqli_connection_overwrite(DATABASE);
-        
-        if(@$_REQUEST['terminate']==1){
-            $res = 'terminate';
-            updateProgress($mysqli, $_REQUEST['session'], false, $res);
-        }else{
-            $res = updateProgress($mysqli, $_REQUEST['session'], false, null);
+            $mysqli = $system->get_mysqli();
+            
+            if(@$_REQUEST['terminate']==1){
+                $res = 'terminate';
+                mysql__update_progress($mysqli, $_REQUEST['session'], false, $res);
+            }else{
+                $res = mysql__update_progress($mysqli, $_REQUEST['session'], false, null);
 
+            }
+            
+            $mysqli->close();
         }
-        
-        $mysqli->close();
         
 /*        
         $dbname_full = 'hdb_'.$_REQUEST['db'];

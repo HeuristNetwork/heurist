@@ -37,30 +37,31 @@
 
 <head>
  <meta http-equiv="content-type" content="text/html; charset=utf-8">
- <link rel="stylesheet" href="../../common/css/global.css">
+ <link rel="stylesheet" href="../../h4style.css">
  <title>Publish report</title>
+ 
+ <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
+ 
  <script>
 
    function build_links() {
-     if (top.HEURIST)
+     if (widnow.hWin.HEURIST4)
      {
+			var template_file = widnow.hWin.HEURIST4.util.getUrlParameter('template_file', location.search)
 
-			var mode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
+            var mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty');
 
-			var params = top.HEURIST.parseParams(location.search);
-			var template_file = params.template_file;
-
-	 		var currentSearchQuery =
-	 				(mode=="selected")
-						?top.HEURIST.currentQuery_sel
-						:((mode=="all")?top.HEURIST.currentQuery_all:top.HEURIST.currentQuery_main);
+	 		var currentSearchQuery = 'q=ids:123';
+                        //(mode=="selected")
+						//?top.HEURIST.currentQuery_sel
+						//:((mode=="all")?top.HEURIST.currentQuery_all:top.HEURIST.currentQuery_main);
 
 			if(currentSearchQuery)
 			{
                
 				currentSearchQuery = currentSearchQuery.replace('"','%22');
 
-				var surl = top.HEURIST.baseURL + "viewers/smarty/showReps.php?"+
+				var surl = widnow.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
 					currentSearchQuery + '&publish=1&debug=0&template='+encodeURIComponent(template_file);
 
 				document.getElementById("linkOpenInNewWindow").href = surl;
@@ -80,8 +81,7 @@
    
    function onPublish(){
        
-       var params = top.HEURIST.parseParams(location.search);
-       window.close( params.template_file );  
+       window.close( widnow.hWin.HEURIST4.util.getUrlParameter('template_file', location.search) );  
        //find showReps 
        /*for (var idx in top)
         if(idx!==undefined && top[idx] && top[idx].showReps){

@@ -604,17 +604,18 @@ function print_public_details($bib) {
                         .'ulf_FileSizeKB as fileSize,'
                         .'from recUploadedFiles where ulf_ID='.$bd['dtl_UploadedFileID']);*/
                         
-                $listpaths = fileGetPath_URL_Type($system, $bd['dtl_UploadedFileID']); //see db_files.php
+                $listpaths = fileGetFullInfo($system, $bd['dtl_UploadedFileID']); //see db_files.php
                 if(is_array($listpaths) && count($listpaths)>0){
 
-                    $fileinfo = $listpaths[0];
-                    $filepath = $fileinfo[0];  //concat(ulf_FilePath,ulf_FileName fullPath
-                    $external_url = $fileinfo[1];     //ulf_ExternalFileReference
-                    $mimeType = $fileinfo[2];  //fxm_MimeType
-                    $params = $fileinfo[3];  //ulf_Parameters - not used anymore (for backward capability only)
-                    $originalFileName = $fileinfo[4];
-                    $fileSize = $fileinfo[5]; 
-                    $file_nonce = $fileinfo[6]; //ulf_ObfuscatedFileID
+                    $fileinfo = $listpaths[0]; //
+                    $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
+                    $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
+                    $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
+                    $params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
+                    $originalFileName = $fileinfo['ulf_OrigFileName'];
+                    $fileSize = $fileinfo['ulf_FileSizeKB'];
+                    $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
+                    
 
                     $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
                     $file_thumbURL  = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&thumb='.$file_nonce;

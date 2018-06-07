@@ -523,18 +523,17 @@ window.hWin.HEURIST4.util = {
     // 1) for call H3 scripts in H4 code
     // 2) in case hapi is not inited 
     //
-    sendRequest: function(url, request, caller, callback){
+    sendRequest: function(url, request, caller, callback, dataType){
         
         if(!request.db && window.hWin && window.hWin.HAPI4){
             request.db = window.hWin.HAPI4.database;
         }
-
+        
         //note jQuery ajax does not properly in the loop - success callback does not work often
-        $.ajax({
+        var options = {
             url: url,
             type: "POST",
             data: request,
-            dataType: "json",
             cache: false,
             error: function(jqXHR, textStatus, errorThrown ) {
                 if(callback){
@@ -561,7 +560,15 @@ window.hWin.HEURIST4.util = {
                     }
                 }
             }
-        });
+        }
+
+        if(window.hWin.HEURIST4.util.isnull(dataType)){
+            options['dataType'] = 'json';
+        }else if(dataType!='auto'){
+            options['dataType'] = dataType;    
+        }
+        
+        $.ajax(options);
     },
 
     getScrollBarWidth: function() {
