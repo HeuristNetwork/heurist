@@ -848,6 +848,32 @@ error_log(print_r($params, true));
         return $ids;
         
     }
+    
+
+    //
+    // returns null if some of csv is not integer - repalce with prepareIds?
+    //
+    function getCommaSepIds($value)
+    {
+        if(is_array($value)){
+            $a = $value;
+        }else{
+            if(substr($value, -1) === ','){
+                //remove last comma
+                $value = substr($value,0,-1);
+            }
+
+            $a = explode(',', $value);
+        }
+        $n = array_map('intval', $a);
+        
+        if(!array_diff($a, $n)){
+            return $value;
+        }else{
+            return null;
+        }
+    }
+    
     //
     //
     //

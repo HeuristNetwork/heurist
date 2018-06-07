@@ -1658,7 +1658,12 @@ $loop_cnt++;
 
                 case "file":
 
-                    $detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], false);
+                    //$detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], false);
+                    
+                    $listpaths = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
+                    if(is_array($listpaths) && count($listpaths)>0){
+                        $detailValue = array("file" => $listpaths);
+                    }
 
                     break;
 

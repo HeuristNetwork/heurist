@@ -23,9 +23,9 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
-require_once (dirname(__FILE__).'/db_files.php');
-require_once (dirname(__FILE__).'/db_records.php'); //for recordDelete
-require_once (dirname(__FILE__).'/db_users.php'); //send email methods
+require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
+require_once (dirname(__FILE__).'/../dbaccess/db_records.php'); //for recordDelete
+require_once (dirname(__FILE__).'/../dbaccess/db_users.php'); //send email methods
 
 
 class DbSysUsers extends DbEntityBase

@@ -7,7 +7,7 @@
 * 
 * 
 * fileGetByObfuscatedId - get id by obfuscated id
-* fileGetPath_URL_Type  - local paths, external links, mimetypes and parameters (mediatype and source)
+* fileGetFullInfo  - local paths, external links, mimetypes and parameters (mediatype and source)
 * fileGetThumbnailURL - URL to thumbnail for given record ID
 * getImageFromFile - return image object for given file
 * getPrevailBackgroundColor2  - not used
@@ -80,7 +80,7 @@ function fileGetByFileName($system, $fullname){
 * @param mixed $system
 * @param mixed $file_ids
 */
-function fileGetPath_URL_Type($system, $file_ids){
+function fileGetFullInfo($system, $file_ids){
 
     if(is_string($file_ids)){
         $file_ids = explode(",", $file_ids);
@@ -94,7 +94,8 @@ function fileGetPath_URL_Type($system, $file_ids){
         }
 
         $query = 'select concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
-        .'fxm_MimeType, ulf_Parameters, ulf_OrigFileName, ulf_FileSizeKB, ulf_ObfuscatedFileID from recUploadedFiles '
+        .'fxm_MimeType, ulf_Parameters, ulf_OrigFileName, ulf_FileSizeKB,'
+        .' ulf_ObfuscatedFileID, ulf_Description from recUploadedFiles '
         .' left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt where '
         .$query;
 
@@ -104,7 +105,7 @@ function fileGetPath_URL_Type($system, $file_ids){
         if ($res){
             $result = array();
 
-            while ($row = $res->fetch_row()){
+            while ($row = $res->fetch_assoc()){
                 array_push($result, $row);
 
                 /*

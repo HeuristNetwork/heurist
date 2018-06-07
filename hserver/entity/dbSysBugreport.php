@@ -22,7 +22,7 @@
 
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
-require_once (dirname(__FILE__).'/db_files.php');
+require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
 require_once(dirname(__FILE__).'/../../external/php/geekMail-1.0.php');
 

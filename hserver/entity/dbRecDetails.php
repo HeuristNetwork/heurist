@@ -21,7 +21,7 @@
     */
 
 require_once (dirname(__FILE__).'/../System.php');
-require_once (dirname(__FILE__).'/db_records.php');
+require_once (dirname(__FILE__).'/../dbaccess/db_records.php');
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 
 class DbRecDetails

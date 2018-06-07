@@ -23,7 +23,7 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/dbEntitySearch.php');
-require_once (dirname(__FILE__).'/db_files.php');
+require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
 
 class DbRecUploadedFiles extends DbEntityBase

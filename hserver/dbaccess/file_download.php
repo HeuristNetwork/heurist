@@ -5,7 +5,7 @@
 *
 * db
 * thumb - obfuscated file id - returns existing thumbnail or resize image
-* file - obfuscated file id - uses fileGetPath_URL_Type to get path to file or URL
+* file - obfuscated file id - uses fileGetFullInfo to get path to file or URL
 * 
 * mode  
 *   page - return
@@ -83,18 +83,17 @@ if($db){
         $system->init($db);
 
         //find
-        $listpaths = fileGetPath_URL_Type($system, $fileid);
+        $listpaths = fileGetFullInfo($system, $fileid);
         if(is_array($listpaths) && count($listpaths)>0){
 
             $fileinfo = $listpaths[0]; //
-            $filepath = $fileinfo[0];  //concat(ulf_FilePath,ulf_FileName as fullPath
-            $external_url = $fileinfo[1];     //ulf_ExternalFileReference
-            $mimeType = $fileinfo[2];  //fxm_MimeType
-            $params = $fileinfo[3];  //ulf_Parameters - not used anymore (for backward capability only)
-            $originalFileName = $fileinfo[4];
-            $fileSize = $fileinfo[5];
+            $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
+            $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
+            $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
+            $params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
+            $originalFileName = $fileinfo['ulf_OrigFileName'];
+            $fileSize = $fileinfo['ulf_FileSizeKB'];
 
-                
             if( @$_REQUEST['mode']=='tag'){
                 
                 filePrintPlayerTag($fileid, $mimeType, $params, $external_url);
