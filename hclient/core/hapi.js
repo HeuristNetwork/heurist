@@ -29,9 +29,8 @@ function hAPI(_db, _oninit) { //, _currentUser
     _database = null, //same as public property  @toremove      
     _region = 'en',
     _regional = null, //localization resources
-    _guestUser = {ugr_ID:0, ugr_FullName:'Guest' };
-
-
+    _guestUser = {ugr_ID:0, ugr_FullName:'Guest' },
+    _listeners = [];
 
     /**
     * initialization of hAPI object
@@ -480,7 +479,6 @@ function hAPI(_db, _oninit) { //, _currentUser
             ,get_defs_all: function(is_message, document, callback){
                 
                 window.hWin.HEURIST4.msg.bringCoverallToFront();
-                
 
                 this.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                     
@@ -507,7 +505,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         
                         if($.isFunction(callback)) callback.call();
 
-                        $(document).trigger(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                     }
                 });
 
@@ -1039,7 +1037,19 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
         triggerEvent:function(eventType, data){
-            $(window.hWin.document).trigger(eventType, null );
+            $(window.hWin.document).trigger(eventType, data );
+
+            //this is for listeners in other frames
+            for (var i=0; i<_listeners.length; i++){
+                if(_listeners[i].event_type == eventType){
+                    _listeners[i].callback.call( _listeners[i].obj, data );
+                }
+            }
+        },
+
+        //to support event listeners in other frames
+        addEventListener:function( object, event_type, callback){
+            _listeners.push( {obj:object, event_type:event_type, callback:callback} );
         },
         
         is_ui_normal: function(){

@@ -109,12 +109,19 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             
             
             var $rec_select = _fillSelectRecordTypes();
-            $rec_select.hSelect({change: function(event, data){
-                   var selval = data.item.value;
-                   $('#sel_recordtype').val(selval);    
-                   _onAddRecordChange();        
+            $rec_select.hSelect({change: _onSelectRecordType});
+
+            window.hWin.HAPI4.addEventListener(
+                that,
+                window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE,
+                function(data) {
+               
+                    $rec_select = _fillSelectRecordTypes();
+                    $rec_select.hSelect({change: _onSelectRecordType});
+                }
+            );
             
-            }});
+            
             
             if(!(add_rec_prefs[0]>0)) add_rec_prefs[0] = '';
             $('#sel_recordtype').val(add_rec_prefs[0]);
@@ -205,6 +212,15 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         });
         //if(!data || data.origin!='recordAction'){
         //}
+    }
+
+    //
+    // on record type change for record addition mode
+    //
+    function _onSelectRecordType(event, data){
+                   var selval = data.item.value;
+                   $('#sel_recordtype').val(selval);    
+                   _onAddRecordChange();        
     }
 
     //

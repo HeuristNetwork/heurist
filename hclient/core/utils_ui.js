@@ -828,6 +828,22 @@ window.hWin.HEURIST4.ui = {
             
             if(rectypeList.length>0){
                 $(selObj).val(rectypeList[0]);
+                
+                /* make it per widget - since need to reassign onchange listener
+                //refill on structure change
+                $(window.hWin.document).on(
+                    window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE,
+                    function(e, data) {
+                        
+                        if($(selObj).hSelect("instance")!=undefined){
+                            $(selObj).hSelect("destroy"); 
+                        }
+                        $(selObj).empty();
+
+                        window.hWin.HEURIST4.ui.createRectypeSelect(selObj, rectypeList, topOptions, useHtmlSelect);
+                    }
+                );
+                */
             }
             
         }

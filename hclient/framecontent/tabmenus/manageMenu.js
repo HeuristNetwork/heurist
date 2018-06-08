@@ -112,7 +112,7 @@ function hmanageMenu() {
         
         $('#menulink-database-refresh').click(
             function(event){
-                window.hWin.HAPI4.SystemMgr.get_defs_all( true, top.document);
+                window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document );
                 event.preventDefault();
                 return false;
             }

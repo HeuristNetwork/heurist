@@ -156,16 +156,16 @@ function RectypeManager() {
         dragDropEnable();
         
         
-        if(top.hWin && top.hWin.HAPI4){
+        if(window.hWin){
             var request = {
                 'a'       : 'counts',
                 'entity'  : 'defRecTypes',
                 'mode'    : 'record_count'
                 };
                 
-            var topwin = top.hWin;    
+            var topwin = window.hWin;    
         
-            top.hWin.HAPI4.EntityMgr.doRequest(request, 
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
                 if(response.status == topwin.HAPI4.ResponseStatus.OK){
                     _rt_counts = response.data;
@@ -1594,8 +1594,11 @@ function onGroupChange() {
 
 function _refreshClientStructure(context){
     top.HEURIST.rectypes = context.rectypes;
-    if(top.hWin && top.hWin.HEURIST4){
-        top.hWin.HEURIST4.rectypes = context.rectypes;
+    if(window.hWin && window.hWin.HEURIST4){
+        window.hWin.HEURIST4.rectypes = context.rectypes;
+     
+        //trigger via document does not work from iframe
+        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE); 
     }
 }
 

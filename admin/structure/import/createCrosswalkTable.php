@@ -1004,6 +1004,11 @@
                                 }
                                 _updateFilter();
                                 
+                                //refresh local db structure definitions
+                                console.log('refresh defs');
+                                if(window.hWin && window.hWin.HAPI4){
+                                    window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document );
+                                }
                             }
                         }
                     } // end readystate callback

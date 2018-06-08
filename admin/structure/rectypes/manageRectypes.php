@@ -74,6 +74,31 @@ if(isForAdminOnly("to modify database structure")){
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
 
+<script type="text/javascript">
+    //find heurist object in parent windows or init new one if current window is a top most
+    function _detectHeurist( win ){
+        if(win.HEURIST4){ //defined
+            return win;
+        }
+
+        try{
+            win.parent.document;
+        }catch(e){
+            // not accessible - this is cross domain
+            return win;
+        }
+        if (win.top == win.self) {
+            //we are in frame and this is top most window and Heurist is not defined
+            //lets current window will be heurist window
+            return window;
+        }else{
+            return _detectHeurist( win.parent );
+        }
+    }
+    //detect wether this window is top most or inside frame
+    window.hWin = _detectHeurist(window);
+</script>        
+            
     </head>
 
     <body class="popup yui-skin-sam">

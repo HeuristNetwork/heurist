@@ -539,13 +539,13 @@ $.widget( "heurist.search", {
                 that._refresh();
             }
         });
-        $(this.document).on(
+        $(window.hWin.document).on(
             window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
             + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(e, data) { that._onSearchGlobalListener(e, data) } );
-
+            
         this._refresh();
 
         /* search on load
@@ -756,15 +756,18 @@ $.widget( "heurist.search", {
             }
 
         }else if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE){
+
             if(this.search_assistant!=null){
                 this.search_assistant.remove();
                 this.search_assistant = null;
             }
+            
             if(this.select_rectype_addrec!=null){
                 this.select_rectype_addrec.remove();
                 this.select_rectype_addrec = null;
                 this._refresh();
             }
+            
         }
 
 
