@@ -32,7 +32,9 @@ body {
     font-size: 0.7em;
     /*padding:10px;*/
 }
-
+a{
+outline: 0;
+}
 .logo {
     background-image: url("hclient/assets/h4logo_small.png") !important;
     background-repeat: no-repeat !important;

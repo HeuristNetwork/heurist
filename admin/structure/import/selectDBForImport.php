@@ -162,12 +162,12 @@
 
                 var myColumnDefs = [
                     {key:"id", label:"ID" , formatter:YAHOO.widget.DataTable.formatNumber, sortable:false, resizeable:false, width:"40", className:"right"},
-                    {key:"crosswalk", label:"Action", resizeable:false, width:"60", className: "center",
+                    {key:"crosswalk", label:"Action", resizeable:false, width:"80", className: "left",
                         formatter:function(elLiner, oRecord, oColumn, oData) {
                                 var str = oRecord.getData("crosswalk");
-                                if(oRecord.getData("id")>0 && oRecord.getData("id")<21){
+                                if(oRecord.getData("id")>100 && oRecord.getData("id")<1000){
                                     str = str
-                                    + (' <a href="'
+                                    + ('<a style="padding-left:20px" href="'
                                     + top.HEURIST.baseURL 
                                     + 'admin/setup/dboperations/cloneDatabase.php?db=<?= HEURIST_DBNAME?>&templatedb='
                                     + registeredDBs[oRecord.getData("id")][2]
