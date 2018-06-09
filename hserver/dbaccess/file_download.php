@@ -96,7 +96,7 @@ if($db){
 
             if( @$_REQUEST['mode']=='tag'){
                 
-                filePrintPlayerTag($fileid, $mimeType, $params, $external_url);
+                print fileGetPlayerTag($fileid, $mimeType, $params, $external_url);
             }
             else  //just download file from heurist server or redirect to original remote url
             {

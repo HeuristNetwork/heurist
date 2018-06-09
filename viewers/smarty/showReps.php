@@ -697,7 +697,7 @@ function smarty_function_wrap($params, &$smarty)
                     $params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
                     
                     //$sres = $sres.getPlayerTag($value['nonce'], $value['mimeType'], $value['URL'], $size);
-                    $sres = $sres.filePrintPlayerTag($file_nonce, $mimeType, $params, $external_url, $size); //see db_files
+                    $sres = $sres.fileGetPlayerTag($file_nonce, $mimeType, $params, $external_url, $size); //see db_files
                     
                     /*
                     if($type_media == 'image'){

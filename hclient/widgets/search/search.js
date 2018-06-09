@@ -1249,29 +1249,6 @@ $.widget( "heurist.search", {
         this.div_search.remove();
     }
 
-    , _addNewRecord: function(){
-
-
-        var url = window.hWin.HAPI4.baseURL+ "records/add/addRecordPopup.php?db=" + window.hWin.HAPI4.database;
-
-        window.hWin.HEURIST4.msg.showDialog(url, { height:550, width:700, title:'Add Record',
-            callback:function(response) {
-                /*
-                var sURL = window.hWin.HAPI4.baseURL + "common/php/reloadCommonInfo.php";
-                top.HEURIST.util.getJsonData(
-                sURL,
-                function(response){
-                if(response){
-                top.HEURIST.rectypes.usageCount = response;
-                top.HEURIST.search.createUsedRectypeSelector(true);
-                }
-                },
-                "db="+_db+"&action=usageCount");
-                */
-            }
-        });
-        
-    }
 
     , _doLogin: function(){
 

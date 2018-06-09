@@ -48,9 +48,11 @@ function ShowReps() {
     codeEditor = null,
     infoMessageBox,
     _currentRecordset = null,
-    _currentQuery = null;
+    _currentQuery = null,
     
-    var top_repcontainer = '30px';
+    mylayout = null;
+    
+    var top_repcontainer = '36px';
     
     var progressInterval = null;
 
@@ -265,7 +267,7 @@ function ShowReps() {
 
             _showProgress( session_id );
             
-            request['DBGSESSID']='425944380594800002;d=1,p=0,c=07';
+            //request['DBGSESSID']='425944380594800002;d=1,p=0,c=07';
             
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response){
                 _hideProgress();
@@ -503,10 +505,18 @@ function ShowReps() {
 
         
         
-        var rtSelect = $('#rectype_selector').empty();
-        var $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, window.hWin.HR('select record type'), false );
-        
-        $rec_select.hSelect({change: function(event, data){
+        var rtSelect = $('#rectype_selector').css('max-width','150px');
+        var $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, window.hWin.HR('select record type'), true );
+        $rec_select.change(function(event){
+                    var selel = $(event.target).val();
+                    if(selel>0){
+                        var baseurl = window.hWin.HAPI4.baseURL + "common/php/recordTypeTree.php";
+                        var request = {db:window.hWin.HAPI4.database, mode:'list', 'for':'smarty', rty_id:selel};
+                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __onRectypeTree);
+                    }
+        });
+        /*$rec_select.hSelect.on({change: 
+        function(event, data){
                var selval = data.item.value;
                $('#rectype_selector').val(selval);    
                
@@ -516,22 +526,9 @@ function ShowReps() {
                     window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __onRectypeTree);
                 }
         
-        }});
-        
-     /*   
-        ele.load( window.hWin.HAPI4.baseURL + "common/php/recordTypeSelect.php?db="+window.hWin.HAPI4.database,
-            function(){
-                ele.find('#rectype_elt').on('change', function(event){
-                    var selel = $(event.target).val();
-                    if(selel>0){
-                        var baseurl = window.hWin.HAPI4.baseURL + "common/php/recordTypeTree.php";
-                        var request = {db:window.hWin.HAPI4.database, mode:'list', 'for':'smarty', rty_id:selel};
-                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __onRectypeTree);
-                    }
-                });
-
-        } );
-     */
+         }
+         });
+        */
     }
 
 
@@ -629,14 +626,9 @@ function ShowReps() {
                     }
                  },'auto');
             }else{
-
+                var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
                 //template.gpl
-                if(hasH4()){
-                    window.hWin.HEURIST4.util.downloadURL(baseurl+'?'+squery);
-                }else{
-                    window.open(baseurl+'?'+squery, 'Download'); //old way
-                }
-
+                window.hWin.HEURIST4.util.downloadURL(baseurl+'?'+squery);
             }
 
         }else{
@@ -716,7 +708,8 @@ function ShowReps() {
                         }else if(template_file!=null){
                             _originalFileName = template_file;//_onGetTemplate(obj);
 
-                            window.hWin.HEURIST4.msg.showMsgFlash("Template '"+template_file+"' has been saved", 1000, "Success");
+                            window.hWin.HEURIST4.msg.showMsgFlash("Template '"+template_file+"' has been saved", 1000);
+                            
                         }
 
                         if(modeRef===1 || modeRef===3){
@@ -848,7 +841,7 @@ function ShowReps() {
 
 
 
-    var layout, _isviewer, _iseditor, _kept_width=-1;
+    var layout = null, _isviewer, _iseditor, _kept_width=-1;
 
     /**
     * onclick handler that solves the Safari issue of not responding to onclick
@@ -895,15 +888,18 @@ function ShowReps() {
         document.getElementById("rep_container").style.top = (iseditor) ?"0px" :top_repcontainer;
         document.getElementById("editorcontainer").style.display = (iseditor) ?"block" :"none";
 
-        var body = $(window.hWin.document).find('body');
-        var dim = {h:body.innerHeight(), w:body.innerWidth()};
-
+        
         var units;
         if(isviewer && iseditor){
+            
+        //var body = $(document).find('body'); //this frame
+        //var dim = {h:body.innerHeight(), w:body.innerWidth()};
+            dh =  this.innerHeight;
+            
             units = [
-                { position: 'top', header: 'Editor', height: dim.h*0.7,
+                { position: 'top', header: 'Editor', height: dh*0.7,
                     resize: true, body: 'editorcontainer', gutter:'5px', useShim: true, collapse: true},
-                { position: 'center', body: 'viewercontainer', height: dim.h*0.3}
+                { position: 'center', body: 'viewercontainer', height: dh*0.3}
             ];
         }else if(isviewer){
             units = [
@@ -914,6 +910,7 @@ function ShowReps() {
                 { position: 'center', body: 'editorcontainer'}
             ];
         }
+        
 
         //
         //document.getElementById("layout").style.top = (iseditor) ?"0" :"25";
@@ -921,12 +918,16 @@ function ShowReps() {
         //var el = document.getElementById('layout');
         layout = null;
         layout = new YAHOO.widget.Layout({
-            units: units
+                units: units
         });
+        
         /*layout = new YAHOO.widget.Layout('layout', {
         units: units
         });*/
+
         layout.render();
+        layout.resize(true);
+
 
         //reload templates list
         if(_needListRefresh && !iseditor){
@@ -1049,7 +1050,7 @@ function ShowReps() {
 
 
         var idx_maxval = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
-        var idx_dtype  = window.hWin.HEURIST4.detailTypes.typedefs.fieldNamesToIndex.dty_Type;
+        var idx_dtype  = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
 
         var first_node = null;
 
@@ -1383,11 +1384,9 @@ function ShowReps() {
     */
     function _insertPattern(pattern) {
 
-        if(hasH4()){
-            if(insertPopupID){
-                $(insertPopupID).dialog('close');
-                insertPopupID = null;
-            }
+        if(insertPopupID){
+            $(insertPopupID).dialog('close');
+            insertPopupID = null;
         }
 
         var _text = '';
@@ -1585,13 +1584,9 @@ function ShowReps() {
             inloop_level = (inloop===true)?1:0;
         }
 
-        if(hasH4()){
-            if(insertPopupID){
-                $(insertPopupID).dialog('close');
-                insertPopupID = null;
-            }
-        }else{
-            //!!!!! top.HEURIST.util.closePopupAll();
+        if(insertPopupID){
+            $(insertPopupID).dialog('close');
+            insertPopupID = null;
         }
 
         if(varid==null){
@@ -2057,7 +2052,7 @@ this_id       : "term"
 
     function _onResize(newwidth){
 
-        var newval = newwidth>605?'30px':'60px';
+        var newval = newwidth>605?'36px':'60px';
 
         if(top_repcontainer!=newval){
             top_repcontainer = newval;

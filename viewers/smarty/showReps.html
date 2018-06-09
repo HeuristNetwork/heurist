@@ -36,9 +36,6 @@
         <title></title>
 
         <!-- yui layout -->
-
-        <!--<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
-        -->
         <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/container/assets/skins/sam/container.css">
 
         <!-- Skin CSS files resize.css must load before layout.css -->
@@ -77,7 +74,10 @@
         
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/report.css">
-
+<!--        
+        <script type="text/javascript" src="../../ext/layout/jquery.layout-latest.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../h4styles.css">
+-->
         <link rel="stylesheet" href="../../external/js/codemirror-3.20/lib/codemirror.css">
         <script src="../../external/js/codemirror-3.20/lib/codemirror.js"></script>
         <script src="../../external/js/codemirror-3.20/mode/xml/xml.js"></script>
@@ -88,16 +88,15 @@
         <script src="../../external/js/codemirror-3.20/mode/smartymixed/smartymixed.js"></script>
 
         <style type="text/css">
-            /* hide header in top layout */
+            /*display: none !important;
+            display: block;
+            */
             .yui-skin-sam .yui-layout .yui-layout-hd {
                 background: none;
                 border: 1px solid #ff0000;
                 display: none;
                 height: 0px;
             }
-            /*display: none !important;
-            display: block;
-            */
             .linkadmin {
                 visibility: hidden;
             }
@@ -155,7 +154,7 @@
         </script>
         
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
-         
+        <!-- script type="text/javascript" src="../../hclient/core/utils_ui.js"></script -->
     </head>
 
     <body class="yui-skin-sam"  onresize="onResize()" style="cursor:progress;">
@@ -307,15 +306,15 @@
             </div>
         </div>
 
-
-        <div id="viewercontainer">
-            <div id="progressbar_div" style="width:99%;height:30px;display:none;padding:5px">
+        <!-- viewer -->
+        <div id="viewercontainer" style="padding:0">
+            <div id="progressbar_div" style="width:99%;height:36px;display:none;padding:5px">
                 <div id="progressbar">
                     <div class="progress-label">Loading data...</div>
                 </div>
                 <div id="progress_stop" style="float:right;">Stop</div>
             </div>
-            <div id="toolbardiv" style="width:100%;height:30px;">
+            <div id="toolbardiv" style="width:100%;height:38px;padding:2px">
                 <div style="padding:5px;display:none;">
                     <select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:90px">
                         <option value="all" selected="selected">All on page</option>
@@ -330,7 +329,7 @@
                     <span id="recordCount"></span>
                 </div>
 
-                <div style="display:inline-block;padding-left:0.5em;">
+                <div style="display:inline-block;padding:0.5em;font-size:9px">
                     <button id="btnRepEdit" title="Edit the selected template">Edit</button>
                     <button id="btnRepNew" title="Create a new template">New</button>
                     <button id="btnRepDelete" title="Delete the selected template">Delete</button>
@@ -354,7 +353,9 @@
                 <iframe id="rep_container_frame" style="width:99%;height:99%;border:none"></iframe>
             </div>
         </div>
-        <div id="editorcontainer" style="display:none">
+        
+        <!-- editor -->
+        <div id="editorcontainer">
             <h2>Template <span id="edTemplateName"></span></h2>
 
             <div style="position:absolute;top:4px;right:4px;">
@@ -381,7 +382,7 @@
                         title="Read full documentation on the Smarty templating language">
                         <b>Help on using this function</b></a><br />
                     <div style="margin-top: 10px;">
-                        <label style="font-weight:bold;width:auto;">Select Type</label><span id="rectype_selector"></span>
+                        <label style="font-weight:bold;width:auto;">Select Type</label><select id="rectype_selector"></select>
                     </div>
                     Position cursor in text on left <br/>
                     before selecting actions below
@@ -476,7 +477,8 @@ console.log(e)
             function onFilePublish(){
 
                 var sel = document.getElementById('selTemplates');
-                if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return; }
+                if(window.hWin.HEURIST4.util.isnull(sel) || window.hWin.HEURIST4.util.isnull(sel.options) 
+                    || sel.options.length===0) { return; }
 
                 var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
@@ -485,7 +487,7 @@ console.log(e)
                             + encodeURIComponent(template_file),
                     {   title: 'Publish report',
                         callback: function(filename){
-                            if(!Hul.isnull(filename)) {
+                            if(!window.hWin.HEURIST4.util.isnull(filename)) {
                                 window.showReps.onPublish( filename )
                             }
                         }
@@ -530,7 +532,7 @@ console.log(e)
                 if( window.hWin.HEURIST4.currentQuery_all )
                 {
                     var sel = document.getElementById('selTemplates');
-                    if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return; }
+                    if(window.hWin.HEURIST4.util.isnull(sel) || window.hWin.HEURIST4.util.isnull(sel.options) || sel.options.length===0) { return; }
 
                     var template_file = sel.options[sel.selectedIndex].value; // by default first entry
 
@@ -564,7 +566,7 @@ console.log(e)
                     alert('You must select some records');
                 }else{
                     var name=jQuery.trim(prompt("Please enter template name",""));
-                    if (!Hul.isempty(name))
+                    if (!window.hWin.HEURIST4.util.isempty(name))
                     {
                         window.showReps.generateTemplate(name);
                     }

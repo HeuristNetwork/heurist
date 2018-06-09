@@ -48,6 +48,7 @@
                 }
             }
         }
+        
 
         //init bookmarklet
         // NOTE: bookmarklet source is duplicated in /import/bookmarklet/bookmarkletSource.js
@@ -68,10 +69,11 @@
                 + "s=d.createElement('script');s.type='text/javascript';"
                 + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+window.hWin.HAPI4.database+"';"
                 + "d.getElementsByTagName('head')[0].appendChild(s);}"
-                + "else{w=open(h+'records/add/addRecordPopup.php?db="+window.hWin.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
+                + "else{w=open(h+'hclient/framecontent/addRecordPopup.php?db="+window.hWin.HAPI4.database+"&action=add_record&t='+e(d.title)+'&u='+e(location.href));"
                 //+ "window.setTimeout('w.focus()',200);}"
                 + "}})();"
             );
+            
             sel.text('>> '+window.hWin.HAPI4.database)
         }
     }

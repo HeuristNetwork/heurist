@@ -49,7 +49,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 <ul>
 
                     <li class="list-menu-only">
-                        <a href="records/add/addRecordPopup.php" id="menulink-add-record" name="auto-popup" xclass="h3link"
+                        <a href="#" id="menulink-add-record" name="auto-popup"
                             data-logaction="addRec"
                             title="Add new record of specified record type">
                             Add record</a>

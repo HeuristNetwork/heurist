@@ -82,6 +82,8 @@ function fileGetByFileName($system, $fullname){
 */
 function fileGetFullInfo($system, $file_ids){
 
+    //@todo use prepareIds() and prepareStrIds
+    
     if(is_string($file_ids)){
         $file_ids = explode(",", $file_ids);
     }
@@ -430,8 +432,10 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 //
 // output the appropriate html tag to view media content
 //
-function filePrintPlayerTag($fileid, $mimeType, $params, $external_url, $size=null){ 
+function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null){ 
 
+    $result = '';    
+    
     $is_video = (strpos($mimeType,"video/")===0 || strpos($params,"video")!==false);
     $is_audio = (strpos($mimeType,"audio/")===0 || strpos($params,"audio")!==false);
     $is_image = (strpos($mimeType,"image/")===0);
@@ -458,25 +462,22 @@ function filePrintPlayerTag($fileid, $mimeType, $params, $external_url, $size=nu
 
             $playerURL = getPlayerURL($mimeType, $external_url);
 
-            print '<iframe '.$size.' src="'.$playerURL.'" frameborder="0" '
+            $result = '<iframe '.$size.' src="'.$playerURL.'" frameborder="0" '
             . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
 
         }else{
             $player = HEURIST_BASE_URL."ext/mediaelement/flashmediaelement.swf";
 
             //preload="none"
-            ?>
-            <video  type="<?php echo $size;?>  controls="controls">
-            <source type="<?php echo $mimeType;?>" src="<?php echo $filepath;?>" />
-            <!-- Flash fallback for non-HTML5 browsers -->
-            <object width="640" height="360" type="application/x-shockwave-flash" data="<?php echo $player;?>">
-            <param name="movie" value="<?php echo $player;?>" />
-            <param name="flashvars" value="controls=true&file=<?php echo $filepath;?>" />
-            <img src="<?php echo $thumb_url;?>" width="320" height="240" title="No video playback capabilities" />
-            </object>
-            </video>
-            <?php   
-            //note: we may remove flash fallback since it is blocked in most modern browsers
+            $result = '<video '.$size.' controls="controls">'
+            .'<source type="'.$mimeType.'" src="'.$filepath.'" />'
+            .'<!-- Flash fallback for non-HTML5 browsers -->'
+            .'<object '.$size.' type="application/x-shockwave-flash" data="'.$player.'">'
+            .'<param name="movie" value="'.$player.'" />'
+            .'<param name="flashvars" value="controls=true&file='.$filepath.'" />'
+            .'<img src="'.$thumb_url.'" width="320" height="240" title="No video playback capabilities" />'
+            .'</object>'
+            .'</video>';
 
         }
 
@@ -494,10 +495,10 @@ function filePrintPlayerTag($fileid, $mimeType, $params, $external_url, $size=nu
 
             $playerURL = getPlayerURL($mimeType, $external_url);
 
-            print '<iframe '.$size.' src="'.$playerURL.'" frameborder="0"></iframe>';                        
+            $result = '<iframe '.$size.' src="'.$playerURL.'" frameborder="0"></iframe>';                        
 
         }else{
-            print '<audio controls="controls"><source src="'.$filepath
+            $result = '<audio controls="controls"><source src="'.$filepath
             .'" type="'.$mimeType.'"/>Your browser does not support the audio element.</audio>';                        
         }
 
@@ -507,17 +508,17 @@ function filePrintPlayerTag($fileid, $mimeType, $params, $external_url, $size=nu
             if($size==null || $size==''){
                 $size = 'width="300"';
             }
-            print '<img '.$size.' src="'.$filepath.'"/>';
+            $result = '<img '.$size.' src="'.$filepath.'"/>';
 
     }else if($mimeType=='application/pdf'){
         //error_log($filepath);                 
-        print '<embed width="100%" height="100%" name="plugin" src="'
+        $result = '<embed width="100%" height="100%" name="plugin" src="'
         .$filepath.'&embed=1'
         .'" type="application/pdf" internalinstanceid="9">';
 
     }else{
         //not media - show thumb with download link
-        print '<a href="'.$filepath.'" target="_blank"><img src="'.$thumb_url.'"/></a>';
+        $result = '<a href="'.$filepath.'" target="_blank"><img src="'.$thumb_url.'"/></a>';
 
         /*                
         if($size==null || $size==''){
@@ -526,6 +527,7 @@ function filePrintPlayerTag($fileid, $mimeType, $params, $external_url, $size=nu
         print '<iframe '.$size.' src="'.$filepath.'" frameborder="0"></iframe>';                        
         */    
     }
+    return $result;
 }           
 
 //

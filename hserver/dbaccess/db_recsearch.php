@@ -1662,7 +1662,7 @@ $loop_cnt++;
                     
                     $listpaths = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
                     if(is_array($listpaths) && count($listpaths)>0){
-                        $detailValue = array("file" => $listpaths);
+                        $detailValue = array("file" => $listpaths[0]);
                     }
 
                     break;

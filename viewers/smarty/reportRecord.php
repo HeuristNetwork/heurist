@@ -407,23 +407,27 @@ class ReportRecord {
 
                             //if image - special case
 
-                            $res = "";
+                            $res = array(); //list of urls
                             $origvalues = array();
 
                             foreach ($dtValue as $key => $value){
-                                if(strlen($res)>0) $res = $res.", ";
-                                $res = $res.$value['file']['URL'];
+                                $external_url = @$value['file']['ulf_ExternalFileReference'];
+                                if($external_url){
+                                    array_push($res, $external_url);  //external 
 
-
+                                }else if(@$value['file']['ulf_ObfuscatedFileID']){
+                                    //local
+                                    array_push($res, HEURIST_BASE_URL."?db=".HEURIST_DBNAME
+                                            ."&file=".$value['file']['ulf_ObfuscatedFileID']);
+                                }
+                                
                                 //original value keeps the whole 'file' array
                                 array_push($origvalues, $value['file']);
-
                             }
-
-                            if(strlen($res)==0){
+                            if(count($res)==0){
                                 $res = null;
                             }else{
-                                $res = array($dtname=>$res, $dtname."_originalvalue"=>$origvalues);
+                                $res = array($dtname=>implode(', ',$res), $dtname."_originalvalue"=>$origvalues);
                                 //array_merge($arres, array($dtname=>$res));
                             }
 

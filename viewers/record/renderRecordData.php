@@ -795,7 +795,7 @@ function print_public_details($bib) {
                 if(strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0){
                     print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;">';
 
-                    filePrintPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']); //see db_files
+                    print fileGetPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']); //see db_files
                     
                     //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
                     print '</div>';    
