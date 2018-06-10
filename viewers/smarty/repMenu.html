@@ -30,95 +30,32 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
 -->
-<html>
-
-<head>
- <meta http-equiv="content-type" content="text/html; charset=utf-8">
- <link rel="stylesheet" href="../../h4style.css">
- <title>Publish report</title>
- 
- <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
- 
- <script>
-
-   function build_links() {
-     if (widnow.hWin.HEURIST4)
-     {
-			var template_file = widnow.hWin.HEURIST4.util.getUrlParameter('template_file', location.search)
-
-            var mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty');
-
-	 		var currentSearchQuery = 'q=ids:123';
-                        //(mode=="selected")
-						//?top.HEURIST.currentQuery_sel
-						//:((mode=="all")?top.HEURIST.currentQuery_all:top.HEURIST.currentQuery_main);
-
-			if(currentSearchQuery)
-			{
-               
-				currentSearchQuery = currentSearchQuery.replace('"','%22');
-
-				var surl = widnow.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
-					currentSearchQuery + '&publish=1&debug=0&template='+encodeURIComponent(template_file);
-
-				document.getElementById("linkOpenInNewWindow").href = surl;
-
-     			document.getElementById("code-textbox1").value = surl;
-     			document.getElementById("code-textbox2").value =
-('<script type="text/javascript" src="'+surl+'&mode=js"><'+'/script>'+
-'<noscript>'+
-'<iframe width="80%" height="70%" frameborder="0" src="'+surl+'">'+
-'</iframe>'+
-'</noscript>');
-
-
-	 		}
-	 }
-   }
-   
-   function onPublish(){
-       
-       window.close( widnow.hWin.HEURIST4.util.getUrlParameter('template_file', location.search) );  
-       //find showReps 
-       /*for (var idx in top)
-        if(idx!==undefined && top[idx] && top[idx].showReps){
-                var params = top.HEURIST.parseParams(location.search);
-                top[idx].showReps.onPublish( params.template_file );  
-                break;
-        }*/
-   } 
-   
- </script>
-</head>
-
-<body onLoad="build_links()" width="600" height="350" class="popup">
-
-<p>
+<div>
 Note: The URL will only show records to which the viewer has access.
 External viewers will not be able to see any records unless they are marked as Public visibility
-</p>
+</div>
 
-<a href="#" id="linkOpenInNewWindow" class="external-link" target=_new onClick="setTimeout(window.close, 200);"><b>Open in new window</b></a>
+<div style="padding:10px 0">
+<a href="#" id="linkOpenInNewWindow" style="outline:0" target=_new onClick="setTimeout(window.close, 200);">
+    <b>Open in new window</b><span class="ui-icon ui-icon-extlink"/>
+</a>
+</div>
 
 <blockquote>
 	Copy to clipboard by hitting Ctrl-C or [Enter]
 </blockquote>
-   <br>
+
+<div style="padding:10px 0">
    URL:
-  <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 100%; height: 60px;"
+<textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 100%; height: 60px;"
     id="code-textbox1" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"></textarea>
 
-   <br>
+<br>
    Javascript wrap:
-  <textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 100%; height: 100px;"
+<textarea readonly style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; font-size: 10px; width: 100%; height: 100px;"
     id="code-textbox2" onClick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"></textarea>
 
-  <br><br>  
+</div>
     
-  <button onClick="onPublish()">Set up publishing schedule</button> 
-    
-</body>
-</html>
+<button id="btnSetupSchedule">Set up publishing schedule</button> 

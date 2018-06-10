@@ -110,8 +110,7 @@ if (! is_logged_in()) {
             }
         }
 
-        print "top.HEURIST.reports = " . json_format($records) . ";\n";
-        print "\n";
+        print json_format($records);
 
     }else if($metod=="savereport"){ //-----------------
 

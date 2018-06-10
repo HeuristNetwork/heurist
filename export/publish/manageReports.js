@@ -22,9 +22,6 @@
 
 var reportManager;
 
-//aliases
-var Dom = YAHOO.util.Dom,
-	Hul = top.HEURIST.util;
 
 /**
 * ReportManager - class for listing and searching of scheduled reports
@@ -38,13 +35,12 @@ var Dom = YAHOO.util.Dom,
 */
 function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 
-		var _className = "GroupManager",
+		var _className = "ReportManager",
 			_myDataTable,
 			_myDataSource,
 			_usrID, //filter - @todo to show only reports that belongs to this user
 			_arr_selection = [],
 			_callback_func, //callback function for non-window mode
-			_db,
 			_isSingleSelection = false,
 			_records, //array of all reports from server
 			_keepParameters = null;
@@ -69,15 +65,14 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 				*/
 				function __updateRecordsList(context)
 				{
-					_records = Hul.isnull(context)?[]:context;
+					_records = window.hWin.HEURIST4.util.isnull(context)?[]:context;
 					_initTable( _records );
 				};
 
 				var sfilter = "";
-
-				var baseurl = top.HEURIST.baseURL + "export/publish/loadReports.php";
-				var params = "method=searchreports&db=" + _db + sfilter;
-				Hul.getJsonData(baseurl, __updateRecordsList, params);
+				var baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
+                var request = {method:'searchreports', db:window.hWin.HAPI4.database};
+				window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __updateRecordsList);
 	};
 
 
@@ -115,20 +110,21 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 	function _init(usrID, _callback)
 	{
 		_callback_func = _callback;
-		_db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+
 		_keepParameters = null;
 
-				if (Hul.isnull(usrID) && location.search.length > 1) { //for selection mode
-					//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-					top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-					//datatype = top.HEURIST.parameters.type;
+				if (window.hWin.HEURIST4.util.isnull(usrID) && location.search.length > 1) { //for selection mode
+					
 					//list of selected
-					var sIDs = top.HEURIST.parameters.ids;
+					var sIDs = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);
 					if (sIDs) {
 							_arr_selection = sIDs.split(',');
 					}
 
-					if(!(Hul.isempty(top.HEURIST.parameters.hquery) || Hul.isempty(top.HEURIST.parameters.template)))
+					if(!(window.hWin.HEURIST4.util.isempty(
+                                window.hWin.HEURIST4.util.getUrlParameter('hquery', location.search)) 
+                        || window.hWin.HEURIST4.util.isempty(
+                                window.hWin.HEURIST4.util.getUrlParameter('template', location.search))))
 					{
 						_keepParameters = location.search;
 						//auto open _onAddEditRecord(_keepParameters);
@@ -148,7 +144,7 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 	{
 
 	//if datatable exists, only refill ==========================
-				if(!Hul.isnull(_myDataTable)){
+				if(!window.hWin.HEURIST4.util.isnull(_myDataTable)){
 
 					// all stuff is already inited, change livedata in datasource only
 					_myDataSource.liveData = arr;
@@ -245,7 +241,12 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 					elLiner.innerHTML = '';
 					}else{
 					var recID = oRecord.getData('rps_ID');
-					elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=1&id='+recID+'" target="_blank"><img src="../../common/images/lightning.png" width="16" height="16" border="0" title="Run report"></a>';
+					elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='
+                        +window.hWin.HAPI4.database+'&publish=1&id='
+                        +recID
+                        +'" target="_blank">'
+                        +'<img src="../../common/images/lightning.png" width="16" height="16" border="0" title="Run report">'
+                        +'</a>';
 //					elLiner.innerHTML = '<a href="#execute_report"><img src="../../common/images/lightning.png" width="16" height="16" border="0" title="Run report"><\/a>';
 					}
 			}},
@@ -257,7 +258,12 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 						elLiner.innerHTML = '';
 					}else{
 						var recID = oRecord.getData('rps_ID');
-						elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=3&id='+recID+'" target="_blank"><img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link"></a>';
+						elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='
+                        +window.hWin.HAPI4.database+'&publish=3&id='
+                        +recID
+                        +'" target="_blank">'
+                        +'<img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link">'
+                        +'</a>';
 					}
 			}},
 			{ key: null, label: "<div style='font-size:10;'>JS</div>", sortable:false,resizeable:false,width:7,
@@ -267,7 +273,10 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 						elLiner.innerHTML = '';
 					}else{
 						var recID = oRecord.getData('rps_ID');
-						elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='+_db+'&publish=3&mode=js&id='+recID+'" target="_blank"><img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"></a>';
+						elLiner.innerHTML = '<a href="../../viewers/smarty/updateReportOutput.php?db='
+                        +window.hWin.HAPI4.database+'&publish=3&mode=js&id='
+                        +recID+'" target="_blank">'
+                        +'<img src="../../common/images/external_link_16x16.gif" width="16" height="16" border="0" title="JavaScript link"></a>';
 					}
 			}},
 
@@ -327,7 +336,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 
 				if(elLink.hash === "#edit_record") {
 					YAHOO.util.Event.stopEvent(oArgs.event);
-					_onAddEditRecord("?db="+_db+"&recID="+Number(recID));
+					_onAddEditRecord("?db="+window.hWin.HAPI4.database+"&recID="+Number(recID));
 
 				}else if(elLink.hash === "#delete_record"){
 					YAHOO.util.Event.stopEvent(oArgs.event);
@@ -337,18 +346,17 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 
 							function _updateAfterDelete(context) {
 
-								if(!Hul.isnull(context))
+								if(!window.hWin.HEURIST4.util.isnull(context))
 								{
 									dt.deleteRow(oRecord.getId(), -1);
-									alert("Report schedule #"+recID+" was deleted");
-									top.HEURIST.rectypes = context.rectypes;
+									window.hWin.HEURIST4.msg.showMsgFlash("Report schedule #"+recID+" was deleted",1000);
 								}
 							}
 
-							var baseurl = top.HEURIST.baseURL + "export/publish/loadReports.php";
+							var baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
 							var callback = _updateAfterDelete;
-							var params = "method=deletereport&db=" + _db + "&recID=" + recID;
-							Hul.getJsonData(baseurl, callback, params);
+							var request = {method:'deletereport', db:window.hWin.HAPI4.database, recID:recID};
+							window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
 
 						}else{
 							//alert("Impossible to delete");
@@ -429,7 +437,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 									}
 
 									lblSelect1.innerHTML = "<b>"+_arr_selection.length+"</b> record type"+((_arr_selection.length>1)?"s":"");
-									if(!Hul.isnull(lblSelect2)) {
+									if(!window.hWin.HEURIST4.util.isnull(lblSelect2)) {
 										lblSelect2.innerHTML = lblSelect1.innerHTML;
 									}
 	}
@@ -441,7 +449,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 	function _clearSelection(){
 							_arr_selection = [];
 							lblSelect1.innerHTML = "";
-							if(!Hul.isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
+							if(!window.hWin.HEURIST4.util.isnull(lblSelect2)) {lblSelect2.innerHTML = "";}
 							_updateFilterLocal();
 	}
 
@@ -451,22 +459,22 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 	*/
 	function _initListeners()
 	{
-				filterByName = Dom.get('inputFilterByName');
-				if(!Hul.isnull(filterByName)){
+				filterByName = document.getElementById('inputFilterByName');
+				if(!window.hWin.HEURIST4.util.isnull(filterByName)){
 							filterByName.onkeyup = function (e) {
 								setTimeout(_updateFilterLocal, 600);
 							};
 				}
 
 				/*to remove - not used
-				filterBySelection1 = Dom.get('inputFilterBySelection1');
+				filterBySelection1 = document.getElementById('inputFilterBySelection1');
 				if(filterBySelection1) { filterBySelection1.onchange = _updateFilterLocal; }
-				filterBySelection2 = Dom.get('inputFilterBySelection2');
+				filterBySelection2 = document.getElementById('inputFilterBySelection2');
 				if(filterBySelection2) { filterBySelection2.onchange = _updateFilterLocal; }
 
-				lblSelect1 = Dom.get('lblSelect1');
-				lblSelect2 = Dom.get('lblSelect2');
-				var btnClear = Dom.get('btnClearSelection');
+				lblSelect1 = document.getElementById('lblSelect1');
+				lblSelect2 = document.getElementById('lblSelect2');
+				var btnClear = document.getElementById('btnClearSelection');
 				if(btnClear) { btnClear.onclick = _clearSelection; }
 				*/
 
@@ -477,18 +485,18 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 	*/
 	function _onAddEditRecord(params){
 
-		var url = top.HEURIST.baseURL + "export/publish/editReportSchedule.html";
-		if(!Hul.isempty(params)){
+		var url = window.hWin.HAPI4.baseURL + "export/publish/editReportSchedule.html";
+		if(!window.hWin.HEURIST4.util.isempty(params)){
 			url = url + params;
 		}
 
-		top.HEURIST.util.popupURL(top, url,
-		{   "close-on-blur": false,
+		window.hWin.HEURIST4.msg.showDialog( url, {
+		    "close-on-blur": false,
 			"no-resize": false,
 			height: 400,
 			width: 620,
 			callback: function(context) {
-				if(!Hul.isnull(context)){
+				if(!window.hWin.HEURIST4.util.isnull(context)){
 
 					//update id
 					var recID = Math.abs(Number(context.result[0]));
@@ -523,7 +531,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 
 						if(_isWindowMode){
 							window.close(res, _usrID);
-						}else if (!Hul.isnull(_callback_func) ) {
+						}else if (!window.hWin.HEURIST4.util.isnull(_callback_func) ) {
 							_callback_func(res, _usrID);
 						}
 				},
@@ -534,13 +542,15 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 				cancel : function () {
 					if(_isWindowMode){
 						window.close();
-					}else if (!Hul.isnull(_callback_func) ) {
+					}else if (!window.hWin.HEURIST4.util.isnull(_callback_func) ) {
 						_callback_func();
 					}
 				},
 
 				editReport: function(recID){
-					_onAddEditRecord((recID<0 && _keepParameters)?_keepParameters:"?db="+_db+"&recID="+recID);
+					_onAddEditRecord((recID<0 && _keepParameters)
+                        ?_keepParameters
+                        :"?db="+window.hWin.HAPI4.database+"&recID="+recID);
 				},
 
 				getClass: function () {

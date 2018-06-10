@@ -444,7 +444,7 @@ require_once(dirname(__FILE__).'/../../hserver/dbaccess/conceptCode.php');
         //print json_encode($res);
     }
 
-    if (! function_exists('array_str_replace')) {
+//if (! function_exists('array_str_replace')) {
 
     function array_str_replace($search, $replace, $subject) {
         /*
@@ -486,5 +486,5 @@ require_once(dirname(__FILE__).'/../../hserver/dbaccess/conceptCode.php');
         return $val;
     }
 
-    }
+//}
 ?>

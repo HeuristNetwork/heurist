@@ -646,6 +646,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     
     //
     // take element and assign it to dialog, on dialog close place element back to original parent
+    // and dialog object will be destroed
     //
     showElementAsDialog: function(options){
 

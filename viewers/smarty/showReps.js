@@ -50,6 +50,7 @@ function ShowReps() {
     _currentRecordset = null,
     _currentQuery = null,
     
+    embed_dialog = null,
     mylayout = null;
     
     var top_repcontainer = '36px';
@@ -323,9 +324,10 @@ function ShowReps() {
             var request = {t:(new Date()).getMilliseconds(), session:session_id};            
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-                _hideProgress();
+                
                 if(!response || response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    console.log(response);                   
+                    _hideProgress();
+                    //console.log(response+'  '+session_id);                   
                 }else{
                     
                     var resp = response?response.split(','):[0,0];
@@ -607,11 +609,16 @@ function ShowReps() {
     /**
     * Convert template to global
     */
-    function _doExportTemplate(template_file, istest) {
+    function _doExportTemplate() {
 
+        var istest = false;
+        
         var dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
         if(dbId > 0){
 
+            var template_file = $('#selTemplates').val();
+            if( window.hWin.HEURIST4.util.isempty(template_file) ) return;
+            
             var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
 
             var request = { mode:'serve',db:window.hWin.HAPI4.database, dir:0, template:template_file };
@@ -626,7 +633,7 @@ function ShowReps() {
                     }
                  },'auto');
             }else{
-                var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
+                var squery = 'db='+window.hWin.HAPI4.database+'&mode=serve&dir=0&template='+template_file;
                 //template.gpl
                 window.hWin.HEURIST4.util.downloadURL(baseurl+'?'+squery);
             }
@@ -2025,31 +2032,6 @@ this_id       : "term"
         */
     }
 
-
-
-    //
-    function _onPublish(template_file){
-
-        var q = _getQueryAndTemplate(template_file, true);
-
-        if(q==null) return;
-
-        var sURL = window.hWin.HAPI4.baseURL + "export/publish/manageReports.html?"+q+"&db="+window.hWin.HAPI4.database;
-
-        var body = $(window.hWin.document).find('body');
-        var dim = {h:body.innerHeight(), w:body.innerWidth()};
-
-        window.hWin.HEURIST4.msg.showDialog(sURL, 
-            {   "close-on-blur": false,
-                "no-resize": false,
-                height: 480,
-                width: dim.w*0.9,
-                callback: null
-        });
-    }
-
-
-
     function _onResize(newwidth){
 
         var newval = newwidth>605?'36px':'60px';
@@ -2061,6 +2043,98 @@ this_id       : "term"
             }
         }
     }
+    
+    //
+    // save current output to file
+    //            
+    function _saveOutput(){
+        if( _currentQuery )
+        {
+            var template_file = $('#selTemplates').val(); //current template
+            if(window.hWin.HEURIST4.util.isempty(template_file)) { return; }
+
+            var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
+            squery = squery.replace('"','%22');
+            
+            var surl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
+                squery + '&publish=2&debug=0&output=heurist_report.html&template='+template_file;
+                
+            $("#btnRepSave").hide();    
+            window.hWin.HEURIST4.util.downloadURL(surl, function(){
+                $("#btnRepSave").show();
+            });
+        }
+    }
+    
+    function _onReportPublish(){
+
+        var template_file = $('#selTemplates').val();
+        if(window.hWin.HEURIST4.util.isempty(template_file)) return;
+
+        if(!embed_dialog){
+            embed_dialog = $('#smarty_publish_dialg');
+            embed_dialog.load(window.hWin.HAPI4.baseURL+'viewers/smarty/repMenu.html', 
+            function(){
+                    _onReportPublish();
+            });
+            return;
+        }
+        
+        var mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty'); //not used
+        var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
+        
+        //init and fill ui
+        var surl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
+            squery.replace('"','%22') + '&publish=1&debug=0&template='+encodeURIComponent(template_file);
+
+        embed_dialog.find("#linkOpenInNewWindow").attr('href', surl);
+
+        embed_dialog.find("#code-textbox1").val(surl);
+        embed_dialog.find("#code-textbox2").val(
+        '<script type="text/javascript" src="'+surl+'&mode=js"><'+'/script>'+
+        '<noscript>'+
+        '<iframe width="80%" height="70%" frameborder="0" src="'+surl+'">'+
+        '</iframe>'+
+        '</noscript>');
+        
+        var $dlg_pce;
+        
+        embed_dialog.find("#btnSetupSchedule").button().click(function(event){
+            
+                        $dlg_pce.dialog('close');
+                        
+                        $(event.target).off('click');
+
+                        var q = 'hquery='+encodeURIComponent(squery)+'&template='+template_file;
+                        var sURL = window.hWin.HAPI4.baseURL + "export/publish/manageReports.html?"
+                                    + q + "&db="+window.hWin.HAPI4.database;
+
+                        var body = $(window.hWin.document).find('body');
+                        var dim = {h:body.innerHeight(), w:body.innerWidth()};
+
+                        window.hWin.HEURIST4.msg.showDialog(sURL, 
+                            {   "close-on-blur": false,
+                                "no-resize": false,
+                                height: 480,
+                                width: dim.w*0.9,
+                                callback: null
+                        });
+            
+        });
+
+        $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
+                element: embed_dialog[0],
+                height: 400,
+                width: 600,
+                title: window.hWin.HR('Publish report')
+        });        
+        
+        
+        
+    }
+
+    
+    
 
 
     //public members
@@ -2127,6 +2201,10 @@ this_id       : "term"
                 _showEditor(template_file);
             }
         },
+        
+        onReportPublish: function(){
+            _onReportPublish();
+        },
 
         initEditorMode: function(template_file, template_body){
             _initEditorMode(template_file, template_body);
@@ -2140,12 +2218,12 @@ this_id       : "term"
             _doExecuteFromEditor();
         },
 
-        doExportTemplate: function(template_file){
-            _doExportTemplate(template_file, false);
+        doExportTemplate: function(){
+            _doExportTemplate();
         },
 
-        onPublish:function (template_file){
-            _onPublish(template_file);
+        saveOutput: function(){
+            _saveOutput();
         },
 
         //inserts selected variables inside the loop

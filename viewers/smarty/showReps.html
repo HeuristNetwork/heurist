@@ -364,11 +364,6 @@
                 <!--        <button onClick="doEditor(3)">Delete</button>
                 -->
                 <button onClick="doEditor(0)">Close Editor</button>
-                <!--
-                &nbsp;&nbsp;&nbsp;
-                <button onClick="onExportTemplate()" title="Export template with concept codes">Export</button>
-                <button onClick="{$('#fileupload').click();}" title="Upload template">Import</button>
-                -->
             </div>
 
             <div id="templateCode">
@@ -446,6 +441,8 @@
             </div>
         </div>
 
+        <div id="smarty_publish_dialg" style="display:none"></div>
+        
 
         <script type="text/javascript">
             //
@@ -474,27 +471,6 @@ console.log(e)
             //
             // 
             //
-            function onFilePublish(){
-
-                var sel = document.getElementById('selTemplates');
-                if(window.hWin.HEURIST4.util.isnull(sel) || window.hWin.HEURIST4.util.isnull(sel.options) 
-                    || sel.options.length===0) { return; }
-
-                var template_file = sel.options[sel.selectedIndex].value; // by default first entry
-
-                window.hWin.HEURIST4.msg.showDialog( window.hWin.HAPI4.baseURL 
-                            + 'viewers/smarty/repMenu.html?template_file='
-                            + encodeURIComponent(template_file),
-                    {   title: 'Publish report',
-                        callback: function(filename){
-                            if(!window.hWin.HEURIST4.util.isnull(filename)) {
-                                window.showReps.onPublish( filename )
-                            }
-                        }
-                } );
-
-            }
-
 
             //
             function onShowEditor()
@@ -519,51 +495,11 @@ console.log(e)
             }
 
             //
-            function onPublish()
-            {
-                var sel = document.getElementById('selTemplates');
-
-                if(sel.selectedIndex>=0){
-                    window.showReps.onPublish(sel.options[sel.selectedIndex].value);
-                }
-            }
-
-            function onSaveOutput(){
-                if( window.hWin.HEURIST4.currentQuery_all )
-                {
-                    var sel = document.getElementById('selTemplates');
-                    if(window.hWin.HEURIST4.util.isnull(sel) || window.hWin.HEURIST4.util.isnull(sel.options) || sel.options.length===0) { return; }
-
-                    var template_file = sel.options[sel.selectedIndex].value; // by default first entry
-
-                    var currentSearchQuery = window.hWin.HEURIST4.currentQuery_all.replace('"','%22');
-                    var surl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
-                        currentSearchQuery + '&publish=2&debug=0&output=heurist_report.html&template='+template_file;
-                        
-                        
-                    $("#btnRepSave").hide();    
-                    window.hWin.HEURIST4.util.downloadURL(surl, function(){
-                        $("#btnRepSave").show();
-                    });
-                }
-
-            }
-
-            function onExportTemplate()
-            {
-                var sel = document.getElementById('selTemplates');
-                if(sel.selectedIndex>=0){
-                    window.showReps.doExportTemplate(sel.options[sel.selectedIndex].value);
-                }
-                return false;
-            }
-
-            //
             //
             function onGenerate()
             {
                 if(window.showReps.isNeedSelection()){
-                    alert('You must select some records');
+                    window.hWin.HEURIST4.msg.showMsgErr('You must select some records');
                 }else{
                     var name=jQuery.trim(prompt("Please enter template name",""));
                     if (!window.hWin.HEURIST4.util.isempty(name))
@@ -639,9 +575,12 @@ console.log(e)
                 $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-in" }}).click(function(){
                     $('#fileupload').click();return false;
                 });
-                $("#btnRepExport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).click(onExportTemplate);
-                $("#btnRepSave").button({text:false, icons: { primary: "ui-icon-disk" }}).click(onSaveOutput);
-                $("#btnRepPublish").button({text:false, icons: { primary: "ui-icon-globe-b" }}).click(onFilePublish);
+                $("#btnRepExport").button({text:false, icons: { primary: "ui-icon-sign-out" }})
+                        .click( window.showReps.doExportTemplate );
+                $("#btnRepSave").button({text:false, icons: { primary: "ui-icon-disk" }})
+                        .click( window.showReps.saveOutput );
+                $("#btnRepPublish").button({text:false, icons: { primary: "ui-icon-globe-b" }})
+                        .click(window.showReps.onReportPublish);
                 $("#btnRepRefresh").button({text:false, icons: { primary: "ui-icon-refresh" }}).click(onSelectTemplate);
 
 
@@ -711,7 +650,7 @@ console.log(e)
                             obj = JSON.parse(obj);
                         }
                         if (obj  &&  obj.error) {
-                            alert(obj.error);
+                            window.hWin.HEURIST4.msg.showMsgErr(obj.error);
                         }else if(obj.ok) {
                             window.showReps.showEditor(obj.ok, true);
                             if(obj.details_not_found){
@@ -725,7 +664,7 @@ console.log(e)
 +'<p style="padding-top:1.5em">You may wish to import the missing concepts using Database > Structure > Import from databases. The first part of the code indicates the database in which the concept was originally defined.</p>'
                                 ,null,'Conversion of template file to internal codes');
                                 /* old
-                                alert('Conversion of template file to internal codes. '+
+                                window.hWin.HEURIST4.msg.showMsgErr('Conversion of template file to internal codes. '+
                                 'Unable to convert '+obj.details_not_found.length+
                                 '. Failure to convert the Concept IDs (global codes for particular record types and fields) '+
                                 'to local codes indicates that the Concept IDs are not known within your database. Concept IDs '+

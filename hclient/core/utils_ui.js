@@ -2138,6 +2138,11 @@ window.hWin.HEURIST4.ui = {
         }
     },
 
+    cleanFilename: function(filename) {
+        filename = filename.replace(/\s+/gi, '-'); // Replace white space with dash
+        filename= filename.split(/[^a-zA-Z0-9\-\_\.]/gi).join('_');
+        return filename;
+    },
     
 }//end ui
 

@@ -53,7 +53,7 @@ if(!$system->is_inited()){
 
 $rps_ID = (array_key_exists('id',$_REQUEST)) ? $_REQUEST['id'] :0;
 
-//mode of publication  3- to html or js wrapper
+//mode of publication  3 - redirect to existing  html or js wrapper
 if(array_key_exists('publish',$_REQUEST)){
 	$publish = intval($_REQUEST['publish']);
 }else{
@@ -92,7 +92,7 @@ exit();
 //
 function doReport($row){
 
-	global $publish, $format;
+	global $system, $publish, $format;
 
 	if($row['rps_FilePath']!=null){
 		$dir = $row['rps_FilePath'];
@@ -119,7 +119,7 @@ function doReport($row){
 			if(file_exists($filename2)){
 				$outputfile = $filename2;
 				$ext = $format;
-			}else if ($format=="js"){
+			}else{ // if ($format=="js")
 				$outputfile = $outputfile.".html";
 				$ext = "html";
 			}
@@ -135,8 +135,10 @@ function doReport($row){
                     $publish = 2;
                 }
             }
-            if($publish == 3){
+            if($publish == 3){ //request for current files
             
+                header("Content-type: text/html;charset=UTF-8");
+                
 			    $content = file_get_contents($outputfile);
 			    if($format=="js" && $ext != $format){
 				    $content = str_replace("\n","",$content);
@@ -149,7 +151,7 @@ function doReport($row){
 			    return;
             }
 		}
-		$publish = 2;
+		$publish = 1; //file does not exists - regenerate
 	}//publish==3
 
 	$hquery = $row['rps_HQuery'];
@@ -172,6 +174,6 @@ function doReport($row){
 	$params["publish"] 	= $publish;
 	$params["rps_id"] 	= $row['rps_ID'];
 
-	executeSmartyTemplate($params); //in showReps
+	executeSmartyTemplate($system, $params); //in showReps
 }
 ?>

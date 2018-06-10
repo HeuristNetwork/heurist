@@ -23,7 +23,9 @@
 *
 * 'output' - full file path to be saved
 * 'mode' - if publish>0: js or html (default)
-* 'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only),
+* 'publish' - 0 vsn 3 UI (smarty tab),  
+*             1 - publish,  
+*             2 - no browser output (save into file only)
 *
 * other parameters are hquery's
 * 
@@ -306,13 +308,13 @@ function executeSmartyTemplate($system, $params){
         $smarty->error_reporting = 0;
 
         if($outputfile!=null){
-            $smarty->registerFilter('output', 'smarty_output_filter');
+            $smarty->registerFilter('output', 'smarty_output_filter');  //to preform output into file
         }else if($isJSout){
             $smarty->registerFilter('output', 'smarty_output_js_filter');
         }
     }
     //DEBUG   
-    $smarty->registerFilter('post','smarty_post_filter');
+    $smarty->registerFilter('post','smarty_post_filter'); //to add progress support
 
     if($publishmode==0 && $session_id!=null){
         mysql__update_progress($mysqli, $session_id, true, '0,'.count($results));
@@ -323,6 +325,9 @@ function executeSmartyTemplate($system, $params){
     $execution_counter = -1;
     $execution_total_counter = count($results);
     try{
+        if($outputfile==null && $publishmode==1){
+            header("Content-type: text/html;charset=UTF-8");
+        }
         $smarty->display($template_file);
     } catch (Exception $e) {
         smarty_error_output($sysem, 'Exception on execution: '.$e->getMessage());
@@ -416,7 +421,7 @@ function save_report_output2($tpl_source){
     }
     }
 
-    //$publishmode=2 download
+    //$publishmode=2 save into file or download (no browser output)
     if($publishmode!=1){
 
         if($errors!=null){
