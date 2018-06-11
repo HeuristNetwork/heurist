@@ -22,7 +22,8 @@
 //&callback=initMap" async defer  for gmap
 //<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing"></script>
 //
-require_once(dirname(__FILE__)."/initPage.php");
+define('PDIR','../../');  //need for proper path to js and css    
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 
 $system->defineConstants();
 ?>
@@ -66,8 +67,8 @@ $system->defineConstants();
 <link href="<?php echo PDIR;?>ext/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
 <!-- Mapping -->
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/map.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/map_overlay.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/map/map.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/map/map_overlay.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/map_bubble.js"></script>
 
 
@@ -445,7 +446,7 @@ $system->defineConstants();
 
         var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
         query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-        var url = window.hWin.HAPI4.baseURL+'hclient/framecontent/map.php' + query;
+        var url = window.hWin.HAPI4.baseURL+'viewers/map/map.php' + query;
 
         //document.getElementById("linkTimeline").href = url;
 
@@ -460,7 +461,7 @@ $system->defineConstants();
         //encode
         query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
         query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-        url = window.hWin.HAPI4.baseURL+'hclient/framecontent/map.php' + query;
+        url = window.hWin.HAPI4.baseURL+'viewers/map/map.php' + query;
         document.getElementById("code-textbox2").value = '<iframe src=\'' + url +
         '\' width="800" height="650" frameborder="0"></iframe>';
         

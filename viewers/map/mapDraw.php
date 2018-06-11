@@ -19,7 +19,8 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-require_once(dirname(__FILE__)."/initPage.php");
+define('PDIR','../../');  //need for proper path to js and css    
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
 

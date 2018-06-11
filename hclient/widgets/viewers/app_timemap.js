@@ -1,6 +1,6 @@
 /**
 * app_timemap.js - load map + timeline into an iframe in the interface.
-* This widget acts as a wrapper for hclient/framecontent/map.php
+* This widget acts as a wrapper for viewers/map/map.php
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -148,7 +148,7 @@ $.widget( "heurist.app_timemap", {
             if( this.mapframe.attr('src') ){  //frame already loaded
                 this._initmap()
             }else {
-                var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/map.php?db='+window.hWin.HAPI4.database;
+                var url = window.hWin.HAPI4.baseURL + 'viewers/map/map.php?db='+window.hWin.HAPI4.database;
                 if(this.options.layout){
                     if( this.options.layout.indexOf('timeline')<0 )
                         url = url + '&notimeline=1';
@@ -215,7 +215,7 @@ $.widget( "heurist.app_timemap", {
             return;
         }
 
-        this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see hclient/framecontent/map.js
+        this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see viewers/map/map.js
     }
 
 
@@ -264,7 +264,7 @@ $.widget( "heurist.app_timemap", {
     , loadMapDocumentById: function(recId){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
-            mapping.map_control.loadMapDocumentById(recId);  //see hclient/framecontent/map.js
+            mapping.map_control.loadMapDocumentById(recId);  //see viewers/map/map.js
         }
     }
 
