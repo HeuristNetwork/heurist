@@ -880,7 +880,7 @@ function _showInfoToolTip(event) {
         my_tooltip.mouseover(__clearHideTimer2);
         my_tooltip.mouseout(__hideToolTip2);
 
-        var xy = Hul.getMousePos(event);
+        var xy = window.hWin.HEURIST4.ui.getMousePos(event);
         //xy = [posx = event.target.x,posy = event.target.y];
 
 

@@ -31,8 +31,7 @@
 var selectDetailType;
 
 //aliases
-var Dom = YAHOO.util.Dom,
-	Hul = window.hWin.HEURIST4.util;
+var Hul = window.hWin.HEURIST4.util;
 
 /**
 *
@@ -487,7 +486,7 @@ function SelectDetailType() {
 	*/
 	function _initGroupComboBoxFilter()
 	{
-							filterByGroup = Dom.get('inputFilterByGroup');
+							filterByGroup = document.getElementById('inputFilterByGroup');
 							var dtg_ID,
 								index;
 
@@ -535,7 +534,7 @@ function SelectDetailType() {
 	*/
 	function _initListeners()
 	{
-							filterByName = Dom.get('inputFilterByName');
+							filterByName = document.getElementById('inputFilterByName');
 							filterByName.onkeyup = function (e) {
 								filterByGroup.selectedIndex = 0;
 								clearTimeout(filterTimeout);
@@ -543,14 +542,14 @@ function SelectDetailType() {
 							};
 							setTimeout(function(){filterByName.focus();}, 1000);
 
-							filterBySelection1 = Dom.get('inputFilterBySelection1');
+							filterBySelection1 = document.getElementById('inputFilterBySelection1');
 							filterBySelection1.onchange = _updateFilter;
-							filterBySelection2 = Dom.get('inputFilterBySelection2');
+							filterBySelection2 = document.getElementById('inputFilterBySelection2');
 							filterBySelection2.onchange = _updateFilter;
 
-							lblSelect1 = Dom.get('lblSelect1');
-							lblSelect2 = Dom.get('lblSelect2');
-							var btnClear = Dom.get('btnClearSelection');
+							lblSelect1 = document.getElementById('lblSelect1');
+							lblSelect2 = document.getElementById('lblSelect2');
+							var btnClear = document.getElementById('btnClearSelection');
 							if(btnClear) btnClear.onclick = _clearSelection;
 	} //end init listener
 

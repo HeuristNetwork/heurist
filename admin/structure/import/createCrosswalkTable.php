@@ -685,7 +685,7 @@
 
                     my_tooltip.mouseover(__clearHideTimer);
                     my_tooltip.mouseout(__hideToolTip);
-                    var xy = top.HEURIST.util.getMousePos(event);
+                    var xy = window.hWin.HEURIST4.ui.getMousePos(event);
                     my_tooltip.html(textTip);
                     top.HEURIST.util.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height(),0);
                     hideTimer = window.setTimeout(_hideToolTip, 2000);

@@ -74,7 +74,7 @@ function DetailTypeManager() {
     //
     function _init()
     {
-        window.hWin.HEURIST4.detailtypes.rectypeUsage = {};
+        //window.hWin.HEURIST4.detailtypes.rectypeUsage = {};
         
         var ind = 0,
         dtg_ID,
@@ -284,7 +284,7 @@ console.log('!!!!');
             dty_ID,
             fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
             
-            window.hWin.HEURIST4.detailtypes.rectypeUsage = {}; //temp
+            //window.hWin.HEURIST4.detailtypes.rectypeUsage = {}; //temp
 
             //create datatable and fill it values of particular group
             for (dty_ID in window.hWin.HEURIST4.detailtypes.typedefs) {
@@ -777,7 +777,7 @@ console.log('!!!!');
             }
         }
         if(!Hul.isnull(textTip)) {
-            var xy = Hul.getMousePos(event);
+            var xy = window.hWin.HEURIST4.ui.getMousePos(event);
             xy[0] = xy[0] - 10;
 
             _rolloverInfo.showInfoAt(xy,"inforollover2",textTip);

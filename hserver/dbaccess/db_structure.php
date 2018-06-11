@@ -950,9 +950,9 @@ function dbs_GetRectypeConstraint($system) {
                 'fieldNamesToIndex' => __getColumnNameToIndex(getDetailTypeColNames()));
             $dtStructs['lookups'] = dbs_GetDtLookups();
         }
-        if(false && $imode==2){
+        if($imode==2){
             $dtStructs['rectypeUsage'] = getDetailTypeDefUsage($mysqli);
-            $dtStructs['usageCount']   = getDetailTypeUsageCount($mysqli);
+            //$dtStructs['usageCount']   = getDetailTypeUsageCount($mysqli);
         }
 
         $where_exp = null;        
