@@ -116,8 +116,6 @@ function hAPI(_db, _oninit) { //, _currentUser
 
         var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());
 
-        //window.hWin.HEURIST4.ajax.getJsonData(url, callback, request);
-
         //note jQuery ajax does not properly in the loop - success callback does not work often
         $.ajax({
             url: url,

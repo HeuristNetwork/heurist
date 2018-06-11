@@ -538,20 +538,33 @@ window.hWin.HEURIST4.util = {
             error: function(jqXHR, textStatus, errorThrown ) {
                 if(callback){
                     
-                    var UNKNOWN_ERROR = (window.hWin)
-                            ?window.hWin.ResponseStatus.UNKNOWN_ERROR:'unknown';
+                    //var UNKNOWN_ERROR = (window.hWin)
+                    //        ?window.hWin.ResponseStatus.UNKNOWN_ERROR:'unknown';
+                            
+                    var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
+                                            ?'Error_Connection_Reset':jqXHR.responseText;
+                    var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message}
                     
                     if(caller){
-                        callback(caller, {status:UNKNOWN_ERROR,
-                                message: jqXHR.responseText });
+                        callback(caller, response);
                     }else{
-                        callback({status:UNKNOWN_ERROR,
-                                message: jqXHR.responseText });
+                        callback(response);
                     }
                 }
-                //message:'Error connecting server '+textStatus});
             },
             success: function( response, textStatus, jqXHR ){
+                if(callback){
+                    if(caller){
+                        callback(caller, response);
+                    }else{
+                        callback(response);    
+                    }
+                }
+            },
+            fail: function(  jqXHR, textStatus, errorThrown ){
+                var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
+                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+
                 if(callback){
                     if(caller){
                         callback(caller, response);

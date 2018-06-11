@@ -23,36 +23,38 @@
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 */
+
+define('PDIR','../../');  //need for proper path to js and css    
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
-<html>
-    <head>
-        <title>Heurist crosstabs</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script type="text/javascript">
 
-        <link rel=stylesheet href="../../common/css/global.css" media="all">
+    var mapping, menu_datasets, btn_datasets;
+    
+    // Callback function on page initialization - see initPage.php
+    function onPageInit(success){
+        //database, query q, domain w
+        crosstabsAnalysis = CrosstabsAnalysis('', '');        
+        //
+    }
+</script>
+
         <link rel=stylesheet href="crosstabs.css" media="all">
-
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
     </head>
     <body style="padding:5px;overflow-x:auto;" class="popup">
 
-        <script src="../../common/js/utilsLoad.js"></script>
-        <script src="../../common/php/displayPreferences.php"></script>
-        <script src="../../common/php/loadCommonInfo.php"></script>
-
-        <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
         <script type="text/javascript" src="crosstabs.js"></script>
 
         <div style="margin:0px auto; padding: 0.5em;">
 
             <div id="qform" class="disign-content" style="width:100%;">
-                <div style="position: absolute;top:20px;left:350px;width:200px"><img src="crosstabs_image.png"/></div>
+                <div style="position: absolute;top:20px;left:450px;width:200px"><img src="crosstabs_image.png"/></div>
 
                 <fieldset>
                     <div>
                         <div class="fldheader"><label for="cbRectypes">Show fields for</label></div>
                         <div class="input-cell" style="width:220px;">
-                            <select id="cbRectypes" onchange="crosstabsAnalysis.onRectypeChange(event)" class="text ui-widget-content ui-corner-all"></select>
+                            <select id="cbRectypes" class="text ui-widget-content ui-corner-all"></select>
                             <div style="font-size: 0.9em;">Note: choice of record type determines the list of fields avaiable but does not filter the results - the analysis is based on all records in the result set</div>
                         </div>
                     </div>
@@ -85,7 +87,8 @@
                     <div style="height:2em">&nbsp;</div>
                     <div>
                         <div class="fldheader"><label for="cbPages">Var3 (pages)</label></div>
-                        <div class="input-cell"><select id="cbPages" name="page" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all"></select>
+                        <div class="input-cell"><select id="cbPages" name="page" 
+                            onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all"></select>
                             <button tt='page' class='showintervals collapsed'></button>
                             <div id="pageIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                         </div>
@@ -130,10 +133,10 @@
 
                 </fieldset>
                 <div style="text-align:right;padding-top:1em; padding-bottom:1em; display:none;" id="btnPanels">
-                    <span id="btnUpdate"><button onclick="crosstabsAnalysis.doRetrieve()">Update results</button></span>
+                    <button id="btnUpdate" onclick="crosstabsAnalysis.doRetrieve()">Update results</button>
                     <button onclick="crosstabsAnalysis.doSave()">Save specification</button>
-                    <span id="btnCancel"><button onclick="crosstabsAnalysis.doCancel()">Cancel</button></span>
-                    <span id="btnPrint" style="display:none"><button onclick="crosstabsAnalysis.doPrint()">Print results</button></span>
+                    <button id="btnCancel" onclick="crosstabsAnalysis.doCancel()">Cancel</button>
+                    <button id="btnPrint" onclick="crosstabsAnalysis.doPrint()">Print results</button>
                 </div>
             </div>
 
@@ -150,11 +153,6 @@
             </div>
         </div>
 
-        <script  type="text/javascript">
-            $(document).ready(function() {
-                crosstabsAnalysis = CrosstabsAnalysis('<?=$_REQUEST['db']?>', '<?=@$_REQUEST['q']?>', '<?=@$_REQUEST['w']?>');    
-            });
-        </script>
-
+    
     </body>
 </html>

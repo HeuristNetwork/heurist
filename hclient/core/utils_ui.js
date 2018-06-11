@@ -357,9 +357,9 @@ window.hWin.HEURIST4.ui = {
 
     },
 
-    // not used
+    // 
     //
-    //
+    // see crosstabs
     //
     getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         
