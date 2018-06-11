@@ -341,7 +341,7 @@ copy_IconAndThumb_FromLibrary
 
             $rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
-            if($rows == "1062"){
+            if($rows === "1062"){
                 $ret =  "Record type with specified name already exists in the database, please use the existing record type\nThis type may be hidden - turn it on through Database > Manage structure";
             }else if ($rows==0 || is_string($rows) ) {
                 $ret = handleError("SQL error inserting data into table defRecTypes: ".$rows, $query);
@@ -452,7 +452,7 @@ copy_IconAndThumb_FromLibrary
 
 
 				$res = mysql__exec_param_query($mysqli, $query, $parameters, true);
-				if($res == "1062"){
+				if($res === "1062"){
 					$ret =  "Record type with specified name already exists in the database, please use the existing record type";
 				}else if(!is_numeric($res)){
                     $ret = handleError("SQL error updating record type $rtyID in updateRectype: ".$res, $query);
@@ -1171,7 +1171,7 @@ copy_IconAndThumb_FromLibrary
 
 			$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
-			if($rows == "1062"){
+			if($rows === "1062"){
 				$ret =  "Field type with specified name already exists in the database, please use the existing field type.\nThe field may be hidden - turn it on through Database > Manage base field types";
 			}else  if ($rows==0 || is_string($rows) ) {
 				$ret = "Error inserting data into defDetailTypes table: ".$rows;
@@ -1290,7 +1290,7 @@ copy_IconAndThumb_FromLibrary
 
 				$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
-				if($rows == "1062"){
+				if($rows === "1062"){
 					$ret =  "Field type with specified name already exists in the database, please use the existing field type";
 				}else if ($rows!='' && is_string($rows)){  //(is_string($rows) || $rows==0)
                     $ret = handleError("SQL error updating field type $dtyID in updateDetailType: "

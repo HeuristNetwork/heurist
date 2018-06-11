@@ -63,10 +63,14 @@ function ReportManager(_isFilterMode, _isSelection, _isWindowMode) {
 				/**
 				* Result handler for search on server
 				*/
-				function __updateRecordsList(context)
+				function __updateRecordsList(response )
 				{
-					_records = window.hWin.HEURIST4.util.isnull(context)?[]:context;
-					_initTable( _records );
+                    if(response.status == window.hWin.ResponseStatus.OK){
+					    _records = window.hWin.HEURIST4.util.isnull(response.data)?[]:response.data;
+					    _initTable( _records );
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
 				};
 
 				var sfilter = "";
@@ -341,26 +345,25 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 				}else if(elLink.hash === "#delete_record"){
 					YAHOO.util.Event.stopEvent(oArgs.event);
 
-						var value = confirm("Do you really want to delete '"+oRecord.getData('rps_Title')+"'?");
-						if(value) {
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                            "Do you really want to delete '"+oRecord.getData('rps_Title')+"'?",
+                            function(){ 
+                                function _updateAfterDelete(response) {
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                            dt.deleteRow(oRecord.getId(), -1);
+                                            window.hWin.HEURIST4.msg.showMsgFlash(
+                                                "Report schedule #"+recID+" was deleted",1000);
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    }
+                                }
 
-							function _updateAfterDelete(context) {
-
-								if(!window.hWin.HEURIST4.util.isnull(context))
-								{
-									dt.deleteRow(oRecord.getId(), -1);
-									window.hWin.HEURIST4.msg.showMsgFlash("Report schedule #"+recID+" was deleted",1000);
-								}
-							}
-
-							var baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
-							var callback = _updateAfterDelete;
-							var request = {method:'deletereport', db:window.hWin.HAPI4.database, recID:recID};
-							window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
-
-						}else{
-							//alert("Impossible to delete");
-						}
+                                var baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
+                                var callback = _updateAfterDelete;
+                                var request = {method:'deletereport', db:window.hWin.HAPI4.database, recID:recID};
+                                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+                            }, 
+                            {title:'Confirm',yes:'Continue',no:'Cancel'});
 
 				}else if(eLink.hash === "#execute_report"){
 
@@ -499,7 +502,7 @@ elLiner.innerHTML = '<div align="center"><a href="#delete_record"><img src="../.
 				if(!window.hWin.HEURIST4.util.isnull(context)){
 
 					//update id
-					var recID = Math.abs(Number(context.result[0]));
+					var recID = Math.abs(Number(context.data[0]));
 
 					//refresh table
 					_updateFilter();

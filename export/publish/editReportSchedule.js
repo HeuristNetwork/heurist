@@ -56,34 +56,8 @@ function ReportScheduleEditor() {
         document.getElementById("lblFilePathHelp").innerHTML = "Path to which report is published (leave blank for default path "+ window.hWin.HAPI4.database + "/generated-reports)";
 
 
-        // reads parameters from GET request
-        if (location.search.length > 1) {
-                
-                _recID = window.hWin.HEURIST4.util.getUrlParameter('recID', location.search);
-                
-                typeID = window.hWin.HEURIST4.util.getUrlParameter('typeID', location.search);
-                templatefile = window.hWin.HEURIST4.util.getUrlParameter('template', location.search); 
-                
-                hquery = window.hWin.HEURIST4.util.getUrlParameter('hquery', location.search);  
-                    
-                    
-                if(window.hWin.HEURIST4.util.isnull(typeID)){
-                    typeID = "smarty";
-                }
-                if(window.hWin.HEURIST4.util.isnull(hquery)){
-                    hquery = '';
-                }else{
-                    var _qlabel = window.hWin.HEURIST4.util.getUrlParameter('label', hquery);
-                    if(!window.hWin.HEURIST4.util.isnull(_qlabel)){
-                        qlabel = _qlabel;
-                    }
-                }
-                if(window.hWin.HEURIST4.util.isnull(templatefile)){
-                    templatefile = '';
-                }
-        }
-        
-                
+        _recID = window.hWin.HEURIST4.util.getUrlParameter('recID', location.search);
+
         if (!Number(_recID)>0) { _recID = 0; }
             
         var _url = window.hWin.HAPI4.baseURL + 'export/publish/loadReports.php';
@@ -91,17 +65,50 @@ function ReportScheduleEditor() {
             
         window.hWin.HEURIST4.util.sendRequest(_url, request, null, _continueInit);
         
+        
     }
     
-    function _continueInit(context){
+    function _continueInit(response){
+
+        var typeID = "smarty",
+            templatefile = '',
+            qlabel = '',
+            hquery = '';
         
-        _reports = context;
+        if(response.status != window.hWin.ResponseStatus.OK){
+            window.hWin.HEURIST4.msg.showMsgErr(response);
+            return;   
+        }
+
+        _reports = response['data'];
         
-        _entity = (_recID>0&& _reports)? _reports.records[_recID] :null; 
+        typeID = window.hWin.HEURIST4.util.getUrlParameter('typeID', location.search);
+        templatefile = window.hWin.HEURIST4.util.getUrlParameter('template', location.search); 
         
+        hquery = window.hWin.HEURIST4.util.getUrlParameter('hquery', location.search);  
+            
+            
+        if(window.hWin.HEURIST4.util.isempty(typeID)){
+            typeID = "smarty";
+        }
+        if(window.hWin.HEURIST4.util.isnull(hquery)){
+            hquery = '';
+        }else{
+            var _qlabel = window.hWin.HEURIST4.util.getUrlParameter('label', hquery);
+            if(!window.hWin.HEURIST4.util.isnull(_qlabel)){
+                qlabel = _qlabel;
+            }
+        }
+        if(window.hWin.HEURIST4.util.isnull(templatefile)){
+            templatefile = '';
+        }
+
+
         if (Number(_recID>0) && window.hWin.HEURIST4.util.isnull(_entity) ){
             document.getElementById("statusMsg").innerHTML = "<strong>Error: Report Schedule #"+_recID+"  was not found. Clicking 'save' button will create a new Schedule.</strong><br /><br />";
         }
+        
+        _entity = (_recID>0&& _reports)? _reports.records[_recID] :null; 
         //creates new empty field type in case ID is not defined
         if(window.hWin.HEURIST4.util.isnull(_entity)){
             _recID =  -1;
@@ -253,37 +260,40 @@ function ReportScheduleEditor() {
     *
     * @param context - data from server
     */
-    function _updateResult(context) {
+    function _updateResult(response) {
 
-        if(!window.hWin.HEURIST4.util.isnull(context)){
+        if(response.status != window.hWin.ResponseStatus.OK){
+            window.hWin.HEURIST4.msg.showMsgErr(response);
+            return;   
+        }
+        
+        var error = false,
+            report = "",
+            ind;
 
-            var error = false,
-                report = "",
-                ind;
-
-            for(ind in context.result){
-                if( !window.hWin.HEURIST4.util.isnull(ind) ){
-                    var item = context.result[ind];
-                    if(isNaN(item)){
-                        window.hWin.HEURIST4.msg.showMsgErr(item);
-                        error = true;
-                    }else{
-                        _recID = Number(item);
-                        if(report!=="") {
-                            report = report + ",";
-                        }
-                        report = report + Math.abs(_recID);
+        for(ind in response.data){
+            if( !window.hWin.HEURIST4.util.isnull(ind) ){
+                var item = response.data[ind];
+                if(isNaN(item)){
+                    window.hWin.HEURIST4.msg.showMsgErr(item);
+                    error = true;
+                }else{
+                    _recID = Number(item);
+                    if(report!=="") {
+                        report = report + ",";
                     }
+                    report = report + Math.abs(_recID);
                 }
             }
-
-            if(!error){
-                var ss = (_recID < 0)?"added":"updated";
-
-                // this alert is a pain  alert("Report schedule with ID " + report + " was succesfully "+ss);
-                window.close(context); //send back new HEURIST strcuture
-            }
         }
+
+        if(!error){
+            var ss = (_recID < 0)?"added":"updated";
+
+            // this alert is a pain  alert("Report schedule with ID " + report + " was succesfully "+ss);
+            window.close(response); //send back new HEURIST strcuture
+        }
+        
     }
 
     /**
@@ -329,7 +339,7 @@ function ReportScheduleEditor() {
             // 3. sends data to server
             var baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
             var callback = _updateResult;
-            var request = {methid:'savereport', data:oDataToServer};
+            var request = {method:'savereport', data:oDataToServer};
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
         } else {
             window.close(null);
