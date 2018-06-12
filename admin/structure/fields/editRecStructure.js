@@ -2629,7 +2629,7 @@ function onDefineNewType(index_toinsert){
 
                     if(!Hul.isnull(context)){
                         //refresh the local heurist
-                        window.hWin.HEURIST4.detailtypes = context.detailTypes;
+                        window.hWin.HEURIST4.detailtypes = context.detailtypes;
 
                         //new field type to be added
                         var dty_ID = Math.abs(Number(context.result[0]));

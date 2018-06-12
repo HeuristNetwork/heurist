@@ -376,7 +376,7 @@ window.hWin.HEURIST4.ui = {
             selObj = selObj[0];
             for (var i=0; i<selObj.length; i++){
                 if(!selObj.options[i].disabled){
-                    reslist.push({id:selObj.options[i].value, text:selObj.options[i].text});
+                    reslist.push({id: parseInt(selObj.options[i].value), text:selObj.options[i].text});
                 }
             }
         }

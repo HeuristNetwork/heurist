@@ -568,7 +568,7 @@ function SelectDetailType() {
 
 					if(!Hul.isnull(context)){
 						//refresh the local heurist
-						window.hWin.HEURIST4.detailtypes = context.detailTypes;
+						window.hWin.HEURIST4.detailtypes = context.detailtypes;
 
 						var _dtyID = Number(context.result[0]);
 						if(!isNaN(_dtyID)){
