@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -30,26 +30,29 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+define('PDIR','../../../');  //need for proper path to js and css    
+require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPage.php');
 
-define ('SAVE_URI', 'DISABLED');
-require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../common/php/dbMySqlWrappers.php');
-
-mysql_connection_select(USERS_DATABASE);
+$mysqli = $system->get_mysqli();
 ?>
-<html>
-    <head>
         <title>Advanced search builder</title>
-
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../common/css/search.css">
+        
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR ?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR ?>common/css/search.css">
 
         <script src='queryBuilder.js'></script>
         <script src='queryBuilderPopup.js'></script>
+        
+        <script>
+            function onPageInit(success){
+                if(success){
+                    load_query();
+                }
+            }        
+        </script>
 
     </head>
-    <body class="popup" width=700 height=500 style="overflow: hidden;" onLoad="load_query();">
+    <body class="popup" width=700 height=500 style="overflow: hidden;">
 
         <!-- script type="text/javascript" src="../common/js/utilsUI.js"></script -->
 
@@ -67,7 +70,9 @@ mysql_connection_select(USERS_DATABASE);
 
         </div>
         <div style="padding-left: 30px; color: #666;border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
-            <p>See also: <a href="#" onClick="top.HEURIST.util.popupURL(window, '<?=HEURIST_BASE_URL?>context_help/advanced_search.html'); return false;"><b>help for advanced search</b></a>.</p>
+            <p>See also: <a href="<?=HEURIST_BASE_URL?>context_help/smarty_reports.html"
+                        onClick="window.hWin.HEURIST4.msg.showDialog( this.href );return false;">
+                        <b>help for advanced search</b></a>.</p>
             <div>Use <b>tag:</b>, <b>type:</b>, <b>url:</b>, <b>notes:</b>, <b>owner:</b>, <b>user:</b>, <b>field:</b> and <b>all:</b> modifiers.<br>
                 To find records with geographic objects that contain a given point, use <b>latitude</b> and <b>longitude</b>, e.g.
                 <b>latitude:10 longitude:100</b><br>
@@ -111,11 +116,13 @@ mysql_connection_select(USERS_DATABASE);
                 <option value=p>popularity</option>
                 <optgroup label="Detail fields">
                     <?php
-                    $res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
-                    while ($row = mysql_fetch_assoc($res)) {
+                    $res = $mysqli->query('select dty_ID, dty_Name from defDetailTypes WHERE dty_Type!="separtor" order by dty_Name');
+                    while ($row = $res->fetch_assoc()) {
                         ?>
                         <option value="f:&quot;<?= $row['dty_Name'] ?>&quot;"><?= htmlspecialchars($row['dty_Name']) ?></option>
-                        <?php	}	?>
+                        <?php	}
+                            $res->close();
+                        ?>
                 </optgroup>
             </select>
 
@@ -138,8 +145,9 @@ mysql_connection_select(USERS_DATABASE);
 
         <div class="advanced-search-row">
             <label for="type">Record type:</label>
+
             <?php
-            $res = mysql_query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
+            $res = $mysqli->query("select distinct rty_ID,rty_Name,rty_Description, rtg_Name
                 from defRecTypes left join defRecTypeGroups on rtg_ID = rty_RecTypeGroupID
             where rty_ShowInLists = 1 order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name");
             ?>
@@ -147,7 +155,7 @@ mysql_connection_select(USERS_DATABASE);
                 <option selected="selected" value="">(select record type)</option>
                 <?php
                 $section = "";
-                while ($row = mysql_fetch_assoc($res)) {
+                while ($row = $res->fetch_assoc()) {
                     if ($row["rtg_Name"] != $section) {
                         if ($section) print "</optgroup>\n";
                         $section = $row["rtg_Name"];
@@ -157,6 +165,7 @@ mysql_connection_select(USERS_DATABASE);
                     <option value="<?= $row["rty_ID"] ?>" title="<?= htmlspecialchars($row["rty_Description"]) ?>"><?= htmlspecialchars($row["rty_Name"]) ?></option>
                     <?php
                 }
+                $res->close();
                 ?>
             </select>
 
@@ -167,13 +176,15 @@ mysql_connection_select(USERS_DATABASE);
             <label for="tag">Tags:</label>
             <input name=tag id="tag" onChange="update(this);" onKeyPress="return keypress(event);">
             <?php
-            $res = mysql_query('select concat('.GROUPS_NAME_FIELD.', "\\\\", tag_Text) from '.DATABASE.'.usrTags, '.USER_GROUPS_TABLE.', '.GROUPS_TABLE.' where tag_UGrpID='.USER_GROUPS_GROUP_ID_FIELD.' and '.USER_GROUPS_GROUP_ID_FIELD.'='.GROUPS_ID_FIELD.' and '.USER_GROUPS_USER_ID_FIELD.'=' . get_user_id() . ' order by '.GROUPS_NAME_FIELD.', tag_Text');
-            if (mysql_num_rows($res) > 0) {
+            $res = $mysqli->query('select concat(ugr_Name, "\\\\", tag_Text) from usrTags, sysUsrGrpLinks, '
+            .'sysUGrps where tag_UGrpID=ugl_GroupID and ugl_GroupID=ugr_ID and ugl_UserID=' 
+            . $system->get_user_id() . ' order by ugr_Name, tag_Text');
+            if ($res->num_rows > 0) {
                 ?>
                 <span style="padding-left:28px;">or</span>
                 <select id="wgtag" name="wgtag" onChange="update(this);" onKeyPress="return keypress(event);" style="width: 200px;">
                     <option value="" selected>(select...)</option>
-                    <?php		while ($row = mysql_fetch_row($res)) {	?>
+                    <?php		while ($row = $res->fetch_row()) {	?>
                         <option value="<?= htmlspecialchars($row[0]) ?>"><?= htmlspecialchars($row[0]) ?></option>
                         <?php		}	?>
                 </select>
@@ -182,6 +193,7 @@ mysql_connection_select(USERS_DATABASE);
                 ?>
                 <?php
             }
+            $res->close();
             ?>
             <button type="button" style="visibility:visible; float: right;" onClick="{add_to_search('tag');}" class="button" title="Add to Search">Add</button>
         </div>
@@ -206,10 +218,11 @@ mysql_connection_select(USERS_DATABASE);
                     <optgroup id="rectype-specific-fields" label="rectype specific fields" style="display: none;"></optgroup>
                     <optgroup label="Generic fields">
                         <?php
-                        $res = mysql_query('select dty_ID, dty_Name from '.DATABASE.'.defDetailTypes order by dty_Name');
-                        while ($row = mysql_fetch_assoc($res)) {
-                            print "<option value='".$row['dty_ID']."'>".htmlspecialchars($row['dty_Name'])."</option>";
+                        $res = $mysqli->query('select dty_ID, dty_Name from defDetailTypes where dty_Type!="separtor" order by dty_Name');
+                        while ($row = $res->fetch_assoc()) {
+                            print "<option value='".$row['dty_ID']."'>".htmlspecialchars($row['dty_Name'])."</option>";    
                         }
+                        $res->close();
                         ?>
                     </optgroup>
                 </select>
@@ -228,14 +241,20 @@ mysql_connection_select(USERS_DATABASE);
         -->
 
         <?php
-        $groups = mysql__select_assoc(USERS_DATABASE.".".USER_GROUPS_TABLE." left join ".USERS_DATABASE.".".GROUPS_TABLE." on ".USER_GROUPS_GROUP_ID_FIELD."=".GROUPS_ID_FIELD, GROUPS_ID_FIELD, GROUPS_NAME_FIELD, USER_GROUPS_USER_ID_FIELD."=".get_user_id()." and ".GROUPS_TYPE_FIELD."='workgroup' order by ".GROUPS_NAME_FIELD);
-        if ($groups  &&  count($groups) > 0) {
+
+        $groups = mysql__select_assoc2($mysqli, 
+         'select ugr_ID, ugr_Name from sysUsrGrpLinks left join sysUGrps on ugl_GroupID=ugr_ID '
+        .' where ugl_UserID='.$system->get_user_id().' and ugr_Type="workgroup" order by ugr_Name');
+        
+        $cuser = $system->getCurrentUser();
+        
+        if ($groups  &&  count($groups) > 0) {  //replace with createUserGroupsSelect
             ?>
             <div class="advanced-search-row">
                 <label for="user">Owned&nbsp;by:</label>
                 <select name="owner" id="owner" onChange="update(this);" style="width:200px;">
                     <option value="" selected="selected">(any owner or ownergroup)</option>
-                    <option value="&quot;<?= get_user_username()?>&quot;"><?= get_user_name()?></option>
+                    <option value="&quot;<?=$cuser['ugr_Name']?>&quot;"><?=$cuser['ugr_Name']?></option>
                     <?php	foreach ($groups as $id => $name) { ?>
                         <option value="&quot;<?= htmlspecialchars($name) ?>&quot;"><?= htmlspecialchars($name) ?></option>
                         <?php	} ?>
@@ -255,13 +274,14 @@ mysql_connection_select(USERS_DATABASE);
                 <option value="" selected="selected">(matching users)</option>
             </select>
             <select name="users_all" id="users_all" style="display: none;">
-                <?php
-                $query = 'select '.USERS_ID_FIELD.', concat('.USERS_FIRSTNAME_FIELD.'," ",'.USERS_LASTNAME_FIELD.') as fullname from '.USERS_TABLE.
-                ' where '.USERS_ACTIVE_FIELD.' = "Y" and '.GROUPS_TYPE_FIELD.'="user" order by fullname';
-                $res = mysql_query($query);
-                while ($row = mysql_fetch_row($res)) {
+                <?php  //replace with user selector
+                $query = 'select ugr_ID, concat(ugr_FirstName," ",ugr_LastName) as fullname from sysUGrps '.
+                ' where ugr_Enabled = "Y" and ugr_Type="user" order by fullname';
+                $res = $mysqli->query($query);
+                while ($row = $res->fetch_row()) {
                     print '<option value="&quot;'.htmlspecialchars($row[1]).'&quot;">'.htmlspecialchars($row[1]).'</option>'."\n";
                 }
+                $res->close();
                 ?>
             </select>
             <button type="button" style="visibility:visible; float:right;" onClick="add_to_search('user');" class="button" title="Add to Search">Add</button>

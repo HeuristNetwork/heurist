@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -36,13 +36,6 @@
 
     function update(elt) {
         
-        if(!top.HEURIST.detailTypes && window.hWin.HEURIST4){
-            top.HEURIST.detailTypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.detailtypes);
-            top.HEURIST.rectypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes);
-            top.HEURIST.terms = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.terms);
-        }
-        
-
         if(!allowUpdate){
             return;
         }
@@ -75,23 +68,23 @@
             typeOptgroup.innerHTML = "";    // remove all record-type-specific options
 
             var rt = elt.options[elt.selectedIndex].value.replace(/"/g, "");;
-            for (var rftID in top.HEURIST.rectypes.names) {
-                if (top.HEURIST.rectypes.names[rftID] === rt) {
+            for (var rftID in window.hWin.HEURIST4.rectypes.names) {
+                if (window.hWin.HEURIST4.rectypes.names[rftID] === rt) {
                     rt = rftID;
                     break;
                 }
             }
-            var bdr = top.HEURIST.rectypes.typedefs[rt];
+            var bdr = window.hWin.HEURIST4.rectypes.typedefs[rt];
             if (! bdr) {
                 // no type specified; hide type-specific options
                 typeOptgroup.style.display = "none";
             }
             else {
-                var bdts = top.HEURIST.detailTypes.typedefs;
+                var bdts = window.hWin.HEURIST4.detailtypes.typedefs;
                 for (var bdtID in bdr['dtFields']) {
                     typeOptgroup.appendChild(new Option(bdr['dtFields'][bdtID][0], '"' + bdts[bdtID]['commonFields'][0] + '"'));
                 }
-                typeOptgroup.label = top.HEURIST.rectypes.names[rt] + " fields";
+                typeOptgroup.label = window.hWin.HEURIST4.rectypes.names[rt] + " fields";
                 typeOptgroup.style.display = "";
             }
 
@@ -190,19 +183,29 @@
 
 
     function load_query() {
-        var params = top.HEURIST.parseParams(location.search);
+        
+        $('button').button();
+        
+        /*init rectype and group selector
+        $recTypeSelector = window.hWin.HEURIST4.ui.createRectypeSelect( $('#sel_record_type').get(0), null, 
+                    window.hWin.HR('select record type'), true );
+        $recTypeSelector.change(function(event){ update(event.target) } )
+        //$recTypeSelector.hSelect({ change:update( $('#sel_record_type').get(0) ) });
+        */
+        
+        var params = window.hWin.HEURIST4.util.parseHeuristQuery(location.search);
 
         var q_str = decodeURIComponent(params["q"]);
         var q_bits = null;
         
-        if(top.HEURIST.util.isempty(q_str)){
+        if(window.hWin.HEURIST4.util.isempty(q_str)){
             document.getElementById('q').value = '';
         }else{
             document.getElementById('q').value = q_str;
             q_bits = HQuery.parseQuery(q_str);
         }
 
-        if (!top.HEURIST.util.isnull(q_bits)) {
+        if (!window.hWin.HEURIST4.util.isnull(q_bits)) {
             for (q_key in q_bits) {
                 if (document.getElementById(q_key)) {
                     var val = '';
@@ -430,7 +433,7 @@
 
     function handleFieldSelect(e){
 
-        var dtID = e.target.value;
+        var dtID = parseInt(e.target.value);
         var isEnum = false;
 
         //if enum selector exist remove it
@@ -442,33 +445,38 @@
                    }
         }
 
-        if (dtID){
+        if (dtID>0){
 
-            var dtyDefs = top.HEURIST.detailTypes.typedefs;
+            var dtyDefs = window.hWin.HEURIST4.detailtypes.typedefs;
             isEnum = (dtyDefs[dtID] && dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_Type']] === 'enum');
             // if detatilType is enumeration then create a select for the values.
             if (isEnum){
 
                 //create selector from typedef
-                var allTerms = top.HEURIST.util.expandJsonStructure(dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_JsonTermIDTree']]),
-                    disabledTerms = top.HEURIST.util.expandJsonStructure(dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']]);
-                var enumSelector = top.HEURIST.util.createTermSelect(allTerms, disabledTerms, 'enum', null);
-                if (enumSelector){
-                    enumSelector.id = "enum-selector";
-                }
+                var allTerms = dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_JsonTermIDTree']],
+                    disabledTerms = dtyDefs[dtID]['commonFields'][dtyDefs['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
+                    
+                var enumSelector = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
+                {datatype:'enum', termIDTree:allTerms, headerTermIDsList:disabledTerms,
+                    defaultTermID:null, topOptions:'select term', supressTermCode:true, useHtmlSelect:true});
+                    
+                enumSelector.attr('id',"enum-selector").css({'max-wdith':'180px',width:'180px'}).appendTo($(prev));
 
-                for (var i=0; i<enumSelector.length; i++){
-                    enumSelector.options[i].text = enumSelector.options[i].text+" ["+enumSelector.options[i].value+"]";
-                }
-
-                //attach onchange handler
-                enumSelector.onchange = function(e){
+                enumSelector.change(function(e){
+                        var term_id = Number(e.target.value);
                         var fld = document.getElementById("field");
-                        fld.value = e.target.value;
+                        fld.value = (term_id>0)?term_id:'';
+                        update(fld);
+                });
+                
+                //attach onchange handler
+                /*enumSelector.hSelect({ change: function(e, data){
+                        var term_id = Number(data.item.value);
+                        var fld = document.getElementById("field");
+                        fld.value = term_id;
                         update(fld);
                 }
-                //add it to the popup
-                prev.appendChild(enumSelector);
+                });*/
             }
         }
 

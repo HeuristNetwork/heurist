@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @note        Completely revised for Heurist version 4
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -685,14 +685,15 @@ $.widget( "heurist.search", {
             q ="&q=" + encodeURIComponent(this.query_request.q);
         }
 
-        var url = window.hWin.HAPI4.baseURL+ "search/queryBuilderPopup.php?db=" + window.hWin.HAPI4.database + q;
+        var url = window.hWin.HAPI4.baseURL+ "hclient/widgets/search/queryBuilderPopup.php?db=" 
+                            + window.hWin.HAPI4.database + q;
 
-        window.hWin.HEURIST4.msg.showDialog(url, { width:740, height:540, text:'Advanced Search Builder', callback:
+        window.hWin.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:
             function(res){
                 if(!Hul.isempty(res)) {
                     that.input_search.val(res);
                     that.input_search.change();
-                    that._doSearch();
+                    that._doSearch(true);
                 }
         }});
     },
