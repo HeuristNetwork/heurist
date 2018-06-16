@@ -1,8 +1,9 @@
 <?php
 
 /**
-* @todo - wrap to class !!!
-
+* methods for recUploadedFiles
+* @todo - 1) some methods to dbRecUploadedFiles 2) some to utils_image
+* 
 * file - prefix for functions
 * 
 * 

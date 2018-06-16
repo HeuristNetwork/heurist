@@ -943,6 +943,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 var that = this;                                                
                 
+                //at first we have to search tags that are already assigned to current record
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){

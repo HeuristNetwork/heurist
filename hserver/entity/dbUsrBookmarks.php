@@ -194,5 +194,69 @@ class DbUsrBookmarks extends DbEntityBase
     
         $ret = parent::delete();    
     }
+    
+    
+    //
+    // add/remove bookmarks in batch, set rating in batch
+    //
+    public function batch_action(){
+        
+        $rating = intval(@$this->data['rating']);
+        
+        if(!($rating>=0 && $rating<6)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Rating is out of range (0~5)');
+            return false;
+        }
+        
+        $rec_IDs = prepareIds(@$this->data['bkm_RecID']); //these are rec_IDs from Record table
+        $bkm_IDs = prepareIds(@$this->data['bkm_ID']);
+
+        if(count($rec_IDs)==0 && count($bkm_IDs)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
+            return false;
+        }       
+        
+        $mysqli = $this->system->get_mysqli(); 
+
+        if(count($bkm_IDs)==0){            
+            $query =  'bkm_RecID in (' . join(',', $rec_IDs).')';
+            
+            $rec_RecTypeID = @$this->data['rec_RecTypeID'];
+            if($rec_RecTypeID>0){
+                $query = ', Records where (rec_RecTypeID='.$rec_RecTypeID.') and (rec_ID=bkm_RecID) and '.$query;
+            }else{
+                $query = ' where '.$query;
+            }
+            
+            //get bookmarks
+            $query =  'select bkm_ID from usrBookmarks '.$query
+                    . ' and bkm_UGrpID = ' . $this->system->get_user_id();
+            
+            $bkm_IDs = mysql__select_list2($mysqli, $query);
+        }
+            
+        if(count($bkm_IDs)>0){            
+            $query =  'bkm_ID in (' . join(',', $bkm_IDs).')';
+        
+            $query =  'update usrBookmarks set bkm_Rating = ' . $rating . ' where '.$query 
+                    .' and bkm_UGrpID = ' . $this->system->get_user_id();
+
+            $res = $mysqli->query($query);
+            if(!$res){
+                $this->system->addError(HEURIST_DB_ERROR, 'Can not set rating', $mysqli->error);
+                return false;
+            }
+        
+            $update_count = $mysqli->affected_rows;
+            return array('processed'=>count($bkm_IDs), 
+                         'updated'=>$update_count);
+                         
+        }else{
+            $this->system->addError(HEURIST_NOT_FOUND, 
+                'Rating can be set for bookmarked records only. None of provided are bookmarked');
+            return false;
+        }
+        
+    }
 }
 ?>

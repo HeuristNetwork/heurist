@@ -246,7 +246,9 @@ class DbUsrTags extends DbEntityBase
         return parent::delete();
     }
     
-    
+    //
+    //
+    //
     private function replaceTags(){
         
         $ret = false;
@@ -287,7 +289,7 @@ class DbUsrTags extends DbEntityBase
     }
     
     //
-    // batch action for tags - assignment tags for records
+    // batch actions for tags - assignment tags for records
     //
     // 1) assignment of tags to given set of records - new tags arr completely overwrite old set
     // 2) replace tagIDs with newTagID

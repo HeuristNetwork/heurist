@@ -43,6 +43,44 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+
+/*
+workflow
+
+resultList.js -> resultListMenuSelected.html/resultListMenu.js 
+
+detailBatchEditPopup opens either
+
+to convert
+    recordAddLink - define links/relationship -> RecordMgr.batch_details for links, RecordMgr.save new record for relationship
+    recordAction - change details in batch    -> RecordMgr.batch_details
+
+    recordAccess - define ownership and access rights  -> h3 executeAction("set_wg_and_vis") or just close window
+    recordAdd - define record add initial preferences  -> save prefs and RecordMgr.add -> record_edit.php -> db_records.php
+
+todo    
+*    recordRate - assign record rating -> EntityMgr.doRequest -> dbUsrBookmarks.php 
+    recordBookmark - assign/remove record bookmark -> EntityMgr.doRequest -> dbUsrBookmarks.php 
+    
+    recordDelete -> RecordMgr.remove or (EntityMgr.doRequest) -> dbRecords.php
+    recordTitle - update titles -> RecordMgr.remove (or EntityMgr.doRequest) -> dbRecords.php use titleMask class
+    
+    recordTag - add/remove tags in batch   -> EntityMgr.doRequest ->  dbUsrTags (use dbUsrBookmarks)
+
+    recordNotify - send email about record
+    
+on server side - controller
+RecordMgr.add, save, duplicate, remove  -> record_edit.php -> db_records.php
+
+RecordMgr.batch_details -> record_details.php  -> $dbRecDetails
+
+
+
+*/    
+    
+    
+
+
 define('LOGIN_REQUIRED',1);
 
 require_once(dirname(__FILE__)."/initPage.php");
@@ -131,6 +169,8 @@ if(!in_array($action_type, $allowed_actions)){
                 <div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>
             </div>
 
+<!-- OWNERSHIP/ACCESS -->
+            
             <div id="div_sel_ownership" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
                 <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Record is editable by:</label></div>
                 <select id="sel_Ownership" style="max-width:30em;margin-bottom: 1em;"></select>

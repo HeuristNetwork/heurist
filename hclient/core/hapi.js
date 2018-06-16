@@ -111,7 +111,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
 
         //remove remark to debug 
-        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());
@@ -197,7 +197,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *       database definitions - record structure, field types, terms
     *       saved searches
     *
-    * see usr_info.php and sys_structure.php
+    * see usr_info and sys_structure controllers
     *
     * methods:
     *   login        - login and get current user info
@@ -530,16 +530,20 @@ function hAPI(_db, _oninit) { //, _currentUser
     * see record_edit.php, record_details.php, record_tags.php and record_search.php
     *
     * methods:
+    *           for record_edit controller
     *   add       - creates new temporary record
     *   save      - save record
     *   remove    - delete record
     *   duplicate
     *
+    *           for record_details controller
     *   details   - batch edition of record details for many records
     *
+    *           for record_search controller
     *   search
     *   minmax
-    *   get
+    *   get_facets
+    *   search_related
     *
     * @returns {Object}
     */
@@ -735,6 +739,8 @@ function hAPI(_db, _oninit) { //, _currentUser
         var that = {
 
             //load entity configuration file
+            // entityScrud.action = config
+            // 
             getEntityConfig:function(entityName, callback){
 
                 if(entity_configs[entityName]){
@@ -772,6 +778,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             },
 
             //load entire entity data and store it in cache (applicable for entities with count < ~1500)
+            // entityScrud.action = search
+            //
             getEntityData:function(entityName, force_reload, callback){
 
                 if($.isEmptyObject(entity_data[entityName]) || force_reload==true){
@@ -796,6 +804,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
             },
             
+            //
+            // clear clinet side entity data for further refresh
+            //
             emptyEntityData:function(entityName){
                 if(entityName){
                     entity_data[entityName] = {};    
@@ -804,6 +815,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
             },
 
+            //
+            // generic request for entityScrud
+            //
             doRequest:function(request, callback){
                 //todo - verify basic params
                 request['request_id'] = window.hWin.HEURIST4.util.random();
@@ -812,7 +826,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             },
 
             //
-            //
+            // retrieve title of entity bt given id
+            // entityScrud.action = title
             //
             getTitlesByIds:function(entityName, recIDs, callback){
                 

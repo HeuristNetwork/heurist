@@ -29,6 +29,14 @@ IT USES
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*
+
+1) record addition dialog
+2) set ownership
+3) record detail batch update
+4) record type change
+
+*/
 function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     var _className = "RecordAction",
     _version   = "0.4",
@@ -208,7 +216,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     }
 
     //
-    //
+    // save record add preferences
     //
     function _onAddRecordChange(){
         
@@ -243,7 +251,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     
     
     //
-    //
+    // fill selector with scope options - all (currentRecordset), selected (currentRecordsetSelection), by record type 
     //
     function _fillSelectRecordScope(){
 
@@ -304,7 +312,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     }
 
     //
-    //
+    // scope selector listener
     //
     function _onRecordScopeChange() {
         
@@ -338,6 +346,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
     }
 
+    //
+    // record type selector for change record type action
+    // 
     function _fillSelectRecordTypes() {
         var rtSelect = $('#sel_recordtype');
         rtSelect.empty();
@@ -403,6 +414,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         _createInputElements();
     }
     
+    //
+    // fill list of groups and access right (from preferences)
+    // for actions: set ownership and access 
+    //
     function _fillOwnership(){
         
         var fieldSelect = $('#sel_Ownership');
@@ -558,12 +573,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }
     }
 
-    //
-    //
+    // TWO NO ACTION - it just UI to fill parameters
+    // 1) set ownership from edit record (noscope/ownership)
+    // 2) record addition
     //
     function _startAction(){
         
         if(init_scope_type=='noscope'){   //change ownership/access from edit record
+        
             if(action_type=='ownership'){
                 window.close({owner:$('#sel_Ownership').val(), 
                               access:$('input[type="radio"][name="rb_Access"]:checked').val()});

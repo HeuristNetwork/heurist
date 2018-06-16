@@ -40,8 +40,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
 </style>
 </head>
 <body class="ui-widget-content">
-    <div style="width:280px;top:0;bottom:0;left:0;position:absolute;">
-        <div class="accordion_pnl" style="margin-top:21px">
+    <div style="width:280px;top:21px;bottom:0;left:0;position:absolute;overflow-y:auto;">
+        <div class="accordion_pnl">
             <h3><span class="ui-icon ui-iconalign ui-icon-database"></span>DATABASE</h3>
             <div>
                 <ul>

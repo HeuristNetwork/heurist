@@ -148,6 +148,7 @@ class DbRecDetails
         return true;
     }
     
+    
     /**
     * convert existing records to child record for givent rectype/detailtype
     * 
@@ -739,6 +740,19 @@ class DbRecDetails
         return $this->result_data;        
     }
     
+/*    
+public methods
+
+    detailsAdd
+    detailsReplace
+    detailsDelete
+    changeRecordTypeInBatch    
+    addRevercePointerForChild
+    setRecordAsChild
+    -------------
+*/
+
+// all tags routine must be in dbUsrTags
     /*
     * helper method
     * assign special system tags

@@ -77,6 +77,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <script type="text/javascript" src="common/js/temporalObjectLibrary.js"></script>
 
+        <script type="text/javascript" src="hclient/widgets/record/recordAction.js"></script>
+        
+        
         <!-- DOCUMENTATION TODO: explain this -->
         <!-- these scripts are loaded explicitely - for debug purposes -->
         <script type="text/javascript" src="hclient/widgets/viewers/recordListExt.js"></script>

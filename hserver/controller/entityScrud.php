@@ -82,7 +82,8 @@
                 $res = $entity->config();
             }else if(@$_REQUEST['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
                 $res = $entity->counts();
-            }else if(@$_REQUEST['a'] == 'action'){ //batch action. see details of operaion for method of particular class
+            }else if(@$_REQUEST['a'] == 'action' || @$_REQUEST['a'] == 'batch'){ 
+                //batch action. see details of operaion for method of particular class
                 $res = $entity->batch_action();
             }else {
                 $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");

@@ -937,9 +937,9 @@ function hRecordAddLink() {
                     }
             }        
         
-            if(request.a=='add'){
+            if(request.a=='add'){  //add link - batch update - add new field
                 window.hWin.HAPI4.RecordMgr.batch_details(request, __callBack);
-            }else{
+            }else{ //add relationship - add new record
                 window.hWin.HAPI4.RecordMgr.save(request, __callBack);
             }
         }else if(requests.length>0){

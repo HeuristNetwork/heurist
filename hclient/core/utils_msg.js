@@ -146,7 +146,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(isdlg){
             window.hWin.HEURIST4.msg.showMsgDlg(message, null, "Work in Progress");    
         }else{
-            window.hWin.HEURIST4.msg.showMsgFlash(message, 4000, "Work in Progress");
+            window.hWin.HEURIST4.msg.showMsgFlash(message, 4000, {title:'Work in Progress',height:160});
         }
         
     },
@@ -279,12 +279,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(options.title){
             options.title = window.hWin.HR(options.title);
         }
+        if(!(options.height>0)){
+            options.height = 90;
+        }
 
         $.extend(options, {
             resizable: false,
             width: 'auto',
             modal: false,
-            height: 80,
+            //height: 80,
             buttons: {}
         });
 

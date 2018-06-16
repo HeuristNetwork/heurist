@@ -23,7 +23,7 @@
 //_initControls - add panels and init ui elements
 //_onActionListener - central listener for action events
 //_defineActionButton
-//_rendererActionButton  - renderer of item for resultlist
+//_rendererActionButton  - renderer buttons on item for resultlist
 //_recordListHeaderRenderer  - renderer of header for resultlist
 //_recordListItemRenderer    - renderer of item for resultlist
 //_recordListGetFullData     - callback function to retrieve full record info (in case we use 2 steps search: ids then list per page)  

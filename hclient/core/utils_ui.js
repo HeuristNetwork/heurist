@@ -91,6 +91,7 @@ window.hWin.HEURIST4.ui = {
     addoption: function(sel, value, text, disabled)
     {
         var option = document.createElement("option");
+        //option = new Option(text,value);
         option.text = text; //window.hWin.HEURIST4.util.htmlEscape(text);
         option.value = value;
         if(disabled===true){
@@ -1993,7 +1994,7 @@ window.hWin.HEURIST4.ui = {
         
             var manage_dlg;
             
-            if(!options.container){
+            if(!options.container){ //container not defined - add new one to body
                 
                 manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( $('body') )
@@ -2032,6 +2033,50 @@ window.hWin.HEURIST4.ui = {
         }
     },
 
+    //
+    // show record action dialog
+    //
+    showRecordActionDialog: function(actionName, options){
+
+        
+        if(!options) options = {};
+        if(options.isdialog!==false) options.isdialog = true; //by default popup      
+
+        if($.isFunction($('body')[actionName])){ //OK! widget script js has been loaded
+        
+            var manage_dlg;
+            
+            if(!options.container){ //container not defined - add new one to body
+                
+                manage_dlg = $('<div id="heurist-dialog-'+actionName+'-'+window.hWin.HEURIST4.util.random()+'">')
+                    .appendTo( $('body') )
+                    [actionName]( options );
+            }else{
+                manage_dlg = $(options.container)[actionName]( options );
+            }
+            
+            return manage_dlg;
+        
+        }else{
+            
+            var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/record/';
+            var scripts = [ path+actionName+'.js'];
+            
+            //load missed javascripts
+            $.getMultiScripts(scripts)
+            .done(function() {
+                // all done
+                window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, options);
+            }).fail(function(error) {
+                // one or more scripts failed to load
+                window.hWin.HEURIST4.msg.showMsgWorkInProgress();
+            }).always(function() {
+                // always called, both on success and error
+            });
+            
+        }
+    },    
+    
     //
     // 
     getRidGarbageHelp: function(help_text){

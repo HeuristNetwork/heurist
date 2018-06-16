@@ -16,6 +16,7 @@
 * hintDiv.js
 * Creates popup div with given HTML content to view at the specified coordinates
 *
+* @todo consider replacement with jquery ui tooltip 
 * requires jquery
 *
 * @author      Tom Murtagh
