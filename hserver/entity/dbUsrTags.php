@@ -42,8 +42,15 @@ class DbUsrTags extends DbEntityBase
     */
     public function search(){
 
-                
+        //fields - from configuration - list of field names
+        //data - from request - values
+        
         $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
+
+        //if usergroup is not defined search for user groups of current user
+        if(!@$this->data['tag_UGrpID']){
+            $this->data['tag_UGrpID'] = $this->system->get_user_group_ids();
+        }
         
         $res = $this->searchMgr->validateParams( $this->data );
         if(!is_bool($res)){
@@ -69,7 +76,9 @@ class DbUsrTags extends DbEntityBase
         if($pred!=null) array_push($where, $pred);
         
         $pred = $this->searchMgr->getPredicate('tag_UGrpID');
-        if($pred!=null) array_push($where, $pred);
+        if($pred!=null) {
+            array_push($where, $pred);   
+        }
 
         
         $value = @$this->data['rtl_RecID'];
@@ -167,7 +176,7 @@ class DbUsrTags extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_dbowner() && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_dbowner() && count($this->recordIDs)>0){ //there are tags to update/delete
             
             $ugrs = $this->system->get_user_group_ids();
             
@@ -247,7 +256,7 @@ class DbUsrTags extends DbEntityBase
     }
     
     //
-    //
+    //  Replace one or several tags ($this->recordIDs) to new ONE ($this->newTagID)
     //
     private function replaceTags(){
         
@@ -289,10 +298,15 @@ class DbUsrTags extends DbEntityBase
     }
     
     //
-    // batch actions for tags - assignment tags for records
+    // batch actions for tags 
+    //  - see table usrRecTagLinks
     //
-    // 1) assignment of tags to given set of records - new tags arr completely overwrite old set
-    // 2) replace tagIDs with newTagID
+    // parameter mode 
+    // A) replace all for set of records (recIDs) - remove all old tags and replace with new set (tagIDs) 
+    // B) assign tags (tagIDs)  to records (recIDs) 
+    // C) remove tags (tagIDs)  to records (recIDs) 
+    //
+    // D) replace several old tags (tagIDs) to new ONE (newTagID) see $this->replaceTags()
     //
     public function batch_action(){
         
@@ -303,9 +317,14 @@ class DbUsrTags extends DbEntityBase
             return false;
         }
 
+        // MODE D  replace several old tags (tagIDs) to new ONE
         $this->newTagID = prepareIds(@$this->data['newTagID']);
         if(count($this->newTagID)>0){             
             return $this->replaceTags();   
+        }
+
+        if(!$this->_validatePermission()){ //check that all tags belongs to current user
+            return false;
         }
         
         //record ids
@@ -314,70 +333,113 @@ class DbUsrTags extends DbEntityBase
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of record identificators');
             return false;
         }
+
+        $mysqli = $this->system->get_mysqli();
         
-        if(!$this->_validatePermission()){
-            return false;
+        //narrow by record type
+        $rec_RecTypeID = @$this->data['rec_RecTypeID'];
+        if($rec_RecTypeID>0){ 
+            $assignIDs = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
+                .implode(',', $assignIDs).') and rec_RecTypeID='. $rec_RecTypeID);
+                
+            if($assignIDs==null || count($assignIDs)==0){             
+                $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
+                return false;
+            }
         }
         
-        $mysqli = $this->system->get_mysqli();
 
         $keep_autocommit = mysql__begin_transaction($mysqli);
         
-        // detach/remove all assignments for given records        
-        $query = 'DELETE usrRecTagLinks FROM usrRecTagLinks'
-            . ' WHERE rtl_RecID in (' . implode(',', $assignIDs) . ')';
-        $res = $mysqli->query($query);
-        if(!$res){
-            $mysqli->rollback();
-            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        $mode = @$this->data['mode'];
+        
+        if($mode=='replace'){
+        
+            // detach/remove all assignments for given records        
+            $query = 'DELETE usrRecTagLinks FROM usrRecTagLinks'
+                . ' WHERE rtl_RecID in (' . implode(',', $assignIDs) . ')';
+            $res = $mysqli->query($query);
+            if(!$res){
+                $mysqli->rollback();
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                
+                $system->addError(HEURIST_DB_ERROR,"Cannot detach tags from records", $mysqli->error );
+                return false;
+            }
+            $res_tag_removed = $mysqli->affected_rows; 
+        
+        }else if($mode=='remove'){
             
-            $system->addError(HEURIST_DB_ERROR,"Cannot detach tags from records", $mysqli->error );
-            return false;
+            // detach/remove all assignments for given records        
+            $query = 'DELETE usrRecTagLinks FROM usrRecTagLinks'
+                . ' WHERE tag_ID in (' . implode(',', $this->recordIDs) 
+                . ') and rtl_RecID in (' . implode(',', $assignIDs) . ')';
+            $res = $mysqli->query($query);
+            if(!$res){
+                $mysqli->rollback();
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                
+                $system->addError(HEURIST_DB_ERROR,"Cannot detach tags from records", $mysqli->error );
+                return false;
+            }
+            $res_tag_removed = $mysqli->affected_rows; 
+
+            
+        }else { //assign by default
+            $mode=='assign';
         }
         
         //create new assignments
-        $insert_query = 'INSERT IGNORE INTO usrRecTagLinks (rtl_RecID, rtl_TagID) '
-            . 'SELECT rec_ID, tag_ID FROM usrTags, Records '
-            . ' WHERE rec_ID in (' . implode(',', $assignIDs) . ') '
-            . ' AND tag_ID in (' . implode(',', $this->recordIDs) . ')';
-
-        $res = $mysqli->query($insert_query);
-        if(!$res){
-            $mysqli->rollback();
-            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($mode!='remove'){
             
-            $system->addError(HEURIST_DB_ERROR,"Cannot assign tags", $mysqli->error );
-            return false;
-        }
-    
-        
-        //if at least one tag is private
-        //add bookmarks if tags are private and record is not bookmarked yet
-        $ugrID = $this->system->get_user_id();
-        
-        if(null != mysql__select_value($mysqli, 'SELECT ugr_Type from usrTags where tag_ID in (' 
-            . implode(',', $this->recordIDs) . ') AND tag_UGrpID ='.$ugrID.' LIMIT 1')){
-        
-            $query = 'INSERT INTO usrBookmarks '
-                .' (bkm_UGrpID, bkm_Added, bkm_Modified, bkm_recID)'
-                .' SELECT ' . $ugrID . ', now(), now(), rec_ID FROM Records '
-                .' LEFT JOIN usrBookmarks ON bkm_recID=rec_ID AND bkm_UGrpID='.$ugrID
-                .' WHERE bkm_ID IS NULL AND rec_ID IN (' . implode(',', $record_ids) . ')';
-        
+            $insert_query = 'INSERT IGNORE INTO usrRecTagLinks (rtl_RecID, rtl_TagID) '
+                . 'SELECT rec_ID, tag_ID FROM usrTags, Records '
+                . ' WHERE rec_ID in (' . implode(',', $assignIDs) . ') '
+                . ' AND tag_ID in (' . implode(',', $this->recordIDs) . ')';
+
             $res = $mysqli->query($insert_query);
             if(!$res){
                 $mysqli->rollback();
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                 
-                $system->addError(HEURIST_DB_ERROR,"Cannot create bookmarks", $mysqli->error );
+                $system->addError(HEURIST_DB_ERROR,"Cannot assign tags", $mysqli->error );
                 return false;
             }
+            $res_tag_added = $mysqli->affected_rows; 
+        
+            //if at least one tag is private
+            //add bookmarks if tags are private and record is not bookmarked yet
+            $ugrID = $this->system->get_user_id();
+            
+            if(null != mysql__select_value($mysqli, 'SELECT ugr_Type from usrTags where tag_ID in (' 
+                . implode(',', $this->recordIDs) . ') AND tag_UGrpID ='.$ugrID.' LIMIT 1')){
+            
+                $query = 'INSERT INTO usrBookmarks '
+                    .' (bkm_UGrpID, bkm_Added, bkm_Modified, bkm_recID)'
+                    .' SELECT ' . $ugrID . ', now(), now(), rec_ID FROM Records '
+                    .' LEFT JOIN usrBookmarks ON bkm_recID=rec_ID AND bkm_UGrpID='.$ugrID
+                    .' WHERE bkm_ID IS NULL AND rec_ID IN (' . implode(',', $assignIDs) . ')';
+            
+                $res = $mysqli->query($insert_query);
+                if(!$res){
+                    $mysqli->rollback();
+                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    
+                    $system->addError(HEURIST_DB_ERROR,"Cannot create bookmarks", $mysqli->error );
+                    return false;
+                }
+                $res_bookmarks = $mysqli->affected_rows;
+            }
         }
+        
         //commit
         $mysqli->commit();
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);
         
-        return true;
+        return array('processed'=>count($assignIDs), //afffected records
+                'added'=>$res_tag_added, //tags assigned
+                'removed'=>$res_tag_removed, //tags removed
+                'bookmarks'=>$res_bookmarks); //new bookmarks
         
     }
     

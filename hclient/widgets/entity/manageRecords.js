@@ -1217,8 +1217,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                         //assign new set of tags to record
                                         
                                         var request = {};
-                                        request['a']          = 'action'; //batch action
-                                        request['entity']     = 'usrTags';
+                                        request['a']       = 'batch'; //batch action
+                                        request['entity']  = 'usrTags';
+                                        request['mode']    = 'replace';
                                         request['tagIDs']  = data.selection.getOrder();
                                         request['recIDs']  = that._currentEditID;
                                         request['request_id'] = window.hWin.HEURIST4.util.random();
@@ -1909,10 +1910,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //assign new set of tags to record
             if($.isArray(that._updated_tags_selection)){
                 var request2 = {};
-                request2['a']          = 'action'; //batch action
+                request2['a']          = 'batch'; //batch action
                 request2['entity']     = 'usrTags';
                 request2['tagIDs']  = that._updated_tags_selection;
                 request2['recIDs']  = that._currentEditID;
+                request2['mode']    = 'replace';
                 that._updated_tags_selection = null;
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request2, 

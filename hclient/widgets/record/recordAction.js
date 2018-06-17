@@ -1,5 +1,5 @@
 /**
-* manageEntity.js - BASE widget
+* recordAction.js - BASE widget for actions for scope of records
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -250,8 +250,8 @@ $.widget( "heurist.recordAction", {
 
             this._as_dialog.dialog("open");
             
-            var helpURL = (this.options.helpContent)
-                        ?window.hWin.HAPI4.baseURL+'context_help/'+this.options.helpContent+' #content':null;
+            var helpURL = (this.options.helpContent)                                       //+' #content'
+                        ?(window.hWin.HAPI4.baseURL+'context_help/'+this.options.helpContent):null;
             
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);
         }
@@ -367,6 +367,7 @@ $.widget( "heurist.recordAction", {
         this._on( this.selectRecordScope, {
                 change: this._onRecordScopeChange} );        
         this.selectRecordScope.val(this.options.init_scope);    
+        if(selScope.selectedIndex<0) selScope.selectedIndex=0;
         this._onRecordScopeChange();
     },
 

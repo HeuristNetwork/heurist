@@ -60,12 +60,12 @@ to convert
 
 todo    
 *    recordRate - assign record rating -> EntityMgr.doRequest -> dbUsrBookmarks.php 
-    recordBookmark - assign/remove record bookmark -> EntityMgr.doRequest -> dbUsrBookmarks.php 
+*    recordBookmark - assign/remove record bookmark -> EntityMgr.doRequest -> dbUsrBookmarks.php 
     
-    recordDelete -> RecordMgr.remove or (EntityMgr.doRequest) -> dbRecords.php
+*    recordDelete -> RecordMgr.remove or (EntityMgr.doRequest) -> dbRecords.php
     recordTitle - update titles -> RecordMgr.remove (or EntityMgr.doRequest) -> dbRecords.php use titleMask class
     
-    recordTag - add/remove tags in batch   -> EntityMgr.doRequest ->  dbUsrTags (use dbUsrBookmarks)
+*    recordTag - add/remove tags in batch   -> EntityMgr.doRequest ->  dbUsrTags (use dbUsrBookmarks)
 
     recordNotify - send email about record
     

@@ -1,5 +1,5 @@
 /**
-* manageEntity.js - BASE widget
+* recordTag.js - assign, detach tags
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -36,7 +36,17 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
     _initControls:function(){
         
         
+        $('#div_header')
+            .css({'line-height':'21px'})
+            .addClass('heurist-helper1')
+            .html('Select tags to be added or removed for choosen record scope<br>'
+            +'Type tag in input. Tags may contain spaces.<br>'
+            +'Matching tags are shown as you type. Click on a listed tag to add it.<br>'
+            +'New tags are added automatically and are specific to each user.<br>');
+        
         this._tagSelectionWidget = $('<div>').css({'width':'100%', padding: '0.2em'}).appendTo( this.element );
+        
+        var that = this;
         
         window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
                 refreshtags:true, 
@@ -45,19 +55,16 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
                 select_mode: 'select_multi', 
                 layout_mode: '<div class="recordList"/>',
                 list_mode: 'compact', //special option for tags
+                show_top_n_recent: true, //show top and recent lists
                 selection_ids: [], //already selected tags
                 select_return_mode:'recordset', //ids by default
                 onselect:function(event, data){
                     if(data && data.selection){
-console.log( data.selection );                        
                         that._tags_selection = data.selection;
                         that._onRecordScopeChange();
                     }
                 }
         });
-        
-        //this.element.parents('.ui-dialog')
-        this._as_dialog.find('#btnDoAction').attr('label', top.HR('Set Rating'));
         
         return this._super();
     },
@@ -70,14 +77,14 @@ console.log( data.selection );
     _getActionButtons: function(){
         var res = this._super();
         
-        //res[1].text = window.hWin.HR('Remove tags'),
+        res[1].text = window.hWin.HR('Remove tags'),
         
         res.push({text:window.hWin.HR('Add tags'),
                     id:'btnDoAction2',
                     disabled:'disabled',
                     css:{'float':'right'},  
                     click: function() { 
-                            that.doAction('add'); 
+                            that.doAction('assign'); 
                     }});
         return res;
     },
@@ -85,21 +92,21 @@ console.log( data.selection );
     //
     //
     //
-    doAction: function(){
+    doAction: function(mode){
 
             var scope_val = this.selectRecordScope.val();
             if(scope_val=='')    return;
             
+            if(!mode) mode = 'remove';
+               
+            alert(mode);
             
             return;
             
-            var rating = this.element.find('input[type=radio]:checked').val();
-            
-            if(!(rating>=0 && rating<6)){
-                window.hWin.HEURIST4.msg.showMsgErr('Please specify rating value');
+            if(window.hWin.HEURIST4.util.isempty(this._tags_selection)){
+                window.hWin.HEURIST4.msg.showMsgErr('Need to select tags to '+mode);
                 return;
             }
-            
             
             var scope = [], 
             rec_RecTypeID = 0;
@@ -116,32 +123,49 @@ console.log( data.selection );
         
             var request = {
                 'a'          : 'batch',
-                'entity'     : 'usrBookmarks',
+                'entity'     : 'usrTags',
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'rating'     : rating,
-                'bkm_RecID'  : scope
+                'mode'       : mode,
+                'tagIDs'  : this._tags_selection,
+                'recIDs'  : scope
                 };
                 
             if(rec_RecTypeID>0){
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
                 
-                var that = this;                                                
-                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            var that = this;                                                
+            
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
 
-                            that._context_on_close = (response.data.updated>0);
+                            that._context_on_close = (response.data.res_bookmarks>0);
                             
                             that.closeDialog();
                             
-                            window.hWin.HEURIST4.msg.showMsgDlg(
-                                response.data.processed + ' bookmarked record'
-                                + (response.data.processed>1?'s':'') +' processed<br><br>for '
-                                + response.data.updated  + ' bookmark'
-                                + (response.data.updated>1?'s':'') + ' the rating was updated',null, 'Result'
-                            );
+                            var msg = 'For <b>'+response.data.processed + '</b> processed record'
+                                + (response.data.processed>1?'s':'') +'<br>';
+                             
+                             if(response.data.res_tag_added==0 && response.data.res_tag_removed==0) {
+                                 msg += 'No tags were affected';
+                             }else{
+                                 if(response.data.res_tag_added>0){
+                                    msg += (response.data.res_tag_added+' tag'
+                                            +(response.data.res_tag_added>1?'s were':' was')+' assigned');
+                                 }else if($res_tag_removed>0){
+                                    msg += (response.data.res_tag_removed+' tag'
+                                            +(response.data.res_tag_removed>1?'s were':' was')+' removed');
+                                 }
+                             } 
+                             if(response.data.res_bookmarks>0){
+                                 msg += '<br>'+response.data.res_bookmarks+' bookmark'
+                                    +(response.data.res_bookmarks>1?'s were':' was')+' added';
+                             }else{
+                                 msg += '<br>No bookmarks added';
+                             }
+                                
+                            window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Result');
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

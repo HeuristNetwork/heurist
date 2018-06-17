@@ -44,12 +44,9 @@
     PUBLIC METHODS:
 
     updateRecordIndexEntry() -> whenever a record is written (new or updated, from record edit or record import or record recode)
-    - saveRecord.php
-    - saveRecordDetails.php
-    - @todo - add into new db_record.php
+    - db_record.php
 
     deleteRecordIndexEntry() -> whenever a record is saved with a different type (editRecord)
-    - deleteRecordInfo.php
     - db_record.php
 
     deleteIndexForDatabase -> whenever a database is deleted (admin actions)

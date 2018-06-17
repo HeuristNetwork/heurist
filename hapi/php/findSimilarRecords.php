@@ -68,7 +68,7 @@ if (! $details  || ! $types) {
 
 mysql_connection_select(DATABASE);
 
-$matches = findFuzzyMatches($details, $types, $id, $fuzziness);
+$matches = findFuzzyMatches($details, $types, $id, $fuzziness); //   findFuzzyRecordMatches
 
 print json_format(array("matches" => $matches));
 

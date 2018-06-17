@@ -297,30 +297,43 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             this.fixDuplicatesPopup();
 
-        }else if(action == "menu-selected-tag"){
-
+        }else if(action == "menu-selected-tag" || action == "menu-selected-bookmark"){
+            
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
+            
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordTag', {onClose:
-               function( context ){
-                   if(context){
-                       //refresh search page
-                       that.reloadSearch();                    
+                   function( context ){
+                       if(context){
+                           //refresh search page
+                           that.reloadSearch(); //@todo reloadPage                   
+                       }
                    }
-               }
             });
-            //this.addRemoveTagsPopup(true);
 
         }else if(action == "menu-selected-wgtags"){
 
-            this.addRemoveKeywordsPopup();
-
-        }else if(action == "menu-selected-bookmark"){
-
-            this.addBookmarks();
+            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
+            
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordTag', {onClose:
+                   function( context ){
+                       if(context){
+                           //refresh search page
+                           that.reloadSearch(); //@todo reloadPage                   
+                       }
+                   }
+            });
 
         }else if(action == "menu-selected-unbookmark"){
 
-            this.deleteBookmarks();
+            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordBookmark', {onClose:
+                   function( context ){
+                       if(context){
+                           //refresh search page
+                           that.reloadSearch(); //@todo reloadPage                   
+                       }
+                   }
+            });
 
         }else if(action == "menu-selected-rate"){
 
@@ -328,7 +341,19 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordRate', {onClose:
                function( context ){
                    if(context){
-                       //refresh search page
+                       // refresh search page
+                       // that.reloadSearch();                    
+                   }
+               }
+            });
+
+        }else if(action == "menu-selected-delete"){
+
+            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {onClose:
+               function( context ){
+                   if(context){
+                       // refresh search page
                        that.reloadSearch();                    
                    }
                }
@@ -342,10 +367,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             //this.setWorkgroupPopup();
             this.detailBatchEditPopup('ownership');
-
-        }else if(action == "menu-selected-delete"){
-
-            this.deleteRecords();
 
         }else if(action == "menu-selected-notify"){
 
@@ -509,119 +530,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     },
 
     //-------------------------------------- ADD, REMOVE TAGS, BOOKMARKS. RATING -------------------------------
-
-
-    /**
-    * Personal tags
-    */
-    addRemoveTagsPopup: function(reload, recID, bkmkID) {
-
-        var that = this;
-        var recIDs_list = [];
-        var bkmkIDs_list = [];
-
-        if(recID || bkmkID){
-            if(recID) recIDs_list = Hul.isArray(recID)?recID:[recID];
-            if(bkmkID) bkmkIDs_list = Hul.isArray(bkmkID)?bkmkID:[bkmkID];
-        }else if (that._selection!=null) {
-            recIDs_list = that._selection.getIds();
-            bkmkIDs_list = that._selection.getBookmarkIds();
-        }
-        if(recIDs_list.length == 1){
-            recID = recIDs_list[0];
-        }
-
-
-        var hasRecordsNotBkmkd = false;
-        if (recIDs_list.length == 0  &&  bkmkIDs_list.length == 0) {
-            //nothing selected
-            window.hWin.HEURIST4.msg.showMsgDlg("Please select at least one record to add tags");
-            return;
-        }else if (recIDs_list.length > bkmkIDs_list.length) {
-            // at least one unbookmarked record selected
-            hasRecordsNotBkmkd = true;
-        }
-
-        var url = window.hWin.HAPI4.baseURL+ "records/tags/updateTagsSearchPopup.php?show-remove?db=" + window.hWin.HAPI4.database + (recID?"&recid="+recID:"");
-
-        window.hWin.HEURIST4.msg.showDialog(url, { width:600, height:400, title:window.hWin.HR('Add / Remove User Tags'), callback:
-
-            function(add, tags) {//options
-                if (! tags) { //no tags added
-                    if (reload) {
-                        //@todo top.HEURIST.search.executeQuery(top.HEURIST.currentQuery_main);
-                    }
-                    return;
-                }
-
-                var saction = (add ? (hasRecordsNotBkmkd? "bookmark_and":"add") : "remove") + "_tags";
-
-                var _data = {bkmk_ids:bkmkIDs_list, rec_ids: recIDs_list, tagString:tags, reload:(reload ? "1" : "")};
-
-                that.executeAction(saction, _data);
-
-            }
-        });
-
-    },
-
-    /**
-    * workgroup tags
-    */
-    addRemoveKeywordsPopup: function() {
-
-        var recIDs_list = this.getSelectionIds("Please select at least one record to add / remove workgroup tags");
-        if(Hul.isempty(recIDs_list)) return;
-
-        var that = this;
-
-        this.convertGroupsForH3();
-
-        var url = window.hWin.HAPI4.baseURL+ "records/tags/editUsergroupTagsPopup.html?db=" + window.hWin.HAPI4.database;
-
-        window.hWin.HEURIST4.msg.showDialog(url, {
-            width: 800, height:700,
-            title:window.hWin.HR('Add / Remove Workgroup Keywords'),
-            callback: function(add, wgTag_ids) {//options
-                if (! wgTag_ids) return;
-
-                var saction = (add ? "add" : "remove") + "_wgTags_by_id";
-                var _data = {rec_ids:recIDs_list, wgTag_ids:wgTag_ids};
-
-                that.executeAction(saction, _data);
-            }
-        });
-    },
-
-    getBookmarkMessage: function(operation) {
-        return "Please select at least one bookmark " + operation
-        + (this._query_request.w=="all"
-            ? "<br>(operation can only be carried out on bookmarked records, shown by a red star )"
-            : "");
-    },
-
-    convertGroupsForH3: function() {
-
-        var workgroups = [];
-        var workgroups2 = {};
-        var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
-        
-        for (var groupID in groups)
-        if(groupID>0){
-            var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
-            if(!Hul.isnull(name))
-            {
-                workgroups.push(groupID);
-                workgroups2[groupID] = {name: name};
-            }
-        }
-        
-        if(top.HEURIST){
-            top.HEURIST.user.workgroups = workgroups;
-            top.HEURIST.workgroups = workgroups2;
-        }
-    },
-
     openEmailForm: function() {
         // Selection check
         var ids = this.getSelectionIds("Please select at least one record to e-mail");
@@ -635,97 +543,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         window.hWin.HEURIST4.msg.showDialog(url, { width:500, height:600, title: window.hWin.HR('Email information') });
 
     },
-
-    setRatingsPopup: function(bkmkID) {
-
-        var bkmkIDs_list = [],
-        that = this;
-
-        if(bkmkID){
-            bkmkIDs_list = [bkmkID];
-        }else if (this._selection!=null) {
-            bkmkIDs_list = this._selection.getBookmarkIds();
-        }
-
-        if (bkmkIDs_list.length == 0) {
-            window.hWin.HEURIST4.msg.showMsgDlg(this.getBookmarkMessage("to set ratings"));
-            return;
-        }
-
-        var url = window.hWin.HAPI4.baseURL+ "search/actions/setRatingsPopup.php?db=" + window.hWin.HAPI4.database;
-
-        window.hWin.HEURIST4.msg.showDialog(url, {
-            width:250, height:220, title: window.hWin.HR('Set Record rating'),
-            callback: function(value) {//options
-                if(Number(value)>=0){
-                    var _data = {bkmk_ids:bkmkIDs_list, ratings: value};
-                    that.executeAction('set_ratings', _data);
-                }
-            }
-        });
-
-    },
-
-    addBookmarks: function() {
-
-        var recIDs_list = this.getSelectionIds("Please select at least one record to bookmark");
-        if(Hul.isempty(recIDs_list)) return;
-
-        this.executeAction( "bookmark_reference", {rec_ids: recIDs_list} );
-    },
-
-    deleteBookmarks: function(bkmkID) {
-
-        var bkmkIDs_list = [],
-        that = this;
-        if(bkmkID){
-            bkmkIDs_list = [bkmkID];
-        }else if (this._selection!=null) {
-            bkmkIDs_list = this._selection.getBookmarkIds();
-        }
-
-        var sMsg = "";
-
-        if (bkmkIDs_list.length == 0) {
-            window.hWin.HEURIST4.msg.showMsgDlg("Please select at least one bookmark to delete");
-            return;
-        }else if (bkmkIDs_list.length == 1) {
-            sMsg = "Do you want to delete one bookmark?<br>(this ONLY removes the bookmark from your resources,<br>it does not delete the record entry)";
-        } else {
-            sMsg = "Do you want to delete " + bkmkIDs_list.length + " bookmarks?<br>(this ONLY removes the bookmarks from your resources,<br>it does not delete the record entries)";
-        }
-
-        window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
-            that.executeAction( "delete_bookmark", {bkmk_ids: bkmkIDs_list} );
-        })
-    },
-
-    // replaced  with this.detailBatchEditPopup('ownership');
-    /* not used anymore
-    setWorkgroupPopup: function() {
-
-        var recIDs_list = this.getSelectionIds("Please select at least one record to set workgroup ownership and visibility");
-        if(Hul.isempty(recIDs_list)) return;
-
-        var that = this;
-
-        this.convertGroupsForH3();
-        
-        var url = window.hWin.HAPI4.baseURL+ "records/permissions/setRecordOwnership.html?db=" + window.hWin.HAPI4.database;
-
-        window.hWin.HEURIST4.msg.showDialog(url, { height:300, width:650, title: window.hWin.HR('Set workgroup / access'),
-            callback:function(wg, viewable, hidden, pending) {
-                if (wg === undefined) return;
-
-                var _data = {rec_ids: recIDs_list,
-                    wg_id  : wg,
-                    vis : (hidden ? "hidden" :
-                        viewable ? "viewable" :
-                        pending ? "pending" : "public") };
-                that.executeAction( "set_wg_and_vis", _data );
-            }
-        });
-    }, */
 
     //-------------------------------------- SELCT ALL, NONE, SHOW -------------------------------
 
@@ -836,43 +653,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     },
 
     //-------------------------------------- VARIOUS: DELETE RECORD, SEND NOTIFICATION -------------------------------
-
-    deleteRecords: function() {
-
-        var recIDs_list = this.getSelectionIds("Please select at least one record to delete");
-        if(Hul.isempty(recIDs_list)) return;
-
-        var that = this;
-        var url = window.hWin.HAPI4.baseURL+ "search/actions/deleteRecordsPopup.php?db=" + window.hWin.HAPI4.database;
-
-        //adjust height
-        var dheight = (recIDs_list.length+2)*50+100;
-        if(dheight<300) {
-            dheight = 300;   
-        }
-        else{
-            var body = $(this.document).find('body');
-            dheight = Math.min(dheight, body.innerHeight());
-
-        }
-
-        window.hWin.HEURIST4.msg.showDialog(url, {
-            title: window.hWin.HR('Delete Records'),
-            height: dheight, width: 600,
-            onpopupload: function(frame){ //assign list of records to be deleted to POST form, to avoid GET length limitation
-                var ele = frame.contentDocument.getElementById("ids");
-                if(Hul.isempty(recIDs_list) || Hul.isnull(ele)) return;
-                ele.value = recIDs_list.join(",");
-                frame.contentDocument.forms[0].submit();
-            },
-            callback: function(context) {
-                if (context==="reload") { //something was deleted - refresh
-                    that.reloadSearch();
-                }
-            }
-        });
-    },
-
+ 
     notificationPopup: function() {
 
         var recIDs_list = this.getSelectionIds(this.getBookmarkMessage("for notification"), 1000);
