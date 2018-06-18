@@ -881,7 +881,7 @@ function hRecordSet(initdata) {
             if(Object.keys(records).length<rec_ids.length){
 
                 for(recID in records)
-                    if(recID && window.hWin.HEURIST4.util.findArrayIndex(rec_ID, rec_ids)>-1) {
+                    if(recID && window.hWin.HEURIST4.util.findArrayIndex(recID, rec_ids)>-1) {
                         _records[recID] = records[recID];
                     }
 

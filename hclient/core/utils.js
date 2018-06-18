@@ -1243,6 +1243,8 @@ window.hWin.HEURIST4.util = {
     //not strict search - valuable for numeric vs string 
     findArrayIndex: function(elt, arr /*, from*/)
     {
+        if( window.hWin.HEURIST4.util.isempty(arr) ) return -1;
+        
         var len = arr.length;
 
         var from = Number(arguments[2]) || 0;

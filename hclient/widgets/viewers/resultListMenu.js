@@ -297,18 +297,28 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             this.fixDuplicatesPopup();
 
-        }else if(action == "menu-selected-tag" || action == "menu-selected-bookmark"){
+        }else if(action == "menu-selected-tag" || action == "menu-selected-bookmark" || action == "menu-selected-wgtags"){
             
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordTag', {onClose:
+            var opts = {
+                groups: (action == "menu-selected-wgtags")?'grouponly':'personal',
+                onClose:
                    function( context ){
                        if(context){
                            //refresh search page
                            that.reloadSearch(); //@todo reloadPage                   
                        }
                    }
-            });
+            };
+            if(action == "menu-selected-bookmark"){
+                opts['title'] = 'Add bookmarks and tag records';
+                opts['modes'] = ['assign'];
+            }else if (action == "menu-selected-wgtags"){
+                opts['title'] = 'Add or Remove Workgroup Tag for Records';    
+            }
+            
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordTag', opts);
 
         }else if(action == "menu-selected-wgtags"){
 
@@ -365,12 +375,15 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         }else if(action == "menu-selected-ownership"){
 
-            //this.setWorkgroupPopup();
-            this.detailBatchEditPopup('ownership');
+            //this.detailBatchEditPopup('ownership');
+            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess');
 
         }else if(action == "menu-selected-notify"){
 
-            this.notificationPopup();
+            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordNotify');
+            //this.notificationPopup();
 
         }else if(action == "menu-selected-value-add"){
 
@@ -656,7 +669,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
  
     notificationPopup: function() {
 
-        var recIDs_list = this.getSelectionIds(this.getBookmarkMessage("for notification"), 1000);
+        var recIDs_list = this.getSelectionIds("for notification", 1000);
         if(Hul.isempty(recIDs_list)) return;
 
         recIDs_list = recIDs_list.join(",");

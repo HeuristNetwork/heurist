@@ -1,5 +1,5 @@
 /**
-* recordBookmark.js - remove bookmarks and detach all personal tags for scope of records
+* recordAccess.js - apply ownership and access rights
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -17,33 +17,35 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.recordBookmark", $.heurist.recordAction, {
+$.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
     // default options
     options: {
     
-        height: 300,
-        width:  540,
+        height: 340,
+        width:  640,
         modal:  true,
         init_scope: 'selected',
-        title:  'Set Record Rating',
-        helpContent: 'recordRate.html'
+        title:  'Change Record Access and Ownership',
+        htmlContent: 'recordAccess.html',
+        helpContent: 'recordAccess.html' //in context_help folder
     },
 
     _initControls:function(){
         
-        $('#div_header')
-            .css({'line-height':'21px'})
-            .addClass('heurist-helper1')
-            .html('Select the scope of records with bookmarks to be removed.<br>'
-            +'Any personal tags for these records will be detached <br>'
-            +'These operation ONLY removes the bookmark from your resources, <br>'
-            +'it does not delete the record entries<br>');
-        
-        this.element.parents('.ui-dialog').find('#btnDoAction').attr('label', top.HR('Remove Bookmarks'));
+        var fieldSelect = $('#sel_Ownership');
+        window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], null,  //take groups of current user
+                [{key:0, title:'Everyone (no restriction)'}, 
+                 {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}]);
         
         return this._super();
     },
+    
+    _getActionButtons: function(){
+        var res = this._super();
+        res[1].text = window.hWin.HR('Apply');
+        return res;
+    },    
     
     //
     //
@@ -51,7 +53,7 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
     doAction: function(){
 
             var scope_val = this.selectRecordScope.val();
-            if(scope_val=='') return;
+            if(scope_val=='')    return;
             
             var scope = [], 
             rec_RecTypeID = 0;
@@ -64,12 +66,14 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
                     rec_RecTypeID = scope_val;
                 }   
             }
+            
+            return;            
         
             var request = {
                 'a'          : 'batch',
                 'entity'     : 'usrBookmarks',
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'mode'       : 'unbookmark',
+                'rating'     : rating,
                 'bkm_RecID'  : scope
                 };
                 
@@ -83,15 +87,15 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
 
-                            that._context_on_close = (response.data.deleted>0);
+                            that._context_on_close = (response.data.updated>0);
                             
                             that.closeDialog();
                             
                             window.hWin.HEURIST4.msg.showMsgFlash(
-                                //'For '+response.data.processed + ' processed record'
-                                //+ (response.data.processed>1?'s':'') +'<br><br> '
-                                + response.data.deleted  + ' bookmark'
-                                + (response.data.deleted>1?'s were':' was') + ' deleted',1000);
+                                response.data.processed + ' bookmarked record'
+                                + (response.data.processed>1?'s':'') +' processed<br><br>for '
+                                + response.data.updated  + ' bookmark'
+                                + (response.data.updated>1?'s':'') + ' the rating was updated',2000);
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

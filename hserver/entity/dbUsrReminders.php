@@ -240,6 +240,9 @@ class DbUsrReminders extends DbEntityBase
                 return false;    
         }
         
+        $rec_IDs = prepareIds(@$this->data['rec_IDs']);
+        $is_notification = (count($rec_IDs)>0);
+        
         $mysqli = $this->system->get_mysqli();
         
         foreach($this->records as $record){
@@ -258,7 +261,8 @@ class DbUsrReminders extends DbEntityBase
             else if (@$record['rem_ToUserID']) {
                 
                 $row = mysql__select_row($mysqli,
-                    'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail from sysUGrps usr where usr.ugr_Type="user" and usr.ugr_ID='.$record['rem_ToUserID']);
+                    'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail FROM sysUGrps usr '
+                    .'WHERE usr.ugr_Type="user" and usr.ugr_ID='.$record['rem_ToUserID']);
                 if ($row) {
                     array_push($recipients, array(
                         "email" => $row[0].' '.$row[1].' <'.$row[2].'>',
@@ -292,57 +296,87 @@ class DbUsrReminders extends DbEntityBase
             
             if(count($recipients)>0){
 
-            $email_headers = 'From: Heurist reminder service <no-reply@'.HEURIST_SERVER_NAME.'>';
-
             //sender params - reminder owner
             $owner = mysql__select_row($mysqli,
-                'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail from sysUGrps usr where usr.ugr_Type="user" and usr.ugr_ID='
-                        .$record['rem_OwnerUGrpID']);
+                'select usr.ugr_FirstName,usr.ugr_LastName,usr.ugr_eMail '
+                    .'FROM sysUGrps usr where usr.ugr_Type="user" and usr.ugr_ID='
+                    .$record['rem_OwnerUGrpID']);
             if ($owner) {
                 
                 $email_owner = $owner[0].' '.$owner[1].' <'.$owner[2].'>';
+                
+                if($is_notification){
+                    $email_headers = 'From: '.$email_owner.' <no-reply@'.HEURIST_SERVER_NAME.'>';    
+                    
+                    //find associated records
+                    $bibs = mysql__select_assoc2($mysqli,
+                        'select rec_ID, rec_Title from Records '.
+                                        'where rec_ID in ('. implode(',', $rec_IDs) .')');
+                    
+                    $email_title = '[HEURIST] Email from '.$owner[0].' '.$owner[1].' ('
+                        .(count($bibs)>1?count($bibs).' references':'one reference').')';
+                }else{
+                    $email_headers = 'From: Heurist reminder service <no-reply@'.HEURIST_SERVER_NAME.'>';        
+                    
+                    //find associated record
+                    $bib = mysql__select_row($mysqli,
+                        'select rec_Title, rec_OwnerUGrpID, rec_NonOwnerVisibility, grp.ugr_Name from Records '.
+                                        'left join sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type!="user" '.
+                                        'where rec_ID = '.$record['rem_RecID']);
+                    
+                    $email_title = '"'.$bib[0].'"'; //rec_Title    
+                    if (@$record['rem_ToUserID'] != @$record['rem_OwnerUGrpID']){
+                        $email_title .= ' from ' . $owner[0].' '.$owner[1];
+                    }
+                }
                 
                 if (@$record['rem_ToEmail']!=$owner[2]  || @$record['rem_ToUserID'] != @$record['rem_OwnerUGrpID']){
                     $email_headers .= "\r\nCc: ".$email_owner;
                 }
                 $email_headers .= "\r\nReply-To: ".$email_owner;
 
-                //find associated record
-                $bib = mysql__select_row($mysqli,
-                    'select rec_Title, rec_OwnerUGrpID, rec_NonOwnerVisibility, grp.ugr_Name from Records '.
-                                    'left join sysUGrps grp on grp.ugr_ID=rec_OwnerUGrpID and grp.ugr_Type!="user" '.
-                                    'where rec_ID = '.$record['rem_RecID']);
-
-                $email_title = '"'.$bib[0].'"'; //rec_Title
-
-                if (@$record['rem_ToUserID'] != @$record['rem_OwnerUGrpID']){
-                    $email_title .= ' from ' . $owner[0].' '.$owner[1];
-                }
-                
 
                 foreach($recipients as $recipient) {
-                    $email_text = 'Reminder From: ' . ($record['rem_ToUserID'] == $record['rem_OwnerUGrpID'] ? 'you'
-                                                        : $email_owner) . "\n\n"
-                                . 'For: "'.$bib[0].'"' . "\n\n" //rec_Title
-                                . 'URL: '.HEURIST_BASE_URL.'?w=all&db='.HEURIST_DBNAME.'&q=ids:'.$record['rem_RecID'] . "\n\n";
+                    if($is_notification){
+                        
+                        $email_text = $owner[0].' '.$owner[1].' would like to draw some records to your attention, with the following note:'. "\n\n"
+                                    . '"'.$record['rem_Message'] . '"' . "\n\n"
+                                    . 'Access them and add them (if desired) to your Heurist records at:' . "\n\n"
+                                    . HEURIST_BASE_URL.'?w=all&db='.HEURIST_DBNAME.'&q=ids:'.implode(',', $rec_IDs) . "\n\n"
+                                    . 'To add records, select them and then Selected > Bookmark' . "\n\n"
+                                    . "Id      Title\n" . "------  ---------\n";                            
+                        foreach($bibs as $rec_id => $rec_title){
+                            $email_text .= str_pad("$rec_id", 8) . $rec_title . "\n";
+                        }
+                                                                                            
+                        $email_text .= "\n\n-------------------------------------------\n\n"
+                                    .  "This email was generated by Heurist (".HEURIST_MAIL_TO_INFO.").\n\n";
+                                    
+                    
+                    }else{
+                        $email_text = 'Reminder From: ' . ($record['rem_ToUserID'] == $record['rem_OwnerUGrpID'] ? 'you'
+                                                            : $email_owner) . "\n\n"
+                                    . 'For: "'.$bib[0].'"' . "\n\n" //rec_Title
+                                    . 'URL: '.HEURIST_BASE_URL.'?w=all&db='.HEURIST_DBNAME.'&q=ids:'.$record['rem_RecID'] . "\n\n";
 
-                    if ($bib[1] && $bib[2] == 'hidden') { //rec_OwnerUGrpID  rec_NonOwnerVisibility
-                        $email_text .= "Note: Record belongs to workgroup ".$bib[3] . "\n"   //ugr_Name
-                                        ."You must be logged in to Heurist and a member of this workgroup to view it". "\n\n";
-                    }
+                        if ($bib[1] && $bib[2] == 'hidden') { //rec_OwnerUGrpID  rec_NonOwnerVisibility
+                            $email_text .= "Note: Record belongs to workgroup ".$bib[3] . "\n"   //ugr_Name
+                                            ."You must be logged in to Heurist and a member of this workgroup to view it". "\n\n";
+                        }
 
-                    $email_text .= 'Message: '.$record['rem_Message'] . "\n\n";
+                        $email_text .= 'Message: '.$record['rem_Message'] . "\n\n";
 
-                    if (@$record['rem_ID']  &&  $record['rem_Freq'] != "once") {
-                        $email_text .= "-------------------------------------------\n\n"
-                                    .  "You will receive this reminder " . $record['rem_Freq'] . "\n"
-                                    .  "Click below if you do not wish to receive this reminder again:\n\n"
-                                    .  $BASE_URL."records/reminders/deleteReminder.php?r=".$record['rem_ID']
-                                    . "db=".HEURIST_DBNAME
-                                    .  ($recipient['u'] ? "&u=".$recipient['u'] : "&e=".$recipient['e']) . "&h=".$record['rem_Nonce'] . "\n\n";
-                    } else {
-                        $email_text .= "-------------------------------------------\n\n"
-                                    .  "You will not receive this reminder again.\n\n";
+                        if (@$record['rem_ID']  &&  $record['rem_Freq'] != "once") {
+                            $email_text .= "-------------------------------------------\n\n"
+                                        .  "You will receive this reminder " . $record['rem_Freq'] . "\n"
+                                        .  "Click below if you do not wish to receive this reminder again:\n\n"
+                                        .  $BASE_URL."records/reminders/deleteReminder.php?r=".$record['rem_ID']
+                                        . "db=".HEURIST_DBNAME
+                                        .  ($recipient['u'] ? "&u=".$recipient['u'] : "&e=".$recipient['e']) . "&h=".$record['rem_Nonce'] . "\n\n";
+                        } else {
+                            $email_text .= "-------------------------------------------\n\n"
+                                        .  "You will not receive this reminder again.\n\n";
+                        }
                     }
                     
                     $res = sendEmail($recipient['email'], $email_title, $email_text, $email_headers, true);

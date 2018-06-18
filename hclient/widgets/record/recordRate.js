@@ -41,10 +41,14 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
                 +'<tr><td><input type="radio" value="5" name="r" id="r5"></td><td><label for="r5" class="yellow_star" style="width:64px;"></label></td></tr>'
         +'</tbody></table>').appendTo( this.element.find('#div_fieldset'));
         
-        this.element.parents('.ui-dialog').find('#btnDoAction').attr('label', top.HR('Set Rating'));
-        
         return this._super();
     },
+    
+    _getActionButtons: function(){
+        var res = this._super();
+        res[1].text = window.hWin.HR('Set Rating');
+        return res;
+    },    
     
     //
     //
@@ -60,7 +64,6 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
                 window.hWin.HEURIST4.msg.showMsgErr('Please specify rating value');
                 return;
             }
-            
             
             var scope = [], 
             rec_RecTypeID = 0;
@@ -97,12 +100,11 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
                             
                             that.closeDialog();
                             
-                            window.hWin.HEURIST4.msg.showMsgDlg(
+                            window.hWin.HEURIST4.msg.showMsgFlash(
                                 response.data.processed + ' bookmarked record'
                                 + (response.data.processed>1?'s':'') +' processed<br><br>for '
                                 + response.data.updated  + ' bookmark'
-                                + (response.data.updated>1?'s':'') + ' the rating was updated',null, 'Result'
-                            );
+                                + (response.data.updated>1?'s':'') + ' the rating was updated',2000);
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

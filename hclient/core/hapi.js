@@ -922,7 +922,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         // they have to be used internally in widgets and loop operations to avoid server/network workload
         // However, before start any action or open widget popup need to call 
         // SystemMgr.verify_credentials
-
+        
         /**
         * Returns true is current user is database admin (admin in group Database Managers)
         */
@@ -1047,6 +1047,10 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
 
+        user_id: function(){
+                return that.currentUser['ugr_ID'];  
+        },
+        
         currentUser: _guestUser,
         sysinfo: {},
 

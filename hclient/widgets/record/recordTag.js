@@ -27,7 +27,9 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Add or Remove Tags for Records',
-        helpContent: 'tags.html'  //'usrTags.html'
+        helpContent: 'tags.html',  //'usrTags.html'
+        groups: 'all',
+        modes: ['assign','remove']
     },
     
     _tags_selection:[], //selected tags
@@ -55,6 +57,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
                 select_mode: 'select_multi', 
                 layout_mode: '<div class="recordList"/>',
                 list_mode: 'compact', //special option for tags
+                groups: this.options.groups, //all,personal,grouponly,or list of ids
                 show_top_n_recent: true, //show top and recent lists
                 selection_ids: [], //already selected tags
                 select_return_mode:'recordset', //ids by default
@@ -77,9 +80,18 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
     _getActionButtons: function(){
         var res = this._super();
         
-        res[1].text = window.hWin.HR('Remove tags'),
+        var that = this;
         
-        res.push({text:window.hWin.HR('Add tags'),
+        
+        if(this.options.modes.indexOf('remove')>=0){
+            res[1].text = window.hWin.HR('Remove tags');
+        }else{
+            res.pop(); //remove last
+        }
+            
+        
+        if(this.options.modes.indexOf('assign')>=0)
+            res.push({text:window.hWin.HR('Add tags'),
                     id:'btnDoAction2',
                     disabled:'disabled',
                     css:{'float':'right'},  
@@ -97,11 +109,8 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
             var scope_val = this.selectRecordScope.val();
             if(scope_val=='')    return;
             
-            if(!mode) mode = 'remove';
-               
-            alert(mode);
-            
-            return;
+            if(mode!='assign') mode = 'remove';
+
             
             if(window.hWin.HEURIST4.util.isempty(this._tags_selection)){
                 window.hWin.HEURIST4.msg.showMsgErr('Need to select tags to '+mode);
@@ -147,25 +156,27 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
                             var msg = 'For <b>'+response.data.processed + '</b> processed record'
                                 + (response.data.processed>1?'s':'') +'<br>';
                              
-                             if(response.data.res_tag_added==0 && response.data.res_tag_removed==0) {
+                             if(response.data.added==0 && response.data.removed==0) {
                                  msg += 'No tags were affected';
                              }else{
-                                 if(response.data.res_tag_added>0){
-                                    msg += (response.data.res_tag_added+' tag'
-                                            +(response.data.res_tag_added>1?'s were':' was')+' assigned');
-                                 }else if($res_tag_removed>0){
-                                    msg += (response.data.res_tag_removed+' tag'
-                                            +(response.data.res_tag_removed>1?'s were':' was')+' removed');
+                                 if(response.data.added>0){
+                                     msg += (response.data.added+' tag'
+                                            +(response.data.added>1?'s were':' was')+' assigned');
+                                            
+                                     if(response.data.bookmarks>0){
+                                         msg += '<br>'+response.data.bookmarks+' bookmark'
+                                            +(response.data.bookmarks>1?'s were':' was')+' added';
+                                     }else{
+                                         msg += '<br>No bookmarks added';
+                                     }
+                                            
+                                 }else if(response.data.removed>0){
+                                    msg += (response.data.removed+' tag'
+                                            +(response.data.removed>1?'s were':' was')+' removed');
                                  }
                              } 
-                             if(response.data.res_bookmarks>0){
-                                 msg += '<br>'+response.data.res_bookmarks+' bookmark'
-                                    +(response.data.res_bookmarks>1?'s were':' was')+' added';
-                             }else{
-                                 msg += '<br>No bookmarks added';
-                             }
                                 
-                            window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Result');
+                            window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000);
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

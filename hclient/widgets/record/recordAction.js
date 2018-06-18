@@ -64,6 +64,8 @@ $.widget( "heurist.recordAction", {
     //  load configuration and call _initControls
     //
     _init: function() {
+        
+        this.element.addClass('ui-heurist-bg-light');
             
         if(this.options.currentRecordset){
             this._currentRecordset  = this.options.currentRecordset;

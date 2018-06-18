@@ -33,6 +33,17 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         this.options.use_cache = true;
         if(this.options.list_mode!='compact') this.options.list_mode = 'accordions';
         this.options.edit_mode = 'inline'; //inline only
+        
+         //all,personal,grouponly,or list of ids
+        if(!this.options.groups || this.options.groups == 'all'){
+            this.options.groups = Object.keys(window.hWin.HAPI4.currentUser.ugr_Groups);    
+            this.options.groups.unshift(window.hWin.HAPI4.user_id());
+        }else if(this.options.groups=='personal'){
+            this.options.groups = [window.hWin.HAPI4.user_id()];
+        }else if(this.options.groups=='grouponly'){
+            this.options.groups = Object.keys(window.hWin.HAPI4.currentUser.ugr_Groups);    
+        }
+        
 
         if(this.options.list_mode!='compact'){
             this.options.width = 900;    
@@ -138,7 +149,6 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     updateRecordList: function( event, data ){
         this._super(event, data);
         
-//console.log(data);        
         if(this.options.list_mode=='compact'){
             this._initCompactUI();
         }else{
@@ -252,7 +262,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             
         }
         
-        __addAcc(window.hWin.HAPI4.currentUser['ugr_ID'], 'Personal tags');
+        __addAcc(window.hWin.HAPI4.user_id(), 'Personal tags');
         
         for (var groupID in window.hWin.HAPI4.currentUser.ugr_Groups)
         if(groupID>0){
@@ -304,7 +314,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 }
                         
                 if(this.options.select_mode=='select_multi'){
-                    if(this.options.selection_ids.indexOf(recID)<0){
+                    if(window.hWin.HEURIST4.util.findArrayIndex(recID, this.options.selection_ids)<0){
                         $(item).appendTo(content.find('.available'));    
                     }else{
                         $(item).appendTo(content.find('.picked'));    
@@ -322,7 +332,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         for (var groupid in maxlen)
         if(groupid>0){
             var wd = (maxlen[groupid]<10?10:maxlen[groupid])+8;
-//console.log(groupid+'   '+maxlen[groupid]+' w='+wd+' cnt='+this.recordList.find('div.recordDiv[groupid="'+groupid+'"]').length);
+
             this.recordList.find('div.recordDiv[groupid="'+groupid+'"]')
                 .attr('data-wd',wd)
                 .css({'min-width': wd+'ex','max-width': wd+'ex'});
@@ -397,7 +407,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 if(subset.length()>0){
                     
                     var recID = Number(subset.getOrder()[0]);
-                    if(this.options.selection_ids.indexOf(recID)<0){
+                    if(window.hWin.HEURIST4.util.findArrayIndex(recID, this.options.selection_ids)<0){
                     
                         if(this.options.select_mode=='select_multi'){
                             //move duplication to picked
@@ -446,7 +456,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         if(recid>0){
                             if(this.options.select_mode=='select_multi'){
                                 
-                                var idx = this.options.selection_ids.indexOf(recid);
+                                var idx = window.hWin.HEURIST4.util.findArrayIndex(recid, this.options.selection_ids);
                                 var content = item.parents('.summary-content');
                                 
                                 if(idx<0){
@@ -576,19 +586,22 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         var idx, panel = this.recordList;
        
         panel.empty().css({'font-size': '0.9em'});
-        
-        //1. selected tags by group
-        $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>') //width:110px;text-align:right;
-            .css({'padding':'3px 4px'})
-            .attr('data-id', window.hWin.HAPI4.currentUser['ugr_ID'])
-            .hide().appendTo(panel);
+console.log('AA');
+       if(window.hWin.HEURIST4.util.findArrayIndex(window.hWin.HAPI4.user_id(), this.options.groups)>=0){ 
+            //1. selected tags by group
+            $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>') //width:110px;text-align:right;
+                .css({'padding':'3px 4px'})
+                .attr('data-id', window.hWin.HAPI4.user_id())
+                .hide().appendTo(panel);
+       }
 
+            
         //render group divs
         //with list of selected tags
         var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
         for (var groupID in groups)
         {
-            if(groupID>0){
+            if(groupID>0 && window.hWin.HEURIST4.util.findArrayIndex(groupID, this.options.groups)>=0){
                 var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                 if(!window.hWin.HEURIST4.util.isnull(name))
                 {   
@@ -619,7 +632,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         var recID, label, groupid, record, grp, isnone = true;
         
         for (idx=0;idx<this.options.selection_ids.length;idx++){
-            this._addTagToPicked(this.options.selection_ids[idx]);
+            this._addTagToPicked(this.options.selection_ids[idx], true);
         }  
         
         //2. add group selector and search/add input     
@@ -640,17 +653,29 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         var input_tag = mdiv.find('input');                             
 
         var sel_group = mdiv.find('select');
-        window.hWin.HEURIST4.ui.createUserGroupsSelect(sel_group[0], null, 
-            [{key:window.hWin.HAPI4.currentUser['ugr_ID'], title:'Personal tags'}]);
+        
+        var topOpt = null;
+        if(window.hWin.HEURIST4.util.findArrayIndex(window.hWin.HAPI4.user_id(), this.options.groups)>=0){
+            topOpt = [{key:window.hWin.HAPI4.user_id(), title:'Personal tags'}];
+        }
+        
+        window.hWin.HEURIST4.ui.createUserGroupsSelect(sel_group[0], this.options.groups, topOpt);
+        
         sel_group.change(function(){
               input_tag.val('');
               if(that.list_div) that.list_div.hide();  //drop down list
+
+              var groupid = sel_group.val(); 
+
+              //that.recordList.find('div[data-id!='+groupid+']').hide();
+              //show assigned
+              //that.recordList.find('div[data-id='+groupid+']').show();
               
               //show top and recent lists
               top_n_recent.empty();
-              if(sel_group.val()>0 && that.options.show_top_n_recent){
-                that._getTagList(sel_group.val(),'Top', 10).appendTo(top_n_recent);
-                that._getTagList(sel_group.val(),'Recent', 10).appendTo(top_n_recent);
+              if(groupid>0 && that.options.show_top_n_recent){
+                that._getTagList(groupid,'Top', 10).appendTo(top_n_recent);
+                that._getTagList(groupid,'Recent', 10).appendTo(top_n_recent);
               }
         });
         sel_group.change();
@@ -693,7 +718,9 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     for (idx=0;idx<order.length;idx++){
 
                         recID = order[idx];
-                        if(recID && that.options.selection_ids.indexOf(Number(recID))<0 && records[recID]){
+                        var kk = window.hWin.HEURIST4.util.findArrayIndex(recID,that.options.selection_ids);
+
+                        if(recID && kk<0 && records[recID]){
                             label = recordset.fld(records[recID],'tag_Text');
                             $('<div recid="'+recID+'" class="truncate">'+label+'</div>').appendTo(that.list_div)
                             .click( function(event){
@@ -706,7 +733,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
 
                         }
                     }
-                    
+                                           
                     that.list_div.show().position({my:'left top', at:'left bottom', of:input_tag})
                     //.css({'max-width':(maxw+'px')});
                     .css({'max-width':input_tag.width()+60});
@@ -786,12 +813,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         return list_div;
     },
     
-    _addTagToPicked: function(recID){
+    _addTagToPicked: function(recID, isinit){
 
         var that = this;
         
         recID = Number(recID);
-        if(that.options.selection_ids.indexOf(recID)>=0){
+        //
+        if(isinit!==true && window.hWin.HEURIST4.util.findArrayIndex(recID, that.options.selection_ids)>=0){
             return;
         }
         
@@ -819,18 +847,19 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             //delete
             ele.find('span').click(function(event){
                  var recID = Number($(event.target).attr('recid'));
-                 var idx = that.options.selection_ids.indexOf(recID);
+                 var idx = window.hWin.HEURIST4.util.findArrayIndex(recID,that.options.selection_ids);
                  that.options.selection_ids.splice(idx, 1);
                  $(event.target).parents('.tagDiv2').remove();
                  that._trigger( "onselect", null, {selection:that.options.selection_ids, 
                     astext:that._selectedTagsAsString()});
             });
             
-                      //display:none;   inline-block
-            
+                      
+            if(isinit!==true){
                 that.options.selection_ids.push(recID);
                 that._trigger( "onselect", null, {selection:that.options.selection_ids,
                     astext:that._selectedTagsAsString()});
+            }
                          
         }
     },
@@ -857,7 +886,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 label = recordset.fld(record,'tag_Text');
                 groupid = recordset.fld(record,'tag_UGrpID');
                 
-                if(window.hWin.HAPI4.currentUser['ugr_ID']==groupid){
+                if(window.hWin.HAPI4.user_id()==groupid){
                     res.push(label);    
                 }else{
                     var grpName = window.hWin.HAPI4.sysinfo.db_usergroups[groupid];
@@ -913,7 +942,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     for (idx=0;idx<order.length;idx++){
 
                         recID = order[idx];
-                        if(recID && that.options.selection_ids.indexOf(Number(recID))<0 && records[recID]){
+                        if(recID && window.hWin.HEURIST4.util.findArrayIndex(recID,that.options.selection_ids)<0 && records[recID]){
                             label = recordset.fld(records[recID],'tag_Text');
                             $('<div recid="'+recID+'" class="truncate">'
                             +label+'</div>').appendTo(that.list_div)
@@ -927,7 +956,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         }
                     }
                     
-                    that.list_div.show().position({my:'left top', at:'left bottom', of:that.edit_replace_input})
+                    that.list_div.show()
+                    .position({my:'left top', at:'left bottom', of:that.edit_replace_input})
                     //.css({'max-width':(maxw+'px')});
                     .css({'max-width':that.edit_replace_input.width()+60});
                     

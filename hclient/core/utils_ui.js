@@ -1205,14 +1205,24 @@ window.hWin.HEURIST4.ui = {
                 }
             }
         }
-        if(groups){
+        if(groups){   //it may 1) array of group ids 2) [ids=>name] 3) [ids=a>rray(0,name,0)]
 
-            for (var groupID in groups)
+            for (var idx in groups)
             {
-                if(groupID>0 && addedontop.indexOf(groupID)<0){
-                    var name = groups[groupID];
-                    if($.isArray(name)) name = name[1] //backward
-                    if(!window.hWin.HEURIST4.util.isnull(name))
+                if(idx>=0){
+                    
+                    var groupID = groups[idx];
+                    var name = null;
+                    if(parseInt(groupID)>0){ //case 1
+                        name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                    }else{
+                        groupID = idx;
+                        name = groups[groupID];    
+                        if($.isArray(name)) name = name[1] //backward  case 3
+                    }
+                    
+                    if(window.hWin.HEURIST4.util.findArrayIndex(groupID,addedontop)<0 
+                        && !window.hWin.HEURIST4.util.isnull(name))
                     {
                         window.hWin.HEURIST4.ui.addoption(selObj, groupID, name);
                     }

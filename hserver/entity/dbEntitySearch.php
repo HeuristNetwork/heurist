@@ -192,7 +192,7 @@ class DbEntitySearch
     //
     // extract first charcter to determine comparison opeartor =,like, >, <, between
     //
-    public function getPredicate($fieldname) {
+    public function getPredicate($fieldname, $is_ids=false) {
         
         $value = @$this->data[$fieldname];
         if($value==null) return null;
@@ -200,7 +200,7 @@ class DbEntitySearch
         $field_config = @$this->fields[$fieldname];
         if($field_config==null) return null;
         $data_type = $field_config['dty_Type'];
-        $is_ids = (@$field_config['dty_Role']=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
+        $is_ids = ($is_ids || @$field_config['dty_Role']=='primary') || (@$field_config['rst_FieldConfig']['entity']!=null);
         
         //special case for ids - several values can be used in IN operator        
         if ($is_ids) {  //preg_match('/^\d+(?:,\d+)+$/', $value)
@@ -350,7 +350,7 @@ class DbEntitySearch
         }//for or_values
         
         if(count($or_predicates)>0){
-            $res = implode(' OR ', $or_predicates);
+            $res = '('.implode(' OR ', $or_predicates).')';
             return $res;
         }else{
             return null;

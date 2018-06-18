@@ -159,7 +159,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         var fields = this._getValidatedValues(); 
         if(fields==null) return; //validation failed
         
-        var request = {
+        var request = {                                                                                        
             'a'          : 'action',
             'entity'     : this.options.entity.entityName,
             'request_id' : window.hWin.HEURIST4.util.random(),
