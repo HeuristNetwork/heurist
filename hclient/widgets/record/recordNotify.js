@@ -36,7 +36,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
 
     _initControls:function(){
         
-        $('#div_header')
+        this.element.find('#div_header')
             .css({'line-height':'21px'})
             .addClass('heurist-helper1')
             .html('Share these records with other users via email<br>'

@@ -38,7 +38,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
     _initControls:function(){
         
         
-        $('#div_header')
+        this.element.find('#div_header')
             .css({'line-height':'21px'})
             .addClass('heurist-helper1')
             .html('Select tags to be added or removed for choosen record scope<br>'

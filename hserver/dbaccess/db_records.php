@@ -30,6 +30,7 @@
         recordCanChangeOwnerwhipAndAccess  - Verifies access right value and is the current user able to change ownership for given record
     
         recordUpdateTitle
+        recordUpdateOwnerAccess
         prepareDetails - validate records detail (need to combine with validators in fileParse)
     
     */
@@ -457,7 +458,7 @@
     }
 
     /**
-    * @todo - to be implemented
+    * 
     *
     * @param mixed $mysqli
     * @param mixed $user
@@ -468,16 +469,39 @@
         $recids = prepareIds($recids);
         if(count($recids)>0){
             
+            //narrow by record type
+            $rec_RecTypeID = @$params['rec_RecTypeID'];
+            if($rec_RecTypeID>0){ 
+                $recids = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
+                    .implode(',', $recids).') and rec_RecTypeID='. $rec_RecTypeID);
+                    
+                if($recids==null || count($recids)==0){             
+                    $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
+                    return false;
+                }
+            }
+            
+            
             $rectypes = array();
+            $noaccess_count = 0;
+            $allowed_recids = array();
         
             //check permission
             foreach ($recids as $recID) {
                 $ownerid = null;
                 $access = null;
                 if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes)){
-                    return $system->getError();
+                    $noaccess_count++;
+                }else{
+                    array_push($allowed_recids, $recID);
                 }
             }
+            if(count($recids)==1 && $noaccess_count==1){
+                return $system->getError();    
+            }else{
+                $system->clearError();    
+            }
+            
             
             $is_error = false;
             $mysqli = $system->get_mysqli();
@@ -491,8 +515,8 @@
             
             $system->defineConstant('RT_RELATION');
                         
-            foreach ($recids as $id) {
-                $stat = deleteOneRecord($mysqli, $id, $rectypes[$id]);
+            foreach ($allowed_recids as $recID) {
+                $stat = deleteOneRecord($mysqli, $recID, $rectypes[$recID]);
                 
                 if( array_key_exists('error', $stat) ){
                     $msg_error = $stat['error'];
@@ -510,8 +534,10 @@
                 $res = $system->addError(HEURIST_DB_ERROR, 'Cannot delete record. '.$msg_error);
             }else{
                 $mysqli->commit();
-                $res = array("status"=>HEURIST_OK, 
-                    "data"=> array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels_count));
+                $res = array('status'=>HEURIST_OK, 
+                    'data'=> array( 'processed'=>count($allowed_recids),
+                                    'deleted'=>count($deleted), 'noaccess'=>$noaccess_count,
+                                    'bkmk_count'=>$bkmk_count, 'rels_count'=>$rels_count));
             }
             
             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
@@ -521,6 +547,99 @@
             return $system->addError(HEURIST_INVALID_REQUEST, 'Record IDs not defined');
         }
     }
+    
+
+    /**
+    * update ownership and access for set of records
+    * $params
+    *     ids - array of record ids
+    *     OwnerUGrpID - new ownership
+    *     NonOwnerVisibility - access rights
+    */
+    function recordUpdateOwnerAccess($system, $params){
+        
+        $recids = @$params['ids']; 
+        
+        $recids = prepareIds($recids);
+        if(count($recids)>0){
+
+            $ownerid = @$params['OwnerUGrpID'];
+            $access = @$params['NonOwnerVisibility'];
+
+            if($ownerid==null ||$access==null){             
+                $this->system->addError(HEURIST_INVALID_REQUEST, 'Neithwe owner nor visibility parameters defined');
+                return false;
+            }
+            
+            //narrow by record type
+            $rec_RecTypeID = @$params['rec_RecTypeID'];
+            if($rec_RecTypeID>0){ 
+                $recids = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
+                    .implode(',', $recids).') and rec_RecTypeID='. $rec_RecTypeID);
+                    
+                if($recids==null || count($recids)==0){             
+                    $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
+                    return false;
+                }
+            }
+            
+            $rectypes = array();
+            
+            $noaccess_count = 0;
+            
+            $allowed_recids = array();
+
+            foreach ($recids as $recID) {
+                if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes)){
+                    $noaccess_count++;
+                }else{
+                    array_push($allowed_recids, $recID);
+                }
+            }
+            if(count($recids)==1 && $noaccess_count==1){
+                return $system->getError();    
+            }else{
+                $system->clearError();    
+            }
+
+            // start transaction
+            $keep_autocommit = mysql__begin_transaction($mysqli);
+
+            $query = 'UPDATE Records set rec_Modified=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=? '
+            .' where rec_ID in ('.implode(',', $allowed_recids).')';
+
+            $stmt = $mysqli->prepare($query);
+
+            $rec_mod = date('Y-m-d H:i:s');
+
+            $stmt->bind_param('sis', $rec_mod, $ownerid, $access);
+
+            if(!$stmt->execute()){
+                $syserror = $mysqli->error;
+                $stmt->close();
+                $mysqli->rollback();
+
+                $res = $system->addError(HEURIST_DB_ERROR, 'Cannot updated ownership and access', $syserror);
+            }else{
+                $updated_count = $mysqli->affected_rows;
+                $stmt->close();
+                $mysqli->commit();
+                
+                $res = array("status"=>HEURIST_OK, 
+                    "data"=> array('processed'=>count($allowed_recids), 
+                                   'updated'=>$updated_count,
+                                   'noaccess'=>$noaccess_count));
+            }
+            
+            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            return $res;
+        
+        
+        }else{
+            return $system->addError(HEURIST_INVALID_REQUEST, 'Record IDs not defined');
+        }
+        
+    }    
     
     //
     //
@@ -728,7 +847,6 @@
     * @param mixed $access
     *   $rectypes  - return record type of current record
     */
-    
     function recordCanChangeOwnerwhipAndAccess($system, $recID, &$ownerid, &$access, &$rectypes)
     {
         
@@ -746,7 +864,7 @@
         }
         
         $ownerid_old = $record["rec_OwnerUGrpID"]; //current ownership
-        if(!($ownerid>=0)){
+        if(!($ownerid>=0)){  
             $ownerid = $record["rec_OwnerUGrpID"];
         }
         

@@ -69,7 +69,7 @@ $.widget( "heurist.recordAction", {
             
         if(this.options.currentRecordset){
             this._currentRecordset  = this.options.currentRecordset;
-            this._currentRecordsetSelIds = null;
+            this._currentRecordsetSelIds = null; //this.options.currentRecordsetSel;
         }else if(window.hWin.HAPI4.currentRecordset){
             this._currentRecordset = window.hWin.HAPI4.currentRecordset;
             this._currentRecordsetSelIds = window.hWin.HAPI4.currentRecordsetSelection;

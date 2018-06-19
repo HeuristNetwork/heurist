@@ -66,6 +66,10 @@
 
                 $response = recordDelete($system, $_REQUEST['ids']);
 
+            } else if ($action=="access"){
+
+                $response = recordUpdateOwnerAccess($system, $_REQUEST);
+
             } else if ($action=="duplicate" && @$_REQUEST['id']) {
 
                 

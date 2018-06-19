@@ -571,6 +571,9 @@ error_log(print_r($_REQUEST, true));
         return $this->errors;
     }
 
+    public function clearError(){
+        $this->errors = array();
+    }
 
 
     /**

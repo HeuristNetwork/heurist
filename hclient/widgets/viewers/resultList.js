@@ -34,6 +34,7 @@ $.widget( "heurist.resultList", {
         recordview_onselect: false, //show record viewer on select
         multiselect: true,    //allows highlight several records
         isapplication: true,  //if false it does not listen global events @todo merge with eventbased
+        eventbased:true,
 
         show_toolbar: true,
         show_menu: false,       //@todo ? - replace to action_select and action_buttons
@@ -43,7 +44,6 @@ $.widget( "heurist.resultList", {
         show_inner_header: false,   // show title of current search in header
 
         title: null,
-        eventbased:true,
         //searchsource: null,
 
         empty_remark:'No entries match the filter criteria',
@@ -393,7 +393,7 @@ $.widget( "heurist.resultList", {
                     var view_mode = btn.attr('value');
 
                     this.applyViewMode(view_mode);
-                    window.hWin.HAPI4.save_pref('rec_list_viewmode', view_mode);
+                    window.hWin.HAPI4.save_pref('rec_list_viewmode_'+this.options.entityName, view_mode);
         }});
 
         
@@ -657,7 +657,7 @@ $.widget( "heurist.resultList", {
         var allowed = ['list','icons','thumbs','thumbs3'];
 
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
-            newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode');
+            newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
         }
 
         if(!this.div_content.hasClass(newmode) || forceapply===true){
@@ -671,7 +671,7 @@ $.widget( "heurist.resultList", {
             }else{
                 //load saved value
                 if(!this.options.view_mode){
-                    this.options.view_mode = window.hWin.HAPI4.get_prefs('rec_list_viewmode');
+                    this.options.view_mode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
                 }
                 if(!this.options.view_mode){
                     this.options.view_mode = 'list'; //default value

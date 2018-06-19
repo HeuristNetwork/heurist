@@ -320,19 +320,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordTag', opts);
 
-        }else if(action == "menu-selected-wgtags"){
-
-            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
-            
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordTag', {onClose:
-                   function( context ){
-                       if(context){
-                           //refresh search page
-                           that.reloadSearch(); //@todo reloadPage                   
-                       }
-                   }
-            });
-
         }else if(action == "menu-selected-unbookmark"){
 
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
@@ -348,22 +335,18 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         }else if(action == "menu-selected-rate"){
 
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordRate', {onClose:
-               function( context ){
-                   if(context){
-                       // refresh search page
-                       // that.reloadSearch();                    
-                   }
-               }
-            });
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordRate');
 
         }else if(action == "menu-selected-delete"){
 
-            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
+            var recIDs_list = this.getSelectionIds("Please select at least one record to delete");
+            if(Hul.isempty(recIDs_list)) return;
+            
+            window.hWin.HAPI4.currentRecordsetSelection = recIDs_list;
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {onClose:
                function( context ){
                    if(context){
-                       // refresh search page
+                       // refresh search
                        that.reloadSearch();                    
                    }
                }
@@ -375,15 +358,20 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         }else if(action == "menu-selected-ownership"){
 
-            //this.detailBatchEditPopup('ownership');
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {onClose:
+               function( context ){
+                   if(context){
+                       //@todo refresh page
+                       that.reloadSearch();                    
+                   }
+               }
+            });
 
         }else if(action == "menu-selected-notify"){
 
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordNotify');
-            //this.notificationPopup();
 
         }else if(action == "menu-selected-value-add"){
 
@@ -432,73 +420,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
     },
 
-    /**    vsn 3
-    * action - name of action
-    * _data - array of parameters
-    * cbAction - callback
-    */
-    executeAction: function(action, _data, cbAction){
-
-        var that = this;
-
-        function _requestCallBack(context) {
-
-            if(!Hul.isnull(context)){
-
-                if(context.problem){
-                    window.hWin.HEURIST4.msg.showMsgErr(context.problem);
-                }else if(context.none){
-                    window.hWin.HEURIST4.msg.showMsgFlash(context.none, 1000, null, 
-                        { my: "center top", at: "center bottom", of: that.element.parent() });
-                }else if(context.execute){
-                    var fname = context.execute.shift();
-                    var args = context.execute;
-                    if(fname=="addRemoveTagsPopup"){
-                        that.addRemoveTagsPopup.apply(that, args);
-                    }
-
-                    //$(that).resultListMenu(fname, args);
-                    /*$.each($(that).data(), function(key, val) {
-                    if ($.isFunction(val[fname])) {
-                    $this[key].apply($this, args);
-                    // break out of the loop
-                    return false;
-                    }
-                    });*/
-
-                    //top.HEURIST.util.executeFunctionByName("that."+fname, window, context.execute);
-                }else if(context.ok){
-
-                    window.hWin.HEURIST4.msg.showMsgFlash(context.ok, 1000, null, 
-                        { my: "center top", at: "center bottom", of: that.element.parent() });
-                    that.reloadSearch();
-
-                    /*window.hWin.HEURIST4.msg.showMsgDlg(context.ok+
-                    "<br><br>Information changes will be visible on re-run the current search."+
-                    "<br>Reloading will reset filters and selection."+
-                    "<br>'Yes' to re-run, 'No' to leave display as-is",
-                    function(){
-                    that._query_request.source = this.element.attr('id');
-                    window.hWin.HAPI4.RecordMgr.search(that._query_request, $(that.document));
-                    });*/
-                }
-            }
-        }
-        //encodeURIComponent(JSON.stringify(_data))
-        var str = JSON.stringify(_data);
-        var baseurl = window.hWin.HAPI4.baseURL + "search/actions/actionHandler.php";   //vsn 3 action handler
-
-        var callback = (typeof cbAction == "function" ? cbAction : _requestCallBack);
-        var params = "db="+window.hWin.HAPI4.database+"&action="+action+"&data=" + encodeURIComponent(str);
-
-        if(top.HEURIST){
-            top.HEURIST.util.getJsonData(baseurl, callback, params);
-        }
-
-
-
-    },
-
     //
     //
     // 
@@ -514,10 +435,10 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     },
     
     //
-    //
+    // clean details for current recordset and force refresh current page
+    // it will be faster than perform search again
     //
     reloadPage: function(){
-    
     
     },
     
@@ -542,7 +463,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
     },
 
-    //-------------------------------------- ADD, REMOVE TAGS, BOOKMARKS. RATING -------------------------------
+    //-------------------------------------- EMAIL FORM -------------------------------
     openEmailForm: function() {
         // Selection check
         var ids = this.getSelectionIds("Please select at least one record to e-mail");
@@ -648,8 +569,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             }else{
                 that._collection = Hul.isempty(results.ids)?[]:results.ids;
                 that.collectionRender();
-                //top.HEURIST.search.collectCount = results.count;
-                //top.HEURIST.search.collection = results.ids;
             }
         }
     },
@@ -663,19 +582,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             //window.hWin.HR('Collected')
             this.menu_Collected_link.html( 'Collected' + (this._collection.length>0?':'+this._collection.length:''));
         }
-    },
-
-    //-------------------------------------- VARIOUS: DELETE RECORD, SEND NOTIFICATION -------------------------------
- 
-    notificationPopup: function() {
-
-        var recIDs_list = this.getSelectionIds("for notification", 1000);
-        if(Hul.isempty(recIDs_list)) return;
-
-        recIDs_list = recIDs_list.join(",");
-        var url = window.hWin.HAPI4.baseURL+ "search/actions/sendNotificationsPopup.php?h4=1&db=" + window.hWin.HAPI4.database + "&bib_ids=\""+recIDs_list+"\"";
-
-        window.hWin.HEURIST4.msg.showDialog(url, {height:230, title: window.hWin.HR('Notification')} );
     },
 
 
@@ -726,14 +632,14 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                             window.hWin.HEURIST4.msg.showMsgFlash(sMsg, 2000);
                         }
             };            
-        }else if(action_type=='ownership'){
+        /*}else if(action_type=='ownership'){
 
             var that = this;
             callback = function(context) {
                         if(context!="" && context!=undefined) {
                                 that.executeAction( "set_wg_and_vis", context );
                         }
-            };            
+            };*/            
         }else{
             callback = function(context){
                 window.hWin.HAPI4.NEED_TAG_REFRESH = true; //flag to reload tags in next manageUsrTags invocation

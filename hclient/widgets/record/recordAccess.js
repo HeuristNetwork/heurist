@@ -27,16 +27,23 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         modal:  true,
         init_scope: 'selected',
         title:  'Change Record Access and Ownership',
+        currentOwner: 0,
+        currentAccess: null,
         htmlContent: 'recordAccess.html',
         helpContent: 'recordAccess.html' //in context_help folder
     },
 
     _initControls:function(){
         
-        var fieldSelect = $('#sel_Ownership');
+        var fieldSelect = this.element.find('#sel_Ownership');
         window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], null,  //take groups of current user
                 [{key:0, title:'Everyone (no restriction)'}, 
                  {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}]);
+        
+        if(this.options.currentOwner>=0 && this.options.currentAccess){
+            fieldSelect.val(this.options.currentOwner);
+            this.element.find('#rb_Access-'+this.options.currentAccess).prop('checked', true);
+        }
         
         return this._super();
     },
@@ -53,7 +60,10 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     doAction: function(){
 
             var scope_val = this.selectRecordScope.val();
-            if(scope_val=='')    return;
+            var ownership = this.element.find('#sel_Ownership').val();
+            var visibility = this.element.find('input[type="radio"][name="rb_Access"]:checked').val();
+            
+            if (!(scope_val!='' && ownership>=0 && visibility))  return;
             
             var scope = [], 
             rec_RecTypeID = 0;
@@ -67,14 +77,11 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 }   
             }
             
-            return;            
-        
             var request = {
-                'a'          : 'batch',
-                'entity'     : 'usrBookmarks',
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'rating'     : rating,
-                'bkm_RecID'  : scope
+                'ids'  : scope,
+                'OwnerUGrpID': ownership,
+                'NonOwnerVisibility': visibility
                 };
                 
             if(rec_RecTypeID>0){
@@ -83,7 +90,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 
                 var that = this;                                                
                 
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                window.hWin.HAPI4.RecordMgr.access(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -91,17 +98,33 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                             
                             that.closeDialog();
                             
-                            window.hWin.HEURIST4.msg.showMsgFlash(
-                                response.data.processed + ' bookmarked record'
-                                + (response.data.processed>1?'s':'') +' processed<br><br>for '
-                                + response.data.updated  + ' bookmark'
-                                + (response.data.updated>1?'s':'') + ' the rating was updated',2000);
+                            var msg = 'Processed : '+response.data.processed + ' record'
+                                + (response.data.processed>1?'s':'') +'. Updated: '
+                                + response.data.updated  + ' record'
+                                + (response.data.updated>1?'s':'');
+                           if(response.data.noaccess>0){
+                               msg += ('<br><br>No enough rights for '+response.data.noaccess+
+                                        ' record' + (response.data.noaccess>1?'s':''));
+                           }     
+                            
+                            window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000);
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
         
+    },
+
+    _onRecordScopeChange: function () 
+    {
+        var scope_val = this.selectRecordScope.val();
+        var ownership = this.element.find('#sel_Ownership').val();
+        var visibility = this.element.find('input[type="radio"][name="rb_Access"]:checked').val();
+            
+        var isdisabled = (!(scope_val!='' && ownership>=0 && visibility));
+        
+        window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );
     },
   
 });

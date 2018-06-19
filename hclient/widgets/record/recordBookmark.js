@@ -32,7 +32,7 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
 
     _initControls:function(){
         
-        $('#div_header')
+        this.element.find('#div_header')
             .css({'line-height':'21px'})
             .addClass('heurist-helper1')
             .html('Select the scope of records with bookmarks to be removed.<br>'
