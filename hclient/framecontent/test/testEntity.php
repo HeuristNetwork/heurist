@@ -102,17 +102,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 if(success){
                     
                     
-                // OLD H3 stuff
-                if(window.HEURIST && window.HAPI4.baseURL){
-                    window.HEURIST.baseURL  = window.HAPI4.baseURL;
-                    window.HEURIST.loadScript(window.HAPI4.baseURL+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
-                    window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
-                    window.HEURIST.database = {  name: window.HAPI4.database };
-                }
-                    
-                    //testUsers();
-                    //testUsers();
-                    
                     
                     $('#curr_user').html(window.hWin.HAPI4.currentUser['ugr_ID']+'  '+window.hWin.HAPI4.currentUser['ugr_Name']);
                 }

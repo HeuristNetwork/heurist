@@ -73,11 +73,6 @@ $.widget( "heurist.mainMenu", {
                 }else{
                     document.location.reload();    
                 }
-                /*var init_search = top.HEURIST.displayPreferences['defaultSearch'];
-                if(!window.hWin.HEURIST4.util.isempty(init_search)){
-                    var request = {q: init_search, w: 'a', detail: 'detail', source:'init' };
-                    window.hWin.HAPI4.SearchMgr.doSearch( this, request );
-                }*/
             }
         });
 
@@ -834,19 +829,8 @@ $.widget( "heurist.mainMenu", {
 
             //from prefs to ui
             allFields.each(function(){
-                if(prefs[this.id] || (top.HEURIST && top.HEURIST.displayPreferences[this.id])){
-                    if($(this).hasClass('h3pref')){
-
-                        if(top.HEURIST){
-                            var val = top.HEURIST.displayPreferences[this.id];
-                            if(this.type=="checkbox"){
-                                this.checked = (val=="true");
-                            }else{
-                                $(this).val(val);
-                            }
-                        }
-
-                    }else if(this.type=="checkbox"){
+                if(prefs[this.id]){
+                    if(this.type=="checkbox"){
                         this.checked = (prefs[this.id]=="1" || prefs[this.id]=="true")
                     }else{
                         $(this).val(prefs[this.id]);
@@ -863,18 +847,10 @@ $.widget( "heurist.mainMenu", {
             function __doSave(){
 
                 var request = {};
-                var h3pref = [], h3pref_val = [], val;
+                var val;
 
                 allFields.each(function(){
-                    if($(this).hasClass('h3pref')){
-                        if(this.type=="checkbox"){
-                            val = this.checked?"true":"false";
-                        }else{
-                            val = $(this).val();
-                        }
-                        h3pref.push(this.id);
-                        h3pref_val.push(val);
-                    }else if(this.type=="checkbox"){
+                    if(this.type=="checkbox"){
                         request[this.id] = this.checked?"1":"0";
                     }else{
                         request[this.id] = $(this).val();
@@ -883,11 +859,6 @@ $.widget( "heurist.mainMenu", {
                 request.layout_theme = currentTheme; //themeSwitcher.getSelected();//    getCurrentTheme();
                 //$('#layout_theme').themeswitcher.
 
-                //save Vsn 3 preferences
-                if(top.HEURIST && top.HEURIST.util){
-                    top.HEURIST.util.setDisplayPreference(h3pref, h3pref_val);
-                }
-                
                 //save preferences in session
                 window.hWin.HAPI4.SystemMgr.save_prefs(request,
                     function(response){

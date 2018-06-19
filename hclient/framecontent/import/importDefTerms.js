@@ -37,12 +37,7 @@ function hImportDefTerms(_trm_ParentTermID) {
 
         if(trm_ParentTermID>0){
             //find parent entry
-            var allterms;
-            if(window.hWin.HEURIST && window.hWin.HEURIST.terms){
-                allterms = window.hWin.HEURIST.terms;
-            }else if(window.hWin.HEURIST4 && window.hWin.HEURIST4.terms){
-                allterms = window.hWin.HEURIST4.terms;
-            }
+            var allterms = window.hWin.HEURIST4.terms;
             
             //get domain   
             if(window.hWin.HEURIST4.util.isnull(allterms.termsByDomainLookup.enum[trm_ParentTermID])){

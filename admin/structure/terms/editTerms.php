@@ -417,12 +417,6 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
             </div> <!-- ent_content_full -->
         </div>
 
-        <div id="divMessage" style="display:none;height:80px;text-align: center; ">
-            <div id="divMessage-text" style="text-align:left;width:280px;color:red;font-weight:bold;margin:10px;"></div>
-            <input type="button" value="Close" onclick="{top.HEURIST.util.closePopupLast();}"/>
-        </div>
-
-
         <div id="divTermMergeConfirm" style="display:none;width:100%;padding:5px">
 
             <div id="divInsertAsChild" style="border-bottom: dotted 1px;">

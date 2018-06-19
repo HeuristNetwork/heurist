@@ -599,16 +599,13 @@ function EditTerms() {
         }
     }
 
-    function _showWarning(message){
-        var ele = document.getElementById ('divMessage');
-        document.getElementById ('divMessage-text').innerHTML =  message;
-        Hul.popupTinyElement(this, ele);
-    }
     function _disableWarning(){
-        _showWarning("Sorry, this term is marked as "+document.getElementById ("trm_Status").value+" and cannot therefore be deleted");
+        window.hWin.HEURIST4.msg.showMsgDlg("Sorry, this term is marked as "+document.getElementById ("trm_Status").value+
+            " and cannot therefore be deleted");
     }
     function _disableWarning2(){
-        _showWarning("Sorry, this term is marked as "+document.getElementById ("trm_Status").value+". Inverse term cannot be set");
+        window.hWin.HEURIST4.msg.showMsgDlg("Sorry, this term is marked as "+document.getElementById ("trm_Status").value+
+            ". Inverse term cannot be set");
     }
 
     /**

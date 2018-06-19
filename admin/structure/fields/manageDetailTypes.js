@@ -548,14 +548,6 @@ console.log('!!!!');
 
                         window.hWin.HEURIST4.msg.showMsgDlg(sUsage);
                         
-                        /*
-                        var ele = document.getElementById("delete-message-text");
-                        ele.innerHTML = sUsage;
-                        ele = document.getElementById("delete-message");
-
-                        top.HEURIST.util.popupTinyElement(top, ele,
-                            { "no-titlebar": false, "no-close": false, width: 320, height:500 });
-                        */    
                     }
                 }
 

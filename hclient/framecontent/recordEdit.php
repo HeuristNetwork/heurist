@@ -56,15 +56,6 @@
                         win = window;
                     }
                     
-                    if(win.HEURIST && win.HAPI4.baseURL){
-                        win.HEURIST.baseURL  = win.HAPI4.baseURL;
-                        win.HEURIST.loadScript(win.HAPI4.baseURL+"common/php/loadUserInfo.php?db=" + win.HAPI4.database);
-                        win.HEURIST.iconBaseURL = win.HAPI4.iconBaseURL;
-                        win.HEURIST.database = {  name: win.HAPI4.database };
-                    }
-                    // end OLD H3 stuff
-                    
-                    
                     $container = $('<div>').appendTo($("body"));
                     
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);

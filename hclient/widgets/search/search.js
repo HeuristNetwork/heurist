@@ -721,7 +721,7 @@ $.widget( "heurist.search", {
                     that._refresh();
                 }
 
-                if(top.HEURIST.displayPreferences['searchQueryInBrowser'] == "true"){
+                if(window.hWin.HAPI4.get_prefs('searchQueryInBrowser') == "true"){
                     window.history.pushState("object or string", "Title", location.pathname+'?'+
                         window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true) );
                 }

@@ -16,7 +16,7 @@
 /**
 * saveStructure.php. This file accepts request to update the system structural definitions -
 * rectypes, detailtypes, terms and constraints. It returns the entire structure for the affected area
-* in order to update top.HEURIST
+* in order to update client side definitions
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson

@@ -142,16 +142,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
            function onPageInit(success){
                
                 if(!success) return;
-                
-                /* OLD H3 stuff
-                if(window.HEURIST && window.HAPI4.baseURL){
-                    window.HEURIST.baseURL  = window.HAPI4.baseURL;
-                    window.HEURIST.loadScript(window.HAPI4.baseURL+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
-                    window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
-                    window.HEURIST.database = {  name: window.HAPI4.database };
-                }
-                */
-                
+
                 //
                 // cfg_widgets and cfg_layouts are defined in layout_default.js
                 //
@@ -323,7 +314,7 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                 else if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
                         || window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
                             
-                    var init_search = window.hWin.HEURIST?window.hWin.HEURIST.displayPreferences['defaultSearch']:'';
+                    var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
                     if(!window.hWin.HEURIST4.util.isempty(init_search)){
                         var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                         setTimeout(function(){

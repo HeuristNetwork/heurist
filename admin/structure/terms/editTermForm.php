@@ -155,7 +155,7 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
             },500);
 
             function submitAndClose(){
-                if(top.HEURIST.util.isempty(document.getElementById("trmName").value)){
+                if(window.hWin.HEURIST4.util.isempty(document.getElementById("trmName").value)){
                     window.close(context_return_res);
                 }else{
                     document.getElementById('close_on_save').value = 1;

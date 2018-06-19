@@ -489,15 +489,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         window.hWin.HEURIST4.terms = response.data.terms;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                         
-                        if(top && top==window && top.HEURIST){
-                            top.HEURIST.rectypes = response.data.rectypes;
-                            top.HEURIST.terms = response.data.terms;
-                            top.HEURIST.detailTypes = response.data.detailtypes;
-                        }
-                             
-                        if(window.hWin.HEURIST && window.hWin.HEURIST.rectypes){
-                            window.hWin.HEURIST.util.reloadStrcuture( is_message ); //relaod H3 structure
-                        }else if (is_message==true) {
+                        if (is_message==true) {
                             window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                                 'You may need to reload pages to see changes.');
                         }      
@@ -535,6 +527,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   save      - save record
     *   remove    - delete record
     *   duplicate
+    *   access    - ownership and visibility
     *
     *           for record_details controller
     *   details   - batch edition of record details for many records
@@ -585,6 +578,14 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('record_edit', request, callback);
             }
             
+            /**
+            * ownership and visibility
+            * ids, OwnerUGrpID, NonOwnerVisibility
+            */
+            ,access: function(request, callback){
+                if(request) request.a = 'access';
+                _callserver('record_edit', request, callback);
+            }
 
             /**
             * Remove Record
@@ -981,11 +982,6 @@ function hAPI(_db, _oninit) { //, _currentUser
                 return that.currentUser['ugr_Preferences'];
             }else{
                 var res = that.currentUser['ugr_Preferences'][name];
-
-                //take from old set
-                if(window.hWin.HEURIST4.util.isnull(res) && window.hWin.HEURIST && window.hWin.HEURIST.displayPreferences){
-                    res = window.hWin.HEURIST.displayPreferences[name];
-                }
 
                 // TODO: redundancy: this duplicates same in System.php
                 if('search_detail_limit'==name){

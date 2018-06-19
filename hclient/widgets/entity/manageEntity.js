@@ -290,7 +290,6 @@ $.widget( "heurist.manageEntity", {
         
         if(this.options.list_mode=='default'){
 
-        
                 //init record list
                 this.recordList
                     .resultList({

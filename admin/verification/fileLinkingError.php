@@ -204,10 +204,10 @@ $mysqli = $system->get_mysqli();
                     function repairBrokenPaths(){
                         
                         function _callback(context){
-                            if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
-                                top.HEURIST.util.showError(null);
+                            if(window.hWin.HEURIST4.util.isempty(context) || window.hWin.HEURIST4.util.isempty(context['result'])){
+                                window.hWin.HEURIST4.msg.showMsgErr(null);
                             }else{
-                                top.HEURIST.util.showMessage(context['result']);
+                                window.hWin.HEURIST4.msg.showMsgDlg(context['result']);
                             }
                         }
 
@@ -251,12 +251,12 @@ $mysqli = $system->get_mysqli();
                                     dt.notfound.push(dt2['notfound'][i]);
                         }
                         
-                        var str = JSON.stringify(dt);
+                        //var str = JSON.stringify(dt);
 
-                        var baseurl = top.HEURIST.baseURL + "admin/verification/repairUploadedFiles.php";
+                        var baseurl = "<?=HEURIST_BASE_URL?>admin/verification/repairUploadedFiles.php";
                         var callback = _callback;
-                        var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
-                        top.HEURIST.util.getJsonData(baseurl, callback, params);
+                        var request = {db:'<?= HEURIST_DBNAME?>', data:dt};
+                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);       
                         
                         document.getElementById('page-inner').style.display = 'none';
                     }

@@ -210,7 +210,7 @@ $.widget( "heurist.dh_search", {
                     
                     if(that._isDigitalHarlem){
                      
-                        var init_search = window.hWin.HEURIST?window.hWin.HEURIST.displayPreferences['defaultSearch']:'';
+                        var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
                         if(!window.hWin.HEURIST4.util.isempty(init_search)){
                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                             setTimeout(function(){

@@ -269,12 +269,8 @@ window.hWin.HEURIST4.ui = {
                 }
             }
             
-            var allterms;
-            if(top.HEURIST && top.HEURIST.terms){
-                allterms = top.HEURIST.terms;
-            }else if(window.hWin.HEURIST4 && window.hWin.HEURIST4.terms){
-                allterms = window.hWin.HEURIST4.terms;
-            }            
+            var allterms = window.hWin.HEURIST4.terms;
+ 
             
             var trmID, tree = allterms.treesByDomain[trm_ParentDomain];
             __getSiblings(tree);  
