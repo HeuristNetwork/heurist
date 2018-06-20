@@ -150,8 +150,6 @@
         </script>
     </head>
     <body>
-        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
-        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
     
     </body>
 </html>

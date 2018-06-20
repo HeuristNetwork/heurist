@@ -352,9 +352,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
     <!-- HTML -->
     <body>
     
-        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
-        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
-    
 <?php
             /*
     function getRelativePath($basePath, $targetPath)

@@ -27,28 +27,35 @@
 * @todo - only one kml per record, perhaps need to return the combination of kml
 */
 
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
 
-require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
-require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
-require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
 require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
 
-mysql_connection_select(DATABASE);
+$system = new System();
+if( !$system->init(@$_REQUEST['db']) ){
+    die("Can not connect to database");
+}
 
 $islist = array_key_exists("q", $_REQUEST);
-
-// TODO: Remove, enable or explain
-//header('Content-type: text/xml; charset=utf-8');
 
 header("Cache-Control: public");
 header("Content-Description: File Transfer");
 header("Content-Disposition: attachment; filename=\"export.kml\"");
 header("Content-Type: text/kml");
 
-// TODO: Remove, enable or explain
-//header("Content-Transfer-Encoding: binary");
+
+$dtFile = ($system->defineConstant('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
+$dtKMLfile = ($system->defineConstant('DT_KML_FILE')?DT_KML_FILE:0);
+$dtKML = ($system->defineConstant('DT_KML')?DT_KML:0);
+$dtDate = ($system->defineConstant('DT_DATE')?DT_DATE:0);
+$dtDateStart = ($system->defineConstant('DT_START_DATE')?DT_START_DATE:0);
+$dtDateEnd = ($system->defineConstant('DT_END_DATE')?DT_END_DATE:0);
+
+
+
+$mysqli = $system->get_mysqli();
 
 /*
 1. just print out content of uploaded kml files
@@ -58,28 +65,29 @@ if(!$islist){
     if(array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")
     {
         //kml is stored in uploaded file
-        $res = mysql_query("select ulf_ID, ulf_FilePath, ulf_FileName from recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = " . intval($_REQUEST["id"]) . " and (dtl_DetailTypeID = ".(defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:"0")." OR dtl_DetailTypeID = ".(defined('DT_KML_FILE')?DT_KML_FILE:"0").")");
+        $kml_file = mysql__select_value($mysqli, 
+            'select concat(ulf_FilePath,ulf_FileName) as fullPath from recDetails '
+            .'left join recUploadedFiles on ulf_ID = dtl_UploadedFileID where dtl_RecID = ' 
+            . intval($_REQUEST["id"]) . " and (dtl_DetailTypeID = "
+            .$dtFile." OR dtl_DetailTypeID = ".$dtKMLfile.")");
 
-        if (mysql_num_rows($res)) {
-            $file_data = mysql_fetch_array($res);
+        if ($kml_file!=null) {
 
-            if ($file_data[2]) {
-                $filename = $file_data[1].$file_data[2]; // post 18/11/11 proper file path and name
-            } else {
-                $filename = HEURIST_FILESTORE_DIR."/".$file_data[0]; // pre 18/11/11 - bare numbers as names, just use file ID
-            }
-
-            print file_get_contents($filename);
+            $kml_file = resolveFilePath($kml_file);
+            if(file_exists($kml_file)){
+                print file_get_contents($kml_file);
+            }   
+                
         }else{
-            $res = mysql_query("select dtl_Value from recDetails where dtl_RecID = " . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = ".(defined('DT_KML')?DT_KML:"0"));
+            //kml snippet
+            $kml = mysql__select_value($mysqli, "select dtl_Value from recDetails where dtl_RecID = " 
+                            . intval($_REQUEST["id"]) . " and dtl_DetailTypeID = ".$dtKML);
 
             print "<?xml version='1.0' encoding='UTF-8'?>\n";
             print '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
             print '<Document>';
 
-            if (mysql_num_rows($res)) {
-                $kml = mysql_fetch_array($res);
-                $kml = $kml[0];
+            if($kml!=null){
                 print $kml;
             }
 
@@ -104,65 +112,43 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
     // for wkt
     $squery = "select rec_ID, rec_URL, rec_Title, d0.dtl_DetailTypeID, d0.dtl_Value, if(d0.dtl_Geo is null, null, AsWKT(d0.dtl_Geo)) as dtl_Geo, ".
     "d1.dtl_Value as Date0, d2.dtl_Value as DateStart, d3.dtl_Value as DateEnd ";
-    $ourwhere = " and (d0.dtl_RecID=rec_ID) and (d0.dtl_Geo is not null ".(defined('DT_KML')?" or d0.dtl_DetailTypeID=".DT_KML:"").")";
+    $ourwhere = " and (d0.dtl_RecID=rec_ID) and (d0.dtl_Geo is not null ".($dtKML>0?" or d0.dtl_DetailTypeID=".$dtKML:"").")";
 
     $detTable =
-    " left join recDetails d1 on d1.dtl_RecID=rec_ID and d1.dtl_DetailTypeID=".(defined('DT_DATE')?DT_DATE:"0").
-    " left join recDetails d2 on d2.dtl_RecID=rec_ID and d2.dtl_DetailTypeID=".(defined('DT_START_DATE')?DT_START_DATE:"0").
-    " left join recDetails d3 on d3.dtl_RecID=rec_ID and d3.dtl_DetailTypeID=".(defined('DT_END_DATE')?DT_END_DATE:"0").
+    " left join recDetails d1 on d1.dtl_RecID=rec_ID and d1.dtl_DetailTypeID=".$dtDate.
+    " left join recDetails d2 on d2.dtl_RecID=rec_ID and d2.dtl_DetailTypeID=".$dtDateStart.
+    " left join recDetails d3 on d3.dtl_RecID=rec_ID and d3.dtl_DetailTypeID=".$dtDateEnd.
     ", recDetails d0";
 
     //for kml
     $squery2 = "select  rec_ID, rec_URL, rec_Title, ulf_ID, ulf_FilePath, ulf_FileName ";
-    $ourwhere2 = " and (dtl_RecID=rec_ID) and (dtl_DetailTypeID=".(defined('DT_KML_FILE')?DT_KML_FILE:"0").(defined('DT_FILE_RESOURCE')?" or (dtl_DetailTypeID = ".DT_FILE_RESOURCE." AND ulf_MimeExt='kml'))":")");
+    
+    $ourwhere2 = " and (dtl_RecID=rec_ID) and (dtl_DetailTypeID=".$dtKMLfile
+            .($dtFile>0?" or (dtl_DetailTypeID = ".$dtFile." AND ulf_MimeExt='kml'))":")");
+            
     $detTable2 = ", recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID";
 
-    $isSearchKml = defined('DT_KML_FILE') || defined('DT_FILE_RESOURCE');
-
+    $isSearchKml = ($dtKMLfile>0 || $dtFile>0);
 
     if($islist){
 
-        if(true || @$_REQUEST['rules']){ //search with h4 search engine
+            $_REQUEST['detail'] = 'ids'; // return ids only
+            //$_REQUEST['limit'] = 1000;
 
-            $url = HEURIST_BASE_URL."/hserver/controller/record_search.php?".$_SERVER["QUERY_STRING"]."&detail=ids&vo=h3"; //call heurist
-            $reclist = loadRemoteURLviaSocket($url); //because of issue with curl/proxy on heurist server loadRemoteURLContent($url, false);
-            $reclist = json_decode($reclist, true);
-            $reccount = @$reclist['resultCount'];
-
-
-
-            if (@$reclist['error']!=null || !($reccount>0)) {
+            $result = recordSearch($system, $_REQUEST); //see db_recsearch.php
+        
+            if(!(@$result['status']==HEURIST_OK && @$result['data']['reccount']>0)){
+                //$error_msg = $system->getError();
+                //$error_msg = $error_msg[0]['message'];
                 print '</Document></kml>';
                 return;
             }
+            $result = $result['data'];
+            $rec_ids = $result['records'];
+            $rec_ids = array_slice($rec_ids,0,1000);
 
-            $reclist = explode(",", $reclist['recIDs']);
-
-            $reclist = array_slice($reclist,0,1000);
-
-            $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", $reclist).") ".$ourwhere;
-            $squery2 = $squery2." from Records ".$detTable2." where rec_ID in (".implode(",", $reclist).") ".$ourwhere2;
-
-        }else{
-
-            if (array_key_exists('w',$_REQUEST)  && ($_REQUEST['w'] == 'B'  ||  $_REQUEST['w'] == 'bookmark'))
-                $search_type = BOOKMARK;	// my bookmarks
-            else
-                $search_type = BOTH;	// all records
-
-            $limit = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['smarty-output-limit']);
-            if (!$limit || $limit<1){
-                $limit = 1000; //default limit in dispPreferences
-            }
-            $limit = PHP_INT_MAX;
-
-
-            $squery = prepareQuery(null, $squery, $search_type, $detTable, $ourwhere, null, $limit);
-            if($isSearchKml){
-                $squery2 = prepareQuery(null, $squery2, $search_type, $detTable2, $ourwhere2, null, $limit);
-            }
-        }
-
+            $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", $rec_ids).") ".$ourwhere;
+            $squery2 = $squery2." from Records ".$detTable2." where rec_ID in (".implode(",", $rec_ids).") ".$ourwhere2;
 
     }else{
         $squery = $squery." from Records ".$detTable." where rec_ID=".$_REQUEST["id"].$ourwhere;
@@ -174,18 +160,18 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
 
     if($squery){
 
-        $res = mysql_query($squery);
+        $res = $mysqli->query($squery);
         if($res===false){
             print '</Document></kml>';
             return;
         }
-        $wkt_reccount = mysql_num_rows($res);
+        $wkt_reccount = $res->num_rows;
 
         $kml_reccount = 0;
         if($isSearchKml){
-            $res2 = mysql_query($squery2);
+            $res2 = $mysqli->query($squery2);
             if($res2!==false)
-                $kml_reccount = mysql_num_rows($res2);
+                $kml_reccount = $res2->num_rows;
         }
 
     }
@@ -194,7 +180,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
     {
 
         if($wkt_reccount>0){
-            while ($row = mysql_fetch_row($res)) {
+            while ($row = $res->fetch_row()) {
                 $kml = null;
                 $dt = $row[3];
                 if($row[5]){
@@ -245,7 +231,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
         }
 
         if($kml_reccount>0){
-            while ($file_data = mysql_fetch_row($res2)) {
+            while ($file_data = $res2->fetch_row()) {
                 if ($file_data[3]) {
 
                     print "<NetworkLink>";

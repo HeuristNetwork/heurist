@@ -354,13 +354,6 @@ var fin_time = new Date().getTime() / 1000;
     </head>
     <body style="background-color:#c9c9c9">
 
-
-    <?php if(!(@$_REQUEST['ll']=='WebSearch' || @$_REQUEST['ll']=='boro')){?>
-        <!-- These are old H3 stuff - needed to support existing features in popups -->
-        <script>top.installDirFromH4="<?=HEURIST_BASE_URL?>";</script>
-        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
-        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
-    <?php } ?>
         <div id="layout_panes" style="height:100%">
             &nbsp;
         </div>

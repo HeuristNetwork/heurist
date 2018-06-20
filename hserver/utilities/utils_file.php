@@ -35,6 +35,8 @@
     
     getRelativePath
     
+    allowWebAccessForForlder
+    
     zip
     unzip
     */
@@ -109,7 +111,7 @@
             
             if($allowWebAccess){
                 //copy htaccess
-                $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'/.htaccess');
+                $res = allowWebAccessForForlder( $folder );
                 if(!$res){
                     $swarn = "Cannot copy htaccess file for folder $folder<br>";
                 }
@@ -140,11 +142,11 @@
     
    
     /**
-    * put your comment there...
+    * clean folder and itseld
     * 
     * @param mixed $dir
     */
-    function folderDelete($dir) {
+    function folderDelete($dir, $rmdir=true) {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
@@ -157,7 +159,8 @@
                 }
             }
             reset($objects);
-            rmdir($dir); //delete folder itself
+            if($rmdir)
+                rmdir($dir); //delete folder itself
         }
     }
    
@@ -708,5 +711,16 @@ function flush_buffers($start=true){
     @ob_flush();
     @flush();
     if($start) @ob_start();
+}
+
+//
+//
+//
+function allowWebAccessForForlder($folder){
+    $res = true;
+    if(file_exists($folder) && is_dir($folder) && !file_exists($folder.'/.htaccess')){
+        $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'/.htaccess');
+    }
+    return $res;
 }
 ?>

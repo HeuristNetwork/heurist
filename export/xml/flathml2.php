@@ -1,6 +1,6 @@
 <?php
 
-/**
+/**   NOT USED
 * flathml.php:  flattened version of HML - records are not generated redundantly but are indicated by references within other records.
 *               $hunifile indicates special one-file-per-record + manifest file for HuNI (huni.net.au)
 *               $output_file - file handler to write output, it allows to avoid memory overflow for large databases
