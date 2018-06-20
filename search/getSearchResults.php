@@ -114,7 +114,7 @@
 
 /*
 *This function takes a comma separated list of recIDS and for each collection record
-*repalces it's recID with the recIDs that statisfy the query string and any direct recIDs from the
+*replaces it's recID with the recIDs that statisfy the query string and any direct recIDs from the
 *repeatable pointer field. It leave any non collection records in place.
 */
 	function expandCollections($recIDs, $publicOnly = false){
