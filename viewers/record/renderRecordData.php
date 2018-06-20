@@ -67,6 +67,7 @@ $endDT = ($system->defineConstant('DT_END_DATE') ? DT_END_DATE : 0);
 $titleDT = ($system->defineConstant('DT_NAME') ? DT_NAME : 0);
 $system->defineConstant('DT_GEO_OBJECT');
 $system->defineConstant('DT_PARENT_ENTITY');
+$system->defineConstant('DT_DATE');
 
 
 
