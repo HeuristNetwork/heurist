@@ -58,7 +58,7 @@
             $mode = intval(@$_REQUEST['mode']);
 
             if($mode>2){
-                $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids, $mode, @$_REQUEST['fieldtypes']);
+                $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids, $mode, @$_REQUEST['fieldtypes'], @$_REQUEST['parentcode']);
             }else{
                 $data["rectypes"] = dbs_GetRectypeStructures($system, $ids, $mode );
             }
@@ -66,7 +66,7 @@
             $mode = 0;
         }
 
-        if($mode==4 && @$_REQUEST['lazyload']){
+        if($mode==5){
             if(count($data["rectypes"])==1){
                 $response = $data["rectypes"][0]['children'];
             }else{

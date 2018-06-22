@@ -1100,7 +1100,7 @@ function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
         return 'ok';
      }else{
         //get dependent record types
-        return dbs_GetRectypeStructureTree($system, $rty_ID, 5, 'resource');
+        return dbs_GetRectypeStructureTree($system, $rty_ID, 6, 'resource');
      }
 }
                                         

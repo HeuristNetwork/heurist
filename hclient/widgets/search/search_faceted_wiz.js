@@ -771,13 +771,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
+                var allowed_fieldtypes = ['enum','freetext',"year","date","integer","float","resource","relmarker"];
+                
                 //load definitions for given rectypes
                 window.hWin.HAPI4.SystemMgr.get_defs({rectypes: rectype,
-                    mode:4, //special node - returns data for treeview
-                    fieldtypes:['enum','freetext',"year","date","integer","float","resource","relmarker"]},  //ART20150810 this.options.params.fieldtypes.join() },
+                    mode:5, //special node - returns data for treeview
+                    fieldtypes:allowed_fieldtypes},  //ART20150810 this.options.params.fieldtypes.join() },
 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if($.isArray(response) || response.status == window.hWin.HAPI4.ResponseStatus.OK){
 
                             //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
                             /*
@@ -852,12 +854,16 @@ $.widget( "heurist.search_faceted_wiz", {
                             __set_queries('', '', response.data.rectypes);
                             */
 
+                            if($.isArray(response)){
+                                  treedata = response;
+                            }else 
+                            if(response.data.rectypes) {
+                                treedata = response.data.rectypes;
+                            }
+                            treedata[0].expanded = true; //first expanded
+                            
                             if(!treediv.is(':empty')){
                                 treediv.fancytree("destroy");
-                            }
-
-                            if(response.data.rectypes) {
-                                response.data.rectypes[0].expanded = true;
                             }
 
                             //setTimeout(function(){
@@ -866,12 +872,42 @@ $.widget( "heurist.search_faceted_wiz", {
                                 //            extensions: ["select"],
                                 checkbox: true,
                                 selectMode: 3,  // hierarchical multi-selection
-                                source: response.data.rectypes,
+                                source: treedata,
                                 beforeSelect: function(event, data){
                                     // A node is about to be selected: prevent this, for folder-nodes:
                                     if( data.node.hasChildren() ){
                                         return false;
                                     }
+                                },
+                                lazyLoad: function(event, data){
+                                    var node = data.node;
+                                    var sURL = window.hWin.HAPI4.baseURL + "hserver/controller/sys_structure.php";
+                                    /*"?db="
+                                        + window.hWin.HAPI4.database
+                                        +'&mode=4&rectypes='+data.node.key
+                                        +'&fieldtypes='+allowed_fieldtypes.join(',');
+                                    */                    
+                                    data.result = {
+                                        url: sURL,
+                                        data: {db:window.hWin.HAPI4.database, mode:5, parentcode:node.data.code, 
+                                            rectypes:node.data.rt_ids, fieldtypes:allowed_fieldtypes}
+                                    } 
+                                                                       
+                                },
+                                loadChildren: function(e, data){
+                                        var showrev = $('#fsw_showreverse').is(":checked");
+                                        var tree = treediv.fancytree("getTree");
+                                        tree.visit(function(node){
+                                            if(node.data.isreverse==1){ 
+                                                if(showrev===true){
+                                                    $(node.li).show();
+                                                }else{
+                                                    $(node.li).hide();
+                                                }
+                                            }
+                                        });
+                                        
+                                        that._assignSelectedFacets();
                                 },
                                 select: function(e, data) {
                                     /* Get a list of all selected nodes, and convert to a key array:
@@ -895,18 +931,8 @@ $.widget( "heurist.search_faceted_wiz", {
                                        data.node.setExpanded(!data.node.isExpanded());
                                        treediv.find('.fancytree-expander').hide();
                                        
-                                        var showrev = $('#fsw_showreverse').is(":checked");
-                                        var tree = treediv.fancytree("getTree");
-                                        tree.visit(function(node){
-                                            if(node.data.isreverse==1){ 
-                                                if(showrev){
-                                                    $(node.li).show();
-                                                }else{
-                                                    $(node.li).hide();
-                                                }
-                                            }
-                                        });
-                                       
+                                   }else if( data.node.lazy) {
+                                       data.node.setExpanded( true );
                                    }
                                 },
                                 dblclick: function(e, data) {
@@ -942,27 +968,12 @@ $.widget( "heurist.search_faceted_wiz", {
                                         }
                                     }
                                 }
+                                that.options.params.facets = that.options.params.facets_new;
                             }else{
                                 facets = that.options.params.facets;
                             }
 
-
-                            var tree = treediv.fancytree("getTree");
-
-                            if(facets && facets.length>0){
-                                tree.visit(function(node){
-
-                                    if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
-                                        //find it among facets
-                                        for(var i=0; i<facets.length; i++){
-                                            if(facets[i].code && facets[i].code==node.data.code){
-                                                node.setSelected(true);
-                                                break;
-                                            }
-                                        }
-                                    }
-                                });
-                            }
+                            that._assignSelectedFacets();
 
                             //change default checkbox for branch root
                             var cb = treediv.find("span.fancytree-checkbox");
@@ -980,7 +991,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             $("#fsw_showreverse").change(function(event){
 
                                 var showrev = $(event.target).is(":checked");
-
+                                var tree = treediv.fancytree("getTree");
                                 tree.visit(function(node){
                                     if(node.data.isreverse==1){ //  window.hWin.HEURIST4.util.isArrayNotEmpty(node.children) &&
                                         if(showrev){
@@ -1006,6 +1017,30 @@ $.widget( "heurist.search_faceted_wiz", {
 
             }
         }
+    }
+    
+    //restore selection in treeview
+    , _assignSelectedFacets: function(){
+          
+        var treediv = $(this.step2).find('#field_treeview');
+        var facets = this.options.params.facets;
+       
+                            var tree = treediv.fancytree("getTree");
+
+                            if(facets && facets.length>0){
+                                tree.visit(function(node){
+                                    if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
+                                        //find it among facets
+                                        for(var i=0; i<facets.length; i++){
+                                            if(facets[i].code && facets[i].code==node.data.code){
+                                                node.setSelected(true);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+        
     }
 
     , _findFacetByCode: function(code){
@@ -1044,8 +1079,29 @@ $.widget( "heurist.search_faceted_wiz", {
             max = Math.floor(max);
             return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
         }        
+        
+        //first scan current facets and add to selection fields that are not found in tree 
+        // it means they are not loaded
+        var old_facets = this.options.params.facets;
+        for (k=0;k<old_facets.length;k++){
+            
+            var code = old_facets[k]['code'];
+            
+            var isfound = false;
+            tree.visit(function(node){
+                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
+                        if(code && code==node.data.code){
+                            isfound = true; //exists = loaded
+                            return false;
+                        }
+                }
+            });//visit
+            if(!isfound){
+                facets.push(old_facets[k]); 
+            }
+        }
 
-        if(len>0){
+        if(len>0 || facets.length>0){
 
             for (k=0;k<len;k++){
                 var node =  fieldIds[k];      //FancytreeNode
@@ -1091,7 +1147,7 @@ $.widget( "heurist.search_faceted_wiz", {
             });
 
 
-            this.options.params.facets = facets;
+            this.options.params.facets = facets;   //assign new selection
             this.options.params.version = 2;
 
             if(len>0){

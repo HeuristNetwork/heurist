@@ -43,13 +43,15 @@
     * 
     * @param mixed $system
     * @param mixed $rectypeids
-    * @param mixed $mode  5 - fields only (no header fields), 3 - all, 4 - for faceted search (with type names)
+    * @param mixed $mode  5 - fields only (no header fields), 3 - all
+    *    4 - for treeview, for faceted search (with type names)
+    *    5 - for treeview, for faceted search (with type names) ONE level only - lazy load
     */
-    function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes=null){
+    function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes=null, $parentcode=null){
 
         global $dbs_rtStructs, $dbs_lookups;
 
-        if($mode==4) set_time_limit(0); //no limit
+        if($mode>=4) set_time_limit(0); //no limit
         
         if($fieldtypes==null){
             $fieldtypes = array('integer','date','freetext','year','float','enum','resource','relmarker');
@@ -58,7 +60,7 @@
         }
 
         //loads plain array for rectypes
-        $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode==4)?null:$rectypeids, 1); 
+        $dbs_rtStructs = dbs_GetRectypeStructures($system, ($mode==4||$mode==5)?null:$rectypeids, 1);  //need all
         $dbs_lookups = dbs_GetDtLookups();
 
         $rtypes = $dbs_rtStructs['names'];
@@ -72,8 +74,15 @@
         foreach ($rectypeids as $rectypeID){
                 $def = __getRecordTypeTree($system, $rectypeID, 0, $mode, $fieldtypes, null);
                 if($def!==null) {
+                    if($parentcode!=null){
+                        if(@$def['code']){
+                            $def['code'] = $parentcode.':'.$def['code'];
+                        }else{
+                            $def['code'] = $parentcode;
+                        }
+                    }
+                    //debug $def['title'] = @$def['code'].$def['title'];   
                     //asign codes
-
                     if(is_array(@$def['children'])){
                         $def = __assignCodes($def);
                         array_push($res, $def);
@@ -84,7 +93,9 @@
         return $res;    
     }
     
-    
+    //
+    // add parent code to children
+    //
     function __assignCodes($def){
                         foreach($def['children'] as $idx => $det){
                             if(@$def['code']){
@@ -94,8 +105,8 @@
                                 }else{
                                     $def['children'][$idx]['code'] = $def['code'];    
                                 }
-                                
                             }
+                            //debug $def['children'][$idx]['title'] = $def['children'][$idx]['code'].$det['title']; 
                                  
                             if(is_array(@$det['children'])){
                                    $def['children'][$idx] = __assignCodes($def['children'][$idx]);
@@ -114,8 +125,9 @@
     //
     // $mode
     //  3
-    //  4 faceted search
-    //  5 import csv   
+    //  4 treeview faceted search
+    //  5 treeview - lazy
+    //  6 import csv   
     //
     // $pointer_fields - to avoid recursion for reverse pointers
     //
@@ -127,8 +139,9 @@
         $children = array();
         
         //add default fields
-        if($mode<5){
+        if($mode<5 || ($mode==5 && $recursion_depth==0)){
             if($mode==3) array_push($children, array('key'=>'recID', 'type'=>'integer', 'title'=>'ID', 'code'=>$recTypeId.":id"));
+            
             array_push($children, array('key'=>'recTitle',    'type'=>'freetext',  
                 'title'=>"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 
                 'code'=>$recTypeId.":title", 'name'=>'Record title'));
@@ -158,8 +171,8 @@
             $res['key'] = $recTypeId;
             $res['title'] = $dbs_rtStructs['names'][$recTypeId];
             $res['type'] = 'rectype';
-
-            if(@$dbs_rtStructs['typedefs'][$recTypeId]){
+                                                                                                              
+            if(@$dbs_rtStructs['typedefs'][$recTypeId] && ($mode!=5 || $recursion_depth==0)){
                 $details =  $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
                 
                 $children_links = array();
@@ -203,7 +216,7 @@
                 $children = array_merge($children, $children_links);
                 
                 //find all reverse links and relations
-                if($mode==4 && $recursion_depth<2){ //&& $recursion_depth==0){
+                if( ($mode==4 && $recursion_depth<2) || ($mode==5 && $recursion_depth==0) ){
                     $reverse_rectypes = __getReverseLinkedRecordTypes($recTypeId);
                     
                     foreach ($reverse_rectypes as $rtID => $dtID){
@@ -234,7 +247,10 @@
             array_push($children, array('key'=>'recRelationEndDate', 'title'=>'RelationEndDate'));
         }
 
-        $res['children'] = $children;
+        
+        if($mode!=5 || $recursion_depth==0){
+            $res['children'] = $children;
+        }
 
         return $res;
     }
@@ -288,7 +304,7 @@
 
     returns display name  or if enum array
 
-    $mode - 3 all, 4 for facet treeview, 5 - for import csv(dependencies)
+    $mode - 3 all, 4,5 for treeview (5 lazy) , 6 - for import csv(dependencies)
     */
     function __getDetailSection($system, $recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId, $pointer_fields){
 
@@ -341,9 +357,14 @@
 
             case 'resource': // link to another record type
             case 'relmarker':
-                                                                //make it 1 for lazy load
-                if( ($mode==5 && $recursion_depth<3) || ($mode==4 && $recursion_depth<3) || $recursion_depth<2){
-
+            
+                $max_depth = 2;
+                if ($mode==6 || $mode==4)
+                   $max_depth = 3;
+                else if ($mode==5) //make it 1 for lazy load
+                   $max_depth = 1; 
+                                                                
+                if($recursion_depth<$max_depth){
                     
                     if($reverseRecTypeId!=null){
                             $res = __getRecordTypeTree($system, $recTypeId, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
@@ -354,6 +375,10 @@
                                 //before 2017-06-20 $dt_title = " <span style='font-style:italic'>" . $rtNames[$recTypeId] ."  ". $dt_title . "</span>";
 
                                 $dt_title = "<span>&lt;&lt; <span style='font-weight:bold'>" . $rtNames[$recTypeId] ."</span> . ". $dt_title.'</span>';
+                                
+                                if($mode==5){
+                                    $res['lazy'] = true;
+                                }
                             }
                     }else{
 
@@ -365,7 +390,7 @@
                             $rectype_ids = explode(",", $pointerRecTypeId);
 
                              
-                            if($mode==4){
+                            if($mode==4 || $mode==5){
                                 /*
                                 if($pointerRecTypeId=="" || count($rectype_ids)==0){ //TEMP
                                      $dt_title .= ' unconst';
@@ -391,23 +416,23 @@
                                     $res['constraint'] = count($rectype_ids);
                                     $res['children'] = array();
                                 }
-                                if(false &&  $mode==4){  //TEMP
+                                if($mode==5){
                                     $res['rt_ids'] = $pointerRecTypeId;
                                     $res['lazy'] = true;
                                 }else{
                                 
-                                foreach($rectype_ids as $rtID){
-                                    $rt_res = __getRecordTypeTree($system, $rtID, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
-                                    if(count($rectype_ids)==1){//exact one rectype constraint
-                                        //avoid redundant level in tree
-                                        $res = $rt_res;
-                                        $res['constraint'] = 1;
-                                        $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
-                                    }else if($rt_res!=null){
-                                        array_push($res['children'], $rt_res);
-                                        $res['constraint'] = count($rt_res);
+                                    foreach($rectype_ids as $rtID){
+                                        $rt_res = __getRecordTypeTree($system, $rtID, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
+                                        if(count($rectype_ids)==1){//exact one rectype constraint
+                                            //avoid redundant level in tree
+                                            $res = $rt_res;
+                                            $res['constraint'] = 1;
+                                            $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
+                                        }else if($rt_res!=null){
+                                            array_push($res['children'], $rt_res);
+                                            $res['constraint'] = count($rt_res);
+                                        }
                                     }
-                                }
                                 
                                 }
                             
@@ -428,7 +453,7 @@
 
             if(!@$res['code']) $res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId).":".$pref.$dtID;  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)
             $res['key'] = "f:".$dtID;
-            if($mode==4){
+            if($mode==4 || $mode==5){
                     
                 $stype = ($detailType=='resource' || $detailType=='relmarker')?"":$dbs_lookups[$detailType];
                 if($reverseRecTypeId!=null){

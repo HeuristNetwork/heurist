@@ -95,15 +95,19 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 var allowed_fieldtypes = ['enum','freetext',"year","date","integer","float","resource","relmarker"];
                 
                 window.hWin.HAPI4.SystemMgr.get_defs({rectypes: rectype_id,
-                    mode:4, //special node - returns data for treeview
+                    mode:5, parentcode:null, //special node - returns data for treeview
                     fieldtypes:allowed_fieldtypes},  //ART20150810 this.options.params.fieldtypes.join() },
 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if($.isArray(response) || response.status == window.hWin.HAPI4.ResponseStatus.OK){
                 
+                            if($.isArray(response)){
+                                  treedata = response;
+                            }else 
                             if(response.data.rectypes) {
-                                response.data.rectypes[0].expanded = true;
+                                treedata = response.data.rectypes;
                             }
+                            treedata[0].expanded = true; //first expanded
 
                             //setTimeout(function(){
                             treediv.fancytree({
@@ -111,7 +115,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                                 //            extensions: ["select"],
                                 checkbox: true,
                                 selectMode: 3,  // hierarchical multi-selection
-                                source: response.data.rectypes,
+                                source: treedata,
                                 lazyLoad: function(event, data){
                                     var node = data.node;
 console.log(node.data.rt_ids);                                    
@@ -124,7 +128,7 @@ console.log(node.data.rt_ids);
                                     */                    
                                     data.result = {
                                         url: sURL,
-                                        data: {db:window.hWin.HAPI4.database, mode:4, lazyload:1, 
+                                        data: {db:window.hWin.HAPI4.database, mode:5, parentcode:node.data.code, 
                                             rectypes:node.data.rt_ids, fieldtypes:allowed_fieldtypes}
                                     } 
                                                                        
@@ -140,11 +144,11 @@ console.log(node.data.rt_ids);
                                 click: function(e, data){
                                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                                        data.node.setExpanded(!data.node.isExpanded());
-                                       treediv.find('.fancytree-expander').hide();
+                                       //treediv.find('.fancytree-expander').hide();
                                        
                                         var showrev = true; //$('#fsw_showreverse').is(":checked");
                                         var tree = treediv.fancytree("getTree");
-                                        tree.visit(function(node){
+                                        tree.visit(function(node){ //show hide all reverse pointers
                                             if(node.data.isreverse==1){ 
                                                 if(showrev){
                                                     $(node.li).show();
@@ -153,7 +157,8 @@ console.log(node.data.rt_ids);
                                                 }
                                             }
                                         });
-                                       
+                                   }else if( data.node.lazy) {
+                                       data.node.setExpanded( true );
                                    }
                                 },
                                 dblclick: function(e, data) {
@@ -171,6 +176,21 @@ console.log(node.data.rt_ids);
                                 //idPrefix: "fancytree-Cb3-"
                             });
                             //},1000);
+                            
+                            setTimeout(function(){
+                                    var showrev = true;
+                                    var tree = treediv.fancytree("getTree");
+                                    tree.visit(function(node){
+                                    if(node.data.isreverse==1){ //  window.hWin.HEURIST4.util.isArrayNotEmpty(node.children) &&
+                                        if(showrev){
+                                            $(node.li).show();
+                                        }else{
+                                            $(node.li).hide();
+                                        }
+                                    }
+                                });
+                            },1000);
+
                             
                         }else{
                             window.hWin.HEURIST4.msg.redirectToError(response.message);
