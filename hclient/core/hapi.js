@@ -1155,7 +1155,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             //if(request) request.a = 'svs_delete';
             //request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
 
-            _callserver('fileParse', request, callback);
+            _callserver('csvImportController', request, callback);
         }
 
 

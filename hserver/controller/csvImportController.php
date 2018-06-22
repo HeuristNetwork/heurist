@@ -1,7 +1,6 @@
 <?php
-    require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
     /**
-    * Interface for CSV parse and import 
+    * Interface/Controller for CSV parse and import 
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -11,6 +10,8 @@
     * @version     4.0
     */
 
+// @todo  move all session routines to csvSession.php
+// all parse routines to csvParser.php
     /*
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
     * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
@@ -82,6 +83,11 @@ require_once (dirname(__FILE__).'/../dbaccess/dbSysImportFiles.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_structure.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_structure_tree.php');
 
+//require_once (dirname(__FILE__).'/../import/csvSession.php');  //parse and work work with import session 
+require_once (dirname(__FILE__).'/../import/csvImport.php'); //performs validation and import
+
+require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
+
 set_time_limit(0);
     
 $response = null;
@@ -112,15 +118,16 @@ if(!$system->init(@$_REQUEST['db'])){
         
             $res = assignRecordIds($_REQUEST); 
                     
-        }else if($action=='step4'){ // validate import - check field values
+        }else if($action=='step4'){ // validate import - check field values  - not implemented we use old version in importCSV_lib
         
-            $res = validateImport($_REQUEST);
+            $res = CsvImport::validateImport($_REQUEST);
         
-        }else if($action=='step5'){ // perform import
+        }else if($action=='step5'){ // perform import  - not implemented we use old version in importCSV_lib
                 
-            //$res = doImport($_REQUEST);
+            $res = CsvImport::performImport($_REQUEST, 'json');
         
         }else if(@$_REQUEST['content']){    
+            
             $res = parse_content(); 
             
         }else if($action=='set_primary_rectype'){

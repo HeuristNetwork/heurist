@@ -3142,7 +3142,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                            }
                        }
                        var params = params.join('&');
-                       var url = window.hWin.HAPI4.baseURL + 'hserver/controller/fileParse.php?'+params;
+                       var url = window.hWin.HAPI4.baseURL + 'hserver/controller/csvImportController.php?'+params;
                         
                        window.hWin.HEURIST4.util.downloadURL(url);
                         

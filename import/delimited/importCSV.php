@@ -38,6 +38,9 @@ set_time_limit(0);
 $mysqli = mysqli_connection_overwrite(DATABASE);
 mysql_connection_overwrite(DATABASE); //for getRecordInfoLibrary
 
+// step4 - preparation - validate
+// step5 - perform import
+//
 if(@$_REQUEST["action"]=='step4' || @$_REQUEST["action"]=='step5'){ //case for new UI
 
     if(!is_admin()){

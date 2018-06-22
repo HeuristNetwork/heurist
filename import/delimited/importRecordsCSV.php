@@ -20,9 +20,9 @@
     */
 
 define('MANAGER_REQUIRED',1);
-define('PDIR','../../../');    
+define('PDIR','../../');    
 
-require_once(dirname(__FILE__)."/../initPage.php");
+require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
 
 $post_max_size = get_config_bytes(ini_get('post_max_size'));
 $file_max_size = get_config_bytes(ini_get('upload_max_filesize'));

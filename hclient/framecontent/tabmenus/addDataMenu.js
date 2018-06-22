@@ -98,7 +98,7 @@ function haddDataMenu() {
                 
                 window.hWin.HAPI4.SystemMgr.verify_credentials(
                 function(){
-                   var url = window.hWin.HAPI4.baseURL + "hclient/framecontent/import/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
+                   var url = window.hWin.HAPI4.baseURL + "import/delimited/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
                    
                    var body = $(this.document).find('body');
                    var dim = {h:body.innerHeight(), w:body.innerWidth()};
