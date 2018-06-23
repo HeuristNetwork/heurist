@@ -1406,7 +1406,7 @@ function EditTerms() {
             var term_id = (isRoot)?0:_currentNode.data.id;
             var term_label = (isRoot)?'root vocabulary':_currentNode.data.label;
 
-            var sURL = window.hWin.HAPI4.baseURL + "hclient/framecontent/import/importDefTerms.php?db="
+            var sURL = window.hWin.HAPI4.baseURL + "import/delimited/importDefTerms.php?db="
             + window.hWin.HAPI4.database +
             "&trm_ID="+term_id;
 

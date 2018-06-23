@@ -20,9 +20,9 @@
     */
     
 define('LOGIN_REQUIRED',1);
-define('PDIR','../../../');    
+define('PDIR','../../');    
 
-require_once(dirname(__FILE__)."/../initPage.php");
+require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
 ?>
         <script type="text/javascript" src="importDefTerms.js"></script>
 

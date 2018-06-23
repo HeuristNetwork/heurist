@@ -307,7 +307,7 @@ function hImportDefTerms(_trm_ParentTermID) {
                                        };
                                        
 
-                        window.hWin.HAPI4.parseCSV(request, function( response ){
+                        window.hWin.HAPI4.doImportAction(request, function( response ){
 
                             //that.loadanimation(false);
                             if(response.status == window.hWin.ResponseStatus.OK){

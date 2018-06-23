@@ -1151,11 +1151,11 @@ function hAPI(_db, _oninit) { //, _currentUser
         //
         //
         //
-        , parseCSV: function(request, callback){
+        , doImportAction: function(request, callback){
             //if(request) request.a = 'svs_delete';
             //request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
 
-            _callserver('csvImportController', request, callback);
+            _callserver('importController', request, callback);
         }
 
 

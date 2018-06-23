@@ -588,7 +588,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 id: window.hWin.HEURIST4.util.random()
                                };
                                
-                            window.hWin.HAPI4.parseCSV(request, function( response ){
+                            window.hWin.HAPI4.doImportAction(request, function( response ){
                                 
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     //and render sequence
@@ -860,7 +860,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         treeElement.addClass('loading');
         treeElement.html('<div style="font-style:italic;padding-bottom:20px">loading...</div>');
-        window.hWin.HAPI4.parseCSV(request, function( response ){
+        window.hWin.HAPI4.doImportAction(request, function( response ){
 
             treeElement.removeClass('loading');
             window.hWin.HEURIST4.util.setDisabled(btn, false);
@@ -1959,7 +1959,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             id: window.hWin.HEURIST4.util.random()
                                };
             
-            window.hWin.HAPI4.parseCSV(request, function( response ){
+            window.hWin.HAPI4.doImportAction(request, function( response ){
                 
                 //that.loadanimation(false);
                 if(response.status == window.hWin.ResponseStatus.OK){
@@ -2023,7 +2023,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                               data: csvdata,
                                 id: window.hWin.HEURIST4.util.random()
                                };
-            window.hWin.HAPI4.parseCSV(request, function( response ){
+            window.hWin.HAPI4.doImportAction(request, function( response ){
                 
                 //that.loadanimation(false);
                 if(response.status == window.hWin.ResponseStatus.OK){
@@ -2110,10 +2110,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             }
                     }); 
                 }               
-                 
-                
 
-                window.hWin.HAPI4.parseCSV(request, function( response ){
+                window.hWin.HAPI4.doImportAction(request, function( response ){
                     
                     _showStep(2);                    
                     //that.loadanimation(false);
@@ -2612,7 +2610,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             _showStep(0);
         
-            window.hWin.HAPI4.parseCSV(request, 
+            window.hWin.HAPI4.doImportAction(request, 
                     function(response){
                         
                         if(response.status == window.hWin.ResponseStatus.OK){
@@ -2770,27 +2768,22 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         function __doPrepareStart(){
 
-        var request = {
-            db        : window.hWin.HAPI4.database,
-            imp_ID    : imp_ID,
-            action    : 'step4',
-            sa_rectype: rtyID,
-            seq_index: currentSeqIndex,
-            mapping   : field_mapping,
-            ignore_insert: 0,
-            recid_field: 'field_'+key_idx //imp_session['columns'][key_idx]
-        };
+            var request = {
+                db        : window.hWin.HAPI4.database,
+                imp_ID    : imp_ID,
+                action    : 'step4',
+                sa_rectype: rtyID,
+                seq_index: currentSeqIndex,
+                mapping   : field_mapping,
+                ignore_insert: 0,
+                recid_field: 'field_'+key_idx //imp_session['columns'][key_idx]
+            };
 
 //request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
         
-        
         _showStep(0);
     
-        //window.hWin.HAPI4.parseCSV(request, 
-        
-        var url = window.hWin.HAPI4.baseURL + 'import/delimited/importCSV.php';
-        
-        window.hWin.HEURIST4.util.sendRequest(url, request, null, 
+        window.hWin.HAPI4.doImportAction(request,  
                 function(response){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -2941,10 +2934,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         _showStep(0);
     
-        //window.hWin.HAPI4.parseCSV(request, 
-        var url = window.hWin.HAPI4.baseURL + 'import/delimited/importCSV.php';
-        
-        window.hWin.HEURIST4.util.sendRequest(url, request, null, 
+        window.hWin.HAPI4.doImportAction(request, 
                 function(response){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -3152,7 +3142,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         $dlg.find('.ent_wrapper').hide();
                         
                         
-                        window.hWin.HAPI4.parseCSV(request, function( response ){
+                        window.hWin.HAPI4.doImportAction(request, function( response ){
                             
                             $dlg.find('.loading').hide();
                             $dlg.find('.ent_wrapper').show();
@@ -3776,7 +3766,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             id: window.hWin.HEURIST4.util.random()
                                };
             
-            window.hWin.HAPI4.parseCSV(request, function(response){
+            window.hWin.HAPI4.doImportAction(request, function(response){
                 
                 //that.loadanimation(false);
                 if(response.status == window.hWin.ResponseStatus.OK){
