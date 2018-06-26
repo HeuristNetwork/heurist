@@ -1083,6 +1083,7 @@ $.widget( "heurist.search_faceted_wiz", {
         //first scan current facets and add to selection fields that are not found in tree 
         // it means they are not loaded
         var old_facets = this.options.params.facets;
+        if(old_facets)
         for (k=0;k<old_facets.length;k++){
             
             var code = old_facets[k]['code'];
