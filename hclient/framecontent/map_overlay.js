@@ -1026,7 +1026,7 @@ map.data.addListener('mouseover', function(event) {
             }
 
             //request['getrelrecs'] = 1;  //return all related records including relationship records
-            request['detail'] = request.rules?'detail':'timemap'; //@todo on server side timemap details for rules
+            request['detail'] = 'timemap'; //request.rules?'detail':'timemap'; //@todo on server side timemap details for rules
 
             if(loadingbar==null){
                 var image = window.hWin.HAPI4.baseURL+'hclient/assets/loading_bar.gif';

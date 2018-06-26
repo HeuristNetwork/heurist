@@ -656,6 +656,10 @@ if(_mapdata.limit_warning){
             
         }
         
+        function __timelineFilterMap(){
+            //vis_timeline
+        }
+        
 
         var toolbar = $("#timeline_toolbar").css({'font-size':'0.8em', zIndex:3});
 
@@ -1028,7 +1032,7 @@ console.log('tileloaded 2');
                         //ART 20151026  _showSelection(false);
                     }
 
-                    console.log('MAP INIT COMPLETED');
+//console.log('MAP INIT COMPLETED');
 
                 });
 
@@ -1847,7 +1851,7 @@ ed_html +
             dataUrl = [];
 
             $('#map canvas').filter(function() {
-              dataUrl.push(this.toDataURL("image/png"));
+                dataUrl.push(this.toDataURL("image/png"));
             })
 
             var container = document.getElementById('map'); //map-canvas

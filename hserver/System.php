@@ -1031,7 +1031,7 @@ error_log(print_r($_REQUEST, true));
     //
     //
     //
-    public function user_GetPreference($property){
+    public function user_GetPreference($property, $def=null){
 
         $res = @$_SESSION[$this->dbname_full]["ugr_Preferences"][$property];
 
@@ -1039,8 +1039,9 @@ error_log(print_r($_REQUEST, true));
         if('search_detail_limit'==$property){
             if(!$res || $res<500 ) {$res = 500;}
             else if($res>5000 ) {$res = 5000;}
+        }else if($res==null && $def!=null){
+            $res = $def;
         }
-
 
         return $res;
     }

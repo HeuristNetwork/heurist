@@ -695,22 +695,32 @@
         
 
         $fieldtypes_in_res = null;
-        $istimemap_request = (@$params['detail']=='timemap');
+        //search for geo and time fields and remove non timemap records - for rules we need all records
+        $istimemap_request = (@$params['detail']=='timemap' && @$params['needall']!=1);  
+        $find_places_for_geo = false;
         $istimemap_counter = 0; //total records with timemap data
         $needThumbField = false;
         $needThumbBackground = false;
-        $needCompleteInformation = false; //if true - get all header fields and relations
+        $needCompleteInformation = false; //if true - get all header fields, relations, ful file info
         $needTags = (@$params['tags']>0)?$system->get_user_id():0;
 
         $relations = null;
 
         if(@$params['detail']=='complete'){
             $params['detail'] = 'detail';
-            $needCompleteInformation = true;
+            $needCompleteInformation = true; //all header fields, relations, full file info
         }
         
         $fieldtypes_ids = null;
-        if($istimemap_request){
+        if(@$params['detail']=='timemap'){ //($istimemap_request){
+             $params['detail']=='detail';
+             
+            $system->defineConstant('DT_START_DATE');
+            $system->defineConstant('DT_END_DATE');
+            $system->defineConstant('DT_GEO_OBJECT');
+            $system->defineConstant('DT_DATE');
+            $is_place_defined = $system->defineConstant('RT_PLACE');
+             
              //get date,year and geo fields from structure
              $fieldtypes_ids = dbs_GetDetailTypes($system, array('date','year','geo'), 3);
              if($fieldtypes_ids==null || count($fieldtypes_ids)==0){
@@ -720,6 +730,9 @@
              $fieldtypes_ids = implode(',', $fieldtypes_ids);
              $needThumbField = true;
 //DEBUG error_log('timemap fields '.$fieldtypes_ids);
+
+             //find places linked to result records for geo field
+             $find_places_for_geo = $is_place_defined && ($system->user_GetPreference('deriveMapLocation', 0)==1);
              
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){ //list of specific detailtypes
             //specific set of detail fields
@@ -873,14 +886,14 @@
             if(@$params['limit']) unset($params['limit']);
             if(@$params['offset']) unset($params['offset']);
             if(@$params['vo']) unset($params['vo']);
-
-            $params['needall'] = 1; //return all records
             
-            $resSearch = recordSearch($system, $params);
+            $params['needall'] = 1; //return all records, otherwise dependent records could not be found
+            
+            $resSearch = recordSearch($system, $params); //search for main set
 
             $keepMainSet = (@$params['rulesonly']!=1);
             
-            if(is_array($resSearch) && $resSearch['status']!=HEURIST_OK){
+            if(is_array($resSearch) && $resSearch['status']!=HEURIST_OK){  //error
                 return $resSearch;
             }
             
@@ -904,7 +917,7 @@
 
             $is_get_relation_records = (@$params['getrelrecs']==1); //get all related and relationship records
 
-            foreach($flat_rules as $idx => $rule){
+            foreach($flat_rules as $idx => $rule){ //loop fro all rules
                 if($idx==0) continue;
 
                 $is_last = (@$rule['islast']==1);
@@ -1249,6 +1262,7 @@
                     }
                     $res->close();
                     
+                    //LOAD DETAILS
                     if(($istimemap_request ||
                         $params['detail']=='detail' ||
                         $params['detail']=='structure') && count($records)>0){
@@ -1273,20 +1287,32 @@ $loop_cnt=1;
                     while ($offset<$res_count){   
                             
 //here was as problem, since chunk size for mapping can be 5000 or more we got memory overflow here
-//resaon the list of ids in SELECT is bigger than mySQL limit
+//reason the list of ids in SELECT is bigger than mySQL limit
 //solution - we perfrom the series of request for details by 1000 records
                             $chunk_rec_ids = array_slice($all_rec_ids, $offset, 1000); 
                             $offset = $offset + 1000;
 
                             //search for specific details
                             if($fieldtypes_ids!=null && $fieldtypes_ids!=''){
-                                $detail_query =  'select dtl_RecID,'
+                                
+                                $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
                                 .'AsWKT(dtl_Geo), 0, 0, 0 '
-                                .'from recDetails
-                                where dtl_RecID in (' . join(',', $chunk_rec_ids) . ') '
-                                .' and dtl_DetailTypeID in ('.$fieldtypes_ids.')';
+                                .'FROM recDetails
+                                WHERE (dtl_RecID in (' . join(',', $chunk_rec_ids) . ') '
+                                .' AND dtl_DetailTypeID in ('.$fieldtypes_ids.'))';
+                                
+                                if($find_places_for_geo){
+                                    $detail_query = $detail_query . 'UNION  '
+                                    .'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,AsWKT(dtl_Geo), 0, 0, 0 '
+                                    .' FROM recDetails, recLinks, Records '
+                                    .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
+                                    .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID='. RT_PLACE
+                                    .' AND rl_SourceID in (' . join(',', $chunk_rec_ids) . ')';
+                                }
+                                
+//error_log($detail_query);
                                 
                             }else{
                                 

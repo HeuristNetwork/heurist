@@ -261,6 +261,8 @@
         "layout_theme" => "heurist",
         'search_detail_limit' => 2000,
         'userCompetencyLevel' => "beginner",
+        
+        'deriveMapLocation ' => 1,
 
         "edit_open_in_new_window" => "0",
         "edit_force_tags" => "1",
