@@ -146,7 +146,8 @@ function hTabMenu() {
             function(event){
         
                 window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
-                event.preventDefault();
+                window.hWin.HEURIST4.util.stopEvent(event);
+                //event.preventDefault();
                 return false;
             }        
         );

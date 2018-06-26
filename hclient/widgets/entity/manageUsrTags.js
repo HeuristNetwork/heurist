@@ -586,7 +586,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         var idx, panel = this.recordList;
        
         panel.empty().css({'font-size': '0.9em'});
-console.log('AA');
+
        if(window.hWin.HEURIST4.util.findArrayIndex(window.hWin.HAPI4.user_id(), this.options.groups)>=0){ 
             //1. selected tags by group
             $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>') //width:110px;text-align:right;
