@@ -719,7 +719,8 @@
             $system->defineConstant('DT_END_DATE');
             $system->defineConstant('DT_GEO_OBJECT');
             $system->defineConstant('DT_DATE');
-            $is_place_defined = $system->defineConstant('RT_PLACE');
+            $is_place_defined = $system->defineConstant('RT_PLACE') ||
+                                $system->defineConstant('RT_EN_PLACE');
              
              //get date,year and geo fields from structure
              $fieldtypes_ids = dbs_GetDetailTypes($system, array('date','year','geo'), 3);
@@ -1303,13 +1304,22 @@ $loop_cnt=1;
                                 WHERE (dtl_RecID in (' . join(',', $chunk_rec_ids) . ') '
                                 .' AND dtl_DetailTypeID in ('.$fieldtypes_ids.'))';
                                 
+                                $rt_places = array();
+                                if(defined('RT_PLACE')){
+                                    array_push($rt_places, RT_PLACE);    
+                                }
+                                if(defined('RT_EN_PLACE')){
+                                    array_push($rt_places, RT_EN_PLACE);    
+                                }
+                                
+                                
                                 if($find_places_for_geo){
                                     $detail_query = $detail_query . 'UNION  '
                                     .'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,AsWKT(dtl_Geo), 0, 0, 0 '
                                     .' FROM recDetails, recLinks, Records '
                                     .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
-                                    .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID='. RT_PLACE
-                                    .' AND rl_SourceID in (' . join(',', $chunk_rec_ids) . ')';
+                                    .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID in ('. join(',', $rt_places)
+                                    .') AND rl_SourceID in (' . join(',', $chunk_rec_ids) . ')';
                                 }
                                 
 //error_log($detail_query);

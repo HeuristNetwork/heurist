@@ -215,6 +215,7 @@ $rtDefines = array(
     'RT_FACTOID' => array(3, 22), // Deprecated
     // Spatial data
     'RT_PLACE' => array(3, 1009), 
+    'RT_EN_PLACE' => array(1125, 25), //place for Expert Nation database
     'RT_KML_SOURCE' => array(3, 1014),
     'RT_SHP_SOURCE' => array(3, 1017),
     'RT_GEOTIFF_SOURCE' => array(3, 1018),
