@@ -1828,7 +1828,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 var ele = $('<div><div class="edit-button" style="background:#f48642 !important;margin: 40px auto;width:200px;padding:10px;border-radius:4px;">'
                             +'<h2 style="display:inline-block;color:white">View-only mode</h2>&nbsp;&nbsp;'
-                            +'<a href="#" style="color:white">edit</a><span><br>No enough rights</span></div></div>')
+                            +'<a href="#" style="color:white">edit</a><span><br>Not enough rights</span></div></div>')
                        .addClass('coverall-div-bare')
                        .css({top:'30px', 'text-align':'center','zIndex':9999999999, height:'auto'}) //, bottom: '40px', 'background':'red'
                        .appendTo(dlged);

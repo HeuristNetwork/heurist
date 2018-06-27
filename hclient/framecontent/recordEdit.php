@@ -48,6 +48,23 @@
             // Callback function on page initialization
             function onPageInit(success){
                 if(success){
+                
+                    //FORCE LOGIN    
+                    if(!window.hWin.HAPI4.has_access()){
+                        
+                        $(document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(){
+                                console.log('logged in');
+                                onPageInit(true);
+                        });
+                        
+                        if(typeof doLogin !== "undefined" && $.isFunction(doLogin)){  // already loaded 
+                            doLogin(true);
+                        }else{
+                            //var that = this;
+                            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', function(){onPageInit(true);} );
+                        }                                
+                        return;
+                    }
                     
                     // OLD H3 stuff - need to call edit rectype structure
                     if(window.hWin){

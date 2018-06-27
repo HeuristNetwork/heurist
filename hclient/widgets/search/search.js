@@ -1278,7 +1278,7 @@ $.widget( "heurist.search", {
 
     , _doLogin: function(){
 
-        if(doLogin && $.isFunction(doLogin)){  // already loaded in index.php
+        if(typeof doLogin !== "undefined" && $.isFunction(doLogin)){  // already loaded in index.php
             doLogin(this.options.isloginforced);
         }else{
             //var that = this;

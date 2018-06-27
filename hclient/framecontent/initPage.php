@@ -64,7 +64,8 @@ $login_warning = 'To perform this action you must be logged in';
 // define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
-    //header('Location: '.ERROR_REDIR); //'&msg='.rawurlencode($login_warning)); //No Need to show error message when login is required, login page ia already rendered
+    //No Need to show error message when login is required, login page ia already rendered
+    //header('Location: '.ERROR_REDIR); //'&msg='.rawurlencode($login_warning));
     exit();
 
 

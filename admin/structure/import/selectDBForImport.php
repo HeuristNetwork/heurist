@@ -217,15 +217,15 @@
                 ];
                 var notAdded = true;
                 for(dbID in registeredDBs) {
-                    if(notAdded && Number(dbID)>20){
+                    if(notAdded && Number(dbID)>999){
                         notAdded = false;
                         dataArray.push(['YYY','User databases','Databases registered by Heurist users - use with care, look for entity types with good internal documentation','','']);
-                    }else{
+                    }
                         db = registeredDBs[dbID];
                         dataArray.push([db[0],db[2],db[3],
                             '<a href=\"'+db[1]+'?db='+db[2]+'\" target=\"_blank\">'+db[1]+'</a>',
                             '<img src="../../../common/images/drag_up_down_16x16.png" class="button"/>']);  //b_database.png
-                    }
+                    
                 }
 
                 var myDataSource = new YAHOO.util.LocalDataSource(dataArray,{
