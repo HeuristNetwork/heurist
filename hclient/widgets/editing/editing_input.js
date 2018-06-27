@@ -363,11 +363,11 @@ $.widget( "heurist.editing_input", {
                 else if(fieldname=='dty_Type') val = 'freetext'
                     else if(fieldname=='rst_DisplayHeight'
                         && this.f('dty_Type')=='blocktext') {
-                          val = 3; //height in rows
+                          val = 8; //height in rows
                         }else if(fieldname=='rst_DisplayWidth'
                             && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='url' || 
                                 this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
-                            val = '55';  //default width for input fields
+                            val = '100';  //default width for input fields
                         }
         }
         return val;
