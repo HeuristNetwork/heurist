@@ -1017,7 +1017,10 @@ console.log('tileloaded 2');
 
                     //return;
 
-                    //_initDrawListeners();
+                    if(window.hWin.HAPI4.get_prefs_def('mapSelectTools', 0)==1){
+                        _initDrawListeners();    
+                    }
+                    
 
                     if(false && dataset.mapenabled>0){
                         tmap.datasets.main.hide();
@@ -1278,6 +1281,9 @@ console.log('tileloaded 2');
 
     }
 
+    //
+    // FOR MAIN DATASET ONLY
+    //
     function _selectItemsInShape(){
 
         selection = [];
@@ -1329,22 +1335,57 @@ console.log('tileloaded 2');
         if(_onSelectEventListener)_onSelectEventListener.call(that, selection);
     }
 
+    //
+    // select items with the same coordinates  FOR MAIN DATASET AND POINTERS ONLY
+    //
+    function _selectItemsWithSameCoords(main_item){
 
+        selection = [];
+        
+        var pos = main_item.getNativePlacemark().getPosition();
+        var lat = pos.lat();
+        var lng = pos.lng();
+
+        var dataset = tmap.datasets.main;  //take main dataset
+            dataset.each(function(item){ //loop trough all items
+                        if(item.placemark){
+                            var isOK = false;
+                            if(!item.placemark.points){ //point
+                                var pos = item.getNativePlacemark().getPosition();
+                                if(pos.lat()==lat && pos.lng()==lng){
+                                    selection.push(item.opts.recid);
+                                }
+                            }
+                        }
+            });
+
+        //reset and highlight selection
+        _showSelection(true);
+        //trigger selection - to highlight on other widgets
+        if(_onSelectEventListener)_onSelectEventListener.call(that, selection);
+    }
 
     //
     // Add clicked marker to array of selected
     //
     // (timemap)item.opts.openInfoWindow -> _onItemSelection  -> _showSelection (highlight marker) -> _showPopupInfo
+    // this - selected item
     //
     function _onItemSelection(  ){
         //that - hMapping
         //this - item (map item)
+        
+        if(!this.placemark.points && this.dataset.id=='main'){
+        
+            _selectItemsWithSameCoords(this);
+        }else{
 
-        selection = [this.opts.recid];
-        _showSelection(true);
-        //trigger global selection event - to highlight on other widgets
-        if(_onSelectEventListener) _onSelectEventListener.call(that, selection);
-        //TimeMapItem.openInfoWindowBasic.call(this);
+            selection = [this.opts.recid];
+            _showSelection(true);
+            //trigger global selection event - to highlight on other widgets
+            if(_onSelectEventListener) _onSelectEventListener.call(that, selection);
+            //TimeMapItem.openInfoWindowBasic.call(this);
+        }
     }
 
     //
@@ -1653,6 +1694,10 @@ console.log('tileloaded 2');
                 }else{
                     popupURL = window.hWin.HAPI4.baseURL + 'records/view/renderRecordData.php?mapPopup=1&recID='
                             +item.opts.recid+'&db='+window.hWin.HAPI4.database;
+                            
+                  if(selection.length>1){
+                        popupURL = popupURL + '&ids=' + selection.join(',');    
+                  }         
                     
                     //html =  bubble_header + item.opts.info + '</div>'; //predefined content
                 }
@@ -1722,7 +1767,7 @@ ed_html +
                     if(popupURL){
                         $.get(popupURL, function(responseTxt, statusTxt, xhr){
                            if(statusTxt == "success"){
-                                placemark.setInfoBubble(bubble_header+responseTxt+'</div>');
+                                placemark.setInfoBubble(bubble_header+responseTxt);    //+'</div>'
                                 placemark.openBubble();
                            }
                         });
@@ -1743,7 +1788,7 @@ ed_html +
                     if(popupURL){
                         $.get(popupURL, function(responseTxt, statusTxt, xhr){
                            if(statusTxt == "success"){
-                                item.map.openBubble(item.getInfoPoint(), bubble_header+responseTxt+'</div>');
+                                item.map.openBubble(item.getInfoPoint(), bubble_header+responseTxt);//+'</div>'
                                 item.map.tmBubbleItem = item;
                            }
                         });

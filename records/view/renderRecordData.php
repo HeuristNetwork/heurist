@@ -76,6 +76,10 @@ if (@$_REQUEST['recID'] && !@$_REQUEST['bkmk_id']) {
 }
 $bkm_ID = intval(@$_REQUEST['bkmk_id']);
 $rec_id = intval(@$_REQUEST['recID']);
+$sel_ids = array();
+if(@$_REQUEST['ids']){
+    $sel_ids = explode(',',$_REQUEST['ids']);
+}
 
 if(!$is_map_popup){
 ?>
@@ -117,7 +121,15 @@ if(!$is_map_popup){
             //detect wether this window is top most or inside frame
             window.hWin = _detectHeurist(window);
         
+            function reloadWithOtherRecord(event){
+                var val = event.target.value;
+                if(val>0){
+                    document.location = window.hWin.HAPI4.baseURL + 'records/view/renderRecordData.php?mapPopup=1&recID='
+                            +value+'&db='+window.hWin.HAPI4.database + '&ids=<?php echo $_REQUEST['ids'];?>';                    
+                }
+            }
         
+            
             function zoomInOut(obj,thumb,url) {
                 var thumb = thumb;
                 var url = url;
@@ -280,26 +292,58 @@ if(!$is_map_popup){
         <script src="../../records/edit/digitizer/mapViewer.js"></script>
 
         <?php
-} //$is_map_popup
+} //!$is_map_popup
 else{
-    print '<div style="font-size:0.8em">';
+//print '<html><body>';     
 }        
         if ($bkm_ID) {
             $res = mysql_query('select * from usrBookmarks left join Records on bkm_recID=rec_ID left join defRecTypes on rec_RecTypeID=rty_ID where bkm_ID='.$bkm_ID.' and bkm_UGrpID='.get_user_id().' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
             $bibInfo = mysql_fetch_assoc($res);
+            print '<div style="font-size:0.8em">';
             print_details($bibInfo);
+            print '</div>';
         } else if ($rec_id) {
-            $res = mysql_query('select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='.$rec_id.' and not rec_FlagTemporary');
-            $bibInfo = mysql_fetch_assoc($res);
-            print_details($bibInfo);
+            
+                $res = mysql_query('select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='.$rec_id.' and not rec_FlagTemporary');
+                $bibInfo = mysql_fetch_assoc($res);
+                print '<div data-recid="'.$rec_id.'" style="font-size:0.8em">';
+                print_details($bibInfo);
+                print '</div>';
+                             
+            if(count($sel_ids)>1){
+                
+                $opts = $opts . '<option value="'.$rec_id.'">(#'.$rec_id.') '.$bibInfo['rec_Title'].'</option>';
+                
+                $cnt = 1;
+                
+                foreach($sel_ids as $id){
+                if($id!=$rec_id){    
+                    $res = mysql_query('select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
+                                .$id.' and not rec_FlagTemporary');
+                                
+                    $bibInfo = mysql_fetch_assoc($res);
+                    print '<div data-recid="'.$id.'" style="font-size:0.8em;display:none">';
+                    print_details($bibInfo);
+                    print '</div>';
+                    
+                    $opts = $opts . '<option value="'.$id.'">(#'.$id.') '.$bibInfo['rec_Title'].'</option>';
+                    $cnt++;
+                }
+                }
+                
+                print '<div style="font-size:0.8em">Other selected records<br><select style="font-size:0.9em"'
+                .' onclick="$(\'div[data-recid]\').hide(); $(\'div[data-recid=\'+$(event.target).val()+\']\').show();" '  //reloadWithOtherRecord(event)
+                .'>'.$opts;
+                print '</select></div>';
+            }
         } else {
             print 'No details found';
         }
  if($is_map_popup){
-    print '</div>';
+//print  '</body></html>';
  }else{
        ?>
-        <div id=bottom><div></div></div>
+        <div id=bottom><div></div>
 
     </body>
 </html>
@@ -350,7 +394,7 @@ function print_header_line($bib) {
 
         <div id=recID>ID:<?= htmlspecialchars($rec_id) ?><span class="link"><a id=edit-link class="normal"
             onClick="return sane_link_opener(this);"
-            target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span>
+            target=blank href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>"><img src="../../common/images/edit-pencil.png" title="Edit record"></a></span>
         </div>
 
         <?php
@@ -363,6 +407,7 @@ function print_header_line($bib) {
             <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
                 <?= $bib['rec_Title'] ?>
             </h2>
+    </div>
     <div id=footer>
     <?php 
     if(!$is_map_popup){ 
@@ -700,29 +745,7 @@ function print_private_details($bib) {
             }//for
             
             
-            //sort array by order_by_date for resource (pointer) details
-            function cmp($a, $b)
-            {
-                if($a['rst_DisplayOrder'] == $b['rst_DisplayOrder']){
-                    
-                    if($a['dty_ID'] == $b['dty_ID']){
-                        
-                        if(@$a['order_by_date']==null ||  @$b['order_by_date']==null){
-                             return ($a['dtl_ID'] < $b['dtl_ID'])?-1:1;    
-                        }else{
-                             return ($a['order_by_date'] < $b['order_by_date']) ? -1 : 1;
-                        }
-                        
-                        
-                    }else{
-                        return ($a['dty_ID'] < $b['dty_ID'])?-1:1;    
-                    }
-                    
-                }else {
-                    return (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
-                }
-            }            
-            usort($bds, "cmp");
+            usort($bds, "__sortResourcesByDate");
 
 if($is_map_popup){
     echo '<div>';  
@@ -998,14 +1021,15 @@ function print_linked_details($bib) {
     if ($res==false || mysql_num_rows($res) <= 0) return;
     
         if($is_map_popup){
-           print '<div>';
+           //print '<div>';
         }else{
-           print '<div class=detailRowHeader>Linked from'; 
+           print '<div class=detailRowHeader>Linked from</div>'; 
     ?>
-        <div class=detailRow>
+        <div class="detailRow" <?php echo ($is_map_popup?'style="display:none"':'')?>>
             <div class=detailType>Referencing records</div>
-            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkedto:<?=$bib['rec_ID']?>" onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
-                <!--  <br> <i>Search = linkedto:<?=$bib['rec_ID']?> <br>(returns records pointing TO this record)</i> -->
+            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkedto:<?=$bib['rec_ID']?>" 
+                    onClick="top.location.href = this.href; return false;">
+                    <b>Show list below as search results</b></a>
             </div>
         </div>
     <?php
@@ -1015,11 +1039,11 @@ function print_linked_details($bib) {
 
         while ($row = mysql_fetch_assoc($res)) {
 
-            print '<div class=detailRow>';
-            print '<div class=detailType>'.$lbl.'</div>';
-            print '<div class="detail'.($is_map_popup?' truncate':'').'">';
-            print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
-            print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
+            print '<div class="detailRow" '.($is_map_popup?'style="display:none"':'').'>';
+                print '<div class=detailType>'.$lbl.'</div>';
+                print '<div class="detail'.($is_map_popup?' truncate':'').'">';
+                print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
+                print '<a target=_new href="'.HEURIST_BASE_URL.'records/view/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
             print '</div></div>';
 
             $lbl = '';
@@ -1203,5 +1227,27 @@ function output_chunker($val) {
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);
     */
 }
+//sort array by order_by_date for resource (pointer) details
+function __sortResourcesByDate($a, $b)
+{
+    if($a['rst_DisplayOrder'] == $b['rst_DisplayOrder']){
+        
+        if($a['dty_ID'] == $b['dty_ID']){
+            
+            if(@$a['order_by_date']==null ||  @$b['order_by_date']==null){
+                 return ($a['dtl_ID'] < $b['dtl_ID'])?-1:1;    
+            }else{
+                 return ($a['order_by_date'] < $b['order_by_date']) ? -1 : 1;
+            }
+            
+            
+        }else{
+            return ($a['dty_ID'] < $b['dty_ID'])?-1:1;    
+        }
+        
+    }else {
+        return (@$a['rst_DisplayOrder']==null || $a['rst_DisplayOrder'] > $b['rst_DisplayOrder'])?1:-1;
+    }
+}            
 
 ?>
