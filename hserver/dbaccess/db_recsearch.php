@@ -733,7 +733,9 @@
 //DEBUG error_log('timemap fields '.$fieldtypes_ids);
 
              //find places linked to result records for geo field
-             $find_places_for_geo = $is_place_defined && ($system->user_GetPreference('deriveMapLocation', 0)==1);
+             if(@$params['suppres_derivemaplocation']!=1){ //for producation sites - such as boro or DH
+                $find_places_for_geo = $is_place_defined && ($system->user_GetPreference('deriveMapLocation', 1)==1);
+             }
              
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){ //list of specific detailtypes
             //specific set of detail fields

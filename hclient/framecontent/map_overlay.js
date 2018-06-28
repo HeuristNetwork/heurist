@@ -1027,6 +1027,11 @@ map.data.addListener('mouseover', function(event) {
 
             //request['getrelrecs'] = 1;  //return all related records including relationship records
             request['detail'] = 'timemap'; //request.rules?'detail':'timemap'; //@todo on server side timemap details for rules
+            
+            var lt = window.hWin.HAPI4.sysinfo['layout'];   
+            if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0)){
+                request['suppres_derivemaplocation']=1;
+            }
 
             if(loadingbar==null){
                 var image = window.hWin.HAPI4.baseURL+'hclient/assets/loading_bar.gif';
@@ -1117,8 +1122,13 @@ map.data.addListener('mouseover', function(event) {
                 if(!recset.isMapEnabled()){
 
                     var request = {w: 'all', 
-                        detail: 'timemap', 
+                        detail: 'timemap'
                     };
+                    
+                    var lt = window.hWin.HAPI4.sysinfo['layout'];   
+                    if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0)){
+                        request['suppres_derivemaplocation']=1;
+                    }
 
                     if(recset.length()<2001){ //limit query by id otherwise use current query
                         source.query = { q:'ids:'+recset.getIds().join(',') };
