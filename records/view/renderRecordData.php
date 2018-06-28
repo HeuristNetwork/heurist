@@ -309,7 +309,7 @@ else{
                 print '<div data-recid="'.$rec_id.'" style="font-size:0.8em">';
                 print_details($bibInfo);
                 print '</div>';
-                             
+            $opts = '';
             if(count($sel_ids)>1){
                 
                 $opts = $opts . '<option value="'.$rec_id.'">(#'.$rec_id.') '.$bibInfo['rec_Title'].'</option>';
