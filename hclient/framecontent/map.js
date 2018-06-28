@@ -311,6 +311,7 @@ if(_mapdata.limit_warning){
                         if(item.placemark.points){ //polygone or polyline
                             for(i=0; i<item.placemark.points.length; i++){
                                 var point = item.placemark.points[i];
+                                
                                 if (point.lat < minLat) minLat = point.lat;
                                 if (point.lat > maxLat) maxLat = point.lat;
                                 if (point.lon < minLng) minLng = point.lon;
@@ -320,6 +321,7 @@ if(_mapdata.limit_warning){
                                 var pm = item.getNativePlacemark();
                                 if(pm){
                                     var point = pm.getPosition();
+                                    
                                     if (point.lat() < minLat) minLat = point.lat();
                                     if (point.lat() > maxLat) maxLat = point.lat();
                                     if (point.lng() < minLng) minLng = point.lng();
@@ -331,6 +333,7 @@ if(_mapdata.limit_warning){
                     
                 });
                 
+//console.log( 'minLat=' + minLat + ', maxLat=' +  maxLat +', minLng=' +  minLng +', maxLng=' +  maxLng );
                 
                 var forceZoom = false;
                 if(minLat<-40 && maxLat>70 && minLng<-120 && maxLng>120){
@@ -339,7 +342,17 @@ if(_mapdata.limit_warning){
                     minLng = -120;
                     maxLng = 120;
                     forceZoom = true;
+                }else{
+                    
+                    if(minLat<-60)  minLat = -60;
+                    if(maxLat>70)   maxLat = 70;
+                    if(minLng<-180) minLng = -180;
+                    if(maxLng>180)  maxLng = 180;
+                    
                 }
+                //forceZoom = true;
+                
+                
                 
                 if(mapdata.min_zoom>0){
                     if(maxLat-minLat<mapdata.min_zoom){

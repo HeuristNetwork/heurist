@@ -612,9 +612,11 @@ window.hWin.HEURIST4.util = {
 
                     if(format==0){ //@todo use geodesy-master to calculate distance
 
-                        var x0 = gjson.coordinates[0];
-                        var y0 = gjson.coordinates[1];
-                        var radius = gjson.coordinates[2] - gjson.coordinates[0];
+                        var x0 = gjson.coordinates[0][0];
+                        var y0 = gjson.coordinates[0][1];
+                        var radius = gjson.coordinates[1][0] - gjson.coordinates[0][0];
+                        if(radius==0)
+                          radius = gjson.coordinates[1][1] - gjson.coordinates[0][1];
 
                         shape = [];
                         for (var i=0; i <= 40; ++i) {
