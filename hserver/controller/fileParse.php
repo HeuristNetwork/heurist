@@ -1409,6 +1409,9 @@ function findRecordIds($imp_session, $params){
                         ." FROM ".implode(",",$a_from)
                         ." WHERE ".implode(" and ",$a_where);
                   
+//error_log($search_query);
+//error_log(print_r($a_tobind,true));
+                  
                         $search_stmt = $mysqli->prepare($search_query);
                         //$search_stmt->bind_param('s', $field_value);
                         $search_stmt->bind_result($rec_ID, $rec_Title);
@@ -1782,7 +1785,7 @@ function getMultiValues($values, $csv_enclosure, $csv_mvsep){
                 if(strpos($value,$csv_enclosure)===0 && strrpos($value,$csv_enclosure)===strlen($value)-1){
                     $value = substr($value,1,strlen($value)-2);
                 }
-                array_push($nv, $value);
+                array_push($nv, trim($value));
             }
         }
     }
