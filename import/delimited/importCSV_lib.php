@@ -2038,25 +2038,23 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
     
     $currentSeqIndex = @$params['seq_index'];
     $use_sequence = false;
+    $mapping_keys_values = null;
     if($currentSeqIndex>=0 && @$imp_session['sequence'] && is_array(@$imp_session['sequence'][$currentSeqIndex])){
-        $use_sequence = true;    
+        $use_sequence = true; 
+        
+        $mapping_keys_values = @$imp_session['sequence'][$currentSeqIndex]['mapping_keys_values'];
     }
     
-    $id_field = @$params['recid_field']; //record ID field is always defined explicitly
+    $id_field = @$params['recid_field']; //record ID field is always defined explicitly  field_XXX
     
     $id_field_not_defined = ($id_field==null || $id_field=='');
-
-    if($id_field && @$imp_session['indexes_keyfields'][$id_field]){  //indexes_keyfields not used anymore in new method
-        $is_mulivalue_index = true;
-    }else{
-        $is_mulivalue_index = false;       //so we always have FALSE
-    }
 
     if(intval($recordType)<1){
         return "record type not defined";
     }
 
     $field_types = array();  // idx => fieldtype ID
+    $field_indexes = array();
     $sel_query = array();
     $mapping = array();
     
@@ -2069,6 +2067,7 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                 $field_name = "field_".$index;
                 array_push($field_types, $field_type);
                 array_push($sel_query, $field_name);
+                array_push($field_indexes, $index);
             }
         }else{
             return 'Mapping is not defined';
@@ -2175,14 +2174,18 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
         $csv_enclosure = @$params['csv_enclosure']?$params['csv_enclosure']:$imp_session['csv_enclosure'];
                                    
         $previos_recordId = null;
+        $recid_in_idfield = null; //value in id field in import table before import session
+        $prev_recid_in_idfield = null;
+        $ismulti_id = false; $prev_ismulti_id=false;
         $recordId = null;
         $details = array();
-        $details2 = array(); //to keep original for sa_mode=2 (replace all existing value)
+        $details2 = array(); //original details = to keep for sa_mode=2 (replace all existing value)
 
         $new_record_ids = array();
         $imp_id = null;
 
         $pairs = array(); // for multivalue rec_id => new_rec_id  (keep new id if such id already used)
+        $pairs_id_value = array(); //for multivalue rec_id     new_rec_id => value of mapped field
 
         while ($row = $res->fetch_row()){
 
@@ -2192,34 +2195,41 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                 if(@$row[$id_field_idx]){ //id field defined - detect insert or update
                     $id_field_values = explode($csv_mvsep, $row[$id_field_idx]);
                 }else if(!$ignore_insert){
-                    //field value is not defined - add new record
+                    //special case: field value is not defined - add new record
                     $id_field_values = array(0=>null);
                 }
             }
             
-            //loop all id values - because on index field may have multivalue ID
-            foreach($id_field_values as $idx2 => $recordId_in_import){
+            $ismulti_id = count($id_field_values)>1;
+            
+            //loop all id values - because index field may have multivalue ID - always consider ID field as multivalues
+            foreach($id_field_values as $idx2 => $recid_in_idfield){   //this id from matching
 
-                if($recordId_in_import!=null && @$pairs[$recordId_in_import]){ //already imported
-                    $recordId_in_import = $pairs[$recordId_in_import];
+                if($recid_in_idfield!=null && @$pairs[$recid_in_idfield]){ //it was already imported at this import session
+                    $recordId_in_import = $pairs[$recid_in_idfield];
+                }else{
+                    $recordId_in_import = $recid_in_idfield;
                 }
 
                 //we already have recordID
                 if($recordId_in_import){ //id field defined - detect insert or update
 
-                    //@toremove OLD $recordId_in_import = $row[$id_field_idx];
                     if($previos_recordId!=$recordId_in_import){ //next record ID
 
-                        //record id is changed - save data
+                        //record id is changed - save data ----------------------------
                         //$recordId is already set 
-                        if($previos_recordId!=null && !$is_mulivalue_index && count($details)>0){ //perform action
+                        if($previos_recordId!=null && count($details)>0){ //perform import action
 
                             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                             //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
-                            $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
-                            $pairs[$previos_recordId] = $new_id;//new_A
+                            $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, 
+                                                            $prev_ismulti_id?$prev_recid_in_idfield:null, $mode_output);
+                            if($prev_recid_in_idfield!=null) $pairs[$prev_recid_in_idfield] = $new_id;//new_A
                         }
+                        $prev_recid_in_idfield = $recid_in_idfield; //ugly
+                        $prev_ismulti_id = $ismulti_id;
                         $previos_recordId = $recordId_in_import;
+                        //----------------------------------------------
 
                         //reset
                         $details = array();
@@ -2255,6 +2265,15 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                     $details['imp_id'] = array();
                 }
                 array_push( $details['imp_id'], end($row));
+                
+                //find values for mapping_keys fields 
+                // this aray is filled on matching step
+                // since multivalue in id field need to know the combination of mapping_keys 
+                // rec_id=>{field_idx:values,.....}
+                $mapping_keys_values_curr = array();
+                if(is_array($mapping_keys_values) && @$mapping_keys_values[$recid_in_idfield]){
+                    $mapping_keys_values_curr = $mapping_keys_values[$recid_in_idfield];    
+                }
 
                 $lat = null;
                 $long = null;
@@ -2281,13 +2300,11 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                             $fieldtype_type = $ft_vals[$idx_fieldtype];
                         }
 
-                        if(strpos($row[$index], $csv_mvsep)!==false){
+                        if(@$mapping_keys_values_curr[@$field_indexes[$index]]){
+                            $values = array( $mapping_keys_values_curr[$field_indexes[$index]] );
+                        }else
+                        if(strpos($row[$index], $csv_mvsep)!==false){ //multivalue
                             $values = getMultiValues($row[$index], $csv_enclosure, $csv_mvsep);
-
-                            //  if this is multivalue index field we have to take only current value
-                            if($is_mulivalue_index && @$imp_session['indexes_keyfields'][$id_field][$sel_query[$index]] && $idx2<count($values)){
-                                $values = array($values[$idx2]);
-                            }
                         }else{
                             $values = array($row[$index]);
                         }
@@ -2507,28 +2524,14 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
                 if(  ($id_field_not_defined || $recordId==null) && count($details)>0 ){ //id field not defined - insert for each line
 
                     if(!$ignore_insert){
-                        $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
-                        $pairs[$recordId_in_import] = $new_id;//new_A
+                        $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, 
+                                                        $ismulti_id?$recid_in_idfield:null, $mode_output);
+                        if($recid_in_idfield!=null) $pairs[$recid_in_idfield] = $new_id;//new_A
                         $details = array();
                     }
                     
 
-                }else if ($is_mulivalue_index){ //idfield is multivalue (now is is assummed that index field is always multivalue)
-                    //THIS SECTION IS NOT USED
-                    //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
-                    if(count($details)>1){
-                        $new_id = doInsertUpdateRecord($recordId, $params, $details, null, $mode_output);
-                        if($new_id!=null && intval($new_id)>0) array_push($new_record_ids, $new_id);
-                        $previos_recordId = null;
-
-                        if(($recordId==null || $recordId<0) && intval($new_id)>0){ //new records OR predefined id
-                            $pairs[$id_field_values[$idx2]] = $new_id;
-                        }
-                    }else if($recordId>0){
-                        array_push($new_record_ids, $recordId);
-                    }
                 }
-
 
                 $rep_processed++;
 
@@ -2545,22 +2548,31 @@ function doImport($mysqli, $imp_session, $params, $mode_output){
             }//foreach multivalue index
 
             
-            if($is_mulivalue_index && is_array($new_record_ids) && count($new_record_ids)>0){
-                //save record ids in import table
-                updateRecIds($import_table, end($row), $id_field, $new_record_ids, $csv_mvsep);
-                $new_record_ids = array(); //to save in import table
-            }
-
         }//main  all recs in import table
         $res->close();
 
-        if($id_field && count($details)>0 && !$is_mulivalue_index && $recordId!=null){ //action for last record
+        if($id_field && count($details)>0 && $recordId!=null){ //action for last record
             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
-            $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output);
+            $new_id = doInsertUpdateRecord($recordId, $params, $details, $id_field, 
+                                $ismulti_id?$recid_in_idfield:null, $mode_output);
+            if($recid_in_idfield!=null) $pairs[$recid_in_idfield] = $new_id;//new_A
         }
         if(!$id_field){
             array_push($imp_session['uniqcnt'], $rep_added);
         }
+        
+        //reassign record ids to keep in session
+        if(is_array($mapping_keys_values)){
+            $new_keys_values = array();
+            foreach ($mapping_keys_values as $old_id=>$values){
+                $new_id = @$pairs[$old_id];
+                if($new_id>0){
+                     $new_keys_values[$new_id] = $values;
+                }
+            }
+            $imp_session['sequence'][$currentSeqIndex]['mapping_keys_values'] = $new_keys_values;
+        }
+        
         
         $import_report = array(                
               'processed'=>$rep_processed,
@@ -2736,7 +2748,7 @@ function findOriginalRecord($recordId){
 //
 //
 //
-function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_output){
+function doInsertUpdateRecord($recordId, $params, $details, $id_field, $old_id_in_idfield, $mode_output){
 
     global $mysqli, $imp_session, $rep_processed, $rep_skipped, $rep_permission,
             $wg_id,$rec_visibility, $rep_added, $rep_updated, $rep_unique_ids;
@@ -2823,14 +2835,49 @@ function doInsertUpdateRecord($recordId, $params, $details, $id_field, $mode_out
         
         //change record id in import table from negative temp to id form Huerist records (for insert)        
         if($id_field){ // ($recordId==null || $recordId>0)){
-                $updquery = "UPDATE ".$import_table
-                ." SET ".$id_field."=".$out["bibID"]
-                ." WHERE imp_id in (". implode(",",$details['imp_id']) .")";
-
+            
+            
+            if($old_id_in_idfield==null){
+                
+                $new_id = $out["bibID"];
+                $updquery = 'UPDATE '.$import_table
+                    .' SET '.$id_field.'="'.$new_id
+                    .'" WHERE imp_id in ('. implode(',',$details['imp_id']) .')';
+                
                 if(!$mysqli->query($updquery) && $mode_output!='array'){
-                    print "<div style='color:red'>Cannot update import table (set record id ".$out["bibID"].") for lines:".
+                    print "<div style='color:red'>Cannot update import table (set record id ".$new_id.") for lines:".
                     implode(",",$details['imp_id'])."</div>";
                 }
+
+            }else{
+                $csv_mvsep = @$params['csv_mvsep']?$params['csv_mvsep']:$imp_session['csv_mvsep'];
+                
+                $oldvals = mysql__select_array3($mysqli,
+                    'SELECT imp_id, '.$id_field.' FROM '.$import_table.' WHERE imp_id in ('. implode(',',$details['imp_id']) .')', false);
+                if(is_array($oldvals))
+                foreach($oldvals as $idx=>$row){
+                    $ids = explode($csv_mvsep, $row[1]);
+                    
+                    $new_id = $out["bibID"];
+                    foreach($ids as $i=>$id){
+                        if($id==$old_id_in_idfield){
+                             $ids[$i] = $new_id;
+                        }
+                    }
+                    /*array_map(function ($v) use ($old_id_in_idfield, $new_id) {
+                        return $v == $old_id_in_idfield ? $new_id : $v;
+                    }, $ids);*/                    
+                    
+                    $new_id = implode($csv_mvsep, $ids);
+                    
+                    $updquery = 'UPDATE '.$import_table
+                        .' SET '.$id_field.'="'.$new_id
+                        .'" WHERE imp_id='.$row[0];
+                        
+                    $mysqli->query($updquery);
+                }//foreach
+            }
+            
         }
 
 

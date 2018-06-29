@@ -1539,7 +1539,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#mapping_column_header').text((currentStep==3)
                                                     ?'Column to Field mapping (record match)'
                                                     :'Fields to update');
-        var stype = (currentStep==3)?'mapping_keys':'mapping_flds';
+        var stype = (currentStep==3)?'mapping_keys':'mapping_flds'; //for matching and for import
         var mapping_flds = imp_session['sequence'][currentSeqIndex][stype];  //field index=field type id
         if(!mapping_flds) mapping_flds = {};
         

@@ -120,15 +120,6 @@ if(!$is_map_popup){
             }
             //detect wether this window is top most or inside frame
             window.hWin = _detectHeurist(window);
-        
-            function reloadWithOtherRecord(event){
-                var val = event.target.value;
-                if(val>0){
-                    document.location = window.hWin.HAPI4.baseURL + 'records/view/renderRecordData.php?mapPopup=1&recID='
-                            +value+'&db='+window.hWin.HAPI4.database + '&ids=<?php echo $_REQUEST['ids'];?>';                    
-                }
-            }
-        
             
             function zoomInOut(obj,thumb,url) {
                 var thumb = thumb;
@@ -332,7 +323,7 @@ else{
                 }
                 
                 print '<div style="font-size:0.8em">Other selected records<br><select style="font-size:0.9em"'
-                .' onclick="$(\'div[data-recid]\').hide(); $(\'div[data-recid=\'+$(event.target).val()+\']\').show();" '  //reloadWithOtherRecord(event)
+                .' onclick="$(\'div[data-recid]\').hide(); $(\'div[data-recid=\'+$(event.target).val()+\']\').show();" '  
                 .'>'.$opts;
                 print '</select></div>';
             }

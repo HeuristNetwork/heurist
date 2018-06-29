@@ -1230,11 +1230,14 @@ function findRecordIds($imp_session, $params){
     $mapped_fields = array();
     $mapping = @$params['mapping'];
     $sel_fields = array();
+    $mapping_fieldname_to_index = array(); //field_x => x for quick access
 
     if(is_array($mapping))
     foreach ($mapping as $index => $field_type) {
         if($field_type=="url" || $field_type=="id" || @$detDefs[$field_type]){
                 $field_name = "field_".$index;
+                $mapping_fieldname_to_index[$field_name] = $index;
+                                
                 $mapped_fields[$field_name] = $field_type;
                 $sel_fields[] = $field_name;
         }
@@ -1248,7 +1251,9 @@ function findRecordIds($imp_session, $params){
     $imp_session['validation']['mapped_fields'] = $mapped_fields;
 
     //already founded IDs
-    $pairs = array(); //to avoid search    $keyvalue=>recID
+    $pairs = array(); //to avoid search    $keyvalue=>new_recID
+    $mapping_keys_values = array(); //new_recID => array(field idx=>value,.... - for multivalue keyvalues   
+    
     $records = array();
     $disambiguation = array();
     $disambiguation_lines = array();
@@ -1269,6 +1274,7 @@ function findRecordIds($imp_session, $params){
                 
                 $values_tobind = array();
                 $values_tobind[] = ''; //first element for bind_param must be a string with field types
+                $keys_values = array();
 
                 //BEGIN statement constructor
                 $select_query_match_from = array("Records");
@@ -1317,6 +1323,9 @@ function findRecordIds($imp_session, $params){
                                 array_push($select_query_match_from, $from);
                                 $values_tobind[] = trim($row[$fieldname]);
                                 $values_tobind[0] = $values_tobind[0].'s';
+                                
+                                if(@$mapping_fieldname_to_index[$fieldname]>=0)
+                                    $keys_values[$mapping_fieldname_to_index[$fieldname]] = trim($row[$fieldname]);
                             }
                             
                         }
@@ -1342,15 +1351,23 @@ function findRecordIds($imp_session, $params){
                     }
                 }
 
-                foreach($values as $idx=>$value){
+                
+                //keyvalue = values from other field + value from multivalue
+                foreach($values as $idx=>$value){ //from multivalue matching vield
                     
                     $a_tobind = $values_tobind; //values for prepared query
                     $a_from = $select_query_match_from;
                     $a_where = $select_query_match_where;
                     
-                    if($multivalue_field_name!=null) $row[$multivalue_field_name] = $value;
+                    if($multivalue_field_name!=null){
+                        
+                      $row[$multivalue_field_name] = $value;  
+                      
+                      if(@$mapping_fieldname_to_index[$multivalue_field_name]>=0)
+                                $keys_values[$mapping_fieldname_to_index[$multivalue_field_name]] = $value;
+                    } 
                     
-                    if(trim($value)!=''){
+                    if(trim($value)!=''){ //if multivalue field has values use $values_tobind
                             $a_tobind[0] = $a_tobind[0].'s';
                             $a_tobind[] = $value;
                  
@@ -1453,9 +1470,12 @@ function findRecordIds($imp_session, $params){
                             $disambiguation[$keyvalue] = $disamb;
                             $disambiguation_lines[$keyvalue] = $imp_id;
                         }
-                        $pairs[$keyvalue] = $new_id;
-                        array_push($ids, $new_id);
                         
+                        $pairs[$keyvalue] = $new_id;
+                        
+                        $mapping_keys_values[$new_id] = $keys_values;
+                        
+                        array_push($ids, $new_id);
                         
                     }
                     
@@ -1485,6 +1505,10 @@ function findRecordIds($imp_session, $params){
     $imp_session['validation']['disambiguation'] = $disambiguation;
     $imp_session['validation']['disambiguation_lines'] = $disambiguation_lines;
     $imp_session['validation']['pairs'] = $pairs;     //keyvalues => record id - count number of unique values
+    
+    if($multivalue_field_name!=null){
+        $imp_session['validation']['mapping_keys_values'] = $mapping_keys_values;
+    }
 
     //MAIN RESULT - ids to be assigned to each record in import table
     $imp_session['validation']['records'] = $records; //imp_id(line#) => list of records ids
@@ -1513,7 +1537,7 @@ function assignRecordIds($params){
     //get rectype to import
     $rty_ID = @$params['sa_rectype'];
     $currentSeqIndex = @$params['seq_index'];
-    $match_mode = @$params['match_mode'] ?$params['match_mode']: 0;   //by fields, by id, skip match
+    $match_mode = @$params['match_mode'] ?$params['match_mode']: 0;   //by fields 0, by id 1, skip match 2
     
     if(intval($rty_ID)<1 || !(intval($currentSeqIndex)>=0)){
         $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong value');
@@ -1711,6 +1735,9 @@ function assignRecordIds($params){
     
     if($match_mode!=2){
         $imp_session['sequence'][$currentSeqIndex]['mapping_keys'] = @$params['mapping'];
+        if(@$imp_session['validation']['mapping_keys_values']){ //id - mapping field values - required for multivalue key fields
+            $imp_session['sequence'][$currentSeqIndex]['mapping_keys_values'] = $imp_session['validation']['mapping_keys_values'];
+        }
     }
     
     $imp_session['sequence'][$currentSeqIndex]['counts'] = array(
