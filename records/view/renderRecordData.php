@@ -322,7 +322,7 @@ else{
                 }
                 }
                 
-                print '<div style="font-size:0.8em">Other selected records<br><select style="font-size:0.9em"'
+                print '<div style="font-size:0.8em">Multiple entries here<br><br><select style="font-size:0.9em"'
                 .' onclick="$(\'div[data-recid]\').hide(); $(\'div[data-recid=\'+$(event.target).val()+\']\').show();" '  
                 .'>'.$opts;
                 print '</select></div>';
@@ -876,7 +876,7 @@ if($is_map_popup){
         <?php
         // </div>  
             if($is_map_popup){
-                echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.detailRow\').show();$(event.target).hide()">more ...</a></div></div>';
+                echo '<div class=detailRow><a href="#" onClick="$(\'.detailRow\').show();$(event.target).hide()">more ...</a></div>';
                 echo '<div class=detailRow>&nbsp;</div>';
             }
             

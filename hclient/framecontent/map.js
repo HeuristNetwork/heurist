@@ -50,7 +50,7 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
     vis_timeline = null, // vis timeline object
     vis_timeline_range = null,
     vis_timeline_label_mode = 0, //default full label
-    drawingManager,     //manager to draw the selection rectnagle
+    drawingManager = null,     //manager to draw the selection rectnagle
     lastSelectionShape,
 
     keepMinDate = null,
@@ -1017,7 +1017,7 @@ console.log('tileloaded 2');
 
                     //return;
 
-                    if(window.hWin.HAPI4.get_prefs_def('mapSelectTools', 0)==1){
+                    if(window.hWin.HAPI4.get_prefs_def('mapSelectTools', 1)==1){
                         _initDrawListeners();    
                     }
                     
@@ -1144,6 +1144,8 @@ console.log('tileloaded 2');
     // adds draw button and init them for google map DrawingManager
     //
     function _initDrawListeners(){
+        
+            if(drawingManager!=null) return;
 
             var shift_draw = false;
 

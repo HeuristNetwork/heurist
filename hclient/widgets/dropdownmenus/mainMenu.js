@@ -916,7 +916,9 @@ $.widget( "heurist.mainMenu", {
                                 prefs['mapcluster_on'] != request['mapcluster_on'] || 
                                 prefs['search_detail_limit'] != request['search_detail_limit'] ||
                                 prefs['mapcluster_count'] != request['mapcluster_count'] ||   
-                                prefs['mapcluster_zoom'] != request['mapcluster_zoom']);
+                                prefs['mapcluster_zoom'] != request['mapcluster_zoom'] ||
+                                prefs['deriveMapLocation'] != request['deriveMapLocation'] || 
+                                prefs['mapSelectTools'] != request['mapSelectTools']);
                                 
                             //check help toggler and bookmark search - show/hide
                             window.hWin.HEURIST4.ui.applyCompetencyLevel(request['userCompetencyLevel']);
