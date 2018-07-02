@@ -258,6 +258,8 @@ class DbSysUsers extends DbEntityBase
             }
             if(!$this->system->is_admin() && (!@$this->records[$idx]['ugr_ID'] || $this->records[$idx]['ugr_Type']<0)){
                 $this->records[$idx]['ugr_Enabled'] = 'n';
+            }else if(!($this->records[$idx]['ugr_Enabled']=='n' || $this->records[$idx]['ugr_Enabled']=='y')){
+                $this->records[$idx]['ugr_Enabled'] = 'n';    
             }
 
             //validate duplication
