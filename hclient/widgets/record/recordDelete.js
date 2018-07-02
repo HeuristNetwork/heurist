@@ -223,12 +223,12 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                                 + (response.data.deleted>1?'s':'');
                                 
                            if(response.data.bkmk_count>0){
-                               msg += ('<br><br>Bookmarks removed: '+response.data.bkmk_count
-                                        + (response.data.bkmk_count>1?'s':''));
+                               msg += ('<br><br>Bookmark'+(response.data.bkmk_count>1?'s':'')
+                                            +' removed: '+response.data.bkmk_count);
                            }
                            if(response.data.rels_count>0){
-                               msg += ('<br><br>Relationships removed: '+response.data.rels_count
-                                        + (response.data.rels_count>1?'s':''));
+                               msg += ('<br><br>Relationship'+(response.data.rels_count>1?'s':'')
+                                        +' removed: '+response.data.rels_count);
                            }
                            if(response.data.noaccess>0){
                                msg += ('<br><br>No enough rights for '+response.data.noaccess+

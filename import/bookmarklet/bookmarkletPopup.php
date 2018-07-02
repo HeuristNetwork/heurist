@@ -21,15 +21,19 @@
 */
 
 header('Content-type: text/javascript');
-require_once(dirname(__FILE__)."/../../common/config/initialise.php");
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+$system = new System();
+if(!$system->init(@$_REQUEST['db'])){
+    return;
+}    
 ?>
 var Heurist = {
 
 w: 370,
 h: 240,
 
-uriBase: "<?= HEURIST_BASE_URL ?>",
-uriHost: "<?= HEURIST_SERVER_URL ?>/",
+uriBase: "<?=HEURIST_BASE_URL ?>",
+uriHost: "<?=HEURIST_SERVER_URL ?>/",
 database:"<?=HEURIST_DBNAME?>",
 init: function () {
 	// toggle display if our div is already present in the DOM

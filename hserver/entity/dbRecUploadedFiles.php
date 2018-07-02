@@ -333,11 +333,11 @@ class DbRecUploadedFiles extends DbEntityBase
     }    
 
     //
-    //
+    // two steps - first save record, then update it with  ulf_ObfuscatedFileID and ulf_FileName
     //
     public function save(){
 
-        $ret = parent::save();
+        $ret = parent::save(); 
 /*
         if($ret!==false){
             //treat thumbnail image
@@ -359,18 +359,25 @@ class DbRecUploadedFiles extends DbEntityBase
             if(!@$record['ulf_ObfuscatedFileID']){ //define obfuscation
             
                 $ulf_ID = $record['ulf_ID'];
-                $nonce = addslashes(sha1($ulf_ID.'.'.rand()));
-                    
-                $file2 = array();
-                $file2['ulf_ID'] = $ulf_ID;
-                $file2['ulf_ObfuscatedFileID'] = $nonce;
-                $this->records[$rec_idx]['ulf_ObfuscatedFileID'] = $nonce;
-                if(!@$record['ulf_ExternalFileReference']){
-                    $file2['ulf_FileName'] = 'ulf_'.$ulf_ID.'_'.$record['ulf_OrigFileName']; 
-                }
-
-                $res = mysql__insertupdate($this->system->get_mysqli(), $this->config['tableName'], 'ulf', $file2);
                 
+                if($ulf_ID>0){
+                    $nonce = addslashes(sha1($ulf_ID.'.'.rand()));
+                        
+                    $file2 = array();
+                    $file2['ulf_ID'] = $ulf_ID;
+                    $file2['ulf_ObfuscatedFileID'] = $nonce;
+                    
+                    if(!@$record['ulf_ExternalFileReference'] && !@$record['ulf_FileName']){
+                        $file2['ulf_FileName'] = 'ulf_'.$ulf_ID.'_'.$record['ulf_OrigFileName']; 
+                    }
+
+                    $res = mysql__insertupdate($this->system->get_mysqli(), $this->config['tableName'], 'ulf', $file2);
+                    
+                    if($res>0){
+                        $this->records[$rec_idx]['ulf_ObfuscatedFileID'] = $nonce;
+    //                    $this->records[$rec_idx]['ulf_ID'] = $res;
+                    }
+                }
             }
         }//after save loop
         return $ret;

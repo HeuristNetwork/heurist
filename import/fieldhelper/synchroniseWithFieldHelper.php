@@ -31,21 +31,28 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
-require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
+define('MANAGER_REQUIRED',1);
+define('PDIR','../../');  //need for proper path to js and css    
 
-if (! is_logged_in()) {
-    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-    return;
-}
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+//require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_records.php');
+require_once(dirname(__FILE__)."/../../hserver/dbaccess/db_files.php");
+require_once(dirname(__FILE__)."/../../hserver/utilities/utils_file.php");
+
 ?>
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Import Records In Situ / FieldHelepr Manifests</title>
-        <link rel=stylesheet href="../../common/css/global.css" media="all">
+<!--
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+-->        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        
     </head>
     <body class="popup">
 
@@ -58,10 +65,8 @@ if (! is_logged_in()) {
         </script>
 
         <?php
-        if (! is_admin()) {
-            print "<p>FieldHelper synchronisation requires you to be an Administrator of the Database Managers group</p></body></html>";
-            return;
-        }
+        
+        $system->defineConstants();
 
         $titleDT = (defined('DT_NAME')?DT_NAME:0);
         $geoDT = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
@@ -109,12 +114,6 @@ if (! is_logged_in()) {
         if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
         if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
 
-        
-        mysql_connection_overwrite(DATABASE);
-        if(mysql_error()) {
-            die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
-        }
-
         ?>
         <h2>ADVANCED USERS</h2>
 
@@ -158,24 +157,16 @@ if (! is_logged_in()) {
 
         if(!array_key_exists('mode', $_REQUEST)) {
 
-            if(HEURIST_DBID==0){ //is not registered
+            if(false && !($system->get_system('sys_dbRegisteredID')>0)){ //is not registered
 
-                print "<p style=\"color:red\">Note: Database must be registered with the Heurist master index to use this function<br>".
+                print "<div class='ui-state-error' style='padding:10px'>Note: Database must be registered with the Heurist master index to use this function<br>".
                 "Register the database using Database administration page > Database > Registration - ".
-                "only available to the database creator/owner (user #2)</p>";
+                "only available to the database creator/owner (user #2)</div>";
 
             }else{
-                // Find out which folders to parse for XML manifests - specified for FieldHelper indexing in Advanced Properties
-                $query1 = "SELECT sys_MediaFolders, sys_MediaExtensions from sysIdentification where 1";
-                $res1 = mysql_query($query1);
-                if (!$res1 || mysql_num_rows($res1) == 0) {
-                    die ("<p><b>Sorry, unable to read the sysIdentification from the current database. ".
-                        "Possibly wrong database format, please consult Heurist team");
-                }
-
-                // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
-                $row1 = $row = mysql_fetch_row($res1);
-                $mediaFolders = $row1[0];
+                
+                $mediaFolders = $system->get_system('sys_MediaFolders');
+                $mediaExts = $system->get_system('sys_MediaExtensions');
                 
                 if($mediaFolders==null || $mediaFolders==''){
                     $mediaFolders = HEURIST_FILESTORE_DIR;
@@ -187,25 +178,20 @@ if (! is_logged_in()) {
                 $mediaFolders = implode(';', $dirs);
                 
                 // The defined list of file extensions for FieldHelper indexing.
-                if($row1[1]==null){
+                if($mediaExts==null || $mediaExts==''){
                     $mediaExts = "jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,".
                     "aif,aiff,mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,".
                     "htm,html,xhtml,ppt,pptx,zip,gzip,tar";
-                }else{
-                    $mediaExts = $row1[1]; // user gets to define from scratch so they can restrict what's indexed
                 }
 
-                if ($mediaFolders=="" || count($dirs) == 0) {
-                    $mediaFolders = HEURIST_FILESTORE_DIR; // default to the data folder for this database
-                    //print ("<p><b>It seems that there are no media folders specified for this database</b>");
-                }
                 print "<p><b>Folders to scan :</b> $mediaFolders<p>";
                 print "<p><b>Extensions to scan:</b> $mediaExts<p>";
-
-//@todo change to entity dialog                
-                print  "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAdvanced.php?db=".HEURIST_DBNAME."&popup=1'>".
-                "Click here to set media folders (database file directory descendants scanned by default)</a><p>";
-
+               ?>
+                <p><a href='#' onclick="{window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification'); return false;}"
+                    title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>
+                    Click here to set media folders (database file directory descendants scanned by default)</a>
+                </p>                
+                <?php
 
                 if (!($mediaFolders=="" || count($dirs) == 0)) {
                     print "<form name='selectdb' action='synchroniseWithFieldHelper.php' method='get'>";
@@ -216,7 +202,7 @@ if (! is_logged_in()) {
                     print "<input type='submit' value='Continue' />";
                 }
             }
-            exit;
+            exit();
         }
 
         // ---- visit #3 - PROCESS THE HARVESTING -----------------------------------------------------------------
@@ -368,7 +354,7 @@ if (! is_logged_in()) {
         */
         function doHarvestInDir($dir) {
 
-            global $rep_issues, $fieldhelper_to_heurist_map, $mediaExts, $progress_divid,
+            global $system, $rep_issues, $fieldhelper_to_heurist_map, $mediaExts, $progress_divid,
             $geoDT, $fileDT, $titleDT, $startdateDT, $enddateDT, $descriptionDT;
 
             $rep_processed = 0;
@@ -504,7 +490,7 @@ if (! is_logged_in()) {
                             }
 
                             if($recordId!=null){ //veify that this record exists
-                                $res = mysql__select_array("Records", "rec_ID", "rec_ID=".$recordId);
+                                $res = mysql__select_value($system->get_mysqli(),'SELECT rec_ID FROM Records WHERE rec_ID='.$recordId);
                                 if (!(is_array($res) && count($res)>0)){
                                     print  "<div>File: <i>$filename_base</i> was indexed as rec# $recordId. ".
                                     "This record was not found. File will be reindexed</div>";
@@ -521,7 +507,7 @@ if (! is_logged_in()) {
                                         $currfile = $filename; //assign to global
 
                                         //add-update the uploaded file
-                                        $file_id = register_file($filename, null, false);
+                                        $file_id = fileRegister($system, $filename); //see db_files.php
                                         if(is_numeric($file_id)){
                                             $details["t:".$fileDT] = array("1"=>$file_id);
 
@@ -564,34 +550,26 @@ if (! is_logged_in()) {
                                     $details["t:".$key] = array("1"=>$new_md5);
                                 }
 
-                                $out['error']='test';
+                                $record = array();
+                                $record['ID'] = -1; //add new
+                                $record['RecTypeID'] = $recordType;
+                                $record['AddedByImport'] = 2;
+                                $record['no_validation'] = true;
+                                $record['URL'] = $recordURL;
+                                $record['ScratchPad'] = null;
+                                $record['details'] = $details;
+                                
+                                $out = recordSave($system, $record);  //see db_records.php
 
-                                //add-update Heurist record
-                                $out = saveRecord($recordId, $recordType,
-                                    $recordURL,
-                                    $recordNotes,
-                                    null, //???get_group_ids(), //group
-                                    null, //viewable
-                                    null, //bookmark
-                                    null, //pnotes
-                                    null, //rating
-                                    null, //tags
-                                    null, //wgtags
-                                    $details,
-                                    null, //-notify
-                                    null, //+notify
-                                    null, //-comment
-                                    null, //comment
-                                    null //+comment
-                                );
-
-                                if (@$out['error']) {
+                                if ( @$out['status'] != HEURIST_OK ) {
                                     print "<div>File: <i>$filename_base</i> <span  style='color:red'>Error: ".
-                                    implode("; ",$out["error"])."</span></div>";
+                                    implode("; ",$out["message"])."</span></div>";
+                                    
                                 }else{
                                     if($new_md5==null){
                                         $new_md5 = md5_file($filename);
                                     }
+                                    $new_recordID = intval($out['data']);
                                     //update xml
                                     if($recordId==null){
                                         if($old_md5!=$new_md5){
@@ -599,14 +577,14 @@ if (! is_logged_in()) {
                                             "Warning: Checksum differs from value in manifest; ".
                                             "data file may have been changed</span></div>";
                                         }
-                                        $f_item->addChild("heurist_id", $out["bibID"]);
+                                        $f_item->addChild("heurist_id", $new_recordID);
                                         $f_item->addChild("md5", $new_md5);
                                         $f_item->addChild("filesize", filesize($filename));
 
 
                                         $rep_added++;
                                     }else{
-                                        $el_heuristid["heurist_id"] = $out["bibID"];
+                                        $el_heuristid["heurist_id"] = $new_recordID;
                                         $rep_updated++;
                                     }
 
@@ -693,17 +671,15 @@ XML;
                     {
 
                         $details = array();
-
-                        $file_id = register_file($filename, null, false);
-                        if(is_numeric($file_id)){
+                        
+                        $file_id = fileRegister($system, $filename);  //see db_files.php
+                            
+                        if($file_id>0){
                             $details["t:".$fileDT] = array("1"=>$file_id);
-
-                            //read EXIF data for JPEG images
                             $recordNotes = readEXIF($filename);
-
                         }else{
                             print "<div>File: <i>$filename_base</i> <span  style=\"color:#ff8844\">".
-                            "Warning: failed to register. No record created for:  .$file_id</span></div>";
+                            "Warning: failed to register. No record created for this file</span></div>";
                             //$rep_issues = $rep_issues."<br/>Can't register file:".$filename.". ".$file_id;
                             $file_id = null;
                             continue;
@@ -751,25 +727,16 @@ XML;
                         }
 
                         //add-update Heurist record
-                        $out['error'] = 'test2';
-                        $out = saveRecord(null, //record ID
-                            RT_MEDIA_RECORD, //record type
-                            null,  //record URL
-                            $recordNotes,  //Notes
-                            null, //???get_group_ids(), //group
-                            null, //viewable
-                            null, //bookmark
-                            null, //pnotes
-                            null, //rating
-                            null, //tags
-                            null, //wgtags
-                            $details,
-                            null, //-notify
-                            null, //+notify
-                            null, //-comment
-                            null, //comment
-                            null //+comment
-                        );
+                        $record = array();
+                        $record['ID'] = -1;
+                        $record['RecTypeID'] = RT_MEDIA_RECORD;
+                        $record['AddedByImport'] = 2;
+                        $record['no_validation'] = true;
+                        $record['URL'] = null;
+                        $record['ScratchPad'] = $recordNotes;
+                        $record['details'] = $details;
+                        
+                        $out = recordSave($system, $record);  //see db_records.php
 
                         $f_item = $f_items->addChild("item");
                         $f_item->addChild("filename", htmlspecialchars($flleinfo['basename']));
@@ -787,14 +754,16 @@ XML;
                         $f_item->addChild("md5", $new_md5);
                         $f_item->addChild("filesize", filesize($filename));
 
-
-                        if (@$out['error']) {
-                            print "<div>Fle: <i>$filename_base</i> <span style='color:red'>Error: ".implode("; ",$out["error"])."</span></div>";
+                        
+                        if ( @$out['status'] != HEURIST_OK ) {                        
+                            print "<div>Fle: <i>$filename_base</i> <span style='color:red'>Error: ".implode("; ",$out["message"])."</span></div>";
                         }else{
-                            $f_item->addChild("heurist_id", $out["bibID"]);
+                            $new_recordID = intval($out['data']);
+                            $f_item->addChild("heurist_id", $new_recordID);
                             $cnt_added++;
                         }
 
+                        
                         $rep_processed_dir++;
                     }//check ext
 

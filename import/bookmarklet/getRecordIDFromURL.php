@@ -29,47 +29,48 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+header("Content-type: text/javascript");
 
+if (! @$_REQUEST["url"]) return;
 
-define('ISSERVICE',1);
-define("SAVE_URI", "disabled");
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+$system = new System();
+if(!$system->init(@$_REQUEST['db'])){
+    return;
+}    
 
 // using ob_gzhandler makes this stuff up on IE6-
 ini_set("zlib.output_compression_level", 5);
 //ob_start('ob_gzhandler');
 
-require_once(dirname(__FILE__)."/../../common/connect/applyCredentials.php");
-require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-
-mysql_connection_select(DATABASE);
-
-header("Content-type: text/javascript");
-
-if (! @$_REQUEST["url"]) return;
-
 ob_start();
 
 $url = $_REQUEST["url"];
+$mysqli = $system->get_mysqli();
 
 if (substr($url, -1) == "/") $url = substr($url, 0, strlen($url)-1);
 
-$query = "select rec_id from Records left join usrBookmarks on bkm_recID = rec_id where (rec_URL='".mysql_real_escape_string($url)."' or rec_URL='".mysql_real_escape_string($url)."/') ".
-            "group by bkm_ID  order by count(bkm_ID), rec_id limit 1";
+$url = $mysqli->real_escape_string($url);
 
-$res = mysql_query($query);
+//find record with exactly the same URL
+$query = "select rec_id from Records where (rec_URL='". $url ."' or rec_URL='". $url ."/')";
 
-if ($row = mysql_fetch_assoc($res)) {
-	print "HEURIST_url_bib_id = ".$row["rec_id"].";\n\n";
+$rec_id = mysql__select_value($mysqli, $query);
+$bkm_id = 0;
+
+if ($rec_id>0) {
+	print "HEURIST_url_bib_id = ".$rec_id.";\n\n";
+    
+    //find bookmark for this record for current user
+    $query = 'select bkm_ID from usrBookmarks where bkm_recID='.$rec_id.' and bkm_UGrpID='.$system->get_user_id();
+    $bkm_id = mysql__select_value($mysqli, $query);
+    
 } else {
 	print "HEURIST_url_bib_id = null;\n\n";
 }
 
-$query = "select bkm_ID from usrBookmarks left join Records on rec_id = bkm_recID where bkm_UGrpID=".get_user_id().
-        " and (rec_URL='".mysql_real_escape_string($url)."' or rec_URL='".mysql_real_escape_string($url)."/') limit 1";
-
-$res = mysql_query($query);
-if ($res && $row = mysql_fetch_assoc($res)) {
-	print "HEURIST_url_bkmk_id = ".$row["bkm_ID"].";\n\n";
+if ($bkm_id>0) {
+	print "HEURIST_url_bkmk_id = ".$bkm_id.";\n\n";
 } else {
 	print "HEURIST_url_bkmk_id = null;\n\n";
 }

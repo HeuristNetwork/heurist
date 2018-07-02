@@ -30,19 +30,22 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+require_once (dirname(__FILE__).'/../../hserver/System.php');
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+header('Content-type: text/javascript; charset=utf-8');
 
 $title = '';
 $url = @$_REQUEST['url'];
 
 $rv = array('num'=>$_REQUEST['num']);
 
-if (! is_logged_in()) {
-	$rv['error']='You must be logged in';
+$system = new System();
+if(!$system->init(@$_REQUEST['db'])){
+    print json_encode( $system->getError() );
+}else if(!$system->has_access() ){
+    print json_encode( $system->addError(HEURIST_REQUEST_DENIED) );
 }else if ( !$url  ||  (!intval($_REQUEST['num'])  &&  $_REQUEST['num'] != 'popup')) {
-	$rv['error']='URL is not defined';
+    print json_encode( $system->addError(HEURIST_INVALID_REQUEST), 'URL is not defined' );
 }else{
 
 	$url = str_replace(' ', '+', $url);
@@ -72,7 +75,7 @@ if (! is_logged_in()) {
 		$rv['error']='URL could not be retrieved';
 	}
 
-    header('Content-type: text/javascript; charset=utf-8');
-    print json_format($rv);
+    
+    print json_encode(array('status'=>HEURIST_OK, 'data'=>$rv));
 }
 ?>

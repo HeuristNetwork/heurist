@@ -22,34 +22,68 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+define('MANAGER_REQUIRED',1);
+define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-
-if(isForAdminOnly("to import records")){
-    return;
-}
-
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-require_once(dirname(__FILE__)."/../../common/php/saveRecord.php");
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_records.php');
 
 require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
 //require_once dirname(__FILE__).'/../../external/libZotero/build/libZoteroSingle.php';
 
+$system->defineConstants();
+
 $dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
 if($dt_SourceRecordID==0){
-    print "Detail type 'source record id' not defined";
-    return;
+    $system->addError(HEURIST_ERROR, 'Detail type "source record" id not defined');
+    include ERROR_REDIR;
+    exit();
 }
-?>
+$HEURIST_ZOTEROSYNC = $system->get_system('sys_SyncDefsWithDB');
+if($HEURIST_ZOTEROSYNC==''){
+    $system->addError(HEURIST_ERROR, 'Library key for Zotero synchronisation is not defined. '
+                .'Please configure Zotero connection in Manage > Database > Properties');
+    include ERROR_REDIR;
+    exit();
+}
 
+$mapping_file = "zoteroMap.xml";
+$fh_data = null;
+
+if(!file_exists($mapping_file) || !is_readable($mapping_file)){
+    $system->addError(HEURIST_ERROR, 'Sorry, could not find/read configuration file .../import/biblio/zoteroMap.xml '
+    .'required for Zotero synchronisation - please ask your system administrator to copy it from Heurist source code');
+    include ERROR_REDIR;
+    exit();
+}
+
+$step = @$_REQUEST['step'];
+    
+if($step>0){
+    $fh_data = simplexml_load_file($mapping_file);
+    if($fh_data==null || is_string($fh_data)){
+        $system->addError(HEURIST_ERROR, 'Sorry, configuration file import/biblio/zoteroMap.xml for Zotero '
+        .'synchronisation is corrupted - please ask your system administrator to update it from Heurist source code');
+        include ERROR_REDIR;
+        exit();
+    }
+}
+
+?>
 <html>
 
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Zotero synchronization</title>
-        <link rel=stylesheet href="../../common/css/global.css" media="all">
-        <link rel=stylesheet href="../../common/css/admin.css" media="all">
+<!--
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+-->        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+
         <script>
             function __showLoading(){
                 var ele = document.getElementById('divStart2');
@@ -64,16 +98,10 @@ if($dt_SourceRecordID==0){
     <body class="popup">
 
         <?php
-        mysql_connection_overwrite(DATABASE);
-        if(mysql_error()) {
-            die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
-        }
-
-        $step = @$_REQUEST['step'];
 
         // 1) load config file from import/biblio/zoteroMap.xml.
         // This file maps Zotero names to Heurist codes according to context
-        $mapping_file = "zoteroMap.xml";
+        
         $user_ID = null;
         $group_ID = null;
         $api_Key = null;
@@ -90,15 +118,10 @@ if($dt_SourceRecordID==0){
         // ."&mode=properties2\"Manage > Database > Prxoperties</a>";
 
 
-        if(!defined('HEURIST_ZOTEROSYNC') && HEURIST_ZOTEROSYNC==''){
-            die(' <p>Library key for Zotero synchronisation is not defined. '
-                .'Please configure Zotero connection in Manage > Database > Properties');
-        }
-
         //print "<div>Orignal ID detail:".$dt_SourceRecordID."</div>";
 
 
-        $lib_keys = explode("|", HEURIST_ZOTEROSYNC);
+        $lib_keys = explode("|", $HEURIST_ZOTEROSYNC);
 
         if(!$step){
             if(count($lib_keys)>1){ //select key
@@ -144,19 +167,11 @@ if($user_ID!=null)$user_ID = trim($user_ID);
 if($group_ID!=null)$group_ID = trim($group_ID);
 if($api_Key!=null)$api_Key = trim($api_Key);
 
-
-if(!file_exists($mapping_file) || !is_readable($mapping_file)){
-    die("Sorry, could not find/read configuration file .../import/biblio/zoteroMap.xml required for Zotero synchronisation - please ask your system administrator to copy it from Heurist source code");
-}
-$fh_data = simplexml_load_file($mapping_file);
-if($fh_data==null || is_string($fh_data)){
-    die("Sorry, configuration file import/biblio/zoteroMap.xml for Zotero synchronisation is corrupted - please ask your system administrator to update it from Heurist source code");
-}
-
 global $rectypes, $is_verbose;
 $is_verbose = true;
+
 if($is_verbose){
-    $rectypes = getAllRectypeStructures();
+    $rectypes = dbs_GetRectypeStructures($ystem, null, 2);
     print '<table style="display:none" id="mapping_report">';
 }
 
@@ -172,7 +187,7 @@ foreach ($fh_data->children() as $f_gen){
 
                     $zType = strval($arr['zType']);
                     // find record type with such code (or concept code)
-                    $rt_id = getRecTypeLocalID($arr['h3id']);
+                    $rt_id = ConceptCode::getRecTypeLocalID($arr['h3id']);
                     
                     printMappingReport_rt($arr, $rt_id);                    
                     
@@ -226,11 +241,10 @@ if($is_verbose){
 
 
 if( ( is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
-    print "<div style='color:red'><br />Current Zotero access settings incomplete: ' ".$key.
+    print "<div class='ui-state-error'><br />Current Zotero access settings incomplete: ' ".$key.
     " ' <p>Please configure Zotero connection in Manage > Database > Properties.</div></body></html>";
     exit;
 }
-
 
 $zotero = null;
 $zotero = new phpZotero($api_Key);
@@ -268,10 +282,10 @@ if($step=="1"){  //first step - info about current status
     $code = $zotero->getResponseStatus();
 
     if($code>499 ){
-        print "<div style='color:red'><br />Zotero Server Side Error: returns response code: $code.<br /><br />"
+        print "<div class='ui-state-error'><br />Zotero Server Side Error: returns response code: $code.<br /><br />"
         ."Please try this operation later.</div>";
     }else if($code>399){
-        $msg = "<div style='color:red'><br />Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
+        $msg = "<div class='ui-state-error'><br />Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
         if($code==400 || $code==401 || $code==403){
             $msg = $msg."Please verify Zotero API key in Manage > Database > Properties - it may be incorrect or truncated.";
 
@@ -282,9 +296,9 @@ if($step=="1"){  //first step - info about current status
         }
         print $msg."</div>";
     }else if(!$items){
-        print "<div style='color:red'><br />Unrecognized Error: cannot connect to Zotero API: returns response code: $code</div>";
+        print "<div class='ui-state-error'><br />Unrecognized Error: cannot connect to Zotero API: returns response code: $code</div>";
         if($code==0){
-            print "<div style='color:red'><br />Please ask your system administrator to check that the Heurist proxy settings are correctly set.</div>";
+            print "<div class='ui-state-error'><br />Please ask your system administrator to check that the Heurist proxy settings are correctly set.</div>";
         }
     }else{
 
@@ -333,8 +347,8 @@ if($step=="1"){  //first step - info about current status
     }
 }else if ($step=='2'){ //second step - sync
 
-    $alldettypes = getAllDetailTypeStructures();
-    $allterms = getTerms();
+    $alldettypes = dbs_GetDetailTypes($system);
+    $allterms = dbs_GetTerms($system);
 
     $fi_dettype = $alldettypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     $fi_constraint = $alldettypes['typedefs']['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
@@ -355,6 +369,8 @@ if($step=="1"){  //first step - info about current status
     $totalitems = $_REQUEST['cnt'];
     $new_recid = 0;
     $isFailure = false;
+    
+    $mysqli = $system->get_mysqli();
 
     while ($start<$totalitems){
 
@@ -412,9 +428,9 @@ if($step=="1"){  //first step - info about current status
                 // 3) try to search record in database by zotero id
                 $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d  ".
                 "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID=".$dt_SourceRecordID." and d.dtl_Value='".$zotero_itemid."'";
-                $res = mysql_query($query);
+                $res = $mysqli->query($query);
                 if($res){
-                    $row = mysql_fetch_array($res);
+                    $row = $res->fetch_row();
                     if($row){
                         $recId = $row[0];
 
@@ -555,7 +571,7 @@ if($step=="1"){  //first step - info about current status
 
                             $pages = explode("-",$value);
                             $details["t:".$detail_id] = array("0"=>$pages[0]);
-                            $detail_id2 = getDetailTypeLocalID("3-1027"); //MAGIC NUMBER
+                            $detail_id2 = ConceptCode::getDetailTypeLocalID("3-1027"); //MAGIC NUMBER
                             if($detail_id2){
                                 $details["t:".$detail_id2] = array("0"=>(count($pages)>1)?$pages[1] :$pages[0]);
                             }
@@ -639,7 +655,7 @@ if($step=="1"){  //first step - info about current status
 
             foreach($recdata as $resource_rt_id=>$resource_details){ //recordtype
 
-                $recource_recid = createResourceRecord($resource_rt_id, $resource_details);
+                $recource_recid = createResourceRecord($mysqli, $resource_rt_id, $resource_details);
 
                 if(!is_array($recource_recid)){
                     $recource_recid = array("0"=>$recource_recid);
@@ -650,7 +666,7 @@ if($step=="1"){  //first step - info about current status
                     $inserts = array($rec_id, $dt_id, $res_rec_id, 1);
                     $query = "insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) values ("
                     . join(",", $inserts).")";
-                    mysql_query($query);
+                    $mysqli->query($query);
                     $ptr_cnt++;
                 }
             }
@@ -695,7 +711,7 @@ function addMapping($arr, $zType, $rt_id)
 
     }else{
 
-        $dt_id = getDetailTypeLocalID($dt_code);
+        $dt_id = ConceptCode::getDetailTypeLocalID($dt_code);
 
         if($dt_id == null){
             //not found
@@ -786,7 +802,7 @@ function getResourceMapping($dt_code, $rt_id, $arr=null){
         return "  wrong resource mapping ".$dt_code;
     }
 
-    $dt_id = getDetailTypeLocalID($dt_code);
+    $dt_id = ConceptCode::getDetailTypeLocalID($dt_code);
     
     if($arr!=null){
         printMappingReport_dt($arr, $rt_id, $dt_id);    
@@ -801,7 +817,7 @@ function getResourceMapping($dt_code, $rt_id, $arr=null){
     }
 
 
-    $res_rt_id = getRecTypeLocalID($resource_rt_id);
+    $res_rt_id = ConceptCode::getRecTypeLocalID($resource_rt_id);
     
     printMappingReport_rt($resource_rt_id, $res_rt_id);
     
@@ -809,7 +825,7 @@ function getResourceMapping($dt_code, $rt_id, $arr=null){
         return " resource record type not recognized: ".$resource_rt_id;
     }
 
-    $res_dt_id = getDetailTypeLocalID($resource_dt_id);
+    $res_dt_id = ConceptCode::getDetailTypeLocalID($resource_dt_id);
     
         
     
@@ -877,14 +893,14 @@ function assignUnresolvedPointer(&$unresolved, $key, $value){
 *
 * returns array of resource record ID
 */
-function createResourceRecord($record_type, $recdetails){
+function createResourceRecord($mysqli, $record_type, $recdetails){
 
     global $alldettypes, $fi_dettype, $report_log;
 
     if(is_array($recdetails) && array_key_exists(0, $recdetails)){ //these are creators
         $recource_recids = array();
         foreach($recdetails as $idx=>$creator){
-            array_push($recource_recids, createResourceRecord($record_type, $creator));
+            array_push($recource_recids, createResourceRecord($mysqli, $record_type, $creator));
         }
         return $recource_recids;
     }
@@ -916,7 +932,7 @@ function createResourceRecord($record_type, $recdetails){
                 $record_type_2 =  getConstrainedRecordType($dt_id);
                 if($record_type_2){
                     $recdata = array(DT_NAME=>$recdata);
-                    $value = createResourceRecord($record_type_2, $recdata);
+                    $value = createResourceRecord($mysqli, $record_type_2, $recdata);
                 }else{
                     $report_log = $report_log."<br> resource record type unconstrained for detail type: ".$dt_id;
                     continue;
@@ -926,7 +942,7 @@ function createResourceRecord($record_type, $recdetails){
                 $value = array();
                 foreach($recdata as $record_type_2=>$recdata_nextlevel){ //recordtype
 
-                    $value = createResourceRecord($record_type_2, $recdata_nextlevel); //return rec_id
+                    $value = createResourceRecord($mysqli, $record_type_2, $recdata_nextlevel); //return rec_id
                     break;
 
                 }
@@ -969,9 +985,9 @@ function createResourceRecord($record_type, $recdetails){
         //find resouce record , if not found create new one
         $query = "select r.rec_ID from Records r $qd where r.rec_RecTypeID=".$record_type.$query;
 
-        $res = mysql_query($query);
+        $res = $mysqli->query($query);
         if($res){
-            $row = mysql_fetch_array($res);
+            $row = $res->fetch_row();
             if($row){
                 $recource_recid = $row[0];
             }
@@ -1078,7 +1094,19 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         // 8) save rtecord
         $ref = null;
 
-
+        //add-update Heurist record
+        $record = array();
+        $record['ID'] = $recId;
+        $record['RecTypeID'] = $recordType;
+        $record['AddedByImport'] = 2;
+        $record['no_validation'] = true;
+        $record['URL'] = $rec_URL;
+        $record['ScratchPad'] = null;
+        $record['details'] = $details;
+        
+        $out = recordSave($system, $record);  //see db_records.php
+        
+/*
         if($recId){
             //sice we do not know dtl_ID - remove all details for updated record
             $query = "DELETE FROM recDetails where dtl_RecID=".$recId;
@@ -1090,38 +1118,15 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
                 return;
             }
         }
+*/
+    if ( @$out['status'] != HEURIST_OK ) {
+           print "<div style='color:red'> Error: ".implode("; ",$out["message"])."</div>";
+    }else{
 
-        //add-update Heurist record
-        $out = saveRecord($recId, //record ID
-            $recordType,
-            $rec_URL, // URL
-            null, //Notes
-            null, //???get_group_ids(), //group
-            null, //viewable    TODO: SHOULD BE A CHOICE
-            null, //bookmark
-            null, //pnotes
-            null, //rating
-            null, //tags
-            null, //wgtags
-            $details,
-            null, //-notify
-            null, //+notify
-            null, //-comment
-            null, //comment
-            null, //+comment
-            $ref,
-            $ref,
-            2    // import without check of record type structure
-        );
-
-        if (@$out['error']) {
-            print "<div style='color:red'> Error: ".implode("; ",$out["error"])."</div>";
-        }else{
-
-            $new_recid = $out["bibID"];
+            $new_recordID = intval($out['data']);
 
             if($is_echo){
-                print '['.($recId?"Updated":"Added")."&nbsp;Id&nbsp".$out["bibID"].']<br>';
+                print '['.($new_recordID==$recId?"Updated":"Added")."&nbsp;Id&nbsp".$new_recordID.']<br>';
             }
 
 

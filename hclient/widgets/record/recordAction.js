@@ -233,7 +233,7 @@ $.widget( "heurist.recordAction", {
                 close:function(){
                     if($.isFunction(that.options.onClose)){
                       //that.options.onClose(that._currentEditRecordset);  
-                      that.options.onClose.call( that._context_on_close );
+                      that.options.onClose( that._context_on_close );
                     } 
                     that._as_dialog.remove();    
                         

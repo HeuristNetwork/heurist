@@ -7,7 +7,9 @@
 * file - prefix for functions
 * 
 * 
+* fileRegister
 * fileGetByObfuscatedId - get id by obfuscated id
+* fileGetByFileName
 * fileGetFullInfo  - local paths, external links, mimetypes and parameters (mediatype and source)
 * fileGetThumbnailURL - URL to thumbnail for given record ID
 * getImageFromFile - return image object for given file
@@ -34,6 +36,53 @@
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/db_users.php');
 require_once (dirname(__FILE__).'/../utilities/utils_file.php');
+require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
+
+/**
+* register file in recUploadedFiles
+* 
+* @param mixed $system
+* @param mixed $fullname
+*/
+function fileRegister($system, $fullname){
+    
+    
+    $file_id = fileGetByFileName($system, $filename); //apparently it is already registered
+    
+    if(!($file_id>0)) {
+                            
+        $filesize = filesize($fullname);
+        $fileinfo = pathinfo($fullname);
+        
+        $mimetypeExt = strtolower($fileinfo['extension']);
+        $filename_base = $fileinfo['basename'];
+        $dir = $fileinfo['dirname'];
+        
+        // get relative path to db root folder
+        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dir);
+        
+        $fileinfo = array(
+            'entity'=>'recUploadedFiles', 
+            'fields'=>array(    
+                'ulf_OrigFileName' => $filename_base,
+                'ulf_MimeExt' => $mimetypeExt, //extension or mimetype allowed
+                'ulf_FileSizeKB' => ($filesize<1024?1:intval($filesize/1024)),
+                'ulf_FilePath' => $relative_path, //relative path to HEURIST_FILESTORE_DIR - db root
+                'ulf_FileName' => $filename_base
+            )
+        );
+        
+        $entity = new DbRecUploadedFiles($system, $fileinfo);
+        $ret = $entity->save();
+        if($ret!==false){
+            $records = $entity->records();
+            $file_id = $records[0]['ulf_ID'];
+        }
+    }
+    
+    
+    return $file_id;
+}
 
 /**
 * Get file IDs by Obfuscated ID
@@ -81,13 +130,15 @@ function fileGetByFileName($system, $fullname){
 * @param mixed $system
 * @param mixed $file_ids
 */
-function fileGetFullInfo($system, $file_ids){
+function fileGetFullInfo($system, $file_ids, $all_fields=false){
 
     //@todo use prepareIds() and prepareStrIds
-    
     if(is_string($file_ids)){
         $file_ids = explode(",", $file_ids);
+    }else if(!is_array($file_ids)){
+        $file_ids = array($file_ids);
     }
+    
     if(count($file_ids)>0){
 
         if(is_numeric($file_ids[0])){
@@ -98,7 +149,9 @@ function fileGetFullInfo($system, $file_ids){
 
         $query = 'select ulf_ID, concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
         .'fxm_MimeType, ulf_Parameters, ulf_OrigFileName, ulf_FileSizeKB,'
-        .' ulf_ObfuscatedFileID, ulf_Description, ulf_Added from recUploadedFiles '
+        .' ulf_ObfuscatedFileID, ulf_Description, ulf_Added'
+        .($all_fields?', ulf_Thumbnail, ulf_MimeExt':'')
+        .' from recUploadedFiles '
         .' left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt where '
         .$query;
 

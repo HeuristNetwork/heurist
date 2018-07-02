@@ -225,7 +225,7 @@
 
         $mysqli = $system->get_mysqli();
 
-        //0 normal, 1 import, 2 - faims import
+        //0 normal, 1 import, 2 - faims or zotero import (add without recstructure check)
         $modeImport = @$record['AddedByImport']?intval($record['AddedByImport']):0;
 
         $is_strict_validation = true;

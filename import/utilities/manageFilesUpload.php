@@ -190,6 +190,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 $mediaExts = "jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff, ".
                     "mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,htm,html,xhtml,ppt,pptx,zip,gzip,tar,"
                     .$mediaExts; // default set to allow
+                $mediaExts = implode(',',array_unique(explode(',',$mediaExts)));
                 // TODO: we should eliminate any duplicate extensions which might have been added by the user
 
                 if ($mediaFolders=="" || count($dirs) == 1) {

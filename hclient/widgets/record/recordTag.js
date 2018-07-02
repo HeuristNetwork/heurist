@@ -29,7 +29,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         title:  'Add or Remove Tags for Records',
         helpContent: 'tags.html',  //'usrTags.html'
         groups: 'all',
-        modes: ['assign','remove']
+        modes: ['assign','remove']       //bookmark_url - just selection of tags - no real action
     },
     
     _tags_selection:[], //selected tags
@@ -37,14 +37,23 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
 
     _initControls:function(){
         
+        var sMsg;
+        if(this.options.modes=='bookmark_url'){ //selection only - no scope needed
+            this.element.find('#div_fieldset').hide();
+            sMsg = 'Select tags to be added to bookmarks for choosen URLs<br>';
+        }else{
+            sMsg = 'Select tags to be added or removed for choosen record scope<br>';
+        }   
+        sMsg = sMsg 
+            +'Type tag in input. Tags may contain spaces.<br>'
+            +'Matching tags are shown as you type. Click on a listed tag to add it.<br>'
+            +'New tags are added automatically and are specific to each user.<br>';
+        
         
         this.element.find('#div_header')
             .css({'line-height':'21px'})
             .addClass('heurist-helper1')
-            .html('Select tags to be added or removed for choosen record scope<br>'
-            +'Type tag in input. Tags may contain spaces.<br>'
-            +'Matching tags are shown as you type. Click on a listed tag to add it.<br>'
-            +'New tags are added automatically and are specific to each user.<br>');
+            .html(sMsg);
         
         this._tagSelectionWidget = $('<div>').css({'width':'100%', padding: '0.2em'}).appendTo( this.element );
         
@@ -83,7 +92,12 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         var that = this;
         
         
-        if(this.options.modes.indexOf('remove')>=0){
+        if(this.options.modes.indexOf('bookmark_url')>=0){
+            res[1].text = window.hWin.HR('Bookmark');
+            res[1].click = function() { 
+                        that.doTagSelection();                        
+                    };
+        }else if(this.options.modes.indexOf('remove')>=0){
             res[1].text = window.hWin.HR('Remove tags');
         }else{
             res.pop(); //remove last
@@ -100,12 +114,19 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
                     }});
         return res;
     },
-    
+
+    //
+    // ony tag selection for bookmark_url (see importHyperlinks)
+    //
+    doTagSelection: function(){
+        this._context_on_close = this._tags_selection;
+        this.closeDialog();
+    },
     //
     //
     //
     doAction: function(mode){
-
+        
             var scope_val = this.selectRecordScope.val();
             if(scope_val=='')    return;
             
@@ -187,7 +208,8 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
 
     _onRecordScopeChange: function () 
     {
-        var isdisabled = (this.selectRecordScope.val()=='') || !(this._tags_selection.length>0);
+        var isdisabled = (this.options.modes.indexOf('bookmark_url')<0 && this.selectRecordScope.val()=='') 
+                        || !(this._tags_selection.length>0);
         
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );

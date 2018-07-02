@@ -162,7 +162,7 @@ class DbEntityBase
                                     $this->config['tableName'], $this->fields,
                                     $values );
                                             
-            if($ret==true || $ret==null){ //it return true for non-numeric primary field
+            if($ret===true || $ret==null){ //it return true for non-numeric primary field
                    $results[] = $record[$this->primaryField];
             }else if(is_numeric($ret)){
                    $this->records[$rec_idx][$this->primaryField] = $ret;

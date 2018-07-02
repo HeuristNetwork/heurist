@@ -10,8 +10,8 @@
         HEURIST_FILESTORE_DIR."scratch/",
         HEURIST_FILESTORE_DIR."settings/",
         HEURIST_FILESTORE_DIR.'term-icons/',
-        HEURIST_FILESTORE_DIR.'smarty-templates/',  //HEURIST_SMARTY_TEMPLATES_DIR,
-        HEURIST_FILESTORE_DIR.'xsl-templates/');   //HEURIST_XSL_TEMPLATES_DIR);
+        HEURIST_SMARTY_TEMPLATES_DIR); 
+    if(defined('HEURIST_XSL_TEMPLATES_DIR')) array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);
     if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
     if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
 
@@ -224,7 +224,7 @@ function getFilesInDir($dir, $mediaExts, $imode) {
             {
                 if($imode==1){
                 
-                    $file_id = fileGetByFileName( $system, $filename);
+                    $file_id = fileGetByFileName( $system, $filename);  //see db_files.php
 
                     if($file_id>0){
                         array_push($reg_info['reg'], $filename);
