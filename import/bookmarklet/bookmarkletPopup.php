@@ -149,7 +149,7 @@ render: function() {
 		a = td.appendChild(document.createElement("a"));
 		a.target = "_blank";
         a.href= Heurist.uriBase +'?fmt=edit&db='+Heurist.database+'&recID='+ HEURIST_url_bib_id;
-		//a.href= Heurist.uriBase +'records/edit/editRecord.html?db='+Heurist.database+'&bkmk_id=' + HEURIST_url_bkmk_id;
+
 		a.onclick = function() { Heurist.close() };
 		a.innerHTML = "edit record";
 
@@ -158,7 +158,7 @@ render: function() {
 		td.colSpan = "2";
 		td.style.height = "10px";
 
-	} else if (HEURIST_url_bib_id) { // The page has been bookmarked by someone but not current user
+	} else if (HEURIST_url_bib_id) { // The page has been already in database
 		var nobr = td.appendChild(document.createElement("nobr"));
 		nobr.appendChild(document.createTextNode("Page already in Heurist"));
 		nobr.style.color = "green";
@@ -351,6 +351,9 @@ findFavicon: function() {
 	return "";
 },
 
+//
+//  main method - add new record with extracted from page values 
+//
 bookmark: function(rectype) {
 	Heurist.close();
 	var version='20060713';
@@ -372,12 +375,13 @@ bookmark: function(rectype) {
 	}
 	var favicon = Heurist.findFavicon();
 
-	var w = open(Heurist.uriBase +'records/add/addRecord.php?db='+Heurist.database+'&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
-				 '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) +
-				 (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '') +
-				 (favicon? ('&f=' + encodeURIComponent(favicon)) : '') +
-				 (rectype ? '&rec_rectype=' + rectype : '') +
-				 '&version=' + version);
+	var w = open(Heurist.uriBase +'?fmt=edit&b=1&db='+Heurist.database
+                + '&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) 
+				+ '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) 
+				+ (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '')
+				+ (favicon? ('&f=' + encodeURIComponent(favicon)) : '') 
+                + (rectype ? '&rec_rectype=' + rectype : '') 
+				+ '&version=' + version);
 	void(window.setTimeout('window.focus()',200));
 },
 

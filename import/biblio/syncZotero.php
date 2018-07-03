@@ -28,6 +28,7 @@ define('PDIR','../../');  //need for proper path to js and css
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
 require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_records.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/conceptCode.php');
 
 require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
 //require_once dirname(__FILE__).'/../../external/libZotero/build/libZoteroSingle.php';
@@ -60,16 +61,13 @@ if(!file_exists($mapping_file) || !is_readable($mapping_file)){
 
 $step = @$_REQUEST['step'];
     
-if($step>0){
-    $fh_data = simplexml_load_file($mapping_file);
-    if($fh_data==null || is_string($fh_data)){
+$fh_data = simplexml_load_file($mapping_file);
+if($fh_data==null || is_string($fh_data)){
         $system->addError(HEURIST_ERROR, 'Sorry, configuration file import/biblio/zoteroMap.xml for Zotero '
         .'synchronisation is corrupted - please ask your system administrator to update it from Heurist source code');
         include ERROR_REDIR;
         exit();
-    }
 }
-
 ?>
 <html>
 
@@ -171,7 +169,7 @@ global $rectypes, $is_verbose;
 $is_verbose = true;
 
 if($is_verbose){
-    $rectypes = dbs_GetRectypeStructures($ystem, null, 2);
+    $rectypes = dbs_GetRectypeStructures($system, null, 2);
     print '<table style="display:none" id="mapping_report">';
 }
 
@@ -1082,7 +1080,7 @@ function getConstrainedRecordType($resource_dt_id){
 */
 function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo){
 
-    global $rep_errors_only, $dt_SourceRecordID;
+    global $system, $rep_errors_only, $dt_SourceRecordID;
 
     $new_recid = null;
 
@@ -1096,7 +1094,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
 
         //add-update Heurist record
         $record = array();
-        $record['ID'] = $recId;
+        $record['ID'] = $recId?$recId:-1;
         $record['RecTypeID'] = $recordType;
         $record['AddedByImport'] = 2;
         $record['no_validation'] = true;
@@ -1120,13 +1118,13 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         }
 */
     if ( @$out['status'] != HEURIST_OK ) {
-           print "<div style='color:red'> Error: ".implode("; ",$out["message"])."</div>";
+           print "<div style='color:red'> Error: ".$out["message"]."</div>";
     }else{
 
-            $new_recordID = intval($out['data']);
+            $new_recid = intval($out['data']);
 
             if($is_echo){
-                print '['.($new_recordID==$recId?"Updated":"Added")."&nbsp;Id&nbsp".$new_recordID.']<br>';
+                print '['.($new_recordID==$recId?"Updated":"Added")."&nbsp;Id&nbsp".$new_recid.']<br>';
             }
 
 

@@ -55,23 +55,29 @@
         sel = $("#bookmarklet-link");
         if(sel.length==1){ //global variable defined in layout_default.js
             sel.attr('href',
-                "javascript:(function(){"
-                + "e=encodeURIComponent;d=document;h='" + window.hWin.HAPI4.baseURL + "';"
-                + "if(location.protocol=='https:'){if(window.confirm('Only the URL and web page title can be extracted from https:// pages."
+"javascript:(function(){"
+    + "e=encodeURIComponent;d=document;h='" + window.hWin.HAPI4.baseURL + "';"
+    + "if(location.protocol=='https:'){"
+        + "if(window.confirm('Only the URL and web page title can be extracted from https:// pages."
                 + "\\nAdditional information will need to be set manually."
                 + "\\n\\nClick OK to add a record for this page.')){"
-                + "window.open(h+'records/add/addRecord.php?addref=1&db="+window.hWin.HAPI4.database
-                + "&rec_rectype=2&rec_owner=1&rec_visibility=viewable&t='+e(d.title)+'&u='+e(location.href));}return;}"
+                    + "window.open(h+'records/add/addRecord.php?addref=1&db="+window.hWin.HAPI4.database
+                    + "&rec_rectype=2&rec_owner=1&rec_visibility=viewable&t='+e(d.title)+'&u='+e(location.href));"
+        + "}"
+    + "return;}"
 
-                + "c=d.contentType;"
-                + "if(c=='text/html'||!c){"
-                + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
-                + "s=d.createElement('script');s.type='text/javascript';"
-                + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+window.hWin.HAPI4.database+"';"
-                + "d.getElementsByTagName('head')[0].appendChild(s);}"
-                + "else{w=open(h+'hclient/framecontent/addRecordPopup.php?db="+window.hWin.HAPI4.database+"&action=add_record&t='+e(d.title)+'&u='+e(location.href));"
+    + "c=d.contentType;"
+    + "if(c=='text/html'||!c){"
+        + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+        
+        + "s=d.createElement('script');s.type='text/javascript';"
+        + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+window.hWin.HAPI4.database+"';"
+        + "d.getElementsByTagName('head')[0].appendChild(s);"
+    + "}"
+    + "else{"
+    +   "w=open(h+'?fmt=edit&b=1&db="+window.hWin.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
                 //+ "window.setTimeout('w.focus()',200);}"
-                + "}})();"
+    + "}})();"
             );
             
             sel.text('>> '+window.hWin.HAPI4.database)

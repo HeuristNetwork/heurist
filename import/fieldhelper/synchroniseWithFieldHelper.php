@@ -563,7 +563,7 @@ require_once(dirname(__FILE__)."/../../hserver/utilities/utils_file.php");
 
                                 if ( @$out['status'] != HEURIST_OK ) {
                                     print "<div>File: <i>$filename_base</i> <span  style='color:red'>Error: ".
-                                    implode("; ",$out["message"])."</span></div>";
+                                    $out["message"]."</span></div>";
                                     
                                 }else{
                                     if($new_md5==null){
@@ -756,7 +756,7 @@ XML;
 
                         
                         if ( @$out['status'] != HEURIST_OK ) {                        
-                            print "<div>Fle: <i>$filename_base</i> <span style='color:red'>Error: ".implode("; ",$out["message"])."</span></div>";
+                            print "<div>File: <i>$filename_base</i> <span style='color:red'>Error: ".$out["message"]."</span></div>";
                         }else{
                             $new_recordID = intval($out['data']);
                             $f_item->addChild("heurist_id", $new_recordID);

@@ -356,7 +356,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(recID<0){
                 popup_options = {selectOnSave: this.options.selectOnSave, 
                                  parententity: this.options.parententity,
-                                 new_record_params:{rt:this._currentEditRecTypeID}};
+                                 new_record_params:{RecTypeID:this._currentEditRecTypeID}};
                 if(this.options.select_mode!='manager' && this.options.selectOnSave){ 
                     //this is select form that all addition of new record
                     //it should be closed after addition of new record
@@ -1335,14 +1335,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(!that.options.new_record_params) that.options.new_record_params = {};
         
             if(that._currentEditRecTypeID>0){
-                that.options.new_record_params['rt'] = that._currentEditRecTypeID;
+                that.options.new_record_params['RecTypeID'] = that._currentEditRecTypeID;
             }        
             
-            that.options.new_record_params['temp'] = 1;
+            that.options.new_record_params['ID'] = -1;
+            that.options.new_record_params['FlagTemporary'] = 1;
             
-            if(!(that.options.new_record_params['rt']>0)){
+            if(!(that.options.new_record_params['RecTypeID']>0)){
                 
-                //record type not defined
+                //record type not defined - show popup with rectype selection
                 var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='
                         + window.hWin.HAPI4.database
                         + '&action=add_record&scope=popup';
@@ -1352,12 +1353,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     //resizable:false,
                     title: window.hWin.HR('add_record'),
                     callback: function(context){
-                        if(context && context.rt>0){
+                        if(context && context.RecTypeID>0){
 
-                            that._currentEditRecTypeID = context.rt;
+                            that._currentEditRecTypeID = context.RecTypeID;
                             that.options.new_record_params =  context;
+                            
+                            that.options.new_record_params['RecTypeID']  = context.RecTypeID;
+                            that.options.new_record_params['OwnerUGrpID'] = context.OwnerUGrpID;
+                            that.options.new_record_params['NonOwnerVisibility'] = context.NonOwnerVisibility;
                                                 
-                            window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                            window.hWin.HAPI4.RecordMgr.save( that.options.new_record_params,
                                     function(response){  response.is_insert=true; that._initEditForm_step4(response); });
                             
                         }else{
@@ -1366,44 +1371,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     }
                 });
 
-                /*
-                //select record type first
-                if(!this._rt_select_dialog){
-                    this._rt_select_dialog = $('<div>').css({'text-align': 'center'}).appendTo(this.element);
-                    var selRt = $('<select>').addClass('text ui-corner-all ui-widget-content').appendTo(this._rt_select_dialog);
-                    window.hWin.HEURIST4.ui.createRectypeSelect(selRt.get(0), null, null, true);    
-                }
-                
-                var $dlg, btns = [
-                {text:window.hWin.HR('Add Record'),
-                    click: function(){  
-                                    
-                            that._currentEditRecTypeID = that._rt_select_dialog.find('select').val();
-                            that.options.new_record_params['rt'] = that._currentEditRecTypeID;
-                                                
-                            window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
-                                    function(response){  response.is_insert=true; that._initEditForm_step4(response); });
-                                            
-                            $dlg.dialog('close');
-                                                    
-                    } },
-                {text:window.hWin.HR('Cancel'),
-                                click:function(){
-                                      $dlg.dialog('close');
-                                      that.closeDialog();
-                                } } ];
-                       
-                $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
-                        window:  window.hWin, //opener is top most heurist window
-                        element:  this._rt_select_dialog[0],
-                        height: 120,
-                        width:  400,
-                        resizable: false,
-                        title: window.hWin.HR('Select record type for new record'),                         
-                        buttons: btns
-                    });
-                */       
-               
             }else{
                 
                 //default values for ownership and viewability from preferences
@@ -1412,18 +1379,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
                 }
                 
-                if(!(that.options.new_record_params.ro>=0)){
-                    that.options.new_record_params.ro = add_rec_prefs[1];    
+                if(!(that.options.new_record_params.OwnerUGrpID>=0)){
+                    that.options.new_record_params.OwnerUGrpID = add_rec_prefs[1];    
                 }
                 if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(add_rec_prefs[1]))) {
-                    that.options.new_record_params.ro = 0; //default to eveyone window.hWin.HAPI4.currentUser['ugr_ID'];    
+                    that.options.new_record_params.OwnerUGrpID = 0; //default to eveyone window.hWin.HAPI4.currentUser['ugr_ID'];    
                 }
-                if(window.hWin.HEURIST4.util.isempty(that.options.new_record_params.rv)){
-                    that.options.new_record_params.rv = add_rec_prefs[2];
+                if(window.hWin.HEURIST4.util.isempty(that.options.new_record_params.NonOwnerVisibility)){
+                    that.options.new_record_params.NonOwnerVisibility = add_rec_prefs[2];
                 }
                 
                 //this._currentEditRecTypeID is set in add button
-                window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                window.hWin.HAPI4.RecordMgr.save( that.options.new_record_params,
                         function(response){ response.is_insert=true; that._initEditForm_step4(response); });
             }
         }

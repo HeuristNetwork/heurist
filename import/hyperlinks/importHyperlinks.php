@@ -536,7 +536,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
     $out = recordSave($system, $record);  //see db_records.php    
     
     if ( @$out['status'] != HEURIST_OK ) {
-        //print "<div style='color:red'> Error: ".implode("; ",$out["message"])."</div>";
+        //print "<div style='color:red'> Error: ".$out["message"]."</div>";
         return 0;
     }else{
         

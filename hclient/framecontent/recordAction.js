@@ -32,7 +32,7 @@ IT USES
 /*
 
 1) record addition dialog
-2) set ownership
+2) set ownership    - changed to recordAccess.js
 3) record detail batch update
 4) record type change
 
@@ -95,9 +95,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     function(){
                         
                         var new_record_params = {};
-                        new_record_params['rt'] = add_rec_prefs[0];
-                        new_record_params['ro'] = add_rec_prefs[1];
-                        new_record_params['rv'] = add_rec_prefs[2];
+                        new_record_params['RecTypeID'] = add_rec_prefs[0];
+                        new_record_params['OwnerUGrpID'] = add_rec_prefs[1];
+                        new_record_params['NonOwnerVisibility'] = add_rec_prefs[2];
                         if(add_rec_prefs[3]) new_record_params['tag'] = add_rec_prefs[3];
                                             
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
@@ -593,9 +593,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }else if(action_type=='add_record'){
             
                 var new_record_params = {};
-                    new_record_params['rt'] = add_rec_prefs[0];
-                    new_record_params['ro'] = add_rec_prefs[1];
-                    new_record_params['rv'] = add_rec_prefs[2];
+                    new_record_params['RecTypeID'] = add_rec_prefs[0];
+                    new_record_params['OwnerUGrpID'] = add_rec_prefs[1];
+                    new_record_params['NonOwnerVisibility'] = add_rec_prefs[2];
                     if(add_rec_prefs[3]) new_record_params['tag'] = add_rec_prefs[3];
             
                 window.close(new_record_params);

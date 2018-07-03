@@ -151,7 +151,7 @@ public static function getDetailTypeLocalID($dtyConceptID) {
 * @uses      getLocalID()
 */
 public static function getRecTypeLocalID($rtyConceptID) {
-    return getLocalID($rtyConceptID, "defRecTypes", "rty_");
+    return self::getLocalID($rtyConceptID, "defRecTypes", "rty_");
 }
 /**
 * return local ontology id for a ontologys concept ID

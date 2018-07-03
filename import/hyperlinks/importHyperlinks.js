@@ -151,7 +151,7 @@ function lookupTitle(button) {
 	document.forms['mainform'].elements['titlegrabber_lock'].value = buttonNum;
 	button.disabled = true;
 	titleElt.disabled = true;
-
+    
 	var baseurl = window.hWin.HAPI4.baseURL+'import/hyperlinks/getTitleFromURL.php';//'?num='+buttonNum+'&url='+escape(urlElt.value);
     
     window.hWin.HEURIST4.util.sendRequest(baseurl, 
@@ -160,7 +160,7 @@ function lookupTitle(button) {
              num:buttonNum},
             null, 
     function(response){
-        if(response.status==window.hWin.ResponseStatus.HEURIST_OK){
+        if(response.status==window.hWin.ResponseStatus.OK){
             
                     response = response.data;
                     if(!window.hWin.HEURIST4.util.isnull(response)){
