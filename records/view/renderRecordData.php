@@ -139,13 +139,16 @@ if(!$is_map_popup){
                 }
             }
             
+            
             //
             //
-            function printLTime(sdate){
+            //
+            function printLTime(sdate,ele){
                 var date = new Date(sdate+"+00:00");
-                document.write((''+date.getHours()).padStart(2, "0")
+                ele = document.getElementById(ele)
+                ele.innerHTML = (''+date.getHours()).padStart(2, "0")
                         +':'+(''+date.getMinutes()).padStart(2, "0")
-                        +':'+(''+date.getSeconds()).padStart(2, "0"));
+                        +':'+(''+date.getSeconds()).padStart(2, "0");
             }
             
             //
@@ -828,8 +831,8 @@ if($is_map_popup){
             $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']); //get form database in server time
             if($add_date){
                 $add_date = $add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
-                $add_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
-                            $add_date.'")</script> local)';
+                $add_date_local = ' (<span id="lt0"></span><script type="text/javascript">printLTime("'.  //output in js in local time
+                            $add_date.'", "lt0")</script> local)';
             }else{
                 $add_date = false;
             }
@@ -837,8 +840,8 @@ if($is_map_popup){
             $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']); //get form database in server time
             if($mod_date){
                 $mod_date = $mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
-                $mod_date_local = ' (<script type="text/javascript">printLTime("'.  //output in js in local time
-                            $mod_date.'")</script> local)';
+                $mod_date_local = ' (<span id="lt1"></span><script type="text/javascript">printLTime("'.  //output in js in local time
+                            $mod_date.'", "lt1")</script> local)';
             }else{
                 $mod_date = false;
             }

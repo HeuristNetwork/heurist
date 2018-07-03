@@ -2090,3 +2090,11 @@ function sane_link_opener(link) {
 function showPlayer(obj, id, url) {
 }
 
+// this function is required for printing local time form map popup info
+function printLTime(sdate, ele){
+    var date = new Date(sdate+"+00:00");
+    ele = document.getElementById(ele)
+    ele.innerHTML = (''+date.getHours()).padStart(2, "0")
+                        +':'+(''+date.getMinutes()).padStart(2, "0")
+                        +':'+(''+date.getSeconds()).padStart(2, "0");
+}
