@@ -921,9 +921,16 @@ window.hWin.HEURIST4.util = {
                     end = null;
                 }
                 
-                            // for VISJS timeline
+                            // for VISJS timeline - must be ISO string
                             function __forVis(dt){
                                 if(dt){
+                                    if(!dt.getMonth()){
+                                        dt.setMonth(1)
+                                    }
+                                    if(!dt.getDay()){
+                                        dt.setDay(1)
+                                    }
+                                    
                                     var res = dt.toString('yyyy-MM-ddTHH:mm:ssz');
                                     if(res.indexOf('-')==0){ //BCE
                                         res = res.substring(1);
@@ -939,34 +946,44 @@ window.hWin.HEURIST4.util = {
                 
                             try{
                                 var temporal;
-                                if($.type( start ) === "string"  && start.search(/VER=/)){
-                                    temporal = new Temporal(start);
-                                    if(temporal){
-                                        var dt = temporal.getTDate('PDB');  //probable begin
-                                        if(!dt) dt = temporal.getTDate('TPQ');
-                                        
-                                        if(dt){ //this is range - find end date
-                                            var dt2 = temporal.getTDate('PDE'); //probable end
-                                            if(!dt2) dt2 = temporal.getTDate('TAQ');
-                                            end = __forVis(dt2);
-                                        }else{
-                                            dt = temporal.getTDate('DAT');  //simple date
+                                if(start!="" && $.type( start ) === "string"){
+                                
+                                    if(start.search(/VER=/)!==-1){
+                                        temporal = new Temporal(start);
+                                        if(temporal){
+                                            var dt = temporal.getTDate('PDB');  //probable begin
+                                            if(!dt) dt = temporal.getTDate('TPQ');
+                                            
+                                            if(dt){ //this is range - find end date
+                                                var dt2 = temporal.getTDate('PDE'); //probable end
+                                                if(!dt2) dt2 = temporal.getTDate('TAQ');
+                                                end = __forVis(dt2);
+                                            }else{
+                                                dt = temporal.getTDate('DAT');  //simple date
+                                            }
+                                            
+                                            if(dt){
+                                                start = __forVis(dt);
+                                            }else{
+                                                return null;
+                                            }
                                         }
-                                        
-                                        if(dt){
-                                            start = __forVis(dt);
-                                        }else{
-                                            return null;
-                                        }
+                                    }else{
+                                        start = __forVis(new TDate(start));
                                     }
                                 }
-                                if(start!="" && $.type( end ) === "string"  && end.search(/VER=/)){
-                                    temporal = new Temporal(end);
-                                    if(temporal){
-                                        var dt = temporal.getTDate('PDE'); //probable end
-                                        if(!dt) dt = temporal.getTDate('TAQ');
-                                        if(!dt) dt = temporal.getTDate('DAT');
-                                        end = __forVis(dt);
+
+                                if(start!="" && $.type( end ) === "string") {
+                                    if(end.search(/VER=/)!==-1){
+                                        temporal = new Temporal(end);
+                                        if(temporal){
+                                            var dt = temporal.getTDate('PDE'); //probable end
+                                            if(!dt) dt = temporal.getTDate('TAQ');
+                                            if(!dt) dt = temporal.getTDate('DAT');
+                                            end = __forVis(dt);
+                                        }
+                                    }else{
+                                        end = __forVis(new TDate(end));
                                     }
                                 }
                             }catch(e){

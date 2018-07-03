@@ -183,8 +183,7 @@ function hRecordSet(initdata) {
                 }
             }
         }
-         
-         
+        
         var tot = 0;
         
         for(idx in records){
