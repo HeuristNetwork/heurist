@@ -61,7 +61,7 @@
         + "if(window.confirm('Only the URL and web page title can be extracted from https:// pages."
                 + "\\nAdditional information will need to be set manually."
                 + "\\n\\nClick OK to add a record for this page.')){"
-                    + "window.open(h+'records/add/addRecord.php?addref=1&db="+window.hWin.HAPI4.database
+                    + "window.open(h+'?fmt=edit&db="+window.hWin.HAPI4.database
                     + "&rec_rectype=2&rec_owner=1&rec_visibility=viewable&t='+e(d.title)+'&u='+e(location.href));"
         + "}"
     + "return;}"
@@ -75,7 +75,7 @@
         + "d.getElementsByTagName('head')[0].appendChild(s);"
     + "}"
     + "else{"
-    +   "w=open(h+'?fmt=edit&b=1&db="+window.hWin.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
+    +   "w=open(h+'?fmt=edit&db="+window.hWin.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
                 //+ "window.setTimeout('w.focus()',200);}"
     + "}})();"
             );

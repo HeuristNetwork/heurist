@@ -50,11 +50,15 @@
 
             if($action=="a" || $action=="add"){
 
-                $record = array();
-                $record['RecTypeID'] = @$_REQUEST['rt'];
-                $record['OwnerUGrpID'] = @$_REQUEST['ro'];
-                $record['NonOwnerVisibility'] =  @$_REQUEST['rv'];
-                $record['FlagTemporary'] = @$_REQUEST['temp'];
+                if(@$_REQUEST['rt']>0){ //old
+                    $record = array();
+                    $record['RecTypeID'] = @$_REQUEST['rt'];
+                    $record['OwnerUGrpID'] = @$_REQUEST['ro'];
+                    $record['NonOwnerVisibility'] =  @$_REQUEST['rv'];
+                    $record['FlagTemporary'] = @$_REQUEST['temp'];
+                }else{ //new
+                    $record = $_REQUEST;
+                }
 
                 $response = recordAdd($system, $record);
 

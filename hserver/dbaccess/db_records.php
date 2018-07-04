@@ -133,8 +133,8 @@
 
         $query = "INSERT INTO Records
         (rec_AddedByUGrpID, rec_RecTypeID, rec_OwnerUGrpID, rec_NonOwnerVisibility,"
-        ."rec_URL, rec_ScratchPad, rec_Added, rec_AddedByImport, rec_FlagTemporary) "
-        ."VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        ."rec_URL, rec_ScratchPad, rec_Added, rec_AddedByImport, rec_FlagTemporary, rec_Title) "
+        ."VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $mysqli->prepare($query);
 
@@ -147,8 +147,8 @@
         //DateTime('now')->format('Y-m-d H:i:s') is same as date('Y-m-d H:i:s')
         $data_add = date('Y-m-d H:i:s');
         
-        $stmt->bind_param('iiissssii', $currentUserId, $rectype, $ownerid, $access,
-            $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp);
+        $stmt->bind_param('iiissssiis', $currentUserId, $rectype, $ownerid, $access,
+            $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp, @$record['Title']);
         $stmt->execute();
         $newId = $stmt->insert_id;
         $syserror = $mysqli->error;
@@ -235,6 +235,7 @@
         }
         
         $rectype = intval(@$record['RecTypeID']);
+        $detailValues = null;
 
         if ($rectype && !dbs_GetRectypeByID($mysqli, $rectype))  {
             return $system->addError(HEURIST_INVALID_REQUEST, "Record type is wrong");
@@ -327,7 +328,7 @@
 
         //ADD DETAILS
         $addedByImport = ($modeImport?1:0);
-
+        
         $query = 'INSERT INTO recDetails '.
         '(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo) '.
         "VALUES ($recID, ?, ?, $addedByImport, ?, geomfromtext(?) )";
@@ -399,8 +400,9 @@
             return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
         }
 
-        $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['RecTitle']);
-
+        $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']);
+    
+        
         if(!$is_insert){
             removeReverseChildToParentPointer($system, $recID, $rectype);    
 

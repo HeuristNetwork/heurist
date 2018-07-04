@@ -1340,6 +1340,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             that.options.new_record_params['ID'] = -1;
             that.options.new_record_params['FlagTemporary'] = 1;
+            that.options.new_record_params['no_validation'] = 1;
+            
             
             if(!(that.options.new_record_params['RecTypeID']>0)){
                 
@@ -1362,8 +1364,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             that.options.new_record_params['OwnerUGrpID'] = context.OwnerUGrpID;
                             that.options.new_record_params['NonOwnerVisibility'] = context.NonOwnerVisibility;
                                                 
-                            window.hWin.HAPI4.RecordMgr.save( that.options.new_record_params,
-                                    function(response){  response.is_insert=true; that._initEditForm_step4(response); });
+                            window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                                    function(response){  
+                                            response.is_insert=true; 
+                                            //add details from new_record_params
+                                            //@todo
+                                            that._initEditForm_step4(response); });
                             
                         }else{
                              that.closeDialog();
@@ -1390,8 +1396,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
                 
                 //this._currentEditRecTypeID is set in add button
-                window.hWin.HAPI4.RecordMgr.save( that.options.new_record_params,
-                        function(response){ response.is_insert=true; that._initEditForm_step4(response); });
+                window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                        function(response){ 
+                            response.is_insert=true; 
+                            //add details from new_record_params
+                            //@todo
+                            that._initEditForm_step4(response); });
             }
         }
 

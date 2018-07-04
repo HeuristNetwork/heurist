@@ -175,7 +175,7 @@ render: function() {
 			button.type = "button";
 			button.value = "Bookmark Record";
 			button.onclick = function() {
-				Heurist.bookmark();
+				Heurist.doBookmark();
 			};
 		td.appendChild(button);
 
@@ -192,7 +192,7 @@ render: function() {
 		button = document.createElement("input");
 		button.type = "button";
 		button.value = "Bookmark as web page";
-		button.onclick = function() { Heurist.bookmark(); };
+		button.onclick = function() { Heurist.doBookmark(); };
 		td.appendChild(button);
 
         tr = t.appendChild(document.createElement("tr"));
@@ -213,7 +213,7 @@ render: function() {
         button.disabled = true;
         button.onclick = function() {
             var r = document.getElementById("rectype-select").value;
-            if (r) Heurist.bookmark(r);
+            if (r) Heurist.doBookmark(r);
         };
         td.appendChild(button);
 
@@ -354,7 +354,7 @@ findFavicon: function() {
 //
 //  main method - add new record with extracted from page values 
 //
-bookmark: function(rectype) {
+doBookmark: function(rectype) {
 	Heurist.close();
 	var version='20060713';
 	var findSelection = function(w) {
@@ -375,7 +375,7 @@ bookmark: function(rectype) {
 	}
 	var favicon = Heurist.findFavicon();
 
-	var w = open(Heurist.uriBase +'?fmt=edit&b=1&db='+Heurist.database
+	var w = open(Heurist.uriBase +'?fmt=edit&db='+Heurist.database
                 + '&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) 
 				+ '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) 
 				+ (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '')
