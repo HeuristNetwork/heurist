@@ -835,7 +835,8 @@ var TDate = function (strDate) {
                             return (format[0] === " " ? " " : "") + (_tzOffset ? "GMT" + _tzOffset : '');
                         case " z":
                         case "z":
-                            return (format[0] === " " ? " " : "") + (_tzOffset ? _tzOffset : "");
+                            return (format[0] === " " ? " " : "") 
+                                +(_tzOffset ? ( (_tzOffset.indexOf('-')==0?'':'+') + _tzOffset) : "");
                         default:
                             return "";
                     }

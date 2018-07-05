@@ -56,6 +56,8 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
     keepMinDate = null,
     keepMaxDate = null,
     keepMinMaxDate = true,
+    isApplyTimelineFilter = false,
+    _keepLastTimeLineRange = null,
 
     _onSelectEventListener,
 
@@ -302,7 +304,7 @@ if(_mapdata.limit_warning){
                 var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
 
                 var pnt_counts = 0; //in case MarkerClusterer we have to increase the delay
-                
+
                 dataset.loadItems(mapdata.options.items);
                 dataset.each(function(item){
                     item.opts.openInfoWindow = _onItemSelection;  //event listener on marker selection
@@ -451,6 +453,7 @@ if(_mapdata.limit_warning){
     
     
     // get unix timestamp from vis
+    // item - record id or timelime item, field - start|end
     function _getUnixTs(item, field, ds){
 
         var item_id = 0;
@@ -556,6 +559,66 @@ if(_mapdata.limit_warning){
                 });
     }
 
+    //
+    //    isApplyTimelineFilter _timelineApplyRangeOnMap
+    //
+    function _timelineApplyRangeOnMap(params){
+        
+        if(params==null){
+            params = _keepLastTimeLineRange;
+        }else{
+            _keepLastTimeLineRange = params;    
+        }
+        
+        if (!isApplyTimelineFilter) return;
+        
+        //console.log(params);
+        //console.log(new Date(params.start_stamp) + '  ' + new Date(params.end_stamp))
+        //loop by timeline datasets
+        
+        //if fit range
+        var items_visible = [], items_hidden=[];
+                 
+        
+        vis_timeline.itemsData.forEach(function (itemData) {
+                    
+            var start = _getUnixTs(itemData, 'start');
+            var end = 'end' in itemData ? _getUnixTs(itemData, 'end') :start;
+            //var start = itemData.start.valueOf();
+            //var end = 'end' in itemData ? itemData.end.valueOf() : itemData.start.valueOf();            
+            //start = (new Date(start)).getTime();
+            //end = (new Date(end)).getTime();
+            
+            //intersection
+            var res = false;
+            if(start == end){
+                res = (start>=params.start_stamp && start<=params.end_stamp);
+            }else{
+                res = (start==params.start_stamp) || 
+                    (start > params.start_stamp ? start <= params.end_stamp : params.start_stamp <= end);
+            }
+            
+            //find record among map items
+            if (res) {
+                items_visible.push(itemData.recID); // do not use id but item.id, id itself is stringified
+            } else {
+                items_hidden.push(itemData.recID);
+            }
+
+        });
+        
+        if(items_visible.length>0 || items_hidden.length>0)
+        tmap.each(function(dataset){
+                dataset.each(function(item){
+                    if(items_visible.indexOf( item.opts.recid )>=0){
+                        item.showPlacemark();
+                    }else if(items_hidden.indexOf( item.opts.recid )>=0){
+                        item.hidePlacemark();
+                    }
+                });
+            });
+            
+    }
 
     //called once on first timeline load
     // it inits buttons on timeline toolbar
@@ -659,6 +722,22 @@ if(_mapdata.limit_warning){
                             vis_timeline.redraw();    
                         }*/
                         
+                        var newval = $( this ).find('input[type="checkbox"][name="time-filter-map"]').is(':checked');
+                        
+                        if(isApplyTimelineFilter !== newval){
+                            isApplyTimelineFilter = newval;
+                            if(newval){
+                                _timelineApplyRangeOnMap( null );    
+                            }else{
+                                //reset all map elements to visible
+                                tmap.each(function(dataset){
+                                        dataset.each(function(item){
+                                                item.showPlacemark();
+                                        });
+                                    });
+                            }
+                        }
+                        
                          $( this ).dialog( "close" );
                     }},
                     {text:window.hWin.HR('Cancel'), click: function() {
@@ -669,11 +748,6 @@ if(_mapdata.limit_warning){
             
         }
         
-        function __timelineFilterMap(){
-            //vis_timeline
-        }
-        
-
         var toolbar = $("#timeline_toolbar").css({'font-size':'0.8em', zIndex:3});
 
         $("<button>").button({icons: {
@@ -907,6 +981,10 @@ if(_mapdata.limit_warning){
                         //31536000000 - year
             // Create a Timeline
             vis_timeline = new vis.Timeline(timeline_ele, null, options);
+            
+            vis_timeline.on('rangechanged', function(params){
+                    _timelineApplyRangeOnMap(params);  
+            });
             //on select listener
             vis_timeline.on('select', function(params){
                 selection = params.items;
@@ -933,7 +1011,7 @@ if(_mapdata.limit_warning){
                     });
 
                     $( document ).bubble( "option", "content", "" );
-                    _showSelection(true, true); //show selction on map
+                    _showSelection(true, true, null); //show selction on map
                     if(_onSelectEventListener)_onSelectEventListener.call(that, selection); //trigger global selection event
                 }
             });
@@ -1171,12 +1249,18 @@ console.log('tileloaded 2');
                 map: tmap.getNativeMap()
             });
 
+            
+            function __clearCurrentShape(){
+                if (!window.hWin.HEURIST4.util.isnull(lastSelectionShape)) {
+                    lastSelectionShape.setMap(null);
+                    lastSelectionShape = null;
+                }
+            }
+            
             google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {
 
                 //clear previous
-                if (lastSelectionShape != undefined) {
-                    lastSelectionShape.setMap(null);
-                }
+                __clearCurrentShape();
 
                 // cancel drawing mode
                 if (shift_draw == false) { drawingManager.setDrawingMode(null); }
@@ -1243,17 +1327,19 @@ console.log('tileloaded 2');
             });*/
 
             //clear rectangle on any click or drag on the map
+            // Clear the current overlay
+            google.maps.event.addListener(drawingManager, 'drawingmode_changed', function(){
+                __clearCurrentShape();
+            }); 
+            
             google.maps.event.addListener(map, 'mousedown', function () {
-                if (lastSelectionShape != undefined) {
-                    lastSelectionShape.setMap(null);
-                }
+                __clearCurrentShape();
             });
 
             google.maps.event.addListener(map, 'drag', function () {
-                if (lastSelectionShape != undefined) {
-                    lastSelectionShape.setMap(null);
-                }
+                __clearCurrentShape();
             });
+            
 
             //define custom tooltips
 
@@ -1295,6 +1381,7 @@ console.log('tileloaded 2');
         if(isRect){
             lastBounds = lastSelectionShape.getBounds();
         }
+        var selected_placemarks = [];
 
         var dataset = tmap.datasets.main;  //take main dataset
             dataset.each(function(item){ //loop trough all items
@@ -1314,11 +1401,24 @@ console.log('tileloaded 2');
                                 }
 
                             }else{
-                                var pos = item.getNativePlacemark().getPosition();
-                                if(isRect){
-                                    isOK = lastBounds.contains( pos );
-                                }else{
-                                    isOK = google.maps.geometry.poly.containsLocation(pos, lastSelectionShape);
+
+                                var placemarks = ($.isArray(item.placemark))?item.placemark:[item.placemark];
+                                for(var i=0;i<placemarks.length;i++){
+                                    //var pos = placemarks[i].getPosition();
+                                    //var pos = item.getNativePlacemark().getPosition();
+                                    var pnt = placemarks[i].location;
+                                    var pos = new google.maps.LatLng(pnt.lat, pnt.lon);
+                                    var isInShape = false;
+                                
+                                    if(isRect){
+                                        isInShape = lastBounds.contains( pos );
+                                    }else{
+                                        isInShape = google.maps.geometry.poly.containsLocation(pos, lastSelectionShape);
+                                    }
+                                    if(isInShape){
+                                        selected_placemarks.push( placemarks[i] );
+                                        isOK = true;
+                                    }
                                 }
 
                             }
@@ -1332,7 +1432,7 @@ console.log('tileloaded 2');
 
 
         //reset and highlight selection
-        _showSelection(true);
+        _showSelection(true, false, selected_placemarks); 
         //trigger selection - to highlight on other widgets
         if(_onSelectEventListener)_onSelectEventListener.call(that, selection);
     }
@@ -1340,50 +1440,70 @@ console.log('tileloaded 2');
     //
     // select items with the same coordinates  FOR MAIN DATASET AND POINTERS ONLY
     //
-    function _selectItemsWithSameCoords(main_item){
+    function _selectItemsWithSameCoords(main_item, selected_placemark){
 
-        selection = [];
+        var res = _getPlaceMarkFromItem( main_item, selected_placemark );
+        if(res.placemark_type=='marker'){
         
-        var pos = main_item.getNativePlacemark().getPosition();
-        var lat = pos.lat();
-        var lng = pos.lng();
+            selection = [];
+            
+            var selected_placemarks = [];
+            
+            //main_item.getNativePlacemark()   
+            /*var pos = res.placemark.getPosition();
+            var lat = pos.lat();
+            var lng = pos.lng();*/
+            var lat = res.placemark.location.lat;
+            var lng = res.placemark.location.lon;
 
-        var dataset = tmap.datasets.main;  //take main dataset
-            dataset.each(function(item){ //loop trough all items
-                        if(item.placemark){
-                            var isOK = false;
-                            if(!item.placemark.points){ //point
-                                var pos = item.getNativePlacemark().getPosition();
-                                if(pos.lat()==lat && pos.lng()==lng){
+            var dataset = tmap.datasets.main;  //take main dataset
+                dataset.each(function(item){ //loop trough all items
+                    if(item.placemark){
+                        
+                        var placemarks = ($.isArray(item.placemark))?item.placemark:[item.placemark];
+                        
+                        for(var i=0;i<placemarks.length;i++){
+                            if(!placemarks[i].points && placemarks[i] instanceof mxn.Marker){
+                                
+                                //var pos = placemarks[i].getPosition();
+                                var pos = placemarks[i].location;
+                                
+                                if(pos.lat==lat && pos.lon==lng){
                                     selection.push(item.opts.recid);
+                                    selected_placemarks.push(placemarks[i]);
                                 }
                             }
                         }
-            });
+                    }
+                });
 
-        //reset and highlight selection
-        _showSelection(true);
-        //trigger selection - to highlight on other widgets
-        if(_onSelectEventListener)_onSelectEventListener.call(that, selection);
+            //reset and highlight selection
+            _showSelection(true, false, selected_placemarks);
+            //trigger selection - to highlight on other widgets
+            if(_onSelectEventListener)_onSelectEventListener.call(that, selection);
+        
+        }
     }
 
     //
-    // Add clicked marker to array of selected
+    // Add clicked marker to array of selected - invoked from timemap
     //
     // (timemap)item.opts.openInfoWindow -> _onItemSelection  -> _showSelection (highlight marker) -> _showPopupInfo
     // this - selected item
     //
-    function _onItemSelection(  ){
+    function _onItemSelection( selected_placemark ){
         //that - hMapping
         //this - item (map item)
+        //placemark_selected that was cliked - item may have several placemarks
         
         if(!this.placemark.points && this.dataset.id=='main'){
         
-            _selectItemsWithSameCoords(this);
+            _selectItemsWithSameCoords( this, selected_placemark );
         }else{
 
             selection = [this.opts.recid];
-            _showSelection(true);
+            _showSelection(true, false, [selected_placemark]); //highlight marker
+            
             //trigger global selection event - to highlight on other widgets
             if(_onSelectEventListener) _onSelectEventListener.call(that, selection);
             //TimeMapItem.openInfoWindowBasic.call(this);
@@ -1397,7 +1517,7 @@ console.log('tileloaded 2');
     //
     // isreset - true - remove previous selection
     //
-    function _showSelection( isreset, fromtimeline ){
+    function _showSelection( isreset, fromtimeline, selected_placemarks ){
 
             //select items on timeline
             if(!fromtimeline && vis_timeline){
@@ -1420,21 +1540,35 @@ console.log('tileloaded 2');
 
                 var lastRecID = selection[selection.length-1];
                 var lastSelectedItem = null;
-
-                tmap.each(function(dataset){
-                    dataset.each(function(item){ //loop trough all items
-
-                        if(lastRecID==item.opts.recid){
-                            lastSelectedItem = item;
-                            return false;
+                var selected_placemark = null;
+                
+                if($.isArray(selected_placemarks) && selected_placemarks.length>0){
+                    $(selected_placemarks).each( function(i, pm){
+                        if (pm.item.opts.recid == lastRecID){
+                                lastSelectedItem = pm.item;
+                                selected_placemark = pm;
+                                return false;
                         }
                     });
-                    if(lastSelectedItem != null) return false;
-                });
+                }else{
+
+                    tmap.each(function(dataset){
+                        dataset.each(function(item){ //loop trough all items
+
+                            if(lastRecID==item.opts.recid){
+                                lastSelectedItem = item;
+                                return false;
+                            }
+                        });
+                        if(lastSelectedItem != null) return false; //exit from "each"
+                    });
+                
+                }
 
                 //find selected item in the dataset
-                if(lastSelectedItem)
-                    _showPopupInfo.call(lastSelectedItem);
+                if(lastSelectedItem){
+                    _showPopupInfo.call(lastSelectedItem, selected_placemark);
+                }
                     
             }else if(!fromtimeline){
                 
@@ -1617,43 +1751,63 @@ console.log('tileloaded 2');
             //lastSelectedItem.openInfoWindow();
         }
     }
+    
+    //
+    //
+    //
+    function _getPlaceMarkFromItem( item, selected_placemark ){
+    
+            var placemark, placemark_type;
+        
+            if( selected_placemark ){
+                placemark = selected_placemark;
+            }else {
+                var placemarks = ($.isArray(item.placemark))?item.placemark:[item.placemark];
+                
+                for(var i=0;i<placemarks.length;i++){
+                    if(placemarks[i] instanceof mxn.Marker){
+                        placemark = placemarks[i];
+                        placemark_type = "marker";
+                        break;
+                    }
+                }
+                if(!placemark){
+                    placemark = placemarks[0];
+                }
+            }
+            
+            if(placemark instanceof mxn.Marker){
+                placemark_type = "marker";
+            }else{
+                placemark_type = item.getType();
+                //placemark_type = "object";    
+            }
+            /*}else{
+                placemark = item.placemark;
+                placemark_type = item.getType();
+            }*/                
+        
+        
+        return {placemark:placemark, placemark_type:placemark_type};
+    }
 
     //
     //  item.opts.openInfoWindow -> _onItemSelection  -> _showSelection -> _showPopupInfo
     //
-    function _showPopupInfo(){
+    function _showPopupInfo( selected_placemark ){
 
             //close others bubbles
             $( document ).bubble( "closeAll" );
-
 
             var item = this,
                 html = item.getInfoHtml(),
                 ds = item.dataset,
                 placemark, placemark_type,
                 show_bubble_on_map = false;
-                                                              //text-align:right;
-            if($.isArray(item.placemark)){
-                for(var i=0;i<item.placemark.length;i++){
-                    if(item.placemark[i] instanceof mxn.Marker){
-                        placemark = item.placemark[i];
-                        placemark_type = "marker";
-                        break;
-                    }
-                }
-                if(!placemark){
-                    placemark = item.placemark[0];
-                    if(placemark instanceof mxn.Marker){
-                        placemark_type = "marker";
-                    }else{
-                        placemark_type = "object";    
-                    }
-                    
-                }
-            }else{
-                placemark = item.placemark;
-                placemark_type = item.getType();
-            }                
+                
+            var res = _getPlaceMarkFromItem( item,  selected_placemark );
+            placemark = res.placemark;
+            placemark_type = res.placemark_type;
                                                               
                                                               
             show_bubble_on_map = (placemark_type != "" && placemark.api!=null);
