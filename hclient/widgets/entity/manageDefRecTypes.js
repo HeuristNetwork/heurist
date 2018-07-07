@@ -1,5 +1,5 @@
 /**
-* manageDefRecTypes.js - main widget to manage defRecTypes
+* manageSysUsers.js - main widget to manage sysUGrps users
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -19,216 +19,313 @@
 
 
 $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
-    
-    // the widget's constructor
-    _create: function() {
-        
-        this._super();
+   
+    _entityName:'defRecTypes',
 
-        this._entityTitle = 'Record Type',
-        this._entityTitlePlural = 'Record Types',
-        this._empty_remark = 'Please use the search field above to locate relevant record type (partial string match on title)',
-        
-        this._default_sel_actions = [
-                          {key:'import_fromdb', title:'Import from DB'},
-                          {key:'import_template', title:'Import from Template'},
-                          {key:'edit', title:'Edit', icon:'ui-icon-pencil'},
-                          {key:'delete', title:'Delete', icon:'ui-icon-circle-close', hint:'Click to remove record type'},
-                          {key:'merge', title:'Merge'},
-                          {key:'duplicate', title:'Duplicate', icon:'ui-icon-copy', hint:'Duplicate record type'},
-                          {key:'structure', title:'Structure', icon:'ui-icon-file-txt', hint:'Edit structure (add/remove fields)'},
-                          {key:'avatar', title:'Change Icon/Thumbnail'}];
-                          
-        this._default_btn_actions = [{key:'add', title:'New Record Type'}];
-        
-    }, //end _create
-    
-    // Any time the widget is called with no arguments or with only an option hash, 
-    // the widget is initialized; this includes when the widget is created.
+    //
+    //
+    //    
     _init: function() {
         
-        this._super();
+        this.options.layout_mode = 'short';
+        this.options.use_cache = false;
+        //this.options.edit_mode = 'popup';
+        
+        //this.options.select_return_mode = 'recordset';
+        this.options.edit_need_load_fullrecord = true;
+        this.options.edit_height = 640;
+        this.options.height = 640;
 
-        // init search header
-        this.searchForm.searchDefRecTypes(this.options);
-            
-        this._on( this.searchForm, {
-                "searchdefrectypesonresult": this.updateRecordList
-                });
-        this.recordList.css('top','4.5em');
-                
+        if(this.options.edit_mode=='editonly'){
+            this.options.edit_mode = 'editonly';
+            this.options.select_mode = 'manager';
+            this.options.layout_mode = 'editonly';
+            this.options.width = 790;
+            //this.options.height = 640;
+        }else
+        //for selection mode set some options
+        if(this.options.select_mode!='manager'){
+            this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                    
+            //this.options.edit_mode = 'none'
+        }
+    
+        this._super();
     },
     
-    //----------------------
+    //  
+    // invoked from _init after load entity config    
     //
-    // NOT USED yet
-    //    
-    _recordListHeaderRenderer:function(){
+    _initControls: function() {
         
-        function fld_head(content, sclass, col_width){ //only for list
-            var swidth = '';
-            if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = 'width:'+col_width;
-            }
-            return '<div class="'+sclass+'" style="display:inline-block;border-right:1px solid;'+swidth+'">'+content+'</div>';
+        if(!this._super()){
+            return false;
         }
         
-        var showActionInList = (window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)); 
+        if(this.options.edit_mode=='editonly'){
+            this._initEditorOnly();
+            return;
+        }
         
-        var header = 
-              ((this.options.select_mode!='select_multi')?'':
-              fld_head('<input type="checkbox" style="vertical-align:-3px"/>','','width:3em'))
-            + fld_head('&nbsp;','','5em')
-            + fld_head('ID','','2em')
-            + (showActionInList?this._rendererActionButton('edit', true):'')
-            + fld_head('Name','','14em')
-            + fld_head('Description','','25em');
+        //update dialog title
+        if(this.options.isdialog){ // &&  !this.options.title
+            var title = null;
+            var usr_ID = 0;
             
-        if(showActionInList){
-            header = header 
-                + fld_head('Actions','','15em')
-                /*+ fld_head('Status','','3em')
-                + this._rendererActionButton('duplicate', true)
-                + this._rendererActionButton('structure', true)
-                + fld_head('Group','','4.6em')
-                + this._rendererActionButton('delete', true);*/
-        }            
             
-        header = header 
-            +'</div>';
+            if(this.options.title){
+                title = this.options.title;
+            }else
+            if(this.options.select_mode=='select_single'){
+               title = 'Select Record Type'; 
+            }else
+            if(this.options.select_mode=='select_multi'){
+               title = 'Select Record Types'; 
+              
+              if(this.options.rtg_ID<0){ 
+                    usr_ID = Math.abs(this.options.rtg_ID);
+                    title += ' to add to group '+window.hWin.HEURIST4.rectypes.groups[Math.abs(this.options.rtg_ID)].name;
+              }
+               
+            }else
+            if(this.options.rtg_ID>0){
+                usr_ID = this.options.rtg_ID;
+                title = 'Manage Record types of group '+window.hWin.HEURIST4.rectypes.groups[this.options.rtg_ID].name;
+            }else{
+                title = 'Manage Record Types';    
+            }
+            
+            this._as_dialog.dialog('option','title', title);    
+        }
         
-        return header;
+        // init search header
+        this.searchForm.searchDefRecTypes(this.options);
+        
+        var iheight = 7;
+        if(this.options.edit_mode=='inline'){            
+            iheight = iheight + 6;
+        }
+        this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '730px'});
+        this.recordList.css({'top':iheight+0.5+'em', 'min-width': '730px'});
+        //init viewer 
+        var that = this;
+        
+        if(this.options.select_mode=='manager'){
+            this.recordList.parent().css({'border-right':'lightgray 1px solid'});
+            
+            
+            this.recordList.resultList('option','rendererHeader',
+                    function(){
+                    var s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
+                                +'<div style="width:13em">Name</div>'
+                                +'<div style="width:20em;border:none;">Description</div>';
+                        
+                        if (window.hWin.HAPI4.is_admin()){
+                            s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                        }
+                        
+                        return s;
+                    }
+                );
+            //this.recordList.resultList('applyViewMode');
+        }
+
+        this._on( this.searchForm, {
+                "searchdefrectypesonresult": this.updateRecordList,
+                "searchdefrectypesonadd": function() { this.addEditRecord(-1); }
+                });
+
+
+        
+        return true;
     },
     
+    _initEditorOnly: function(){
+        
+            //load user for given record id
+            if(this.options.rty_ID>0){
+                    var request = {};
+                    request['rty_ID']  = this.options.rty_ID;
+                    request['a']          = 'search'; //action
+                    request['entity']     = this.options.entity.entityName;
+                    request['details']    = 'full';
+                    request['request_id'] = window.hWin.HEURIST4.util.random();
+                    
+                    //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
+
+                    var that = this;                                                
+                    
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                        function(response){
+                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                var recset = new hRecordSet(response.data);
+                                if(recset.length()>0){
+                                    that.updateRecordList(null, {recordset:recset});
+                                    that.addEditRecord( recset.getOrder()[0] );
+                                }
+                                else {
+                                    //nothing found - add new bookmark
+                                    that.addEditRecord(-1);
+                                }                            
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                                that.closeEditDialog();
+                            }
+                        });        
+                        
+            }else{
+                this.addEditRecord(-1);
+            }
+    }
+
+    //----------------------
     //
     //
     //
-    _recordListItemRenderer:function(recordset, record){
+    , _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
-            return recordset.fld(record, fldname);
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
         function fld2(fldname, col_width){
             swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 swidth = ' style="width:'+col_width+'"';
             }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
-        function fld3(fldname, col_width){ //only for list
-            var s = fld2(fldname, col_width).replace('class="item"', 'class="item inlist"');
-            return s;
-        }
-        
-        var showActionInList = (window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)); 
-        //&& (this.options.select_mode=='manager')
         
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
         
         var recID   = fld('rty_ID');
-        var recIcon = window.hWin.HAPI4.iconBaseURL + recID + '.png';
         
-        var recTitle = fld2('rty_ID','4em')
-                + (showActionInList?this._rendererActionButton('edit'):'')
-                + fld2('rty_Name','14em')
-                + '<div class="item inlist" style="width:25em;">'+fld('rty_Description')+'</div>';
-                //fld3('rty_Description','25em');
-
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + recID + '.png&quot;);"></div>';
-
+        //var recTitle = fld2('ugr_ID','3em')+fld2('ugr_Name','10em')+fld('ugr_FirstName')+' '+fld('ugr_LastName');
+        var recTitleHint = fld('ugr_Organisation');
         
+        var recTitle = fld2('rty_ID','3.5em')
+                    + fld2('rty_Name','15em')
+                    + fld2('rty_Description','45em');
+        
+        var rtIcon = window.hWin.HAPI4.iconBaseURL+recID;// window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
+        //var rtThumb = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'thumb');
+        var recThumb = window.hWin.HAPI4.iconBaseURL+'thumb/th_'+recID; //window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', 2, this.options.database);
+        
+        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);">'
+        +'</div>';
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="min-height: 2.6em;">'  
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordIcons">'
+        + '<div class="recordIcons" style="min-width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-        +     '" style="margin-left:15px;background-image: url(&quot;'+recIcon+'&quot;);">'   //class="rt-icon" 
+        +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
         + '</div>'
-        + '<div class="recordTitle">'
-        +     recTitle;
-        //@todo editors - show in list, duplicate, structure, group, counter
+        + '<div class="recordTitle recordTitle2" style="right:60px">'
+        +     recTitle
+        + '</div>';
         
-        //actions
-        if(showActionInList){
-            
-            //special case for show in list checkbox
-            html = html 
-            +  '<div title="Make type visible in user accessible lists" class="item inlist logged-in-only"'
-            +  ' style="width:3em;padding-top:5px" role="button" aria-disabled="false" data-key="show-in-list">'
-            +     '<input type="checkbox" checked="'+(fld('rty_ShowInLists')==0?'':'checked')+'" />'
-            + '</div>';
-            
-            var group_selectoptions = this.searchForm.find('#sel_group').html();
-                        
-            html = html 
-                + this._rendererActionButton('duplicate')
-                + this._rendererActionButton('structure')
-                //group selector
-            +  '<div title="Change group" class="item inlist logged-in-only"'
-            +  ' style="width:8em;padding-top:3px;" data-key2="group-change">'
-            +     '<select style="max-width:7.5em;font-size:1em" data-grpid="'+fld('rty_RecTypeGroupID')
-            + '">'+group_selectoptions+'</select>'
-            +  '</div>'
-                + this._rendererActionButton('delete');
+        // add edit/remove action buttons
+        if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+        
+                
+               html = html 
+                + '<div class="rec_actions" style="top:4px;width:60px;">'
+                    + '<div title="Click to edit record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                    + '</div>&nbsp;'
+                    + '<div title="Click to delete record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                    + '</div></div>';
         }
         
-        html = html + '</div>'; //close recordTitle
 
-        html = html 
-            +  ''   //counter
-            + '</div>'; //close recordDiv
-        
-        /* 
-            html = html 
-        +'<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-        + '</div>&nbsp;&nbsp;'
-        + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-        + '</div>'
-        + '</div>';*/
-
+        html = html + '</div>';
 
         return html;
         
     },
-
-    //
-    //
-    //
+    
+    //overwritten    
     _recordListGetFullData:function(arr_ids, pageno, callback){
-        
+
         var request = {
                 'a'          : 'search',
-                'entity'     : 'defRecTypes',
+                'entity'     : this.options.entity.entityName,
                 'details'    : 'list',
-                'request_id' : pageno,
-                'rty_ID'     : arr_ids,
-                //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
+                'pageno'     : pageno,
+                'db'         : this.options.database  
+                
         };
+        var rty_RecTypeGroupID = this.searchForm.find('#input_search_group').val();
+        if(rty_RecTypeGroupID>0){
+            request['rty_RecTypeGroupID'] = rty_RecTypeGroupID;
+        }
         
+        
+        request[this.options.entity.keyField] = arr_ids;
         window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
-    }
+    },
+    
+    
+    //-----
+    // adding group ID value for new user
+    //
+    _afterInitEditForm: function(){
+
+        this._super();
+        
+        var rty_RecTypeGroupID = this.searchForm.find('#input_search_group').val();
+        if(rty_RecTypeGroupID>0 && !this._currentEditRecordset){ //insert       
+
+            var ele = this._editing.getFieldByName('rty_RecTypeGroupID');
+            ele.editing_input('setValue', rty_RecTypeGroupID);
+            //hide save button
+            if(this._toolbar){
+                this._toolbar.find('#btnRecSave').css('visibility', 'visible');
+            }
+        }else
+        //hide after edit init btnRecRemove for status locked 
+        if(false){ //@todo
+            var ele = this._toolbar;
+            ele.find('#btnRecRemove').hide();
+        }
+
+    },    
+    
+    // update list after save (refresh)
+    //
+    _afterSaveEventHandler: function( recID, fieldvalues ){
+
+        // close on addition of new record in select_single mode    
+        if(this._currentEditID<0 && this.options.select_mode=='select_single'){
+            
+                this._selection = new hRecordSet();
+                //{fields:{}, order:[recID], records:[fieldvalues]});
+                this._selection.addRecord(recID, fieldvalues);
+                this._selectAndClose();
+                return;    
+                    
+        }
+        
+        this._super( recID, fieldvalues );
+        this.getRecordSet().setRecord(recID, fieldvalues);
+        
+        if(this.options.edit_mode == 'editonly'){
+            this.closeDialog(true); //force to avoid warning
+        }else{
+            this.recordList.resultList('refreshPage');  
+        }
+    },
+    
+    _deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this._super(); 
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this record type? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
+    },
     
 });
-
-//
-// Show as dialog
-//
-function showManageDefRecTypes( options ){
-
-    var manage_dlg = $('#heurist-records-dialog');  //@todo - unique ID
-
-    if(manage_dlg.length<1){
-        
-        options.isdialog = true;
-
-        manage_dlg = $('<div id="heurist-records-dialog">')
-        .appendTo( $('body') )
-        .manageDefRecTypes( options );
-    }
-
-    manage_dlg.manageDefRecTypes
-    ( 'popupDialog' );
-}

@@ -996,7 +996,7 @@ function mysql__insertupdate($database, $table_name, $table_prefix, $record){
     }else{
         $query = "UPDATE $table_name set ";
     }
- 
+
     $params = array();
     $params[0] = '';
 

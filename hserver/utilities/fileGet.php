@@ -137,7 +137,7 @@ if($filename){ //download from scratch
         $rec_id = @$_REQUEST['id'];  
         
         $path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
-                
+        
         if($entity_name=='sysDatabases' && $rec_id){
             
             $db_name = $rec_id;
