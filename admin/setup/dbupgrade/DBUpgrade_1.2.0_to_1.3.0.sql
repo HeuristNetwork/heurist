@@ -64,8 +64,13 @@
     ADD  `ugr_UsrPreferences` TEXT NULL
     COMMENT 'JSon array containing user profile available across machines. If blank, profile is specific to local session';
 
+-- List of record type considered as Places
+
+    ALTER TABLE `sysIdentification` 
+    ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' 
+    COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places';
     
-    -- Addition of 
+-- Addition of 
     CREATE TABLE usrAnalyses (
       uan_ID mediumint(8) unsigned NOT NULL auto_increment 
     COMMENT 'Analysis or derivation rule ID, primary key',

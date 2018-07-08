@@ -442,7 +442,7 @@ function RectypeManager() {
                 { key: "id", label: "n=", sortable:false, minWidth:30, maxAutoWidth:30, width:30, className:'center', 
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var id = oRecord.getData("id");
-                        elLiner.innerHTML = (_rt_counts[id]>0)?_rt_counts[id]:'';
+                        elLiner.innerHTML = (_rt_counts && _rt_counts[id]>0)?_rt_counts[id]:'';
                     }
                 },
                 

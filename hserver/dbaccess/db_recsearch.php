@@ -719,9 +719,20 @@
             $system->defineConstant('DT_END_DATE');
             $system->defineConstant('DT_GEO_OBJECT');
             $system->defineConstant('DT_DATE');
-            $is_place_defined = $system->defineConstant('RT_PLACE') ||
-                                $system->defineConstant('RT_EN_PLACE');
-             
+            
+            $rectypes_as_place = $system->get_system('sys_TreatAsPlaceRefForMapping');
+            if($rectypes_as_place){
+                $rectypes_as_place = prepareIds($rectypes_as_place);
+            }else {
+                $rectypes_as_place = array();
+            }
+            //Place always in this array
+            if($system->defineConstant('RT_PLACE')){
+                if(!in_array(RT_PLACE, $rectypes_as_place)){
+                    array_push($rectypes_as_place, RT_PLACE);
+                }
+            }
+            
              //get date,year and geo fields from structure
              $fieldtypes_ids = dbs_GetDetailTypes($system, array('date','year','geo'), 3);
              if($fieldtypes_ids==null || count($fieldtypes_ids)==0){
@@ -734,7 +745,8 @@
 
              //find places linked to result records for geo field
              if(@$params['suppres_derivemaplocation']!=1){ //for producation sites - such as boro or DH
-                $find_places_for_geo = $is_place_defined && ($system->user_GetPreference('deriveMapLocation', 1)==1);
+                $find_places_for_geo = count($rectypes_as_place)>0 && 
+                                        ($system->user_GetPreference('deriveMapLocation', 1)==1);
              }
              
         }else if(  !in_array(@$params['detail'], array('header','timemap','detail','structure')) ){ //list of specific detailtypes
@@ -1306,21 +1318,13 @@ $loop_cnt=1;
                                 WHERE (dtl_RecID in (' . join(',', $chunk_rec_ids) . ') '
                                 .' AND dtl_DetailTypeID in ('.$fieldtypes_ids.'))';
                                 
-                                $rt_places = array();
-                                if(defined('RT_PLACE')){
-                                    array_push($rt_places, RT_PLACE);    
-                                }
-                                if(defined('RT_EN_PLACE')){
-                                    array_push($rt_places, RT_EN_PLACE);    
-                                }
-                                
                                 
                                 if($find_places_for_geo){
                                     $detail_query = $detail_query . 'UNION  '
                                     .'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,AsWKT(dtl_Geo), 0, 0, 0 '
                                     .' FROM recDetails, recLinks, Records '
                                     .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
-                                    .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID in ('. join(',', $rt_places)
+                                    .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID in ('. join(',', $rectypes_as_place)
                                     .') AND rl_SourceID in (' . join(',', $chunk_rec_ids) . ')';
                                 }
                                 

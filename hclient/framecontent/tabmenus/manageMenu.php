@@ -58,14 +58,20 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         title="Create a new database on the current server - essential structure elements are populated automatically">
                         New</a>
                     </li>
-                    
+
+                    <li><a href="#" id="menulink-database-properties"
+                        data-nologin="1" data-logaction="dbProperties"
+                        title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
+                        Properties</a>
+                    </li>
+<!--                    
                     <li class="admin-only">
                         <a href="admin/setup/dbproperties/editSysIdentificationAll.php" name="auto-popup" class="portrait h3link"
                             onclick= "{return false;}" data-logaction="dbProperties"
                             title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
                             Properties</a>
                     </li>
-                    
+-->                    
                     <li class="admin-only">
                         <a href="admin/setup/dbproperties/registerDB.php" name="auto-popup" class="portrait h3link"
                             onclick= "{return false;}" data-logaction="dbRegister"
