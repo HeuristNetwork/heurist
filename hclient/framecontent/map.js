@@ -676,7 +676,7 @@ if(_mapdata.limit_warning){
             _timelineZoomToRange({min:vis_timeline_range.max.getTime()-interval+delta, max:vis_timeline_range.max.getTime()+delta, nofit:true});
         }
 
-
+        //not used
         function __timelineShowLabels(){
             if($("#btn_timeline_labels").is(':checked')){
                 $(".vis-item-content").find("span").show();
@@ -880,8 +880,8 @@ if(_mapdata.limit_warning){
 
     }
     
-    //
-    //
+    //  mode 
+    // 0 - full, 1 - truncate, 2- fixed width, 3 - hide
     //
     function _applyTimeLineLabelsSettings(mode, labelpos){
         
@@ -1042,11 +1042,13 @@ if(_mapdata.limit_warning){
 //        window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 //        //vis_timeline.fit(); //short way
 
+/*
         if(!is_stack){
             $(timeline_ele).find(".vis-item-content").find("span").hide();
             //$.find('#vis_timeline_toolbar li').removeClass('ui-icon-check');
             //$.find('#vis_timeline_toolbar li #tlm4').addClass('ui-icon-check');
         }
+*/        
         timeline_content.show();
 
         }

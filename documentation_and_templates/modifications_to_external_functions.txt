@@ -72,6 +72,10 @@ external/php/phpZotero.php (114-121) support proxy settings
 
         Including the reference to base abstract class file in code  explicitly. Since v5.4 php autoloader 
         can't find file if class name is not the same as file name. (for example Geometry and Geometry.class.php)
+
+2018-07-05 ext/timemap.js/2.0.1/src/timemap2.js
+        send selected placemarks as parameter to open info popup
+
             
 -----------------------------------------------------------------------------------------------------------------------------------
 
