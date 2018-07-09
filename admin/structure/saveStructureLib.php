@@ -238,6 +238,24 @@
         }
         
         
+        $query = 'SELECT sys_TreatAsPlaceRefForMapping FROM sysIdentification where 1';
+        $res = $mysqli->query($query);
+        if ($mysqli->error) {
+            return handleError("SQL error in deleteRecType retreiving sys_TreatAsPlaceRefForMapping", $query);
+        }else{
+            $places = $res->fetch_row();
+            if(@$places[0] && $places[0]!=''){
+                $places = explode(',', $places[0]);
+            
+                if (in_array($rtyID, $palces)) {
+                    $ret['error'] = "Error: You cannot delete record type $rtyID. "
+                                ." It is referenced as 'treat as places for mapping' in database properties";
+                    return $ret;
+                }
+            }
+        }
+
+        
 		$query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=0 limit 1";
 		$res = $mysqli->query($query);
         $error = $mysqli->error;
