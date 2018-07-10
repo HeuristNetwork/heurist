@@ -33,8 +33,6 @@ class DbSysImportFiles extends DbEntityBase
     public function init(){
         
         $mysqli = $this->system->get_mysqli();
-    
-
 
     $query = "CREATE TABLE IF NOT EXISTS `sysImportFiles` (
     `sif_ID` int(11) unsigned NOT NULL auto_increment
@@ -146,9 +144,10 @@ class DbSysImportFiles extends DbEntityBase
         }
 
         $is_ids_only = (count($this->data['details'])==1);
+        $from_table = $this->config['tableName'];
             
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM sysImportFiles';
+        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM '.$from_table;
 
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
@@ -157,7 +156,7 @@ class DbSysImportFiles extends DbEntityBase
                         .$this->searchMgr->getLimit();
         
 
-        $res = $this->searchMgr->execute($query, $is_ids_only, 'sysImportFiles');
+        $res = $this->searchMgr->execute($query, $is_ids_only, $from_table);
         return $res;
 
     }

@@ -1581,7 +1581,6 @@ $.widget( "heurist.editing_input", {
                         var popup_options = {
                             isdialog: true,
                             select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
-                            
                             select_return_mode:select_return_mode, //ids or recordset(for files)
                             filter_group_selected:null,
                             filter_groups: this.configMode.filter_group,
@@ -1649,6 +1648,16 @@ $.widget( "heurist.editing_input", {
                     
                                 popup_options.width = usrPreferences.width;
                                 popup_options.height = usrPreferences.height;
+                                var sels = this.newvalues[$(event.target).attr('id')];
+                                if(!sels && this.options.values && this.options.values[0]){
+                                     sels = this.options.values[0];
+                                } 
+                                if(!window.hWin.HEURIST4.util.isempty(sels)){
+                                    popup_options.selection_on_init = sels.split(',');
+                                } else {
+                                    popup_options.selection_on_init = null;    
+                                }                                                                                       
+                                
                                 
                                 //init dialog
                                 window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);

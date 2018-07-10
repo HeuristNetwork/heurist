@@ -101,7 +101,9 @@ $.widget( "heurist.manageEntity", {
 
         selectbutton_label: 'Select',  //label for select button
         
-        select_return_mode: 'ids', //ids or recordset
+        select_return_mode: 'ids', //ids or recordset                              
+        
+        selection_on_init:null, //ids to be selected on init
         
         selectOnSave:false, //edit/save of record triggers onselect and close dialog
         
@@ -603,7 +605,7 @@ $.widget( "heurist.manageEntity", {
     },
 
     //
-    // callback function to retrieve full record info (incase we use 2 steps search: ids then list per page)  
+    // callback function to retrieve full record info (in case we use 2 steps search: ids then list per page)  
     //
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
@@ -887,8 +889,11 @@ $.widget( "heurist.manageEntity", {
                 if(this._cachedRecordset){
                     value = this._cachedRecordset.getSubSetByIds(value);
                 }else{
-                    value = null;
+                    //var recset = this.recordList.resultList('getRecordSet', value);
+                    //value = recset.getSubSetByIds(value);
+                    value = null;               
                 }
+                //this.recordList.resultList('setSelected', value); //highlight
             }
             //setter
             this._selection = value;
@@ -914,8 +919,15 @@ $.widget( "heurist.manageEntity", {
         if (data){
             if(this.options.use_cache){
                 this._cachedRecordset = data.recordset;
+    
             }else if(this.options.list_mode=='default'){
                 this.recordList.resultList('updateResultSet', data.recordset, data.request);
+            }
+            
+            if(this.options.selection_on_init && this.options['select_mode']=='select_multi'){
+                this.recordList.resultList('setMultiSelction', this.options.selection_on_init);
+                //this.selectedRecords( this.options.selection_on_init );
+                this.options.selection_on_init = null;
             }
         }
     },

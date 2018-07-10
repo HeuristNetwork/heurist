@@ -683,7 +683,7 @@ error_log(print_r($_REQUEST, true));
     /**
     * Returns array of ID of all groups for current user plus current user ID
     */
-    public function get_user_group_ids(){
+    public function get_user_group_ids($level=null){
     
         $ugrID = $this->get_user_id();
 
@@ -692,8 +692,16 @@ error_log(print_r($_REQUEST, true));
             if(!is_array($groups)){
                 $groups = $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
             }
-
-            $groups = array_keys($groups);
+            if($level!=null){
+                foreach($this->current_User['ugr_Groups'] as $grpid=>$lvl){
+                    if($lvl==$level){
+                        $groups[] = $grpid;        
+                    }
+                }
+            }else{
+                $groups = array_keys($groups);    
+            }
+            
             
             //add user itself
             array_push($groups, intval($ugrID) );

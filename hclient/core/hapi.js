@@ -1113,7 +1113,8 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
         /**
-        *
+        *  @todo need to rewrite since it works with global currentRecordset
+        * 
         *   Returns subset of currentRecordset or array of its ids
         *   @param selection :
         *           all - returns all records of currentRecordset

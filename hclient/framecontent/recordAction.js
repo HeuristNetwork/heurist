@@ -429,6 +429,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 [{key:0, title:'Everyone (no restriction)'}, 
                  {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}]);
 
+        if(action_type!='add_record'){         
+             var ele = $('#sel_Access-viewable-group');
+             ele.empty().hide();
+             _createGroupSelectorElement('#sel_Access-viewable-group', '');    
+             ele.find('.input-cell').css({'display':'table-cell'});
+             ele.find('input').css('max-width','400px');
+        }
 
         if(val_owner!=null && val_owner>=0){
             fieldSelect.val(val_owner);
@@ -451,6 +458,16 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     fieldSelect.val(currentOwner);
                     $('#rb_Access-'+currentAccess).prop('checked', true);
                 }
+                
+                $('input[name="rb_Access"]').change(function(){
+                    
+                    if($('#rb_Access-viewable-group').prop('checked')){
+                        $('#sel_Access-viewable-group').show();
+                    }else{
+                        $('#sel_Access-viewable-group').hide();
+                    }
+                    
+                });
             }
         }
     }
@@ -503,7 +520,35 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
     }
 
+    //
+    //
+    //
+    function _createGroupSelectorElement(input_id, init_value){
+        
+        if(window.hWin.HEURIST4.util.isnull(init_value)) init_value = '';
 
+        var ed_options = {
+            recID: -1,
+            dtID: 'group_selector',
+            //rectypeID: rectypeID,
+            //rectypes: window.hWin.HEURIST4.rectypes,
+            values: init_value,
+            readonly: false,
+            showclear_button: false,
+            dtFields:{
+                dty_Type:"resource",
+                rst_DisplayName:'Select Groups:', rst_DisplayHelpText:'',
+                rst_FieldConfig: {entity:'sysGroups', csv:true}
+            }
+        };
+
+        $("<div>").attr('id','group_selector').editing_input(ed_options).appendTo($.find(input_id));
+        //$.find(input_id).editing_input(ed_options);
+    }
+
+    //
+    // 
+    //
     function _createInputElement(input_id, input_label, init_value){
 
         var $fieldset = $('#div_widget>fieldset');
@@ -683,7 +728,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 
                 var _data = {rec_ids: request['recIDs'],
                              wg_id  :$('#sel_Ownership').val(),
-                             vis : $('input[type="radio"][name="rb_Access"]:checked').val() };
+                             vis : $('input[type="radio"][name="rb_Access"]:checked').val()};
                 //that.executeAction( "set_wg_and_vis", _data );
                 window.close(_data);
             

@@ -1345,7 +1345,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         + window.hWin.HAPI4.database
                         + '&action=add_record&scope=popup';
 
-                window.hWin.HEURIST4.msg.showDialog(url, {height:500, width:700,
+                window.hWin.HEURIST4.msg.showDialog(url, {height:600, width:700,
                     padding: '0px',
                     //resizable:false,
                     title: window.hWin.HR('add_record'),
