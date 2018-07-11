@@ -368,6 +368,9 @@ if(_mapdata.limit_warning){
                         minLng = d - mapdata.min_zoom/2;
                     }
                 }
+                if(Math.abs(maxLng-minLng)<0.06 && Math.abs(maxLat-minLat)<0.06){
+                    forceZoom = true;  
+                }
                 
                 var southWest = new google.maps.LatLng(minLat, minLng);
                 var northEast = new google.maps.LatLng(maxLat, maxLng);
@@ -439,10 +442,18 @@ if(_mapdata.limit_warning){
         //var dataset = tmap.datasets[dataset_id];
         var mapdata = _getDataset(dataset_id);
         if(mapdata && mapdata.geoextent){
+
               //zoom to geo extent
-              
               var nativemap = tmap.getNativeMap();
-              nativemap.fitBounds(mapdata.geoextent);
+              
+              var ne = mapdata.geoextent.getNorthEast();
+              var sw = mapdata.geoextent.getSouthWest();
+              if( Math.abs(ne.lat()-sw.lat())<0.06 && Math.abs(ne.lng()-sw.lng())<0.06 ){
+                    nativemap.setCenter(mapdata.geoextent.getCenter()); 
+                    nativemap.setZoom(14);      
+              }else{
+                    nativemap.fitBounds(mapdata.geoextent);
+              }
         }
         
         //zoom to time extent
@@ -570,7 +581,7 @@ if(_mapdata.limit_warning){
             _keepLastTimeLineRange = params;    
         }
         
-        if (!isApplyTimelineFilter) return;
+        if (!isApplyTimelineFilter || !vis_timeline.itemsData || !params) return;
         
         //console.log(params);
         //console.log(new Date(params.start_stamp) + '  ' + new Date(params.end_stamp))
@@ -685,7 +696,6 @@ if(_mapdata.limit_warning){
             }
         }
         
-       
         function __timelineEditProperties(){
             
             var $dlg_edit_layer = $('#timeline-edit-dialog').dialog({
@@ -737,8 +747,10 @@ if(_mapdata.limit_warning){
                                     });
                             }
                         }
+                        window.hWin.HAPI4.save_pref('mapTimelineFilter', isApplyTimelineFilter?1:0);
+                        $('#lbl_timeline_filter').html('Time filter '+(isApplyTimelineFilter?'on':'off'));
                         
-                         $( this ).dialog( "close" );
+                        $( this ).dialog( "close" );
                     }},
                     {text:window.hWin.HR('Cancel'), click: function() {
                         $( this ).dialog( "close" );
@@ -785,6 +797,8 @@ if(_mapdata.limit_warning){
             },text:false, label:window.hWin.HR("Timeline options")})
             .click(function(){ __timelineEditProperties(); })
             .appendTo(toolbar);
+        $("<label>").attr('id','lbl_timeline_filter')
+            .text('').css('font-style','italic').appendTo(toolbar);
 
             /*
         var menu_label_settings = $('<ul id="vis_timeline_toolbar"><li id="tlm0"><a href="#"><span class="ui-icon ui-icon-check"/>Full label</a></li>'
@@ -859,6 +873,16 @@ if(_mapdata.limit_warning){
               }
             }).css('width','2em').hide();//rre.hide();
 
+            
+            
+        isApplyTimelineFilter = (window.hWin.HAPI4.get_prefs_def('mapTimelineFilter', 1)==1);   
+            
+        if(isApplyTimelineFilter){    
+            $('#timeline-edit-dialog').find('input[type="checkbox"][name="time-filter-map"]').prop('checked',true);
+        }
+       
+            
+            
         /*
         $("<input id='btn_timeline_labels' type='checkbox' checked>").appendTo(toolbar);
         $("<label for='btn_timeline_labels'>Show labels2</label>").appendTo(toolbar);
@@ -1034,6 +1058,11 @@ if(_mapdata.limit_warning){
         
         //apply label settings
         _applyTimeLineLabelsSettings(vis_timeline_label_mode, 0);
+        
+        if(isApplyTimelineFilter) _timelineApplyRangeOnMap(null);
+        window.hWin.HAPI4.save_pref('mapTimelineFilter', isApplyTimelineFilter?1:0);
+        $('#lbl_timeline_filter').html('Time filter '+(isApplyTimelineFilter?'on':'off'));
+        
         
 //console.log('TIMELINE DATASET. set data: '+ ( new Date().getTime() / 1000 - window.hWin.HEURIST4._time_debug) );
 //        window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
