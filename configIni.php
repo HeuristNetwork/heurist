@@ -62,8 +62,9 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "4.5.12"; // sets current program version number, determined by Heurist development lead
+$version = "4.5.13"; // sets current program version number, determined by Heurist development lead
 
+// 4.5.13 13 Jul 18 Handle multi valus for pointer field in CSV import, bug fixing/cosmetics on mapping, reinstate time filter
 // 4.5.12 27 Jun 18 Implicit location of entities on Map view based on connected Place records, minor bug fixing
 // 4.5.11 6 Jun 18 Improve integrity when structure is edited, improve handling of child pointers in title generation, various bug fixes and cosmetics
 // 4.5.10 14 Apr 18 Rewritten settings functions based on Artem's entity model, improved display of relationships in edit mode, UTM conversion on import/digitiser, clone template databases, correct facet search counts, fixes to child records and titles, permissions fixes, lots of small bug fixing
