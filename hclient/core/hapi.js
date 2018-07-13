@@ -28,9 +28,8 @@ function hAPI(_db, _oninit) { //, _currentUser
     _database = null, //same as public property  @toremove      
     _region = 'en',
     _regional = null, //localization resources
-    _guestUser = {ugr_ID:0, ugr_FullName:'Guest' };
-
-
+    _guestUser = {ugr_ID:0, ugr_FullName:'Guest' },
+    _listeners = [];
 
     /**
     * initialization of hAPI object
@@ -111,7 +110,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
 
         //remove remark to debug 
-        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());
@@ -197,7 +196,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *       database definitions - record structure, field types, terms
     *       saved searches
     *
-    * see usr_info and sys_structure controllers
+    * see usr_info.php and sys_structure.php
     *
     * methods:
     *   login        - login and get current user info
@@ -1035,7 +1034,19 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
         triggerEvent:function(eventType, data){
-            $(window.hWin.document).trigger(eventType, null );
+            $(window.hWin.document).trigger(eventType, data );
+
+            //this is for listeners in other frames
+            for (var i=0; i<_listeners.length; i++){
+                if(_listeners[i].event_type == eventType){
+                    _listeners[i].callback.call( _listeners[i].obj, data );
+                }
+            }
+        },
+
+        //to support event listeners in other frames
+        addEventListener:function( object, event_type, callback){
+            _listeners.push( {obj:object, event_type:event_type, callback:callback} );
         },
         
         is_ui_normal: function(){

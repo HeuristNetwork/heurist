@@ -101,7 +101,9 @@ $.widget( "heurist.manageEntity", {
 
         selectbutton_label: 'Select',  //label for select button
         
-        select_return_mode: 'ids', //ids or recordset
+        select_return_mode: 'ids', //ids or recordset                              
+        
+        selection_on_init:null, //ids to be selected on init
         
         selectOnSave:false, //edit/save of record triggers onselect and close dialog
         
@@ -886,8 +888,11 @@ $.widget( "heurist.manageEntity", {
                 if(this._cachedRecordset){
                     value = this._cachedRecordset.getSubSetByIds(value);
                 }else{
-                    value = null;
+                    //var recset = this.recordList.resultList('getRecordSet', value);
+                    //value = recset.getSubSetByIds(value);
+                    value = null;               
                 }
+                //this.recordList.resultList('setSelected', value); //highlight
             }
             //setter
             this._selection = value;
@@ -916,6 +921,12 @@ $.widget( "heurist.manageEntity", {
             }else if(this.options.list_mode=='default'){
                 this.recordList.resultList('updateResultSet', data.recordset, data.request);
             }
+            
+            if(this.options.selection_on_init && this.options['select_mode']=='select_multi'){
+                this.recordList.resultList('setMultiSelction', this.options.selection_on_init);
+                //this.selectedRecords( this.options.selection_on_init );
+                this.options.selection_on_init = null;
+            }
         }
     },
 
@@ -924,7 +935,7 @@ $.widget( "heurist.manageEntity", {
     //
     filterRecordList: function(event, request){
         var subset = null;
-        if(this.options.use_cache){
+        if(this.options.use_cache && this._cachedRecordset){
             subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
             if(this.options.list_mode=='default'){
                 this.recordList.resultList('updateResultSet', subset, request);   

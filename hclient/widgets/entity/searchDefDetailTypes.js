@@ -1,7 +1,8 @@
 /**
-* Search header for DefDetailTypes manager
+* Search header for manageDefDetailTypes manager
 *
-* @package     Heurist academic knowledge management system
+* 
+*  @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
@@ -21,53 +22,53 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
 
     //
     _initControls: function() {
-        this._super();
-        
+
         var that = this;
-            
-        this.selectRole   = this.element.find('#sel_datatype'); //status of record type - for manager mode only
         
-        var key;
-        var data_types = [{key:'',title:window.hWin.HR('Any Type')}];
-        for (key in window.hWin.HEURIST4.detailtypes.lookups){
-            if(window.hWin.HEURIST4.detailtypes.lookups[key]){
-                data_types.push({key:key,title:window.hWin.HEURIST4.detailtypes.lookups[key]});
-            }
+        this.input_search_type = this.element.find('#input_search_type');   //field type
+        var vals = {any:'any type'};
+        $.extend(vals, window.hWin.HEURIST4.detailtypes.lookups);
+        window.hWin.HEURIST4.ui.createSelector(this.input_search_type[0], vals);
+
+        this.input_search_group = this.element.find('#input_search_group');   //detail group
+        window.hWin.HEURIST4.ui.createDetailtypeGroupSelect(this.input_search_group[0],
+                                        [{key:'any',title:'any group'}]);
+
+        this._super();
+
+        //hide all help divs except current mode
+        var smode = this.options.select_mode; 
+        this.element.find('.heurist-helper1').find('span').hide();
+        this.element.find('.heurist-helper1').find('span.'+smode+',span.common_help').show();
+        
+        this.btn_add_record = this.element.find('#btn_add_record');
+        this.btn_find_record = this.element.find('#btn_find_record');
+
+        if(this.options.edit_mode=='none'){
+            this.btn_add_record.hide();
+            this.btn_find_record.hide();
+        }else{
         }
-        window.hWin.HEURIST4.ui.createSelector(that.selectRole.get(0), data_types);
         
-        this.selectGroup = this.element.find('#sel_group');
-        this.selectGroup.empty();
-            
-        //@todo change to ui.createEntitySelector
-        window.hWin.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
-                        'entity':'defDetailTypeGroups','dtg_ID':that.options.filter_groups},
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            var groups = new hRecordSet(response.data).makeKeyValueArray('dtg_Name');
-                            
-                            if(window.hWin.HEURIST4.util.isempty(that.options.filter_groups)){
-                                groups.unshift({key:'',title:window.hWin.HR('Any Group')});
-                            }
-                            
-                            window.hWin.HEURIST4.ui.createSelector(that.selectGroup.get(0), groups);
-                            
-                            if(!window.hWin.HEURIST4.util.isempty(that.options.filter_group_selected)){
-                                that.selectGroup.val(that.options.filter_group_selected);
-                            }
-                            
-                            that.startSearch();
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
+        this._on(this.input_search_type,  { change:this.startSearch });
+        this._on(this.input_search_group,  { change:this.startSearch });
+        
+        //@todo - possible to remove
+        if( this.options.dtg_ID>0 ){
+            this.input_search_group.parent().hide();
+            this.input_search_group.val(this.options.dtg_ID);
+        }else if( this.options.dtg_ID<0 ){  //addition of recctype to group
+            //find any rt not in given group
+            //exclude this group from selector
+            this.input_search_group.find('option[value="'+Math.abs(this.options.dtg_ID)+'"]').remove();
+        }else{
+            this.btn_find_record.hide();
+        }
+             
+        this.input_sort_type = this.element.find('#input_sort_type');
+        this._on(this.input_sort_type,  { change:this.startSearch });
                       
-                      
-            this._on( this.element.find('select'), {
-                change: function(event){
-                    this.startSearch();
-                }
-            });
+        this.startSearch();            
                 
     },  
 
@@ -81,31 +82,51 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             
             var request = {}
         
-            if(this.selectGroup.val()!=''){
-                request['dty_DetailTypeGroupID'] = this.selectGroup.val();
-            }   
-            if(this.selectRole.val()!=''){
-                request['dty_Type'] = this.selectRole.val();
-            }   
             if(this.input_search.val()!=''){
                 request['dty_Name'] = this.input_search.val();
             }
+            if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
+                request['dty_Type'] = this.input_search_type.val();
+            }   
             
-            //noothing defined
+            if( this.options.dtg_ID<0 ){
+                //find not in given group
+                request['not:dty_DetailTypeGroupID'] = Math.abs(this.options.dtg_ID);
+            }
+        
+            if(this.input_search_group.val()>0){
+                request['dty_DetailTypeGroupID'] = this.input_search_group.val();
+            }
+            
+            
+            this.input_sort_type = this.element.find('#input_sort_type');
+            if(this.input_sort_type.val()=='recent'){
+                request['sort:rty_Modified'] = '-1' 
+            }else{
+                request['sort:rty_Name'] = '1';   
+            }
+  
+            if(this.options.use_cache){
+            
+                this._trigger( "onfilter", null, request);            
+            }else
             if(false && $.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new hRecordSet()} );
             }else{
                 this._trigger( "onstart" );
         
                 request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;  //'defDetailTypes'
-                request['details']    = 'list'; //'id';
+                request['entity']     = this.options.entity.entityName;
+                request['details']    = 'id'; //'id';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
+                //we may search users in any database
+                request['db']     = this.options.database;
+
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
-                
+           
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
@@ -115,7 +136,10 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
-            }
+                    
+            }            
+            
+            
     },
     
 

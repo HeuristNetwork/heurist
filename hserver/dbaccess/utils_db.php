@@ -633,6 +633,17 @@ error_log(print_r($params, true));
                 $sysValues = $res->fetch_assoc();
                 $res->close();
             }
+
+            if(!array_key_exists('sys_TreatAsPlaceRefForMapping', $sysValues)){
+                //add new field into table
+                $query = 'DROP TRIGGER IF EXISTS update_sys_index_trigger';
+                $res = $mysqli->query($query);
+                $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
+                $res = $mysqli->query($query);
+                $sysValues['sys_TreatAsPlaceRefForMapping'] = '';
+            }
+            
+            
         }
         return $sysValues;
     }

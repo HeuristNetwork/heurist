@@ -143,12 +143,13 @@
         $rec_scr  = @$record['ScratchPad'];
         $rec_imp  = (@$record['AddedByImport']?1:0);
         $rec_temp = (@$record['FlagTemporary']?1:0);
+        $rec_title = @$record['Title']==null?'':$record['Title'];
 
         //DateTime('now')->format('Y-m-d H:i:s') is same as date('Y-m-d H:i:s')
         $data_add = date('Y-m-d H:i:s');
         
         $stmt->bind_param('iiissssiis', $currentUserId, $rectype, $ownerid, $access,
-            $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp, @$record['Title']);
+            $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp, $rec_title);
         $stmt->execute();
         $newId = $stmt->insert_id;
         $syserror = $mysqli->error;

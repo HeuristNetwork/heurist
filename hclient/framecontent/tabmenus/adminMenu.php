@@ -45,13 +45,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
             <h3><span class="ui-icon ui-iconalign ui-icon-database"></span>DATABASE</h3>
             <div>
                 <ul>
-                    <li><a href="setup/dboperations/cloneDatabase.php"  name="auto-popup" class="h3link"
+                    <li><a href="admin/setup/dboperations/cloneDatabase.php"  name="auto-popup" class="h3link"
                         title="Clones an identical database from the currrent database with all data, users, attached files, templates etc.">
                         Clone database</a>
                     </li>
                     
 
-                    <li><a href="setup/dboperations/deleteCurrentDB.php" name="auto-popup" class="h3link"
+                    <li><a href="admin/setup/dboperations/deleteCurrentDB.php" name="auto-popup" class="h3link"
                         onClick="{return false;}"
                         title="Delete the current database completely - cannot be undone, although data is copied to a backup which could be reloaded by a system administrator">
                         Delete entire database</a>
@@ -62,13 +62,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         title="Clear all data (records, values, attached files) from the current database. Database structure - record types, fields, terms, constraints - is unaffected">
                         Delete all records</a>
                     </li>
-                    
+                    <!--
                     <li class="admin-only">
                         <a href="admin/rollback/rollbackRecords.php" name="auto-popup" class="h3link"
                             onClick="{return false;}"
                             title="Selectively roll back the data in the database to a specific date and time">
                          Rollback</a>
                     </li>
+                    -->
                 </ul>
             </div>
         </div>

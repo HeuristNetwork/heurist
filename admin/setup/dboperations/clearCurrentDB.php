@@ -20,21 +20,41 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
-    require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
+define('OWNER_REQUIRED', 1);   
+define('PDIR','../../../');  //need for proper path to js and css    
 
-    if(isForOwnerOnly("to clear a database")){
-        return;
-    }
+require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 ?>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Clear Records from Current Heurist Database</title>
-    <link rel='stylesheet' type='text/css' href='../../../common/css/global.css'>
-    <link rel='stylesheet' type='text/css' href='../../../common/css/edit.css'>
-    <link rel='stylesheet' type='text/css' href='../../../common/css/admin.css'>
+    <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+    <style>
+    p {
+        display: block;
+        -webkit-margin-before: 1em;
+        -webkit-margin-after: 1em;
+        -webkit-margin-start: 0px;
+        -webkit-margin-end: 0px;
+    }
+    .gray-gradient {
+        background-color: rgba(100, 100, 100, 0.6);
+        background: -moz-linear-gradient(center top , rgba(100, 100, 100, 0.6), rgba(100, 100, 100, 0.9)) repeat scroll 0 0 transparent;
+        background: -webkit-gradient(linear, left top, left bottom, from(rgba(100, 100, 100, 0.6)), to(rgba(100, 100, 100, 0.9)));
+        border: 1px solid #999;
+        -moz-border-radius: 3px;
+        -webkit-border-radius: 3px;
+        border-radius: 3px;
+        padding: 3px;
+        font-size: 14px;
+        color: #FFF;
+    }
+    </style>
 </head>
 <body class='popup'>
     <div class='banner'><h2>Clear Records from Current Heurist database</h2></div>
@@ -45,11 +65,13 @@
     if(!@$_REQUEST['mode']) {
 ?>
 
-    <h4 style='display:inline-block; margin:0 5px 0 0'>
-        <span><img src='../../../common/images/url_error.png' /> DANGER <img src='../../../common/images/url_error.png' /></span>
-    </h4>
+    <div class="gray-gradient" style="display:inline-block;">
+            <span class="ui-icon ui-icon-alert" style="display:inline-block;color:red;text-align:center"></span>&nbsp;
+            DANGER 
+            &nbsp;<span class="ui-icon ui-icon-alert" style="display:inline-block;color:red"></span>
+    </div>
 
-    <h1 style='display:inline-block'>CLEAR ALL RECORDS FROM CURRENT DATABASE</h1><br>
+    <h1 style='display:inline-block;font-size: 16px;'>CLEAR ALL RECORDS FROM CURRENT DATABASE</h1><br>
 
     <h3>This will clear (delete) all records and reset counter to 1 for the current database: </h3>
     <h2>Clear database: <?=$dbname?></h2>
@@ -59,7 +81,7 @@
         This operation may take some minutes on a large database<br>
         <p>Enter the words CLEAR ALL RECORDS in ALL-CAPITALS to confirm that you want to clear all records from the current database
         <p>Type the words above to confirm deletion of records: <input type='input' maxlength='20' size='20' name='del' id='del'>
-        &nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Clear' style='font-weight: bold;' >
+        &nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Clear' class="h3button" style='font-weight: bold;' >
         <input name='mode' value='2' type='hidden'>
         <input name='db' value='<?=$dbname?>' type='hidden'>
     </form>
@@ -73,9 +95,7 @@
                 print "<p>Undefined database name</p>"; // shouldn't get here
             } else {
 
-                $fulldbname = HEURIST_DB_PREFIX.$dbname;
-
-                $res = db_clean($fulldbname);
+                $res = DbUtils::databaseEmpty($dbname);
 /*
                 // This is a bit inelegant but it does the job effectively. Delete all the related records first because
                 // otherwise referential integrity will stop you deleting the records and/or bookmarks
@@ -240,7 +260,7 @@
 
                 if (!$res) {
                     echo ("<h2>Warning:</h2> Unable to fully delete records from <b>".HEURIST_DB_PREFIX.$dbname."</b>");
-                    print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a></p>";
+                    //print "<p><a href=".HEURIST_BASE_URL."?db=$dbname>Return to Heurist</a></p>";
                 } else {
                     // Remove from ElasticSearch
                     print "<br/><br/>Removing indexes, calling deleteIndexForDatabase with parameter $dbname";

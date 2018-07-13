@@ -47,7 +47,7 @@ if(isset($_POST['password'])) {
                     if($system->is_system_admin() || 
                             ($_REQUEST['database']==$_REQUEST['db'] && $system->is_dbowner()) )
                     {
-                        $res = DbUtils::databaseDrop(false, $_REQUEST['database']);    
+                        $res = DbUtils::databaseDrop(false, $_REQUEST['database'], false);    
                     }else{
                         $system->addError(HEURIST_REQUEST_DENIED, 
                             'You must be logged in as a system administrator or database owner to delete database',1);

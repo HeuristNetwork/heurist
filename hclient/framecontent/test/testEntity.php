@@ -55,6 +55,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysDatabases.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysBugreport.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypes.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefRecTypes.js"></script>
 
         <!--      
 
@@ -406,7 +408,7 @@ print $targetPath.'<br>';
                             <option value="SysBugreport">Bug report</option>
                             <option value="Records">Records</option>
                             <option value="SysUsers" >Users +</option>
-                            <option value="SysGroups" selected>Workgroups +</option>
+                            <option value="SysGroups">Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
                             <option value="UsrReminders" >Reminders</option>
@@ -415,7 +417,7 @@ print $targetPath.'<br>';
                             <option value="Records">Saved Searches</option>
                             <option value="DefRecTypes">Record Types</option>
                             <option value="DefRecTypeGroups">Record Type Groups</option>
-                            <option value="DefDetailTypes">Field Types</option>
+                            <option value="DefDetailTypes" selected>Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
                             <option value="DefTerms">Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>

@@ -19,7 +19,7 @@
 */
 require_once(dirname(__FILE__)."/../System.php");
 require_once(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
-require_once(dirname(__FILE__).'/../dbaccess/dbRecUploadedFiles.php');
+require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 require_once(dirname(__FILE__).'/../utilities/utils_file.php');
 
 $response = null;

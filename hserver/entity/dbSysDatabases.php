@@ -60,7 +60,7 @@ class DbSysDatabases extends DbEntityBase
             $current_user_email = $user['ugr_eMail'];
         }
 
-        if(false){  
+        if(true){  
             $order   = array();
             $records = array();
             
@@ -88,7 +88,9 @@ class DbSysDatabases extends DbEntityBase
                             'fields'=>array('sys_Database'),
                             'records'=>$records,
                             'order'=>$order,
-                            'entityName'=>'sysDatabases');
+                            'entityName'=>$this->config['entityName']);
+        
+            //sys_Database, sys_dbRegisteredID, sys_dbName, sys_AllowRegistration, sus_Role, sus_Count
         
         }else {//from index database
         
@@ -117,42 +119,40 @@ class DbSysDatabases extends DbEntityBase
                         .$this->searchMgr->getLimit();
          */
 
-        $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );
-        $db_list = $this->searchMgr->execute($query, false, $this->config['entityName']);
-        
-        if(false){
+            $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );
+            $db_list = $this->searchMgr->execute($query, false, $this->config['entityName']);
             
-            //validate that database (in central index) does really exsist
-            $query = "show databases";
-            $res = $mysqli->query($query);
-            $databases = array();
-            while ($row = $res->fetch_row()) {
-                $database  = $row[0];
-                if (strpos($database, HEURIST_DB_PREFIX) === 0){
-                    array_push($databases, $database);
+            if(false){ //validation that database (in central index) does really exsist
+                
+                $query = "show databases";
+                $res = $mysqli->query($query);
+                $databases = array();
+                while ($row = $res->fetch_row()) {
+                    $database  = $row[0];
+                    if (strpos($database, HEURIST_DB_PREFIX) === 0){
+                        array_push($databases, $database);
+                    }
                 }
-            }
-            $res->close();
+                $res->close();
+                
+                $order = $db_list['order'];
+                foreach ($order as $idx => $database){
+                    if(!in_array($database, $databases)){
+                        //remove from records
+                        $db_list['records'][$database] = null;
+                        unset($db_list['records'][$database]);
+                        //remove from order
+                        $db_list['order'][$idx] = null;
+                        unset($db_list['order'][$idx]);
+                        //remove from index database
+                        $mysqli->query('DELETE FROM Heurist_DBs_index.sysUsers WHERE sus_Database=`'.$database.'`');
+                        $mysqli->query('DELETE FROM Heurist_DBs_index.sysIdentifications WHERE sys_Database=`'.$database.'`');
+                    }
+                }
             
-            $order = $db_list['order'];
-            foreach ($order as $idx => $database){
-                if(!in_array($database, $databases)){
-                    //remove from records
-                    $db_list['records'][$database] = null;
-                    unset($db_list['records'][$database]);
-                    //remove from order
-                    $db_list['order'][$idx] = null;
-                    unset($db_list['order'][$idx]);
-                    //remove from index database
-                    $mysqli->query('DELETE FROM Heurist_DBs_index.sysUsers WHERE sus_Database=`'.$database.'`');
-                    $mysqli->query('DELETE FROM Heurist_DBs_index.sysIdentifications WHERE sys_Database=`'.$database.'`');
-error_log('fix central index = '.$database);                    
-                }
             }
-        
-        }
-        
-        return $db_list;
+            
+            return $db_list;
         
         }//from index database
     }

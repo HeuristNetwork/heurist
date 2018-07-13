@@ -1,9 +1,9 @@
 /**
-* Search header for DefRecTypes manager
+* Search header for manageDefRecTypes manager
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2018 University of Sydney
+* @copyright   (C) 2005-2016 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -19,59 +19,72 @@
 
 $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
-    // the widget's constructor
-    _create: function() {
-        this._super();
-
-        this._htmlContent =  'searchDefRecTypes.html';
-        this._helpContent = 'defRecTypes.html';
-        this._helpTitle = 'Record Types';
-    }, //end _create
-
     //
     _initControls: function() {
-        this._super();
         
         var that = this;
-            
-        this.selectRole   = this.element.find('#sel_role'); //status of record type - for manager mode only
-        if(this.options.select_mode!='manager') this.selectRole.parent().hide();
         
-        this.selectGroup = this.element.find('#sel_group');
-        this.selectGroup.empty();
-            
-        window.hWin.HAPI4.EntityMgr.doRequest({a:'search','details':'name', //'DBGSESSID':'423997564615200001;d=1,p=0,c=0',
-                        'entity':'defRecTypeGroups','rtg_ID':that.options.filter_groups},
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            var groups = new hRecordSet(response.data).makeKeyValueArray('rtg_Name');
-                            
-                            if(window.hWin.HEURIST4.util.isempty(that.options.filter_groups)){
-                                groups.unshift({key:'',title:window.hWin.HR('Any Group')});
-                            }
-                            
-                            window.hWin.HEURIST4.ui.createSelector(that.selectGroup.get(0), groups);
-                            
-                            if(!window.hWin.HEURIST4.util.isempty(that.options.filter_group_selected)){
-                                that.selectGroup.val(that.options.filter_group_selected);
-                            }
-                            
-                            that.startSearch();
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                      
-                      
-            this._on( this.element.find('select'), {
-                change: function(event){
-                    this.startSearch();
-                }
-            });
+        this.input_search_group = this.element.find('#input_search_group');   //rectype group
+        window.hWin.HEURIST4.ui.createRectypeGroupSelect(this.input_search_group[0],
+                                        [{key:'any',title:'any group'}]);
+
+        this._super();
+
+        //hide all help divs except current mode
+        var smode = this.options.select_mode; 
+        this.element.find('.heurist-helper1').find('span').hide();
+        this.element.find('.heurist-helper1').find('span.'+smode+',span.common_help').show();
+        
+        this.btn_add_record = this.element.find('#btn_add_record');
+        this.btn_find_record = this.element.find('#btn_find_record');
+
+        if(this.options.edit_mode=='none'){
+            this.btn_add_record.hide();
+            this.btn_find_record.hide();
+        }else{
+            /*
+            this.btn_add_record.css({'min-width':'9m','z-index':2})
+                    .button({label: window.hWin.HR("Add New Record Type"), icon: "ui-icon-plus"})
+                .click(function(e) {
+                    that._trigger( "onadd" );
+                }); 
+
+            this.btn_find_record.css({'min-width':'9m','z-index':2})
+                    .button({label: window.hWin.HR("Find/Add Record Type"), icon: "ui-icon-search"})
+                .click(function(e) {
+                    that._trigger( "onfind" );
+                }); 
                 
+            //@todo proper alignment
+            if(this.options.edit_mode=='inline'){
+                this.btn_add_record.css({'float':'left','border-bottom':'1px lightgray solid',
+                'min-height': '2.4em', 'margin-bottom': '0.4em'});    
+            }
+            */                       
+        }
+        
+        this._on(this.input_search_group,  { change:this.startSearch });
+        this._on(this.input_search_type,  { change:this.startSearch });
+        
+        //@todo - possible to remove
+        if( this.options.rtg_ID>0 ){
+            this.input_search_group.parent().hide();
+            this.input_search_group.val(this.options.rtg_ID);
+        }else if( this.options.rtg_ID<0 ){  //addition of recctype to group
+            //find any rt not in given group
+            //exclude this group from selector
+            this.input_search_group.find('option[value="'+Math.abs(this.options.rtg_ID)+'"]').remove();
+        }else{
+            this.btn_find_record.hide();
+        }
+             
+        this.input_sort_type = this.element.find('#input_sort_type');
+        this._on(this.input_sort_type,  { change:this.startSearch });
+                      
+        this.startSearch();            
     },  
 
-
+    
     //
     // public methods
     //
@@ -81,31 +94,48 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             
             var request = {}
         
-            if(this.selectGroup.val()!=''){
-                request['rty_RecTypeGroupID'] = this.selectGroup.val();
-            }   
-            if(this.selectRole.val()!=''){
-                request['rty_Status'] = this.selectRole.val();
-            }   
             if(this.input_search.val()!=''){
                 request['rty_Name'] = this.input_search.val();
             }
             
-            //noothing defined
+            if( this.options.rtg_ID<0 ){
+                //not in given group
+                request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
+            }
+        
+            if(this.input_search_group.val()>0){
+                request['rty_RecTypeGroupID'] = this.input_search_group.val();
+            }
+            
+            
+            this.input_sort_type = this.element.find('#input_sort_type');
+            if(this.input_sort_type.val()=='recent'){
+                request['sort:rty_Modified'] = '-1' 
+            }else{
+                request['sort:rty_Name'] = '1';   
+            }
+  
+            if(this.options.use_cache){
+            
+                this._trigger( "onfilter", null, request);            
+            }else
             if(false && $.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new hRecordSet()} );
             }else{
                 this._trigger( "onstart" );
         
                 request['a']          = 'search'; //action
-                request['entity']     = 'defRecTypes';
-                request['details']    = 'list'; //'id';
+                request['entity']     = this.options.entity.entityName;
+                request['details']    = 'id'; //'id';
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 
+                //we may search users in any database
+                request['db']     = this.options.database;
+
                 //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
                 var that = this;                                                
-                //that.loadanimation(true);
+           
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
@@ -115,9 +145,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
-
-            }
-    },
-    
-
+                    
+            }            
+    }
 });

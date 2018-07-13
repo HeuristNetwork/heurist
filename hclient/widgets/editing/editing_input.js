@@ -363,7 +363,7 @@ $.widget( "heurist.editing_input", {
                 else if(fieldname=='dty_Type') val = 'freetext'
                     else if(fieldname=='rst_DisplayHeight'
                         && this.f('dty_Type')=='blocktext') {
-                          val = 3; //height in rows
+                          val = 8; //height in rows
                         }else if(fieldname=='rst_DisplayWidth'
                             && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='url' || 
                                 this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
@@ -1646,6 +1646,16 @@ $.widget( "heurist.editing_input", {
                     
                                 popup_options.width = usrPreferences.width;
                                 popup_options.height = usrPreferences.height;
+                                var sels = this.newvalues[$(event.target).attr('id')];
+                                if(!sels && this.options.values && this.options.values[0]){
+                                     sels = this.options.values[0];
+                                } 
+                                if(!window.hWin.HEURIST4.util.isempty(sels)){
+                                    popup_options.selection_on_init = sels.split(',');
+                                } else {
+                                    popup_options.selection_on_init = null;    
+                                }                                                                                       
+                                
                                 
                                 //init dialog
                                 window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
@@ -2305,6 +2315,14 @@ $.widget( "heurist.editing_input", {
         return res;
     },
 
+    
+    //
+    //
+    //
+    getConfigMode: function(){
+        return this.configMode;
+    },
+    
     //
     //
     //

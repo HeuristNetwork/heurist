@@ -80,7 +80,7 @@ $.widget( "heurist.resultList", {
     hintDiv:null, // rollover for thumbnails
 
     _currentRecordset:null,
-    _currentSelection:null, //for select_multi - to keep selection across pages and queries
+    _currentMultiSelection:null, //for select_multi - to keep selection across pages and queries
 
     _startupInfo:null,
 
@@ -633,7 +633,7 @@ $.widget( "heurist.resultList", {
         this._removeNavButtons();
 
 
-        this._currentSelection = null;
+        this._currentMultiSelection = null;
 
     },
 
@@ -1105,6 +1105,33 @@ $.widget( "heurist.resultList", {
             $rdiv.attr('title', title);
         }
     },
+    
+    
+    //
+    //
+    //
+    setMultiSelction: function(ids){
+         this._currentMultiSelection = ids;
+    },
+    //
+    //
+    //
+    _manageMultiSelection: function(recID, is_add){
+        var idx = this._currentMultiSelection==null 
+                    ? -1
+                    :window.hWin.HEURIST4.util.findArrayIndex(recID, this._currentMultiSelection);
+        if(is_add){
+              if(idx<0){
+                  if(this._currentMultiSelection==null){
+                      this._currentMultiSelection = [];
+                  }
+                  this._currentMultiSelection.push( recID );
+              }
+        }else if(idx>=0){
+            this._currentMultiSelection.splice(idx,1);
+        } 
+    },
+    
 
     //
     //
@@ -1187,15 +1214,17 @@ $.widget( "heurist.resultList", {
             if($rdiv.hasClass('selected')){
                 $rdiv.removeClass('selected');
                 $rdiv.find('.recordSelector>input').prop('checked', '');
-                this._currentSelection.removeRecord(selected_rec_ID);
+                //this._currentSelection.removeRecord(selected_rec_ID);
+                this._manageMultiSelection(selected_rec_ID, false);
             }else{
                 $rdiv.addClass('selected')
                 $rdiv.find('.recordSelector>input').prop('checked', 'checked');
-                if(this._currentSelection==null){
-                    this._currentSelection = this._currentRecordset.getSubSetByIds([selected_rec_ID]);
+                this._manageMultiSelection(selected_rec_ID, true);
+                /*if(this._currentSelection==null){
+                    this._currentSelection = [selected_rec_ID]; //this._currentRecordset.getSubSetByIds([selected_rec_ID]);
                 }else{
                     this._currentSelection.addRecord(selected_rec_ID, this._currentRecordset.getById(selected_rec_ID));
-                }
+                }*/
             }
             this._updateInfo();
 
@@ -1284,12 +1313,12 @@ $.widget( "heurist.resultList", {
 
         if(this.options.select_mode == 'select_multi'){
 
-            if(this._currentSelection==null){
+            if(this._currentMultiSelection==null){
                 return null;
             }else if(idsonly){
-                return this._currentSelection.getIds();
+                return this._currentMultiSelection; //.getIds();
             }else{
-                return this._currentSelection;
+                return this._currentRecordset.getSubSetByIds(this._currentMultiSelection);
             }
 
 
@@ -1336,12 +1365,13 @@ $.widget( "heurist.resultList", {
             this.div_content.find('.recordDiv').addClass('selected');
         }else{
 
-            var recIDs_list = window.hWin.HAPI4.getSelection(selection, true);
+            var recIDs_list = window.hWin.HAPI4.getSelection(selection, true); //need to rewrite since it works with global currentRecordset
             if( window.hWin.HEURIST4.util.isArrayNotEmpty(recIDs_list) ){
 
                 this.div_content.find('.recordDiv').each(function(ids, rdiv){
                     var rec_id = $(rdiv).attr('recid');
-                    if(recIDs_list.indexOf(rec_id)>=0){  //important must be the same type: string or int
+                    var idx = window.hWin.HEURIST4.util.findArrayIndex(rec_id, recIDs_list);
+                    if(idx>=0){ 
                         $(rdiv).addClass('selected');
                         //if(that._lastSelectedIndex==rec_id){
                         //    $(rdiv).addClass('selected_last');
@@ -1414,8 +1444,8 @@ $.widget( "heurist.resultList", {
 
         var w = this.element.width();
 
-        if(this.options.select_mode=='select_multi' && this._currentSelection!=null && this._currentSelection.length()>0){
-            sinfo = sinfo + " | Selected: "+this._currentSelection.length();
+        if(this.options.select_mode=='select_multi' && this._currentMultiSelection!=null && this._currentMultiSelection.length>0){
+            sinfo = sinfo + " | Selected: "+this._currentMultiSelection.length;
             if(w>400){
                 sinfo = sinfo+' <a href="#">clear</a>';
             }
@@ -1451,7 +1481,7 @@ $.widget( "heurist.resultList", {
         if(this.options.select_mode=='select_multi'){
             var that = this;
             this.span_info.find('a').click(function(){
-                that._currentSelection=null;
+                that._currentMultiSelection = null;
                 that._updateInfo();
 
                 that.div_content.find('.recordDiv').removeClass('selected');
@@ -1652,7 +1682,7 @@ $.widget( "heurist.resultList", {
 
         if(is_retained_selection){ //draw retained selection
 
-            recordset = this._currentSelection;
+            recordset = this._currentRecordset.getSubSetByIds(this._currentMultiSelection);
             this._removeNavButtons();
             idx = 0;
             len = recordset.length();
@@ -1713,11 +1743,12 @@ $.widget( "heurist.resultList", {
 
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
-        }else if(this._currentSelection!=null) { //highlight retained selected records
+        }else if(this._currentMultiSelection!=null) { //highlight retained selected records
 
             for(idx=0; idx<rec_onpage.length; idx++){
                 recID = rec_onpage[idx];
-                if(this._currentSelection.getById(recID)!=null){
+                var index = window.hWin.HEURIST4.util.findArrayIndex(recID, this._currentMultiSelection);
+                if(index>=0){ //this._currentSelection.getById(recID)!=null
                     var $rdiv = this.div_content.find('.recordDiv[recid="'+recID+'"]');
                     $rdiv.find('.recordSelector>input').prop('checked','checked');
                     $rdiv.addClass('selected');
@@ -1893,7 +1924,7 @@ $.widget( "heurist.resultList", {
         var need_show = this.cb_selected_only.is(':checked');
 
 
-        if(need_show && this._currentSelection!=null && this._currentSelection.length()>0){
+        if(need_show && this._currentMultiSelection!=null && this._currentMultiSelection.length>0){
             this._renderPage(0, null, true);
         }else{
             this._renderPage(this.current_page);

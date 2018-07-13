@@ -155,6 +155,15 @@
                             {"key":"1","title":"Yes"}
                         ]}
                     }
+                },
+                {
+                    "dtID": "sys_TreatAsPlaceRefForMapping",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "rst_DisplayName": "Record types considered as Places",
+                        "rst_DisplayHelpText": "Comma delimited list of additional record types (local codes) to be considered as Places", 
+                        "rst_FieldConfig": {"entity":"defRecTypes", "csv":true}
+                    }
                 }
         ]},    
         {

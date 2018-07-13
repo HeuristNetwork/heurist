@@ -35,6 +35,7 @@ getPlainTermsList
 getFullTermLabel
 
 createRectypeGroupSelect - get SELECT for record type groups
+createDetailtypeGroupSelect
 createRectypeSelect - get SELECT for record types   
 createRectypeDetailSelect - get SELECT for details of given recordtype
 createRectypeTreeSelect - get SELECT for hierarchy of record types   
@@ -200,6 +201,9 @@ window.hWin.HEURIST4.ui = {
         return selObj;
     },
 
+    //
+    //
+    //
     fillSelector: function(selObj, topOptions) {
         
         if(window.hWin.HEURIST4.util.isArray(topOptions)){
@@ -233,6 +237,13 @@ window.hWin.HEURIST4.ui = {
                     }
                 }
             }
+        }else  if(!$.isEmptyObject(topOptions) && Object.keys(topOptions).length>0 ) {
+           
+                for (var key in topOptions)
+                if(!window.hWin.HEURIST4.util.isempty(topOptions[key])){
+                        window.hWin.HEURIST4.ui.addoption(selObj, key, topOptions[key], false);
+                }
+            
         }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
             if(topOptions===true) topOptions ='';
             window.hWin.HEURIST4.ui.addoption(selObj, '', topOptions);
@@ -733,6 +744,32 @@ window.hWin.HEURIST4.ui = {
             var name = rectypes.groups[index].name;
             if(!window.hWin.HEURIST4.util.isnull(name)){
                 window.hWin.HEURIST4.ui.addoption(selObj, rectypes.groups[index].id, name);
+            }
+        }
+
+        return selObj;
+
+    },
+    
+    createDetailtypeGroupSelect: function(selObj, topOptions) {
+
+        window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
+
+        var detailtypes = window.hWin.HEURIST4.detailtypes,
+        index;
+
+        if(!detailtypes) return selObj;
+
+
+        for (index in detailtypes.groups){
+            if (index == "groupIDToIndex" ){
+                //rectypes.groups[index].showTypes.length < 1)
+                continue;
+            }
+
+            var name = detailtypes.groups[index].name;
+            if(!window.hWin.HEURIST4.util.isnull(name)){
+                window.hWin.HEURIST4.ui.addoption(selObj, detailtypes.groups[index].id, name);
             }
         }
 

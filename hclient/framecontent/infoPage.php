@@ -72,6 +72,7 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 
         <link rel="stylesheet" href="<?php echo $cssLink;?>" />
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
     </head>
     <body style="padding:44px;" class="ui-heurist-header1">
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">

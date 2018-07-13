@@ -24,13 +24,7 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    /*
-    require_once (dirname(__FILE__).'/../dbaccess/dbSysUGrps.php');
-    require_once (dirname(__FILE__).'/../dbaccess/dbDefRecTypes.php');
-    require_once (dirname(__FILE__).'/../dbaccess/dbDefRecTypeGroups.php');
-    require_once (dirname(__FILE__).'/../dbaccess/dbDefDetailTypes.php');
-    require_once (dirname(__FILE__).'/../dbaccess/dbDefDetailTypeGroups.php');
-    */
+
     require_once (dirname(__FILE__).'/../entity/dbUsrTags.php');
     require_once (dirname(__FILE__).'/../entity/dbSysDatabases.php');
     require_once (dirname(__FILE__).'/../entity/dbSysIdentification.php');
@@ -40,6 +34,7 @@
     require_once (dirname(__FILE__).'/../entity/dbDefFileExtToMimetype.php');
     require_once (dirname(__FILE__).'/../entity/dbDefTerms.php');
     require_once (dirname(__FILE__).'/../entity/dbDefRecTypeGroups.php');
+    require_once (dirname(__FILE__).'/../entity/dbDefDetailTypes.php');
     require_once (dirname(__FILE__).'/../entity/dbDefRecTypes.php');
     require_once (dirname(__FILE__).'/../entity/dbSysBugreport.php');
     require_once (dirname(__FILE__).'/../entity/dbSysImportFiles.php');

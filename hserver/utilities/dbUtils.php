@@ -31,12 +31,12 @@
 * - add_index_html()
 * - server_connect()
 * - db_create()
-* - db_drop()
+* - databaseDrop()
 * - db_dump()
 * - db_clean()
 * - db_script()  - see utils_db_load_script.php
 * 
-* - db_register - set register ID to sysIdentification and rectype, detail and term defintions
+* - databaseRegister - set register ID to sysIdentification and rectype, detail and term defintions
 */
 
 require_once(dirname(__FILE__).'/../../hserver/utilities/utils_db_load_script.php');
@@ -125,15 +125,16 @@ class DbUtils {
     }    
 
     //
-    // set Origin ID for rectype, detail and term defintions
+    // remove database entirely
     //
-    public static function databaseDrop( $verbose=false, $database_name=null, $withoutArchive=false ){
+    public static function databaseDrop( $verbose=false, $database_name=null, $createArchive=false, $dumpData=false ){
 
         self::initialize();
         
         $mysqli = self::$mysqli;
         $system = self::$system;
         
+        if($database_name==null) $database_name = HEURIST_DBNAME;
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         
         if($database_name!=HEURIST_DBNAME){ //switch to database
@@ -141,26 +142,38 @@ class DbUtils {
         }else{
            $connected = true;
         }
+        
+        $archiveFolder = HEURIST_FILESTORE_ROOT."DELETED_DATABASES/";        
 
         if(!$connected){
             $msg = 'Failed to connect to database '.$database_name;
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
             if($verbose) echo '<br>'.$msg;
-        }else
-        if($withoutArchive || DbUtils::databaseDump( $verbose, $database_name )) {
+        }else 
+        if($createArchive) {
+
             // Create DELETED_DATABASES directory if needed
-            $folder = HEURIST_FILESTORE_ROOT."DELETED_DATABASES/";
-            if(!$withoutArchive && !folderCreate($folder, true)){
-                $system->addError(HEURIST_SYSTEM_CONFIG, 'Can not create folder for deleteted databases');                
-                return false;
+            if(!folderCreate($archiveFolder, true)){
+                    $system->addError(HEURIST_SYSTEM_CONFIG, 'Can not create folder for deleteted databases');                
+                    return false;
             }
-
-            // Zip $source to $file
-            $source = HEURIST_FILESTORE_ROOT.$database_name.'/'; //HEURIST_FILESTORE_DIR;  database upload folder
-            $destination = $folder.$database_name."_".time().".zip";
-                    
-            if($withoutArchive || zip($source, null, $destination, $verbose)) {
-
+            
+            if($dumpData){
+                if (!DbUtils::databaseDump( $verbose, $database_name )) {
+                    $msg = "Failed to dump database $database_name to a .sql file";
+                    self::$system->addError(HEURIST_ERROR, $msg);                
+                    if($verbose) echo '<br/>'.$msg;
+                    return false;
+                }
+            }
+        }
+        
+        // Zip $source to $file
+        $source = HEURIST_FILESTORE_ROOT.$database_name.'/'; //HEURIST_FILESTORE_DIR;  database upload folder
+        $destination = $archiveFolder.$database_name."_".time().".zip";
+            
+        if(!$createArchive || zip($source, null, $destination, $verbose)) {
+            
                 // Delete database from MySQL server
                 if(!mysql__drop_database($mysqli, $database_name_full)){
                     
@@ -176,20 +189,19 @@ class DbUtils {
                 folderDelete($source);
                 if($verbose) echo "<br/>Folder ".$source." has been deleted";
                 
-                // Delete from central index
+                /* Delete from central index
                 $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysIdentifications` WHERE sys_Database="'.$database_name_full.'"');
                 $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysUsers` WHERE sus_Database="'.$database_name_full.'"');
+                */
                 
-                return true;
-            }else{
-                $msg = "Failed to zip $source to $destination";
-                self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
-                if($verbose) echo '<br/>'.$msg;
-            }
+            return true;
         }else{
-                $msg = "Failed to dump database $database_name to a .sql file";
-                if($verbose) echo '<br/>'.$msg;
+            $msg = "Failed to zip $source to $destination";
+            self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
+            if($verbose) echo '<br/>'.$msg;
         }
+        
+                
         return false;
 
     }    
@@ -432,6 +444,101 @@ class DbUtils {
         return $warnings;
     }
     
+    
+    //
+    //
+    //
+    private static function empty_table($name, $remark, $verbose){
+
+        $mysqli = self::$mysqli;
+        
+        if($verbose) echo ("Deleting ".$remark."</br>");
+
+        if(!$mysqli->query("delete from $name where 1")){
+            if($verbose) {
+                echo ("<br/><p>Warning: Unable to clean ".$remark
+                    ." - SQL error: ".$mysqli->error."</p>");
+            }
+            return false;
+        }else{
+            //if($verbose) { echo ("<p>OK</p>"); }
+            return true;
+        }
+    }
+
+    
+
+    //
+    //
+    //
+    public static function databaseEmpty($database_name, $verbose=true){
+
+        list($database_name_full, $database_name) = mysql__get_names( $database_name );
+        
+        $res = true;
+        
+        self::initialize();
+        $mysqli = self::$mysqli;
+        
+        if($database_name!=HEURIST_DBNAME){ //switch to database
+           $connected = mysql__usedatabase($mysqli, $database_name_full);
+        }else{
+           $connected = true;
+        }
+        if(!$connected){
+            $msg = 'Failed to connect to database '.$database_name;
+            $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
+            if($verbose) echo '<br><p>'.$msg.'</p>';
+            return false;
+        }
+        
+        $mysqli->autocommit(FALSE);
+
+        if(!$mysqli->query("update recThreadedComments set cmt_ParentCmtID = NULL where cmt_ID>0")){
+            $res = false;
+            if($verbose) {
+                echo ("<br/><p>Warning: Unable to set parent IDs to null for Comments".
+                    " - SQL error: ".$mysqli->error."</p>");
+            }
+        }
+        
+        if($res){
+
+            $tables = array(
+                "recThreadedComments" => "Comments",
+                "recForwarding" => "Forwarding",
+                "recRelationshipsCache" => "Relationships Cache",
+                "recSimilarButNotDupes" => "List of Similar Records",
+                "usrRecTagLinks" => "Tag Links",
+                "usrReminders" => "Reminders",
+                "usrRemindersBlockList" => "Reminders Block List",
+                "usrRecPermissions" => "Permissions",
+                "recDetails" => "Details",
+                "usrBookmarks" => "Bookmarks",
+                "Records" => "Records"
+            );
+
+            foreach ($tables as $name => $remark) {
+                if(! self::empty_table($name, $remark, $verbose)){
+                    $res = false;
+                    break;
+                }
+            }
+
+            if($res){
+                $res = $mysqli->query("ALTER TABLE Records AUTO_INCREMENT = 0");
+                if($res) $mysqli->commit();
+            }
+        }
+    
+        if(!$res){
+            $mysqli->rollback();
+        }
+
+        $mysqli->close();
+
+        return $res;
+    }
 
     
 }

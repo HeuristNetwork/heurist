@@ -34,15 +34,15 @@
 
 */
 
-require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
-require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
-require_once(dirname(__FILE__).'/../../../common/php/utilsMail.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php');
+define('MANAGER_REQUIRED', 1);   
+define('PDIR','../../../');  //need for proper path to js and css    
 
-if(isForAdminOnly("to clone a database")){ //first 20 databases are templates
-    return;
-}
+require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
+
+//require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php');
+
 
 $user_id = get_user_id(); //keep user id (need to copy current user into cloned db for template cloning)
 

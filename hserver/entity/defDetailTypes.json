@@ -12,12 +12,6 @@
         "entityTitle": "Field Types",
         "entityTitlePlural": "Field Types",
         "empty_remark": "Please use the search field above to locate relevant field (partial string match on title)",
-
-        "sel_actions": [{"key":"edit", "title":"Edit Field Type"},
-                        {"key":"delete", "title":"Remove Field Type"}],
-        "btn_actions": [{"key":"add", "title":"Add New Field Type"}],
-
-        "reference_query": {},
         
         "fields": [
                 {
