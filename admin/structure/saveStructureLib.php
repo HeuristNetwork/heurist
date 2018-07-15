@@ -1783,7 +1783,7 @@ copy_IconAndThumb_FromLibrary
         //find usage in recDetails
         if(!array_key_exists("error", $ret) && $indetails){
 
-            $query = "select distinct dtl_RecID from recDetails, defDetailTypes "
+                $query = "select distinct dtl_RecID from recDetails, defDetailTypes "
                     ."where (dty_ID = dtl_DetailTypeID ) and "
                     ."(dty_Type='enum' or dty_Type='relationtype') and "
                     ."(dtl_Value in (".implode(",",$children)."))";
@@ -1791,7 +1791,7 @@ copy_IconAndThumb_FromLibrary
                 $res = $mysqli->query($query);
                 if ($mysqli->error) {
                     $ret = handleError("SQL error in isTermInUse retreiving records which use term $termID", $query);
-                    break;
+                    return $ret;
                 }else{
                     $recCount = $res->num_rows;
                     if ($recCount>0) { // there are records existing of this rectype, need to return error and the recIDs

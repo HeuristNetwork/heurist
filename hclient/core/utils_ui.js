@@ -237,7 +237,7 @@ window.hWin.HEURIST4.ui = {
                     }
                 }
             }
-        }else  if(!$.isEmptyObject(topOptions) && Object.keys(topOptions).length>0 ) {
+        }else  if(false && !$.isEmptyObject(topOptions) && Object.keys(topOptions).length>0 ) {
            
                 for (var key in topOptions)
                 if(!window.hWin.HEURIST4.util.isempty(topOptions[key])){
@@ -2226,6 +2226,17 @@ window.hWin.HEURIST4.ui = {
         }
     },
 
+    preventNonAlphaNumeric: function(evt) {
+        var theEvent = evt || window.event;
+        var key = theEvent.keyCode || theEvent.which;
+        if(key==37 || key==39) return;
+        key = String.fromCharCode( key );
+        if(!/^[a-zA-Z0-9$_]+$/.test(key)){
+            theEvent.returnValue = false;
+            theEvent.preventDefault();
+        }
+    },
+    
     cleanFilename: function(filename) {
         filename = filename.replace(/\s+/gi, '-'); // Replace white space with dash
         filename= filename.split(/[^a-zA-Z0-9\-\_\.]/gi).join('_');

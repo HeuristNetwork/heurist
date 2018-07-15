@@ -25,7 +25,7 @@ DELIMITER $$
 
 DROP function IF EXISTS `hhash`$$
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `hhash`(recID int) RETURNS varchar(4095) CHARSET utf8
+CREATE DEFINER=CURRENT_USER FUNCTION `hhash`(recID int) RETURNS varchar(4095) CHARSET utf8
 	READS SQL DATA
 	DETERMINISTIC
 
@@ -75,7 +75,7 @@ DELIMITER $$
 
 DROP function IF EXISTS `simple_hash`$$
 
-	CREATE DEFINER=`root`@`localhost` FUNCTION `simple_hash`(recID int) RETURNS varchar(4095) CHARSET utf8
+	CREATE DEFINER=CURRENT_USER FUNCTION `simple_hash`(recID int) RETURNS varchar(4095) CHARSET utf8
 	READS SQL DATA
 	DETERMINISTIC
 	begin
@@ -106,7 +106,7 @@ DELIMITER $$
 
 DROP procedure IF EXISTS `set_all_hhash`$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `set_all_hhash`()
+CREATE DEFINER=CURRENT_USER PROCEDURE `set_all_hhash`()
 
 	begin
 		create temporary table t (rec_ID int);
@@ -278,7 +278,7 @@ DELIMITER $$
 
 DROP function IF EXISTS `getTemporalDateString`$$
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `getTemporalDateString`(strDate varchar(4095)) RETURNS varchar(4095) CHARSET utf8
+CREATE DEFINER=CURRENT_USER FUNCTION `getTemporalDateString`(strDate varchar(4095)) RETURNS varchar(4095) CHARSET utf8
 	DETERMINISTIC
 	begin
 			declare temporalType char;
@@ -423,7 +423,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS insert_Details_precis_trigger$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `insert_Details_precis_trigger`
 	BEFORE INSERT ON `recDetails`
 	FOR EACH ROW
@@ -435,7 +435,7 @@ DELIMITER $$
     DROP TRIGGER IF EXISTS insert_Details_trigger$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `insert_Details_trigger`
     AFTER INSERT ON `recDetails`
     FOR EACH ROW
@@ -497,7 +497,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS pre_update_Details_trigger$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `pre_update_Details_trigger`
 	BEFORE UPDATE ON `recDetails`
 	FOR EACH ROW
@@ -523,7 +523,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS update_Details_trigger$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `update_Details_trigger`
 	AFTER UPDATE ON `recDetails`
 	FOR EACH ROW
@@ -583,7 +583,7 @@ DELIMITER $$
     DROP TRIGGER IF EXISTS delete_detail_trigger$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `delete_detail_trigger`
     AFTER DELETE ON `recDetails`
     FOR EACH ROW
@@ -611,7 +611,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS insert_record_trigger$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `insert_record_trigger`
 	AFTER INSERT ON `Records`
 	FOR EACH ROW
@@ -675,7 +675,7 @@ DELIMITER $$
     DROP TRIGGER IF EXISTS update_record_trigger$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `update_record_trigger`
     BEFORE UPDATE ON `Records`
     FOR EACH ROW
@@ -701,7 +701,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS usrRecentRecords_updater$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `usrRecentRecords_updater`
 	AFTER UPDATE ON `Records`
 	FOR EACH ROW
@@ -770,7 +770,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS delete_record_trigger$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `delete_record_trigger`
 	AFTER DELETE ON `Records`
 	FOR EACH ROW
@@ -810,7 +810,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS usrBookmarks_update$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `usrBookmarks_update`
 	BEFORE UPDATE ON `usrBookmarks`
 	FOR EACH ROW
@@ -824,13 +824,12 @@ DELIMITER ;
 DELIMITER $$
 
 DROP TRIGGER IF EXISTS sysUGrps_last_insert$$
-DROP TRIGGER IF EXISTS sysUGrps_last_delete$$
 DROP TRIGGER IF EXISTS sysUGrps_last_update$$
 
 
 --  			insert
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `sysUGrps_last_insert`
 	AFTER INSERT ON `sysUGrps`
 	FOR EACH ROW
@@ -838,45 +837,14 @@ DROP TRIGGER IF EXISTS sysUGrps_last_update$$
 
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `sysUGrps_last_update`
     AFTER UPDATE ON `sysUGrps`
     FOR EACH ROW
     begin
         update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUGrps";
-        if (OLD.ugr_eMail<>NEW.ugr_eMail) THEN
-            UPDATE `Heurist_DBs_index`.`sysUsers` SET sus_Email=NEW.ugr_eMail WHERE `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=OLD.ugr_eMail;  
-        END IF;
     end$$
     
-    CREATE
-    DEFINER=`root`@`localhost`
-    TRIGGER `sysUGrps_last_delete`
-    AFTER DELETE ON `sysUGrps`
-    FOR EACH ROW
-    begin
-        DELETE FROM `Heurist_DBs_index`.`sysUsers` WHERE `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=OLD.ugr_eMail;  
-    end$$
-
-DELIMITER ;
-
--- ------------------------------------------------------------------------------
--- --------sysIdentification
-
-DELIMITER $$
-
-DROP TRIGGER IF EXISTS update_sys_index_trigger$$
-
-    CREATE
-    DEFINER=`root`@`localhost`
-    TRIGGER `update_sys_index_trigger`
-    AFTER UPDATE ON `sysIdentification`
-    FOR EACH ROW
-    begin
-       delete from `Heurist_DBs_index`.`sysIdentifications` where `sys_Database`=(SELECT DATABASE());
-       insert into `Heurist_DBs_index`.`sysIdentifications` select (SELECT DATABASE()) as dbName, s.* from `sysIdentification` as s;
-    end$$
-
 DELIMITER ;
 
 -- ------------------------------------------------------------------------------
@@ -886,91 +854,24 @@ DELIMITER $$
 
 DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_insert$$
 DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_update$$
-DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_delete$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `sysUsrGrpLinks_last_insert`
     AFTER INSERT ON `sysUsrGrpLinks`
     FOR EACH ROW
     begin
        update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUsrGrpLinks";
-    
-       IF (NEW.ugl_UserID<>2) THEN
-               
-       select ugr_Email, COALESCE(ugl_Role,'member') as role from sysUGrps 
-        LEFT JOIN sysUsrGrpLinks on ugr_ID=ugl_UserID and ugl_GroupID=1 and ugl_Role='admin' 
-        where ugr_ID=NEW.ugl_UserID INTO @email, @role;
-       
-       select `sus_ID`,`sus_Role` from `Heurist_DBs_index`.`sysUsers` 
-       where `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=@email 
-       into @sus_id, @sus_role;
-       
-       IF (@sus_id>0)  THEN
-        IF(@sus_role<>@role)  THEN
-            update `Heurist_DBs_index`.`sysUsers` set sus_Role=@role WHERE sus_ID=@sus_id;
-        END IF;
-       ELSE
-            insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) values (@email, (SELECT DATABASE()), @role);
-       END IF;
-       
-      END IF;
     end$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `sysUsrGrpLinks_last_update`
     AFTER UPDATE ON `sysUsrGrpLinks`
     FOR EACH ROW
     begin
        update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUsrGrpLinks";
-    
-       IF (NEW.ugl_UserID<>2) THEN
-               
-       select ugr_Email, COALESCE(ugl_Role,'member') as role from sysUGrps 
-        LEFT JOIN sysUsrGrpLinks on ugr_ID=ugl_UserID and ugl_GroupID=1 and ugl_Role='admin' 
-        where ugr_ID=NEW.ugl_UserID INTO @email, @role;
-       
-       select `sus_ID`,`sus_Role` from `Heurist_DBs_index`.`sysUsers` 
-       where `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=@email 
-       into @sus_id, @sus_role;
-       
-       IF(@sus_id>0)  THEN
-        IF(@sus_role<>@role) THEN
-            update `Heurist_DBs_index`.`sysUsers` set sus_Role=@role WHERE sus_ID=@sus_id;
-        END IF;
-       ELSE
-            insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) values (@email, (SELECT DATABASE()), @role);
-       END IF;
-       
-      END IF;
     end$$
-
-    CREATE
-    DEFINER=`root`@`localhost`
-    TRIGGER `sysUsrGrpLinks_last_delete`
-    AFTER DELETE ON `sysUsrGrpLinks`
-    FOR EACH ROW
-    begin
-      IF (OLD.ugl_UserID<>2) THEN
-               
--- get new role               
-     select ugr_eMail, COALESCE(ugl_Role,'member') as role from sysUGrps 
-        LEFT JOIN sysUsrGrpLinks on ugr_ID=ugl_UserID and ugl_GroupID=1 and ugl_Role='admin' 
-        where ugr_ID=OLD.ugl_UserID INTO @email, @role;       
-       
-        IF ((@email IS NOT NULL) AND (@email<>'')) THEN
-            select `sus_ID`,`sus_Role` from `Heurist_DBs_index`.`sysUsers` 
-            where `sus_Database`=(SELECT DATABASE()) AND `sus_Email`=@email 
-            into @sus_id, @sus_role;
-            
-           IF ((@sus_id>0) AND (@sus_role<>@role)) THEN
-              update `Heurist_DBs_index`.`sysUsers` set sus_Role=@role WHERE sus_ID=@sus_id;
-           END IF;
-        END IF;
-      END IF;
-    end$$
-
 
 DELIMITER ;
 
@@ -983,7 +884,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defDetailTypes_last_insert$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defDetailTypes_last_insert`
 	AFTER INSERT ON `defDetailTypes`
 	FOR EACH ROW
@@ -996,7 +897,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defDetailTypes_last_update$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defDetailTypes_last_update`
 	AFTER UPDATE ON `defDetailTypes`
 	FOR EACH ROW
@@ -1009,7 +910,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defDetailTypes_delete$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defDetailTypes_delete`
 	AFTER DELETE ON `defDetailTypes`
 	FOR EACH ROW
@@ -1026,7 +927,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defRecTypes_last_insert$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defRecTypes_last_insert`
 	AFTER INSERT ON `defRecTypes`
 	FOR EACH ROW
@@ -1039,7 +940,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defRecTypes_last_update$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defRecTypes_last_update`
 	AFTER UPDATE ON `defRecTypes`
 	FOR EACH ROW
@@ -1052,7 +953,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defRecTypes_delete$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defRecTypes_delete`
 	AFTER DELETE ON `defRecTypes`
 	FOR EACH ROW
@@ -1066,7 +967,7 @@ DELIMITER $$
 --  			insert
 	DROP TRIGGER IF EXISTS defRecStructure_last_insert$$
 
-	CREATE DEFINER=`root`@`localhost`
+	CREATE DEFINER=CURRENT_USER 
 	TRIGGER `defRecStructure_last_insert`
 	AFTER INSERT ON `defRecStructure`
 	FOR EACH ROW
@@ -1078,7 +979,7 @@ DELIMITER $$
 --  			update
 	DROP TRIGGER IF EXISTS defRecStructure_last_update$$
 
-	CREATE DEFINER=`root`@`localhost`
+	CREATE DEFINER=CURRENT_USER 
 	TRIGGER `defRecStructure_last_update`
 	AFTER UPDATE ON `defRecStructure`
 	FOR EACH ROW
@@ -1091,7 +992,7 @@ DELIMITER $$
 -- 5/9/11 This trigger gives an error "multiple triggers with the same action time and event for one table" not yet supported
 	DROP TRIGGER IF EXISTS defRecStructure_last_delete$$
 
-	CREATE DEFINER=`root`@`localhost`
+	CREATE DEFINER=CURRENT_USER 
 	TRIGGER `defRecStructure_last_delete`
 	AFTER DELETE ON `defRecStructure`
 	FOR EACH ROW
@@ -1108,7 +1009,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defTerms_last_insert$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defTerms_last_insert`
 	AFTER INSERT ON `defTerms`
 	FOR EACH ROW
@@ -1121,7 +1022,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defTerms_last_update$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defTerms_last_update`
 	AFTER UPDATE ON `defTerms`
 	FOR EACH ROW
@@ -1134,7 +1035,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defTerms_last_delete$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defTerms_last_delete`
 	AFTER DELETE ON `defTerms`
 	FOR EACH ROW
@@ -1151,7 +1052,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defRelationshipConstraints_last_insert`
 	AFTER INSERT ON `defRelationshipConstraints`
 	FOR EACH ROW
@@ -1164,7 +1065,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defRelationshipConstraints_last_update`
 	AFTER UPDATE ON `defRelationshipConstraints`
 	FOR EACH ROW
@@ -1177,7 +1078,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defRelationshipConstraints_last_delete`
 	AFTER DELETE ON `defRelationshipConstraints`
 	FOR EACH ROW
@@ -1195,7 +1096,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defRecTypeGroups_insert$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defRecTypeGroups_insert`
 	AFTER INSERT ON `defRecTypeGroups`
 	FOR EACH ROW
@@ -1208,7 +1109,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defRecTypeGroups_update$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defRecTypeGroups_update`
 	AFTER UPDATE ON `defRecTypeGroups`
 	FOR EACH ROW
@@ -1221,7 +1122,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defRecTypeGroups_delete$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defRecTypeGroups_delete`
 	AFTER DELETE ON `defRecTypeGroups`
 	FOR EACH ROW
@@ -1238,7 +1139,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defDetailTypeGroups_insert$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defDetailTypeGroups_insert`
 	AFTER INSERT ON `defDetailTypeGroups`
 	FOR EACH ROW
@@ -1251,7 +1152,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defDetailTypeGroups_update$$
 
 	CREATE
-	DEFINER=`root`@`localhost`
+	DEFINER=CURRENT_USER 
 	TRIGGER `defDetailTypeGroups_update`
 	AFTER UPDATE ON `defDetailTypeGroups`
 	FOR EACH ROW
@@ -1264,7 +1165,7 @@ DELIMITER $$
 	DROP TRIGGER IF EXISTS defDetailTypeGroups_delete$$
 
 		CREATE
-		DEFINER=`root`@`localhost`
+		DEFINER=CURRENT_USER 
 	TRIGGER `defDetailTypeGroups_delete`
 	AFTER DELETE ON `defDetailTypeGroups`
 		FOR EACH ROW

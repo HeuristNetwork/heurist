@@ -43,52 +43,43 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 
 //require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php');
 
-
-$user_id = get_user_id(); //keep user id (need to copy current user into cloned db for template cloning)
+$user_id = $system->get_user_id(); //keep user id (need to copy current user into cloned db for template cloning)
+$mysqli  = $system->get_mysqli();
 
 $templateddb = @$_REQUEST['templatedb'];
 $isCloneTemplate = ($templateddb!=null);
 
 if($isCloneTemplate){ //template db must be registered with id less than 21
 
-    if(strpos($templateddb,'hdb_')!==0){
-        $templateddb = HEURIST_DB_PREFIX .$templateddb;
-    }
-    mysql_connection_select($templateddb);
-    if(mysql_error()) {
-        die("<h2>Error</h2>Sorry, could not connect to the database $templateddb (mysql_connection_overwrite error)");
+    if(mysql__usedatabase($mysqli, $templateddb)!==true){
+        die("<h2>Error</h2>Sorry, could not connect to the database $templateddb");
     }
     
-    $dbRegID = 'SELECT sys_dbRegisteredID FROM sysIdentification';
-    $res = mysql_query('select sys_dbRegisteredID from sysIdentification');
-    if (!$res) {
-        die("<h2>Error</h2>Unable to read database description from sysIdentification table. ".
-            "May indicate corrupted database. ".$talkToSysAdmin." MySQL error: " . mysql_error());
-    }
-    $res = mysql_fetch_row($res);
-    $dbRegID = $res[0];
-    
+    $dbRegID = $system->get_system('sys_dbRegisteredID');
     if(!($dbRegID>0 && $dbRegID<21)){
         die("<h2>Error</h2>The database $templateddb is not a template. It must be registered and has ID within specific range");
     }
 }else{
     $templateddb = null;
-    mysql_connection_overwrite(DATABASE);
-    if(mysql_error()) {
-        die("<h2>Error</h2>Sorry, could not connect to the database ".DATABASE." (mysql_connection_overwrite error)");
-    }
 }
-
 ?>
-
 <html>
     <head>
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Clone Database</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        
+        <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
-        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+        <!-- jQuery UI -->
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        
+        <!-- Heurist CSS -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>">
+
+        <!-- Heurist JS -->
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        
 
         <style>
             ul {color:#CCC;}
@@ -155,9 +146,6 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 
         <div class="banner"><h2>Clone <?php print ($isCloneTemplate?'Template ':'')?>Database</h2></div>
 
-        <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
-        <script src="../../../common/php/loadCommonInfo.php"></script>
         <div id="page-inner" style="overflow:auto">
 
         
@@ -185,7 +173,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
                     $targetdbname = $_REQUEST['targetdbname'];
 
                     // Avoid illegal chars in db name
-                    $hasInvalid = isInValid($targetdbname);
+                    $hasInvalid = preg_match('[\W]', $targetdbname);
                     if ($hasInvalid) {
                         echo ("<p><hr><p>&nbsp;<p>Requested database copy name: <b>$targetdbname</b>".
                             "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name");
@@ -195,11 +183,12 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
                             unset($_REQUEST['targetdbname']);
                     } // rejecting illegal characters in db name
                     else{
-
-                        $list = mysql__getdatabases();
-                        $list = array_map("arraytolower", $list);
-                        if(in_array(strtolower($targetdbname), $list)){
-                            echo ("<p class='error'>Warning: database '".$targetdbname."' already exists. Please choose a different name<br/></p>");
+                        list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
+                        
+                        $dblist = mysql__select_list2($mysqli, 'show databases');
+                        if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
+                            echo ("<div class='ui-state-error'>Warning: database '".$targetdbname
+                                ."' already exists. Please choose a different name<br/></div>");
                             $_REQUEST['mode'] = 0;
                             $_REQUEST['targetdbname'] = null;
                             unset($_REQUEST['targetdbname']);
@@ -243,15 +232,6 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 }
 
 // ---- PROCESS THE COPY FUNCTION (second pass) --------------------------------------------------------------------
-
-
-function isInValid($str) {
-    return preg_match('[\W]', $str);
-}
-function arraytolower($item)
-{
-    return strtolower($item);
-}
 
 if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 

@@ -150,15 +150,15 @@ $file  = false;
 // Check PHP version
 
 if (!$error && !function_exists('version_compare'))
-{ echo ("<p class=\"error\">PHP version 4.1.0 is required for db script read to proceed. You have PHP ".phpversion()." installed. Sorry!</p>\n");
-  $error=true;
+{ 
+    error_echo ("<p class=\"error\">PHP version 4.1.0 is required for db script read to proceed. You have PHP ".phpversion()." installed. Sorry!</p>\n");
 }
 
 // Check if mysql extension is available
 
 if (!$error && !function_exists('mysqli_connect_error'))
-{ echo ("<p class=\"error\">There is no mySQL extension available in your PHP installation. Sorry!</p>\n");
-  $error=true;
+{ 
+    error_echo ("<p class=\"error\">There is no mySQL extension available in your PHP installation. Sorry!</p>\n");
 }
 
 
@@ -171,18 +171,18 @@ if (!$error && !TESTMODE)
    $mysqli = new mysqli($db_server,$db_username,$db_password);
   if (!$mysqli){
 
-    echo ("<p class=\"error\">Database connection failed due to ".mysqli_connect_error()."</p>\n");
-    echo ("<p>Edit the database settings in your configuration file, or contact your system administrator.</p>\n");
-    $error=true;
+    error_echo (  
+    "<p class=\"error\">Database connection failed due to ".mysqli_connect_error()."</p>\n"
+    ."<p>Edit the database settings in your configuration file, or contact your system administrator.</p>\n");
       
   }else{
     $success = $mysqli->select_db($db_name);
     
       if (!$success)
       { 
-        echo ("<p class=\"error\">Database connection failed due to ".$mysqli->error."</p>\n");
-        echo ("<p>Edit the database settings in your configuration file, or contact your system administrator.</p>\n");
-        $error=true;
+        error_echo(
+            "<p class=\"error\">Database connection failed due to ".$mysqli->error."</p>\n"
+            ."<p>Edit the database settings in your configuration file, or contact your system administrator.</p>\n");
       }
   }
     
@@ -194,10 +194,10 @@ if (!$error && !TESTMODE)
     foreach ($pre_query as $pre_query_value)
     {	if (!$mysqli->query($pre_query_value))
     	{ 
-            echo ("<p class=\"error\">Error with pre-query.</p>\n");
-      	    echo ("<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n");
-      	    echo ("<p>MySQL: ".$mysqli->error."</p>\n");
-      	    $error=true;
+        error_echo(
+            "<p class=\"error\">Error with pre-query.</p>\n"
+      	    ."<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n"
+      	    ."<p>MySQL: ".$mysqli->error."</p>\n");
       	    break;
         }
     }
@@ -242,11 +242,12 @@ if (!$error && isset($_REQUEST["start"]))
   $gzipmode=false;
 
   if ((!$gzipmode && !$file=@fopen($curfilename,"r")) || ($gzipmode && !$file=@gzopen($curfilename,"r")))   //$upload_dir.'/'.
-  { echo ("<p class=\"error\">Can't open ".$curfilename." for import</p>\n");
-    echo ("<p>Please, check that your script file name contains only alphanumerical characters, and rename it accordingly, for example: $curfilename.".
+  {    
+    error_echo(
+        "<p class=\"error\">Can't open ".$curfilename." for import</p>\n"
+        ."<p>Please, check that your script file name contains only alphanumerical characters, and rename it accordingly, for example: $curfilename.".
            "<br>Or, specify \$filename in bigdump.php with the full filename. ".
            "<br>Or, you have to upload the $curfilename to the server first.</p>\n");
-    $error=true;
   }
 
 // Get the file size (can't do it fast on gzipped files, no idea how)
@@ -256,15 +257,13 @@ if (!$error && isset($_REQUEST["start"]))
     else $filesize = gztell($file);                   // Always zero, ignore
   }
   else
-  { echo ("<p class=\"error\">I can't seek into $curfilename</p>\n");
-    $error=true;
+  { error_echo ("<p class=\"error\">I can't seek into $curfilename</p>\n");
   }
 
 // Stop if csv file is used, but $csv_insert_table is not set
 
   if (!$error && ($csv_insert_table == "") && (preg_match("/(\.csv)$/i",$curfilename)))
-  { echo ("<p class=\"error\">You have to specify \$csv_insert_table when using a CSV file. </p>\n");
-    $error=true;
+  { error_echo ("<p class=\"error\">You have to specify \$csv_insert_table when using a CSV file. </p>\n");
   }
 }
 
@@ -280,8 +279,7 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
 // Check start and foffset are numeric values
 
   if (!is_numeric($_REQUEST["start"]) || !is_numeric($_REQUEST["foffset"]))
-  { echo ("<p class=\"error\">UNEXPECTED: Non-numeric values for start and foffset</p>\n");
-    $error=true;
+  { error_echo ("<p class=\"error\">UNEXPECTED: Non-numeric values for start and foffset</p>\n");
   }
   else
   {	$_REQUEST["start"]   = floor($_REQUEST["start"]);
@@ -300,10 +298,9 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
     $query = "DELETE FROM `$csv_insert_table`";
     if (!TESTMODE && !$mysqli->query(trim($query)))
     { 
-        echo ("<p class=\"error\">Error when deleting entries from $csv_insert_table.</p>\n");
-        echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
-        echo ("<p>MySQL: ".$mysqli->error."</p>\n");
-        $error=true;
+        error_echo ("<p class=\"error\">Error when deleting entries from $csv_insert_table.</p>\n"
+            ."<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n"
+            ."<p>MySQL: ".$mysqli->error."</p>\n");
     }
   }
 
@@ -321,15 +318,13 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
 // Check $_REQUEST["foffset"] upon $filesize (can't do it on gzipped files)
 
   if (!$error && !$gzipmode && $_REQUEST["foffset"]>$filesize)
-  { echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer behind the end of file</p>\n");
-    $error=true;
+  { error_echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer behind the end of file</p>\n");
   }
 
 // Set file pointer to $_REQUEST["foffset"]
 
   if (!$error && ((!$gzipmode && fseek($file, $_REQUEST["foffset"])!=0) || ($gzipmode && gzseek($file, $_REQUEST["foffset"])!=0)))
-  { echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer to offset: ".$_REQUEST["foffset"]."</p>\n");
-    $error=true;
+  { error_echo ("<p class=\"error\">UNEXPECTED: Can't set file pointer to offset: ".$_REQUEST["foffset"]."</p>\n");
   }
 
 // Start processing queries from $file
@@ -438,11 +433,10 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
 
       if ($querylines>$max_query_lines)
       {
-        echo ("<p class=\"error\">Stopped at the line $linenumber. </p>");
-        echo ("<p>At this place the current query includes more than ".$max_query_lines." dump lines. That can happen if your dump file was ");
-        echo ("created by some tool which doesn't place a semicolon followed by a linebreak at the end of each query, or if your dump contains ");
-        echo ("extended inserts or very long procedure definitions.</p>\n");
-        $error=true;
+        error_echo ("<p class=\"error\">Stopped at the line $linenumber. </p>"
+        ."<p>At this place the current query includes more than ".$max_query_lines." dump lines. That can happen if your dump file was "
+        ."created by some tool which doesn't place a semicolon followed by a linebreak at the end of each query, or if your dump contains "
+        ."extended inserts or very long procedure definitions.</p>\n");
         break;
       }
 
@@ -465,10 +459,11 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
 
         if (!TESTMODE && !$mysqli->query($query))
         { 
-            echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline)."</p>\n");
-            echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
             $errorMsg = $mysqli->error;
-            echo ("<p>MySQL: ".$errorMsg."</p>\n");
+            error_echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline)."</p>\n"
+            ."<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n"
+            ."<p>MySQL: ".$errorMsg."</p>\n");
+            $error = false;
             if(strpos($errorMsg,'Duplicate column')===false){
                 $error = true;
             }
@@ -491,8 +486,7 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
     else
       $foffset = gztell($file);
     if (!$foffset)
-    { echo ("<p class=\"error\">UNEXPECTED: Can't read the file pointer offset</p>\n");
-      $error=true;
+    { error_echo ("<p class=\"error\">UNEXPECTED: Can't read the file pointer offset</p>\n");
     }
   }
 
@@ -662,5 +656,11 @@ function skin_open()
 function skin_close()
 {
   echo ('</div>');
+}
+
+function error_echo($msg){
+    global $error;
+    error_log($msg);
+    //echo ($msg);
 }
 ?>

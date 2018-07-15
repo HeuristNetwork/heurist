@@ -21,7 +21,7 @@
 */
 
 require_once(dirname(__FILE__).'/../../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/DbUtils.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
 
 $res = false;
 

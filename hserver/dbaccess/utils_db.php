@@ -561,7 +561,7 @@ error_log(print_r($params, true));
         if($result==true){ //&& $primary_field_type=='integer'
             $result = ($isinsert) ?$mysqli->insert_id :$rec_ID;
         }//for non-numeric it returns null
-        
+
         return $result;
     }
 
@@ -582,9 +582,18 @@ error_log(print_r($params, true));
                 }
             }
         }else{        
-            
+
             $stmt = $mysqli->prepare($query);
             if($stmt){
+
+//error_log($query);
+//error_log(print_r($params, true));
+/*  faster
+                $refArr = referenceValues($params); 
+                $ref    = new ReflectionClass('mysqli_stmt'); 
+                $method = $ref->getMethod("bind_param"); 
+                $method->invokeArgs($stmt, $refArr); 
+*/                
                 call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
                 if(!$stmt->execute()){
                     $result = $mysqli->error;
@@ -607,10 +616,10 @@ error_log(print_r($params, true));
     * @return   array of values or references to values
     */
     function referenceValues($arr) {
-        if (strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
+        if (true || strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
         {
             $refs = array();
-            foreach ($arr as $key => $value) $refs[$key] = & $arr[$key];
+            foreach ($arr as $key => $value) $refs[$key] = &$arr[$key];
             return $refs;
         }
         return $arr;

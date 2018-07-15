@@ -96,7 +96,7 @@ $.widget( "heurist.staticPage", {
 
             var url = this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
             url = url.replace("[layout]",  window.hWin.HAPI4.sysinfo['layout']);
-            if(this.options.url.indexOf('http://')<0){
+            if(this.options.url.indexOf('http://')<0 && this.options.url.indexOf('https://')<0){
                 this.options.url = window.hWin.HAPI4.baseURL + url;
             }
 

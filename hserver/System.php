@@ -585,7 +585,8 @@ error_log(print_r($_REQUEST, true));
         if($status==HEURIST_REQUEST_DENIED && $sysmsg==null){
             $sysmsg = $this->get_user_id();
         }else if($status==HEURIST_DB_ERROR){
-            error_log('DATABASE ERROR :'.HEURIST_DBNAME.'  '.$message.($sysmsg?'. System message:'.$sysmsg:''));
+            error_log('DATABASE ERROR :'.(defined('HEURIST_DBNAME')?HEURIST_DBNAME:'')
+            .'  '.$message.($sysmsg?'. System message:'.$sysmsg:''));
             $message = 'Heurist was unable to process. '.$message;
             $sysmsg = 'reported in the server\'s PHP error log';
             //if(!$this->is_dbowner()){ //reset to null if not database owner
@@ -1139,6 +1140,11 @@ error_log(print_r($_REQUEST, true));
     private function _get_config_bytes($val) {
         $val = trim($val);
         $last = strtolower($val[strlen($val)-1]);
+
+        if($last){
+            $val = intval(substr($val,0,strlen($val)-1));
+        }
+            
         switch($last) {
             case 'g':
                 $val *= 1024;

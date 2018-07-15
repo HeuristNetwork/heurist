@@ -49,7 +49,10 @@
             if(!$email_header){
                 $email_header = "From: HEURIST";
                 if(defined('HEURIST_SERVER_NAME')){
-                    $email_header = $email_header." (".HEURIST_DBNAME.") <no-reply@".HEURIST_SERVER_NAME.">";
+                    if(defined('HEURIST_DBNAME')){
+                        $email_header = $email_header." (".HEURIST_DBNAME.")";
+                    }
+                    $email_header = $email_header." <no-reply@".HEURIST_SERVER_NAME.">";
                 }
             }
 

@@ -1,5 +1,4 @@
 <?php
-//@TODO to hclient
 
 /**
 * createNewDB.php: Create a new database by applying blankDBStructure.sql and coreDefinitions.txt
@@ -78,7 +77,7 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
         
         <!-- Heurist CSS -->
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-        <link rel="stylesheet" type="text/css" href="<?echo $cssLink;?>">
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>">
 
         <!-- Heurist JS -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        
@@ -241,7 +240,11 @@ if($registrationRequired) //show registration dialog at once
                     var request = {db:window.hWin.HEURIST4.util.getUrlParameter('db')};
                     var inputs = $("#createDBForm").find('input');
                     inputs.each(function(idx, inpt){
-                        if($(inpt).attr('name') && $(inpt).val()){
+                        if($(inpt).attr('type')=='radio'){
+                            if ($(inpt).is(':checked')){
+                                request[$(inpt).attr('name')] =  $(inpt).val();
+                            }
+                        }else if($(inpt).attr('name') && $(inpt).val()){
                             request[$(inpt).attr('name')] =  $(inpt).val();
                         }
                     });

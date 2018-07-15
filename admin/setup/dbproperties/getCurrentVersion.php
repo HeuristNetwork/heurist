@@ -16,6 +16,7 @@
 
 /**
 * getCurrentVersion.php - requests code and database version from Heurist master index server
+* this script runs on master index server only
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @copyright   (C) 2005-2018 University of Sydney
@@ -26,10 +27,20 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
-require_once(dirname(__FILE__)."/../../../records/files/fileUtils.php");
-require_once(dirname(__FILE__)."/../../../common/php/utilsMail.php");
+require_once(dirname(__FILE__).'/../../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
 
+$res = false;
+
+$system = new System();
+
+$isSystemInited = $system->init(@$_REQUEST['db'], false);
+    
+if(!$isSystemInited){
+        print '';//json_encode($system->getError());
+        exit();
+}
+    
 $is_check = @$_REQUEST["check"];
 
 
@@ -39,10 +50,17 @@ $is_check = @$_REQUEST["check"];
 if($is_check){ // check is set to 1 when this is called to contact the Heurist reference server.
     // If HEURIST_INDEX_BASE_URL==HEURIST_BASE_URL, this script is running on the reference server
     //return current db and code versions
-    echo HEURIST_VERSION."|".HEURIST_DBVERSION;
+    $db_version = $this->get_system('sys_dbVersion').'.'
+        .$this->get_system('sys_dbSubVersion').'.'
+        .$this->get_system('sys_dbSubSubVersion');
+    
+    
+    echo HEURIST_VERSION."|".$db_version;
     exit();
 }
 
+
+//functions below are not in use anymore @todo remove
 
 // LOCAL COPY CHECK
 // Code to run on a copy which is checking itself against the reference server

@@ -93,9 +93,10 @@ function db_drop($db_name, $verbose = true) { // called in case of failure to re
         $sql = "DROP DATABASE IF EXISTS `".$db_name."`";
         if ($mysqli->query($sql)) {
             
-            //remove from central index database
+            /*remove from central index database
             $mysqli->query('DELETE FROM Heurist_DBs_index.sysUsers WHERE sus_Database=`'.$db_name.'`');
             $mysqli->query('DELETE FROM Heurist_DBs_index.sysIdentifications WHERE sys_Database=`'.$db_name.'`');
+            */
             
             $res = true;
         }
@@ -564,9 +565,10 @@ function db_delete($db, $verbose=true) {
             deleteFolder($source);
             if($verbose) echo "<br/>Folder ".$source." has been deleted";
             
-            // Delete from central index
+            /* Delete from central index
             $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysIdentifications` WHERE sys_Database="hdb_'.$db.'"');
             $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysUsers` WHERE sus_Database="hdb_'.$db.'"');
+            */
             
             return true;
         }else{
@@ -1029,7 +1031,7 @@ function mysql__insertupdate($database, $table_name, $table_prefix, $record){
     }else{
         $query = $query." where ".$table_prefix."ID=".$rec_ID;
     }
-
+    
     $stmt = $mysqli->prepare($query);
     if($stmt){
         call_user_func_array(array($stmt, 'bind_param'), refValues($params));
@@ -1043,6 +1045,7 @@ function mysql__insertupdate($database, $table_name, $table_prefix, $record){
         $ret = $mysqli->error;
     }
 
+    
     return $ret;
 }
 

@@ -366,7 +366,7 @@ var fin_time = new Date().getTime() / 1000;
                 author: Dr Ian Johnson<br/>
                 programmers: Artem Osmakov, Tom Murtagh, Kim Jackson, Stephen White and others...</p>
 
-            <p style="margin-top: 1em;">Copyright (C) 2005-2018 <a href="http://sydney.edu.au/arts/" target="_blank">University of Sydney</a></p>
+            <p style="margin-top: 1em;">Copyright (C) 2005-2018 <a href="http://sydney.edu.au/arts/" style="outline:0;" target="_blank">University of Sydney</a></p>
 
             <p style="font-size: x-small; margin-top:1em; display:none;" class="fullmode">
                 Licensed under the GNU General Public License Version 3.0 (the "License"); you may not use this file except

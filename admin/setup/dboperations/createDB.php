@@ -20,7 +20,7 @@
 */
 
 require_once(dirname(__FILE__).'/../../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/DbUtils.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../admin/structure/import/importDefintions.php');
 
 header('Content-type: text/javascript');
@@ -127,14 +127,13 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         
         //verify that database with such name already exists
         $dblist = mysql__select_list2($mysqli, 'show databases');
-        if ( array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
+        if (array_search(strtolower($database_name_full), array_map('strtolower', $dblist)) !== false ){
+            //$mysqli->query('drop database '.$database_name_full);
                 $system->addError(HEURIST_ERROR, 
                         'Database with name '.$database_name_full.' aready exists. Try different name');
                 print json_encode($system->getError());
                 exit();
         }
-        
-        
 
         //get path to registered db template and download coreDefinitions.txt
         $reg_url = @$_REQUEST['url_template'];  //NOT USED
@@ -160,7 +159,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 print json_encode($system->getError());
                 exit();
             }            
-            
+
             //create empty database
             if(!DbUtils::databaseCreate($database_name_full)){
                 print json_encode($system->getError());
@@ -170,7 +169,6 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             //switch to new database            
             mysql__usedatabase( $mysqli, $database_name_full);  
 
-            //@todo may be convert it to static class
             $idef = new ImportDefinitions();
             $idef->initialize( $mysqli );
 
@@ -189,6 +187,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             
             
             $warnings = DbUtils::databaseCreateFolders($database_name_full);
+            
             if(!is_array($warnings)) $warnings = array();
 
 //@TODO                createElasticIndex($database_name_full); // All Elastic methods use the database prefix.
@@ -201,12 +200,10 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         }
 */
 
-
             if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, smarty templates etc
                 $upload_root = $system->getFileStoreRootFolder();
                 unzip($templateFoldersContent, $upload_root.$database_name."/");    
             }            
-            
             
             //update owner in new database
             $user_record['ugr_ID'] = 2;
@@ -216,7 +213,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             if($ret!=2){
                 array_push($warnings, 'Can not set owner user. '.$ret);                
             }
-            
+           
             //add default saved searches and tree
             $navTree = '{"expanded":true,"key":"root_3","title":"root","children":[{"expanded":true,"folder":true,"key":"_1","title":"Right-click for new folder, filter, ...","children":[{"key":"28","title":"Organisations","data":{"isfaceted":false}},{"key":"29","title":"Persons","data":{"isfaceted":false}},{"key":"30","title":"Media items","data":{"isfaceted":false}}]}]}';
                         
@@ -226,12 +223,12 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             }
             
 
-            //register in cetral index
+/* register in cetral index
             $mysqli->query('insert into `Heurist_DBs_index`.`sysIdentifications` select "'
                     .$database_name_full.'" as dbName, s.* from `sysIdentification` as s');
             $mysqli->query("insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "
                     .'values("'.$user_record['ugr_eMail'].'","'.$database_name_full.'","owner")');
-            
+*/            
             $fullName = $user_record['ugr_FirstName'].' '.$user_record['ugr_LastName'];
             
             // email the system administrator to tell them a new database has been created
@@ -259,6 +256,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 }
             }
         }
+        
         $res = true;
     }else{
         $system->addError(HEURIST_INVALID_REQUEST, 'Name of new database not defined');
