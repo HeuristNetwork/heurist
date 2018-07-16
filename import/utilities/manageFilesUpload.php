@@ -60,7 +60,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
             }
         </style>
         <!-- blueimp Gallery styles -->
-        <link rel="stylesheet" href="http://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+        <link rel="stylesheet" href="https://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
         <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
         <link rel="stylesheet" href="../../ext/jquery-file-upload/css/jquery.fileupload.css">
         <link rel="stylesheet" href="../../ext/jquery-file-upload/css/jquery.fileupload-ui.css">
@@ -144,10 +144,10 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
                             //realpath gives real path on remote file server
                             if(strpos($dir, '/srv/HEURIST_FILESTORE/')===0){
-                                $dir = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $dir);
+                                $dir = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_DIR, $dir);
                             }else
                             if(strpos($dir, '/misc/heur-filestore/')===0){
-                                $dir = str_replace('/misc/heur-filestore/', HEURIST_UPLOAD_ROOT, $dir);
+                                $dir = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_DIR, $dir);
                             }
                             $dir = str_replace('\\','/',$dir);     
                             if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
@@ -346,13 +346,13 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
 
         <!-- The Templates plugin is included to render the upload/download listings -->
-        <script src="http://blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
+        <script src="https://blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
         <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
-        <script src="http://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
+        <script src="https://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
         <!-- The Canvas to Blob plugin is included for image resizing functionality -->
-        <script src="http://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
+        <script src="https://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
         <!-- blueimp Gallery script -->
-        <script src="http://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+        <script src="https://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
         <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
         <script src="../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
         <!-- The basic File Upload plugin -->
