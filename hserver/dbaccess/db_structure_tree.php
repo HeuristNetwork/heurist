@@ -414,7 +414,7 @@
                                 if(count($rectype_ids)>1){
                                     $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
                                     $res['constraint'] = count($rectype_ids);
-                                    $res['children'] = array();
+                                    if($mode!=5) $res['children'] = array();
                                 }
                                 if($mode==5){
                                     $res['rt_ids'] = $pointerRecTypeId;
