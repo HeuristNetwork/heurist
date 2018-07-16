@@ -46,7 +46,7 @@ function RectypeManager() {
     arrDataSources = [];
 
     var currentTipId,
-    _rt_counts = {}, //counts by recorc type
+    _rt_counts = {}, //record counts by type
     _rolloverInfo;
 
     var _groups = [],  //for dropdown list
@@ -154,7 +154,6 @@ function RectypeManager() {
         initTabView();
 
         dragDropEnable();
-        
         
         if(window.hWin){
             var request = {

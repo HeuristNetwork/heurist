@@ -255,5 +255,22 @@ class DbDefRecTypes extends DbEntityBase
     public function batch_action(){
          //@todo
     }    
+    
+    //
+    //
+    //
+    public function counts(){
+
+        $res = null;
+                
+        if(@$this->data['mode']=='record_count'){
+            $query = 'SELECT d.rty_ID, count(r.rec_ID) FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID '
+            .' GROUP BY d.rty_ID';
+          
+           $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
+        }
+        
+        return $res;
+    }
 }
 ?>
