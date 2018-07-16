@@ -1321,55 +1321,64 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         
         
         //load overlays from server        
-        var rts = [window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'],
+        var rts2 = [window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE'],
                    //window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE'],
                    window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE']];
+        var rts = [];
+        for(var k=0; k<rts2.length-1; k++)
+        if(rts2[k]>0){
+            rts.push(rts2[k]);
+        }
         
-        var request = { q: {"t":rts.join(',')},
-            w: 'a',
-            detail: 'header',
-            source: 'sel_overlays'};
+        if(rts.length>0){
+        
+            var request = { q: {"t":rts.join(',')},
+                w: 'a',
+                detail: 'header',
+                source: 'sel_overlays'};
 
-        //perform search
-        window.hWin.HAPI4.RecordMgr.search(request, function(response){
+            //perform search
+            window.hWin.HAPI4.RecordMgr.search(request, function(response){
 
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
-                    var resdata = new hRecordSet(response.data);
+                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        var resdata = new hRecordSet(response.data);
 
-                    map_overlays = [];
+                        map_overlays = [];
 
-                    if(resdata.length()>0){
-                       map_overlays.push({key:0, title:'select...'}); 
-                    }
-                    
-                    var idx, records = resdata.getRecords();
-                    for(idx in records){
-                        if(idx)
-                        {
-                            var record = records[idx];
-                            var recID  = resdata.fld(record, 'rec_ID'),
-                            recName = resdata.fld(record, 'rec_Title');
-
-                            map_overlays.push({key:recID, title:recName});
+                        if(resdata.length()>0){
+                           map_overlays.push({key:0, title:'select...'}); 
                         }
-                    }//for
-                    
-                   
-                    var $sel_overlays = $('#sel_overlays');
-                    window.hWin.HEURIST4.ui.createSelector( $sel_overlays.get(0),
-                        $.isEmptyObject(map_overlays)?window.hWin.HR('none defined'): map_overlays);
-
-                   var map_overlay_sel = window.hWin.HAPI4.get_prefs('map_overlay_sel');     
-                   if(map_overlay_sel>0) {
-                       $sel_overlays.val(map_overlay_sel);   
-                       $sel_overlays.change();
-                   }
                         
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            });        
+                        var idx, records = resdata.getRecords();
+                        for(idx in records){
+                            if(idx)
+                            {
+                                var record = records[idx];
+                                var recID  = resdata.fld(record, 'rec_ID'),
+                                recName = resdata.fld(record, 'rec_Title');
 
+                                map_overlays.push({key:recID, title:recName});
+                            }
+                        }//for
+                        
+                       
+                        var $sel_overlays = $('#sel_overlays');
+                        window.hWin.HEURIST4.ui.createSelector( $sel_overlays.get(0),
+                            $.isEmptyObject(map_overlays)?window.hWin.HR('none defined'): map_overlays);
+
+                       var map_overlay_sel = window.hWin.HAPI4.get_prefs('map_overlay_sel');     
+                       if(map_overlay_sel>0) {
+                           $sel_overlays.val(map_overlay_sel);   
+                           $sel_overlays.change();
+                       }
+                            
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });        
+
+                
+        }
     }
 
     //
