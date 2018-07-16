@@ -1062,9 +1062,11 @@ $.widget( "heurist.boro_nav", {
                     html = '<li>Born '+that.__formatDate(sDate)+(place.link?' in '+place.link:'')+'</li>';   
                     
                     if(placeID==0){
-                        that.__setPlaceDesc(place, 'birth', 'Birth '+(sDate?(that.__formatDate(sDate)):''));//' on '+                                         }else{
-                        that.__setPlaceDesc(place);                                         }
+                        that.__setPlaceDesc(place, 'birth', 'Birth '+(sDate?(that.__formatDate(sDate)):''));//' on '+ 
+                    }else{
+                        that.__setPlaceDesc(place);                                         
                     }
+                }
             }
             var birthYear = that.__getYear(sDate,1);
             timeline.push({year:birthYear,            //for sort
@@ -1096,7 +1098,8 @@ $.widget( "heurist.boro_nav", {
                     html = html + '<li>'+sDeathType+' '+that.__formatDate(sDate)+ (place.link?' in '+place.link:'') + '</li>';
             
                     if(placeID==0){  
-                        that.__setPlaceDesc(place, 'death', sDeathType+' '+(sDate?(that.__formatDate(sDate)):'')); //' on '                                      }else{
+                        that.__setPlaceDesc(place, 'death', sDeathType+' '+(sDate?(that.__formatDate(sDate)):'')); //' on '
+                    }else{
                         that.__setPlaceDesc(place);                                         
                     }
                     
@@ -1216,7 +1219,8 @@ $.widget( "heurist.boro_nav", {
                         
                         if(place!=null){
                             if(placeID==0){
-                                that.__setPlaceDesc(place, 'tertiary-study', (is_awarded?'Awarded ':'Studied ')+sDegree+' at '+sEduInst);                              }else{
+                                that.__setPlaceDesc(place, 'tertiary-study', (is_awarded?'Awarded ':'Studied ')+sDegree+' at '+sEduInst);                              
+                            }else{
                                 that.__setPlaceDesc(place);                                         
                             }
                         }
@@ -1328,6 +1332,11 @@ $.widget( "heurist.boro_nav", {
                                     description: sOccupationTitle+' '+sOccupationOrg+' '
                                         +(place.link?place.link:'')+' '+eventDate.desc });//', '
                         }
+                        if(placeID){
+                                that.__setPlaceDesc(place, 'place', //@todo replace to name of occupation icon
+                                    sOccupationTitle+' '+sOccupationOrg+' '+eventDate.desc);                    
+                        }
+                        
                     }
                 }
             }
@@ -1773,17 +1782,30 @@ $.widget( "heurist.boro_nav", {
             html = html + '</li>';
             
             var head_of_item = '<li class="bor-stop">'
-            +'<div class="bor-stop-label bor-tooltip" data-toggle="tooltip" data-placement="left" title="" data-original-title="Do you have information that will help us complete this timeline? Visit the contribute page to let us know.">';
-            
+            +'<div class="bor-stop-label">';
+            var head_of_item_tp = '<li class="bor-stop">'
+            +'<div class="bor-stop-label bor-tooltip" title="Do you have information that will help us complete this timeline? Visit the contribute page to let us know.">';
             
             for(var k=0; k<timeline.length; k++){
                 
-                html = html + head_of_item + timeline[k].date + '</div><div class="bor-stop-description"><p>'
+                html = html + (timeline[k].date=='?'?head_of_item_tp:head_of_item) 
+                            + timeline[k].date + '</div><div class="bor-stop-description"><p>'
                             + timeline[k].description
                             + '</p></div></li>';
             }
             
             $('#p_timeline').empty().append($(html));    
+            
+            $('#p_timeline').find('.bor-tooltip').tooltip({
+                position: { my: "right center", at: "left-5 center" },
+                /* does not work
+                classes: {
+                    "ui-tooltip": "ui-corner-all tooltip-inner"
+                },*/
+                tooltipClass:"tooltip-inner",
+                hide: { effect: "explode", duration: 500 }
+            });
+
             
             
             // MAPPING -------------------
@@ -2068,7 +2090,8 @@ $.widget( "heurist.boro_nav", {
                 }
                 var iconPath = window.hWin.HAPI4.baseURL + 'hclient/widgets/boro/bundles/markers/';
                 this.recset.setFld(place_rec, 'rec_Icon', iconPath+icon+'.png');   
-                                
+                  
+//console.log(place.names[i]+'  '+description+'   '+iconPath+icon+'.png')                                
                 
             }
         }
