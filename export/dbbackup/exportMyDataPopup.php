@@ -287,7 +287,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 } catch (Exception $e) {
                     if(file_exists($progress_flag)) unlink($progress_flag);
                     print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
-                    die ("<h2>Error</h2>Unable to generate MySQL database dump.".$e->getMessage().$please_advise);
+                    die ("Sorry, unable to generate MySQL database dump.".$e->getMessage().$please_advise);
                 }
 
             }
