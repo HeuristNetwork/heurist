@@ -517,16 +517,6 @@ error_log(print_r($params, true));
                 $res->close();
             }
 
-            if(!array_key_exists('sys_TreatAsPlaceRefForMapping', $sysValues)){
-                //add new field into table
-                $query = 'DROP TRIGGER IF EXISTS update_sys_index_trigger';
-                $res = $mysqli->query($query);
-                $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
-                $res = $mysqli->query($query);
-                $sysValues['sys_TreatAsPlaceRefForMapping'] = '';
-            }
-            
-            
         }
         return $sysValues;
     }
@@ -534,6 +524,33 @@ error_log(print_r($params, true));
     function updateDatabseToLatest($system){
         
         $mysqli = $system->get_mysqli();
+
+        $query = 'DROP TRIGGER IF EXISTS update_sys_index_trigger';
+        $res = $mysqli->query($query);
+
+        
+        $sysValues = $system->get_system();
+        //add new field into sysIdentification
+        if(!array_key_exists('sys_TreatAsPlaceRefForMapping', $sysValues)){
+            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
+            $res = $mysqli->query($query);
+        }
+        
+        //create new table
+        $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
+              ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
+              ."`rcp_UGrpID` smallint(5) unsigned NOT NULL COMMENT 'ID of group',"
+              ."`rcp_RecID` int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',"
+              ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
+              ."PRIMARY KEY  (rcp_ID),"
+              ."UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)"
+            .") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records'";
+        
+        $res = $mysqli->query($query);
+        if(!$res){
+            $system->addError(HEURIST_DB_ERROR, 'Cannot create usrRecPermissions', $mysqli->error);
+            return false;
+        }
         
         //verify that required column exists in sysUGrps
         $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_CreateChildIfRecPtr'";
@@ -547,8 +564,8 @@ error_log(print_r($params, true));
             $res = $mysqli->query($query);
             if(!$res){
                 $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_CreateChildIfRecPtr', $mysqli->error);
+                return false;
             }
-            return false;
         }
         
 
@@ -563,8 +580,8 @@ error_log(print_r($params, true));
             $res = $mysqli->query($query);
             if(!$res){
                 $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_NavigationTree', $mysqli->error);
+                return false;
             }
-            return false;
         }
         
         //verify that required column exists in sysUGrps
@@ -578,10 +595,11 @@ error_log(print_r($params, true));
             $res = $mysqli->query($query);
             if(!$res){
                 $system->addError(HEURIST_DB_ERROR, 'Cannot modify usrBookmarks to add bkm_Notes', $mysqli->error);
+                return false;
             }
-            return false;
         }
         
+        //insert special field type - reference to parent record
         $dty_ID = mysql__select_value($mysqli,  
             "SELECT dty_ID FROM `defDetailTypes` WHERE dty_OriginatingDBID=2  dty_IDInOriginatingDB=247");
 

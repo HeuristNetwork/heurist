@@ -262,6 +262,11 @@ function db_clone($db_source, $db_target, $verbose, $nodata=false, $isCloneTempl
                     if($isCloneTemplate &&  in_array(strtolower($table), $exception_for_clone_template)){
                         continue;
                     }
+                    if(strtolower($table)=='usrrecpermissions'){
+                        $res = $mysqli->query("select count(*) from ".$db_source.".`".$table."`");
+                        if(!$res) continue; //not exists in source
+                        $res->close();
+                    }
                     
                     $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
                     $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  );
