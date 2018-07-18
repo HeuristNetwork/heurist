@@ -92,7 +92,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 
         <script type="text/javascript">
             //
-            // allow only alphanum chars for database name
+            // allow only alphanum chars for database name    @todo replace with utils_ui.preventNonAlphaNumeric
             //
             function onKeyPress(event){
 
@@ -169,7 +169,8 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
                 }
                 
                 //verify that name of database is unique
-                if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
+                if(@$_REQUEST['mode']=='2'){
+                    
                     $targetdbname = $_REQUEST['targetdbname'];
 
                     // Avoid illegal chars in db name
@@ -199,7 +200,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 
                 // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
 
-                if(@$_REQUEST['mode']!='2' || !@$_REQUEST['targetdbname']){
+if(@$_REQUEST['mode']!='2' || !@$_REQUEST['targetdbname']){
                     ?>
                     <div class="separator_row" style="margin:20px 0;"></div>
                     <form name='selectdb' action='cloneDatabase.php' method='get'>
@@ -233,7 +234,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 
 // ---- PROCESS THE COPY FUNCTION (second pass) --------------------------------------------------------------------
 
-if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
+if(@$_REQUEST['mode']=='2'){
 
     $targetdbname = $_REQUEST['targetdbname'];
     $nodata = (@$_REQUEST['nodata']==1);
@@ -259,35 +260,32 @@ if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 // 5. remove registration info and assign originID for definitions
 //
 function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
+    global $mysqli;
+    
     set_time_limit(0);
 
     $isCloneTemplate = ($templateddb!=null);
     
-    $newname = HEURIST_DB_PREFIX.$targetdbname;
+    list($newname, $targetdbname) = mysql__get_names( $targetdbname );
 
-    //create new empty database
-    if(!db_create($newname)){
-        return false;
-    }
-
+    //create new empty database and structure
     echo_flush ("<p>Create Database Structure (tables)</p>");
-    if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql")){
-        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
-    }else{
-        db_drop($newname);
+    if(!DbUtils::databaseCreate($newname, 1)){
         return false;
+    }else{
+        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }
     
-    // Remove initial values from empty database
-    mysql_connection_insert($newname);
-    mysql_query('delete from sysIdentification where 1');
-    mysql_query('delete from sysTableLastUpdated where 1');
-    mysql_query('delete from defLanguages where 1');
+    // Connect to new database and  Remove initial values from empty database
+    mysql__usedatabase($mysqli, $newname);
+    $mysqli->query('delete from sysIdentification where 1');
+    $mysqli->query('delete from sysTableLastUpdated where 1');
+    $mysqli->query('delete from defLanguages where 1');
     
     if($isCloneTemplate){
         $source_database = $templateddb;
-        //copy current user from DATABASE to cloned database as user#2
-        mysql_query('update sysUGrps u1, '.DATABASE.'.sysUGrps u2 SET '
+        //copy current user from current HEURIST_DBNAME_FULL to cloned database as user#2
+        $mysqli->query('update sysUGrps u1, '.HEURIST_DBNAME_FULL.'.sysUGrps u2 SET '
 .'u1.ugr_Type=u2.ugr_Type ,u1.ugr_Name=u2.ugr_Name ,u1.ugr_LongName=u2.ugr_LongName ,u1.ugr_Description=u2.ugr_Description '
 .',u1.ugr_Password=u2.ugr_Password ,u1.ugr_eMail=u2.ugr_eMail, u1.ugr_FirstName=u2.ugr_FirstName ,u1.ugr_LastName=u2.ugr_LastName '
 .',u1.ugr_Department=u2.ugr_Department ,u1.ugr_Organisation=u2.ugr_Organisation ,u1.ugr_City=u2.ugr_City '
@@ -298,104 +296,96 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         .' where u1.ugr_ID=2 AND u2.ugr_ID='.$user_id);
         
     }else{
-        $source_database = DATABASE;
-        mysql_query('delete from sysUsrGrpLinks where 1');
-        mysql_query('delete from sysUGrps where ugr_ID>=0');
+        $source_database = HEURIST_DBNAME_FULL;
+        $mysqli->query('delete from sysUsrGrpLinks where 1');
+        $mysqli->query('delete from sysUGrps where ugr_ID>=0');
     }
 
     
 
     echo_flush ("<p>Copy data</p>");
     // db_clone function in /common/php/db_utils.php does all the work
-    if( db_clone($source_database, $newname, true, $nodata, $isCloneTemplate) ){
+    if( DbUtils::databaseClone($source_database, $newname, true, $nodata, $isCloneTemplate) ){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
-        db_drop($newname);
+        DbUtils::databaseDrop( false, $newname, false, false );
         
         return false;
     }
     
     //cleanup target database to avoid issues with addition of constraints
-    mysql_connection_insert($newname);
 
     //1. cleanup missed trm_InverseTermId
-    mysql_query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID
+    $mysqli->query('update defTerms t1 left join defTerms t2 on t1.trm_InverseTermId=t2.trm_ID
         set t1.trm_InverseTermId=null
     where t1.trm_ID>0 and t2.trm_ID is NULL');
     
     //2. remove missed recent records
-    mysql_query('delete FROM usrRecentRecords
+    $mysqli->query('delete FROM usrRecentRecords
         where rre_RecID is not null
     and rre_RecID not in (select rec_ID from Records)');
     
     //3. remove missed rrc_SourceRecID and rrc_TargetRecID
-    mysql_query('delete FROM recRelationshipsCache
+    $mysqli->query('delete FROM recRelationshipsCache
         where rrc_SourceRecID is not null
     and rrc_SourceRecID not in (select rec_ID from Records)');
 
-    mysql_query('delete FROM recRelationshipsCache
+    $mysqli->query('delete FROM recRelationshipsCache
         where rrc_TargetRecID is not null
     and rrc_TargetRecID not in (select rec_ID from Records)');
     
     //4. cleanup orphaned details
-    mysql_query('delete FROM recDetails
+    $mysqli->query('delete FROM recDetails
         where dtl_RecID is not null
     and dtl_RecID not in (select rec_ID from Records)');
     
     //5. cleanup missed references to uploaded files
-    mysql_query('delete FROM recDetails
+    $mysqli->query('delete FROM recDetails
         where dtl_UploadedFileID is not null
     and dtl_UploadedFileID not in (select ulf_ID from recUploadedFiles)');
 
     //6. cleanup missed rec tags links
-    mysql_query('delete FROM usrRecTagLinks where rtl_TagID not in (select tag_ID from usrTags)');
-    mysql_query('delete FROM usrRecTagLinks where rtl_RecID not in (select rec_ID from Records)');
+    $mysqli->query('delete FROM usrRecTagLinks where rtl_TagID not in (select tag_ID from usrTags)');
+    $mysqli->query('delete FROM usrRecTagLinks where rtl_RecID not in (select rec_ID from Records)');
 
     //7. cleanup orphaned bookmarks
-    mysql_query('delete FROM usrBookmarks where bkm_RecID not in (select rec_ID from Records)');
+    $mysqli->query('delete FROM usrBookmarks where bkm_RecID not in (select rec_ID from Records)');
 
     
     $sHighLoadWarning = "<p><h4>Note: </h4>Failure to clone a database may result from high server load. Please try again, and if the problem continues contact the Heurist developers at info heuristnetwork dot org</p>";
     
     // 4. add contrainsts, procedure and triggers
     echo_flush ("<p>Addition of Referential Constraints</p>");
-    if(db_script($newname, dirname(__FILE__)."/../dbcreate/addReferentialConstraints.sql")){
+    if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
-        db_drop($newname);
+        DbUtils::databaseDrop( false, $newname, false, false );
         print $sHighLoadWarning;
         return false;
     }
 
     echo_flush ("<p>Addition of Procedures and Triggers</p>");
-    if(db_script($newname, dirname(__FILE__)."/../dbcreate/addProceduresTriggers.sql")){
+    if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
-        db_drop($newname);
+        DbUtils::databaseDrop( false, $newname, false, false );
         print $sHighLoadWarning;
         return false;
-    }
-
+    }    
+    
     // 5. remove registration info and assign originID for definitions
-    mysql_connection_insert($newname);
-    $sourceRegID = 0;
-    $res = mysql_query('select sys_dbRegisteredID from sysIdentification where 1');
-    if($res){
-        $row = mysql_fetch_row($res);
-        if($row){
-            $sourceRegID = $row[0];
-        }
-    }
+    $sourceRegID = mysql__select_value($mysqli, 'select sys_dbRegisteredID from sysIdentification where 1');
+
     //print "<p>".$sourceRegID."</p>";
     // RESET register db ID and zotero credentials
     $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders='', sys_eMailImapProtocol='', sys_eMailImapUsername='', sys_dbRights='', sys_NewRecOwnerGrpID=0 where 1";
-    $res1 = mysql_query($query1);
-    if (mysql_error())  { //(mysql_num_rows($res1) == 0)
-        print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".mysql_error().
+    $res1 = $mysqli->query($query1);
+    if ($mysqli->error)  { //(mysql_num_rows($res1) == 0)
+        print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".$mysqli->error.
         ")<br> Please reset the registration ID manually</b></p>";
     }
     //assign origin ID    
-    db_register($newname, $sourceRegID);
+    DbUtils::databaseRegister($sourceRegID);
 
     // Index new database for Elasticsearch
     //TODO: Needs error report, trap error and warn or abort clone
@@ -403,13 +393,13 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     // Copy the images and the icons directories
     //TODO: Needs error report, trap error and warn or abort clone
-    recurse_copy( HEURIST_UPLOAD_ROOT.HEURIST_DBNAME, HEURIST_UPLOAD_ROOT.$targetdbname );
+    folderRecurseCopy( HEURIST_UPLOAD_ROOT.HEURIST_DBNAME, HEURIST_UPLOAD_ROOT.$targetdbname );
 
     // Update file path in target database  with absolute paths
     $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_UPLOAD_ROOT.$targetdbname.
     "/' where ulf_FilePath='".HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/' and ulf_ID>0";
-    $res1 = mysql_query($query1);
-    if (mysql_error())  { //(mysql_num_rows($res1) == 0)
+    $res1 = $mysqli->query($query1);
+    if ($mysqli->error)  { //(mysql_num_rows($res1) == 0)
         print "<p><h4>Warning</h4><b>Unable to set database files path to new path</b>".
         "<br>Query was:".$query1.
         "<br>Please get your system administrator to fix this problem BEFORE editing the database (your edits will affect the original database)</p>";
@@ -421,19 +411,41 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     "' title='' target=\"_new\"><strong>".$targetdbname."</strong></a></p>";
     
     //SEND EMAIL ABOUT CREATING NEW DB
-    $res = mysql_query('select ugr_Name, CONCAT(ugr_FirstName," ",ugr_LongName) as ugr_FullName,'
+    $user_record = mysql__select_row_assoc($mysqli, 'select ugr_Name, CONCAT(ugr_FirstName," ",ugr_LastName) as ugr_FullName,'
          .'ugr_Organisation,ugr_eMail,ugr_Interests '
          .' FROM sysUGrps WHERE ugr_ID='.($isCloneTemplate?'2':$user_id));
 
-    $row = mysql_fetch_assoc($res);
-    if($row){
-        user_EmailAboutNewDatabase($row['ugr_Name'], $row['ugr_FullName'], $row['ugr_Organisation'],
-                $row['ugr_eMail'], $targetdbname, $row['ugr_Interests'],
-                ($isCloneTemplate?$_REQUEST['templatedb']:HEURIST_DBNAME),
-                $isCloneTemplate);
-    }
+    if($user_record){
+    
+            $fullName = $user_record['ugr_FullName'];
+            
+            // email the system administrator to tell them a new database has been created
+            $email_text =
+            "There is new Heurist database.\n".
+            "Database name: ".$newname."\n\n".
+            //($cloned_from_db?('Cloned from '.($isCloneTemplate?'template ':'').'database '.$cloned_from_db."\n"):'').
+            'The user who created the new database is:'.$user_record['ugr_Name']."\n".
+            "Full name:    ".$fullName."\n".
+            "Email address: ".$user_record['ugr_eMail']."\n".
+            "Organisation:  ".$user_record['ugr_Organisation']."\n".
+            "Research interests:  ".$user_record['ugr_Interests']."\n".
+            "Go to the address below to review further details:\n".
+            HEURIST_BASE_URL."?db=".$targetdbname;
 
+            $email_title = 'New database: '.$newname.' by '.$fullName.' ['.$user_record['ugr_eMail'].'] '
+                .'Cloned from  '.($isCloneTemplate?'template ':'database ').$source_database;
+
+            //$rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
+            $rv = sendEmail('osmakov@gmail.com', $email_title, $email_text, null);
+    }
     
     return true;
 } // straightCopyNewDatabase
+
+function echo_flush($msg){
+    ob_start();
+    print $msg;
+    @ob_flush();
+    @flush();
+}
 ?>

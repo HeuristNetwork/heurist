@@ -324,7 +324,7 @@ function db_clone($db_source, $db_target, $verbose, $nodata=false, $isCloneTempl
 
     return $res;
 }
-
+    
 /**
 * Dump all tables (except csv import cache) into text files
 * It is assumed that all tables exist and empty in target db

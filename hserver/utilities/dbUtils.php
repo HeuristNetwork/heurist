@@ -22,18 +22,17 @@
 */
 
 /**
-* @todo     Funnel all calls to functions in this file.
-*           Not all system code uses these abstractions. Especially services.
-* 
-* @todo for H4 - implement as class fot given database connection
+* Static class to perform database operations
 *
-* Function list:
-* - add_index_html()
-* - server_connect()
-* - db_create()
+* Methods:
+
+* - databaseCreate()
 * - databaseDrop()
-* - db_dump()
-* - db_clean()
+* - databaseDump()
+* - databaseCreateFolders
+*   databaseEmpty    
+*   databaseClone
+* 
 * - db_script()  - see utils_db_load_script.php
 * 
 * - databaseRegister - set register ID to sysIdentification and rectype, detail and term defintions
@@ -337,8 +336,9 @@ class DbUtils {
   
     //    
     //create new empty heurist database
+    // $level - 0 empty db, 1 +strucute, 2 +constraints and triggers
     //
-    public static function databaseCreate($database_name){
+    public static function databaseCreate($database_name, $level=2){
 
         self::initialize();
         
@@ -351,17 +351,17 @@ class DbUtils {
         if (is_array($res)){
             self::$system->addError($res[0], $res[1]); //can't create
         }else
-        if(db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql")){
+        if($level<1 || db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/blankDBStructure.sql")){
 
             // echo_flush ('OK');
             // echo_flush ("<p>Add Referential Constraints ");
 
-            if(db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
+            if($level<2 || db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
 
                 // echo_flush ('OK');
                 // echo_flush ("<p>Add Procedures and Triggers ");
 
-                if(db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
+                if($level<2 || db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
 
                     // echo_flush ('OK');
                     return true;
@@ -540,6 +540,112 @@ class DbUtils {
         return $res;
     }
 
+    /**
+    * Copy all tables (except csv import cache) from one db to another
+    * It is assumed that all tables exist and empty in target db
+    *
+    * @param mixed $db_source
+    * @param mixed $db_target
+    * @param mixed $verbose
+    */
+    public static function databaseClone($db_source, $db_target, $verbose, $nodata=false, $isCloneTemplate){
+
+        self::initialize();
+        
+        $res = true;
+        
+        if( !mysql__usedatabase($mysqli, $db_target) ){
+            $res = false;
+            if($verbose) {
+                echo ("<br/><p>Warning: Could not open database ".$db_target);
+            }
+        }
+
+        if($res){
+                
+                //$isCloneTemplate
+                $exception_for_clone_template = array('sysugrps','sysusrgrplinks',
+                'woot_chunkpermissions','woot_chunks','woot_recpermissions','woots',
+                'usrreminders','usrremindersblocklist','recthreadedcomments','usrrecentrecords','usrreportschedule','usrhyperlinkfilters');
+                
+                $data_tables = array('records','recdetails','reclinks','recrelationshipscache',
+                'recsimilarbutnotdupes','recthreadedcomments','recuploadedfiles','usrbookmarks','usrrecentrecords','usrrectaglinks',
+                'usrreminders','usrremindersblocklist','woot_chunkpermissions','woot_chunks','woot_recpermissions','woots');
+          
+                
+                $tables = $mysqli->query("SHOW TABLES");  //get all tables from target db
+                if($tables){
+
+                    $mysqli->query("SET foreign_key_checks = 0"); //disable
+                    $mysqli->query("SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
+
+                    echo ("<b>Adding records to tables: </b>");
+                    while ($table = $tables->fetch_row()) { //loop for all tables
+                        $table = $table[0];
+                        
+                        if($nodata && in_array(strtolower($table), $data_tables)){
+                            continue;
+                        }
+                        if($isCloneTemplate &&  in_array(strtolower($table), $exception_for_clone_template)){
+                            continue;
+                        }
+                        
+                        $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
+                        $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM ".$db_source.".`".$table."`"  );
+
+                        if($res){
+                            echo (" > " . $table . ": ".$mysqli->affected_rows . "  ");
+                        }else{
+                            if($table=='usrReportSchedule'){
+                                echo ("<br/><p class=\"error\">Warning: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
+                            }else{
+                                echo ("<br/><p class=\"error\">Error: Unable to add records into ".$table." - SQL error: ".$mysqli->error."</p>");
+                                $res = false;
+                                break;
+                            }
+                        }
+
+                        if($table=='recForwarding'){ //remove missed records otherwise we get exception on constraint addition
+                            $mysqli->query('DELETE FROM recForwarding where rfw_NewRecID not  in (select rec_ID from Records)');
+                        }
+
+                        $mysqli->query("ALTER TABLE `".$table."` ENABLE KEYS");
+                    }//while
+
+                    if($isCloneTemplate){
+                        //change ownership OR remove entries for all users and groups but 0~3
+                        $mysqli->query('delete FROM usrRecTagLinks,usrTags WHERE rtl_TagID=tag_ID AND tag_UGrpID NOT IN (0,1,2,3)');
+                        $mysqli->query('delete FROM usrTags WHERE tag_UGrpID NOT IN (0,1,2,3)');
+
+                        $mysqli->query('delete FROM usrBookmarks WHERE bkm_UGrpID NOT IN (0,1,2,3)');
+                        $mysqli->query('delete FROM usrSavedSearches WHERE svs_UGrpID NOT IN (0,1,2,3)');
+                        
+                        $mysqli->query('update Records set rec_AddedByUGrpID=2 WHERE rec_AddedByUGrpID NOT IN (0,1,2,3)');
+                        $mysqli->query('update Records set rec_OwnerUGrpID=2 WHERE rec_OwnerUGrpID NOT IN (0,1,2,3)');
+                        $mysqli->query('update recUploadedFiles set ulf_UploaderUGrpID=2 WHERE ulf_UploaderUGrpID NOT IN (0,1,2,3)');
+                    }
+                    
+                    
+                    $mysqli->query("SET foreign_key_checks = 1"); //restore/enable foreign indexes verification
+
+                }else{
+                    $res = false;
+                    if($verbose) {
+                        echo ("<br/><p class=\"error\">Error: Cannot get list of table in database ".$db_target."</p>");
+                    }
+                }
+
+
+                //$mysqli->autocommit(FALSE);
+                //if($res) $mysqli->commit();
+            }
+
+        if(!$res){
+            //$mysqli->rollback();
+        }
+
+        return $res;
+    }
     
 }
 
