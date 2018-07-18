@@ -433,7 +433,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     // Update file path in target database  with absolute paths
     $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_UPLOAD_ROOT.$targetdbname.
-    "/' where ulf_FilePath='".HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/' and ulf_ID>0";
+    "/' where ulf_FilePath='".HEURIST_UPLOAD_ROOT.$source_database_short."/' and ulf_ID>0";
     $res1 = mysql_query($query1);
     if (mysql_error())  { //(mysql_num_rows($res1) == 0)
         print "<p><h4>Warning</h4><b>Unable to set database files path to new path</b>".
