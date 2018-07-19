@@ -32,6 +32,7 @@ class VerifyValue {
      * This is by purpose, because we want a static class.
      */
     private function __construct() {}    
+    private static $system = null;
     private static $mysqli = null;
     private static $initialized = false;
 
@@ -46,6 +47,7 @@ class VerifyValue {
             return;
 
         global $system;
+        self::$system = $system;
         self::$mysqli = $system->get_mysqli();    
         
         self::$initialized = true;
@@ -78,6 +80,8 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
     $allowed_terms = null;
 
     if($dtyID==null || !@self::$dtyIDDefs[$dtyID]){ //detail type ID is not defined or terms are already found
+    
+        self::$system->defineConstant('DT_RELATION_TYPE');
 
         if ( $dtyID == DT_RELATION_TYPE) {
             //get all root terms (vocabs)
@@ -149,18 +153,18 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
     if($dtyID==null || !@self::$dtyIDDefs_labels[$dtyID]){
     
         self::initialize();
-        if(self::$terms==null)  self::$terms = dbs_GetTerms();
+        if(self::$terms==null)  self::$terms = dbs_GetTerms(self::$system);
         $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
         
         $allowed_labels = array();
         
-        $idx_code = self::$terms['fieldNamesToIndex']['trm_Label'];
+        $idx_label = self::$terms['fieldNamesToIndex']['trm_Label'];
     
         //get all labels    
         $domain = @self::$terms['termsByDomainLookup']['relation'][$allowed_terms[0]]?'relation':'enum';
         $list = self::$terms['termsByDomainLookup'][$domain];
         foreach($allowed_terms as $term_id){
-           array_push( $allowed_labels, $list[$term_id][$idx][$idx_code] );
+           $allowed_labels[$term_id] = $list[$term_id][$idx_label] ;
         }
     
         if($isStripAccents && is_array($allowed_labels)){
@@ -204,7 +208,7 @@ public static function isValidTermCode($defs, $defs_nonsel, $code, $dtyID){
     if($dtyID==null || !@self::$dtyIDDefs_codes[$dtyID]){
     
         self::initialize();
-        if(self::$terms==null)  self::$terms = dbs_GetTerms();
+        if(self::$terms==null)  self::$terms = dbs_GetTerms(self::$system);
         $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
         
         $allowed_codes = array();
@@ -215,7 +219,7 @@ public static function isValidTermCode($defs, $defs_nonsel, $code, $dtyID){
         $domain = @self::$terms['termsByDomainLookup']['relation'][$allowed_terms[0]]?'relation':'enum';
         $list = self::$terms['termsByDomainLookup'][$domain];
         foreach($allowed_terms as $term_id){
-           array_push( $allowed_codes, mb_strtolower($list[$term_id][$idx][$idx_code]) );
+           $allowed_codes[$term_id] = mb_strtolower($list[$term_id][$idx_code]);
         }
     
         //keep for future use

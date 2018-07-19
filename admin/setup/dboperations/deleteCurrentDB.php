@@ -99,7 +99,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
                     } else {
                         
                         //not verbose, copy files, don't dump data
-                        if(true || DbUtils::databaseDrop(false, $dbname, true, false)){ 
+                        if(DbUtils::databaseDrop(false, $dbname, true, false)){ 
 
                             //print "<p>Removing indexes<br /><br /></p>";
                             ElasticSearch::deleteIndexForDatabase($dbname);  //Deleting all Elasticsearch indexes

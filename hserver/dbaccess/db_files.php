@@ -47,7 +47,7 @@ require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 function fileRegister($system, $fullname){
     
     
-    $file_id = fileGetByFileName($system, $filename); //apparently it is already registered
+    $file_id = fileGetByFileName($system, $fullname); //apparently it is already registered
     
     if(!($file_id>0)) {
                             
@@ -105,7 +105,7 @@ function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
 * @param mixed $fullname
 */
 function fileGetByFileName($system, $fullname){
-
+    
         $path_parts = pathinfo($fullname);
         $dirname = $path_parts['dirname'].'/';
         $filename = $path_parts['basename'];

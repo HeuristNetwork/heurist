@@ -553,13 +553,23 @@ class DbUtils {
         self::initialize();
         
         $res = true;
+        $mysqli = self::$mysqli;
         
-        if( !mysql__usedatabase($mysqli, $db_target) ){
+        if( !mysql__usedatabase($mysqli, $db_source) ){
             $res = false;
             if($verbose) {
-                echo ("<br/><p>Warning: Could not open database ".$db_target);
+                echo ("<br/><p>Warning: Could not open source database ".$db_source);
             }
-        }
+        }else{
+            updateDatabseToLatest(self::$system);
+            
+            if( !mysql__usedatabase($mysqli, $db_target) ){
+                $res = false;
+                if($verbose) {
+                    echo ("<br/><p>Warning: Could not open target database ".$db_target);
+                }
+            }
+        }   
 
         if($res){
                 
@@ -588,6 +598,11 @@ class DbUtils {
                         }
                         if($isCloneTemplate &&  in_array(strtolower($table), $exception_for_clone_template)){
                             continue;
+                        }
+                        
+                        if(strtolower($table)=='usrrecpermissions'){
+                            $cnt = mysql__select_value($mysqli,'select count() from usrRecPermissions');
+                            if(!($cnt>0)) continue;
                         }
                         
                         $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");

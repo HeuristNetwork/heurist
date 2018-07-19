@@ -320,7 +320,7 @@ class ElasticSearch {
                 error_log("[elasticSearch.php] buildAllIndices --> invalid query: $query");
             }
         }else{
-           print "ElasticSearch indices have successfully been built for $count record types."; 
+           print "ElasticSearch service not detected"; 
         }
         return false;
     } // buildAllIndices

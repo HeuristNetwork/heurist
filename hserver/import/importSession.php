@@ -67,7 +67,7 @@ public static function load($import_id){
 
         return $session;
     }else{
-        $system->addError(HEURIST_NOT_FOUND, 'Import session #'.$imp_ID.' not found');
+        self::$system->addError(HEURIST_NOT_FOUND, 'Import session #'.$import_id.' not found');
         return false;
     }
 }
@@ -84,7 +84,7 @@ public static function save($imp_session){
     
     $imp_id = mysql__insertupdate(self::$mysqli, "sysImportFiles", "sif",
         array("sif_ID"=>@$imp_session["import_id"],
-            "sif_UGrpID"=>get_user_id(),
+            "sif_UGrpID"=>self::$system->get_user_id(),
             "sif_TempDataTable"=>$imp_session["import_name"],
             "sif_ProcessingInfo"=>json_encode($imp_session) ));
 
@@ -123,7 +123,7 @@ public static function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
         return 'ok';
      }else{
         //get dependent record types
-        return dbs_GetRectypeStructureTree($system, $rty_ID, 5, 'resource');
+        return dbs_GetRectypeStructureTree(self::$system, $rty_ID, 5, 'resource');
      }
 }
                                         
@@ -142,7 +142,7 @@ public static function getRecordsFromImportTable1( $import_table, $imp_ids) {
     
     $imp_ids = prepareIds($imp_ids);
     
-    $query = 'SELECT * FROM $import_table WHERE imp_id IN ('. implode( ',', $imp_ids ) .')';
+    $query = 'SELECT * FROM '.$import_table.' WHERE imp_id IN ('. implode( ',', $imp_ids ) .')';
     $res = mysql__select_row($mysqli, $query);
     
     return $res;

@@ -46,6 +46,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
             <div>
                 <ul>
                     <li><a href="admin/setup/dboperations/cloneDatabase.php"  name="auto-popup" class="h3link"
+                        onClick="{return false;}"
                         title="Clones an identical database from the currrent database with all data, users, attached files, templates etc.">
                         Clone database</a>
                     </li>

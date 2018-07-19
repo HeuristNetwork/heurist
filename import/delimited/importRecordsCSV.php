@@ -440,10 +440,10 @@ If you have missing data for Required fields, you may find it convenient to set 
         </div>                    
         </fieldset>
         
-        <img id="img_arrow1" src="../../assets/blackdot.png" height="2" style="position:absolute;left:0px;width:100px;display:none" >
-        <img id="img_arrow2" src="../../assets/blackdot.png" width="2"  style="position:absolute;left:0px;height:16px;display:none">
-        <img id="img_arrow3" src="../../assets/arrow.png" style="position:absolute;left:0px;display:none">        
-        <img id="img_arrow4" src="../../assets/blackdot.png" width="2" style="position:absolute;left:0px;height:16px;display:none">        
+        <img id="img_arrow1" src="../../hclient/assets/blackdot.png" height="2" style="position:absolute;left:0px;width:100px;display:none" >
+        <img id="img_arrow2" src="../../hclient/assets/blackdot.png" width="2"  style="position:absolute;left:0px;height:16px;display:none">
+        <img id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none">        
+        <img id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:16px;display:none">        
         
         <div style="padding:1em 0 1em 4em" id="divheader">
             

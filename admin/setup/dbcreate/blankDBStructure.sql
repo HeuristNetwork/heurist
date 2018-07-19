@@ -618,6 +618,7 @@ CREATE TABLE sysIdentification (
   sys_AllowRegistration tinyint(1) unsigned NOT NULL default '0' COMMENT 'If set, people can apply for registration through web-based form',
   sys_MediaFolders varchar(10000) default NULL COMMENT 'Additional comma-sep directories which can contain files indexed in database',
   sys_MediaExtensions varchar(1024) default 'jpg,png,gif,tif,tiff,wmv,doc,docx,xls,xlsx,txt,rtf,xml,xsl,xslt,mpg,mpeg,mov,mp3,mp4,qt,wmd,avi,kml,sid,ecw,mp3,mid,midi,evo,csv,tab,wav,cda,wmz,wms,aif,aiff' COMMENT 'The file extensions to be harvested from the MediaFolders directories',
+  sys_TreatAsPlaceRefForMapping VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places',
   PRIMARY KEY  (sys_ID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Identification/version for this Heurist database (single rec)';
 
@@ -754,6 +755,21 @@ CREATE TABLE usrRecTagLinks (
   KEY rtl_TagIDKey (rtl_TagID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Link table connecting tags to records';
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table 'usrRecPermissions'
+--
+
+CREATE TABLE IF NOT EXISTS usrRecPermissions (
+    rcp_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',
+    rcp_UGrpID smallint(5) unsigned NOT NULL COMMENT 'ID of group',
+    rcp_RecID int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',
+    rcp_Level enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',
+    PRIMARY KEY  (rcp_ID),
+    UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records';
+            
 -- --------------------------------------------------------
 
 --

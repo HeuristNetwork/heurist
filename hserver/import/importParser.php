@@ -244,7 +244,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     
     if(!$keyfields) $keyfields = array();
     if(!$datefields) $datefields = array();
-    if(!$memofields) $memofields = array();
+    if(!$memofields) {$memofields = array(); }
     
     $csv_dateformat = @$params["csv_dateformat"];
     
@@ -411,7 +411,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         if($csv_delimiter=='tab') {
             $csv_delimiter = "\t";
         }
-
+        
+        $lb = null;
         if($csv_linebreak=='auto'){
             ini_set('auto_detect_line_endings', true);
             $lb = null;
@@ -641,6 +642,7 @@ private static function prepareDateField($field, $csv_dateformat){
     if(is_numeric($field) && abs($field)<99999){ //year????
 
     }else{
+        //$field = str_replace(".","-",$field);
         if($csv_dateformat==1){
             $field = str_replace("/","-",$field);
         }
@@ -868,7 +870,7 @@ private static function saveToDatabase($preproc){
 
     $session = ImportSession::save($session);
     if(!is_array($session)){
-        $system->addError(HEURIST_DB_ERROR, 'Can not save import session', $session);
+        self::$system->addError(HEURIST_DB_ERROR, 'Can not save import session', $session);
         return false;
     }
     

@@ -84,7 +84,7 @@ require_once (dirname(__FILE__).'/../dbaccess/db_structure_tree.php');
 
 require_once (dirname(__FILE__).'/../import/importParser.php'); //parse CSV, KML and save into import table
 require_once (dirname(__FILE__).'/../import/importSession.php'); //work work with import session 
-require_once (dirname(__FILE__).'/../import/importaAction.php'); //work with import tbale: matching, assign id, performs validation and import
+require_once (dirname(__FILE__).'/../import/importAction.php'); //work with import tbale: matching, assign id, performs validation and import
 
 require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
 
@@ -112,7 +112,7 @@ if(!$system->init(@$_REQUEST['db'])){
         }else if($action=='step1'){   
             
             //encode and invoke parse_prepare with limit
-            $res = ImportParser::encodeAndGetPreview( @$_REQUEST["upload_file_name"], @$_REQUEST["csv_encoding"]);  
+            $res = ImportParser::encodeAndGetPreview( @$_REQUEST["upload_file_name"], $_REQUEST);  
             
         }else if($action=='step2'){
             

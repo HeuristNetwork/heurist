@@ -109,8 +109,8 @@ require_once(dirname(__FILE__)."/../../hserver/utilities/utils_file.php");
             HEURIST_FILESTORE_DIR."scratch/",
             HEURIST_FILESTORE_DIR."settings/",
             HEURIST_FILESTORE_DIR.'term-images/',
-            HEURIST_SMARTY_TEMPLATES_DIR,
-            HEURIST_XSL_TEMPLATES_DIR);
+            HEURIST_SMARTY_TEMPLATES_DIR);
+        if(defined('HEURIST_XSL_TEMPLATES_DIR')) array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);    
         if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
         if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
 
@@ -120,7 +120,7 @@ require_once(dirname(__FILE__)."/../../hserver/utilities/utils_file.php");
         <p style="font-weight:bold;font-size:larger;padding:10 0">This function is designed for the indexing of bulk uploaded files (often images)</p>
         
         This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants)
-        listed in Admin > Database > Advanced Properties and writes the metadata as records in the current database, 
+        listed in Manage > Database > Properties and writes the metadata as records in the current database, 
         with pointers back to the files described by the manifests.
         
          <p>
@@ -130,7 +130,7 @@ require_once(dirname(__FILE__)."/../../hserver/utilities/utils_file.php");
             Note: the folders to be indexed must be writeable by the PHP system - normally they should be owned by Apache or www-data (as appropriate).
          </p>   
          <p>
-            Files will need to be uploaded to the server via direct access to the server or through Import > Multi-file upload.
+            Files will need to be uploaded to the server via direct access to the server or through Add Data > Utilities > Multi-file upload.
          </p>
          <?php
         
@@ -199,7 +199,7 @@ require_once(dirname(__FILE__)."/../../hserver/utilities/utils_file.php");
                     print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
                     print '<input name="media" value="'.$mediaFolders.'" type="hidden">';
                     print "<input name='exts' value='$mediaExts' type='hidden'>";
-                    print "<input type='submit' value='Continue' />";
+                    print "<input type='submit' value='Continue' class='h3button'/>";
                 }
             }
             exit();

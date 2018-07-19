@@ -24,6 +24,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 require_once(dirname(__FILE__)."/../../admin/verification/verifyValue.php");
+require_once(dirname(__FILE__)."/../../hserver/dbaccess/db_records.php");
 
 require_once('UTMtoLL.php');
 require_once('GpointConverter.php');
@@ -150,7 +151,7 @@ private static function findRecordIds($imp_session, $params){
     $tmp_idx_insert = array(); //to keep indexes
     $tmp_idx_update = array(); //to keep indexes
 
-    $mysqli = self::$system->get_mysqli();
+    $mysqli = self::$mysqli;
     
     //loop all records in import table and detect what is for insert and what for update
     $select_query = "SELECT imp_id, ".implode(",", $sel_fields)." FROM ".$import_table;
@@ -402,7 +403,7 @@ private static function findRecordIds($imp_session, $params){
 */
 public static function assignRecordIds($params){
     
-    global $system;
+    self::initialize();
     
     //get rectype to import
     $rty_ID = @$params['sa_rectype'];
@@ -410,7 +411,7 @@ public static function assignRecordIds($params){
     $match_mode = @$params['match_mode'] ?$params['match_mode']: 0;   //by fields, by id, skip match
     
     if(intval($rty_ID)<1 || !(intval($currentSeqIndex)>=0)){
-        $system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong value');
+        self::$system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined or wrong value');
         return false;
     }
     
@@ -433,7 +434,7 @@ public static function assignRecordIds($params){
             $pairs = $imp_session['validation']['pairs'];     //keyvalues => record id - count number of unique values
             $disambiguation = $imp_session['validation']['disambiguation'];
         }else{
-            $system->addError(HEURIST_ERROR, $imp_session);
+            self::$system->addError(HEURIST_ERROR, $imp_session);
             return false; //error
         }
         
@@ -451,7 +452,7 @@ public static function assignRecordIds($params){
 
     $import_table = $imp_session['import_table'];
 
-    $mysqli = $system->get_mysqli();
+    $mysqli = self::$mysqli; //$system->get_mysqli();
     
     $id_fieldname = @$params['idfield'];
     $id_field = null;
@@ -476,13 +477,13 @@ public static function assignRecordIds($params){
         $id_field = "field_".$field_count;
         $altquery = "alter table ".$import_table." add column ".$id_field." varchar(255) ";
         if (!$mysqli->query($altquery)) {
-            $system->addError(HEURIST_DB_ERROR, 'Cannot alter import session table; cannot add new index field', $mysqli->error);
+            self::$system->addError(HEURIST_DB_ERROR, 'Cannot alter import session table; cannot add new index field', $mysqli->error);
             return false;
         }
         /*
         $altquery = "update ".$import_table." set ".$id_field."=-1 where imp_id>0";
         if (!$mysqli->query($altquery)) {
-            $system->addError(HEURIST_DB_ERROR, 'Cannot set new index field', $mysqli->error);
+            self::$system->addError(HEURIST_DB_ERROR, 'Cannot set new index field', $mysqli->error);
             return false;
         }*/
         
@@ -527,7 +528,7 @@ public static function assignRecordIds($params){
                 $updquery = "update ".$import_table." set ".$id_field."='".$ids
                 ."' where imp_id = ".$imp_id;
                 if(!$mysqli->query($updquery)){
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot update import table: set ID field', $mysqli->error.' QUERY:'.$updquery);
+                    self::$system->addError(HEURIST_DB_ERROR, 'Cannot update import table: set ID field', $mysqli->error.' QUERY:'.$updquery);
                     return false;
                 }
             }
@@ -685,6 +686,8 @@ public static function validateImport($params) {
     $cnt_update_rows = 0;
     $cnt_insert_rows = 0;
 
+    $mysqli = self::$system->get_mysqli();
+    
     //get field mapping and selection query from _REQUEST(params)
     if(@$params['mapping']){    //new way
         $mapping_params = @$params['mapping'];
@@ -789,8 +792,8 @@ public static function validateImport($params) {
         $cnt = mysql__select_value($mysqli, $select_query);
         if($cnt>0){
             
-                $imp_session['validation']['count_update'] = $row[0];
-                $imp_session['validation']['count_update_rows'] = $row[0];
+                $imp_session['validation']['count_update'] = $cnt;
+                $imp_session['validation']['count_update_rows'] = $cnt;
                 //find first 100 records to display
                 $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)
                 ." FROM ".$import_table
@@ -808,7 +811,7 @@ public static function validateImport($params) {
             // find records to insert
             $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table." WHERE ".$id_field."<0"; //$id_field." is null OR ".
             $cnt = mysql__select_value($mysqli, $select_query);
-            $cnt = ($cnt>0)?intval(cnt):0;
+            $cnt = ($cnt>0)?intval($cnt):0;
 
             $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL"; 
             $cnt2 = mysql__select_value($mysqli, $select_query);
@@ -850,6 +853,7 @@ public static function validateImport($params) {
 
     // fill array with field in import table to be validated
     $recStruc = dbs_GetRectypeStructures(self::$system, array($recordType), 2);
+    $recStruc = $recStruc['typedefs'];
     $idx_reqtype = $recStruc['dtFieldNamesToIndex']['rst_RequirementType'];
     $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
 
@@ -1339,7 +1343,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
                             $term_id = VerifyValue::isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
                         }
                     }
-
+                    
                     if (!$term_id)
                     {//not found
                         $is_error = true;
@@ -1518,9 +1522,9 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
 * @param mixed $fields_checked - name of field to be verified
 * @param mixed $field_idx - index of validation field in query result (to get value)
 */
-private static function validateDateField($mysqli, $query, $imp_session, $fields_checked, $field_idx, $type){
+private static function validateDateField($query, $imp_session, $fields_checked, $field_idx, $type){
 
-    $res = $mysqli->query($query." LIMIT 5000");
+    $res = self::$mysqli->query($query." LIMIT 5000");
 
     if($res){
         $wrong_records = array();
@@ -1691,6 +1695,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             self::$rep_permission++;
             return null;
         }
+    }else if(!$recordId){
+        $recordId = -1;
     }
 
     $record = array();
@@ -1709,23 +1715,24 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
 
     if ( @$out['status'] != HEURIST_OK ) {
 
-        //array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg)
-
-        //@todo special formatting
-        foreach($out["error"] as $idx=>$value){
-            $value = str_replace(". You may need to make fields optional. Missing data","",$value);
-            $k = strpos($value, "Missing data for Required field(s) in");
-            if($k!==false){
-                $value = "<span style='color:red'>".substr($value,0,$k+37)."</span>".substr($value,$k+37);
-            }else{
-                $value  = "<span style='color:red'>".$value."</span>";
-            }
-            $out["error"][$idx] = $value;
-        }
-        
         if ($mode_output!='json'){
+            //array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg)
+
+            //@todo special formatting
+            //foreach($out["error"] as $idx=>$value){
+                $value = $out["message"];
+                $value = str_replace(". You may need to make fields optional. Missing data","",$value);
+                $k = strpos($value, "Missing data for Required field(s) in");
+                if($k!==false){
+                    $value = "<span style='color:red'>".substr($value,0,$k+37)."</span>".substr($value,$k+37);
+                }else{
+                    $value  = "<span style='color:red'>".$value."</span>";
+                }
+            //$out["error"][$idx] = $value;
+            //for}
+        
             foreach($details['imp_id'] as $imp_id){
-                print "<div><span style='color:red'>Line: ".$imp_id.".</span> ".implode("; ",$out["message"]);
+                print "<div><span style='color:red'>Line: ".$imp_id.".</span> ".implode("; ",$value);
                 $res = self::getImportValue($imp_id, $import_table);
                 if(is_array($res)){
                     $s = htmlspecialchars(implode(", ", $res));
@@ -1733,6 +1740,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                 }
                 print "</div>";
             }
+        }else{
+            error_log( $out["message"] );
         }
 
         self::$rep_skipped++;
@@ -1758,7 +1767,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                 ." SET ".$id_field."=".$new_recordID
                 ." WHERE imp_id in (". implode(",",$details['imp_id']) .")";
 
-                if(!$mysqli->query($updquery) && $mode_output!='json'){
+                if(!self::$mysqli->query($updquery) && $mode_output!='json'){
                     print "<div style='color:red'>Cannot update import table (set record id ".$new_recordID.") for lines:".
                     implode(",",$details['imp_id'])."</div>";
                 }
@@ -1888,6 +1897,7 @@ public static function performImport($params, $mode_output){
     
     //indexes
     $recStruc = dbs_GetRectypeStructures(self::$system, array($recordType), 2);
+    $recStruc = $recStruc['typedefs'];
     $recTypeName = $recStruc[$recordType]['commonFields'][ $recStruc['commonNamesToIndex']['rty_Name'] ];
     $idx_name = $recStruc['dtFieldNamesToIndex']['rst_DisplayName'];
 
@@ -1937,15 +1947,15 @@ public static function performImport($params, $mode_output){
             $id_field_def = "field_".$field_count;
 
             $altquery = "alter table ".$import_table." add column ".$id_field_def." int(10) ";
-            if (!$mysqli->query($altquery)) {
-                return "SQL error: cannot alter import session table, cannot add new index field: " . $mysqli->error;
+            if (!self::$mysqli->query($altquery)) {
+                return "SQL error: cannot alter import session table, cannot add new index field: " . self::$mysqli->error;
             }
             $imp_session['indexes'][$id_field_def] = $recordType;
             array_push($imp_session['columns'], $id_fieldname);
         }
     }
 
-    $res = $mysqli->query($select_query);
+    $res = self::$mysqli->query($select_query);
     if (!$res) {
 
         return "import table is empty";
@@ -1966,7 +1976,7 @@ public static function performImport($params, $mode_output){
         $previos_recordId = null;
         $recordId = null;
         $details = array();
-        $details2 = array(); //to keep original for sa_mode=2 (replace all existing value)
+        $details_orig = array(); //to keep original for sa_mode=2 (replace all existing value)
 
         $new_record_ids = array();
         $imp_id = null;
@@ -2012,18 +2022,19 @@ public static function performImport($params, $mode_output){
 
                         //reset
                         $details = array();
-                        $details2 = array();
+                        $details_orig = array();
 
                         if($recordId_in_import>0){ //possible update
                             // find original record in HDB
-                            $details2 = self::findOriginalRecord($recordId_in_import);
-                            if(count($details2)==0){
+                            $details_orig = self::findOriginalRecord($recordId_in_import);
+                            if(count($details_orig)==0){
                                 //record not found - this is insert with predefined ID
                                 $recordId = -$recordId_in_import;
 
                             }else{
                                 // record found - update detail according TO settings
                                 $recordId = $recordId_in_import;
+                                $details = $details_orig;
                             }
 
                         }else{
@@ -2048,7 +2059,7 @@ public static function performImport($params, $mode_output){
                 $lat = null;
                 $long = null;
 
-                foreach ($field_types as $index => $field_type) {
+                foreach ($field_types as $index => $field_type) {  //for import data
 
                     if($field_type=="url"){
                         if($row[$index])
@@ -2155,7 +2166,7 @@ public static function performImport($params, $mode_output){
                                 //find if url is already registered
                                 $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
                                                         .$r_value.'"';
-                                $fres = mysql__select_value($mysqli, $file_query);
+                                $fres = mysql__select_value(self::$mysqli, $file_query);
                                 if($fres>0){
                                     $ulf_ID = $fres;
                                 }else{
@@ -2187,13 +2198,13 @@ public static function performImport($params, $mode_output){
                                         if($mimeType!=null && $mimeType!==false){
                                             $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
                                                         .$mimeType.'"';
-                                            $extension = mysql__select_value($mysqli, $ext_query);
+                                            $extension = mysql__select_value(self::$mysqli, $ext_query);
                                         }
                                     }
                                     
                                     if($extension){   
                                             //add to table
-                                            $ulf_ID = mysql__insertupdate($mysqli, 'recUploadedFiles', 'ulf', 
+                                            $ulf_ID = mysql__insertupdate(self::$mysqli, 'recUploadedFiles', 'ulf', 
                                                 array("ulf_ID"=>0,
                                                     'ulf_OrigFileName'=>'_remote',
                                                     'ulf_UploaderUGrpID'=> get_user_id(),
@@ -2206,7 +2217,7 @@ public static function performImport($params, $mode_output){
                            
                                             if($ulf_ID>0){
                                                 $nonce = addslashes(sha1($ulf_ID.'.'.rand()));
-                                                mysql__insertupdate($mysqli, 'recUploadedFiles', 'ulf', 
+                                                mysql__insertupdate(self::$mysqli, 'recUploadedFiles', 'ulf', 
                                                 array("ulf_ID"=>$ulf_ID,
                                                     'ulf_ObfuscatedFileID'=>$nonce
                                                     ));
@@ -2258,47 +2269,54 @@ public static function performImport($params, $mode_output){
                                 
                                 //$field_type = 28;
                             }
+           
+//sa_upd
+//0 - Retain existing values and append distinct new data as repeat values(existing values are not duplicated)                            
+//1 - Add new data only if field is empty (new data ignored for non-empty fields)
+//2 - Add and replace all existing value(s) for the fields specified below
 
-                            if($value  &&   //value defined
-                            ($params['sa_upd']!=1 || !@$details2["t:".$field_type] ) ){
-                                //$params['sa_upd']==1 Add new data only if field is empty (new data ignored for non-empty fields)
-
-                                $details_lc = array();
-                                $details2_lc = array();
-
-                                /*if($params['sa_upd']==2 && $params['sa_upd2']==1 && !@$details["t:".$field_type]["bd:delete"]){
-                                unset($details["t:".$field_type]["bd:delete"]); //new data is porvided - no need to delete
-                                }else if($params['sa_upd']==2 && $params['sa_upd2']!=1 && !@$details["t:".$field_type]["bd:delete"]){
-                                $details["t:".$field_type]["bd:delete"] = "ups!"; //if new data are provided then remove old data
-                                }*/
-
-                                if($params['sa_upd']==2){
-                                    $details["t:".$field_type]["bd:delete"] = "ups!"; //if new data are provided then remove old data
+                            if($value) {
+                                
+                                $need_add = false;
+                                
+                                if($params['sa_upd']==1 && !@$details_orig["t:".$field_type]){
+                                    $need_add = true;
+                                    
+                                }else if($params['sa_upd']==2){ //repalce old one
+                                    $need_add = true;
+                                    
+                                    if(@$details_orig["t:".$field_type]){ //remove original
+                                        unset($details["t:".$field_type]);
+                                        unset($details_orig["t:".$field_type]);
+                                    }
+                                    
+                                }else  if($params['sa_upd']==0){ //add distinct only
+                                
+                                    if(!@$details["t:".$field_type]){
+                                        //not yet assigned
+                                        $need_add = true;
+                                    }else{
+                                        $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
+                                        if (array_search(trim_lower_accent($value), $details_lc, true)===false){
+                                            //no duplications
+                                            $need_add = true;
+                                        } 
+                                    }
                                 }
-
-
-                                if(is_array(@$details["t:".$field_type]))
-                                    $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
-                                if($params['sa_upd']!=2 && is_array(@$details2["t:".$field_type]))
-                                    $details2_lc = array_map('trim_lower_accent', $details2["t:".$field_type]);
-
-                                if ((!@$details["t:".$field_type] || array_search(trim_lower_accent($value), $details_lc, true)===false) //no duplications
-                                &&
-                                (!@$details2["t:".$field_type] || array_search(trim_lower_accent($value), $details2_lc, true)===false))
-                                {
+                                
+                                if($need_add){
                                     $cnt = count(@$details["t:".$field_type])+1;
                                     $details["t:".$field_type][$cnt] = $value;
-                                }else{
                                 }
-                            }
-
-                            if($params['sa_upd']==2 && $params['sa_upd2']==1 && !@$details["t:".$field_type]["bd:delete"]
-                            && !$value && $recordTypeStructure[$field_type][$idx_reqtype] != "required"){ //delete old even if new is not provided
-
-                                $details["t:".$field_type]["bd:delete"] = "ups!";
-                            }
-
-                        }//$values
+                            
+                            }else 
+                            if($params['sa_upd']==2 && $params['sa_upd2']==1 
+                                     && @$details_orig["t:".$field_type]
+                                     && $recordTypeStructure[$field_type][$idx_reqtype] != "required") { //delete old even if new is not provided
+                                
+                                    unset($details_orig["t:".$field_type]);
+                                    unset($details["t:".$field_type]);
+                            }   
 
                         //if insert and require field is not defined - skip it
                         if( !($recordId>0) &&
@@ -2310,6 +2328,7 @@ public static function performImport($params, $mode_output){
                                                         //break;
                         }
 
+                    }   //for values
                     }
                 }//for import data
 
@@ -2331,7 +2350,7 @@ public static function performImport($params, $mode_output){
 
                 }else if ($is_mulivalue_index){ //idfield is multivalue (now is is assummed that index field is always multivalue)
                     //THIS SECTION IS NOT USED
-                    //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
+                    //$details = retainExisiting($details, $details_orig, $params, $recordTypeStructure, $idx_reqtype);
                     if(count($details)>1){
                         $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $details, null, $mode_output);
                         if($new_id!=null && intval($new_id)>0) array_push($new_record_ids, $new_id);
@@ -2374,7 +2393,7 @@ public static function performImport($params, $mode_output){
         $res->close();
 
         if($id_field && count($details)>0 && !$is_mulivalue_index && $recordId!=null){ //action for last record
-            //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
+            //$details = retainExisiting($details, $details_orig, $params, $recordTypeStructure, $idx_reqtype);
             $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $details, $id_field, $mode_output);
         }
         if(!$id_field){

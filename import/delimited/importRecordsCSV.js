@@ -1780,7 +1780,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 var sel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(item, rtyID, 
                     $item.hasClass('indexes')?allowed2:allowed, 
                     $item.hasClass('indexes')?topitems2:topitems,
-                    {useHtmlSelect:false, 
+                    {useHtmlSelect:true, 
                      show_dt_name:true, 
                      show_latlong:(currentStep==4), 
                      show_required:(currentStep==4)});    
@@ -3132,7 +3132,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                            }
                        }
                        var params = params.join('&');
-                       var url = window.hWin.HAPI4.baseURL + 'hserver/controller/csvImportController.php?'+params;
+                       var url = window.hWin.HAPI4.baseURL + 'hserver/controller/importController.php?'+params;
                         
                        window.hWin.HEURIST4.util.downloadURL(url);
                         

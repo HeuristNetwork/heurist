@@ -220,7 +220,7 @@ if(@$_REQUEST['mode']!='2' || !@$_REQUEST['targetdbname']){
                         <div style="margin-left: 40px;">
                             <input type='text' name='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
                             <input type='button' value='Clone "<?=($isCloneTemplate)?$_REQUEST['templatedb']:HEURIST_DBNAME?>"'
-                                onclick='onSubmit(event)'/>
+                                class="h3button" onclick='onSubmit(event)'/>
                         </div>
 
                     </form>
@@ -266,18 +266,18 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     $isCloneTemplate = ($templateddb!=null);
     
-    list($newname, $targetdbname) = mysql__get_names( $targetdbname );
+    list($targetdbname_full, $targetdbname) = mysql__get_names( $targetdbname );
 
     //create new empty database and structure
     echo_flush ("<p>Create Database Structure (tables)</p>");
-    if(!DbUtils::databaseCreate($newname, 1)){
+    if(!DbUtils::databaseCreate($targetdbname_full, 1)){
         return false;
     }else{
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }
     
     // Connect to new database and  Remove initial values from empty database
-    mysql__usedatabase($mysqli, $newname);
+    mysql__usedatabase($mysqli, $targetdbname_full);
     $mysqli->query('delete from sysIdentification where 1');
     $mysqli->query('delete from sysTableLastUpdated where 1');
     $mysqli->query('delete from defLanguages where 1');
@@ -301,14 +301,15 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         $mysqli->query('delete from sysUGrps where ugr_ID>=0');
     }
 
+    list($source_database_full, $source_database) = mysql__get_names( $source_database );
     
 
     echo_flush ("<p>Copy data</p>");
     // db_clone function in /common/php/db_utils.php does all the work
-    if( DbUtils::databaseClone($source_database, $newname, true, $nodata, $isCloneTemplate) ){
+    if( DbUtils::databaseClone($source_database_full, $targetdbname_full, true, $nodata, $isCloneTemplate) ){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
-        DbUtils::databaseDrop( false, $newname, false, false );
+        DbUtils::databaseDrop( false, $targetdbname_full, false, false );
         
         return false;
     }
@@ -356,19 +357,19 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     
     // 4. add contrainsts, procedure and triggers
     echo_flush ("<p>Addition of Referential Constraints</p>");
-    if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
+    if(db_script($targetdbname_full, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
-        DbUtils::databaseDrop( false, $newname, false, false );
+        DbUtils::databaseDrop( false, $targetdbname_full, false, false );
         print $sHighLoadWarning;
         return false;
     }
 
     echo_flush ("<p>Addition of Procedures and Triggers</p>");
-    if(db_script($newname, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
+    if(db_script($targetdbname_full, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
-        DbUtils::databaseDrop( false, $newname, false, false );
+        DbUtils::databaseDrop( false, $targetdbname_full, false, false );
         print $sHighLoadWarning;
         return false;
     }    
@@ -389,15 +390,15 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     // Index new database for Elasticsearch
     //TODO: Needs error report, trap error and warn or abort clone
-    ElasticSearch::buildAllIndices($newname); // ElasticSearch uses full database name including prefix
+    ElasticSearch::buildAllIndices($targetdbname_full); // ElasticSearch uses full database name including prefix
 
     // Copy the images and the icons directories
     //TODO: Needs error report, trap error and warn or abort clone
-    folderRecurseCopy( HEURIST_UPLOAD_ROOT.HEURIST_DBNAME, HEURIST_UPLOAD_ROOT.$targetdbname );
+    folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database, HEURIST_FILESTORE_ROOT.$targetdbname );
 
     // Update file path in target database  with absolute paths
-    $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_UPLOAD_ROOT.$targetdbname.
-    "/' where ulf_FilePath='".HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/' and ulf_ID>0";
+    $query1 = "update recUploadedFiles set ulf_FilePath='".HEURIST_FILESTORE_ROOT.$targetdbname.
+    "/' where ulf_FilePath='".HEURIST_FILESTORE_ROOT.$source_database."/' and ulf_ID>0";
     $res1 = $mysqli->query($query1);
     if ($mysqli->error)  { //(mysql_num_rows($res1) == 0)
         print "<p><h4>Warning</h4><b>Unable to set database files path to new path</b>".
@@ -422,7 +423,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
             // email the system administrator to tell them a new database has been created
             $email_text =
             "There is new Heurist database.\n".
-            "Database name: ".$newname."\n\n".
+            "Database name: ".$targetdbname_full."\n\n".
             //($cloned_from_db?('Cloned from '.($isCloneTemplate?'template ':'').'database '.$cloned_from_db."\n"):'').
             'The user who created the new database is:'.$user_record['ugr_Name']."\n".
             "Full name:    ".$fullName."\n".
@@ -432,8 +433,8 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
             "Go to the address below to review further details:\n".
             HEURIST_BASE_URL."?db=".$targetdbname;
 
-            $email_title = 'New database: '.$newname.' by '.$fullName.' ['.$user_record['ugr_eMail'].'] '
-                .'Cloned from  '.($isCloneTemplate?'template ':'database ').$source_database;
+            $email_title = 'New database: '.$targetdbname_full.' by '.$fullName.' ['.$user_record['ugr_eMail'].'] '
+                .'Cloned from  '.($isCloneTemplate?'template ':'database ').$source_database_full;
 
             //$rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
             $rv = sendEmail('osmakov@gmail.com', $email_title, $email_text, null);
