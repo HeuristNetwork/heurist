@@ -1401,7 +1401,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
     }
 }
 
-$typeDict = array("s" => "Simple Date", "c" => "C14 Date", "f" => "Aproximate Date", "p" => "Date Range", "d" => "Duration");
+$typeDict = array("s" => "Simple Date", "c" => "C14 Date", "f" => "Approximate Date", "p" => "Date Range", "d" => "Duration");
 $fieldsDict = array("VER" => "Version Number", "TYP" => "Temporal Type Code", "PRF" => "Probability Profile", "SPF" => "Start Profile", "EPF" => "End Profile", "CAL" => "Calibrated", "COD" => "Laboratory Code", "DET" => "Determination Type", "COM" => "Comment", "EGP" => "Egyptian Date");
 $determinationCodes = array(0 => "Unknown", 1 => "Attested", 2 => "Conjecture", 3 => "Measurement");
 $profileCodes = array(0 => "Flat", 1 => "Central", 2 => "Slow Start", 3 => "Slow Finish");
