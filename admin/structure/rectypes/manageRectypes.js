@@ -757,7 +757,7 @@ function RectypeManager() {
                 'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
                 'Those with registration IDs less than 1000 are templates curated by the Heurist team. '
                 +'\n\n'
-+'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are' 
++'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are ' 
 +'optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.'                
                 
                 +'\n\nUse:  Manage tab > Structure > Browse templates')){
