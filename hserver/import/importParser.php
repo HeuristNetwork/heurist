@@ -394,6 +394,10 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
           }//foreach
         }        
         
+        
+        $csv_enclosure = '"';
+        $csv_mvsep = '|';
+        
     }
     else{   //CSV
         

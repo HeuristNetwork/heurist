@@ -1,5 +1,5 @@
 /**
-* manageEntity.js - BASE widget
+* importStructure.js - widget to browse template database, select record type and import it
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -16,6 +16,10 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+//  recordList for database browse = list of records from main index database
+//  manageRecordtype - select record type
+//  record type - treeview with individual fields selection
 
 //
 // METHODS

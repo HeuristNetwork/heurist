@@ -1070,10 +1070,10 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
     //3. In DB: Verify that enumeration fields have correct values =====================================
     if(!@$imp_session['csv_enclosure']){
-        $imp_session['csv_enclosure'] = $params['csv_enclosure'];
+        $imp_session['csv_enclosure'] = @$params['csv_enclosure']?$params['csv_enclosure']:'"';
     }
     if(!@$imp_session['csv_mvsep']){
-        $imp_session['csv_mvsep'] = $params['csv_mvsep'];
+        $imp_session['csv_mvsep'] = @$params['csv_mvsep']?$params['csv_mvsep']:'|';
     }
 
 
@@ -1972,6 +1972,8 @@ public static function performImport($params, $mode_output){
         
         $csv_mvsep = @$params['csv_mvsep']?$params['csv_mvsep']:$imp_session['csv_mvsep'];
         $csv_enclosure = @$params['csv_enclosure']?$params['csv_enclosure']:$imp_session['csv_enclosure'];
+        if(!$csv_mvsep) $csv_mvsep = '|';
+        if(!$csv_enclosure) $csv_enclosure = '"';
                                    
         $previos_recordId = null;
         $recordId = null;
