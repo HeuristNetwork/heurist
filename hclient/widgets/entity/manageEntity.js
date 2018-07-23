@@ -322,7 +322,7 @@ $.widget( "heurist.manageEntity", {
                                
                                 });     
 
-                this._on( this.recordList, {
+                this._on( this.recordList, {        
                         "resultlistonselect": function(event, selected_recs){
                                     this.selectedRecords(selected_recs);
                                     

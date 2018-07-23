@@ -28,13 +28,21 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     _entityName:'defRecTypes',
 
     //
-    //
+    //                                                  
     //    
     _init: function() {
         
+        //define it to load recordtypes from other server/database - if defined it allows selection only
+        if(!this.options.database_url){ //for example http://heurist.sydney.edu.au/heurist/?db=Heurist_Reference_Set
+            if(this.options.select_mode=='manager') this.options.select_mode='select_single';
+            this.options.use_cache = true;
+            this.options.use_structure = true;    
+        }else{
+            this.options.use_cache = true;
+            this.options.use_structure = true;
+        }
+        
         this.options.layout_mode = 'short';
-        this.options.use_cache = true;
-        this.options.use_structure = true;
         //this.options.edit_mode = 'popup';
         
         //this.options.select_return_mode = 'recordset';
@@ -56,6 +64,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
     
         this._super();
+        
     },
     
     //  
@@ -135,11 +144,35 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(this.options.use_cache){
             
             if(this.options.use_structure){
-                //take recordset from HEURIST.rectypes format     
-                this._cachedRecordset = this._getRecordsetFromStructure();
-                this.recordList.resultList('updateResultSet', this._cachedRecordset);
+                
+                if(this.options.database_url!=''){
+                    
+                    window.hWin.HEURIST4.msg.bringCoverallToFront();
+                    
+                    window.hWin.HAPI4.SystemMgr.get_defs(
+                            {rectypes:'all', mode:2, remote:this.options.database_url}, function(response){
+                    
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                
+                                that._cachedRecordset = that._getRecordsetFromStructure( response.data.rectypes );
+                                that.recordList.resultList('updateResultSet', that._cachedRecordset);
+                                
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                    });                    
+                    
+                }else{
+                    //take recordset from HEURIST.rectypes format     
+                    this._cachedRecordset = this._getRecordsetFromStructure();
+                    this.recordList.resultList('updateResultSet', this._cachedRecordset);
+                }
             }else{
-                //usual way from server
+                this.options.database_url
+                
+                //usual way from server via entity
                 var that = this;
                 window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
                     function(response){
@@ -168,7 +201,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     // get recordset from HEURIST4.rectypes
     //
-    _getRecordsetFromStructure: function(){
+    _getRecordsetFromStructure: function( rectypes ){
         
         var rdata = { 
             entityName:'defRecTypes',
@@ -176,8 +209,17 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             fields:[],
             records:{},
             order:[] };
+            
+        if(!rectypes){
+            rectypes = window.hWin.HEURIST4.rectypes;
+        } else {
+            //reload groups for remote rectypes            
+            
+            var ele = this.element.find('#input_search_group');   //rectype group
+            window.hWin.HEURIST4.ui.createRectypeGroupSelect(ele[0],
+                                        [{key:'any',title:'any group'}]);
+        }    
 
-        var rectypes = window.hWin.HEURIST4.rectypes;
 
         rdata.fields = rectypes.typedefs.commonFieldNames;
         rdata.fields.unshift('rty_ID');

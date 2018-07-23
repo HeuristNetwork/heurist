@@ -29,54 +29,88 @@
     $_REQUEST['db'] = 'dos_3';
     $_REQUEST['q'] = 'manly';
     */
-
+    
     $response = array();
-
-    $system = new System();
-    if( ! $system->init(@$_REQUEST['db']) ){
-
-        //get error and response
-        $response = $system->getError();
+    $is_remote = false;
+    
+    //get list of registered database and master index db on the same server
+    if(@$_REQUEST['remote']){
         
-    }else{
-
-        //$currentUser = $system->getCurrentUser();
-        $data = array();
-
-        if (@$_REQUEST['terms']) {
-            $data["terms"] = dbs_GetTerms($system);
-        }
-
-        if (@$_REQUEST['detailtypes']) {
-            $ids = $_REQUEST['detailtypes']=='all'?null:$_REQUEST['detailtypes'];
-            $data["detailtypes"] = dbs_GetDetailTypes($system, $ids, intval(@$_REQUEST['mode']) );
-        }
-
+       $remoteURL = $_REQUEST['remote'];
+       preg_match("/db=([^&]*).*$/", $remoteURL, $match);
         
-        if (@$_REQUEST['rectypes']) {
-            $ids = $_REQUEST['rectypes']=='all'?null:$_REQUEST['rectypes'];
-            $mode = intval(@$_REQUEST['mode']);
+       if(strpos($remoteURL, HEURIST_SERVER_URL)===0){ //same domain
 
-            if($mode>2){
-                $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids, $mode, @$_REQUEST['fieldtypes']);
-            }else{
-                $data["rectypes"] = dbs_GetRectypeStructures($system, $ids, $mode );
-            }
+            unset($_REQUEST['remote']);
+            $_REQUEST['db'] = $match[1];
+       }else{
+                $splittedURL = explode('?', $remoteURL);
+                   
+                $remoteURL = $splittedURL[0].'hserver/controller/sys_structure.php?db='.$match[1];
+                if (@$_REQUEST['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$_REQUEST['rectypes'];
+                if (@$_REQUEST['mode']) $remoteURL = $remoteURL.'&mode='.$_REQUEST['mode'];
+                                                                    
+                $data = loadRemoteURLContent($remoteURL);            
+            
+                //$response = json_decode($data, true);
+                //$is_remote = true;
+                
+                header('Content-Encoding: gzip');
+                header('Content-type: application/json;charset=UTF-8');
+                echo $data; 
+                exit();                
+       }
+    }
+    
+    if(!$is_remote){
+
+        $system = new System();
+        if( ! $system->init(@$_REQUEST['db']) ){
+
+            //get error and response
+            $response = $system->getError();
+            
         }else{
-            $mode = 0;
-        }
 
-        if($mode==4 && @$_REQUEST['lazyload']){
-            if(count($data["rectypes"])==1){
-                $response = $data["rectypes"][0]['children'];
-            }else{
-                $response = $data["rectypes"];
+            //$currentUser = $system->getCurrentUser();
+            $data = array();
+
+            if (@$_REQUEST['terms']) {
+                $data["terms"] = dbs_GetTerms($system);
             }
-        }else{
-            $response = array("status"=>HEURIST_OK, "data"=> $data );
-        }
 
-    }               
+            if (@$_REQUEST['detailtypes']) {
+                $ids = $_REQUEST['detailtypes']=='all'?null:$_REQUEST['detailtypes'];
+                $data["detailtypes"] = dbs_GetDetailTypes($system, $ids, intval(@$_REQUEST['mode']) );
+            }
+
+            
+            if (@$_REQUEST['rectypes']) {
+                $ids = $_REQUEST['rectypes']=='all'?null:$_REQUEST['rectypes'];
+                $mode = intval(@$_REQUEST['mode']);
+
+                if($mode>2){
+                    $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids, $mode, @$_REQUEST['fieldtypes']);
+                }else{
+                    $data["rectypes"] = dbs_GetRectypeStructures($system, $ids, $mode );
+                }
+            }else{
+                $mode = 0;
+            }
+
+            if($mode==4 && @$_REQUEST['lazyload']){
+                if(count($data["rectypes"])==1){
+                    $response = $data["rectypes"][0]['children'];
+                }else{
+                    $response = $data["rectypes"];
+                }
+            }else{
+                $response = array("status"=>HEURIST_OK, "data"=> $data );
+            }
+
+        }               
+    
+    }
     
     /*
     if ( extension_loaded('zlib') && (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) )

@@ -58,6 +58,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypes.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefRecTypes.js"></script>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
+        
         <!--      
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrTags.js"></script>
@@ -129,7 +131,12 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 
                 
             }
+
+            function testImportStruc(){
+
+                $('#main_div').empty().importStructure( {isdialog: false} );
              
+            }
             // to remove 
             function testRecords(){
                     var ispopup = true;
@@ -415,9 +422,9 @@ print $targetPath.'<br>';
                             <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
                             <option value="Records">Saved Searches</option>
-                            <option value="DefRecTypes">Record Types</option>
+                            <option value="DefRecTypes" selected>Record Types</option>
                             <option value="DefRecTypeGroups">Record Type Groups</option>
-                            <option value="DefDetailTypes" selected>Field Types</option>
+                            <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
                             <option value="DefTerms">Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>
@@ -472,7 +479,9 @@ print $targetPath.'<br>';
                     <button onclick="testEntity(true)">show in popup dialog</button>
                     <button onclick="testEntity(false)">show on this page</button>
                     <button onclick="testTags()">embedded select tags</button>
+                    <button onclick="testImportStruc()">Import structure</button>
                 </div>
+                
             </div>
         <div id="main_div" style="position:absolute;top:250px;min-height:300px;width:700;border:1px solid">
         </div>

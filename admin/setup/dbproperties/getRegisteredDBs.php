@@ -91,7 +91,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     // Return all registered databases as a json string
     $query = 'select rec_ID, rec_URL, rec_Title, rec_Popularity, dtl_value as version '
     .' from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=335 where `rec_RecTypeID`=22';
-    //.' from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=219 where `rec_RecTypeID`=49'; 
+    //local debug .' from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=219 where `rec_RecTypeID`=49'; 
     if($is_curated){
         $query = $query.' and rec_ID<1000';    
     }

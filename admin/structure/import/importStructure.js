@@ -17,8 +17,8 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-//  recordList for database browse = list of records from main index database
-//  manageRecordtype - select record type
+//  recordList_dbs for database browse = list of records from main index database
+//  recordList_rty - select record type
 //  record type - treeview with individual fields selection
 
 //
@@ -55,9 +55,6 @@ $.widget( "heurist.importStructure", {
     //cached records hRecordSet for databases
     _cachedRecordset_dbs:null,
     
-    //cached records hRecordSet for record types
-    _cachedRecordset_rty:null,
-    
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
@@ -82,8 +79,8 @@ $.widget( "heurist.importStructure", {
                         +    '<div class="ent_content_full recordList"/>'
                         +'</div>'
                         +'<div class="ent_wrapper" id="panel_rty" style="display:none">'
-                        +    '<div class="ent_header searchForm"/>'
-                        +    '<div class="ent_content_full recordList"/>'
+                        //+    '<div class="ent_header searchForm"/>'
+                        //+    '<div class="ent_content_full recordList"/>'
                         +'</div>'
                 +'</div>';
         $(layout).appendTo(this.element);
@@ -92,8 +89,8 @@ $.widget( "heurist.importStructure", {
         this.recordList_dbs = this.element.find('#panel_dbs .recordList');
         this.searchForm_dbs = this.element.find('#panel_dbs .searchForm');
 
-        this.recordList_rty = this.element.find('#panel_rty .recordList');
-        this.searchForm_rty = this.element.find('#panel_rty .searchForm');
+        //this.recordList_rty = this.element.find('#panel_rty .recordList');
+        //this.searchForm_rty = this.element.find('#panel_rty .searchForm');
 
         var that = this;
         //init record list for dbs and rty
@@ -106,36 +103,260 @@ $.widget( "heurist.importStructure", {
                        
                        entityName: 'Records',
                        view_mode: 'list',
+                       show_viewmode: false,
                        
                        pagesize: (this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
                        empty_remark: '<div style="padding:1em 0 1em 0">No registered databases found</div>',
 
-                       renderer: function(recordset, record){ 
-                                return that._recordListItemRenderer_dbs(recordset, record); 
+                       rendererHeader:  function(){
+        sHeader = '<div style="width:62px">Reg#</div><div style="width:13em">Database Name</div>'
+                +'<div style="width:28em">Description</div>'
+                +'<div style="width:5em">URL</div>';
+                            return sHeader;
                        },
-                       rendererHeader: function(){
-                                return that._recordListHeaderRenderer_dbs();
+                       renderer:
+                       function(recordset, record){ 
+                                return that._recordListItemRenderer_dbs(recordset, record); 
                        }
             });     
-
+            
         this._on( this.recordList_dbs, {
                         "resultlistonselect": function(event, selected_recs){
-                            // show list of reccord types
+                            // show list of record types for selected database
+                            that._loadRecordTypesForDb( selected_recs );
+                            
                         },
                         "resultlistonaction": this._onActionListener        
         });
-                        
+              
         //init search panel
+        this.searchForm_dbs.load(window.hWin.HAPI4.baseURL
+                    +'hclient/widgets/entity/searchSysDatabases.html?t'
+                    +window.hWin.HEURIST4.util.random(), 
+        function(response, status, xhr){
+            
+            //init buttons
+            that.btn_search_start = that.searchForm_dbs.find('#btn_search_start')
+                //.css({'width':'6em'})
+                .button({label: window.hWin.HR("Start search"), showLabel:false, 
+                        icon:"ui-icon-search", iconPosition:'end'});
+                 
+                    
+            //this is default search field - define it in your instance of html            
+            that.input_search = that.searchForm_dbs.find('#input_search');
+            
+            that._on( that.input_search, { keypress: that.startSearchOnEnterPress });
+            that._on( that.btn_search_start, { click: that.startSearch_dbs });            
+            
+            that.searchForm_dbs.find('#input_search_type_div2').show();
+            that.input_search_type = that.searchForm_dbs.find('#input_search_type2');
+            that._on(that.input_search_type,  { change:that.startSearch_dbs });
+            
+            that.input_sort_type = that.searchForm_dbs.find('#input_sort_type');
+            that.input_sort_type.val('register');
+            that._on(that.input_sort_type,  { change:that.startSearch_dbs });
+            
+        });
         
+//------------------------ rty panel
+
+        /*init record list for dbs and rty
+        this.recordList_rty
+            .resultList({
+                       eventbased: false, 
+                       isapplication: false, //do not listent global events @todo merge with eventbased
+                       multiselect: false,
+                       select_mode: 'select_single', // none
+                       
+                       entityName: 'defRecTypes',
+                       view_mode: 'list',
+                       
+                       pagesize: (this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
+                       empty_remark: '<div style="padding:1em 0 1em 0">No record types found</div>',
+
+                       rendererHeader:
+                            function(){
+                                var s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
+                                            +'<div style="width:13em">Name</div>'
+                                            +'<div style="width:20em;border:none;">Description</div>';
+                                    
+                                if (false && window.hWin.HAPI4.is_admin()){
+                                        s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                                }
+                                    
+                                return s;
+                            }
+            });     
+            
+        this._on( this.recordList_rty, {
+                        "resultlistonselect": function(event, selected_recs){
+                            // show list of record types for selected database
+                            //that.
+                            
+                        },
+                        "resultlistonaction": this._onActionListener        
+        });
         
-        
+        //init search panel
+        this.searchForm_rty.load(window.hWin.HAPI4.baseURL
+                    +'hclient/widgets/entity/searchDefRecTypes.html?t'
+                    +window.hWin.HEURIST4.util.random(), 
+        function(response, status, xhr){
+            
+            //init buttons
+            that.btn_search_start_rty = that.searchForm_rty.find('#btn_search_start')
+                //.css({'width':'6em'})
+                .button({label: window.hWin.HR("Start search"), showLabel:false, 
+                        icon:"ui-icon-search", iconPosition:'end'});
+                 
+                    
+            //this is default search field - define it in your instance of html            
+            that.input_search_rty = that.searchForm_rty.find('#input_search');
+            
+            that._on( that.input_search, { keypress: function(e){that.startSearchOnEnterPress(e,'rty')} });
+            that._on( that.btn_search_start_rty, { click: that.startSearch_rty });            
+            
+            that.input_search_group_rty = that.searchForm_rty.find('#input_search_group');
+            that._on(that.input_search_group_rty,  { change:that.startSearch_rty });
+            
+            that.input_sort_type_rty = that.searchForm_rty.find('#input_sort_type');
+            that._on(that.input_sort_type_rty,  { change:that.startSearch_rty });
+            
+        });
+        */
+
+
+//----------------------       
+        //show dialog if required 
         if(this.options.isdialog){
             this.popupDialog();
         }
         
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
+
+        var that = this;
+        
+        window.hWin.HAPI4.EntityMgr.getEntityConfig('records', 
+        function(entity){
+            that.options.entity = entity;
+                        
+            //retrieve all template databases from master index server
+            var query_request = {remote:'master'};
+            window.hWin.HAPI4.RecordMgr.search(query_request, 
+                function( response ){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        
+                        response.data.fields.push('rec_ScratchPad');
+                        
+                        that._cachedRecordset_dbs = new hRecordSet(response.data);
+                        
+                        //prepare recordset - extract database name and transfer title to notes
+                        that._cachedRecordset_dbs.each(function(recID, record){
+                            
+                                var recURL  = this.fld(record, 'rec_URL');
+                                var recDesc = this.fld(record, 'rec_Title');
+                        
+                                var splittedURL = recURL.split('?');
+                                var dbURL = splittedURL[0];
+                                var matches = recURL.match(/db=([^&]*).*$/);
+                                var dbName = (matches && matches.length>1)?matches[1]:'';
+        
+                                this.setFld(record, 'rec_URL', dbURL);
+                                this.setFld(record, 'rec_Title', dbName);
+                                this.setFld(record, 'rec_ScratchPad', recDesc);
+                        });
+                        
+                        that.filterRecordList_dbs({}); 
+
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                }
+            );
+                        
+        });
+                
+        
     },
 
+    //
+    //
+    //    
+    startSearchOnEnterPress: function(e){
+        
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if (code == 13) {
+            window.hWin.HEURIST4.util.stopEvent(e);
+            e.preventDefault();
+            this.startSearch_dbs();
+        }
+
+    },
+    
+    startSearch_dbs: function(){
+            var request = {};
+            
+            if(this.input_search.val()!=''){
+                request['rec_Title'] = this.input_search.val();
+            }
+            
+            if(this.input_search_type.val()!=''){
+                if(this.input_search_type.val()=='curated'){
+                    request['rec_ID'] = '<1000';
+                }else if(this.input_search_type.val()=='user'){
+                    request['rec_ID'] = '>999';
+                }
+            }
+            
+            if(this.input_sort_type.val()=='name'){
+                request['sort:rec_Title'] = 1;
+            }else if(this.input_sort_type.val()=='register'){
+                request['sort:rec_ID'] = 1;
+            }else  if(this.input_sort_type.val()=='url'){
+                request['sort:rec_URL'] = -1;
+            }
+            
+            this.filterRecordList_dbs(request);
+    },
+
+    //
+    //
+    //
+    _loadRecordTypesForDb: function(db_ids){
+        
+        var record = db_ids.getFirstRecord();//this._cachedRecordset_dbs.getById(db_ids[0]);
+        
+        var sURL  = db_ids.fld(record, 'rec_URL');
+        var sDB   = db_ids.fld(record, 'rec_Title');
+        
+        var options = {
+            isdialog: false,
+            container: '#panel_rty',
+            select_mode: 'select_single',
+            database_url:  (sURL+'?db='+sDB),
+            
+            onselect:function(event, data){
+                
+                var s = 'Selected ';
+                if(data && data.selection)
+                for(i in data.selection){
+                    if(i>=0)
+                        s = s+data.selection[i]+'<br>';
+                }
+                alert(s);
+            }
+        };
+
+        this.element.find('#panel_dbs').hide();
+        this.element.find('#panel_rty').show();
+        
+        window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', options);
+        
+        
+    },
+    
     //Called whenever the option() method is called
     //Overriding this is useful if you can defer processor-intensive changes for multiple option change
     _setOptions: function( ) {
@@ -156,8 +377,8 @@ $.widget( "heurist.importStructure", {
         if(this.searchForm_dbs) this.searchForm_dbs.remove();
         if(this.recordList_dbs) this.recordList_dbs.remove();
 
-        if(this.searchForm_rty) this.searchForm_rty.remove();
-        if(this.recordList_rty) this.recordList_rty.remove();
+        //if(this.searchForm_rty) this.searchForm_rty.remove();
+        //if(this.recordList_rty) this.recordList_rty.remove();
     },
     
     //----------------------
@@ -177,38 +398,58 @@ $.widget( "heurist.importStructure", {
          }
         return false;
     },
-    
-    //
-    // DBS: custom renderer for resultList header
-    //
-    _recordListHeaderRenderer_dbs:function(){
-        //TO EXTEND        
-        return '';
-    },
-    
+
     //
     // DBS: renderer of item for resultlist
     //
     _recordListItemRenderer_dbs:function(recordset, record){
-        //TO EXTEND        
-        return 'implement _recordListItemRenderer';
-    },
 
+        function fld(fldname){
+            return recordset.fld(record, fldname);
+        }
+
+        
+        var recID = fld('rec_ID');
+        var recURL = fld('rec_URL');
+        var dbName = fld('rec_Title');
+        var recTitle = window.hWin.HEURIST4.util.htmlEscape(fld('rec_ScratchPad'));
+        
+        /*var splittedURL = recURL.split('?');
+        var dbURL = splittedURL[0];
+        var matches = recURL.match(/db=([^&]*).*$/);
+        var dbName = (matches && matches.length>1)?matches[1]:'';
+        //get database and server url
+        var recTitle = window.hWin.HEURIST4.util.htmlEscape(fld('rec_Title'));
+        */
+        
+        var rtIcon = window.hWin.HAPI4.getImageUrl('sysDatabases', 0, 'icon');
+        var recThumb = window.hWin.HAPI4.getImageUrl('sysDatabases', recID, 'thumb');
+        
+        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
+        +'</div>';
+        
+        var recTitle = '<div class="item" style="width:3em">'+recID+'</div>'
+                      +'<div class="item" style="width:15em;'+(recID<1000?'font-weight:bold':'')
+                                                        +'">'+dbName+'</div>'
+                      +'<div class="item" style="width:30em">'+recTitle+'</div>'
+                      +'<div class="item" style="width:20em"><a href="'+recURL+'?db='+dbName+'" target="_blank">'
+                        + window.hWin.HEURIST4.util.htmlEscape(recURL)+'</a></div>';
+        
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        + html_thumb
+        + '<div class="recordSelector"><input type="checkbox" /></div>'
+        + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
+        + '</div>'
+        + '<div class="recordTitle" style="left:40px !important">'
+        +     recTitle 
+        + '</div></div>';
+        
+       
+
+        return html;
     
-    //
-    // RTY: custom renderer for resultList header
-    //
-    _recordListHeaderRenderer_rty:function(){
-        //TO EXTEND        
-        return '';
-    },
-    
-    //
-    // RTY: renderer of item for resultlist
-    //
-    _recordListItemRenderer_rty:function(recordset, record){
-        //TO EXTEND        
-        return 'implement _recordListItemRenderer';
     },
     
     //
@@ -264,25 +505,16 @@ $.widget( "heurist.importStructure", {
     
     //--------------- WORK WITH LIST
     //
-    // listener of onresult event generated by search
-    //
-    updateRecordList: function( event, data ){
-        if (data){
-            this._cachedRecordset_dbs = data.recordset;
-        }
-    },
-
-    //
     // listener of onfilter event generated by search
     //
-    filterRecordList: function(event, request){
+    filterRecordList_dbs: function(request){
         var subset = null;
-        if(this._cachedRecordset){
-            subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
-            this.recordList.resultList('updateResultSet', subset, request);   
+        if(this._cachedRecordset_dbs){
+            subset = this._cachedRecordset_dbs.getSubSetByRequest(request, this.options.entity.fields);
+            this.recordList_dbs.resultList('updateResultSet', subset, request);   
         }
         return subset;
     },
-    
+
 });
 

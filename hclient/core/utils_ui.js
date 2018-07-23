@@ -725,12 +725,13 @@ window.hWin.HEURIST4.ui = {
     //
     // get selector for record type groups
     //
-    createRectypeGroupSelect: function(selObj, topOptions) {
+    createRectypeGroupSelect: function(selObj, topOptions, rectypes) {
 
         window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
-        var rectypes = window.hWin.HEURIST4.rectypes,
-        index;
+        if(!rectypes) rectypes = window.hWin.HEURIST4.rectypes;
+        
+        var index;
 
         if(!rectypes) return selObj;
 
@@ -1651,7 +1652,6 @@ window.hWin.HEURIST4.ui = {
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
                                     widget.closeEditDialog();
-                                    
                                 }
 
                             });
