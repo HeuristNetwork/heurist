@@ -175,6 +175,16 @@ function hTabMenu() {
                 }
             }
         );
+        
+        $('#menulink-structure-import').click(
+        
+            function(event){
+                $('#frame_container_div').css('top',20).empty().importStructure( {isdialog: false} );
+                event.preventDefault();
+                return false;
+            }
+        
+        );
        
     }
     

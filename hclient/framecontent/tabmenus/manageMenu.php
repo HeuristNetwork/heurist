@@ -45,12 +45,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
             <h3><span class="ui-icon ui-iconalign ui-icon-database"></span>DATABASE</h3>
             <div>
                 <ul>
-                    <li><a href="#" id="menulink-database-browse"
+                    <li><a href="#" id="menu-database-browse"
                         data-nologin="1" data-logaction="dbOpen"
                         title="Open and login to another Heurist database - current database remains open">
                         Open</a>
                     </li>
-                    
 
                     <li><a href="admin/setup/dbcreate/createNewDB.php" name="auto-popup" class="large h3link"
                         onClick="{return false;}" data-logaction="dbNew"
@@ -99,14 +98,20 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             Visualise</a>
                     </li>
                     
+                    <!-- 
                     <li>
-                    <!-- admin/structure/import/selectDBForImport.php -->
-                        <a href="#" name="auto-popup" class="h3link"
+                        <a href="admin/structure/import/selectDBForImport.php" name="auto-popup" class="h3link"
                             style="text-decoration:line-through"
                             onClick="{return false;}" data-logaction="stAcquire"
                             title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
                             Browse templates</a>
                     </li>
+                    -->
+                    <li><a href="#" id="menulink-structure-import"
+                            title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
+                            Browse templates</a>
+                    </li>
+                    
 
                     <!-- Remarked temporarely 2016-05-11
                     <li>

@@ -22,12 +22,8 @@ $.widget( "heurist.mainMenu", {
 
     // default options
     options: {
-        btn_visible_designer:false,
-        btn_visible_newrecord:false
-        // callbacks
     },
 
-    _selectionRecordIDs:null,
     _current_query_string:'',
 
     // the widget's constructor
@@ -36,9 +32,7 @@ $.widget( "heurist.mainMenu", {
         var that = this;
 
         this.element.css('height','100%').addClass('ui-heurist-header2')
-        //
-        // prevent double click to select text
-        .disableSelection();
+            .disableSelection();// prevent double click to select text
 
         this.div_logo = $( "<div>")
         .addClass('logo')
@@ -158,14 +152,16 @@ $.widget( "heurist.mainMenu", {
 
         /* new entityfeatures*/
         this.divProfileItems = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
+        
+        
         this._initMenu('Profile', this.divProfileItems);
-        
-        
-        if(window.hWin.HAPI4.sysinfo['layout']=='original'){
-            this._initMenu('Database');
-            this._initMenu('Import');
-            this._initMenu('Export');
-        }
+
+        this._initMenu('Database');            
+        this._initMenu('Structure');
+        this._initMenu('Import');
+        this._initMenu('Verify');
+        this._initMenu('Archive');
+        this._initMenu('Admin');
         this._initMenu('Help');
         
         this.divMainMenuItems.menu();
@@ -175,6 +171,7 @@ $.widget( "heurist.mainMenu", {
         this.divProfileItems.find('.ui-menu-item').css({'padding':'0em !important'});
 
 
+        //logout case
         this.divMainMenuItems_lo = $('<ul>')
         .addClass('horizontalmenu')
         .addClass('logged-out-only')
@@ -187,36 +184,8 @@ $.widget( "heurist.mainMenu", {
         this.divMainMenuItems_lo.menu();
 
 
-        // SECOND LINE --------------------------------------------------
-        if(this.options.btn_visible_designer){
-            this.div_BottomRow = $("<div>").css({ 'position':'absolute', top:46, left: '2px', right:0, 'padding-right': '2em' }).appendTo( this.element );
-
-            this.btn_switch_to_design = $( "<button>", {
-                text: window.hWin.HR("go to database administration")
-            })
-            .css('width','160px')
-            .appendTo( this.div_BottomRow )
-            .button()
-            .click(function( event ) {
-                var url = window.hWin.HAPI4.baseURL + "admin/adminMenuStandalone.php?db=" + window.hWin.HAPI4.database;
-                window.open(url, "_blank");
-            });
-        }
-        if(this.options.btn_visible_newrecord){
-            this.btn_add_record = $( "<button>", {
-                text: window.hWin.HR("add new record")
-            })
-            .css('float','right')
-            .addClass('logged-in-only')
-            .appendTo( this.div_BottomRow )
-            .button({icons: {
-                primary: "ui-icon-circle-plus"
-            }})
-            .click( function(){window.hWin.HAPI4.SystemMgr.verify_credentials(that._addNewRecord);} );
-        }
-
-
-        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SELECT + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECTON_REC_SEARCHSTART,
+        // LISTENERS --------------------------------------------------
+        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
             function(e, data) {
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
                     if(data) {
@@ -228,12 +197,6 @@ $.widget( "heurist.mainMenu", {
                             + '&q=' + encodeURIComponent(query_request.q);
                         }
                     }
-                }else{
-                    if(data){
-                        data = data.selection?data.selection:data;
-                    }
-                    that._selectionRecordIDs = window.hWin.HAPI4.getSelection(data, true);
-
                 }
         });
 
@@ -309,9 +272,9 @@ $.widget( "heurist.mainMenu", {
     _destroy: function() {
 
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS);
-        $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SELECT + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECTON_REC_SEARCHSTART);
+        $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART);
 
-        // remove generated elements
+        /* remove generated elements
         this.btn_Admin.remove();
         this.btn_Profile.remove();
         this.menu_Profile.remove();
@@ -328,9 +291,13 @@ $.widget( "heurist.mainMenu", {
         this.btn_Database_lo.remove();
         this.btn_Help_lo.remove();
         this.menu_Help_lo.remove();
-
+        */
     },
 
+    
+    //
+    // menu element is <li> (button) for horizontal meny and drop-down that is loaded from html
+    //
     _initMenu: function(name, parentdiv){
 
         var that = this;
@@ -374,7 +341,10 @@ $.widget( "heurist.mainMenu", {
                 //that._onPopupLink
             });
 
-        }else if(name=='Profile'){
+        }
+        else if(name=='Profile'){
+            
+            //profile menu header consists of two labels: Settings and Current user name
             
             link = $('<a href="#"><span style="display:inline-block;padding-right:20px">Settings</span>' 
             +'<div class="ui-icon-user" style="display:inline-block;font-size:16px;width:16px;line-height:10px;vertical-align:bottom;"></div>'
@@ -382,7 +352,8 @@ $.widget( "heurist.mainMenu", {
             +window.hWin.HAPI4.currentUser.ugr_FullName
             +'</div><div style="position:relative;" class="ui-icon ui-icon-carat-1-s"></div></a>');
                                                                                                            
-        }else{
+        }
+        else{
             link = $('<a>',{
                 text: window.hWin.HR((name=='Help_lo'?'Help':name)), href:'#'
             });
@@ -413,13 +384,21 @@ $.widget( "heurist.mainMenu", {
                 .appendTo( that.document.find('body') )
                 //.addClass('ui-menu-divider-heurist')
                 .menu({select: function(event, ui){ 
-                        that._menuActionHandler(event, ui.item.attr('id'), ui.item.attr('data-logaction'));
+                        that._menuActionHandler(event, ui.item.find('a'));
                         return false; 
                 }});
 
+                that['menu_'+name].find('a').each(function(idx,item){
+                    var href = $(item).attr('href');
+                    if(href!='#' && !window.hWin.HEURIST4.util.isempty(href)){
+                        $(item).attr('href','#')
+                        $(item).attr('data-link', href);
+                    }
+                });
+                
                 that._refresh();
                 
-                that._initLinks(that['menu_'+name]);
+                //that._initLinks(that['menu_'+name]);
             })
             //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
             .hide();
@@ -502,7 +481,7 @@ $.widget( "heurist.mainMenu", {
 
         var that = this;
 
-        menu.find('[name="auto-popup"]').each(function(){
+        menu.find('a').each(function(){
             var ele = $(this);
             var href = ele.attr('href');
             if(!window.hWin.HEURIST4.util.isempty(href)){
@@ -545,25 +524,59 @@ $.widget( "heurist.mainMenu", {
 
     },
 
-    _menuActionHandler: function(event, action, action_log){
+    //
+    //
+    //
+    _menuActionHandler: function(event, item){
         
         var that = this;
         
-        if(action_log){
-            window.hWin.HAPI4.SystemMgr.user_log(action_log);
-        }
+        var action = item.attr('id');
+        var action_log = item.attr('data-logaction');
+        var action_level = item.attr('data-level');
+        var href = item.attr('data-link');
+        var target = item.attr('target');
         
-        var requiredLevel = 0;
+        //  -1 no verification
+        //  0 logged (DEFAULT)
+        //  groupid  - admin of group  
+        //  1 - db admin (admin of group #1)
+        //  2 - db owner
+        var requiredLevel = (action_level=-1 || action_level>=0) ?action_level :0;
         
         window.hWin.HAPI4.SystemMgr.verify_credentials(
-        function(){
+            function(){
+            
+            if(action_log){
+                window.hWin.HAPI4.SystemMgr.user_log(action_log);
+            }
         
+        if(action == "menu-database-browse"){
+            
+                window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', {
+                    select_mode:'select_single',
+                    isdialog: true,
+                    //container: $('#frame_container_div'),
+                    onselect:function(event, data){
+
+                        if(data && data.selection && data.selection.length==1){
+                            var db = data.selection[0];
+                            if(db.indexOf('hdb_')===0) db = db.substr(4);
+                            window.open( window.hWin.HAPI4.baseURL + '?db=' + db, '_blank');
+                        }
+                                                
+                    }
+                });
+        
+        }else 
+        if(action == "menu-database-properties"){
+            
+                window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
+           
+        }else 
         if(action == "menu-help-bugreport"){
             
            window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport');
-        }else 
-        if(action == "menu-profile-preferences"){
-            that._editPreferences();
         }else 
         if(action == "menu-profile-tags"){
             window.hWin.HEURIST4.ui.showEntityDialog('usrTags');
@@ -584,214 +597,39 @@ $.widget( "heurist.mainMenu", {
         if(action == "menu-profile-users"){ //for admin only
             window.hWin.HEURIST4.ui.showEntityDialog('sysUsers');
         }else 
+        if(action == "menu-profile-preferences"){
+            that._editPreferences();
+        }else
         if(action == "menu-profile-import"){  //for admin only
             that._importUsers();
-        }else if(action == "menu-database-refresh"){
+        }else 
+        if(action == "menu-database-refresh"){
             that._refreshLists( true );
-            
-        }else if(action == "menu-import-csv"){ // Result set
-            that.importCSV();
-        }else if(action == "menu-export-hml-resultset"){ // Current resultset, including rule-based expansion if applied
-            that.exportHML(true,false,false); // isAll, includeRelated, multifile
-        }else if(action == "menu-export-hml-selected"){ //Currently selected records only
-            that.exportHML(false,false,false);
-        }else if(action == "menu-export-hml-plusrelated"){ // Current resulktset with any related records
-            that.exportHML(true,true,false);
-        }else if(action == "menu-export-hml-multifile"){ // selected + related
-            that.exportHML(true,false,true);
-        }else if(action == "menu-export-kml"){
-            that.exportKML(true);
-        }else if(action == "menu-export-rss"){
-            that.exportFeed('rss');
-        }else if(action == "menu-export-atom"){
-            that.exportFeed('atom');
-        }else if(action == "menu-help-tipofday"){
+        }else 
+        if(action == "menu-help-tipofday"){
             showTipOfTheDay(false);
+        }else
+        if(!window.hWin.HEURIST4.util.isempty(href) && href!='#'){
+    
+            href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
+            
+            if(!window.hWin.HEURIST4.util.isempty(target)){
+                window.open( href, target);    
+            }else{
+                var options = {};
+                window.hWin.HEURIST4.msg.showDialog( href, options);    
+            }
+            
         }
+        
         
         },
-        requiredLevel //needed level of credentials any, logged (by default), admin of group, db admin, db owner
+            requiredLevel //needed level of credentials any, logged (by default), admin of group, db admin, db owner
         );
 
-        //event.preventDefault();
-        
+        window.hWin.HEURIST4.util.stopEvent(event);
     },
 
-
-    importCSV: function(){
-        
-           var url = window.hWin.HAPI4.baseURL + "hclient/framecontent/import/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
-           
-           var body = $(this.document).find('body');
-           var dim = {h:body.innerHeight(), w:body.innerWidth()};
-           
-           window.hWin.HEURIST4.msg.showDialog(url, {    
-                title: 'Import Records from CSV/TSV',
-                height: dim.h-5,
-                width: dim.w-5,
-                'context_help':window.hWin.HAPI4.baseURL+'context_help/importRecordsCSV.html #content'
-                //callback: _import_complete
-            });
-    },
-
-    _addNewRecord: function(){
-        window.hWin.HAPI4.SystemMgr.verify_credentials(function(){    
-
-            var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='
-                        +window.hWin.HAPI4.database
-                        +'&action=add_record';
-            window.hWin.HEURIST4.msg.showDialog(url, { height:550, width:700, title:'Add Record'});
-        });
-    },
-
-
-
-    exportHML: function(isAll, includeRelated, multifile){
-
-        var q = "",
-        layoutString,rtFilter,relFilter,ptrFilter,
-        depth = 0;
-
-        if(isAll){
-
-            if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
-                q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
-                if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
-                    q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
-                }
-            }
-
-        }else{    //selected only
-
-            if (!window.hWin.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
-                window.hWin.HEURIST4.msg.showMsgDlg("Please select at least one record to export");
-                return false;
-            }
-            q = "ids:"+this._selectionRecordIDs.join(",");
-
-        }
-
-        if (includeRelated){
-
-            depth = 1;
-
-            /* TODO: includeRelated + depth=1 has been commented out with no explanation. Why? Delete?
-            var rtFilter = top.HEURIST.search.getPushDownFilter('rectype');
-            if (rtFilter[0] > depth){ // if filter max depth is greater than depth -> adjust depth
-            depth = rtFilter[0];
-            }
-            rtFilter = rtFilter[1];
-            var relFilter = top.HEURIST.search.getPushDownFilter('reltype');
-            if (relFilter[0] > depth){
-            depth = relFilter[0];
-            }
-            relFilter = relFilter[1];
-            var ptrFilter = top.HEURIST.search.getPushDownFilter('ptrtype');
-            if (ptrFilter[0] > depth){
-            depth = ptrFilter[0];
-            }
-            ptrFilter = ptrFilter[1];
-            var layoutString = top.HEURIST.search.getLayoutString();
-            if (layoutString[0] > depth){
-            depth = layoutString[0];
-            }
-            layoutString = layoutString[1];
-            var selFilter = top.HEURIST.search.getSelectedString();
-            if (selFilter[0] > depth){
-            depth = selFilter[0];
-            }
-            selFilter = selFilter[1];
-            */
-        }
-
-        if(q!=''){
-
-            var url = window.hWin.HAPI4.baseURL + "export/xml/flathml.php?"+
-            "w=all"+
-            "&a=1"+
-            "&depth="+depth +
-            "&q=" + q +
-            /*(layoutString ? "&" + layoutString : "") +
-            (selFilter ? "&" + selFilter : "") +
-            (rtFilter ? "&" + rtFilter : "") +
-            (relFilter ? "&" + relFilter : "") +
-            (ptrFilter ? "&" + ptrFilter : "") +*/
-            "&db=" + window.hWin.HAPI4.database +
-            (multifile?'&file=1':'');
-
-            window.open(url, '_blank');
-        }
-
-        return false;
-    },
-
-
-
-    exportKML: function(isAll){
-
-        var q = "";
-        if(isAll){
-
-            q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
-
-            if(q=='?'){
-                window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
-                return;
-            }
-
-
-        }else{
-
-            if (!window.hWin.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs)) {
-                window.hWin.HEURIST4.msg.showMsgDlg("Please select at least one record to export");
-                return false;
-            }
-            q = "?w=all&q=ids:"+this._selectionRecordIDs.join(",");
-        }
-
-        if(q!=''){
-            var url = window.hWin.HAPI4.baseURL + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
-            window.open(url, '_blank');
-        }
-
-        return false;
-    },
-
-
-
-    exportFeed: function(mode){
-
-        if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
-            var q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
-
-            if(!window.hWin.HEURIST4.util.isempty(q)){
-                var w = window.hWin.HEURIST4.current_query_request.w;
-                if(window.hWin.HEURIST4.util.isempty(w)) w = 'a';
-                if(mode=='rss') {
-                    mode = '';
-                }else{
-                    mode = '&feed='+mode;
-                }
-                var rules = '';
-                if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
-                    rules = '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
-                }
-
-
-                var url = window.hWin.HAPI4.baseURL + 'export/xml/feed.php?&q=' + q + '&w=' + w + '&db=' + window.hWin.HAPI4.database + mode + rules;
-                window.open(url, '_blank');
-            }
-        }
-    },
-
-
-
-    /**
-    * Reload database structure image on client side
-    */
-    _refreshLists: function( is_message ){
-        window.hWin.HAPI4.SystemMgr.get_defs_all( is_message, this.document);
-    },
 
     /**
     * Open Edit Preferences dialog (@todo: ? move into separate file?)

@@ -263,6 +263,9 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             , verify_credentials: function(callback, requiredLevel){
 
+                callback(); //verification temporarely disabled
+                return; 
+                
                 //check if login
                 _callserver('usr_info', {a:'verify_credentials'},
                 function(response){
@@ -777,6 +780,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
             },
 
+            
             //load entire entity data and store it in cache (applicable for entities with count < ~1500)
             // entityScrud.action = search
             //

@@ -61,8 +61,8 @@ $.widget( "heurist.search", {
         return;
         }*/
         this.element.css({'height':'6.88em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
-        if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
-            this.element.addClass('ui-heurist-header1');
+        if(window.hWin.HAPI4.sysinfo['layout']!='H4Default' && window.hWin.HAPI4.sysinfo['layout']!='H5Default'){
+            this.element.addClass('ui-heurist-header1'); //dark navy bg - used long ago in original layout - to remove
         }else{
             this.element.addClass('ui-widget-content');
         }
