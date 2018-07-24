@@ -479,7 +479,6 @@ function hAPI(_db, _oninit) { //, _currentUser
             ,get_defs_all: function(is_message, document, callback){
                 
                 window.hWin.HEURIST4.msg.bringCoverallToFront();
-                
 
                 this.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                     

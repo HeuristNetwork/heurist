@@ -26,20 +26,22 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 
 <li>HELP</li>
 
-<li style="padding-left:5px;" data-logaction="hlpOnline">
-    <a href="../../help/index.html" target="_blank"
+<li style="padding-left:5px;">
+    <a href="help/index.html" target="_blank" data-logaction="hlpOnline"
        title="Comprehensive online help for the Heurist system">
        Online help</a>
 </li>
 
-<li class="admin-only" style="padding-left:5px;" data-logaction="hlpWebsite">
+<li class="admin-only" style="padding-left:5px;">
     <a href="http://HeuristNetwork.org" target="_blank"
+       data-logaction="hlpWebsite"
        title="Heurist Network website - a source for a wide range of information, services and contacts ">
        Heurist Network website</a>
 </li>
 
-<li style="padding-left:5px;" id="menu-help-tipofday" class="logged-in-only" data-logaction="hlpTips">
+<li style="padding-left:5px;" class="logged-in-only" >
     <a href="#"
+       id="menu-help-tipofday" data-logaction="hlpTips"
        title="Useful tipson how to get started with Heurist">
        Getting-started tips</a>
 </li>
@@ -50,7 +52,8 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 
 <!-- export/email/formEmailRecordPopup.html?rectype=bugreport -->
 
-<li style="padding-left:5px;" id="menu-help-bugreport"><a href="#"
+<li style="padding-left:5px;"><a href="#"
+    id="menu-help-bugreport"
     title="Click to send a bug report or feature request to the Heurist development team">Bug report</a>
 </li>
 
@@ -71,7 +74,7 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
     <a href="#"
         onclick="{  var dlg = $('#heurist-about');
                     dlg.parent().find('.fullmode').css('display','block');
-                    dlg.dialog('option',{height: 360, title:window.hWin.HR('About')});
+                    dlg.dialog('option',{height: 420, title:window.hWin.HR('About')});
                     dlg.dialog('open');
                     return false; }"
         title="Version, Credits, Copyright, License">

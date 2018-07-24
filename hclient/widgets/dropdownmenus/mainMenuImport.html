@@ -27,15 +27,18 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 <li>IMPORT</li>
 
     <li>
-        <a href="#" id="menu-import-csv"
-            data-logaction="impDelim"
+        <a href="import/delimited/importRecordsCSV.php"
+            data-logaction="impDelim" data-size="large"
+            data-header="Import &gt; Records from CSV/TSV"
+            data-help="importRecordsCSV"
             title="Import data from delimited text file. Supports matching, record creation, record update.">
             Delimited text (csv, tsv)</a>
     </li>
 
     <li>
         <a href="import/biblio/syncZotero.php"
-            data-logaction="syncZotero"
+            data-logaction="syncZotero" data-size="portrait"
+            data-header="Import &gt; Synchronise with a Zotero web library"
             title="Synchronise with a Zotero web library - new records are added to Heurist, existing records updated">
             Zotero synchronisation</a>
     </li>
@@ -51,14 +54,17 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 
     <li>
         <a href="import/hyperlinks/importHyperlinks.php"
-            data-logaction="impHyperlinks"
+            data-logaction="impHyperlinks" data-size="large"
+            data-header="Import &gt; Records from bookmakrs file ot web page hyperlinks"
             title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
             Import hyperlinks</a>
     </li>
 
     <li>
-        <a href="#" id="menu-import-kml"
-            data-logaction="impKML"
+        <a href="import/delimited/importRecordsCSV.php?format=kml"
+            data-logaction="impKML" data-size="large"
+            data-header="Import &gt; Records from KML"
+            data-help="importRecordsCSV"
             title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
             Import KML</a>
     </li>
@@ -87,12 +93,14 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 
     <li class="admin-only">
         <a href="import/utilities/manageFilesUpload.php"
-            title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
-            Multi-file upload</a>
+           data-size="medium"
+           title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
+           Multi-file upload</a>
     </li>
     
     <li class="admin-only">
         <a href="import/fieldhelper/synchroniseWithFieldHelper.php"
-            title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
-            Index files</a>
+           data-size="large"
+           title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
+           Index files</a>
     </li>

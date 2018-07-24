@@ -113,7 +113,7 @@ function hTabMenu() {
         $('#menulink-database-refresh').click(
             function(event){
                 window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
-                window.hWin.HAPI4.SystemMgr.get_defs_all( true, top.document);
+                window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin);//was top.document
                 event.preventDefault();
                 return false;
             }

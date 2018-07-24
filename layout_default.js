@@ -131,7 +131,7 @@ var cfg_layouts = [
         north_pane:{ dropable:false, dragable:false, 
                 css:{position:'absolute', top:0,left:0,height:'6em',right:0, 
                      'min-width':'75em'}, 
-            apps:[{appid:'h3_mainMenu', hasheader:false, css:{height:'100%', border:'solid'} }] 
+            apps:[{appid:'h3_mainMenu', hasheader:false, css:{height:'100%', border:'solid'}, options:{topics:['help','profile']} }] 
         },
         center_pane:{ dockable:false, dropable:false, dragable:false, 
                 css:{position:'absolute', top:'6em',left:0,bottom:0,right:0},

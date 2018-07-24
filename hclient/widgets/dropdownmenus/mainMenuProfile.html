@@ -26,45 +26,62 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
 
 <li>PROFILE</li>
 
-<li style="padding-left:5px;" id="menu-profile-preferences" data-logaction="profPrefs"><a href="#" 
-    title="Display preferences relating to behaviours related to this database">Preferences</a>
+<li style="padding-left:5px;">
+    <a href="#" 
+         id="menu-profile-preferences" data-logaction="profPrefs"
+         title="Display preferences relating to behaviours related to this database">Preferences</a>
 </li>
 
-<li style="padding-left:5px;" id="menu-profile-tags" data-logaction="profTags">
-    <a href="#" title="Delete, combine, rename your personal and workgroup tags">Manage tags</a>
+<li style="padding-left:5px;">
+    <a href="#" 
+        id="menu-profile-tags" data-logaction="profTags"
+        title="Delete, combine, rename your personal and workgroup tags">Manage tags</a>
 </li>
 
-<li style="padding-left:5px;" id="menu-profile-reminders" data-logaction="profReminders"><a href="#"
-    title="View and delete automatic notification emails sent from the records you have bookmarked">Manage reminders</a>
+<li style="padding-left:5px;">
+    <a href="#"
+        id="menu-profile-reminders" data-logaction="profReminders"
+        title="View and delete automatic notification emails sent from the records you have bookmarked">Manage reminders</a>
 </li>
 
-<li style="padding-left:5px;" id="menu-profile-files" data-logaction="profFiles"><a href="#"
-    title="Manage uploaded files and registered remote media resources">Manage files</a>
+<li style="padding-left:5px;">
+    <a href="#"
+        id="menu-profile-files" data-logaction="profFiles"
+        title="Manage uploaded files and registered remote media resources">Manage files</a>
 </li>
 
 <li>-</li>
 
 <li>ACCESS</li>
 
-<li style="padding-left:5px;" id="menu-profile-groups" data-logaction="profWorkgroups"><a href="#"
-    title="List of groups you are member of">My workgroups</a>
+<li style="padding-left:5px;">
+    <a href="#"
+        id="menu-profile-groups" data-logaction="profWorkgroups"
+        title="List of groups you are member of">My workgroups</a>
 </li>
 
-<li style="padding-left:5px;" id="menu-profile-info" data-logaction="profUserinfo"><a href="#"
-    title="User personal information">My user info</a>
+<li style="padding-left:5px;">
+    <a href="#"
+        id="menu-profile-info" data-logaction="profUserinfo"
+        title="User personal information">My user info</a>
 </li>
 
-<li style="padding-left:5px;" class="admin-only" id="menu-profile-users" data-logaction="profUsers"><a href="#"
-    title="Add and edit database users, including authorization of new users. Use Manage Workgroups to allocate users to workgroups and define roles within workgroups">Manage users</a>
+<li style="padding-left:5px;" class="admin-only">
+    <a href="#"
+        id="menu-profile-users" data-logaction="profUsers"
+        title="Add and edit database users, including authorization of new users. Use Manage Workgroups to allocate users to workgroups and define roles within workgroups">Manage users</a>
 </li>
 
-<li style="padding-left:5px;" class="admin-only" id="menu-profile-import" data-logaction="profImportUser"><a href="#"
-    title="Import users one at a time from another database on the system, including user name, password and email address - users are NOT assigned to workgroups">Import user</a>
+<li style="padding-left:5px;" class="admin-only">
+    <a href="#"
+        id="menu-profile-import" data-logaction="profImportUser"
+        title="Import users one at a time from another database on the system, including user name, password and email address - users are NOT assigned to workgroups">Import user</a>
 </li>
 
 <li>-</li>
 
-<li style="padding-left:5px;"><a href="#"
+<li style="padding-left:5px;">
+    <a href="#"
     onclick="{ 
         window.hWin.HAPI4.SystemMgr.logout(
             function(response){

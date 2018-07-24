@@ -234,7 +234,7 @@ foreach ($fh_data->children() as $f_gen){
 
 if($is_verbose){
     print '</table><br><br>';
-    print 'Mapping check passed. <button onclick="{document.getElementById(\'mapping_report\').style.display=\'block\';}">Show report</button><br><br>';
+    print 'Mapping check passed. <button class="h3button" onclick="{document.getElementById(\'mapping_report\').style.display=\'block\';}">Show report</button><br><br>';
 }
 
 
@@ -311,7 +311,7 @@ if($step=="1"){  //first step - info about current status
         print "<div>Count items in Zotero: $totalitems</div>";
         if($totalitems>0){
             print "<div id='divStart2'><br /><br /><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".HEURIST_DBNAME.
-            "&lib_key=".$lib_key_idx."' onclick='__showLoading()'><button>Start</button></a></div>";
+            "&lib_key=".$lib_key_idx."' onclick='__showLoading()'><button class='h3button'>Start</button></a></div>";
             print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../common/images/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
         }
 

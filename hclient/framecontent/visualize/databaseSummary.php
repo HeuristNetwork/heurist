@@ -154,6 +154,7 @@ A:link {
                    $("#expand").click();
             }
         </script>
+        
     </head>
 
     <body class="popup" style="background-color: #FFF;">

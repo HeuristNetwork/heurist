@@ -264,7 +264,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
                 } else {
                     // Remove from ElasticSearch
                     print "<br/><br/>Removing indexes, calling deleteIndexForDatabase with parameter $dbname";
-                    ElasticSearch::deleteIndexForDatabase($fulldbname); // ElasticSearch uses full database name with prefix
+                    ElasticSearch::deleteIndexForDatabase($dbname); // ElasticSearch uses full database name with prefix
 
                     print "<br/><br/>Record data, bookmarks and tags have been deleted from <b>$dbname</b><br/>";
                     print "Database structure (record types, fields, terms, constraints etc.) and users have not been affected.";

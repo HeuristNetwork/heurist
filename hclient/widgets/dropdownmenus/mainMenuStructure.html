@@ -22,8 +22,8 @@
 
 <li>
     <a href="hclient/framecontent/visualize/databaseSummary.php" id="menu-structure-summary"
-        data-level="1" data-logaction="stVis"
-        onClick="{return false;}"
+        data-level="1" data-logaction="stVis" data-size="large"
+        data-header="Structure &gt; Visualization of links between record types"
         title="Visualise the internal connections between record types in the database and add connections (record pointers and relationshi markers) between them">
         Visualise</a>
 </li>
@@ -40,7 +40,8 @@
 
 <li>
     <a href="admin/structure/rectypes/manageRectypes.php"
-        data-level="1" data-logaction="stManage"
+        data-level="1" data-logaction="stManage" data-size="large"
+        data-header="Structure &gt; Modify &gt; Record types"
         title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
         Record types</a>
 </li>
@@ -65,22 +66,25 @@
 
 <li>
     <a id="manage_terms" href="admin/structure/terms/editTerms.php?treetype=enum" 
-        data-level="1" data-logaction="stTerms"
+        data-level="1" data-logaction="stTerms" data-size="medium"
+        data-header="Structure &gt; Modify &gt; Terms"
         title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
         Terms</a>
 </li>
 
 <li>
     <a  href="admin/structure/terms/editTerms.php?treetype=relation"
-        data-level="1" data-logaction="stRelations"
+        data-level="1" data-logaction="stRelations" data-size="medium"
+        data-header="Structure &gt; Modify &gt; Relationship types"
         title="Browse and edit the relationship types"  onclick= "{return false;}">
         Relationship types</a>
 </li>
 
 <li>
     <a href="#" id="menu-structure-mimetypes"
-        data-level="1"
-        title="Define the relationship between file extension and mime type for uploaded and externally referenced files">
+        data-level="1" data-size="medium"
+        data-header="Structure &gt; Modify &gt; Mime types"
+        title="Define file mime types and extensions">
         Mime types</a>
 </li>
 
@@ -90,17 +94,17 @@
     <a href='#'>Schemas</a>
     <ul style="min-width:180px">                                                            
             <li>
-                <a href="admin/describe/listRectypeRelations.php?action=simple"
+                <a href="admin/describe/listRectypeRelations.php?action=simple" data-size="medium"
                     title="Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts">
                     Simple fields schema</a>
             </li>
             <li>
-                <a href="admin/describe/listRectypeRelations.php?action=relations"
+                <a href="admin/describe/listRectypeRelations.php?action=relations" data-size="medium"
                     title="Display/print a listing of the record types and their pointer and relationship fields, including usage counts">
                     Relationships schema</a>
             </li>
             <li>
-                <a href="admin/describe/listRectypeRelations.php?action=all"
+                <a href="admin/describe/listRectypeRelations.php?action=all" data-size="medium"
                     title="Display/print a listing of the record types and all fields, including usage counts">
                     Combined schema</a>
             </li>
@@ -115,6 +119,7 @@
 
             <li>
                 <a href="admin/describe/getDBStructureAsSQL.php?pretty=1"
+                    target="_blank"
                     title="Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)">
                     Structure (SQL)</a>
             </li>
@@ -126,14 +131,15 @@
 <li>
     <a href="admin/verification/recalcTitlesAllRecords.php"
         data-level="1" data-logaction="stRebuildTitles"
-        onClick="{return false;}"
+        data-header="Structure &gt; Rebuild record titles"
         title="Rebuilds the constructed record titles listed in search results, for all records">
         Rebuild record titles</a>
 </li>
 
 <li>
     <a href="admin/verification/listDatabaseErrorsInit.php"
-        data-level="1" data-logaction="stVerify"
+        data-level="1" data-logaction="stVerify" data-size="medium"
+        data-header="Structure &gt; Errors in database structure"
         title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
         Verify</a>
 </li>
@@ -141,7 +147,6 @@
 <li id="menu-database-refresh">
     <a href="#" id="menu-structure-refresh"
         data-level="0" data-logaction="stRefresh"
-        onClick="{return false;}" data-nologin="1"
         title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
         Refresh</a>
 </li>

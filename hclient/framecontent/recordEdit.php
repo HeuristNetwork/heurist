@@ -48,7 +48,7 @@ if(@$_REQUEST['u']){
                 
     if ($res[0] > 0) { //already bookmarked
         print '<script>var prepared_params = {recID:'.$res[1].'};</script>';
-    }else if (exist_similar($mysqli, $url)) {
+    }else if (false && exist_similar($mysqli, $url)) {  //@todo implement disambiguation dialog
 //----- 2. find similar url - show disambiguation dialog -----------------------------------------
 
         //redirect to disambiguation
@@ -108,7 +108,9 @@ if(@$_REQUEST['u']){
     }
     
 }   
-    
+else{
+    print '<script>var prepared_params = {};</script>';
+}    
 ?>
 <!-- <?php echo PDIR;?> -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/rec_relation.js"></script>
@@ -144,8 +146,9 @@ if(@$_REQUEST['u']){
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
                     
                     function __param(pname){
-                        if(window.hWin.HEURIST4.util.isempty(prepared_params) || 
-                           window.hWin.HEURIST4.util.isempty(prepared_params[pname])){
+                        if($.isEmptyObject(prepared_params) || 
+                           window.hWin.HEURIST4.util.isempty(prepared_params[pname]))
+                        {
                                 return window.hWin.HEURIST4.util.getUrlParameter(pname, window.location.search);
                         }else{
                                 return prepared_params[pname];

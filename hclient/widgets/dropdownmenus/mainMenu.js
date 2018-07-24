@@ -153,16 +153,19 @@ $.widget( "heurist.mainMenu", {
         /* new entityfeatures*/
         this.divProfileItems = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
         
+        function __include(topic){
+             return (!that.options.topics || that.options.topics.indexOf(topic.toLowerCase())>=0);
+        }
         
-        this._initMenu('Profile', this.divProfileItems);
+        if(__include('profile')) this._initMenu('Profile', this.divProfileItems);
 
-        this._initMenu('Database');            
-        this._initMenu('Structure');
-        this._initMenu('Import');
-        this._initMenu('Verify');
-        this._initMenu('Archive');
-        this._initMenu('Admin');
-        this._initMenu('Help');
+        if(__include('Database')) this._initMenu('Database');            
+        if(__include('Structure')) this._initMenu('Structure');
+        if(__include('Import')) this._initMenu('Import');
+        if(__include('Verify')) this._initMenu('Verify');
+        if(__include('Archive')) this._initMenu('Archive');
+        if(__include('Admin')) this._initMenu('Admin');
+        if(__include('Help')) this._initMenu('Help');
         
         this.divMainMenuItems.menu();
         this.divProfileItems.menu();
@@ -180,6 +183,7 @@ $.widget( "heurist.mainMenu", {
 
         this._initMenu('Database_lo', this.divMainMenuItems_lo); //logout case
         this._initMenu('Help_lo', this.divMainMenuItems_lo);
+        
         this.menu_Help_lo.find('.logged-in-only').hide();
         this.divMainMenuItems_lo.menu();
 
@@ -239,7 +243,7 @@ $.widget( "heurist.mainMenu", {
             $(this.element).find('.logged-in-only').show();
             $(this.element).find('.logged-out-only').hide();
 
-            this.menu_Help.find('.logged-in-only').show();
+            //this.menu_Help.find('.logged-in-only').show();
 
         }else{
             //not logged -guest
@@ -536,7 +540,7 @@ $.widget( "heurist.mainMenu", {
         var action_level = item.attr('data-level');
         var href = item.attr('data-link');
         var target = item.attr('target');
-        
+
         //  -1 no verification
         //  0 logged (DEFAULT)
         //  groupid  - admin of group  
@@ -573,6 +577,18 @@ $.widget( "heurist.mainMenu", {
             
                 window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
            
+        }else 
+        if(action == "menu-structure-mimetypes"){
+            
+                window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',
+                                                {edit_mode:'inline', width:900});
+
+        }else 
+        if(action == "menu-structure-refresh"){
+            
+                window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
+                window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin);//was top.document
+                                                
         }else 
         if(action == "menu-help-bugreport"){
             
@@ -611,12 +627,41 @@ $.widget( "heurist.mainMenu", {
         }else
         if(!window.hWin.HEURIST4.util.isempty(href) && href!='#'){
     
-            href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
+            if(!(href.indexOf('http://')==0 || href.indexOf('https://')==0)){
+                href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
+            }
             
             if(!window.hWin.HEURIST4.util.isempty(target)){
                 window.open( href, target);    
             }else{
+                
                 var options = {};
+                var size_type = item.attr('data-size');
+                var dlg_title = item.attr('data-header');
+                var dlg_help = item.attr('data-help');
+                
+                if(size_type=='large'){
+                    options = {width:1400, height:800};
+                }else if(size_type=='portrait'){
+                    options = {width:650, height:800};    
+                }else if(size_type=='medium'){
+                    options = {width:1050, height:640};
+                }else{
+                    options = {width:760, height:400};
+                }
+                if(!window.hWin.HEURIST4.util.isempty(dlg_title)){
+                    options['title'] = dlg_title;
+                }           
+                if(!window.hWin.HEURIST4.util.isempty(dlg_title)){
+                    options['context_help'] = window.hWin.HAPI4.baseURL+'context_help/'+dlg_help+'.html #content';
+                }
+                
+                var position = { my: "center", at: "center", of: window.hWin };
+                var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+                if(options['width']>maxw) options['width'] = maxw*0.95;
+                var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+                if(options['height']>maxh) options['height'] = maxh*0.95;
+                
                 window.hWin.HEURIST4.msg.showDialog( href, options);    
             }
             
