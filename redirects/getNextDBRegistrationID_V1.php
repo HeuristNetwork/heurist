@@ -3,7 +3,7 @@
 /**
 *
 * getNextRegistrationID_V1.php
-* redirector to getRegisteredDBs.php to provide a stable URL in case of restructuring of the codebase
+* redirector to getNextRegistrationID.php to provide a stable URL in case of restructuring of the codebase
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

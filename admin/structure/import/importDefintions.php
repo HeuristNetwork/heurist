@@ -1,6 +1,7 @@
 <?php
 /**
 * importDefinitions.php - add definitions to database
+* see createDB
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
