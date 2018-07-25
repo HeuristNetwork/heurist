@@ -7,7 +7,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -55,7 +55,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysDatabases.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysBugreport.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypes.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefRecTypes.js"></script>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
+        
         <!--      
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrTags.js"></script>
@@ -102,17 +106,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 if(success){
                     
                     
-                // OLD H3 stuff
-                if(window.HEURIST && window.HAPI4.baseURL){
-                    window.HEURIST.baseURL  = window.HAPI4.baseURL;
-                    window.HEURIST.loadScript(window.HAPI4.baseURL+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
-                    window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
-                    window.HEURIST.database = {  name: window.HAPI4.database };
-                }
-                    
-                    //testUsers();
-                    //testUsers();
-                    
                     
                     $('#curr_user').html(window.hWin.HAPI4.currentUser['ugr_ID']+'  '+window.hWin.HAPI4.currentUser['ugr_Name']);
                 }
@@ -138,7 +131,12 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 
                 
             }
+
+            function testImportStruc(){
+
+                $('#main_div').empty().importStructure( {isdialog: false} );
              
+            }
             // to remove 
             function testRecords(){
                     var ispopup = true;
@@ -188,7 +186,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                                         
                                         window.hWin.HAPI4.EntityMgr.doRequest(request, 
                                             function(response){
-                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                if(response.status == window.hWin.ResponseStatus.OK){
                                                 }
                                             });
                                         //update panel
@@ -287,6 +285,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
 */
                 }else{//on this page
 
+                    options.isdialog = false;
                     options.container = '#main_div';
 /*                
                     var widgetname = 'manage'+entity,
@@ -361,9 +360,6 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
     <!-- HTML -->
     <body>
-    
-        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
-        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
     
 <?php
             /*
@@ -483,7 +479,9 @@ print $targetPath.'<br>';
                     <button onclick="testEntity(true)">show in popup dialog</button>
                     <button onclick="testEntity(false)">show on this page</button>
                     <button onclick="testTags()">embedded select tags</button>
+                    <button onclick="testImportStruc()">Import structure</button>
                 </div>
+                
             </div>
         <div id="main_div" style="position:absolute;top:250px;min-height:300px;width:700;border:1px solid">
         </div>

@@ -4,7 +4,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -118,7 +118,7 @@ $.widget( "heurist.dh_search", {
             //perform search
             
             window.hWin.HAPI4.RecordMgr.search(request, function(response){
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     var resdata = new hRecordSet(response.data);
                     //add SELECT and fill it with values
                     var smenu = '', idx;
@@ -210,7 +210,7 @@ $.widget( "heurist.dh_search", {
                     
                     if(that._isDigitalHarlem){
                      
-                        var init_search = window.hWin.HEURIST?window.hWin.HEURIST.displayPreferences['defaultSearch']:'';
+                        var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
                         if(!window.hWin.HEURIST4.util.isempty(init_search)){
                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                             setTimeout(function(){
@@ -305,7 +305,7 @@ $.widget( "heurist.dh_search", {
 
             window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.UGrpID},
                 function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         that.usr_SavedSearch = response.data;
                         that._refresh();
                     }

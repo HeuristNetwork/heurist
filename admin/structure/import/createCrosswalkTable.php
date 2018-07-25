@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Stephen White
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
@@ -685,7 +685,7 @@
 
                     my_tooltip.mouseover(__clearHideTimer);
                     my_tooltip.mouseout(__hideToolTip);
-                    var xy = top.HEURIST.util.getMousePos(event);
+                    var xy = window.hWin.HEURIST4.ui.getMousePos(event);
                     my_tooltip.html(textTip);
                     top.HEURIST.util.showPopupDivAt(my_tooltip, xy, $(window).scrollTop(), $(window).width(), $(window).height(),0);
                     hideTimer = window.setTimeout(_hideToolTip, 2000);

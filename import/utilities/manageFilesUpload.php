@@ -9,7 +9,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -24,29 +24,13 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+define('MANAGER_REQUIRED',1);
+define('PDIR','../../');  //need for proper path to js and css    
 
-    /* TODO: This function only works for individual files within PHP limit, we need to use bulk/segmented uploader
-    Use jQuery File Upload plugin. By making use of Chunked file uploads (with chunks smaller than 4GB),
-    the potential file size is unlimited.
-    */
-    require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
-
-    if (! is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        return;
-    }
-
-    if (! is_admin()) { // TO DO: Change this to members of database managers
-        print "<html><body><p>Only members of the Database Managers group may upload files</p></body></html>";
-        return;
-    }
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
 ?>
-
 <html>
-
     <head>
 
         <!-- Force latest IE rendering engine or ChromeFrame if installed -->
@@ -55,17 +39,19 @@
         <![endif]-->
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>File upload manager</title>
-        <link rel=stylesheet href="../../common/css/global.css" media="all">
-
-
-        <!-- jQuery UI styles
-        <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/base/jquery-ui.css" id="theme"> -->
-        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" id="theme"/>
         
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        
+
         <!-- Demo styles -->
-        <link rel="stylesheet" href="../../external/jquery-file-upload/css/demo.css">
+        <link rel="stylesheet" href="../../ext/jquery-file-upload/css/demo.css">
         <!--[if lte IE 8]>
-        <link rel="stylesheet" href="../../external/jquery-file-upload/css/demo-ie8.css">
+        <link rel="stylesheet" href="../../ext/jquery-file-upload/css/demo-ie8.css">
         <![endif]-->
         <style>
             /* Adjust the jQuery UI widget font-size: */
@@ -74,50 +60,30 @@
             }
         </style>
         <!-- blueimp Gallery styles -->
-<!--        
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
--->
-        <link rel="stylesheet" href="http://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+        <link rel="stylesheet" href="https://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
         <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-        <link rel="stylesheet" href="../../external/jquery-file-upload/css/jquery.fileupload.css">
-        <link rel="stylesheet" href="../../external/jquery-file-upload/css/jquery.fileupload-ui.css">
+        <link rel="stylesheet" href="../../ext/jquery-file-upload/css/jquery.fileupload.css">
+        <link rel="stylesheet" href="../../ext/jquery-file-upload/css/jquery.fileupload-ui.css">
 
     </head>
 
 
     <body class="popup" style="margin:0 !important; color:black;">
 
+        <div class="banner">
+            <h2>FILE MANAGEMENT</h2>
+        </div>
+
+        <p>Members of the database managers group can upload multiple files and/or large files to the database scratch space. <br>
+           Most commonly, files will be uploaded prior to importing data from them or running the in situ multimedia import.<br>
+           The function is restricted to database managers to reduce the risk of other users filling the database with unwanted material.<br>
+        </p>
+    
         <?php
-
-            // TODO: Do we need this for anything?
-            mysql_connection_overwrite(DATABASE);
-            if(mysql_error()) {
-                die("Sorry, could not connect to the database (mysql_connection_overwrite error)");
-            }
-
-            print "<h2>FILE MANAGEMENT</h2>";
-            print "<p>Members of the database managers group can upload ".
-                "multiple files and/or large files to the database scratch space. <br>";
-            print "Most commonly, files will be uploaded prior ".
-                "to importing data from them or running the in situ multimedia import.<br>";
-            print "The function is restricted to database managers to reduce the risk of ".
-                "other users filling the database with unwanted material.<br>";
-            print "</p>";
-
 
             // ----Visit #1 - CHECK MEDIA FOLDERS --------------------------------------------------------------------------------
             
             if(!array_key_exists('mode', $_REQUEST)) {
-
-                // Find out which folders are allowable - the default scratch space plus any
-                // specified for FieldHelper indexing in Advanced Properties
-                $query1 = "SELECT sys_MediaFolders, sys_MediaExtensions from sysIdentification where 1";
-                $res1 = mysql_query($query1);
-                if (!$res1 || mysql_num_rows($res1) == 0) {
-                    die ("<p><b>Sorry, unable to read the sysIdentification table from the current database. ".
-                        "Possibly wrong database format, please consult Heurist team</b></p>");
-                }
 
                 $system_folders = array(HEURIST_THUMB_DIR,
                         HEURIST_FILESTORE_DIR."generated-reports/",
@@ -126,17 +92,25 @@
                         HEURIST_FILESTORE_DIR.'documentation_and_templates/',
                         HEURIST_FILESTORE_DIR.'backup/',
                         HEURIST_FILESTORE_DIR.'entity/',
-                        HEURIST_SMARTY_TEMPLATES_DIR,
-                        HEURIST_XSL_TEMPLATES_DIR);
+                        HEURIST_SMARTY_TEMPLATES_DIR
+                        );
+                if(defined('HEURIST_XSL_TEMPLATES_DIR')) array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);
                 if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
                 if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
 
 
+                // Find out which folders are allowable - the default scratch space plus any
+                // specified for FieldHelper indexing in Advanced Properties
+                $mediaFolders = $system->get_system('sys_MediaFolders');
+                if(!$mediaFolders){
+                    $mediaFolders = '';
+                }
+                $mediaExts = $system->get_system('sys_MediaExtensions');
+                if(!$mediaExts) $mediaExts = '';
+                
                 // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
                 // These are the most likely location for bulk upload (of images) and restricting to these directories
                 // avoids the risk of clobbering the system's required folders (since most people won't know what they're called)
-                $row1 = $row = mysql_fetch_row($res1);
-                $mediaFolders = $row1[0];
                 $dirs = explode(';', $mediaFolders); // get an array of folders
                 $dirs2 = array();
 
@@ -170,10 +144,10 @@
 
                             //realpath gives real path on remote file server
                             if(strpos($dir, '/srv/HEURIST_FILESTORE/')===0){
-                                $dir = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $dir);
+                                $dir = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_DIR, $dir);
                             }else
                             if(strpos($dir, '/misc/heur-filestore/')===0){
-                                $dir = str_replace('/misc/heur-filestore/', HEURIST_UPLOAD_ROOT, $dir);
+                                $dir = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_DIR, $dir);
                             }
                             $dir = str_replace('\\','/',$dir);     
                             if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){
@@ -214,9 +188,9 @@
                 // For the moment keep this in as a restriction on file types which can be uploaded
                 // Unlike indexing, we add the user-defined set to the default set
                 $mediaExts = "jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff, ".
-                    "mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,htm,html,xhtml,ppt,pptx,zip,gzip,tar";
-                    // default set to allow
-                $mediaExts = $mediaExts.$row1[1];
+                    "mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,htm,html,xhtml,ppt,pptx,zip,gzip,tar,"
+                    .$mediaExts; // default set to allow
+                $mediaExts = implode(',',array_unique(explode(',',$mediaExts)));
                 // TODO: we should eliminate any duplicate extensions which might have been added by the user
 
                 if ($mediaFolders=="" || count($dirs) == 1) {
@@ -225,11 +199,16 @@
                 }else{
                     print "<p><b>Allowable extensions for upload:</b> $mediaExts</p>";
                 }
+               
+//@todo change to entity dialog  
+                ?>
                 
-                print  "<br/><p><a href='../../admin/setup/dbproperties/editSysIdentificationAll.php?db=".HEURIST_DBNAME."&popup=3' "
-                    ." title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>"
-                    ."Click here to set media/upload folders</a></p>";
-
+                <br/>
+                <p><a href='#' onclick="{window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification'); return false;}"
+                    title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>
+                    Click here to set media/upload folders</a>
+                </p>                
+                <?php              
             } // Visit #1
 
 
@@ -241,6 +220,7 @@
         <form id="fileupload" action="//jquery-file-upload.appspot.com/" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="upload_thumb_dir" value="<?php echo HEURIST_THUMB_DIR; ?>"/>
             <input type="hidden" name="upload_thumb_url" value="<?php echo HEURIST_THUMB_URL; ?>"/>
+            <input type="hidden" name="db" value="<?php echo HEURIST_DBNAME; ?>"/>
             <div><label for="upload_folder" style="color:black;">Select target folder:</label>
                 <select name="folder" id="upload_folder">
                     <?php
@@ -364,35 +344,32 @@
         </script>
 
 
-        <script src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
-        
         <!-- The Templates plugin is included to render the upload/download listings -->
-        <script src="http://blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
+        <script src="https://blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
         <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
-        <script src="http://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
+        <script src="https://blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
         <!-- The Canvas to Blob plugin is included for image resizing functionality -->
-        <script src="http://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
+        <script src="https://blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
         <!-- blueimp Gallery script -->
-        <script src="http://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+        <script src="https://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
         <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-        <script src="../../external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script src="../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
         <!-- The basic File Upload plugin -->
-        <script src="../../external/jquery-file-upload/js/jquery.fileupload.js"></script>
+        <script src="../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
         <!-- The File Upload processing plugin -->
-        <script src="../../external/jquery-file-upload/js/jquery.fileupload-process.js"></script>
+        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-process.js"></script>
         <!-- The File Upload image preview & resize plugin -->
-        <script src="../../external/jquery-file-upload/js/jquery.fileupload-image.js"></script>
+        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-image.js"></script>
         <!-- The File Upload audio preview plugin -->
-        <script src="../../external/jquery-file-upload/js/jquery.fileupload-audio.js"></script>
+        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-audio.js"></script>
         <!-- The File Upload video preview plugin -->
-        <script src="../../external/jquery-file-upload/js/jquery.fileupload-video.js"></script>
+        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-video.js"></script>
         <!-- The File Upload validation plugin -->
-        <script src="../../external/jquery-file-upload/js/jquery.fileupload-validate.js"></script>
+        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-validate.js"></script>
         <!-- The File Upload user interface plugin -->
-        <script src="../../external/jquery-file-upload/js/jquery.fileupload-ui.js"></script>
+        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-ui.js"></script>
         <!-- The File Upload jQuery UI plugin -->
-        <script src="../../external/jquery-file-upload/js/jquery.fileupload-jquery-ui.js"></script>
+        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-jquery-ui.js"></script>
 
         <script type="text/javascript">
             $(function () {
@@ -403,7 +380,7 @@
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
                     upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
-                    url: '<?=HEURIST_BASE_URL?>external/jquery-file-upload/server/php/'
+                    url: '<?=HEURIST_BASE_URL?>ext/jquery-file-upload/server/php/'
                 });
                 
                 $('#btnFinished')
@@ -419,7 +396,7 @@
                     'redirect',
                     window.location.href.replace(
                         /\/[^\/]*$/,
-                        '<?=HEURIST_BASE_URL?>external/jquery-file-upload/cors/result.html?%s'
+                        '<?=HEURIST_BASE_URL?>ext/jquery-file-upload/cors/result.html?%s'
                     )
                 );
 

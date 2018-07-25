@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @note        Completely revised for Heurist version 4
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -61,8 +61,8 @@ $.widget( "heurist.search", {
         return;
         }*/
         this.element.css({'height':'6.88em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
-        if(window.hWin.HAPI4.sysinfo['layout']!='H4Default'){
-            this.element.addClass('ui-heurist-header1');
+        if(window.hWin.HAPI4.sysinfo['layout']!='H4Default' && window.hWin.HAPI4.sysinfo['layout']!='H5Default'){
+            this.element.addClass('ui-heurist-header1'); //dark navy bg - used long ago in original layout - to remove
         }else{
             this.element.addClass('ui-widget-content');
         }
@@ -403,8 +403,10 @@ $.widget( "heurist.search", {
             .click( function(){ 
                 window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                     if(that.select_rectype_addrec.val()>0){
+                        
+                        
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                            {new_record_params:{rt:that.select_rectype_addrec.val()}});
+                            {new_record_params:{RecTypeID:that.select_rectype_addrec.val()}});
                     }else{
                         that.btn_select_rt.click();
                     }
@@ -475,7 +477,7 @@ $.widget( "heurist.search", {
                                 
                                 window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.owner},
                                 function(response){
-                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
                                         btn_select_owner.button({'label'
                                             :'<div style="text-align:left;display:inline-block">'
                                                 +response.data[context.owner]+'<br>'+context.access+'</div>'});
@@ -642,7 +644,7 @@ $.widget( "heurist.search", {
                    
                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
                    
-                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{rt:selval}});
+                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{RecTypeID:selval}});
                    return false;
                 }
             });
@@ -662,7 +664,7 @@ $.widget( "heurist.search", {
         var that = this;
         window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:add_rec_prefs[1]},
         function(response){
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 
                 var owner = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
                 
@@ -685,14 +687,15 @@ $.widget( "heurist.search", {
             q ="&q=" + encodeURIComponent(this.query_request.q);
         }
 
-        var url = window.hWin.HAPI4.baseURL+ "search/queryBuilderPopup.php?db=" + window.hWin.HAPI4.database + q;
+        var url = window.hWin.HAPI4.baseURL+ "hclient/widgets/search/queryBuilderPopup.php?db=" 
+                            + window.hWin.HAPI4.database + q;
 
-        window.hWin.HEURIST4.msg.showDialog(url, { width:740, height:540, text:'Advanced Search Builder', callback:
+        window.hWin.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:
             function(res){
                 if(!Hul.isempty(res)) {
                     that.input_search.val(res);
                     that.input_search.change();
-                    that._doSearch();
+                    that._doSearch(true);
                 }
         }});
     },
@@ -720,7 +723,7 @@ $.widget( "heurist.search", {
                     that._refresh();
                 }
 
-                if(top.HEURIST.displayPreferences['searchQueryInBrowser'] == "true"){
+                if(window.hWin.HAPI4.get_prefs('searchQueryInBrowser') == "true"){
                     window.history.pushState("object or string", "Title", location.pathname+'?'+
                         window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true) );
                 }
@@ -1252,29 +1255,6 @@ $.widget( "heurist.search", {
         this.div_search.remove();
     }
 
-    , _addNewRecord: function(){
-
-
-        var url = window.hWin.HAPI4.baseURL+ "records/add/addRecordPopup.php?db=" + window.hWin.HAPI4.database;
-
-        window.hWin.HEURIST4.msg.showDialog(url, { height:550, width:700, title:'Add Record',
-            callback:function(response) {
-                /*
-                var sURL = window.hWin.HAPI4.baseURL + "common/php/reloadCommonInfo.php";
-                top.HEURIST.util.getJsonData(
-                sURL,
-                function(response){
-                if(response){
-                top.HEURIST.rectypes.usageCount = response;
-                top.HEURIST.search.createUsedRectypeSelector(true);
-                }
-                },
-                "db="+_db+"&action=usageCount");
-                */
-            }
-        });
-        
-    }
 
     , _doLogin: function(){
 

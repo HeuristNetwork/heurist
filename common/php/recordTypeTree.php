@@ -1,7 +1,8 @@
 <?php
+//@TODO  1) similat method in db_structure 2) compose tree data on client side
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -26,7 +27,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -34,23 +35,20 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
 
-define('SEARCH_VERSION', 1);
+    $system = new System();
+    if( !$system->init(@$_REQUEST['db']) ){
+        header('Content-type: application/json;charset=UTF-8');
+        echo json_encode( array("error"=>'Can not connect to database') );
+        exit();
+    }
+    
+    $system->defineConstant('DT_PARENT_ENTITY');
 
-require_once(dirname(__FILE__).'/../../common/config/initialise.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
-require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
-
-
-    mysql_connection_overwrite(DATABASE);
-    //was mysql_connection_select(DATABASE);
-
-    //load definitions (USE CACHE)
-    $rtStructs = getAllRectypeStructures(true);
-    //$dtStructs = getAllDetailTypeStructures(true);
-    //$dtTerms = getTerms(true);
-    //$first_record = null;  //to obtain names of record header fields
+    $rtStructs = dbs_GetRectypeStructures($system, null, 2);
 
     $resVars = array();
     //$resVarsByType = array();
@@ -67,8 +65,9 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
               array_push($resVars, $res);
         }        
         
-        header("Content-type: text/javascript");
-        echo json_format($resVars, true);
+        header('Content-type: application/json;charset=UTF-8');
+        print json_encode($resVars);
+        
         
     }else{
     
@@ -76,26 +75,27 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
     $isvarname = ($mode=='varsonly');
 
     $_REQUEST['limit'] = 100;
-    $qresult = loadSearch($_REQUEST); //from search/getSearchResults.php - loads array of records based on GET request
+    $qresult = recordSearch($system, $_REQUEST);
     
     if($isvarname){
 
         $rectypeID = @$_REQUEST['rty_id'];
         $res = getRecordTypeTree($rectypeID, 0);
         
-        header("Content-type: text/javascript");
-        echo json_format( array("vars"=>$res,
-                                "records"=>$qresult["records"]), true);
+        header('Content-type: application/json;charset=UTF-8');
+        echo json_encode( array("vars"=>$res,
+                                "recordset"=>@$qresult['data']), true);
 
     }else{
 
-            if(!array_key_exists('records',$qresult)){
-                echo "Empty query. Cannot generate template";
+            if(@$qresult['status'] != HEURIST_OK || !@$qresult['data']["records"]){
+                header('Content-type: application/json;charset=UTF-8');
+                echo json_encode( array("error"=>'Empty query. Cannot generate template') );
                 exit();
             }
 
             //convert to array that will assigned to smarty variable
-            $records =  $qresult["records"];
+            $records =  $qresult['data']["records"];
 
             $recTypes = array();
 
@@ -116,8 +116,8 @@ require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
                 }
             }
 
-            header("Content-type: text/javascript");
-            echo json_format($resVars, true);
+            header('Content-type: application/json;charset=UTF-8');
+            echo json_encode($resVars, true);
     }
     }
 
@@ -348,6 +348,4 @@ function getDetailSection($dtKey, $dtValue, $recursion_depth, $forpurpose=null){
 
     return $res;
 }
-
-
 ?>

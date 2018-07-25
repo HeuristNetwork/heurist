@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
@@ -23,19 +23,19 @@
 */
 ini_set('max_execution_time', 0);
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../../records/files/uploadFile.php');
+define('OWNER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
 
-if (isForOwnerOnly()) exit();
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+
+$mysqli = $system->get_mysqli();
 ?>
 <html>
     <head>
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
         <style type="text/css">
             h3, h3 span {
                 display: inline-block;
@@ -69,21 +69,25 @@ if (isForOwnerOnly()) exit();
         unlink($log_filename);
     }
 
-    
+    $counter = 0;
             
-    $dbs = mysql__getdatabases(true);            
+    $dbs = mysql__getdatabases4($mysqli, true);            
     foreach ($dbs as $db){
+        
+        //if($counter>50) break;
+        $counter++;
         
         print "<h2>".$db."</h2>";
             
     $query1 = "SELECT * from ".$db.".recUploadedFiles"; // get a list of all the files
-    $res1 = mysql_query($query1);
-    if (!$res1 || mysql_num_rows($res1) == 0) {
+    $res1 = $mysqli->query($query1);
+    if (!$res1 || $res1->num_rows == 0) {
         print "<p><b>This database does not have uploaded files</p>";
+        if ($res1) $res1->close();
         continue;
     }
     else {
-        print "<p>Number of files to process: ".mysql_num_rows($res1)."</p><br>";
+        print "<p>Number of files to process: ".$res1->num_rows."</p><br>";
     }
     
     $files_orphaned = array();
@@ -92,7 +96,7 @@ if (isForOwnerOnly()) exit();
     $external_count = 0;
     $local_count = 0;
 
-    while ($res = mysql_fetch_assoc($res1)) {
+    while ($res = $res1->fetch_assoc()) {
 
             //verify path
             $res['db_fullpath'] = null;
@@ -105,18 +109,19 @@ if (isForOwnerOnly()) exit();
             
             //missed link from recDetails - orphaned files       
             $query2 = "SELECT dtl_RecID from ".$db.".recDetails where dtl_UploadedFileID=".$res['ulf_ID'];
-            $res2 = mysql_query($query2);
+            $res2 = $mysqli->query($query2);
             $currentRecID = null;
             if ($res2) {
-                if(mysql_num_rows($res2) == 0) {
+                if($res2->num_rows == 0) {
                   $files_orphaned[$res['ulf_ID']] = array('ulf_ID'=>$res['ulf_ID'], 
                                             'res_fullpath'=>@$res['res_fullpath'],
                                             'isfound'=>0,
                                             'ulf_ExternalFileReference'=>@$res['ulf_ExternalFileReference']);
                 }else{
-                    $row = mysql_fetch_row($res2);  
+                    $row = $res2->fetch_row();  
                     $currentRecID = $row[0];
                 }
+                $res2->close();
             }
             
             if( $res['db_fullpath']!=null && @$res['res_fullpath'] ){
@@ -199,10 +204,10 @@ if (isForOwnerOnly()) exit();
                     function repairBrokenPaths(){
                         
                         function _callback(context){
-                            if(top.HEURIST.util.isnull(context) || top.HEURIST.util.isnull(context['result'])){
-                                top.HEURIST.util.showError(null);
+                            if(window.hWin.HEURIST4.util.isempty(context) || window.hWin.HEURIST4.util.isempty(context['result'])){
+                                window.hWin.HEURIST4.msg.showMsgErr(null);
                             }else{
-                                top.HEURIST.util.showMessage(context['result']);
+                                window.hWin.HEURIST4.msg.showMsgDlg(context['result']);
                             }
                         }
 
@@ -246,12 +251,12 @@ if (isForOwnerOnly()) exit();
                                     dt.notfound.push(dt2['notfound'][i]);
                         }
                         
-                        var str = JSON.stringify(dt);
+                        //var str = JSON.stringify(dt);
 
-                        var baseurl = top.HEURIST.baseURL + "admin/verification/repairUploadedFiles.php";
+                        var baseurl = "<?=HEURIST_BASE_URL?>admin/verification/repairUploadedFiles.php";
                         var callback = _callback;
-                        var params = "db=<?= HEURIST_DBNAME?>&data=" + encodeURIComponent(str);
-                        top.HEURIST.util.getJsonData(baseurl, callback, params);
+                        var request = {db:'<?= HEURIST_DBNAME?>', data:dt};
+                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);       
                         
                         document.getElementById('page-inner').style.display = 'none';
                     }
@@ -261,7 +266,7 @@ if (isForOwnerOnly()) exit();
                 }   
                 if(count($files_orphaned)>0){
                 ?>
-                    <h3>Orphand files</h3>
+                    <h3>Orphaned files</h3>
                     <div><?php echo count($files_orphaned);?> entries</div>
                     <div>No reference to these files found in record details. These files will be removed from db and file system</div>
                     <br>

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 *
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -190,8 +190,8 @@ if ($reccount>0)
         $thubURL = getThumbnailURL($row[0]);
 
 
-        $url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
-        $uid = HEURIST_BASE_URL."records/view/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+        $url = 	($row[1]) ? htmlspecialchars($row[1]) : HEURIST_BASE_URL."viewers/record/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
+        $uid = HEURIST_BASE_URL."viewers/record/viewRecord.php?db=".HEURIST_DBNAME."&amp;recID=".$row[0];
         $uniq_id++;
 
         $date_published = date("r", strtotime(($row[5]==null)? $row[6] : $row[5]));

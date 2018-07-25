@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -36,9 +36,6 @@
         <title></title>
 
         <!-- yui layout -->
-
-        <!--<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/reset-fonts-grids/reset-fonts-grids.css">
-        -->
         <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/container/assets/skins/sam/container.css">
 
         <!-- Skin CSS files resize.css must load before layout.css -->
@@ -69,7 +66,6 @@
         <script type="text/javascript" src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-
         <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/heurist/jquery-ui.css" />
         
         <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
@@ -78,7 +74,10 @@
         
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/report.css">
-
+<!--        
+        <script type="text/javascript" src="../../ext/layout/jquery.layout-latest.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../h4styles.css">
+-->
         <link rel="stylesheet" href="../../external/js/codemirror-3.20/lib/codemirror.css">
         <script src="../../external/js/codemirror-3.20/lib/codemirror.js"></script>
         <script src="../../external/js/codemirror-3.20/mode/xml/xml.js"></script>
@@ -89,16 +88,15 @@
         <script src="../../external/js/codemirror-3.20/mode/smartymixed/smartymixed.js"></script>
 
         <style type="text/css">
-            /* hide header in top layout */
+            /*display: none !important;
+            display: block;
+            */
             .yui-skin-sam .yui-layout .yui-layout-hd {
                 background: none;
                 border: 1px solid #ff0000;
                 display: none;
                 height: 0px;
             }
-            /*display: none !important;
-            display: block;
-            */
             .linkadmin {
                 visibility: hidden;
             }
@@ -139,7 +137,7 @@
             }
         </style>
         <script type="text/javascript">
-            var showReps, isEditorVisible=false, isInited=false;
+            var showReps, isEditorVisible=false, isInited=false, hSmarty = {};
 
             // inserts variable (false,false), repeat loop (true,false, or if test (false,true)
             function insertVar(isloop, isif){
@@ -153,20 +151,17 @@
                 }
             }
 
-            
-/*
-            if(!top.HEURIST.rectypes){
-                top.HEURIST.loadScript(top.HEURIST.baseURL+"common/php/loadCommonInfo.php")
-            }
-*/            
         </script>
+        
+        <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
+        <!-- script type="text/javascript" src="../../hclient/core/utils_ui.js"></script -->
     </head>
 
     <body class="yui-skin-sam"  onresize="onResize()" style="cursor:progress;">
-        <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-        <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
+
         <script type="text/javascript" src="../../viewers/smarty/showReps.js"></script>
 
+        <!-- need for import/upload template -->
         <script src="../../external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
         <script src="../../external/jquery-file-upload/js/jquery.fileupload.js"></script>
 
@@ -196,7 +191,7 @@
                                 <option value="2">Field + function wrapper</option>
                             </select>
                         </td>
-                        <td><button onclick="top.HEURIST.insertVar(null, false, false )"
+                        <td><button onclick="window.hSmarty.insertVar(null, false, false )"
                             title="Inserts the value of the field in the output. Customise using the dropdowns.">
                             Insert field value</button>
                         </td>
@@ -206,7 +201,7 @@
                         <td>
                             <select id="selInsertModifiers" style="width:200px"
                                 title="Smarty functions which can reformat the data value (see Smarty documentation for additional functions)"
-                                onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){top.HEURIST.insertModifier(sel.value);sel.selectedIndex = 0;}}"
+                                onChange="{var sel = document.getElementById('selInsertModifiers');if(sel.selectedIndex>0){window.hSmarty.insertModifier(sel.value);sel.selectedIndex = 0;}}"
                                 >
                                 <option>choose function ...</option>
                                 <option>capitalize</option>
@@ -233,7 +228,7 @@
                             </select>
                         </td>
                         <td>
-                            <button onclick="top.HEURIST.insertVar(null,  false, true )"
+                            <button onclick="window.hSmarty.insertVar(null,  false, true )"
                                 title="Inserts a test of whether the field is blank (or a specific value).">
                                 Test value (If ...)</button>
                         </td>
@@ -252,21 +247,21 @@
                         <td >
                             <div class="ins_isloop">Use these buttons to insert field<br/> or test within a repeat loop</div>
                         </td>
-                        <td><div class="ins_isloop"><button onclick="top.HEURIST.insertSelectedVarAsLoop(null)">
+                        <td><div class="ins_isloop"><button onclick="window.hSmarty.insertSelectedVarAsLoop(null)">
                             Insert repeat</button></div>
                         </td>
                     </tr>
 
                     <tr class="ins_isloop">
                         <td></td>
-                        <td><div class="ins_isloop"><button onclick="top.HEURIST.insertVar(null,  true, false )">
+                        <td><div class="ins_isloop"><button onclick="window.hSmarty.insertVar(null,  true, false )">
                             Insert field value</button></div>
                         </td>
                     </tr>
 
                     <tr class="ins_isloop">
                         <td></td>
-                        <td><div class="ins_isloop"><button onclick="top.HEURIST.insertVar(null,  true, true )">
+                        <td><div class="ins_isloop"><button onclick="window.hSmarty.insertVar(null,  true, true )">
                             Test value (If ...)</button></div>
                         </td>
                     </tr>
@@ -295,7 +290,7 @@
                     <option value="4">Information on last element of a loop</option>
                     <option value="99">Outer records loop</option>
                     </select>
-                    <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
+                    <button onclick="window.hSmarty.insertPattern(Number(document.getElementById('selInsertPattern').value))">
                     Insert pattern
                     </button>
                     </td>
@@ -311,15 +306,15 @@
             </div>
         </div>
 
-
-        <div id="viewercontainer">
-            <div id="progressbar_div" style="width:99%;height:30px;display:none;padding:5px">
+        <!-- viewer -->
+        <div id="viewercontainer" style="padding:0">
+            <div id="progressbar_div" style="width:99%;height:36px;display:none;padding:5px">
                 <div id="progressbar">
                     <div class="progress-label">Loading data...</div>
                 </div>
                 <div id="progress_stop" style="float:right;">Stop</div>
             </div>
-            <div id="toolbardiv" style="width:100%;height:30px;">
+            <div id="toolbardiv" style="width:100%;height:38px;padding:2px">
                 <div style="padding:5px;display:none;">
                     <select id="cbUseAllRecords1" onChange="setQueryMode(event)" style="width:90px">
                         <option value="all" selected="selected">All on page</option>
@@ -334,7 +329,7 @@
                     <span id="recordCount"></span>
                 </div>
 
-                <div style="display:inline-block;padding-left:0.5em;">
+                <div style="display:inline-block;padding:0.5em;font-size:9px">
                     <button id="btnRepEdit" title="Edit the selected template">Edit</button>
                     <button id="btnRepNew" title="Create a new template">New</button>
                     <button id="btnRepDelete" title="Delete the selected template">Delete</button>
@@ -358,7 +353,9 @@
                 <iframe id="rep_container_frame" style="width:99%;height:99%;border:none"></iframe>
             </div>
         </div>
-        <div id="editorcontainer" style="display:none">
+        
+        <!-- editor -->
+        <div id="editorcontainer">
             <h2>Template <span id="edTemplateName"></span></h2>
 
             <div style="position:absolute;top:4px;right:4px;">
@@ -367,11 +364,6 @@
                 <!--        <button onClick="doEditor(3)">Delete</button>
                 -->
                 <button onClick="doEditor(0)">Close Editor</button>
-                <!--
-                &nbsp;&nbsp;&nbsp;
-                <button onClick="onExportTemplate()" title="Export template with concept codes">Export</button>
-                <button onClick="{$('#fileupload').click();}" title="Upload template">Import</button>
-                -->
             </div>
 
             <div id="templateCode">
@@ -381,11 +373,11 @@
             <div id="templateTree">
                 <div>
                     <a href="../../context_help/smarty_reports.html"
-                        onClick="top.HEURIST.util.popupURL(window, this.href);return false;"
+                        onClick="window.hWin.HEURIST4.msg.showDialog( this.href );return false;"
                         title="Read full documentation on the Smarty templating language">
                         <b>Help on using this function</b></a><br />
                     <div style="margin-top: 10px;">
-                        <label style="font-weight:bold;width:auto;">Select Type</label><span id="rectype_selector"></span>
+                        <label style="font-weight:bold;width:auto;">Select Type</label><select id="rectype_selector"></select>
                     </div>
                     Position cursor in text on left <br/>
                     before selecting actions below
@@ -404,7 +396,7 @@
                             <option value="4">Information on last element of a loop</option>
                             <option value="99">Outer records loop</option>
                         </select>
-                        <button onclick="top.HEURIST.insertPattern(Number(document.getElementById('selInsertPattern').value))">
+                        <button onclick="window.hSmarty.insertPattern(Number(document.getElementById('selInsertPattern').value))">
                             Insert pattern
                         </button>
                     </div>
@@ -449,6 +441,8 @@
             </div>
         </div>
 
+        <div id="smarty_publish_dialg" style="display:none"></div>
+        
 
         <script type="text/javascript">
             //
@@ -475,26 +469,8 @@ console.log(e)
             }
 
             //
-            function onFile(){
-
-                var sel = document.getElementById('selTemplates');
-                if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return; }
-
-                var template_file = sel.options[sel.selectedIndex].value; // by default first entry
-
-                Hul.popupURL(this, top.HEURIST.baseURL 
-                            + 'viewers/smarty/repMenu.html?template_file='
-                            + encodeURIComponent(template_file),
-                    {   title: 'Publish report',
-                        callback: function(filename){
-                            if(!Hul.isnull(filename)) {
-                                window.showReps.onPublish( filename )
-                            }
-                        }
-                } );
-
-            }
-
+            // 
+            //
 
             //
             function onShowEditor()
@@ -519,54 +495,14 @@ console.log(e)
             }
 
             //
-            function onPublish()
-            {
-                var sel = document.getElementById('selTemplates');
-
-                if(sel.selectedIndex>=0){
-                    window.showReps.onPublish(sel.options[sel.selectedIndex].value);
-                }
-            }
-
-            function onSaveOutput(){
-                if(top.HEURIST && top.HEURIST.currentQuery_all && hasH4())
-                {
-                    var sel = document.getElementById('selTemplates');
-                    if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return; }
-
-                    var template_file = sel.options[sel.selectedIndex].value; // by default first entry
-
-                    var currentSearchQuery = top.HEURIST.currentQuery_all.replace('"','%22');
-                    var surl = top.HEURIST.baseURL + "viewers/smarty/showReps.php?"+
-                        currentSearchQuery + '&publish=2&debug=0&output=heurist_report.html&template='+template_file;
-                        
-                        
-                    $("#btnRepSave").hide();    
-                    window.hWin.HEURIST4.util.downloadURL(surl, function(){
-                        $("#btnRepSave").show();
-                    });
-                }
-
-            }
-
-            function onExportTemplate()
-            {
-                var sel = document.getElementById('selTemplates');
-                if(sel.selectedIndex>=0){
-                    window.showReps.doExportTemplate(sel.options[sel.selectedIndex].value);
-                }
-                return false;
-            }
-
-            //
             //
             function onGenerate()
             {
                 if(window.showReps.isNeedSelection()){
-                    alert('You must select some records');
+                    window.hWin.HEURIST4.msg.showMsgErr('You must select some records');
                 }else{
                     var name=jQuery.trim(prompt("Please enter template name",""));
-                    if (!Hul.isempty(name))
+                    if (!window.hWin.HEURIST4.util.isempty(name))
                     {
                         window.showReps.generateTemplate(name);
                     }
@@ -593,7 +529,7 @@ console.log(e)
 
                     var template_file = sel.options[sel.selectedIndex].value;
 
-                    top.HEURIST.util.setDisplayPreference("viewerCurrentTemplate", template_file);
+                    window.hWin.HAPI4.SystemMgr.save_prefs({'viewerCurrentTemplate': template_file});
                     window.showReps.processTemplate(template_file);
                 }
             }
@@ -639,9 +575,12 @@ console.log(e)
                 $("#btnRepImport").button({text:false, icons: { primary: "ui-icon-sign-in" }}).click(function(){
                     $('#fileupload').click();return false;
                 });
-                $("#btnRepExport").button({text:false, icons: { primary: "ui-icon-sign-out" }}).click(onExportTemplate);
-                $("#btnRepSave").button({text:false, icons: { primary: "ui-icon-disk" }}).click(onSaveOutput);
-                $("#btnRepPublish").button({text:false, icons: { primary: "ui-icon-globe-b" }}).click(onFile);
+                $("#btnRepExport").button({text:false, icons: { primary: "ui-icon-sign-out" }})
+                        .click( window.showReps.doExportTemplate );
+                $("#btnRepSave").button({text:false, icons: { primary: "ui-icon-disk" }})
+                        .click( window.showReps.saveOutput );
+                $("#btnRepPublish").button({text:false, icons: { primary: "ui-icon-globe-b" }})
+                        .click(window.showReps.onReportPublish);
                 $("#btnRepRefresh").button({text:false, icons: { primary: "ui-icon-refresh" }}).click(onSelectTemplate);
 
 
@@ -653,14 +592,11 @@ console.log(e)
 
                 isInited = true;
 
-            }
-
-            function onLoadUserInfoHandler(){
-
                 $('button[id^="btnRep"]').hide();
 
-                if(top.HEURIST.is_logged_in()){
-                    if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
+                if(window.hWin.HAPI4.has_access()){
+                    if( window.hWin.HAPI4.is_member(window.hWin.HAPI4.sysinfo.db_managers_groupid) 
+                        || window.hWin.HAPI4.has_access(2)){
                         $('#btnRepEdit').show();
                         $('#btnRepNew').show();
                         $('#btnRepDelete').show();
@@ -678,73 +614,33 @@ console.log(e)
 
                 var s = '';
 
-                if(top.HEURIST.is_logged_in()){
+                if(window.hWin.HAPI4.has_access()){
 
                     s = s + '<li><a href="#" onClick="onExportTemplate()"  class="separator">Export Template</a></li>' +
                     '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import Template</a></li>';
 
-                    if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
+                    if( window.hWin.HAPI4.is_member(window.hWin.HAPI4.sysinfo.db_managers_groupid) 
+                        || window.hWin.HAPI4.has_access(2)){
                         s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>';
                     }
                 }
-                s = s + '<li><a href="#" onClick="onSelectTemplate()" '+ (top.HEURIST.is_logged_in()?'class="separator"':'') +'>Refresh</a></li>';
+                s = s + '<li><a href="#" onClick="onSelectTemplate()" '+ (window.hWin.HAPI4.has_access()?'class="separator"':'') +'>Refresh</a></li>';
 
-
-                /* OLD MENU ORDER
-
-                var s = '<li><a href="#" onClick="onSelectTemplate()">Reload</a></li><li><a href="#" onClick="onPrint()">Print report</a></li>'+
-                '<li><a href="#" onClick="onFile()">Get URL for report</a></li>';
-
-                if(top.HEURIST.is_logged_in()){
-                s = s + '<li><a href="#" onClick="onPublish()">Publish report</a></li>';
-
-                if(top.HEURIST.user.isInWorkgroup(1) || top.HEURIST.is_wgAdmin(null)){ //is_admin()){
-                s = s + '<li><a href="#" onClick="onDeleteTemplate()">Delete Template</a></li>'+
-                '<li><a href="#" onClick="onShowEditor()">Edit Template</a></li>'+
-                '<li><a href="#" onClick="onGenerate()">New Template</a></li>';
-                } else {
-                s = s + '<li> <a href="#" >Manage (Admins only)</a></li>'
-                }
-
-                s = s + '<li><a href="#" onClick="onExportTemplate()">Export</a></li>' +
-                '<li><a href="#" onClick="{$(\'#fileupload\').click();return false;}">Import</a></li>';
-
-                }
-                */
 
                 //$('#btnRepPrint').button( {icon:'ui-icon-print'} );
                 //$('#btnRepMenu2').button( {icon:'ui-icon-gear'} );
 
                 var elem = document.getElementById('toolMenuItems');
                 elem.innerHTML = s;
-            }
-
-            if(!top.HEURIST.rectypes){
-                if(top.HEURIST4 && top.HEURIST4.rectypes){
-                    top.HEURIST.rectypes = top.HEURIST4.rectypes;
-                    top.HEURIST.detailTypes = top.HEURIST4.detailtypes;
-                    top.HEURIST.terms = top.HEURIST4.terms;
-                }else{
-                    top.HEURIST.loadScript(top.HEURIST.baseURL+"common/php/loadCommonInfo.php")
-                }
-            }
-            YAHOO.util.Event.addListener(window, "load", loadHandler );
-            
-
-            var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            $.getScript( top.HEURIST.baseURL+"common/php/loadUserInfo.php?db="+_db, onLoadUserInfoHandler);
-            //YAHOO.util.Event.addListener(window, "heurist-obj-user-loaded", loadUserInfoHandler );
-            //top.HEURIST.loadScript(top.HEURIST.baseURL+"common/php/loadUserInfo.php");
+            }//loadHandler
 
 
             $(function () {
                 'use strict';
 
-                var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-
                 $('#fileupload').fileupload({
                     url: 'templateOperations.php',
-                    formData: [{name:'db', value: _db}, {name:'mode', value:'import'}],
+                    formData: [{name:'db', value: window.hWin.HAPI4.database}, {name:'mode', value:'import'}],
                     dataType: 'json',
                     done: function (e, data) {
 
@@ -754,7 +650,7 @@ console.log(e)
                             obj = JSON.parse(obj);
                         }
                         if (obj  &&  obj.error) {
-                            alert(obj.error);
+                            window.hWin.HEURIST4.msg.showMsgErr(obj.error);
                         }else if(obj.ok) {
                             window.showReps.showEditor(obj.ok, true);
                             if(obj.details_not_found){
@@ -768,7 +664,7 @@ console.log(e)
 +'<p style="padding-top:1.5em">You may wish to import the missing concepts using Database > Structure > Import from databases. The first part of the code indicates the database in which the concept was originally defined.</p>'
                                 ,null,'Conversion of template file to internal codes');
                                 /* old
-                                alert('Conversion of template file to internal codes. '+
+                                window.hWin.HEURIST4.msg.showMsgErr('Conversion of template file to internal codes. '+
                                 'Unable to convert '+obj.details_not_found.length+
                                 '. Failure to convert the Concept IDs (global codes for particular record types and fields) '+
                                 'to local codes indicates that the Concept IDs are not known within your database. Concept IDs '+
@@ -784,6 +680,9 @@ console.log(e)
                     },
                 });
             });
+            
+            $(document).ready(loadHandler);
+
 
         </script>
     </body>

@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -579,7 +579,7 @@ $.widget( "heurist.editing_input", {
                     //select term by image
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 var recset = new hRecordSet(response.data);
                                 if(recset.length()>0){                                  
                                 
@@ -628,9 +628,7 @@ $.widget( "heurist.editing_input", {
                         //    if(context=="ok") {
                         afterclose: function(){
                             if(true){ //always reload term list after this popup
-                                window.hWin.HEURIST4.terms = window.hWin.HEURIST.terms;
                                 $input = that._recreateSelector($input, true);
-                                
                                 $input.change( __onTermChange );
                                 
                                 __showHideSelByImage();
@@ -651,7 +649,6 @@ $.widget( "heurist.editing_input", {
                         //class:'ui-heurist-bg-light',
                         callback: function(editedTermTree, editedDisabledTerms){
                             if(editedTermTree || editedDisabledTerms) {
-                                window.hWin.HEURIST4.terms = window.hWin.HEURIST.terms;
                                 
                                 that.options['dtFields']['rst_FilteredJsonTermIDTree'] = editedTermTree;
                                 that.options['dtFields']['rst_TermIDTreeNonSelectableIDs'] = editedDisabledTerms
@@ -1138,7 +1135,7 @@ $.widget( "heurist.editing_input", {
                             function __openrecedit() { 
                                     
                                   if(new_rec_param==null){
-                                      new_rec_param = {rt:selector_rectype.val()};
+                                      new_rec_param = {RecTypeID:selector_rectype.val()};
                                   }
                                   
                                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
@@ -1755,7 +1752,7 @@ $.widget( "heurist.editing_input", {
             $progress_dlg.dialog( "close" );
         
             response = response.result;
-            if(response.status==window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status==window.hWin.ResponseStatus.OK){
                 var data = response.data;
 
                 $.each(data.files, function (index, file) {
@@ -1833,7 +1830,7 @@ $.widget( "heurist.editing_input", {
                         if(that.is_disabled) return;
                     
                         var url = window.hWin.HAPI4.baseURL +
-                        'hclient/framecontent/mapDraw.php?db='+window.hWin.HAPI4.database+
+                        'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database+
                         '&wkt='+that.newvalues[$input.attr('id')]; //$input.val();
                        
                        var wkt_params = {'wkt': that.newvalues[$input.attr('id')] };
@@ -1960,7 +1957,7 @@ $.widget( "heurist.editing_input", {
                               var child_rec_to_delete = that.newvalues[input_id];
                               window.hWin.HAPI4.RecordMgr.remove({ids: child_rec_to_delete}, 
                                 function(response){
-                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
                                         
                                         var delcnt = response.data.deleted.length, msg = '';
                                         if(delcnt>1){
@@ -2056,7 +2053,7 @@ $.widget( "heurist.editing_input", {
                     if(!sTitle){
                         window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+value, w: "e", f:"header"},  //search for temp also
                             function(response){
-                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
                                     ele.empty();
 
                                     var recordset = new hRecordSet(response.data);

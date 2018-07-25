@@ -8,11 +8,13 @@ getRelatedRecords - returns an array of related record for given recID or record
 getLinkedRecords - returns array of linkedto and linkedfrom record IDs
 getWootText  - returns text related with given record ID
 */
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../search/getSearchResults.php');
-require_once(dirname(__FILE__).'/../../records/woot/woot.php');
-require_once(dirname(__FILE__).'/../../common/php/getRecordInfoLibrary.php');
+
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
+
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
+//require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 class ReportRecord {
     
@@ -20,16 +22,22 @@ class ReportRecord {
        protected $rtStructs;
        protected $dtStructs;
        protected $dtTerms;
+       protected $system;
     
     function __construct() {
+       global $system; 
        
-       $this->rtStructs = getAllRectypeStructures(true);
-       $this->dtStructs = getAllDetailTypeStructures(true);
-       $this->dtTerms = getTerms(true);
+       $this->system = $system;
+       $this->rtStructs = dbs_GetRectypeStructures($system, null, 2);
+       $this->dtStructs = dbs_GetDetailTypes($system);
+       $this->dtTerms = dbs_GetTerms($system);
        
        $this->loaded_recs = array();
     }    
     
+    //
+    // this method is used in smarty template in main loop to access record info by record ID
+    //
     public function getRecord($rec, $smarty_obj=null) {
 
         if(is_array($rec) && $rec['recID']){
@@ -39,18 +47,18 @@ class ReportRecord {
         }
         
 
-        if(@$this->loaded_recs[$rec_ID]){
+        if(@$this->loaded_recs[$rec_ID]){ //already loaded
             return $this->loaded_recs[$rec_ID];
         }
 
-        $rec = loadRecord($rec_ID, false, true); //from search/getSearchResults.php
+        $rec = recordSearchByID($this->system, $rec_ID); //from db_recsearch.php
         
         if($rec){
-            $rec['rec_Tags'] = loadPersonalTags($rec_ID); //for current user only
+            $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID); //for current user only
             if(is_array($rec['rec_Tags'])) $rec['rec_Tags'] = implode(',',$rec['rec_Tags']);
         }
         
-        $res1 = $this->getRecordForSmarty($rec);
+        $res1 = $this->getRecordForSmarty($rec); 
         
         return $res1;
     }
@@ -66,10 +74,11 @@ class ReportRecord {
             }else{
                 $rec_ID = $rec;
             }
+            
         
-            $relRT = (defined('RT_RELATION')?RT_RELATION:0);
-            $relSrcDT = (defined('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
-            $relTrgDT = (defined('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
+            $relRT = ($this->system->defineConstant('RT_RELATION')?RT_RELATION:0);
+            $relSrcDT = ($this->system->defineConstant('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+            $relTrgDT = ($this->system->defineConstant('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
 
             $res = array();
             $rel_records = array();
@@ -77,35 +86,21 @@ class ReportRecord {
             /* find related records */
             if($rec_ID>0 && $relRT>0 && $relSrcDT>0 && $relTrgDT>0){
 
+                $mysqli = $this->system->get_mysqli();
                 // get rel records where current record is source
-                $from_res = mysql_query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID='.$rec_ID);
+                $from_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_SourceID='.$rec_ID);
 
                 // get rel records where current record is target
-                $to_res = mysql_query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID='.$rec_ID);
+                $to_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID='.$rec_ID);
 
-                /* old slow way                                   
-                $from_res = mysql_query('select recDetails.*
-                from recDetails
-                left join Records on rec_ID = dtl_RecID
-                where dtl_DetailTypeID = '.$relSrcDT.
-                ' and rec_RecTypeID = '.$relRT.
-                ' and dtl_Value = ' . $record["recID"]);        //primary resource
-                $to_res = mysql_query('select recDetails.*
-                from recDetails
-                left join Records on rec_ID = dtl_RecID
-                where dtl_DetailTypeID = '.$relTrgDT.
-                ' and rec_RecTypeID = '.$relRT.
-                ' and dtl_Value = ' . $record["recID"]);          //linked resource
-                */
-
-                if (mysql_num_rows($from_res) > 0  ||  mysql_num_rows($to_res) > 0) {
+                if ($from_res->num_rows() > 0  ||  $to_res->num_rows() > 0) {
 
                     //load relationship record details
-                    while ($reln = mysql_fetch_assoc($from_res)) {
+                    while ($reln = $from_res->fetch_assoc()) {
                         $bd = fetch_relation_details($reln['dtl_RecID'], true);
                         array_push($rel_records, $bd);
                     }
-                    while ($reln = mysql_fetch_assoc($to_res)) {
+                    while ($reln = $to_res->fetch_assoc()) {
                         $bd = fetch_relation_details($reln['dtl_RecID'], false);
                         array_push($rel_records, $bd);
                     }
@@ -136,6 +131,8 @@ class ReportRecord {
                     
                 }
                 
+                $from_res->close();
+                $to_res->close();
             }
             return $res;
     }
@@ -168,6 +165,8 @@ class ReportRecord {
                     }
                 }
             }
+            
+            $mysqli = $this->system->get_mysqli();
         
             $to_records = array();
             $from_records = array();
@@ -177,13 +176,7 @@ class ReportRecord {
                 $from_query = 'SELECT rl_TargetID as linkID FROM recLinks '
                     .str_replace('linkID','rl_TargetID',$where).' rl_RelationID IS NULL AND rl_SourceID='.$rec_ID;
 
-                $from_res = mysql_query($from_query);
-                if (mysql_num_rows($from_res) > 0){
-                    //find sources
-                    while ($row = mysql_fetch_row($from_res)) {
-                        array_push($from_records, $row[0]);
-                    }
-                }    
+               $from_records = mysql__select_list2($mysqli, $from_query);     
             }
 
             if($direction==null || $direction=='linkedto'){
@@ -191,14 +184,8 @@ class ReportRecord {
                 $to_query = 'SELECT rl_SourceID as linkID FROM recLinks '
                     .str_replace('linkID','rl_SourceID',$where).' rl_RelationID IS NULL AND rl_TargetID='.$rec_ID;
 
-                $to_res = mysql_query($to_query);
-
-                if (mysql_num_rows($to_res) > 0) {
-                    //find targets
-                    while ($row = mysql_fetch_row($to_res)) {
-                        array_push($to_records, $row[0]);
-                    }
-                }
+                    
+                $to_records = mysql__select_list2($mysqli, $to_query);     
             }
             
             $res = array('linkedto'=>$to_records, 'linkedfrom'=>$from_records);
@@ -370,7 +357,7 @@ class ReportRecord {
                                     $term = $this->dtTerms['termsByDomainLookup'][$domain][$value];
 
                                     //IJ wants to show terms for all parents
-                                    $term_full = getFullTermLabel($this->dtTerms, $term, $domain, false);
+                                    $term_full = getTermFullLabel($this->dtTerms, $term, $domain, false); //sse db_strcture.php
 
                                     $res_id = $this->_add_term_val($res_id, $value);
                                     $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);
@@ -420,23 +407,27 @@ class ReportRecord {
 
                             //if image - special case
 
-                            $res = "";
+                            $res = array(); //list of urls
                             $origvalues = array();
 
                             foreach ($dtValue as $key => $value){
-                                if(strlen($res)>0) $res = $res.", ";
-                                $res = $res.$value['file']['URL'];
+                                $external_url = @$value['file']['ulf_ExternalFileReference'];
+                                if($external_url){
+                                    array_push($res, $external_url);  //external 
 
-
+                                }else if(@$value['file']['ulf_ObfuscatedFileID']){
+                                    //local
+                                    array_push($res, HEURIST_BASE_URL."?db=".HEURIST_DBNAME
+                                            ."&file=".$value['file']['ulf_ObfuscatedFileID']);
+                                }
+                                
                                 //original value keeps the whole 'file' array
                                 array_push($origvalues, $value['file']);
-
                             }
-
-                            if(strlen($res)==0){
+                            if(count($res)==0){
                                 $res = null;
                             }else{
-                                $res = array($dtname=>$res, $dtname."_originalvalue"=>$origvalues);
+                                $res = array($dtname=>implode(', ',$res), $dtname."_originalvalue"=>$origvalues);
                                 //array_merge($arres, array($dtname=>$res));
                             }
 
@@ -639,6 +630,7 @@ class ReportRecord {
 
         $res = "";
 
+/* woot is disabled in this version
         $woot = loadWoot(array("title"=>"record:".$recID));
         if(@$woot["success"])
         {
@@ -657,6 +649,7 @@ class ReportRecord {
         }else if (@$woot["errorType"]) {
             $res = "WootText: ".$woot["errorType"];
         }
+*/
 
         return $res;
     }
@@ -664,7 +657,5 @@ class ReportRecord {
     public function getRecordTags($recID){
         
     }
-    
-    
 }
 ?>

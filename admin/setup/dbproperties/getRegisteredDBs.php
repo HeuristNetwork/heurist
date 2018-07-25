@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
@@ -24,14 +24,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-//$isOutSideRequest = (@$_REQUEST['db']!="Heurist_Master_Index");
-$_REQUEST['db'] = "Heurist_Master_Index";
-
-if(!defined('NO_DB_ALLOWED')) define('NO_DB_ALLOWED',1);
-if(!defined('SKIP_VERSIONCHECK2')) define('SKIP_VERSIONCHECK2',1);
-require_once(dirname(__FILE__)."/../../../common/config/initialise.php");
-require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
+require_once (dirname(__FILE__).'/../../hserver/System.php');
 
 $registeredDBs = array();
 
@@ -61,7 +54,12 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     if($data){
         $registeredDBs = json_decode($data);
         if(!is_array($registeredDBs)){
-            if(defined("HEURIST_HTTP_PROXY")){
+            $registeredDBs = null;
+        }
+    }
+    //second attempt
+    if($registeredDBs==null || !is_array($registeredDBs)){
+                if(defined("HEURIST_HTTP_PROXY")){
                 $data = loadRemoteURLContent($reg_url, false); //false = USE PROXY
                 if($data){
                     $registeredDBs = json_decode($data);
@@ -70,24 +68,18 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
                     }
                 }
             }
-        }
-    }else{
-        
-            if(defined("HEURIST_HTTP_PROXY")){
-                $data = loadRemoteURLContent($reg_url, false); //false = USE PROXY
-                if($data){
-                    $registeredDBs = json_decode($data);
-                    if(!is_array($data)){
-                        $registeredDBs = array();
-                    }
-                }
-            }        
-        
     }
 
 }else{ // this is a connection on the same server as the master index
 
-    mysql_connection_select("hdb_Heurist_Master_Index");
+    // init main system class
+    $system = new System();
+
+    if(!$system->init('Heurist_Master_Index')){
+        $response = $system->getError();
+        print json_encode($response);
+        return;
+    }
 
     //except specified databases
     if(@$_REQUEST['exclude']){
@@ -99,16 +91,16 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     // Return all registered databases as a json string
     $query = 'select rec_ID, rec_URL, rec_Title, rec_Popularity, dtl_value as version '
     .' from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=335 where `rec_RecTypeID`=22';
-    //.' from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=219 where `rec_RecTypeID`=49'; 
+    //local debug .' from Records left join recDetails on rec_ID=dtl_RecID and dtl_DetailTypeID=219 where `rec_RecTypeID`=49'; 
     if($is_curated){
         $query = $query.' and rec_ID<1000';    
     }
     if($is_public){
         $query = $query." and rec_NonOwnerVisibility='public'";    
     }
-    $res = mysql_query( $query );
-
-    while($registeredDB = mysql_fetch_array($res, MYSQL_ASSOC)) {
+    
+    $res = $system->get_mysqli()->query( $query );
+    while($registeredDB = $res->fetch_assoc()) {
 
         if(!array_search( $registeredDB['rec_ID'], $exclude )){
 
@@ -142,7 +134,8 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
             }
 
         }
-    }
+    }//while
+    $res->close();
 
 }
 

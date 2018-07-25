@@ -12,7 +12,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @note        Completely revised for Heurist version 4
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -53,7 +53,7 @@ function hSearchMinimalDigitalHarlem() {
 
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response) {
-                if(response.status != window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status != window.hWin.ResponseStatus.OK){
                     callback( null );
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     return;
@@ -176,7 +176,7 @@ function hSearchMinimalDigitalHarlem() {
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response) {
 
-                if(response.status != window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status != window.hWin.ResponseStatus.OK){
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                     return;
                 }

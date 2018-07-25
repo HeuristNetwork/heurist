@@ -3,7 +3,7 @@
 /**
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -100,26 +100,30 @@ class System {
                         return false;
                     }
                     
-                    if(!defined('HEURIST_DBNAME')){
-                        define('HEURIST_DBNAME', $this->dbname);
-                        define('HEURIST_DBNAME_FULL', $this->dbname_full);
-                    }
-
-                    //@todo  - test upload and thumb folder exist and writeable
-                    if(!$this->initPathConstants()){
-                        $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
-                            "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
-                            "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
-
-                        return false;
-                    }
-
-                    $this->login_verify( false ); //load user info from session
-                    if($this->get_user_id()>0){
-                        //set current user for stored procedures (log purposes)
-                        $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
-                    }
+                    if($this->dbname_full){
                     
+                        if(!defined('HEURIST_DBNAME')){
+                            define('HEURIST_DBNAME', $this->dbname);
+                            define('HEURIST_DBNAME_FULL', $this->dbname_full);
+                        }
+                        
+
+                        //@todo  - test upload and thumb folder exist and writeable
+                        if(!$this->initPathConstants()){
+                            $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
+                                "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
+                                "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
+
+                            return false;
+                        }
+
+                        $this->login_verify( false ); //load user info from session
+                        if($this->get_user_id()>0){
+                            //set current user for stored procedures (log purposes)
+                            $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
+                        }
+                        
+                    }
                     // consts
                     // @todo constants inited once in initPage for index (main) page only
                     // $this->defineConstants();    
@@ -140,7 +144,7 @@ error_log(print_r($_REQUEST, true));
     //
     private function init_db_connection(){
         
-        $res = mysql_connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+        $res = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
         if ( is_array($res) ){
             //connection to server failed
             $this->addError($res[0], $res[1]);
@@ -338,45 +342,26 @@ error_log(print_r($_REQUEST, true));
     //------------------------- END RT DT CONSTANTS --------------------
 
     //
-    // $dbname - shortname (without prefix)
     //
-    public function initPathConstants($dbname=null){
-
-        global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
-        if(!$dbname) $dbname = HEURIST_DBNAME;
-
-        //path is defined in configIni
+    //
+    public function getFileStoreRootFolder(){
+        
+        global $defaultRootFileUploadPath;
+        
         if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
-
-
+            
             if ($defaultRootFileUploadPath != "/" && !preg_match("/[^\/]\/$/", $defaultRootFileUploadPath)) { //check for trailing /
                 $defaultRootFileUploadPath.= "/"; // append trailing /
             }
+            
             if ( !strpos($defaultRootFileUploadPath,":/") && $defaultRootFileUploadPath != "/" && !preg_match("/^\/[^\/]/", $defaultRootFileUploadPath)) {
                 //check for leading /
                 $defaultRootFileUploadPath = "/" . $defaultRootFileUploadPath; // prepend leading /
             }
-
-            if(!defined('HEURIST_FILESTORE_ROOT')){
-                define('HEURIST_FILESTORE_ROOT', $defaultRootFileUploadPath );
-            }
             
-            if(!defined('HEURIST_FILESTORE_DIR')){
-                define('HEURIST_FILESTORE_DIR', $defaultRootFileUploadPath . $dbname . '/');
-            }
+            return $defaultRootFileUploadPath;
             
-
-            if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
-                return false;
-            }
-
-            define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
-
-
-
-        }
-        else{
-            //path has defaul name
+        }else{
             
             $install_path = 'HEURIST/'; //$this->getInstallPath();
             $dir_Filestore = "HEURIST_FILESTORE/";
@@ -385,12 +370,52 @@ error_log(print_r($_REQUEST, true));
             if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
             
             
+            return  $documentRoot . $install_path . $dir_Filestore;
+            
+        }
+    }
+    
+    //
+    // $dbname - shortname (without prefix)
+    //
+    public function initPathConstants($dbname=null){
+
+        global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
+
+        if(!$dbname) $dbname = HEURIST_DBNAME;
+        
+        $upload_root = $this->getFileStoreRootFolder();
+
+        //path is defined in configIni
+        if (isset($defaultRootFileUploadPath) && $defaultRootFileUploadPath && $defaultRootFileUploadPath!="") {
+
             if(!defined('HEURIST_FILESTORE_ROOT')){
-                define('HEURIST_FILESTORE_ROOT', $documentRoot . $install_path . $dir_Filestore );
+                define('HEURIST_FILESTORE_ROOT', $upload_root );
             }
             
             if(!defined('HEURIST_FILESTORE_DIR')){
-                define('HEURIST_FILESTORE_DIR', $documentRoot . $install_path . $dir_Filestore . $dbname . '/');
+                define('HEURIST_FILESTORE_DIR', $upload_root . $dbname . '/');
+            }
+
+            if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
+                return false;
+            }
+
+            define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
+
+        }
+        else{
+            //path has default name
+            
+            $install_path = 'HEURIST/'; //$this->getInstallPath();
+            $dir_Filestore = "HEURIST_FILESTORE/";
+
+            if(!defined('HEURIST_FILESTORE_ROOT')){
+                define('HEURIST_FILESTORE_ROOT', $upload_root);
+            }
+            
+            if(!defined('HEURIST_FILESTORE_DIR')){
+                define('HEURIST_FILESTORE_DIR', $upload_root . $dbname . '/');
             }
             if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
                 return false;
@@ -414,6 +439,10 @@ error_log(print_r($_REQUEST, true));
         define('HEURIST_TERM_ICON_DIR', HEURIST_FILESTORE_DIR . 'term-icons/');
         define('HEURIST_TERM_ICON_URL', HEURIST_FILESTORE_URL . 'term-icons/');
 
+
+        define('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_FILESTORE_DIR . 'smarty-templates/');
+        folderCreate(HEURIST_SMARTY_TEMPLATES_DIR, true);
+        
         define('HEURIST_SCRATCH_DIR', HEURIST_FILESTORE_DIR . 'scratch/');
         folderCreate(HEURIST_SCRATCH_DIR, true);
 
@@ -492,7 +521,7 @@ error_log(print_r($_REQUEST, true));
     /**
     * Returns true if system is inited ccorretly and db connection is established
     */
-    public function is_inted(){
+    public function is_inited(){
         return $this->is_inited;
     }
 
@@ -518,14 +547,10 @@ error_log(print_r($_REQUEST, true));
     public function set_dbname_full($db, $dbrequired=true){
         
         if($db){
-            if(strpos($db, HEURIST_DB_PREFIX)===0){
-                $this->dbname_full = $db;
-                $this->dbname = substr($db,strlen(HEURIST_DB_PREFIX));
-            }else{
-                $this->dbname = $db;
-                $db = HEURIST_DB_PREFIX.$db;
-                $this->dbname_full = $db;
-            }
+            
+            //list($this->dbname_full, $this->dbname) = DbUtils::databaseGetNames($db
+            list($this->dbname_full, $this->dbname ) = mysql__get_names( $db );
+            
         }else{
             $this->dbname = null;
             $this->dbname_full = null;
@@ -547,6 +572,9 @@ error_log(print_r($_REQUEST, true));
         return $this->errors;
     }
 
+    public function clearError(){
+        $this->errors = array();
+    }
 
 
     /**
@@ -554,10 +582,11 @@ error_log(print_r($_REQUEST, true));
     */
     public function addError($status, $message='', $sysmsg=null) {
 
-        if($status==HEURIST_REQUEST_DENIED){
+        if($status==HEURIST_REQUEST_DENIED && $sysmsg==null){
             $sysmsg = $this->get_user_id();
         }else if($status==HEURIST_DB_ERROR){
-            error_log('DATABASE ERROR :'.HEURIST_DBNAME.'  '.$message.($sysmsg?'. System message:'.$sysmsg:''));
+            error_log('DATABASE ERROR :'.(defined('HEURIST_DBNAME')?HEURIST_DBNAME:'')
+            .'  '.$message.($sysmsg?'. System message:'.$sysmsg:''));
             $message = 'Heurist was unable to process. '.$message;
             $sysmsg = 'reported in the server\'s PHP error log';
             //if(!$this->is_dbowner()){ //reset to null if not database owner
@@ -719,7 +748,8 @@ error_log(print_r($_REQUEST, true));
     * @param mixed $ug - user ID to check
     */
     public function is_member($ug){
-        return ($ug==0 || $ug==null || $this->get_user_id()==$ug ||  @$this->current_User['ugr_Groups'][$ug]);
+        return ( $ug==0 || $ug==null || in_array($ug, $this->get_user_group_ids()) );  
+        //$this->get_user_id()==$ug ||  @$this->current_User['ugr_Groups'][$ug]);
     }
 
     /**
@@ -741,6 +771,18 @@ error_log(print_r($_REQUEST, true));
         return ( $this->has_access( $this->get_system('sys_OwnerGroupID') ) );
     }
     
+    /**
+    * check if current user is system administrator
+    */
+    public function is_system_admin(){
+        if ($this->get_user_id()>0){
+            $user = user_getById($this->mysqli, $this->get_user_id());
+            return (defined('HEURIST_MAIL_TO_ADMIN') && (@$user['ugr_eMail']==HEURIST_MAIL_TO_ADMIN));    
+        }else{
+            return false;
+        }
+    }
+    
    /**
     * Returns IF currentUser satisfies to required level
     *
@@ -755,7 +797,7 @@ error_log(print_r($_REQUEST, true));
         $ugrID = $this->get_user_id();
         
         if(!$requiredLevel || $requiredLevel<1){
-            return ($ugrID>0); 
+            return ($ugrID>0);   //just logged in
         }
         
         return ($requiredLevel==$ugrID ||   //iself 
@@ -1107,6 +1149,11 @@ error_log(print_r($_REQUEST, true));
     private function _get_config_bytes($val) {
         $val = trim($val);
         $last = strtolower($val[strlen($val)-1]);
+
+        if($last){
+            $val = intval(substr($val,0,strlen($val)-1));
+        }
+            
         switch($last) {
             case 'g':
                 $val *= 1024;

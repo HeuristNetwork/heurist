@@ -1,4 +1,5 @@
 <?php
+//@TODO convert to class
 
     /**
     * Library to search records
@@ -10,7 +11,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -1190,7 +1191,7 @@
                     }
                     $res->close();
 
-                    if(@$params['vo']=='h3'){ //output version
+                    if(@$params['vo']=='h3'){ //output version used in showReps.php (where else???)
                         $response = array('resultCount' => $total_count_rows,
                                           'recordCount' => count($records),
                                           'recIDs' => implode(',', $records) );
@@ -1581,19 +1582,6 @@ $loop_cnt++;
 
     }
 
-
-    function _loadRecordDetails( $system, $record_ids){
-
-    }
-    
-    //
-    // pickup only timemap enabled records
-    //
-    function _getTimemapRecords($res){
-        
-        
-    }
-
     //backward capability - remove as soon as old uploadFileOrDefineURL get rid of use
     function fileParseParameters($params){
         $res = array();
@@ -1616,34 +1604,156 @@ $loop_cnt++;
     
     //
     // find replacement for given record id
-    // 
-    function recordSearchReplacement($mysqli, $rec_id){ //see get_replacement_bib_id in H3
-        
-        while(true){
-            $query = 'select rfw_NewRecID from recForwarding where rfw_OldRecID=' . intval($rec_id);
-            $new_rec_id = mysql__select_value($mysqli, $query);
-            if($new_rec_id>0){
-                $rec_id = $new_rec_id;
+    //
+    function recordSearchReplacement($mysqli, $rec_id, $level=0){
+
+        if($rec_id>0){    
+            $rep_id = mysql__select_value($mysqli, 
+                        'select rfw_NewRecID from recForwarding where rfw_OldRecID=' . intval($rec_id));
+            if($rep_id>0){
+                if($level<10){
+                    return recordSearchReplacement($mysqli, $rep_id, $level++);
+                }else{
+                    return $rep_id;
+                }
             }else{
-                return $rec_id;                
+                return $rec_id;
+            }
+        }else{
+            return 0;
+        }
+    } 
+    
+//------------------------
+    function recordSearchByID($system, $id) 
+    {
+        $mysqli = $system->get_mysqli();
+        $record = mysql__select_row_assoc( $mysqli, 
+            "select rec_ID,
+            rec_RecTypeID,
+            rec_Title,
+            rec_URL,
+            rec_ScratchPad,
+            rec_OwnerUGrpID,
+            rec_NonOwnerVisibility,
+            rec_URLLastVerified,
+            rec_URLErrorMessage,
+            rec_Added,
+            rec_Modified,
+            rec_AddedByUGrpID,
+            rec_Hash
+            from Records
+            where rec_ID = $id");
+        if ($record) {
+            recordSearchDetails($system, $record);
+        }
+        return $record;
+    }
+
+    //
+    // load details for given record
+    //    
+    function recordSearchDetails($system, &$record) {
+
+        $recID = $record["rec_ID"];
+        $squery =
+        "select dtl_ID,
+        dtl_DetailTypeID,
+        dtl_Value,
+        AsWKT(dtl_Geo) as dtl_Geo,
+        dtl_UploadedFileID,
+        dty_Type,
+        rec_ID,
+        rec_Title,
+        rec_RecTypeID,
+        rec_Hash
+        from recDetails
+        left join defDetailTypes on dty_ID = dtl_DetailTypeID
+        left join Records on rec_ID = dtl_Value and dty_Type = 'resource'
+        where dtl_RecID = $recID";
+
+        $mysqli = $system->get_mysqli();
+        $res = $mysqli->query($squery);
+
+        $details = array();
+        if($res){
+        while ($rd = $res->fetch_assoc()) {
+            // skip all invalid value
+            if (( !$rd["dty_Type"] === "file" && $rd["dtl_Value"] === null ) ||
+                (($rd["dty_Type"] === "enum" || $rd["dty_Type"] === "relationtype") && !$rd["dtl_Value"])) {
+                continue;
+            }
+
+            if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
+
+            $detailValue = null;
+
+            switch ($rd["dty_Type"]) {
+                case "freetext": case "blocktext":
+                case "float":
+                case "date":
+                case "enum":
+                case "relationtype":
+                case "integer": case "boolean": case "year": case "urlinclude": // these shoudl no logner exist, retained for backward compatibility
+                    $detailValue = $rd["dtl_Value"];
+                    break;
+
+                case "file":
+
+                    //$detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], false);
+                    
+                    $listpaths = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
+                    if(is_array($listpaths) && count($listpaths)>0){
+                        $detailValue = array("file" => $listpaths[0]);
+                    }
+
+                    break;
+
+                case "resource":
+                    $detailValue = array(
+                        "id" => $rd["rec_ID"],
+                        "type"=>$rd["rec_RecTypeID"],
+                        "title" => $rd["rec_Title"],
+                        "hhash" => $rd["rec_Hash"]
+                    );
+                    break;
+
+                case "geo":
+                    if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
+                        $detailValue = array(
+                            "geo" => array(
+                                "type" => $rd["dtl_Value"],
+                                "wkt" => $rd["dtl_Geo"]
+                            )
+                        );
+                    }
+                    break;
+
+                case "separator":    // this should never happen since separators are not saved as details, skip if it does
+                case "relmarker":    // relmarkers are places holders for display of relationships constrained in some way
+                default:
+                    continue;
+            }
+
+            if ($detailValue) {
+                $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
             }
         }
-        
-        /*
-        $res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=" . intval($rec_id));
-        $recurseLimit = 10;
-        while (mysql_num_rows($res) > 0) {
-            $row = mysql_fetch_row($res);
-            $rec_id = $row[0];
-            $replaced = true;
-            $res = mysql_query("select rfw_NewRecID from recForwarding where rfw_OldRecID=" . $rec_id);
 
-            if ($recurseLimit-- === 0) { break; }
+            $res->close();
         }
-        */
-
-        return $rec_id;
+        $record["details"] = $details;
     }
-    
-    
+
+    //
+    // load personal tags (current user) for given record ID
+    //
+    function recordSearchPersonalTags($system, $rec_ID) {
+
+        $mysqli = $system->get_mysqli();
+        
+        return mysql__select_list2($mysqli, 
+            'SELECT tag_Text FROM usrRecTagLinks, usrTags WHERE '
+            ."tag_ID = rtl_TagID and tag_UGrpID= ".$system->get_user_id()." and rtl_RecID = $rec_ID order by rtl_Order");        
+    }       
 ?>

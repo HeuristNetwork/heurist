@@ -1,6 +1,6 @@
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -40,7 +40,7 @@ function onPageInit(success) //callback function of hAPI initialization
         // find both records details
         var request = {q:'ids:'+source_ID+','+target_ID,w:'a',f:'detail'};
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 var resdata = new hRecordSet(response.data);
         
                 //add SELECT and fill it with values
@@ -728,7 +728,7 @@ function hRecordAddLink() {
         var request = {q:'ids:'+rec_id, w:'e',f:'detail'};  //w=e everything including temporary
         
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 var resdata = new hRecordSet(response.data);
         
                 //add SELECT and fill it with values
@@ -930,7 +930,7 @@ function hRecordAddLink() {
             var hWin = window.hWin;
             
             function __callBack(response){
-                    if(response.status == hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == hWin.ResponseStatus.OK){
                         if(requests[idx].a=='s'){
                             res.relation_recID = response.data; //add rec id
                         }
@@ -941,9 +941,9 @@ function hRecordAddLink() {
                     }
             }        
         
-            if(request.a=='add'){
+            if(request.a=='add'){  //add link - batch update - add new field
                 window.hWin.HAPI4.RecordMgr.batch_details(request, __callBack);
-            }else{
+            }else{ //add relationship - add new record
                 window.hWin.HAPI4.RecordMgr.save(request, __callBack);
             }
         }else if(requests.length>0){

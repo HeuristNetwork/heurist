@@ -8,7 +8,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -21,7 +21,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
 
 function hAPI(_db, _oninit) { //, _currentUser
     var _className = "HAPI",
@@ -89,7 +88,6 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
         }
 
-
     }
 
     /*
@@ -112,11 +110,10 @@ function hAPI(_db, _oninit) { //, _currentUser
 
 
         //remove remark to debug 
-        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());
-
-        //window.hWin.HEURIST4.ajax.getJsonData(url, callback, request);
 
         //note jQuery ajax does not properly in the loop - success callback does not work often
         $.ajax({
@@ -130,7 +127,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
                                             ?'Error_Connection_Reset':jqXHR.responseText;
                                             
-                var response = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message}
 
                 if(callback){
                     callback(response);
@@ -146,7 +143,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 /*check response for special marker that forces to reload user and system info
                 //after update sysIdentification, dbowner and user role
                 if(response && 
-                    (response.status == window.hWin.HAPI4.ResponseStatus.OK) && 
+                    (response.status == window.hWin.ResponseStatus.OK) && 
                      response.force_refresh_sys_info) {
                          that.SystemMgr.sys_info(function(success){
                              
@@ -156,7 +153,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             },
             fail: function(  jqXHR, textStatus, errorThrown ){
                 err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
-                var response = {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message}
 
                 if(callback){
                     callback(response);
@@ -266,11 +263,14 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             , verify_credentials: function(callback, requiredLevel){
 
+                callback(); //verification temporarely disabled
+                return; 
+                
                 //check if login
                 _callserver('usr_info', {a:'verify_credentials'},
                 function(response){
                     
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                     
                         if(response.data.sysinfo){
                             window.hWin.HAPI4.sysinfo = response.data.sysinfo;
@@ -289,7 +289,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                             || window.hWin.HAPI4.has_access(requiredLevel))){ 
 
                             response.sysmsg = 0;
-                            response.status = window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED;
+                            response.status = window.hWin.ResponseStatus.REQUEST_DENIED;
                             response.message = 'To perform this operation you have to be logged in';
                             
                             if(requiredLevel==window.hWin.HAPI4.sysinfo.db_managers_groupid){
@@ -306,7 +306,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         }
                     }
                     
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         callback();
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response, true);
@@ -324,7 +324,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 
                 _callserver('usr_info', {a:'sysinfo'}, 
                     function(response){
-                        var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
+                        var  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
                             
                             if(response.data.currentUser) {
@@ -382,7 +382,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(sUserName){
                     var res = {};
                     res[usr_ID] = sUserName;
-                    callback.call(this, {status:window.hWin.HAPI4.ResponseStatus.OK, data:res} );
+                    callback.call(this, {status:window.hWin.ResponseStatus.OK, data:res} );
                 }else{
                     //search on server
                     if(request) request.a = 'usr_names';
@@ -484,21 +484,13 @@ function hAPI(_db, _oninit) { //, _currentUser
                     
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
                     
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         
                         window.hWin.HEURIST4.rectypes = response.data.rectypes;
                         window.hWin.HEURIST4.terms = response.data.terms;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                         
-                        if(top && top==window && top.HEURIST){
-                            top.HEURIST.rectypes = response.data.rectypes;
-                            top.HEURIST.terms = response.data.terms;
-                            top.HEURIST.detailTypes = response.data.detailtypes;
-                        }
-                             
-                        if(window.hWin.HEURIST && window.hWin.HEURIST.rectypes){
-                            window.hWin.HEURIST.util.reloadStrcuture( is_message ); //relaod H3 structure
-                        }else if (is_message==true) {
+                        if (is_message==true) {
                             window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                                 'You may need to reload pages to see changes.');
                         }      
@@ -531,16 +523,21 @@ function hAPI(_db, _oninit) { //, _currentUser
     * see record_edit.php, record_details.php, record_tags.php and record_search.php
     *
     * methods:
+    *           for record_edit controller
     *   add       - creates new temporary record
     *   save      - save record
     *   remove    - delete record
     *   duplicate
+    *   access    - ownership and visibility
     *
+    *           for record_details controller
     *   details   - batch edition of record details for many records
     *
+    *           for record_search controller
     *   search
     *   minmax
-    *   get
+    *   get_facets
+    *   search_related
     *
     * @returns {Object}
     */
@@ -582,6 +579,14 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('record_edit', request, callback);
             }
             
+            /**
+            * ownership and visibility
+            * ids, OwnerUGrpID, NonOwnerVisibility
+            */
+            ,access: function(request, callback){
+                if(request) request.a = 'access';
+                _callserver('record_edit', request, callback);
+            }
 
             /**
             * Remove Record
@@ -647,7 +652,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                     callback = function(response)
                     {
                         var resdata = null;
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             resdata = new hRecordSet(response.data);
                         }else{
 
@@ -736,6 +741,8 @@ function hAPI(_db, _oninit) { //, _currentUser
         var that = {
 
             //load entity configuration file
+            // entityScrud.action = config
+            // 
             getEntityConfig:function(entityName, callback){
 
                 if(entity_configs[entityName]){
@@ -746,7 +753,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }else{
                     _callserver('entityScrud', {a:'config', 'entity':entityName},
                        function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
 
                                 var entity_cfg = response.data;
 
@@ -781,13 +788,16 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
             },
 
+            
             //load entire entity data and store it in cache (applicable for entities with count < ~1500)
+            // entityScrud.action = search
+            //
             getEntityData:function(entityName, force_reload, callback){
 
                 if($.isEmptyObject(entity_data[entityName]) || force_reload==true){
                     _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':'list'},
                        function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 entity_data[response.data.entityName] = new hRecordSet(response.data);
                                 if($.isFunction(callback)) callback(entity_data[response.data.entityName]);
                             }else{
@@ -805,7 +815,21 @@ function hAPI(_db, _oninit) { //, _currentUser
                     }
                 }
             },
+            
+            //
+            // clear clinet side entity data for further refresh
+            //
+            emptyEntityData:function(entityName){
+                if(entityName){
+                    entity_data[entityName] = {};    
+                }else{
+                    entity_data = {};
+                }
+            },
 
+            //
+            // generic request for entityScrud
+            //
             doRequest:function(request, callback){
                 //todo - verify basic params
                 request['request_id'] = window.hWin.HEURIST4.util.random();
@@ -814,7 +838,8 @@ function hAPI(_db, _oninit) { //, _currentUser
             },
 
             //
-            //
+            // retrieve title of entity bt given id
+            // entityScrud.action = title
             //
             getTitlesByIds:function(entityName, recIDs, callback){
                 
@@ -840,7 +865,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         
                         window.hWin.HAPI4.EntityMgr.doRequest(request, 
                                         function(response){
-                                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                            if(response.status == window.hWin.ResponseStatus.OK){
                                                 
                                                 callback.call(this, response.data ); //array of titles
                                             }else{
@@ -863,17 +888,6 @@ function hAPI(_db, _oninit) { //, _currentUser
         baseURL: '', 
         iconBaseURL: '',
         database: '',
-
-        ResponseStatus: {
-            INVALID_REQUEST: "invalid",    // The Request provided was invalid.
-            NOT_FOUND: "notfound",         // The requested object not found.
-            OK: "ok",                      // The response contains a valid Result.
-            REQUEST_DENIED: "denied",      // The webpage is not allowed to use the service.
-            DB_ERROR: "database",          // A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
-            UNKNOWN_ERROR: "unknown",      // A request could not be processed due to a server error. The request may succeed if you try again.
-            SYSTEM_CONFIG: "syscfg", // System NON-fatal configuration. Contact system admin
-            SYSTEM_FATAL: "system"           // System fatal configuration. Contact system admin
-        },
 
         Event: {
             /*LOGIN: "LOGIN",
@@ -920,7 +934,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         // they have to be used internally in widgets and loop operations to avoid server/network workload
         // However, before start any action or open widget popup need to call 
         // SystemMgr.verify_credentials
-
+        
         /**
         * Returns true is current user is database admin (admin in group Database Managers)
         */
@@ -980,11 +994,6 @@ function hAPI(_db, _oninit) { //, _currentUser
             }else{
                 var res = that.currentUser['ugr_Preferences'][name];
 
-                //take from old set
-                if(window.hWin.HEURIST4.util.isnull(res) && window.hWin.HEURIST && window.hWin.HEURIST.displayPreferences){
-                    res = window.hWin.HEURIST.displayPreferences[name];
-                }
-
                 // TODO: redundancy: this duplicates same in System.php
                 if('search_detail_limit'==name){
                     if(window.hWin.HEURIST4.util.isempty(res) || res<500 ) res = 500
@@ -1029,7 +1038,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                 window.hWin.HAPI4.SystemMgr.save_prefs(request,
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             that.currentUser['ugr_Preferences'][name] = value;
                         }
                     }
@@ -1057,6 +1066,10 @@ function hAPI(_db, _oninit) { //, _currentUser
         },
 
 
+        user_id: function(){
+                return that.currentUser['ugr_ID'];  
+        },
+        
         currentUser: _guestUser,
         sysinfo: {},
 
@@ -1162,11 +1175,11 @@ function hAPI(_db, _oninit) { //, _currentUser
         //
         //
         //
-        , parseCSV: function(request, callback){
+        , doImportAction: function(request, callback){
             //if(request) request.a = 'svs_delete';
             //request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
 
-            _callserver('fileParse', request, callback);
+            _callserver('importController', request, callback);
         }
 
 

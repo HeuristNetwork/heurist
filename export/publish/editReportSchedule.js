@@ -4,7 +4,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -19,10 +19,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
-//aliases
-var Dom = YAHOO.util.Dom,
-    Hul = top.HEURIST.util;
 
 /**
 * ReportScheduleEditor - class for pop-up edit report schedules
@@ -42,8 +38,9 @@ function ReportScheduleEditor() {
             _entity, //object (report schedule) to edit
             _recID,     // its ID
             _updatedFields = [], //field names which values were changed to be sent to server
-            _updatedDetails = [], //field values
-            _db;
+            _updatedDetails = []; //field values
+            
+        var _reports = [];    
 
     /**
     * Initialization of input form
@@ -56,48 +53,72 @@ function ReportScheduleEditor() {
             hquery = '';
 
 
-        _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
+        document.getElementById("lblFilePathHelp").innerHTML = "Path to which report is published (leave blank for default path "+ window.hWin.HAPI4.database + "/generated-reports)";
 
-        // reads parameters from GET request
-        if (location.search.length > 1) {
-                top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-                _recID = top.HEURIST.parameters.recID;
 
-                typeID = top.HEURIST.parameters.typeID;
-                templatefile = top.HEURIST.parameters.template;
-                hquery = top.HEURIST.parameters.hquery;
+        _recID = window.hWin.HEURIST4.util.getUrlParameter('recID', location.search);
 
-                if(Number(_recID)>0){
-                    _entity = top.HEURIST.reports.records[_recID];
-                }
-                if(Hul.isnull(typeID)){
-                    typeID = "smarty";
-                }
-                if(Hul.isnull(hquery)){
-                    hquery = '';
-                }else{
-                    var hparams = top.HEURIST.parameters = top.HEURIST.parseParams(hquery);
-                    if(!Hul.isnull(hparams.label)){
-                        qlabel = hparams.label;
-                    }
-                }
-                if(Hul.isnull(templatefile)){
-                    templatefile = '';
-                }
+        if (!Number(_recID)>0) { _recID = 0; }
+            
+        var _url = window.hWin.HAPI4.baseURL + 'export/publish/loadReports.php';
+        var request = {method:'getreport', recID:_recID};
+            
+        window.hWin.HEURIST4.util.sendRequest(_url, request, null, _continueInit);
+        
+        
+    }
+    
+    function _continueInit(response){
+
+        var typeID = "smarty",
+            templatefile = '',
+            qlabel = '',
+            hquery = '';
+        
+        if(response.status != window.hWin.ResponseStatus.OK){
+            window.hWin.HEURIST4.msg.showMsgErr(response);
+            return;   
         }
 
-        if (Number(_recID>0) && Hul.isnull(_entity) ){
-            Dom.get("statusMsg").innerHTML = "<strong>Error: Report Schedule #"+_recID+"  was not found. Clicking 'save' button will create a new Schedule.</strong><br /><br />";
+        _reports = response['data'];
+        
+        typeID = window.hWin.HEURIST4.util.getUrlParameter('typeID', location.search);
+        templatefile = window.hWin.HEURIST4.util.getUrlParameter('template', location.search); 
+        
+        hquery = window.hWin.HEURIST4.util.getUrlParameter('hquery', location.search);  
+            
+            
+        if(window.hWin.HEURIST4.util.isempty(typeID)){
+            typeID = "smarty";
         }
+        if(window.hWin.HEURIST4.util.isnull(hquery)){
+            hquery = '';
+        }else{
+            var _qlabel = window.hWin.HEURIST4.util.getUrlParameter('label', hquery);
+            if(!window.hWin.HEURIST4.util.isnull(_qlabel)){
+                qlabel = _qlabel;
+            }
+        }
+        if(window.hWin.HEURIST4.util.isnull(templatefile)){
+            templatefile = '';
+        }
+
+
+        if (Number(_recID>0) && window.hWin.HEURIST4.util.isnull(_entity) ){
+            document.getElementById("statusMsg").innerHTML = "<strong>Error: Report Schedule #"+_recID+"  was not found. Clicking 'save' button will create a new Schedule.</strong><br /><br />";
+        }
+        
+        _entity = (_recID>0&& _reports)? _reports.records[_recID] :null; 
         //creates new empty field type in case ID is not defined
-        if(Hul.isnull(_entity)){
+        if(window.hWin.HEURIST4.util.isnull(_entity)){
             _recID =  -1;
             //"rps_ID", "rps_Type", "rps_Title", "rps_FilePath", "rps_URL", "rps_FileName", "rps_HQuery", "rps_Template", "rps_IntervalMinutes"
             _entity = [-1,typeID,qlabel,'','','',hquery,templatefile,1440]; //interval 1 day
         }
         
-        Dom.get('rps_Title').onchange = function(event){
-            Dom.get('rps_FileName').value = top.HEURIST.util.cleanFilename(event.target.value);
+        document.getElementById('rps_Title').onchange = function(event){
+            window.hWin.HEURIST4.util
+            document.getElementById('rps_FileName').value = window.hWin.HEURIST4.ui.cleanFilename(event.target.value);
         }
 
         _reload_templates();
@@ -119,10 +140,10 @@ function ReportScheduleEditor() {
                     sel.remove(0);
             }
 
-            if(!Hul.isnull(context) && context.length>0){
+            if(!window.hWin.HEURIST4.util.isnull(context) && context.length>0){
                 for (i in context){
                     if(i!==undefined){
-                        Hul.addoption(sel, context[i].filename, context[i].name);
+                        window.hWin.HEURIST4.ui.addoption(sel, context[i].filename, context[i].name);
                     }
                 } // for
 
@@ -136,9 +157,10 @@ function ReportScheduleEditor() {
     * loads list of templates
     */
     function _reload_templates(){
-                var baseurl = top.HEURIST.baseURL + "viewers/smarty/templateOperations.php";
+                var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
                 var callback = _updateTemplatesList;
-                Hul.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
+                var request = {mode:'list'};
+                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
     }
 
 
@@ -150,29 +172,29 @@ function ReportScheduleEditor() {
 
         var i,
             el,
-            fnames = top.HEURIST.reports.fieldNames;
+            fnames = _reports.fieldNames;
 
         for (i = 0, l = fnames.length; i < l; i++) {
             var fname = fnames[i];
-            el = Dom.get(fname);
-            if(!Hul.isnull(el)){
+            el = document.getElementById(fname);
+            if(!window.hWin.HEURIST4.util.isnull(el)){
                 el.value = _entity[i];
             }
         }
 
         if (_recID<0){
-            Dom.get("rps_ID").innerHTML = 'to be generated';
+            document.getElementById("rps_ID").innerHTML = 'to be generated';
             document.title = "Create New Report Schedule";
         }else{
-            Dom.get("rps_ID").innerHTML =  _recID;
+            document.getElementById("rps_ID").innerHTML =  _recID;
             document.title = "Report Schedule #: " + _recID+" '"+_entity[2]+"'";
 
-            Dom.get("statusMsg").innerHTML = "";
+            document.getElementById("statusMsg").innerHTML = "";
         }
         //set interval to 1440 (1 day) in case not defined
-        var interval = Dom.get("rps_IntervalMinutes").value;
-        if(Hul.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<1){
-            Dom.get("rps_IntervalMinutes").value = 1440;            
+        var interval = document.getElementById("rps_IntervalMinutes").value;
+        if(window.hWin.HEURIST4.util.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<1){
+            document.getElementById("rps_IntervalMinutes").value = 1440;            
         }
 
     }
@@ -196,26 +218,28 @@ function ReportScheduleEditor() {
         _updatedFields = [];
         _updatedDetails = [];
 
-        var interval = Dom.get("rps_IntervalMinutes").value;
-        if(Hul.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<1){
-            Dom.get("rps_IntervalMinutes").value = 1440;            
+        var interval = document.getElementById("rps_IntervalMinutes").value;
+        if(window.hWin.HEURIST4.util.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval)<1){
+            document.getElementById("rps_IntervalMinutes").value = 1440;            
         }
         
         var i,
-            fnames = top.HEURIST.reports.fieldNames;
+            fnames = _reports.fieldNames;
 
         //take only changed values
         for (i = 0, l = fnames.length; i < l; i++){
             var fname = fnames[i];
-            el = Dom.get(fname);
-            if( !Hul.isnull(el) && fname!='rps_ID' ){
+            el = document.getElementById(fname);
+            if( !window.hWin.HEURIST4.util.isnull(el) && fname!='rps_ID' ){
                 if(_recID<0 || (el.value!==String(_entity[i]) && !(el.value==="" && _entity[i]===null)))
                 {
                     // DEBUG alert(el.value+" "+String(_entity[i]));
                     _updatedFields.push(fname);
                     _updatedDetails.push(el.value);
                 }
-                if(Hul.isempty(el.value) && !(fname==='rps_FilePath' || fname==='rps_URL' || fname==='rps_IntervalMinutes') ) {
+                if(window.hWin.HEURIST4.util.isempty(el.value) && 
+                    !(fname==='rps_FilePath' || fname==='rps_URL' || fname==='rps_IntervalMinutes') ) 
+                {
                     if(isShowWarn) {
                         alert(fname.substr(4)+" is a mandatory field");
                     }
@@ -236,37 +260,40 @@ function ReportScheduleEditor() {
     *
     * @param context - data from server
     */
-    function _updateResult(context) {
+    function _updateResult(response) {
 
-        if(!Hul.isnull(context)){
+        if(response.status != window.hWin.ResponseStatus.OK){
+            window.hWin.HEURIST4.msg.showMsgErr(response);
+            return;   
+        }
+        
+        var error = false,
+            report = "",
+            ind;
 
-            var error = false,
-                report = "",
-                ind;
-
-            for(ind in context.result){
-                if( !Hul.isnull(ind) ){
-                    var item = context.result[ind];
-                    if(isNaN(item)){
-                        Hul.showError(item);
-                        error = true;
-                    }else{
-                        _recID = Number(item);
-                        if(report!=="") {
-                            report = report + ",";
-                        }
-                        report = report + Math.abs(_recID);
+        for(ind in response.data){
+            if( !window.hWin.HEURIST4.util.isnull(ind) ){
+                var item = response.data[ind];
+                if(isNaN(item)){
+                    window.hWin.HEURIST4.msg.showMsgErr(item);
+                    error = true;
+                }else{
+                    _recID = Number(item);
+                    if(report!=="") {
+                        report = report + ",";
                     }
+                    report = report + Math.abs(_recID);
                 }
             }
-
-            if(!error){
-                var ss = (_recID < 0)?"added":"updated";
-
-                // this alert is a pain  alert("Report schedule with ID " + report + " was succesfully "+ss);
-                window.close(context); //send back new HEURIST strcuture
-            }
         }
+
+        if(!error){
+            var ss = (_recID < 0)?"added":"updated";
+
+            // this alert is a pain  alert("Report schedule with ID " + report + " was succesfully "+ss);
+            window.close(response); //send back new HEURIST strcuture
+        }
+        
     }
 
     /**
@@ -306,18 +333,14 @@ function ReportScheduleEditor() {
             for(val in values) {
                 oDataToServer.report.defs[_recID].push(values[val]);
             }
-            str = YAHOO.lang.JSON.stringify(oDataToServer);
-        }
 
-
-        if(!Hul.isempty(str)) {
 //DEBUG alert("Stringified changes: " + str);
 
             // 3. sends data to server
-            var baseurl = top.HEURIST.baseURL + "export/publish/loadReports.php";
+            var baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
             var callback = _updateResult;
-            var params = "method=savereport&db=" + _db + "&data=" + encodeURIComponent(str);
-            Hul.getJsonData(baseurl, callback, params);
+            var request = {method:'savereport', data:oDataToServer};
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
         } else {
             window.close(null);
         }

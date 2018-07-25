@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -111,7 +111,7 @@ var Comment = function(parentComment, hComment) {
 	var detailText = hComment.getText() || "";
 		detailText = detailText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 		detailText = detailText.replace(/(http:\/\/[\041-\176]+)/g, "<a href=\"$1\">$1</a>");
-		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\"/"+ installDir +"/records/view/viewRecord.php?recID=$1\">$1</a>]");
+		detailText = detailText.replace(/\[(\d+)\]/g, "[<a href=\"/"+ installDir +"/viewers/record/viewRecord.php?recID=$1\">$1</a>]");
 
 	this.textDiv = this.innerDiv.appendChild(this.document.createElement("div"));
 		this.textDiv.className = "text";

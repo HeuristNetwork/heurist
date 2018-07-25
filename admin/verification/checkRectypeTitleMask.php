@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -20,33 +20,29 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
 
-    require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/titleMask.php');
 
-    // 1 - check only, 2 - check and correct, 3 - output as json list of rectypes with wrong rectitles
+$mysqli = $system->get_mysqli();
+
+    // 0 execute for given rec_id, 1 - check only, 2 - check and correct, 3 - output as json list of rectypes with wrong rectitles
+    // 2,3 not used at the moment
     $mode = @$_REQUEST['check'] ? intval($_REQUEST['check']):0;
-    if ($mode == 0) {
-        mysql_connection_select(DATABASE);
-    }else{
-        mysql_connection_overwrite(DATABASE);
-    }
 
     $rectypeID = @$_REQUEST['rty_id'] ? $_REQUEST['rty_id'] : null;
     $mask = @$_REQUEST['mask'] ? $_REQUEST['mask'] : null;
     $coMask = @$_REQUEST['coMask'] ? $_REQUEST['coMask'] : null; //deprecated - not used
     $recID = @$_REQUEST['rec_id']? $_REQUEST['rec_id'] : null;;
 
-    if($mode!=3){
-    ?>
-
-    <html>
-
+if($mode!=3){
+?>
+<html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
         <style type="text/css">
             h3, h3 span {
                 display: inline-block;
@@ -77,7 +73,8 @@
         </style>
     </head>
 
-    <body class="popup">
+<body class="popup">
+
         <div class="banner">
             <h2><?=(($mode==2)?'Synch Canonical Title Masks':'Check Title Masks') ?></h2>
         </div>
@@ -89,19 +86,23 @@
             For bibliographic records they provide a shortened bibliographic style entry.<br/><br/>
             This check looks for ill formed title masks for record types defined in the <b><?=HEURIST_DBNAME?></b> Heurist database.<br/><br/>
             If the title mask is invalid please edit the record type (see under Structure in the menu on the left)
-            and correct the title mask for the record type.<br/>
-            <?php
-               echo "<br/><hr>\n";
-                }//$mode!=3
-                $rtIDs = mysql__select_assoc("defRecTypes","rty_ID","rty_Name","1 order by rty_ID");
+            and correct the title mask for the record type.<br/><br/><hr>
+<?php
+}//$mode!=3
+                
+                
+                $rtIDs = mysql__select_assoc2($mysqli, 'select rty_ID, rty_Name from defRecTypes order by rty_ID');
 
                 if($mode==3){
                     $rt_invalid_masks = array();
                     foreach ($rtIDs as $rtID => $rtName) {
-                        $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
-                        $mask=$mask[0];
-                        $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
+                        $mask = mysql__select_value($mysqli, 'select rty_TitleMask from defRecTypes where rty_ID='.$rtID);
+                        
+                        //get human readable
+                        $res = TitleMask::execute($mask, $rtID, 2, null, _ERR_REP_MSG);
+                        
                         if(is_array($res)){ //invalid mask
+                            //$res[0]; // mask is invalid - this is error message
                             array_push($rt_invalid_masks, $rtName);
                         }
                     }
@@ -123,24 +124,28 @@
                 }
 
                 function checkRectypeMask($rtID, $rtName, $mask, $coMask, $recID, $mode) {
-                    global $mode;
+                    global $mode, $mysqli;
 
                     if (!@$mask && @$rtID) {
-                        $mask= mysql__select_array("defRecTypes","rty_TitleMask","rty_ID=$rtID");
-                        $mask=$mask[0];
+                        
+                        $mask = mysql__select_value($mysqli, 'select rty_TitleMask from defRecTypes where rty_ID='.$rtID);
+                        
                     }
 
                     if($mode > 0 || !$recID)
                     {
-                        echo "<h3><b> $rtID : <i>$rtName</i></b> <br/> </h3>";
+                        echo "<h3 style=\"padding:15px 0px 10px 4px;\"><b> $rtID : <i>$rtName</i></b> <br/> </h3>";
 
                         if($mask==null || trim($mask)==""){
                             $res = array();
                             $res[0] = "Title mask is not defined";
                         }else{
-                            $res = titlemask_make($mask, $rtID, 2, null, _ERR_REP_MSG); //get human readable
+                            //get human readable
+                            $res = TitleMask::execute($mask, $rtID, 2, null, _ERR_REP_MSG);
                         }
-                        echo "<div class='resultsRow'><div class='statusCell ".(is_array($res)? "invalid'>in":"valid'>")."valid</div>";
+                        echo "<div class='resultsRow'><div class='statusCell ".
+                                    (is_array($res)? "invalid'>in":"valid'>")."valid</div>";
+                                    
                         echo "<div class='maskCell'>Mask: <i>$mask</i></div>";
                         if(is_array($res)){
                             echo "<div class='errorCell'><b>< < < < < ".$res[0]."</b></div>";
@@ -153,8 +158,8 @@
 
                         echo "\n";
                     }else{
-                        echo "checking title mask $mask for record type $rtID and record $recID <br/>";
-                        echo fill_title_mask($mask, $recID, $rtID);
+                        echo "Checking title mask $mask for record type $rtID and record $recID <br/>";
+                        echo TitleMask::fill($recID, $mask);
                     }
                 }
             ?>

@@ -758,6 +758,21 @@ CREATE TABLE usrRecTagLinks (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table 'usrRecPermissions'
+--
+
+CREATE TABLE IF NOT EXISTS usrRecPermissions (
+    rcp_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',
+    rcp_UGrpID smallint(5) unsigned NOT NULL COMMENT 'ID of group',
+    rcp_RecID int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',
+    rcp_Level enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',
+    PRIMARY KEY  (rcp_ID),
+    UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records';
+            
+-- --------------------------------------------------------
+
+--
 -- Table structure for table 'usrRecentRecords'
 --
 

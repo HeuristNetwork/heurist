@@ -1,0 +1,41 @@
+<!--
+/**
+* mainMenuArchive.html: top-level menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2018 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+                    <li class="admin-only">
+                        <!-- export/dbbackup/exportMyDataPopup.php?inframe=1 -->
+                        <a href="#" name="auto-popup" class="portrait h3link"
+                            data-logaction="adminArchive"
+                            style="text-decoration:line-through"
+                            onclick= "{return false;}"
+                            title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
+                            Create data archive package</a>
+                    </li>
+
+                    <li>
+                        <!-- applications/faims/exportFAIMS.php -->                    
+                        <a href="#" name="auto-popup" class="verylarge h3link"
+                            data-logaction="stFAIMS"
+                            style="text-decoration:line-through"
+                            onClick="{return false;}"
+                            title="Create FAIMS module / tablet application structure from the current Heurist database structure. No data is exported">
+                            Build tablet app</a>
+                    </li>

@@ -36,7 +36,7 @@
         
         $dbRecDetails = new DbRecDetails($system, $_REQUEST);
 
-        if(@$_REQUEST['a'] == 'add_child'){
+        if(@$_REQUEST['a'] == 'add_child'){ //add child record
             
            $res = $dbRecDetails->detailsAddChild();
             

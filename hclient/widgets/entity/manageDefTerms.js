@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -178,7 +178,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     var recset = new hRecordSet(response.data);
                     if(recset.length()>0){                                                                      
                         that._filterTreeView(recset);
@@ -425,7 +425,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //that.loadanimation(true);
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             if(callback && $.isFunction(callback)){
                                 callback();                                
                             }

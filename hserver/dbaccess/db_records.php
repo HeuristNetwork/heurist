@@ -2,10 +2,11 @@
 
     /**
     * Library to update records
+    * @todo  use entity/dbRecords
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -18,6 +19,7 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    
     /*
         recordAdd  - create temporary record for given user
         recordSave - Save record
@@ -28,6 +30,7 @@
         recordCanChangeOwnerwhipAndAccess  - Verifies access right value and is the current user able to change ownership for given record
     
         recordUpdateTitle
+        recordUpdateOwnerAccess
         prepareDetails - validate records detail (need to combine with validators in fileParse)
     
     */
@@ -36,6 +39,7 @@
     require_once (dirname(__FILE__).'/db_structure.php');
     require_once (dirname(__FILE__).'/db_recsearch.php');
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
+    require_once (dirname(__FILE__).'/../../records/index/elasticSearch.php');
 
     $recstructures = array();
     $detailtypes   = array();
@@ -129,8 +133,8 @@
 
         $query = "INSERT INTO Records
         (rec_AddedByUGrpID, rec_RecTypeID, rec_OwnerUGrpID, rec_NonOwnerVisibility,"
-        ."rec_URL, rec_ScratchPad, rec_Added, rec_AddedByImport, rec_FlagTemporary) "
-        ."VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        ."rec_URL, rec_ScratchPad, rec_Added, rec_AddedByImport, rec_FlagTemporary, rec_Title) "
+        ."VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $mysqli->prepare($query);
 
@@ -139,12 +143,13 @@
         $rec_scr  = @$record['ScratchPad'];
         $rec_imp  = (@$record['AddedByImport']?1:0);
         $rec_temp = (@$record['FlagTemporary']?1:0);
+        $rec_title = @$record['Title']==null?'':$record['Title'];
 
         //DateTime('now')->format('Y-m-d H:i:s') is same as date('Y-m-d H:i:s')
         $data_add = date('Y-m-d H:i:s');
         
-        $stmt->bind_param('iiissssii', $currentUserId, $rectype, $ownerid, $access,
-            $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp);
+        $stmt->bind_param('iiissssiis', $currentUserId, $rectype, $ownerid, $access,
+            $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp, $rec_title);
         $stmt->execute();
         $newId = $stmt->insert_id;
         $syserror = $mysqli->error;
@@ -221,7 +226,7 @@
 
         $mysqli = $system->get_mysqli();
 
-        //0 normal, 1 import, 2 - faims import
+        //0 normal, 1 import, 2 - faims or zotero import (add without recstructure check)
         $modeImport = @$record['AddedByImport']?intval($record['AddedByImport']):0;
 
         $is_strict_validation = true;
@@ -231,6 +236,7 @@
         }
         
         $rectype = intval(@$record['RecTypeID']);
+        $detailValues = null;
 
         if ($rectype && !dbs_GetRectypeByID($mysqli, $rectype))  {
             return $system->addError(HEURIST_INVALID_REQUEST, "Record type is wrong");
@@ -323,7 +329,7 @@
 
         //ADD DETAILS
         $addedByImport = ($modeImport?1:0);
-
+        
         $query = 'INSERT INTO recDetails '.
         '(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo) '.
         "VALUES ($recID, ?, ?, $addedByImport, ?, geomfromtext(?) )";
@@ -395,8 +401,9 @@
             return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
         }
 
-        $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['RecTitle']);
-
+        $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']);
+    
+        
         if(!$is_insert){
             removeReverseChildToParentPointer($system, $recID, $rectype);    
 
@@ -454,7 +461,7 @@
     }
 
     /**
-    * @todo - to be implemented
+    * 
     *
     * @param mixed $mysqli
     * @param mixed $user
@@ -465,16 +472,39 @@
         $recids = prepareIds($recids);
         if(count($recids)>0){
             
+            //narrow by record type
+            $rec_RecTypeID = @$params['rec_RecTypeID'];
+            if($rec_RecTypeID>0){ 
+                $recids = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
+                    .implode(',', $recids).') and rec_RecTypeID='. $rec_RecTypeID);
+                    
+                if($recids==null || count($recids)==0){             
+                    $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
+                    return false;
+                }
+            }
+            
+            
             $rectypes = array();
+            $noaccess_count = 0;
+            $allowed_recids = array();
         
             //check permission
             foreach ($recids as $recID) {
                 $ownerid = null;
                 $access = null;
                 if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes)){
-                    return $system->getError();
+                    $noaccess_count++;
+                }else{
+                    array_push($allowed_recids, $recID);
                 }
             }
+            if(count($recids)==1 && $noaccess_count==1){
+                return $system->getError();    
+            }else{
+                $system->clearError();    
+            }
+            
             
             $is_error = false;
             $mysqli = $system->get_mysqli();
@@ -488,8 +518,8 @@
             
             $system->defineConstant('RT_RELATION');
                         
-            foreach ($recids as $id) {
-                $stat = deleteOneRecord($mysqli, $id, $rectypes[$id]);
+            foreach ($allowed_recids as $recID) {
+                $stat = deleteOneRecord($mysqli, $recID, $rectypes[$recID]);
                 
                 if( array_key_exists('error', $stat) ){
                     $msg_error = $stat['error'];
@@ -507,8 +537,10 @@
                 $res = $system->addError(HEURIST_DB_ERROR, 'Cannot delete record. '.$msg_error);
             }else{
                 $mysqli->commit();
-                $res = array("status"=>HEURIST_OK, 
-                    "data"=> array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels_count));
+                $res = array('status'=>HEURIST_OK, 
+                    'data'=> array( 'processed'=>count($allowed_recids),
+                                    'deleted'=>count($deleted), 'noaccess'=>$noaccess_count,
+                                    'bkmk_count'=>$bkmk_count, 'rels_count'=>$rels_count));
             }
             
             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
@@ -518,6 +550,99 @@
             return $system->addError(HEURIST_INVALID_REQUEST, 'Record IDs not defined');
         }
     }
+    
+
+    /**
+    * update ownership and access for set of records
+    * $params
+    *     ids - array of record ids
+    *     OwnerUGrpID - new ownership
+    *     NonOwnerVisibility - access rights
+    */
+    function recordUpdateOwnerAccess($system, $params){
+        
+        $recids = @$params['ids']; 
+        
+        $recids = prepareIds($recids);
+        if(count($recids)>0){
+
+            $ownerid = @$params['OwnerUGrpID'];
+            $access = @$params['NonOwnerVisibility'];
+
+            if($ownerid==null ||$access==null){             
+                $this->system->addError(HEURIST_INVALID_REQUEST, 'Neithwe owner nor visibility parameters defined');
+                return false;
+            }
+            
+            //narrow by record type
+            $rec_RecTypeID = @$params['rec_RecTypeID'];
+            if($rec_RecTypeID>0){ 
+                $recids = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
+                    .implode(',', $recids).') and rec_RecTypeID='. $rec_RecTypeID);
+                    
+                if($recids==null || count($recids)==0){             
+                    $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
+                    return false;
+                }
+            }
+            
+            $rectypes = array();
+            
+            $noaccess_count = 0;
+            
+            $allowed_recids = array();
+
+            foreach ($recids as $recID) {
+                if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes)){
+                    $noaccess_count++;
+                }else{
+                    array_push($allowed_recids, $recID);
+                }
+            }
+            if(count($recids)==1 && $noaccess_count==1){
+                return $system->getError();    
+            }else{
+                $system->clearError();    
+            }
+
+            // start transaction
+            $keep_autocommit = mysql__begin_transaction($mysqli);
+
+            $query = 'UPDATE Records set rec_Modified=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=? '
+            .' where rec_ID in ('.implode(',', $allowed_recids).')';
+
+            $stmt = $mysqli->prepare($query);
+
+            $rec_mod = date('Y-m-d H:i:s');
+
+            $stmt->bind_param('sis', $rec_mod, $ownerid, $access);
+
+            if(!$stmt->execute()){
+                $syserror = $mysqli->error;
+                $stmt->close();
+                $mysqli->rollback();
+
+                $res = $system->addError(HEURIST_DB_ERROR, 'Cannot updated ownership and access', $syserror);
+            }else{
+                $updated_count = $mysqli->affected_rows;
+                $stmt->close();
+                $mysqli->commit();
+                
+                $res = array("status"=>HEURIST_OK, 
+                    "data"=> array('processed'=>count($allowed_recids), 
+                                   'updated'=>$updated_count,
+                                   'noaccess'=>$noaccess_count));
+            }
+            
+            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            return $res;
+        
+        
+        }else{
+            return $system->addError(HEURIST_INVALID_REQUEST, 'Record IDs not defined');
+        }
+        
+    }    
     
     //
     //
@@ -549,7 +674,7 @@
                 if ($mysqli->error) break;
                 array_push($deleted, $id);
                
-//ELASTIC todo !!!!1   deleteRecordIndexEntry(DATABASE, $recTypeID, $id);
+                ElasticSearch::deleteRecordIndexEntry(HEURIST_DBNAME, $rectype, $id);
                 
                 $mysqli->query('delete from usrReminders where rem_RecID = ' . $id);
                 if ($mysqli->error) break;
@@ -725,7 +850,6 @@
     * @param mixed $access
     *   $rectypes  - return record type of current record
     */
-    
     function recordCanChangeOwnerwhipAndAccess($system, $recID, &$ownerid, &$access, &$rectypes)
     {
         
@@ -743,7 +867,7 @@
         }
         
         $ownerid_old = $record["rec_OwnerUGrpID"]; //current ownership
-        if(!($ownerid>=0)){
+        if(!($ownerid>=0)){  
             $ownerid = $record["rec_OwnerUGrpID"];
         }
         
@@ -863,43 +987,60 @@
     * @param mixed $recID
     * @param mixed $rectype
     */
-    function recordUpdateTitle($system, $recID, $rectype, $recTitleDefault)
+    function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
     {
         
         $mysqli = $system->get_mysqli();
-
-        if(!(isset($rectype) && $rectype>0)){
-            $rectype = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID=".$recID);
-            if(!($rectype>0)){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot get record for title mask update. Rec#'.$recID);
-                return false;
-            }
+        
+        $mask = null;
+        $rectype = null;
+        
+        if(is_int($rectype_or_mask) && $rectype_or_mask>0){
+            $rectype = $rectype_or_mask;
+        }else if($rectype_or_mask!=null){
+            $mask = $rectype_or_mask;
         }
         
-        $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".$rectype);
-        if(!$mask){
-            $system->addError(HEURIST_DB_ERROR, 'Cannot get title mask for record type', $mysqli->error);
-            return false;
+        if($mask == null){
+
+            if(!(isset($rectype) && $rectype>0)){
+                $rectype = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID=".$recID);
+                if(!($rectype>0)){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot get record for title mask update. Rec#'.$recID);
+                    return false;
+                }
+            }
+            
+            $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".$rectype);
+            if(!$mask){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot get title mask for record type', $mysqli->error);
+                return false;
+            }
+        
         }
 
 
-        $new_title = TitleMask::fill($recID);
+        $new_title = TitleMask::fill($recID, $mask);
         
         if($new_title==null && $recTitleDefault!=null) $new_title = $recTitleDefault;
+        
 
         if ($new_title) {
-            $query = "UPDATE Records set rec_Title=? where rec_ID=".$recID;
+            $new_title = trim($new_title);
+            if($new_title!=''){
+                $query = "UPDATE Records set rec_Title=? where rec_ID=".$recID;
 
-            $stmt = $mysqli->prepare($query);
+                $stmt = $mysqli->prepare($query);
 
-            $stmt->bind_param('s', $new_title);
-            if(!$stmt->execute()){
-                $syserror = $mysqli->error;
+                $stmt->bind_param('s', $new_title);
+                if(!$stmt->execute()){
+                    $syserror = $mysqli->error;
+                    $stmt->close();
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $syserror);
+                    return false;
+                }
                 $stmt->close();
-                $system->addError(HEURIST_DB_ERROR, 'Cannot save record title', $syserror);
-                return false;
             }
-            $stmt->close();
         }
 
         return $new_title;
@@ -1166,45 +1307,6 @@ array_push($errorValues,
 
     } //END prepareDetails
 
-    /**
-    * check that rectype is valid for given detail (constrained pointer)
-    *
-    * @param mixed $mysqli
-    * @param mixed $rectype_tocheck  - rectype to be verified
-    * @param mixed $dtyID  - detail type id
-    * @param mixed $rectype - for rectype
-    */
-    function isValidRectype($system, $rectype_tocheck, $dtyID, $rectype)
-    {
-        global $recstructures, $detailtypes;
-
-        $rectype_ids = null;
-
-        $recstr = dbs_GetRectypeStructure($system, $recstructures, $rectype);
-
-        if($recstr && @$recstr['dtFields'][$dtyID])
-        {
-            $val = $recstr['dtFields'][$dtyID];
-            $idx = $recstructures['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
-            $rectype_ids = $val[$idx]; //constraint for pointer
-        }else{
-            //detail type may be not in rectype structure
-
-            $dtype = getDetailType($system, $detailtypes, $dtyID);
-            if ($dtype) {
-                $idx = $detailtypes['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
-                $rectype_ids = @$dtype[$idx];
-            }
-        }
-
-        if($rectype_ids){
-            $allowed_rectypes = explode(",", $rectype_ids);
-            return in_array($rectype_tocheck, $allowed_rectypes);
-        }
-
-        return true;
-    }
-
     //
     //
     //
@@ -1354,12 +1456,53 @@ array_push($errorValues,
     }
     
     
-    // @todo move terms function in the separate
+    // @todo all these functions are duplicated in VerifyValue and db_structure
 
+    /**
+    * check that rectype is valid for given detail (constrained pointer)
+    *
+    * @param mixed $mysqli
+    * @param mixed $rectype_tocheck  - rectype to be verified
+    * @param mixed $dtyID  - detail type id
+    * @param mixed $rectype - for rectype
+    */
+    function isValidRectype($system, $rectype_tocheck, $dtyID, $rectype)
+    {
+        global $recstructures, $detailtypes;
+
+        $rectype_ids = null;
+
+        $recstr = dbs_GetRectypeStructure($system, $recstructures, $rectype);
+
+        if($recstr && @$recstr['dtFields'][$dtyID])
+        {
+            $val = $recstr['dtFields'][$dtyID];
+            $idx = $recstructures['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+            $rectype_ids = $val[$idx]; //constraint for pointer
+        }else{
+            //detail type may be not in rectype structure
+
+            $dtype = getDetailType($system, $detailtypes, $dtyID);
+            if ($dtype) {
+                $idx = $detailtypes['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
+                $rectype_ids = @$dtype[$idx];
+            }
+        }
+
+        if($rectype_ids){
+            $allowed_rectypes = explode(",", $rectype_ids);
+            return in_array($rectype_tocheck, $allowed_rectypes);
+        }
+
+        return true;
+    }
+
+    
+    
     //
     // get terms from json string
     //
-    function getTermsFromFormat($formattedStringOfTermIDs, $domain) {
+    function getTermsFromFormat2($formattedStringOfTermIDs, $domain) {
 
         global $terms;
 
@@ -1417,7 +1560,7 @@ array_push($errorValues,
     }
 
     //
-    //
+    //   see getTermTopMostParent in db_structure
     //
     function getTopMostTermParent($term_id, $domain, $topmost=null)
     {
@@ -1475,13 +1618,13 @@ array_push($errorValues,
 
             $allowed_terms = null;
 
-            $terms = getTermsFromFormat($terms_ids, $domain);
+            $terms = getTermsFromFormat2($terms_ids, $domain); //parse
 
             if (($cntTrm = count($terms)) > 0) {
                 if ($cntTrm == 1) { //vocabulary
                     $terms = getTermsByParent($terms[0], $domain);
                 }else{
-                    $nonTerms = getTermsFromFormat($terms_none, $domain);
+                    $nonTerms = getTermsFromFormat2($terms_none, $domain);
                     if (count($nonTerms) > 0) {
                         $terms = array_diff($terms, $nonTerms);
                     }

@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     3.0
@@ -20,86 +20,134 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+define('OWNER_REQUIRED', 1);   
+define('PDIR','../../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../../records/index/elasticSearchFunctions.php');
-require_once(dirname(__FILE__).'/../../../common/php/dbUtils.php');
-
-if(isForOwnerOnly("to delete a database")){
-    return;
-}
+require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 ?>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Delete Current Heurist Database</title>
-        <link rel='stylesheet' type='text/css' href='../../../common/css/global.css'>
-        <link rel='stylesheet' type='text/css' href='../../../common/css/edit.css'>
-        <link rel='stylesheet' type='text/css' href='../../../common/css/admin.css'>
-    </head>
-    <body class='popup'>
-        <div class='banner'><h2>Delete Current Heurist Database</h2></div>
-        <div id='page-inner' style='overflow:auto'>
-            
-            <?php
-            $dbname = $_REQUEST['db'];
+        <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+        <style>
+        p {
+            display: block;
+            -webkit-margin-before: 1em;
+            -webkit-margin-after: 1em;
+            -webkit-margin-start: 0px;
+            -webkit-margin-end: 0px;
+        }
+        .gray-gradient {
+            background-color: rgba(100, 100, 100, 0.6);
+            background: -moz-linear-gradient(center top , rgba(100, 100, 100, 0.6), rgba(100, 100, 100, 0.9)) repeat scroll 0 0 transparent;
+            background: -webkit-gradient(linear, left top, left bottom, from(rgba(100, 100, 100, 0.6)), to(rgba(100, 100, 100, 0.9)));
+            border: 1px solid #999;
+            -moz-border-radius: 3px;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+            padding: 3px;
+            font-size: 14px;
+            color: #FFF;
+        }
+        </style>
+    </head>
+    <body class="popup">
+<?php
+            $dbname = $_REQUEST['db'];
 
             if(!@$_REQUEST['mode']) {
                 ?>
-                <h4 style='display:inline-block; margin:0 5px 0 0'><span><img src='../../../common/images/url_error.png' />
-                    DANGER <img src='../../../common/images/url_error.png' /></span></h4>
-                <h1 style='display:inline-block'>DELETION OF CURRENT DATABASE</h1><br>
+        <div class='banner'><h2>Delete Current Heurist Database</h2></div>
+        <div id='page-inner' style='overflow:auto'>
+        
+                <div class="gray-gradient" style="display:inline-block;">
+                    <span class="ui-icon ui-icon-alert" style="display:inline-block;color:red;text-align:center"></span>&nbsp;
+                    DANGER 
+                    &nbsp;<span class="ui-icon ui-icon-alert" style="display:inline-block;color:red"></span>
+                </div>
+                <h1 style='display:inline-block;font-size: 16px;'>DELETION OF CURRENT DATABASE</h1><br>
                 <h3>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h3>
                 <h2>About to delete database: <?=$dbname?></h2>
                 <form name='deletion' action='deleteCurrentDB.php' method='get'>
                     <p>Enter the words DELETE MY DATABASE below in ALL-CAPITALS to confirm that you want to delete the current database
                     <p>Type the words above to confirm deletion <input type='input' maxlength='20' size='20' name='del' id='del'>
-                    &nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Delete' style='font-weight: bold;' >
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type='button' class="h3button" value='OK to Delete' style='font-weight: bold;' 
+                        onclick="$('#page-inner').hide(); forms[0].submit();">
                     <input name='mode' value='2' type='hidden'>
                     <input name='db' value='<?=$dbname?>' type='hidden'>
                 </form>
+        </div>
                 <?php
             }else if(@$_REQUEST['mode']=='2') {
 
                 if (@$_REQUEST['del']=='DELETE MY DATABASE') {
-                    print "<br/><br/><hr>";
+                    
                     if ($dbname=='') {
-                        print "<p class='error'>Undefined database name</p>"; // shouldn't get here
+                        print "<div class='ui-state-error'>Undefined database name</div>"; // shouldn't get here
                     } else {
-                        // It's too risky to delete data with "rm -Rf .$uploadPath", could end up trashing stuff needed elsewhere, so we move it
-                        $uploadPath = HEURIST_UPLOAD_ROOT.$dbname; // individual deletio nto avoid risk of unintended disaster with -Rf
-                        $cmdline = "mv ".$uploadPath." ".HEURIST_UPLOAD_ROOT."DELETED_DATABASES";
-                        $output2 = exec($cmdline . ' 2>&1', $output, $res2);
-                        if ($res2 != 0 ) {
-                            echo ("<h2>Warning:</h2> Unable to move <b>$uploadPath</b> to the deleted files folder, perhaps a permissions problem or previously deleted.");
-                            echo ("<p>Please ask your system adminstrator to delete this folder if it exists.<br></p>");
-                            echo($output2);
-                        }
-                        if (!db_drop(HEURIST_DB_PREFIX.$dbname, false)) {
-                            echo ("<h2>Warning:</h2> Unable to delete <b>".HEURIST_DB_PREFIX.$dbname."</b>");
-                            echo ("<p>Check that the database still exists. Consult Heurist helpdesk if needed<br></p>");
-                            //echo($output2);
-                        } else {
-                            // Remove from Elasticsearch
-                            print "<p>Removing indexes, calling deleteIndexForDatabase with parameter $dbname<br /><br /></p>";
-                            deleteIndexForDatabase($dbname);  //Deleting all Elasticsearch indexes
-                            ?>
-                            <h2>Database <b><?=$dbname?></b> has been deleted</h2>
-                            <p>Associated files stored in upload subdirectories <b><?=$uploadPath?></b> <br/> have ben moved to <?=HEURIST_UPLOAD_ROOT?>DELETED_DATABASES.</p>
-                            <p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>
-                            <p><a href='#' onclick='{top.location.href="<?=HEURIST_BASE_URL?>index.php" }' >Return to Heurist</a></p>
-                            <?php
+                        
+                        //not verbose, copy files, don't dump data
+                        if(DbUtils::databaseDrop(false, $dbname, true, false)){ 
+
+                            //print "<p>Removing indexes<br /><br /></p>";
+                            ElasticSearch::deleteIndexForDatabase($dbname);  //Deleting all Elasticsearch indexes
+                            //show modal popup for furhter redirect to browse databases
+?>
+<script>    
+$(document).ready(
+function () {
+    window.hWin.HEURIST4.msg.showMsgDlg(
+        '<h2>Database <b><?=$dbname?></b> has been deleted</h2>'
+       + '<p>Associated files stored in upload subdirectories have been archived and moved to "DELETED_DATABASES" folder.</p>'
+       + '<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>',
+       null, 'Database deleted',
+       {options:{
+             width:700,
+             height:180,
+            close: function(){
+                window.hWin.document.location = window.hWin.HAPI4.baseURL; //+ "hserver/utilities/list_databases.php";
+            }
+       }}
+    );
+}
+);
+</script>
+<?php                            
+                            
+                        }else{
+                            $err = $system->getError();
+                            $message = @$err['message'];
+?>                            
+        <div style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">
+            <div class="ui-state-error" 
+                style="width:90%;margin:auto;margin-top:10px;padding:10px;">
+                <span class="ui-icon ui-icon-alert" style="float: left; margin-right:.3em;font-weight:bold"></span>
+                Unable to delete <b> <?php echo $dbname;?></b>. <?php echo $message;?>
+                <p>Check that the database still exists. Consult Heurist helpdesk if needed<br></p>
+            </div>
+        </div>
+<?php                            
                         }
                     }
                 } // delete database
 
                 else { // didn't request properly
-                    print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Database <b>$dbname</b> was not deleted</p>";
+                    print "<div class='ui-state-error'><h2>Request disallowed</h2>Incorrect challenge words entered. Database <b>$dbname</b> was not deleted</div>";
                 }
             } // request mode 2
             ?>
-        </div>
     </body>
 </html>
 

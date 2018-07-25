@@ -1,0 +1,152 @@
+<!--
+/**
+* mainMenuStructure.html: top-level menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2018 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<li>
+    <a href="hclient/framecontent/visualize/databaseSummary.php" id="menu-structure-summary"
+        data-level="1" data-logaction="stVis" data-size="large"
+        data-header="Structure &gt; Visualization of links between record types"
+        title="Visualise the internal connections between record types in the database and add connections (record pointers and relationshi markers) between them">
+        Visualise</a>
+</li>
+
+<li>
+    <a href="#" id="menu-structure-import"
+        data-level="1" data-logaction="stImport"
+        title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
+        Browse templates</a>
+</li>
+
+<li>-</li>
+<li>MANAGE</li>
+
+<li>
+    <a href="admin/structure/rectypes/manageRectypes.php"
+        data-level="1" data-logaction="stManage" data-size="large"
+        data-header="Structure &gt; Modify &gt; Record types"
+        title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
+        Record types</a>
+</li>
+
+
+<!-- Remarked temporarely 2016-05-11
+<li>
+    <a href="#" id="menu-structure-import-templates"
+        data-level="1" data-logaction="stAcquire"
+        title="Browse documented record type templates on HeuristNetwork.org and selectively import into the current database">
+        Browse templates</a>
+</li>
+-->
+
+<!-- Removed Ian 13 feb 16: this function is likely to confuse, better to have less in front page menus
+<li>
+    <a href="admin/structure/fields/manageDetailTypes.php"
+        title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
+        Manage base field types</a>
+</li>
+-->
+
+<li>
+    <a id="manage_terms" href="admin/structure/terms/editTerms.php?treetype=enum" 
+        data-level="1" data-logaction="stTerms" data-size="medium"
+        data-header="Structure &gt; Modify &gt; Terms"
+        title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
+        Terms</a>
+</li>
+
+<li>
+    <a  href="admin/structure/terms/editTerms.php?treetype=relation"
+        data-level="1" data-logaction="stRelations" data-size="medium"
+        data-header="Structure &gt; Modify &gt; Relationship types"
+        title="Browse and edit the relationship types"  onclick= "{return false;}">
+        Relationship types</a>
+</li>
+
+<li>
+    <a href="#" id="menu-structure-mimetypes"
+        data-level="1" data-size="medium"
+        data-header="Structure &gt; Modify &gt; Mime types"
+        title="Define file mime types and extensions">
+        Mime types</a>
+</li>
+
+<li>-</li>
+
+<li>
+    <a href='#'>Schemas</a>
+    <ul style="min-width:180px">                                                            
+            <li>
+                <a href="admin/describe/listRectypeRelations.php?action=simple" data-size="medium"
+                    title="Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts">
+                    Simple fields schema</a>
+            </li>
+            <li>
+                <a href="admin/describe/listRectypeRelations.php?action=relations" data-size="medium"
+                    title="Display/print a listing of the record types and their pointer and relationship fields, including usage counts">
+                    Relationships schema</a>
+            </li>
+            <li>
+                <a href="admin/describe/listRectypeRelations.php?action=all" data-size="medium"
+                    title="Display/print a listing of the record types and all fields, including usage counts">
+                    Combined schema</a>
+            </li>
+
+            <li>
+                <a  href="admin/describe/getDBStructureAsXML.php"
+                    target="_blank"
+                    title="Lists the record type and field definitions in XML format (HML - Heurist Markup Language)">
+                   Structure (XML)
+                   </a>
+            </li>
+
+            <li>
+                <a href="admin/describe/getDBStructureAsSQL.php?pretty=1"
+                    target="_blank"
+                    title="Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)">
+                    Structure (SQL)</a>
+            </li>
+    </ul>
+</li>
+
+<li>-</li>
+
+<li>
+    <a href="admin/verification/recalcTitlesAllRecords.php"
+        data-level="1" data-logaction="stRebuildTitles"
+        data-header="Structure &gt; Rebuild record titles"
+        title="Rebuilds the constructed record titles listed in search results, for all records">
+        Rebuild record titles</a>
+</li>
+
+<li>
+    <a href="admin/verification/listDatabaseErrorsInit.php"
+        data-level="1" data-logaction="stVerify" data-size="medium"
+        data-header="Structure &gt; Errors in database structure"
+        title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
+        Verify</a>
+</li>
+
+<li id="menu-database-refresh">
+    <a href="#" id="menu-structure-refresh"
+        data-level="0" data-logaction="stRefresh"
+        title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
+        Refresh</a>
+</li>

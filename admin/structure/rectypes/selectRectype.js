@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -33,7 +33,7 @@ var selectRecordType;
 
 //aliases
 var Dom = YAHOO.util.Dom,
-	Hul = top.HEURIST.util;
+	Hul = window.hWin.HEURIST4.util;
 
 /**
 * SelectRecordType - class for pop-up window to select record types for editing detail type
@@ -113,24 +113,24 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 		if(_callback) _callback_func = _callback;
 
 				if (Hul.isnull(dtyID) && location.search.length > 1) {
-									//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-									top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-									datatype = top.HEURIST.parameters.type;
-									var sIDs = top.HEURIST.parameters.ids;
-									if (!Hul.isempty(sIDs)) {
-                                        dtyID = top.HEURIST.parameters.dtID;
-										_arr_selection = sIDs.split(',');
-                                        _arr_selection_on_init = sIDs.split(',');
-									}else{
-										_arr_selection = [];
-									}
+                                    
+                    datatype = window.hWin.HEURIST4.util.getUrlParameter('type', location.search);
+                    var sIDs = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);
 
-									if (datatype==="select"){
-                                        Dom.get('btnApply1').value = "Select";
-                                        Dom.get('btnApply2').value = "Select";
-                                        //Dom.get('btnAllSelection').style.display = "block";
-                                        Dom.get('divDefineNew').style.display = "none";
-                                    }
+					if (!Hul.isempty(sIDs)) {
+                        dtyID = window.hWin.HEURIST4.util.getUrlParameter('dtID', location.search);
+						_arr_selection = sIDs.split(',');
+                        _arr_selection_on_init = sIDs.split(',');
+					}else{
+						_arr_selection = [];
+					}
+
+					if (datatype==="select"){
+                        Dom.get('btnApply1').value = "Select";
+                        Dom.get('btnApply2').value = "Select";
+                        //Dom.get('btnAllSelection').style.display = "block";
+                        Dom.get('divDefineNew').style.display = "none";
+                    }
 				}
 
 
@@ -149,7 +149,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 
 
-				var fi = top.HEURIST.rectypes.typedefs.commonNamesToIndex;
+				var fi = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex;
 
 				if(_isFilterMode){
 
@@ -162,7 +162,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 					}
 
 					//get datatype by id
-					var recsPtr = top.HEURIST.detailTypes.typedefs[_dtyID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs];
+					var recsPtr = window.hWin.HEURIST4.detailtypes.typedefs[_dtyID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs];
 					if(Hul.isempty(recsPtr)){
 						_arr_selection = [];
 					}else{
@@ -175,7 +175,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 							rty_ID = _arr_selection[ind];
 							if(Hul.isempty(rty_ID) || rty_ID === "undefined") continue;
 
-							rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
+							rectype = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields;
 
 							arr.push([true, //selected
 											"", //icon
@@ -193,7 +193,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 						return;
 					}
 
-					datatype = top.HEURIST.detailTypes.typedefs[_dtyID].commonFields[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type];
+					datatype = window.hWin.HEURIST4.detailtypes.typedefs[_dtyID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type];
 
 						Dom.get('filtertoolbar').style.display = 'none';
 
@@ -202,10 +202,10 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 						Dom.get('filtertoolbar').style.display = 'block';
 
 						//create datatable and fill it values of all rectypes
-						for (rty_ID in top.HEURIST.rectypes.typedefs) {
+						for (rty_ID in window.hWin.HEURIST4.rectypes.typedefs) {
 								if(!isNaN(Number(rty_ID)))
 								{
-										rectype = top.HEURIST.rectypes.typedefs[rty_ID].commonFields;
+										rectype = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields;
 
 										if(datatype!=="fieldsetmarker" || rectype[fi.rty_FlagAsFieldset]==="1")//??????????????SAW what is this  (flagAsFieldSet)
 										{                                                                      //AO: only rectypes with this marker may be selected for fieldsetmarker
@@ -269,8 +269,8 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 				formatter: function(elLiner, oRecord, oColumn, oData) {
 					var id = oRecord.getData("id");
 
-					var str1 = top.HEURIST.iconBaseURL + id;
-					var thumb = top.HEURIST.iconBaseURL + "thumb/th_" + id + ".png";
+					var str1 = window.hWin.HAPI4.iconBaseURL + id;
+					var thumb = window.hWin.HAPI4.iconBaseURL + "thumb/th_" + id + ".png";
 					var icon ="<div class=\"rectypeImages\"><a href=\"#edit_icon\"><img src=\"../../../common/images/16x16.gif\" style=\"background-image:url("+str1+")\" id=\"icon"+id+"\"></a><div style=\"background-image:url("+thumb+");\" class=\"thumbPopup\"><a href=\"#edit_thumb\"><img src=\"../../../common/images/16x16.gif\" width=\"75\" height=\"75\">``</a></div></div>"
 					elLiner.innerHTML = icon;
 			}},
@@ -509,13 +509,13 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 				var grpID,
 					index;
 
-				for (index in top.HEURIST.rectypes.groups) {
+				for (index in window.hWin.HEURIST4.rectypes.groups) {
 					if( !isNaN(Number(index)) ) {
 
-						grpID = top.HEURIST.rectypes.groups[index].id;
-						var grpName = top.HEURIST.rectypes.groups[index].name;
+						grpID = window.hWin.HEURIST4.rectypes.groups[index].id;
+						var grpName = window.hWin.HEURIST4.rectypes.groups[index].name;
 
-						Hul.addoption(filterByGroup, grpID, grpName);
+						window.hWin.HEURIST4.ui.addoption(filterByGroup, grpID, grpName);
 
 						if(filterByGroup.length==2){
 							filterByGroup.selectedIndex = 1;
@@ -577,9 +577,8 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 	function _onDefineNewType(){
 
-			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-								(top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var url = top.HEURIST.baseURL + "admin/structure/rectypes/editRectype.html?supress=1&db="+db;
+			var db = window.hWin.HAPI4.database;
+			var url = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/editRectype.html?supress=1&db="+db;
 
             var dim = Hul.innerDimensions(top);                    
             
@@ -592,7 +591,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 					if(!Hul.isnull(context)){
 						//refresh the local heurist
-						top.HEURIST.rectypes = context.rectypes;
+						window.hWin.HEURIST4.rectypes = context.rectypes;
 
 
 						var _rtyID = Number(context.result[0]);
@@ -616,17 +615,13 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
                 if(_arr_removed.length>0){
                     // verify whether term is in use in field that uses vocabulry
                     // if yes it means it can not be moved into different vocabulary
-                    var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
-                    var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-                                (top.HEURIST.database.name?top.HEURIST.database.name:''));
-                    
-                    var params = 'method=checkDtPtr&dty_ID='+ _dtyID
-                    + '&rty_ID=' + _arr_removed.join(',') 
-                    + '&DBGSESSID=425944380594800002;d=1,p=0,c=07'
-                    + "&db="+_db; //encodeURIComponent(
-                    
-                    Hul.getJsonData(baseurl, function(context){
-                        if(!Hul.isnull(context) && !context.error){
+                    var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+                        
+                    var request = {method:'checkDtPtr', db:window.hWin.HAPI4.database,
+                                     dty_ID:_dtyID, rty_ID:_arr_removed.join(',')};
+                    window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response){
+            
+                        if(response.status == window.hWin.ResponseStatus.OK){
 
                             var res = _arr_selection.join(",");
 
@@ -634,9 +629,13 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
                                 window.close(res, _dtyID);
                             }else if (!Hul.isnull(_callback_func) ) {
                                 _callback_func(res, _dtyID);
-                            }
-
-                        }}, params);    
+                            }                            
+                                                
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }                                        
+                    });
+                        
                     return true;
                 }
             }

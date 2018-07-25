@@ -10,7 +10,7 @@
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -837,6 +837,23 @@ function hRecordSet(initdata) {
         },
         
         /**
+        * traverce all records - pass to callback  recID and record
+        * 
+        * @param callback
+        */
+        each: function( callback ){
+        
+            for(recID in records){
+                var record = records[recID];
+                var res = callback.call(that, recID, record);
+                if(res === false){
+                    break;
+                }
+            }
+            
+        },
+        
+        /**
         * Returns recordSet with the same field and structure definitions
         * 
         * @param  _records - list of objects/records
@@ -880,7 +897,7 @@ function hRecordSet(initdata) {
             if(Object.keys(records).length<rec_ids.length){
 
                 for(recID in records)
-                    if(recID && window.hWin.HEURIST4.util.findArrayIndex(rec_ID, rec_ids)>-1) {
+                    if(recID && window.hWin.HEURIST4.util.findArrayIndex(recID, rec_ids)>-1) {
                         _records[recID] = records[recID];
                     }
 
@@ -928,6 +945,8 @@ function hRecordSet(initdata) {
             var recID, fieldName, dataTypes={}, sortFields = [], sortFieldsOrder=[];
             var isexact = {};
             var isnegate= {};
+            var isless= {};
+            var isgreat= {};
             //remove empty fields from request
             for (fieldName in request) {
                 if (request.hasOwnProperty(fieldName) ){
@@ -937,7 +956,10 @@ function hRecordSet(initdata) {
                         //find data type
                         dataTypes[fieldName] = __getDataType(fieldName);
                         
-                        if(dataTypes[fieldName]=='freetext' || dataTypes[fieldName]=='blocktext'){
+                        if(dataTypes[fieldName]=='freetext' 
+                            || dataTypes[fieldName]=='blocktext' 
+                            || dataTypes[fieldName]=='integer')
+                        {
                             request[fieldName] = request[fieldName].toLowerCase();
                             
                             if(request[fieldName].substring(0,2)=='!='){
@@ -947,7 +969,19 @@ function hRecordSet(initdata) {
                             if(request[fieldName][0]=='='){
                                 request[fieldName] = request[fieldName].substring(1);
                                 isexact[fieldName] = true;
+                            }else
+                            if(request[fieldName][0]=='<'){
+                                request[fieldName] = request[fieldName].substring(1);
+                                isless[fieldName] = true;
+                            }else
+                            if(request[fieldName][0]=='>'){
+                                request[fieldName] = request[fieldName].substring(1);
+                                isgreat[fieldName] = true;
+                            }else 
+                            if(dataTypes[fieldName]=='integer'){
+                                isexact[fieldName] = true;    
                             }
+                            
                         }
                     }else{
                         var realFieldName = fieldName.substr(5);
@@ -967,7 +1001,9 @@ function hRecordSet(initdata) {
                 var isOK = true;
                 for(fieldName in request){
                     if(fieldName.indexOf('sort:')<0 && request.hasOwnProperty(fieldName)){
-                        if(dataTypes[fieldName]=='freetext' || dataTypes[fieldName]=='blocktext'){
+                        if(dataTypes[fieldName]=='freetext' 
+                            || dataTypes[fieldName]=='blocktext'
+                            || dataTypes[fieldName]=='integer'){
                             
                             if(window.hWin.HEURIST4.util.isnull(this.fld(record,fieldName))){
                                 isOK = false;
@@ -981,7 +1017,21 @@ function hRecordSet(initdata) {
                                 isOK = (this.fld(record,fieldName).toLowerCase() == request[fieldName]);
                                 if(!isOK) break;                            
                             }else
-                            if(this.fld(record,fieldName).toLowerCase().indexOf(request[fieldName])<0){
+                            if(isless[fieldName]){
+                                if(dataTypes[fieldName]=='integer'){
+                                    isOK = (Number(this.fld(record,fieldName)) < Number(request[fieldName]));
+                                }else
+                                    isOK = (this.fld(record,fieldName).toLowerCase() < request[fieldName]);
+                                if(!isOK) break;                            
+                            }else
+                            if(isgreat[fieldName]){
+                                if(dataTypes[fieldName]=='integer'){
+                                    isOK = (Number(this.fld(record,fieldName)) > Number(request[fieldName]));
+                                }else
+                                    isOK = (this.fld(record,fieldName).toLowerCase() > request[fieldName]);
+                                if(!isOK) break;                            
+                            }else
+                            if(this.fld(record,fieldName).toLowerCase().indexOf(request[fieldName])<0){ //contain
                                 isOK = false;
                                 break;                            
                             }

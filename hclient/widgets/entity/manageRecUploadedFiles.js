@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -224,8 +224,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     if(window.hWin.HEURIST4.util.isempty(ext)){
                         //request server to detect content type
                         window.hWin.HAPI4.SystemMgr.get_url_content_type(curr_url[0], function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 var ext = response.data.extension;
+
                                 var ele2 = that._editing.getFieldByName('ulf_MimeExt');
                                 
                                 if(response.data.needrefresh){

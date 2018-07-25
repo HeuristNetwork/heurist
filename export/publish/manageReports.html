@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -28,8 +28,6 @@
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Manage Reports</title>
-
-        <link rel=stylesheet href="../../common/css/global.css">
 
         <!-- YUI -->
         <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
@@ -54,7 +52,10 @@
         <script type="text/javascript" src="../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
         <!-- END PAGINATOR -->
 
+        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/heurist/jquery-ui.css" />
         <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
         <style>
@@ -70,16 +71,13 @@
             }*/
         </style>
 
+        <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
     </head>
 
 
     <body width="650" height="450" class="popup yui-skin-sam" style="overflow:auto;">
         <div>
             <!--<div class="banner"><h2>Manage Groups</h2></div>-->
-
-            <script type="text/javascript" src="../../common/js/utilsLoad.js"></script>
-            <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
-            <script src="../../common/php/displayPreferences.php"></script>
 
             <!-- access to functions about current user -->
             <script type="text/javascript" src="manageReports.js"></script>
@@ -114,16 +112,6 @@
                 </div>
 
                 <div id="tabContainer" style="width:100%">
-
-                    <script  type="text/javascript">
-
-                        //  starts initialization on load completion of this window
-                        function createManagerObj(){
-                            reportManager = new  ReportManager(false, false, true); //nonfilter, no selection, in window
-                        }
-                        YAHOO.util.Event.addListener(window, "load", createManagerObj);
-
-                    </script>
                 </div>
 
                 <!-- edit contols -->
@@ -136,5 +124,14 @@
             </div>
         </div>
 
+
+        <script  type="text/javascript">
+
+            //  starts initialization on load completion of this window
+            function createManagerObj(){
+                window.reportManager = new  ReportManager(false, false, true); //nonfilter, no selection, in window
+            }
+            $(document).ready(createManagerObj);
+        </script>
     </body>
 </html>

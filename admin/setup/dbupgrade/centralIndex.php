@@ -1,6 +1,6 @@
 <?php
     /*
-    * Copyright (C) 2005-2016 University of Sydney
+    * Copyright (C) 2005-2018 University of Sydney
     *
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
     * in compliance with the License. You may obtain a copy of the License at
@@ -17,7 +17,7 @@
     * Creates central index database, fill it and update triggers in all databases
     *
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @link        http://HeuristNetwork.org
     * @version     3.1
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -27,23 +27,22 @@
     print 'disabled in code';
     exit();
     
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../../');  //need for proper path to js and css    
 
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../../hserver/dbaccess/utils_db_load_script.php');
+$need_create_index_database = false;
+$need_recreate_triggers = false;
+    
+require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php');
 
-    if (! is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        return;
-    }
-
-    if (!is_admin()) {
-        print "Sorry, you need to be a database owner to be able to modify the database structure";
-        return;
-    }
+if (!$system->is_system_admin()) {
+    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as System Administrator'));
+    exit();
+}
     
     set_time_limit(0); 
-    print 'start execution';
+    print 'start execution<br>';
     
     //1. create and fill central index
     $dir = HEURIST_DIR.'admin/setup/dbupgrade/';
@@ -52,9 +51,9 @@
     
     if( file_exists($filename1) && file_exists($filename2) ){
     
-        if(true){
+        if($need_create_index_database){
             print 'Create index database and fill it<br>';
-            if(!executeScript(DATABASE, $filename1)){
+            if(!executeScript(HEURIST_DBNAME_FULL, $filename1)){
                 exit;
             }
         }
@@ -63,14 +62,15 @@
         exit;
     }
     
-    mysql_connection_insert(DATABASE);
+    $mysqli = $system->get_mysqli();
+    
     //2. update triggers 
     $query = 'show databases';
 
-    $res = mysql_query($query);
-    if (!$res) {  print $query.'  '.mysql_error();  return; }
+    $res = $mysqli->query($query);
+    if (!$res) {  print $query.'  '.$mysqli->error();  return; }
     $databases = array();
-    while (($row = mysql_fetch_row($res))) {
+    while (($row = $res->fetch_row())) {
         //print $row[0].',  ';
         if( strpos($row[0], 'hdb_')===0 ){
             //if($row[0] == 'hdb_osmak_1')
@@ -87,7 +87,7 @@
         
         /* verification that all sysIdentification are valid
         $query = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = '$db_name' AND table_name = 'sysIdentification'";
-        $res = mysql_query($query);
+        $res = $mysqli->query($query);
         $row = mysql_fetch_row($res);
         if($row[0]!=32){
             print $idx.'  '.$db_name.'<br>';     
@@ -97,28 +97,30 @@
        print $idx.'  '.$db_name.'<br>';     
        
        //add entry for database
-       $res = mysql_query("delete from `Heurist_DBs_index`.`sysIdentifications` where `sys_Database`='$db_name'");
-       if(!$res) {print mysql_error(); break;}
-       $res = mysql_query("insert into `Heurist_DBs_index`.`sysIdentifications` select '$db_name' as dbName, s.* from `$db_name`.`sysIdentification` as s");
-       if(!$res) {print mysql_error(); break;}
+       $res = $mysqli->query("delete from `Heurist_DBs_index`.`sysIdentifications` where `sys_Database`='$db_name'");
+       if(!$res) {print $mysqli->error(); break;}
+       $res = $mysqli->query("insert into `Heurist_DBs_index`.`sysIdentifications` select '$db_name' as dbName, s.* from `$db_name`.`sysIdentification` as s");
+       if(!$res) {print $mysqli->error(); break;}
 
        //add all users for database 
-       $res = mysql_query("delete from `Heurist_DBs_index`.`sysUsers` where `sus_Database`='$db_name' AND sus_ID>0");
-       if(!$res) {print mysql_error(); break;}
-       $res = mysql_query("insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "
+       $res = $mysqli->query("delete from `Heurist_DBs_index`.`sysUsers` where `sus_Database`='$db_name' AND sus_ID>0");
+       if(!$res) {print $mysqli->error(); break;}
+       $res = $mysqli->query("insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "
        ."select ugr_Email, '$db_name' as dbaname, IF(ugr_ID=2,'owner',COALESCE(ugl_Role,'member')) as role from `$db_name`.sysUGrps "
        ."LEFT JOIN `$db_name`.sysUsrGrpLinks on ugr_ID=ugl_UserID and ugl_GroupID=1 and ugl_Role='admin' where ugr_Type='user'");
-       if(!$res) {print mysql_error(); break;}
+       if(!$res) {print $mysqli->error(); break;}
     }  
     
-    print 'recreate triggers '.count($databases).' databases<br>';
-    foreach ($databases as $idx=>$db_name){
-       print $idx.'  '.$db_name.'<br>';     
-       //run sql script to update triggers    
-       if(!executeScript($db_name, $filename2)){
-              break;
-       }
-    }//while  databases
+    if($need_recreate_triggers){
+        print 'recreate triggers '.count($databases).' databases<br>';
+        foreach ($databases as $idx=>$db_name){
+           print $idx.'  '.$db_name.'<br>';     
+           //run sql script to update triggers    
+           if(!executeScript($db_name, $filename2)){
+                  break;
+           }
+        }//while  databases
+    }
     
     //
     //

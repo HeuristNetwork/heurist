@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 * main script for scraping and parsing email import* brief description of file
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -523,6 +523,7 @@ function printEmail($email){
 
             }
         }catch(Exception $e){
+//@todo change to entity dialog            
             echo '<b>Processing failed with the following message: '.$e->getMessage().'</b>';
             echo "<p>If the user name and password or IMAP server details are incorrect, you may get 'Login aborted'</p>";
             echo "<p><a href='../../admin/setup/dbproperties/editSysIdentificationAll.php?db=".HEURIST_DBNAME."' target='_blank'>

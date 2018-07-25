@@ -15,7 +15,7 @@ IT USES
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -29,6 +29,14 @@ IT USES
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*
+
+1) record addition dialog
+2) set ownership    - changed to recordAccess.js
+3) record detail batch update
+4) record type change
+
+*/
 function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     var _className = "RecordAction",
     _version   = "0.4",
@@ -87,9 +95,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     function(){
                         
                         var new_record_params = {};
-                        new_record_params['rt'] = add_rec_prefs[0];
-                        new_record_params['ro'] = add_rec_prefs[1];
-                        new_record_params['rv'] = add_rec_prefs[2];
+                        new_record_params['RecTypeID'] = add_rec_prefs[0];
+                        new_record_params['OwnerUGrpID'] = add_rec_prefs[1];
+                        new_record_params['NonOwnerVisibility'] = add_rec_prefs[2];
                         if(add_rec_prefs[3]) new_record_params['tag'] = add_rec_prefs[3];
                                             
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
@@ -259,7 +267,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     
     
     //
-    //
+    // fill selector with scope options - all (currentRecordset), selected (currentRecordsetSelection), by record type 
     //
     function _fillSelectRecordScope(){
 
@@ -320,7 +328,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     }
 
     //
-    //
+    // scope selector listener
     //
     function _onRecordScopeChange() {
         
@@ -354,6 +362,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
     }
 
+    //
+    // record type selector for change record type action
+    // 
     function _fillSelectRecordTypes() {
         var rtSelect = $('#sel_recordtype');
         rtSelect.empty();
@@ -419,6 +430,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         _createInputElements();
     }
     
+    //
+    // fill list of groups and access right (from preferences)
+    // for actions: set ownership and access 
+    //
     function _fillOwnership(){
         
         var fieldSelect = $('#sel_Ownership');
@@ -619,12 +634,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }
     }
 
-    //
-    //
+    // TWO NO ACTION - it just UI to fill parameters
+    // 1) set ownership from edit record (noscope/ownership)
+    // 2) record addition
     //
     function _startAction(){
         
         if(init_scope_type=='noscope'){   //change ownership/access from edit record
+        
             if(action_type=='ownership'){
                 window.close({owner:$('#sel_Ownership').val(), 
                               access:$('input[type="radio"][name="rb_Access"]:checked').val()});
@@ -637,9 +654,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }else if(action_type=='add_record'){
             
                 var new_record_params = {};
-                    new_record_params['rt'] = add_rec_prefs[0];
-                    new_record_params['ro'] = add_rec_prefs[1];
-                    new_record_params['rv'] = add_rec_prefs[2];
+                    new_record_params['RecTypeID'] = add_rec_prefs[0];
+                    new_record_params['OwnerUGrpID'] = add_rec_prefs[1];
+                    new_record_params['NonOwnerVisibility'] = add_rec_prefs[2];
                     if(add_rec_prefs[3]) new_record_params['tag'] = add_rec_prefs[3];
             
                 window.close(new_record_params);
@@ -786,7 +803,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('body > div:not(.loading)').show();
             $('body > #ui-datepicker-div').hide();
             $('.loading').hide();
-            var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
+            var  success = (response.status == window.hWin.ResponseStatus.OK);
             if(success){
                 $('#div_parameters').hide();
                 

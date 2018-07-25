@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -77,6 +77,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <script type="text/javascript" src="common/js/temporalObjectLibrary.js"></script>
 
+        <script type="text/javascript" src="hclient/widgets/record/recordAction.js"></script>
+        
+        
         <!-- DOCUMENTATION TODO: explain this -->
         <!-- these scripts are loaded explicitely - for debug purposes -->
         <script type="text/javascript" src="hclient/widgets/viewers/recordListExt.js"></script>
@@ -122,6 +125,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/media_viewer.js"></script>
         
+        <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
 
         <!--  media viewer - however it is not used at the moment 
         <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>
@@ -139,15 +143,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
            function onPageInit(success){
                
                 if(!success) return;
-                
-                // OLD H3 stuff
-                if(window.HEURIST && window.HAPI4.baseURL){
-                    window.HEURIST.baseURL  = window.HAPI4.baseURL;
-                    window.HEURIST.loadScript(window.HAPI4.baseURL+"common/php/loadUserInfo.php?db=" + window.HAPI4.database);
-                    window.HEURIST.iconBaseURL = window.HAPI4.iconBaseURL;
-                    window.HEURIST.database = {  name: window.HAPI4.database };
-                }
-                
+
                 //
                 // cfg_widgets and cfg_layouts are defined in layout_default.js
                 //
@@ -319,7 +315,7 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                 else if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
                         || window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
                             
-                    var init_search = window.hWin.HEURIST?window.hWin.HEURIST.displayPreferences['defaultSearch']:'';
+                    var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
                     if(!window.hWin.HEURIST4.util.isempty(init_search)){
                         var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                         setTimeout(function(){
@@ -359,13 +355,6 @@ var fin_time = new Date().getTime() / 1000;
     </head>
     <body style="background-color:#c9c9c9">
 
-
-    <?php if(!(@$_REQUEST['ll']=='WebSearch' || @$_REQUEST['ll']=='boro')){?>
-        <!-- These are old H3 stuff - needed to support existing features in popups -->
-        <script>top.installDirFromH4="<?=HEURIST_BASE_URL?>";</script>
-        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
-        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
-    <?php } ?>
         <div id="layout_panes" style="height:100%">
             &nbsp;
         </div>
@@ -378,7 +367,7 @@ var fin_time = new Date().getTime() / 1000;
                 author: Dr Ian Johnson<br/>
                 programmers: Artem Osmakov, Tom Murtagh, Kim Jackson, Stephen White and others...</p>
 
-            <p style="margin-top: 1em;">Copyright (C) 2005-2018 <a href="http://sydney.edu.au/arts/" target="_blank">University of Sydney</a></p>
+            <p style="margin-top: 1em;">Copyright (C) 2005-2018 <a href="http://sydney.edu.au/arts/" style="outline:0;" target="_blank">University of Sydney</a></p>
 
             <p style="font-size: x-small; margin-top:1em; display:none;" class="fullmode">
                 Licensed under the GNU General Public License Version 3.0 (the "License"); you may not use this file except

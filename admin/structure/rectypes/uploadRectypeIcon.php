@@ -1,7 +1,7 @@
 <?php
 
     /*
-    * Copyright (C) 2005-2016 University of Sydney
+    * Copyright (C) 2005-2018 University of Sydney
     *
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
     * in compliance with the License. You may obtain a copy of the License at
@@ -23,7 +23,7 @@
     * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
     * @author      Stephen White   
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @link        http://HeuristNetwork.org
     * @version     3.1.0
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -31,12 +31,13 @@
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
 
-    define('SAVE_URI', 'disabled');
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
 
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../common/php/imageLibrary.php');
+require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../../common/php/imageLibrary.php');
 
-    if (!is_admin()) return;//TOD change this for just admin and return msg. Is probably only called where user is admin
+$mysqli = $system->get_mysqli();
 
     $rt_id = intval(@$_REQUEST['trm_ID']);
     if($rt_id>0){

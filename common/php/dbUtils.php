@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -39,7 +39,7 @@
 * - db_register - set register ID to sysIdentification and rectype, detail and term defintions
 */
 
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/utils_db_load_script.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/utils_db_load_script.php');
 
 function server_connect($verbose = true){
 
@@ -93,10 +93,10 @@ function db_drop($db_name, $verbose = true) { // called in case of failure to re
         $sql = "DROP DATABASE IF EXISTS `".$db_name."`";
         if ($mysqli->query($sql)) {
             
-            if(false){//remove from central index database - this feature is disabled
-                $mysqli->query('DELETE FROM Heurist_DBs_index.sysUsers WHERE sus_Database=`'.$db_name.'`');
-                $mysqli->query('DELETE FROM Heurist_DBs_index.sysIdentifications WHERE sys_Database=`'.$db_name.'`');
-            }
+            /*remove from central index database
+            $mysqli->query('DELETE FROM Heurist_DBs_index.sysUsers WHERE sus_Database=`'.$db_name.'`');
+            $mysqli->query('DELETE FROM Heurist_DBs_index.sysIdentifications WHERE sys_Database=`'.$db_name.'`');
+            */
             
             $res = true;
         }
@@ -329,7 +329,7 @@ function db_clone($db_source, $db_target, $verbose, $nodata=false, $isCloneTempl
 
     return $res;
 }
-
+    
 /**
 * Dump all tables (except csv import cache) into text files
 * It is assumed that all tables exist and empty in target db
@@ -570,11 +570,10 @@ function db_delete($db, $verbose=true) {
             deleteFolder($source);
             if($verbose) echo "<br/>Folder ".$source." has been deleted";
             
-            
-            if(false){ // Delete from central index - this feature is disabled
-                $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysIdentifications` WHERE sys_Database="hdb_'.$db.'"');
-                $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysUsers` WHERE sus_Database="hdb_'.$db.'"');
-            }
+            /* Delete from central index
+            $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysIdentifications` WHERE sys_Database="hdb_'.$db.'"');
+            $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysUsers` WHERE sus_Database="hdb_'.$db.'"');
+            */
             
             return true;
         }else{
@@ -1037,7 +1036,7 @@ function mysql__insertupdate($database, $table_name, $table_prefix, $record){
     }else{
         $query = $query." where ".$table_prefix."ID=".$rec_ID;
     }
-
+    
     $stmt = $mysqli->prepare($query);
     if($stmt){
         call_user_func_array(array($stmt, 'bind_param'), refValues($params));
@@ -1051,6 +1050,7 @@ function mysql__insertupdate($database, $table_name, $table_prefix, $record){
         $ret = $mysqli->error;
     }
 
+    
     return $ret;
 }
 

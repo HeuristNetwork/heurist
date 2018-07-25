@@ -1,4 +1,23 @@
 <?php
+    /**
+    * printVocabulary.php: print out vocabulary as a csv
+    *
+    * @package     Heurist academic knowledge management system
+    * @link        http://HeuristNetwork.org
+    * @copyright   (C) 2005-2018 University of Sydney
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     3.2
+    */
+
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
+    */
 
     require_once (dirname(__FILE__).'/../../../hserver/System.php');
     require_once (dirname(__FILE__).'/../../../hserver/dbaccess/db_structure.php');
@@ -55,7 +74,7 @@
      
     if($error){
         print $error;
-        //header('Location: '.dirname(__FILE__).'/../../../hclient/framecontent/errorPage.php?msg='.$error);
+        //header('Location: '.dirname(__FILE__).'/../../../hclient/framecontent/infoPage.php?message='.$error);
     }
 
 function printTerm($termID, $lvl){
@@ -84,7 +103,7 @@ function printTerm($termID, $lvl){
             if($lvl>0 && $parent_id>0){
                 $parent_term = @$terms['termsByDomainLookup'][$domain][$parent_id];
                 if($parent_term){
-                    $parent_term_label = '"'.getFullTermLabel($terms, $parent_term, $domain, false).'"';
+                    $parent_term_label = '"'.getTermFullLabel($terms, $parent_term, $domain, false).'"';
                 }else{
                     $parent_id = '';
                 }
@@ -113,37 +132,4 @@ function printBranch($tree, $lvl){
         printBranch($children, $lvl+1);
     }
 }    
-//@todo - move to db_structure
-function getFullTermLabel($dtTerms, $term, $domain, $withVocab, $parents=null){
-
-    $fi = $dtTerms['fieldNamesToIndex'];
-    $parent_id = $term[ $fi['trm_ParentTermID'] ];
-
-    $parent_label = '';
-
-    if($parent_id!=null && $parent_id>0){
-        $term_parent = @$dtTerms['termsByDomainLookup'][$domain][$parent_id];
-        if($term_parent){
-            if(!$withVocab){
-                $parent_id = $term_parent[ $fi['trm_ParentTermID'] ];
-                if(!($parent_id>0)){
-                    return $term[ $fi['trm_Label']];
-                }
-            }
-            
-            if($parents==null){
-                $parents = array();
-            }
-            
-            if(array_search($parent_id, $parents)===false){
-                array_push($parents, $parent_id);
-                
-                $parent_label = getFullTermLabel($dtTerms, $term_parent, $domain, $withVocab, $parents);    
-                if($parent_label) $parent_label = $parent_label.'.';
-            }
-        }    
-    }
-    return $parent_label.$term[ $fi['trm_Label']];
-}
-
 ?>

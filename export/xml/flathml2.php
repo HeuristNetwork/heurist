@@ -1,13 +1,13 @@
 <?php
 
-/**
+/**   NOT USED
 * flathml.php:  flattened version of HML - records are not generated redundantly but are indicated by references within other records.
 *               $hunifile indicates special one-file-per-record + manifest file for HuNI (huni.net.au)
 *               $output_file - file handler to write output, it allows to avoid memory overflow for large databases
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Kim Jackson
 * @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>

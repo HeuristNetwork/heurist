@@ -9,7 +9,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -779,7 +779,8 @@ $.widget( "heurist.search_faceted_wiz", {
                     fieldtypes:allowed_fieldtypes},  //ART20150810 this.options.params.fieldtypes.join() },
 
                     function(response){
-                        if($.isArray(response) || response.status == window.hWin.HAPI4.ResponseStatus.OK){
+
+                        if($.isArray(response) || response.status == window.hWin.ResponseStatus.OK){
 
                             //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
                             /*
@@ -1550,7 +1551,7 @@ $.widget( "heurist.search_faceted_wiz", {
         //
         window.hWin.HAPI4.SystemMgr.ssearch_save(request,
             function(response){
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
 
                     var svsID = response.data;
 

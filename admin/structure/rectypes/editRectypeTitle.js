@@ -1,5 +1,7 @@
+//@TODO prepare tree data on client side, use jquery fancytree
+
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,7 +22,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -31,8 +33,7 @@
 
 //aliases
 var Dom = YAHOO.util.Dom,
-Hul = top.HEURIST.util,
-Event = YAHOO.util.Event;
+Hul = window.hWin.HEURIST4.util;
 
 /**
  * EditRectypeTitle - class for pop-up window to define recordtype title mask
@@ -59,10 +60,8 @@ function EditRectypeTitle() {
         //
         if(location.search.length > 1) {
 
-            top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-
-            _rectypeID = top.HEURIST.parameters.rectypeID;
-            Dom.get("rty_TitleMask").value =  top.HEURIST.parameters.mask;
+            _rectypeID = window.hWin.HEURIST4.util.getUrlParameter('rectypeID', location.search);
+            Dom.get("rty_TitleMask").value =  window.hWin.HEURIST4.util.getUrlParameter('mask', location.search);
         }
 
 
@@ -71,19 +70,21 @@ function EditRectypeTitle() {
             return;
         }else{
 
-            _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-                (top.HEURIST.database.name?top.HEURIST.database.name:''));
-
             //find variables for given rectypeID and create variable tree
-            var baseurl = top.HEURIST.baseURL + "common/php/recordTypeTree.php?mode=varsonly&rty_id="+_rectypeID+
-            "&ver=1&w=all&stype=&db="+_db  + "&q=type:" + _rectypeID; //"&q=id:146433";
-            top.HEURIST.util.getJsonData(baseurl, _onGenerateVars, "");
+            var baseurl = window.hWin.HAPI4.baseURL + 'common/php/recordTypeTree.php';
+            
+            var request = {method:'checkDtPtr', db:window.hWin.HAPI4.database, mode:'varsonly',
+                                     rty_id:_rectypeID, ver:1, w:'all',q:('type:'+_rectypeID) }; //styep
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, _onGenerateVars);
+            
         }
     }//end _init
 
 
     function _onGenerateVars(context){
 
+console.log(context);
+        
         if(!Hul.isnull(context))
             {
             if(context===false || !context['vars']){
@@ -138,14 +139,12 @@ function EditRectypeTitle() {
                 sel.remove(1);
             }
 
-            var _recs = context['records'];
-
-            var i;
-            for (i in _recs){
-                if(i!==undefined){
-                    Hul.addoption(sel, _recs[i].rec_ID, _recs[i].rec_Title);
-                }
-            } // for
+            var recordset = new hRecordSet(context.recordset);
+            var recs = recordset.getRecords();
+            for(var rec_ID in recs) 
+            if(rec_ID>0){
+                window.hWin.HEURIST4.ui.addoption(sel, rec_ID, recordset.fld(recs[rec_ID], 'rec_Title'));
+            }
 
             sel.selectedIndex = 0;
         }
@@ -480,34 +479,43 @@ function EditRectypeTitle() {
      */
     function _doTest()
     {
-        var mask = document.getElementById('rty_TitleMask').value;
-        var rec_type = top.HEURIST.parameters.rectypeID;
-
         //verify text title mask    
-        var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
-        //var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
-        var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
+        var mask = document.getElementById('rty_TitleMask').value;
+        var rectypeID = window.hWin.HEURIST4.util.getUrlParameter('rectypeID', location.search);
 
-        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-                var obj = xhr.responseText;
-                if(obj==="" || obj==="\n"){
+        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
+
+        var request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+            function (response) {
+                if(response.status != window.hWin.ResponseStatus.OK || response.message){
+
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    
+                }else{
+                    
                     var sel = Dom.get("listRecords");
                     if (sel.selectedIndex>0){
 
                         var rec_id = sel.value;
-                        squery = "rty_id="+rec_type+"&rec_id="+rec_id+"&mask="+encodeURIComponent(mask)+"&db="+_db;
-                        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-                                var obj2 = xhr.responseText;
-                                document.getElementById('testResult').innerHTML = obj2;
-                            }, squery);
+                        
+                        var request2 = {rty_id:rectypeID, rec_id:rec_id, mask:mask, db:window.hWin.HAPI4.database}; //verify titlemask
+                        window.hWin.HEURIST4.util.sendRequest(baseurl, request2, null,
+                            function (response) {
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    document.getElementById('testResult').innerHTML = response.data;
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                }
+                            });
                     }else{
                         alert('Select a record from the pulldown to test your title mask');
                     }
-                }else{
-                    alert(obj);
-                }
-
-            }, squery);
+                }                                        
+            }
+        );
+        
     }
 
     /**
@@ -529,24 +537,22 @@ function EditRectypeTitle() {
             return;
         }
         
-        
-        var mask = document.getElementById('rty_TitleMask').value;
-        //var rec_type = top.HEURIST.parameters.rectypeID;
-
         //verify text mask 
-        var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
-        //var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
-        var squery = "rty_id="+_rectypeID+"&mask="+encodeURIComponent(mask)+"&db="+_db+"&check=1";
+        var mask = document.getElementById('rty_TitleMask').value;
+        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
 
-        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-               var obj = xhr.responseText;
-               if(obj==="" || obj==="\n"){
+        var request = {rty_id:_rectypeID, mask:mask, db: window.hWin.HAPI4.database, check:1}; //verify titlemask
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+            function (response) {
+                if(response.status != window.hWin.ResponseStatus.OK || response.message){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }else{
                     _doSave_Step2_SaveRectype();
-               }else{
-                    alert(obj);
-               }
-
-            }, squery);
+                }                                        
+            }
+        );
+        
     }
     /**
     * Second step - update record type definition
@@ -554,30 +560,32 @@ function EditRectypeTitle() {
     function _doSave_Step2_SaveRectype(){
                     
             var newvalue = document.getElementById('rty_TitleMask').value;
-            if(newvalue != top.HEURIST.parameters.mask){
+            if(newvalue != window.hWin.HEURIST4.util.getUrlParameter('mask', location.search)){
                 
-                var typedef = top.HEURIST.rectypes.typedefs[_rectypeID];
+                var typedef = window.hWin.HEURIST4.rectypes.typedefs[_rectypeID];
                 
-                typedef.commonFields[ top.HEURIST.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ] = newvalue;
+                typedef.commonFields[ window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ] = newvalue;
                 
                 var _defs = {};
                 _defs[_rectypeID] = [{common:[newvalue],dtFields:[]}];
                 var oRectype = {rectype:{colNames:{common:["rty_TitleMask"],dtFields:[]},
                             defs:_defs}}; //{_rectypeID:[{common:[newvalue],dtFields:[]}]}
-                var str = JSON.stringify(oRectype);
+                //var str = JSON.stringify(oRectype);
                 
-                var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+                var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
                 var callback = _updateTitleMask;// updateResult;
-                var params = "method=saveRT&db="+_db+"&data=" + encodeURIComponent(str);
-                Hul.sendRequest(baseurl, function(xhr) {
-                    _updateTitleMask();
-                    /*var obj = xhr.responseText;
-                    if(obj===""){
-                        _updateTitleMask();
-                    }else{
-                        alert(obj);
-                    }*/
-                }, params);                                
+                
+                var request = {method:'saveRT', db:window.hWin.HAPI4.database, data:oRectype }; //styep
+                
+                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+                    function (response) {
+                        if(response.status == window.hWin.ResponseStatus.OK ){
+                            _updateTitleMask();        
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }                
+                );
             }else{
                 window.close(newvalue);
             }                    
@@ -587,9 +595,10 @@ function EditRectypeTitle() {
     * Third step - update records - change title
     */
     function _updateTitleMask(){
-        var URL = top.HEURIST.baseURL + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+_db+"&recTypeIDs="+_rectypeID;
+        var sURL = window.hWin.HAPI4.baseURL + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+_db+"&recTypeIDs="+_rectypeID;
 
-        Hul.popupURL(top, URL, {
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+
                 "close-on-blur": false,
                 "no-resize": true,
                 height: 400,
@@ -610,30 +619,31 @@ function EditRectypeTitle() {
     function _doCanonical(mode){
 
         var mask = (mode==2)?document.getElementById('rty_TitleMask').value :document.getElementById('rty_CanonincalMask').value;
-        var rec_type = top.HEURIST.parameters.rectypeID;
+        var rectypeID = window.hWin.HEURIST4.util.getUrlParameter('rectypeID', location.search);
+        
+        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
 
-        var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-            (top.HEURIST.database.name?top.HEURIST.database.name:''));
+        var request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+            function (response) {
+                if(response.status != window.hWin.ResponseStatus.OK || response.message){
 
-
-        var baseurl = top.HEURIST.baseURL + "admin/structure/rectypes/editRectypeTitle.php";
-        //var baseurl = top.HEURIST.baseURL + "hserver/controller/rectype_titlemask.php";
-        var squery = "rty_id="+rec_type+"&mask="+encodeURIComponent(mask)+"&db="+db+"&check="+mode;
-
-        top.HEURIST.util.sendRequest(baseurl, function(xhr) {
-                var obj = xhr.responseText;
-
-                if(mode==2){
-                    document.getElementById('rty_CanonincalMask').value = obj;
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    
                 }else{
-                    document.getElementById('rty_TitleMask').value = obj;
-                }
-            }, squery);
-
+                    if(mode==2){
+                        document.getElementById('rty_CanonincalMask').value = obj;
+                    }else{
+                        document.getElementById('rty_TitleMask').value = obj;
+                    }
+                }                                        
+            }
+        );        
     }
 
     //
-    // utility function - TODO: move to HEURIST.utils
+    // utility function - TODO: move to HEURIST4.ui
     //
     function insertAtCursor(myField, myValue) {
         //IE support

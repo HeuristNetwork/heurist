@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -20,10 +20,6 @@
 
 
 //aliases
-var Dom = YAHOO.util.Dom,
-Hul = top.HEURIST.util,
-Event = YAHOO.util.Event;
-
 /**
 * UserEditor - class for pop-up edit group
 *
@@ -40,7 +36,7 @@ function ShowReps() {
 
     var _className = "ShowReps",
     _originalFileName,
-    //squery_all,squery_sel,squery_main,
+
     _variables, //object from server - record type tree
     _varsTree, //treeview object
     _needListRefresh = false, //if true - reload list of templates after editor exit
@@ -52,11 +48,12 @@ function ShowReps() {
     codeEditor = null,
     infoMessageBox,
     _currentRecordset = null,
-    _db;
+    _currentQuery = null,
     
-    var lastQuery = null;
-
-    var top_repcontainer = '30px';
+    embed_dialog = null,
+    mylayout = null;
+    
+    var top_repcontainer = '36px';
     
     var progressInterval = null;
 
@@ -80,7 +77,7 @@ function ShowReps() {
         var sel = document.getElementById('selTemplates'),
         option,
         keepSelIndex = sel.selectedIndex,
-        _currentTemplate = Hul.getDisplayPreference("viewerCurrentTemplate");
+        _currentTemplate = window.hWin.HAPI4.get_prefs('viewerCurrentTemplate');
 
         //celear selection list
         while (sel.length>0){
@@ -92,7 +89,7 @@ function ShowReps() {
             for (i in context){
                 if(i!==undefined){
 
-                    Hul.addoption(sel, context[i].filename, context[i].name);
+                    window.hWin.HEURIST4.ui.addoption(sel, context[i].filename, context[i].name);
                     if(keepSelIndex<0 && _currentTemplate==context[i].filename){
                         keepSelIndex = sel.length-1;
                     }
@@ -115,9 +112,7 @@ function ShowReps() {
 
         infoMessageBox.hide();
 
-        //converts Heurist.tmap structure to timemap structure
-        //HEURIST.tmap = context;
-        var iframe = document.getElementById("rep_container_frame");//Dom.get("rep_container");
+        var iframe = document.getElementById("rep_container_frame");//document.getElementById("rep_container");
         iframe.contentWindow.document.open();
         iframe.contentWindow.document.write(context);
         iframe.contentWindow.document.close();
@@ -135,31 +130,17 @@ function ShowReps() {
     function _init() {
         _setLayout(true, false); //aftert load show viewer only
 
-        if(hasH4()){
+        if(true){
             _sQueryMode = "all";
             $('#cbUseAllRecords1').hide();
             $('#cbUseAllRecords2').hide();
         }else{
-            _sQueryMode = top.HEURIST.displayPreferences["showSelectedOnlyOnMapAndSmarty"];
+            _sQueryMode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty');
             document.getElementById('cbUseAllRecords2').value = _sQueryMode;
             document.getElementById('cbUseAllRecords1').value = _sQueryMode;
         }
 
-        top.HEURIST.insertPattern = _insertPattern;
-
-        _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-
-        /*var s1 = location.search;
-        if(s1=="" || s1=="?null" || s1=="?noquery"){
-        s1 = null;
-        squery_all = top.HEURIST.currentQuery_all;
-        squery_sel = top.HEURIST.currentQuery_sel;
-        squery_main = top.HEURIST.currentQuery_main;
-        }else{
-        squery_all = _sQueryMode=="all"?s1:null;
-        squery_sel = _sQueryMode=="selected"?s1:null;
-        squery_main = _sQueryMode=="main"?s1:null;
-        }*/
+        window.hSmarty.insertPattern = _insertPattern;
 
         _reload_templates();
 
@@ -200,16 +181,21 @@ function ShowReps() {
     * loads list of templates
     */
     function _reload_templates(){
-        var baseurl = top.HEURIST.baseURL + "viewers/smarty/templateOperations.php";
+        
+        var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
         var callback = _updateTemplatesList;
-        Hul.getJsonData(baseurl, callback, 'db='+_db+'&mode=list');
+        var request = {mode:'list', db:window.hWin.HAPI4.database};
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
     }
 
 
     function _getSelectedTemplate(){
 
         var sel = document.getElementById('selTemplates');
-        if(Hul.isnull(sel) || Hul.isnull(sel.options) || sel.options.length===0) { return null; }
+        if(window.hWin.HEURIST4.util.isnull(sel) || window.hWin.HEURIST4.util.isnull(sel.options) 
+            || sel.options.length===0) { return null; }
+            
         if(sel.selectedIndex<0 || !sel.options[sel.selectedIndex]) sel.selectedIndex = 0;
         return sel.options[sel.selectedIndex].value; // by default first entry
     }
@@ -219,9 +205,11 @@ function ShowReps() {
     */
     function _getQueryAndTemplate(template_file, isencode){
 
-        var squery = _getQuery();
+        var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
 
-        if(Hul.isempty(squery) ||  (squery.indexOf("&q=")<0) || (squery.indexOf("&q=") == squery.length-3)) {
+        if(window.hWin.HEURIST4.util.isempty(squery) ||  (squery.indexOf("&q=")<0) || 
+            (squery.indexOf("&q=") == squery.length-3)) {
+                
             if(_sQueryMode=="selected"){
                 _updateReps("<div class='wrap'><div id='errorMsg'><span>No Records Selected</span></div></div>");
             }else{
@@ -232,7 +220,7 @@ function ShowReps() {
 
         }else{
 
-            if(Hul.isnull(template_file)){
+            if(window.hWin.HEURIST4.util.isnull(template_file)){
                 template_file = _getSelectedTemplate();
             }
 
@@ -251,78 +239,46 @@ function ShowReps() {
     */
     function _reload(template_file) {
 
-        var baseurl = top.HEURIST.baseURL + "viewers/smarty/showReps.php";
-        var squery = null;
-        var request_query = {};
+        var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
+        var request = null;
         var session_id = Math.round((new Date()).getTime()/1000);
 
         if(_currentRecordset!=null){
 
             //new approach to support h4
-            if(Hul.isnull(template_file)){
+            if(window.hWin.HEURIST4.util.isnull(template_file)){
                 template_file = _getSelectedTemplate();
             }
-            if(Hul.isnull(template_file)){
+            if(window.hWin.HEURIST4.util.isnull(template_file)){
                 return;
             }
 
-            squery =  'db='+_db+'&template='+template_file;//+&recordset='+JSON.stringify(_currentRecordset);
-            
-            request_query = {db:_db, template:template_file, recordset:_currentRecordset, session:session_id};
+            request = {db:window.hWin.HAPI4.database, template:template_file, recordset:_currentRecordset, session:session_id};
 
         }else{
             return; //use global recordset only
-            squery = _getQueryAndTemplate(template_file, false);
+            squery = _getQueryAndTemplate(template_file, false); //NOT USED
         }
 
-        if(squery!=null){
+        if(request!=null){
 
             //infoMessageBox.setBody("Execute template '"+template_file+"'. Please wait");
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
             infoMessageBox.show();
 
-            lastQuery = squery;
-            
             _showProgress( session_id );
             
-            $.ajax({
-                url: baseurl,
-                type: "POST",
-                data: request_query,
-                dataType: "text",
-                error: function(jqXHR, textStatus, errorThrown ) {
-                    console.log(textStatus+' '+jqXHR.responseText);
-                    _hideProgress();
-                },
-                success: function( response, textStatus, jqXHR ){
-                    _hideProgress();
+            //request['DBGSESSID']='425944380594800002;d=1,p=0,c=07';
+            
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response){
+                _hideProgress();
+                if(response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);                   
+                }else{
                     _updateReps( response );
                 }
-            });
-            
-            /* 
-            Hul.sendRequest(baseurl, function(xhr) {
-                
-                _hideProgress();
-                
-                var obj = xhr.responseText;
-                    _updateReps(obj);
-                
-                    var limit = parseInt(Hul.getDisplayPreference("smarty-output-limit"));
-                    if(top.HEURIST.totalQueryResultRecordCount>limit){
-                        
-$('<hr/><p>Output truncated at '+limit+' records (out of '
-+top.HEURIST.totalQueryResultRecordCount+'). This limit can be reset in Profiles > Preferences.'
-+'Note: calls to this function from websites and other external requests are not truncated'
-+ '- the limit applies only to interactive viewing.</p>').appendTo($("#rep_container"));
-
-                    }
-                
-                }, squery);
-            */    
+            }, 'auto');
         }
-
-        //Hul.getJsonData(baseurl, callback, squery);
     }
 
     //
@@ -331,28 +287,23 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     function _showProgress( session_id ){
 
         var progressCounter = 0;        
-        var progress_url = top.HEURIST.baseURL + "viewers/smarty/reportProgress.php";
+        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
 
         $('#toolbardiv').hide();
         $('#progressbar_div').show();
         $('body').css('cursor','progress');
         
         $('#progress_stop').button().on({click: function() {
-            $.ajax({
-                url: progress_url,
-                type: "GET",
-                data: {db: _db, terminate:1, t:(new Date()).getMilliseconds(), session:session_id},
-                dataType: "text",
-                error: function(jqXHR, textStatus, errorThrown ) {
-                    console.log(textStatus+' '+jqXHR.responseText);
-                    _hideProgress();
-                },
-                success: function( response, textStatus, jqXHR ){
-                    _hideProgress();
+            
+            var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
+            
+            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+                _hideProgress();
+                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    console.log(response);                   
                 }
             });
-        
-        } });
+        } }, 'text');
         
         var pbar = $('#progressbar');
         var progressLabel = pbar.find('.progress-label').text('');
@@ -370,49 +321,43 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         
         progressInterval = setInterval(function(){ 
             
-        $.ajax({
-            url: progress_url,
-            type: "GET",
-            data: {db: _db, t:(new Date()).getMilliseconds(), session:session_id},
-            dataType: "text",
-            cache: false,
-            error: function(jqXHR, textStatus, errorThrown ) {
-                console.log(textStatus+' '+jqXHR.responseText);
-                _hideProgress();
-            },
-            success: function( response, textStatus, jqXHR ){
-
-//console.log('resp '+progressCounter+'  resp='+response+'  '+session_id);
+            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+            
+            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                 
-                var resp = response?response.split(','):[0,0];
-                
-                if(resp && resp[0]){
-                    if(progressCounter>0){
-                        if(resp[1]>0){
-                            var val = resp[0]*100/resp[1];
-                            pbar.progressbar( "value", val );
-                            progressLabel.text(resp[0]+' of '+resp[1]);
+                if(!response || response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    _hideProgress();
+                    //console.log(response+'  '+session_id);                   
+                }else{
+                    
+                    var resp = response?response.split(','):[0,0];
+                    
+                    if(resp && resp[0]){
+                        if(progressCounter>0){
+                            if(resp[1]>0){
+                                var val = resp[0]*100/resp[1];
+                                pbar.progressbar( "value", val );
+                                progressLabel.text(resp[0]+' of '+resp[1]);
+                            }else{
+                                progressLabel.text('wait...');
+                                //progressLabel.text('');
+                            }
                         }else{
-                            progressLabel.text('wait...');
-                            //progressLabel.text('');
+                            pbar.progressbar( "value", 0 );
+                            progressLabel.text('preparing...');
                         }
                     }else{
-                        pbar.progressbar( "value", 0 );
-                        progressLabel.text('preparing...');
+                        _hideProgress();
                     }
-                }else{
-                    _hideProgress();
+                    
+                    
+                    progressCounter++;
+                    
                 }
-                
-                
-                progressCounter++;
-                //if(progressCounter>10000){
-                //     _hideProgress();
-                //}
-            }
-        });            
+            },'text');
+          
         
-            }, 1000);                
+        }, 1000);                
         
     }
     
@@ -448,11 +393,11 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
         function __onGenerateTemplate(context){
 
-            if(Hul.isnull(context)){
+            if(window.hWin.HEURIST4.util.isnull(context)){
                 return;
             }
             if(context===false){
-                alert('No template generated');
+                window.hWin.HEURIST4.msg.showMsgErr('No template generated');
                 return;
             }
 
@@ -510,14 +455,14 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                         res += text[k] + "\n"; // + text.substr(k+2);
                     }
 
-                    Dom.get("edTemplateName").innerHTML = name;
+                    document.getElementById("edTemplateName").innerHTML = name;
                     _initEditor(res);
             }
 
             _variables = context;
 
             /* fille selection box with the list of rectypes
-            var sel = Dom.get("selRectype");
+            var sel = document.getElementById("selRectype");
             //celear selection list
             while (sel.length>0){
             sel.remove(0);
@@ -549,7 +494,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         }
         
         function __onRectypeTree(context){
-            if(Hul.isnull(context)){
+            if(window.hWin.HEURIST4.util.isnull(context)){
                 return;
             }
             _variables = context;
@@ -560,19 +505,32 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             __onGenerateTemplate([]);
         }
 
-        var ele = $('#rectype_selector');
-        ele.load( top.HEURIST.baseURL + "common/php/recordTypeSelect.php?db="+_db,
-            function(){
-                ele.find('#rectype_elt').on('change', function(event){
+        
+        
+        var rtSelect = $('#rectype_selector').css('max-width','150px');
+        var $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), null, window.hWin.HR('select record type'), true );
+        $rec_select.change(function(event){
                     var selel = $(event.target).val();
                     if(selel>0){
-                        var baseurl = top.HEURIST.baseURL + "common/php/recordTypeTree.php";
-                        Hul.getJsonData(baseurl, __onRectypeTree, 'db='+_db+'&mode=list&for=smarty&rty_id='+selel);
+                        var baseurl = window.hWin.HAPI4.baseURL + "common/php/recordTypeTree.php";
+                        var request = {db:window.hWin.HAPI4.database, mode:'list', 'for':'smarty', rty_id:selel};
+                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __onRectypeTree);
                     }
-                });
-
-        } );
-
+        });
+        /*$rec_select.hSelect.on({change: 
+        function(event, data){
+               var selval = data.item.value;
+               $('#rectype_selector').val(selval);    
+               
+                if(selval>0){
+                    var baseurl = window.hWin.HAPI4.baseURL + "common/php/recordTypeTree.php";
+                    var request = {db:window.hWin.HAPI4.database, mode:'list', 'for':'smarty', rty_id:selval};
+                    window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __onRectypeTree);
+                }
+        
+         }
+         });
+        */
     }
 
 
@@ -580,7 +538,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     function _initEditor(content) {
         if(codeEditor==null){
 
-                codeEditor = CodeMirror(Dom.get("templateCode"), {
+                codeEditor = CodeMirror(document.getElementById("templateCode"), {
                     mode           : "smartymixed",
                     tabSize        : 2,
                     indentUnit     : 2,
@@ -612,7 +570,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
     function _initEditorMode(template_file, template_body){
 
-        Dom.get("edTemplateName").innerHTML = template_file;
+        document.getElementById("edTemplateName").innerHTML = template_file;
         _initEditor(template_body);
         _setLayout(true, true);
     }
@@ -628,20 +586,21 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             _initEditorMode(template_file, context);
         }
 
-        var baseurl = top.HEURIST.baseURL + "viewers/smarty/templateOperations.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
 
         _originalFileName = template_file;
 
-        var squery = 'db='+_db+'&mode=get&template='+template_file;
+        var request = {mode:'get', db:window.hWin.HAPI4.database, template:template_file};
 
-        Hul.sendRequest(baseurl, function(xhr) {
-            var obj = Hul.evalJson(xhr.responseText);
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+        function(obj) {
             if (obj  &&  obj.error) {
-                alert(obj.error);
+                window.hWin.HEURIST4.msg.showMsgErr(obj.error);
             }else{
-                _onGetTemplate(xhr.responseText);
+                _onGetTemplate(obj);
             }
-            }, squery);
+        }, 'auto'
+        );
 
         _generateTemplate(template_file, null, false);
     }
@@ -650,36 +609,37 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     /**
     * Convert template to global
     */
-    function _doExportTemplate(template_file, istest) {
+    function _doExportTemplate() {
 
-        if(Number(top.HEURIST.database.id)>0){
+        var istest = false;
+        
+        var dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
+        if(dbId > 0){
 
-            var baseurl = top.HEURIST.baseURL + "viewers/smarty/templateOperations.php";
+            var template_file = $('#selTemplates').val();
+            if( window.hWin.HEURIST4.util.isempty(template_file) ) return;
+            
+            var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
 
-            var squery = 'db='+_db+'&mode=serve&dir=0&template='+template_file;
+            var request = { mode:'serve',db:window.hWin.HAPI4.database, dir:0, template:template_file };
 
             if(istest){
-                Hul.sendRequest(baseurl, function(xhr) {
-                    var obj = Hul.evalJson(xhr.responseText);
+                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
+                 function(obj) {
                     if (obj  &&  obj.error) {
-                        alert(obj.error);
+                        window.hWin.HEURIST4.msg.showMsgErr(obj.error);
                     }else{
-                        _updateReps('<xmp>'+xhr.responseText+'</xmp>');
+                        _updateReps('<xmp>'+obj+'</xmp>');
                     }
-                    }, squery);
+                 },'auto');
             }else{
-
+                var squery = 'db='+window.hWin.HAPI4.database+'&mode=serve&dir=0&template='+template_file;
                 //template.gpl
-                if(hasH4()){
-                    window.hWin.HEURIST4.util.downloadURL(baseurl+'?'+squery);
-                }else{
-                    window.open(baseurl+'?'+squery, 'Download'); //old way
-                }
-
+                window.hWin.HEURIST4.util.downloadURL(baseurl+'?'+squery);
             }
 
         }else{
-            alert('Database must be registered to allow translation of local template to global template.');
+            window.hWin.HEURIST4.msg.showMsgErr('Database must be registered to allow translation of local template to global template.');
         }
     }
 
@@ -693,30 +653,32 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
         if(mode>0){
 
-            var baseurl = top.HEURIST.baseURL + "viewers/smarty/templateOperations.php",
-            squery = 'db='+_db+'&mode=',
+            var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+            var request = {db: window.hWin.HAPI4.database};
             template_file = null;
 
             if(mode<3)
             { //save
-                template_file = jQuery.trim(Dom.get("edTemplateName").innerHTML);
+                template_file = jQuery.trim(document.getElementById("edTemplateName").innerHTML);
 
                 if(mode==1){ //save as - get new name
                     template_file = jQuery.trim(prompt("Please enter new template name", template_file));
-                    if (Hul.isempty(template_file)){
+                    if (window.hWin.HEURIST4.util.isempty(template_file)){
                         return;
                     }
-                    Dom.get("edTemplateName").innerHTML = template_file;
+                    document.getElementById("edTemplateName").innerHTML = template_file;
                 }
 
-                var template_body = codeEditor.getValue();// Dom.get("edTemplateBody").value;
+                var template_body = codeEditor.getValue();// document.getElementById("edTemplateBody").value;
                 if(template_body && template_body.length>10){
-                    squery = squery + 'save&template='+encodeURIComponent(template_file)+'&template_body='+encodeURIComponent(template_body);
+                    request['mode'] = 'save';
+                    request['template'] = template_file;
+                    request['template_body'] = template_body;
 
                     _keepTemplateValue = template_body;
                 }else{
-                    alert('The template body is suspiciously short. No operation performed.');
-                    squery = null;
+                    window.hWin.HEURIST4.msg.showMsgErr('The template body is suspiciously short. No operation performed.');
+                    request = null;
                 }
             }
             else if (mode===3 && _originalFileName!=="") //delete template
@@ -724,14 +686,17 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 var r=confirm("Are you sure you wish to delete template '"+_originalFileName+"'?");
 
                 if (r==true){
-                    squery = squery + 'delete&template='+_originalFileName
+                    
+                    request['mode'] = 'delete';
+                    request['template'] = _originalFileName;
+                    
                     _originalFileName = null;
                 }else{
                     return;
                 }
             }
 
-            if(squery){
+            if(request!=null){
 
                 var modeRef = mode;
                 var alwin;
@@ -740,7 +705,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                     
                     $('*').css('cursor', 'default');
 
-                    if(!Hul.isnull(context))
+                    if(!window.hWin.HEURIST4.util.isnull(context))
                     {
                         var mode = context.ok;
                         //if(mode==="delete"){
@@ -750,10 +715,8 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                         }else if(template_file!=null){
                             _originalFileName = template_file;//_onGetTemplate(obj);
 
-                            infoMessageBox.setBody("Template '"+template_file+"' has been saved");
-                            infoMessageBox.show();
-
-                            setTimeout(function(){infoMessageBox.hide();}, 1000);
+                            window.hWin.HEURIST4.msg.showMsgFlash("Template '"+template_file+"' has been saved", 1000);
+                            
                         }
 
                         if(modeRef===1 || modeRef===3){
@@ -773,7 +736,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
                 infoMessageBox.show();
                 
-                Hul.getJsonData(baseurl, __onOperEnd, squery);
+                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __onOperEnd, 'auto');
             }
         }
 
@@ -787,7 +750,6 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 ];
                 mySimpleDialog.cfg.queueProperty("buttons", myButtons);*/
 
-                if(hasH4()){
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         'Template was changed. Are you sure you wish to exit and lose all modifications?',
                         {'Save': function() {
@@ -805,18 +767,13 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                         },
                         'Warning');
 
-                }else{
-                    mySimpleDialog.setHeader("Warning!");
-                    mySimpleDialog.setBody("Template was changed. Are you sure you wish to exit and lose all modifications?!");
-                    mySimpleDialog.show();
-                }
             }else{
                 _setLayout(true, false);
             }
 
             /*
             var r = true;
-            if(_keepTemplateValue!=Dom.get("edTemplateBody").value){
+            if(_keepTemplateValue!=document.getElementById("edTemplateBody").value){
             r=confirm("Template was changed. Are you sure you wish to exit and lose all modifications?");
             }
             if (r==true){
@@ -854,45 +811,64 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
         if(template_body && template_body.length>10){
 
-            var squery;
 
-            var baseurl = top.HEURIST.baseURL + "viewers/smarty/showReps.php";
+            var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php";
+
+            var request = {};
 
             if(_currentRecordset!=null){
-                squery =  'db='+_db+'&recordset='+JSON.stringify(_currentRecordset);
+                request['recordset'] = _currentRecordset;
             }else{
-                squery = _getQuery();;
+                request = window.hWin.HEURIST4.util.cloneJSON(_currentQuery);
             }
 
             if(debug_limit>0){
-                squery = squery + '&limit='+debug_limit;
+                request['limit'] = debug_limit;
             }
 
-            squery = squery + '&replevel='+replevel+'&template_body='+encodeURIComponent(template_body);
-
-            //squery = squery + '&DBGSESSID=425944380594800002;d=1,p=0,c=07';
-            
+            request['replevel'] = replevel;
+            request['template_body'] = template_body;
+            ///request['DBGSESSID']='425944380594800002;d=1,p=0,c=07';
             
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
             infoMessageBox.show();
             
             _showProgress();
 
-            Hul.sendRequest(baseurl, function(xhr) {
-                _hideProgress();
-                var obj = xhr.responseText;
-                _updateReps(obj);
-                }, squery);
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+                function(context) {
+                    _hideProgress();
+                    _updateReps(context);
+                }, 'auto');
 
         }else{
-            alert('Nothing to execute');
+            window.hWin.HEURIST4.msg.showMsgErr('Nothing to execute');
         }
     }
 
 
 
-    var layout, _isviewer, _iseditor, _kept_width=-1;
+    var layout = null, _isviewer, _iseditor, _kept_width=-1;
 
+    /**
+    * onclick handler that solves the Safari issue of not responding to onclick
+    *
+    * @param ele
+    */
+    function clickworkaround(ele)
+    {
+        if(navigator.userAgent.indexOf('Safari')>0){
+            //Safari so create a click event and dispatch it
+            var event = document.createEvent("HTMLEvents");
+            event.initEvent("click", true, true);
+            ele.dispatchEvent(event);
+        }else{
+            // direct dispatch
+            ele.click();
+        }
+    }
+    
+    
     /**
     * change visibility
     */
@@ -908,25 +884,29 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             //find in parent
             var restLayout = top.document.getElementById("resetPanels_Smarty"+(iseditor?"On":"Off"));
             if(restLayout){
-                Hul.clickworkaround(restLayout);
+                clickworkaround(restLayout);
             }
         }
 
         _isviewer=isviewer;
         _iseditor=iseditor;
 
-        Dom.get("toolbardiv").style.display = (iseditor) ?"none" :"block";
-        Dom.get("rep_container").style.top = (iseditor) ?"0px" :top_repcontainer;
-        Dom.get("editorcontainer").style.display = (iseditor) ?"block" :"none";
+        document.getElementById("toolbardiv").style.display = (iseditor) ?"none" :"block";
+        document.getElementById("rep_container").style.top = (iseditor) ?"0px" :top_repcontainer;
+        document.getElementById("editorcontainer").style.display = (iseditor) ?"block" :"none";
 
-        var dim = Hul.innerDimensions(this);
-
+        
         var units;
         if(isviewer && iseditor){
+            
+        //var body = $(document).find('body'); //this frame
+        //var dim = {h:body.innerHeight(), w:body.innerWidth()};
+            dh =  this.innerHeight;
+            
             units = [
-                { position: 'top', header: 'Editor', height: dim.h*0.7,
+                { position: 'top', header: 'Editor', height: dh*0.7,
                     resize: true, body: 'editorcontainer', gutter:'5px', useShim: true, collapse: true},
-                { position: 'center', body: 'viewercontainer', height: dim.h*0.3}
+                { position: 'center', body: 'viewercontainer', height: dh*0.3}
             ];
         }else if(isviewer){
             units = [
@@ -937,19 +917,24 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                 { position: 'center', body: 'editorcontainer'}
             ];
         }
+        
 
         //
-        //Dom.get("layout").style.top = (iseditor) ?"0" :"25";
+        //document.getElementById("layout").style.top = (iseditor) ?"0" :"25";
 
-        //var el = Dom.get('layout');
+        //var el = document.getElementById('layout');
         layout = null;
         layout = new YAHOO.widget.Layout({
-            units: units
+                units: units
         });
+        
         /*layout = new YAHOO.widget.Layout('layout', {
         units: units
         });*/
+
         layout.render();
+        layout.resize(true);
+
 
         //reload templates list
         if(_needListRefresh && !iseditor){
@@ -1058,7 +1043,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     function _fillTreeView (tv, varnames) {
 
         //create treeview
-        if(Hul.isnull(_varsTree)){
+        if(window.hWin.HEURIST4.util.isnull(_varsTree)){
             _varsTree = new YAHOO.widget.TreeView("varsTree");
             _varsTree.singleNodeHighlight = true;
             _varsTree.selectable = false;
@@ -1071,9 +1056,8 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         }
 
 
-        //top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
-        var idx_maxval = top.HEURIST.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
-        var idx_dtype  = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Type;
+        var idx_maxval = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
+        var idx_dtype  = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
 
         var first_node = null;
 
@@ -1092,7 +1076,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
             for(id in rectypeTree)
             {
-                if(! (Hul.isnull(id) || id=='rt_id' || id=='rt_name' || id=='termfield_name' ) ){
+                if(! (window.hWin.HEURIST4.util.isnull(id) || id=='rt_id' || id=='rt_name' || id=='termfield_name' ) ){
 
                     var label = null;
 
@@ -1123,11 +1107,11 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                     var vartype = term.this_id.substring(0,1);
                     var dtid = term.this_id.substring(1);
 
-                    if(vartype=='f' && Hul.isNumber(dtid) ){
-                        term.dtype = top.HEURIST.detailTypes.typedefs[dtid].commonFields[idx_dtype];
+                    if(vartype=='f' && window.hWin.HEURIST4.util.isNumber(dtid) ){
+                        term.dtype = window.hWin.HEURIST4.detailtypes.typedefs[dtid].commonFields[idx_dtype];
 
-                        if(top.HEURIST.rectypes.typedefs[rectype_id] && top.HEURIST.rectypes.typedefs[rectype_id].dtFields[dtid]){
-                            var maxval = top.HEURIST.rectypes.typedefs[rectype_id].dtFields[dtid][idx_maxval];
+                        if(window.hWin.HEURIST4.rectypes.typedefs[rectype_id] && window.hWin.HEURIST4.rectypes.typedefs[rectype_id].dtFields[dtid]){
+                            var maxval = window.hWin.HEURIST4.rectypes.typedefs[rectype_id].dtFields[dtid][idx_maxval];
                             is_single = (Number(maxval)===1);
                         }
                     }else if (term.this_id=="Relationship") {
@@ -1369,7 +1353,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
         }else{ // insert with 'wrap' fumction which provides URL and image handling
             var dtype = nodedata.dtype;
             res = '{wrap var=$'+varname;
-            if(Hul.isempty(dtype) || nodedata.this_id === 'recURL'){
+            if(window.hWin.HEURIST4.util.isempty(dtype) || nodedata.this_id === 'recURL'){
                 res = res + ' dt="url"';
             }else if(dtype === 'geo'){
                 res = res + '_originalvalue dt="'+dtype+'"';
@@ -1391,7 +1375,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     // TODO: This function no longer needed as root loop is simply one of the patterns inserted by next function
     //
     function _insertRootForEach(){
-        var textedit = Dom.get("edTemplateBody");
+        var textedit = document.getElementById("edTemplateBody");
         var _text = '{foreach $results as $r}\n{$r = $heurist->getRecord($r)}\n\n  {if ($r.recOrder==0)}\n    \n  '+
         '{elseif ($r.recOrder==count($results)-1)}\n    \n  {else}\n  \n{/if}\n{/foreach}\n';      //{* INSERT YOUR CODE HERE *}
 
@@ -1407,17 +1391,15 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     */
     function _insertPattern(pattern) {
 
-        if(hasH4()){
-            if(insertPopupID){
-                $(insertPopupID).dialog('close');
-                insertPopupID = null;
-            }
+        if(insertPopupID){
+            $(insertPopupID).dialog('close');
+            insertPopupID = null;
         }
 
         var _text = '';
-        var textedit = Dom.get("edTemplateBody");
+        var textedit = document.getElementById("edTemplateBody");
 
-        //pattern = Dom.get("selInsertPattern").value;
+        //pattern = document.getElementById("selInsertPattern").value;
 
         // Update these patterns in synch with pulldown in showReps.html
         switch(pattern) {
@@ -1519,7 +1501,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     //
     function _insertRectypeIf(parent, rectypeId, rectypeName){
 
-        var textedit = Dom.get("edTemplateBody");
+        var textedit = document.getElementById("edTemplateBody");
 
         //var _text = '{if ($'+parent+'.recTypeName=="'+rectypeName+'")}\n\t\n{/if}\n';
 
@@ -1539,9 +1521,9 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
     //
     function _showInsertPopup( varid, isloop_level, elt ){
 
-        top.HEURIST.insertSelectedVarAsLoop = _insertSelectedVarsAsLoop;
-        top.HEURIST.insertVar = isloop_level==2?_insertSelectedVars_GP_repeatable:_insertSelectedVars;
-        top.HEURIST.insertModifier = _insertModifier;
+        window.hSmarty.insertSelectedVarAsLoop = _insertSelectedVarsAsLoop;
+        window.hSmarty.insertVar = isloop_level==2?_insertSelectedVars_GP_repeatable:_insertSelectedVars;
+        window.hSmarty.insertModifier = _insertModifier;
 
         if(isloop_level>0){
             $(".ins_isloop").show();
@@ -1554,7 +1536,7 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
 
             var ele = document.getElementById("insert-popup");
 
-            var pos = top.HEURIST.getPosition(elt);
+            //var pos = top.HEURIST.getPosition(elt);
             var scroll = document.getElementById("treeContainer").scrollTop;
             insert_ID = varid;
 
@@ -1568,10 +1550,8 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             document.getElementById("insert-popup-header").innerHTML = 'Inserting: <b>'+title+'</b>';
 
 
-            if(hasH4()){
-
-                //show jquery dialog
-                insertPopupID = $(ele).dialog({
+            //show jquery dialog
+            insertPopupID = $(ele).dialog({
                     autoOpen: true,
                     height: 320,
                     width: 400,
@@ -1580,35 +1560,15 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
                     position: { my: "right top", at: "left bottom", of: $(elt) }
                 });
 
-            }else{
-                var topWindowDims = top.HEURIST.util.innerDimensions(window);
-                var xpos = topWindowDims.w - 400;
-
-                top.HEURIST.util.popupTinyElement(top, ele, {"no-titlebar": false, "title":title, x: xpos, //pos.x + elt.offsetWidth - 100
-                    "no-close": false, y: pos.y-scroll, width: 400, height: isloop_level>0?260:200 });
-
-            }
         }//__shownewpopup
 
 
-        if(hasH4()){
-
-            if(insertPopupID){
-                $(insertPopupID).dialog('close');
-                insertPopupID = null;
-            }
-            __shownewpopup();
-
-        }else{
-            if(top.HEURIST.util.popups.list.length>0){ //close previous
-                top.HEURIST.util.closePopupAll();
-                //top.HEURIST.util.closePopup(insertPopupID);
-                insertPopupID = null;
-                //setTimeout(__shownewpopup, 2000);
-            }else{
-                __shownewpopup();
-            }
+        if(insertPopupID){
+            $(insertPopupID).dialog('close');
+            insertPopupID = null;
         }
+        __shownewpopup();
+
     }
 
     //
@@ -1631,13 +1591,9 @@ $('<hr/><p>Output truncated at '+limit+' records (out of '
             inloop_level = (inloop===true)?1:0;
         }
 
-        if(hasH4()){
-            if(insertPopupID){
-                $(insertPopupID).dialog('close');
-                insertPopupID = null;
-            }
-        }else{
-            top.HEURIST.util.closePopupAll();
+        if(insertPopupID){
+            $(insertPopupID).dialog('close');
+            insertPopupID = null;
         }
 
         if(varid==null){
@@ -1734,13 +1690,13 @@ this_id       : "term"
     //
     function _insertSelectedVarsAsLoop( varid ){
 
-        var textedit = Dom.get("edTemplateBody"),
-        insertMode = Dom.get("selInsertMode").value,
+        var textedit = document.getElementById("edTemplateBody"),
+        insertMode = document.getElementById("selInsertMode").value,
         _text = "",
         _prefix = "";
 
         if(varid==null){
-            //top.HEURIST.util.closePopup(insertPopupID);
+            
             insertPopupID = null;
             varid = insert_ID;
         }
@@ -1778,7 +1734,7 @@ this_id       : "term"
 
 
     function _getVariableName(id){
-        if(!Hul.isempty(id)){
+        if(!window.hWin.HEURIST4.util.isempty(id)){
 
             if (id=="r"){
                 return "";
@@ -1802,11 +1758,11 @@ this_id       : "term"
 
 
     function _getVariableName_old(id){
-        if(!Hul.isempty(id)){
+        if(!window.hWin.HEURIST4.util.isempty(id)){
 
             if (id=="r"){
                 return "";
-            }else if( id=="Relationship" || !Hul.isNumber(id.substring(1)) ) {
+            }else if( id=="Relationship" || !window.hWin.HEURIST4.util.isNumber(id.substring(1)) ) {
                 return id;
             }else{
 
@@ -1814,9 +1770,9 @@ this_id       : "term"
                 id  = id.substring(1);
 
                 if(type=="r"){
-                    return ucwords(top.HEURIST.rectypes.names[id]);
+                    return ucwords(window.hWin.HEURIST4.rectypes.names[id]);
                 }else{
-                    return ucwords(top.HEURIST.detailTypes.names[id]);
+                    return ucwords(window.hWin.HEURIST4.detailtypes.names[id]);
                 }
             }
 
@@ -1939,7 +1895,7 @@ this_id       : "term"
 
 
     //
-    // utility function - move to HEURIST.utils
+    // utility function - move to utils ?
     // TODO: What is the difference btween this and the one above. What do the parameters do?
     //
     function insertAtCursor_fortextarea(myField, myValue, isApplyBreaks, cursorIndent) {
@@ -2040,7 +1996,7 @@ this_id       : "term"
         insertAtCursor(null, "|"+modname, null, null);
 
         /*
-        var textedit = Dom.get("edTemplateBody");
+        var textedit = document.getElementById("edTemplateBody");
 
         if (textedit.selectionStart || textedit.selectionStart == '0') {
 
@@ -2058,13 +2014,13 @@ this_id       : "term"
         }while (k>=0 && k<endPos);
 
         if(pos1<0){
-        alert('Place cursor inside variable entry: between {}');
+        window.hWin.HEURIST4.msg.showMsgErr('Place cursor inside variable entry: between {}');
         return;
         }
 
         var pos2 = textedit.value.indexOf("}", pos1);
         if(pos2<endPos){
-        alert('Place cursor inside variable entry: between {}');
+        window.hWin.HEURIST4.msg.showMsgErr('Place cursor inside variable entry: between {}');
         return;
         }
 
@@ -2076,61 +2032,113 @@ this_id       : "term"
         */
     }
 
-
-
-    //
-    function _getQuery(){
-        if(_sQueryMode=="all"){
-            return top.HEURIST.currentQuery_all_ ?top.HEURIST.currentQuery_all_ :top.HEURIST.currentQuery_all;
-        }else if(_sQueryMode=="selected"){
-            return top.HEURIST.currentQuery_sel;
-        }else {
-            return top.HEURIST.currentQuery_main;
-        }
-    }
-
-
-    //
-    function _onPublish(template_file){
-
-        var q = _getQueryAndTemplate(template_file, true);
-
-        if(q==null) return;
-
-        var url = top.HEURIST.baseURL + "export/publish/manageReports.html?"+q+"&db="+_db;
-
-        var dim = Hul.innerDimensions(top);
-
-        Hul.popupURL(top, url,
-            {   "close-on-blur": false,
-                "no-resize": false,
-                height: 480,
-                width: dim.w*0.9,
-                callback: null
-        });
-    }
-
-
-
     function _onResize(newwidth){
 
-        var newval = newwidth>605?'30px':'60px';
+        var newval = newwidth>605?'36px':'60px';
 
         if(top_repcontainer!=newval){
             top_repcontainer = newval;
             if(!_iseditor){
-                Dom.get("rep_container").style.top = top_repcontainer;
+                document.getElementById("rep_container").style.top = top_repcontainer;
             }
         }
     }
+    
+    //
+    // save current output to file
+    //            
+    function _saveOutput(){
+        if( _currentQuery )
+        {
+            var template_file = $('#selTemplates').val(); //current template
+            if(window.hWin.HEURIST4.util.isempty(template_file)) { return; }
+
+            var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
+            squery = squery.replace('"','%22');
+            
+            var surl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
+                squery + '&publish=2&debug=0&output=heurist_report.html&template='+template_file;
+                
+            $("#btnRepSave").hide();    
+            window.hWin.HEURIST4.util.downloadURL(surl, function(){
+                $("#btnRepSave").show();
+            });
+        }
+    }
+    
+    function _onReportPublish(){
+
+        var template_file = $('#selTemplates').val();
+        if(window.hWin.HEURIST4.util.isempty(template_file)) return;
+
+        if(!embed_dialog){
+            embed_dialog = $('#smarty_publish_dialg');
+            embed_dialog.load(window.hWin.HAPI4.baseURL+'viewers/smarty/repMenu.html', 
+            function(){
+                    _onReportPublish();
+            });
+            return;
+        }
+        
+        var mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty'); //not used
+        var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
+        
+        //init and fill ui
+        var surl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
+            squery.replace('"','%22') + '&publish=1&debug=0&template='+encodeURIComponent(template_file);
+
+        embed_dialog.find("#linkOpenInNewWindow").attr('href', surl);
+
+        embed_dialog.find("#code-textbox1").val(surl);
+        embed_dialog.find("#code-textbox2").val(
+        '<script type="text/javascript" src="'+surl+'&mode=js"><'+'/script>'+
+        '<noscript>'+
+        '<iframe width="80%" height="70%" frameborder="0" src="'+surl+'">'+
+        '</iframe>'+
+        '</noscript>');
+        
+        var $dlg_pce;
+        
+        embed_dialog.find("#btnSetupSchedule").button().click(function(event){
+            
+                        $dlg_pce.dialog('close');
+                        
+                        $(event.target).off('click');
+
+                        var q = 'hquery='+encodeURIComponent(squery)+'&template='+template_file;
+                        var sURL = window.hWin.HAPI4.baseURL + "export/publish/manageReports.html?"
+                                    + q + "&db="+window.hWin.HAPI4.database;
+
+                        var body = $(window.hWin.document).find('body');
+                        var dim = {h:body.innerHeight(), w:body.innerWidth()};
+
+                        window.hWin.HEURIST4.msg.showDialog(sURL, 
+                            {   "close-on-blur": false,
+                                "no-resize": false,
+                                height: 480,
+                                width: dim.w*0.9,
+                                callback: null
+                        });
+            
+        });
+
+        $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
+                element: embed_dialog[0],
+                height: 400,
+                width: 600,
+                title: window.hWin.HR('Publish report')
+        });        
+        
+        
+        
+    }
+
+    
+    
 
 
     //public members
     var that = {
-
-        getQuery: function(){
-            return _getQuery();
-        },
 
         /*setQuery: function(q_all, q_sel, q_main){
         if(q_all) squery_all = q_all;
@@ -2143,9 +2151,10 @@ this_id       : "term"
         },
 
 
-        // recordset is JSON array   {"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599....."}
-        assignRecordset: function(recordset){
+        // recordset is JSON array   {"resultCount":23,"recordCount":23,"recIDs":[8005,11272,8599.....]}
+        assignRecordsetAndQuery: function(recordset, query_request){
             _currentRecordset = recordset;
+            _currentQuery = query_request;
         },
 
         isNeedSelection: function(){
@@ -2156,10 +2165,11 @@ this_id       : "term"
             return _sQueryMode;
         },
 
+        //NOT USED
         setQueryMode: function(val){
             var isChanged = _sQueryMode != val;
             _sQueryMode = val;
-            Hul.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _sQueryMode);
+            //Hul.setDisplayPreference("showSelectedOnlyOnMapAndSmarty", _sQueryMode);
 
 
             if(document.getElementById('cbUseAllRecords1')){
@@ -2176,7 +2186,7 @@ this_id       : "term"
 
         generateTemplate:  function (name){
             if(_needSelection){
-                alert('Please select some records to allow generation of the template.');
+                window.hWin.HEURIST4.msg.showMsgErr('Please select some records to allow generation of the template.');
             }else{
                 _needListRefresh = true;
                 _generateTemplate(name, true);
@@ -2185,11 +2195,15 @@ this_id       : "term"
 
         showEditor:  function (template_file, needRefresh){
             if(_needSelection){
-                alert('Please select some records in the search results before editing the template.');
+                window.hWin.HEURIST4.msg.showMsgErr('Please select some records in the search results before editing the template.');
             }else{
                 _needListRefresh = (needRefresh===true);
                 _showEditor(template_file);
             }
+        },
+        
+        onReportPublish: function(){
+            _onReportPublish();
         },
 
         initEditorMode: function(template_file, template_body){
@@ -2204,12 +2218,12 @@ this_id       : "term"
             _doExecuteFromEditor();
         },
 
-        doExportTemplate: function(template_file){
-            _doExportTemplate(template_file, false);
+        doExportTemplate: function(){
+            _doExportTemplate();
         },
 
-        onPublish:function (template_file){
-            _onPublish(template_file);
+        saveOutput: function(){
+            _saveOutput();
         },
 
         //inserts selected variables inside the loop
@@ -2248,7 +2262,7 @@ this_id       : "term"
         },
 
         baseURL:  function (){
-            return top.HEURIST.baseURL;
+            return window.hWin.HAPI4.baseURL;
         },
 
         originalFileName:  function (val){

@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -18,40 +18,47 @@
 *   Corsstabs server side DB requests
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 */
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once (dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
+//require_once (dirname(__FILE__).'/../../hserver/dbaccess/compose_sql.php');
+//require_once (dirname(__FILE__).'/../../hserver/dbaccess/compose_sql_new.php');
 
-$mysqli = mysqli_connection_overwrite("hdb_".@$_REQUEST['db']);
-
-$params = $_REQUEST;
-
-if(@$_REQUEST['a'] == 'minmax' ){
-
-        $response = recordSearchMinMax($mysqli, $params);
-
-}else if(@$_REQUEST['a'] == 'pointers' ){
-
-        $response = recordSearchDistictPointers($mysqli, $params);
-
-}else if(@$_REQUEST['a'] == 'crosstab' ){
-
-        $response = getCrossTab($mysqli, $params);
-
+$system = new System();
+if( !$system->init(@$_REQUEST['db']) ){
+    $response = $system->getError();
 }else{
-        $response = array("status"=>"INVALID REQUEST");
+
+    $mysqli = $system->get_mysqli();
+    $params = $_REQUEST;
+
+    if(@$_REQUEST['a'] == 'minmax' ){
+
+            $response = recordSearchMinMax( $system, $params ); //db_recsearch
+
+    }else if(@$_REQUEST['a'] == 'pointers' ){
+
+            $response = recordSearchDistinctPointers( $params );
+
+    }else if(@$_REQUEST['a'] == 'crosstab' ){
+
+            $response = getCrossTab( $params );
+
+    }else{
+            $response = array("status"=>HEURIST_INVALID_REQUEST, 'No proper action defined');
+    }
 }
 
 header('Content-type: text/javascript');
 print json_encode($response);
 exit();
+
 
 /**
 * find min amd max value for given detail type
@@ -59,8 +66,12 @@ exit();
 * @param mixed $mysqli
 * @param mixed $params : dt - detail type id
 */
-function recordSearchMinMax($mysqli, $params){
-
+/*
+function recordSearchMinMax( $params){
+    global $system;
+    
+    $mysqli = $system->get_mysqli();
+    
     if(@$params['dt']){
 
 // no more rectype filter
@@ -74,25 +85,27 @@ function recordSearchMinMax($mysqli, $params){
 
         $res = $mysqli->query($query);
         if (!$res){
-            $response = array("status"=>"INVALID REQUEST", "message"=>$mysqli->error);
-            //$response = $system->addError(HEURIST_DB_ERROR, "Search query error on min/max for crosstabs", $mysqli->error);
+            $response = $system->addError(HEURIST_DB_ERROR, 'Search query error on min/max for crosstabs', $mysqli->error);
         }else{
             $row = $res->fetch_assoc();
             if($row){
-                $response = array("status"=>"OK", "data"=> $row);
+                $response = array("status"=>HEURIST_OK, "data"=> $row);
             }else{
-                $response = array("status"=>"NOT FOUND");
+                $response = array("status"=>HEURIST_NOT_FOUND);
             }
             $res->close();
         }
 
     }else{
-        $response = array("status"=>"INVALID REQUEST");
+        $response = array("status"=>HEURIST_INVALID_REQUEST);
     }
 
    return $response;
 }
-
+*/
+//
+//
+//
 function getWhereRecordIds($params){
 
     $recIDs = null;
@@ -116,29 +129,25 @@ function getWhereRecordIds($params){
 * @param mixed $mysqli
 * @param mixed $params:  dt
 */
-function recordSearchDistictPointers($mysqli, $params){
-
+function recordSearchDistinctPointers( $params ){
+    global $system, $mysqli;
+    
     if(@$params['dt']){
 
     $where = getWhereRecordIds($params);
         
     if($where==null){
-        if (function_exists('get_user_id')) {
-            $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
-                                          'ugl_UserID='.get_user_id().' and grp.ugr_Type != "User" order by ugl_GroupID');
-        }else{
-            $wg_ids = null;
-        }
-
-        $search_type = (@$params['w']=="bookmark" || @$params['w']=="b")?$params['w']:"all";
         
-        $where = parse_query($search_type, @$params['q'], null, $wg_ids, false);
+        $currentUser = $system->getCurrentUser();
         
-        //remove order by
+        $query = get_sql_query_clauses($mysqli, $params, $currentUser);
+        $where_clause = $query["where"];
+        
+        /*remove order by
         $pos = strrpos($where, " order by ");
         if($pos){
             $where = substr($where,0,$pos);
-        }
+        }*/
         $where = '(select rec_ID '.$where.' )';
     }else{
         $where = '('.$where.')';
@@ -151,8 +160,7 @@ function recordSearchDistictPointers($mysqli, $params){
         
         $res = $mysqli->query($query);
         if (!$res){
-            $response = array("status"=>"INVALID REQUEST", "message"=>$mysqli->error);
-            //$response = $system->addError(HEURIST_DB_ERROR, "Search query error on crosstabs distinct pointers", $mysqli->error);
+            $response = $system->addError(HEURIST_DB_ERROR, "Search query error on crosstabs distinct pointers", $mysqli->error);
         }else{
 
 
@@ -160,12 +168,12 @@ function recordSearchDistictPointers($mysqli, $params){
             while ($row = $res->fetch_assoc()) {
                 array_push($outp, $row);
             }
-            $response = array("status"=>"OK", "data"=> $outp);
+            $response = array("status"=>HEURIST_OK, "data"=> $outp);
             $res->close();
         }
 
     }else{
-        $response = array("status"=>"INVALID REQUEST");
+        $response = array("status"=>HEURIST_INVALID_REQUEST);
     }
 
    return $response;
@@ -183,7 +191,11 @@ function recordSearchDistictPointers($mysqli, $params){
 *               agg_field - field for avg or sum mode
 *               q - current Heurist query
 */
-function getCrossTab($mysqli, $params){
+function getCrossTab( $params){
+    
+    global $system;
+    
+    $mysqli = $system->get_mysqli();    
 
     $dt_page = @$params['dt_page'];
     if($dt_page){
@@ -207,53 +219,42 @@ function getCrossTab($mysqli, $params){
         $mode = "count(*)";
     }
 
-
-    
-    if (function_exists('get_user_id')) {
-        $wg_ids = mysql__select_array(USERS_DATABASE.'.sysUsrGrpLinks left join '.USERS_DATABASE.'.sysUGrps grp on grp.ugr_ID=ugl_GroupID', 'ugl_GroupID',
-                                      'ugl_UserID='.get_user_id().' and grp.ugr_Type != "User" order by ugl_GroupID');
-    }else{
-        $wg_ids = null;
+    $recIDs = getWhereRecordIds($params);
+    if($recIDs!=null){
+        $params['q'] = 'ids:'.$recIDs;
     }
+        
+    $currentUser = $system->getCurrentUser();
+        
+    $query = get_sql_query_clauses($mysqli, $params, $currentUser);
+    $where = $query["where"];
+    $from = $query["from"];
+        
 
-    $search_type = (@$params['w']=="bookmark" || @$params['w']=="b")?$params['w']:"all";
-
-    $where = getWhereRecordIds($params);
-    if($where==null){
-        $where = parse_query($search_type, @$params['q'], null, $wg_ids, false);
-    }else{    
-        $where = parse_query($search_type, 'ids:'.$where, null, $wg_ids, false);
-    }
-
-    //remove order by
+    /*remove order by
     $pos = strrpos($where, " order by ");
     if($pos){
         $where = substr($where,0,$pos);
-    }
-    //insert our where clauses
-    $pos = strpos($where, " where ");
-    $where_1 = substr($where,0,$pos);
-    $where_2 = substr($where,$pos+7);
-    
+    }*/ 
 
-$query = "select d2.dtl_Value as rws, ".$columnfld.$mode." as cnt ".$pagefld." ".$where_1;
+$query = "select d2.dtl_Value as rws, ".$columnfld.$mode." as cnt ".$pagefld." ".$from;
 
-$query = $query." left join recDetails d2 on d2.dtl_RecID=rec_ID and d2.dtl_DetailTypeID=".$params['dt_row'];
+$query = $query." left join recDetails d2 on d2.dtl_RecID=TOPBIBLIO.rec_ID and d2.dtl_DetailTypeID=".$params['dt_row'];
 if($dt_col){
-    $query = $query." left join recDetails d1 on d1.dtl_RecID=rec_ID and d1.dtl_DetailTypeID=".$dt_col;
+    $query = $query." left join recDetails d1 on d1.dtl_RecID=TOPBIBLIO.rec_ID and d1.dtl_DetailTypeID=".$dt_col;
 }
 if($dt_page){
-    $query = $query." left join recDetails d4 on d4.dtl_RecID=rec_ID and d4.dtl_DetailTypeID=".$dt_page;
+    $query = $query." left join recDetails d4 on d4.dtl_RecID=TOPBIBLIO.rec_ID and d4.dtl_DetailTypeID=".$dt_page;
 }
 if($issum){
     $query = $query
      ." ,recDetails d3 "
     //20130517 ." where rec_RectypeID=".$params['rt']
-    ." where d3.dtl_RecID=rec_ID and d3.dtl_Value is not null && d3.dtl_DetailTypeID=".$params['agg_field']
-    ." and ".$where_2;
+    ." where d3.dtl_RecID=TOPBIBLIO.rec_ID and d3.dtl_Value is not null && d3.dtl_DetailTypeID=".$params['agg_field']
+    ." and ".$where;
 
 }else{
-    $query = $query." where ".$where_2; //20130517 rec_RectypeID=".$params['rt'];
+    $query = $query." where ".$where; //20130517 rec_RectypeID=".$params['rt'];
 }
 //20130517 $query = $query." and ".$where_2;
 
@@ -290,18 +291,17 @@ if($dt_col){
     }
 }
 
-
+//error_log($query);
         $res = $mysqli->query($query);
         if (!$res){
-            $response = array("status"=>"INVALID REQUEST", "message"=>$mysqli->error);
-            //$response = $system->addError(HEURIST_DB_ERROR, "Search query error on crosstabs", $mysqli->error);
+            $response = $system->addError(HEURIST_DB_ERROR, "Search query error on crosstabs", $mysqli->error);
         }else{
 
             $outp = array();
             while ($row = $res->fetch_row()) {
                 array_push($outp, $row);
             }
-            $response = array("status"=>"OK", "data"=> $outp);
+            $response = array("status"=>HEURIST_OK, "data"=> $outp);
             $res->close();
         }
 

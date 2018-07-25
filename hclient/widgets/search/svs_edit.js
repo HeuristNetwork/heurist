@@ -4,7 +4,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -231,7 +231,7 @@ function hSvsEdit(args) {
                 window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs: [svsID],
                                     UGrpID: window.hWin.HAPI4.currentUser.ugr_ID},
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             
                             if(response.data && response.data[svsID]){
                                 window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for this saved search. '
@@ -410,7 +410,7 @@ function hSvsEdit(args) {
                         //
                         window.hWin.HAPI4.SystemMgr.ssearch_save(request,
                             function(response){
-                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
 
                                     var svsID = response.data;
 

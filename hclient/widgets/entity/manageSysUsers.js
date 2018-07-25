@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -106,7 +106,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             if(usr_ID>0 && title){
                 var that = this;
                 function __set_dlg_title(res){
-                    if(res && res.status==window.hWin.HAPI4.ResponseStatus.OK){
+                    if(res && res.status==window.hWin.ResponseStatus.OK){
                         that._as_dialog.dialog('option','title', title+res.data[usr_ID]);    
                     }
                 } 
@@ -177,7 +177,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                         
                                         window.hWin.HAPI4.EntityMgr.doRequest(request, 
                                             function(response){
-                                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                                if(response.status == window.hWin.ResponseStatus.OK){
                                                     //reload
                                                     that.searchForm.searchSysUsers('startSearch');
                                                     
@@ -239,7 +239,7 @@ console.log('ON_CRED???');
 
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){             
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 //reload
                                 //that.searchForm.searchSysUsers('startSearch');
                                 if(newRole=='remove'){
@@ -290,7 +290,7 @@ console.log('ON_CRED???');
                             };
                             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                                 function(response){
-                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
                                         var resp = new hRecordSet( response.data );
                                         var rec_updated = resp.getFirstRecord();
                                         var cnt = resp.fld(rec_updated, 'ugr_Member');
@@ -339,7 +339,7 @@ console.log('ON_CRED???');
                     
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 var recset = new hRecordSet(response.data);
                                 if(recset.length()>0){
                                     that.updateRecordList(null, {recordset:recset});

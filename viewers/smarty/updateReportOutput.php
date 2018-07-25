@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -36,23 +36,24 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+require_once(dirname(__FILE__).'/../../viewers/smarty/showReps.php');
 
-
- require_once(dirname(__FILE__).'/../../viewers/smarty/showReps.php');
-
+//system is defined in showReps
+if(!$system->is_inited()){
+    echo 'System is not inited';
+    exit();
+}
 
 $rps_ID = (array_key_exists('id',$_REQUEST)) ? $_REQUEST['id'] :0;
 
-mysql_connection_select(DATABASE);
-
-//mode of publication  3- to html or js wrapper
+//mode of publication  3 - redirect to existing  html or js wrapper
 if(array_key_exists('publish',$_REQUEST)){
 	$publish = intval($_REQUEST['publish']);
 }else{
@@ -60,23 +61,26 @@ if(array_key_exists('publish',$_REQUEST)){
 }
 $format = (array_key_exists('mode',$_REQUEST) && $_REQUEST['mode']=="js") ?"js":"html";
 
+$mysqli = $system->get_mysqli();
+
 if($rps_ID==0){
 	//regenerate all reports
-	$res = mysql_query('select * from usrReportSchedule');
-	while ($row = mysql_fetch_assoc($res)) {
-		doReport($row);
-	}
+	$res = $mysqli->query('select * from usrReportSchedule');
+    if($res){
+        while ($row = $res->fetch_assoc()) {
+            doReport($row);
+        }
+        $res->close();        
+    }
 
 }else if(is_numeric($rps_ID)){
 	//load one
-	$res = mysql_query("select * from usrReportSchedule where rps_ID=".$rps_ID);
-	if(mysql_error()){
-	}else{
-		$row = mysql_fetch_assoc($res);
-		if($row){
+    
+	$row = mysql__select_row_assoc($mysqli, "select * from usrReportSchedule where rps_ID=".$rps_ID);
+    if($row){
 			doReport($row);
-		}
 	}
+
 }else{
     echo "Wrong report ID parameter: ".$rps_ID;
 }
@@ -88,18 +92,16 @@ exit();
 //
 function doReport($row){
 
-	global $publish, $format;
+	global $system, $publish, $format;
 
 	if($row['rps_FilePath']!=null){
 		$dir = $row['rps_FilePath'];
 		if(substr($dir,-1)!="/") $dir = $dir."/";
 	}else{
 		$dir = HEURIST_FILESTORE_DIR."generated-reports/";
-		if(!file_exists($dir)){
-			if (!mkdir($dir, 0777, true)) {
-    				die('Failed to create folder for generated reports');
-			}
-		}
+        if(!folderCreate($dir, true)){
+            die('Failed to create folder for generated reports');
+        }   
 	}
 
 	$filename = ($row['rps_FileName']!=null)?$row['rps_FileName']:$row['rps_Template'];
@@ -117,7 +119,7 @@ function doReport($row){
 			if(file_exists($filename2)){
 				$outputfile = $filename2;
 				$ext = $format;
-			}else if ($format=="js"){
+			}else{ // if ($format=="js")
 				$outputfile = $outputfile.".html";
 				$ext = "html";
 			}
@@ -133,8 +135,10 @@ function doReport($row){
                     $publish = 2;
                 }
             }
-            if($publish == 3){
+            if($publish == 3){ //request for current files
             
+                header("Content-type: text/html;charset=UTF-8");
+                
 			    $content = file_get_contents($outputfile);
 			    if($format=="js" && $ext != $format){
 				    $content = str_replace("\n","",$content);
@@ -147,7 +151,7 @@ function doReport($row){
 			    return;
             }
 		}
-		$publish = 2;
+		$publish = 1; //file does not exists - regenerate
 	}//publish==3
 
 	$hquery = $row['rps_HQuery'];
@@ -170,6 +174,6 @@ function doReport($row){
 	$params["publish"] 	= $publish;
 	$params["rps_id"] 	= $row['rps_ID'];
 
-	executeSmartyTemplate($params); //in showReps
+	executeSmartyTemplate($system, $params); //in showReps
 }
 ?>

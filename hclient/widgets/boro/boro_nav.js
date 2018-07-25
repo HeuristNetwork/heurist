@@ -9,7 +9,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -378,7 +378,7 @@ $.widget( "heurist.boro_nav", {
         //find faceted searches for search menu
         window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.search_UGrpID},
             function(response){
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     var smenu = '';
                     for (var svsID in response.data)
                     {
@@ -660,7 +660,7 @@ $.widget( "heurist.boro_nav", {
 
             //that.loadanimation(false);
 
-            if(response.status != window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status != window.hWin.ResponseStatus.OK){
                 $('#main_pane').find('.clearfix').hide(); //hide all
                 window.hWin.HEURIST4.msg.showMsgErr(response);
                 return;
@@ -983,7 +983,7 @@ $.widget( "heurist.boro_nav", {
         //perform search
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
 
-            if(response.status != window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status != window.hWin.ResponseStatus.OK){
                 $('#main_pane').find('.clearfix').hide(); //hide all
                 window.hWin.HEURIST4.msg.showMsgErr(response);
                 return;
@@ -1520,7 +1520,7 @@ $.widget( "heurist.boro_nav", {
 
             //that.loadanimation(false);
 
-            if(response.status != window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status != window.hWin.ResponseStatus.OK){
                 window.hWin.HEURIST4.msg.showMsgErr(response);
                 return;
             }
@@ -2168,7 +2168,7 @@ $.widget( "heurist.boro_nav", {
                     
             window.hWin.HAPI4.RecordMgr.save(request, 
                     function(response){
-                        var  success = (response.status == window.hWin.HAPI4.ResponseStatus.OK);
+                        var  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
                            //window.hWin.HEURIST4.msg.showMsgDlg("Thank you for signing up with our newsletter");
                            $('.newsletter-form').hide();

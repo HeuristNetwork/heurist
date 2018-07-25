@@ -4,7 +4,7 @@
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -907,7 +907,7 @@ $.widget( "heurist.search_faceted", {
                 
                 if(field['type']=='enum' && field['groupby']=='firstlevel' && 
                                 !window.hWin.HEURIST4.util.isnull(field['selectedvalue'])){
-                        this._redrawFacets({status:window.hWin.HAPI4.ResponseStatus.OK,  facet_index:i}, false );
+                        this._redrawFacets({status:window.hWin.ResponseStatus.OK,  facet_index:i}, false );
                         return;
                 }
                 
@@ -1027,7 +1027,7 @@ $.widget( "heurist.search_faceted", {
                 if( (!window.hWin.HEURIST4.util.isnull(field['selectedvalue'])) 
                     && (field['type']=="float" || field['type']=="integer" || field['type']=="date" || field['type']=="year")){  //run only once to get min/max values
                 
-                       var response = {status:window.hWin.HAPI4.ResponseStatus.OK, facet_index:i, data:[field['selectedvalue']]};
+                       var response = {status:window.hWin.ResponseStatus.OK, facet_index:i, data:[field['selectedvalue']]};
                        that._redrawFacets(response)
                        break;
                 }
@@ -1119,7 +1119,7 @@ $.widget( "heurist.search_faceted", {
                     this.options.params.viewport = 50; //default viewport
                 }
         
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
 
                     
 //DEBUG if(response.dbg_query) console.log(response.dbg_query);
