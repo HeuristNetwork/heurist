@@ -1135,7 +1135,7 @@ $.widget( "heurist.editing_input", {
                             function __openrecedit() { 
                                     
                                   if(new_rec_param==null){
-                                      new_rec_param = {rt:selector_rectype.val()};
+                                      new_rec_param = {RecTypeID:selector_rectype.val()};
                                   }
                                   
                                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 

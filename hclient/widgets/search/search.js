@@ -403,8 +403,10 @@ $.widget( "heurist.search", {
             .click( function(){ 
                 window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                     if(that.select_rectype_addrec.val()>0){
+                        
+                        
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                            {new_record_params:{rt:that.select_rectype_addrec.val()}});
+                            {new_record_params:{RecTypeID:that.select_rectype_addrec.val()}});
                     }else{
                         that.btn_select_rt.click();
                     }
@@ -642,7 +644,7 @@ $.widget( "heurist.search", {
                    
                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
                    
-                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{rt:selval}});
+                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{RecTypeID:selval}});
                    return false;
                 }
             });
