@@ -165,6 +165,26 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         return true;
     },
     
+    _onActionListener:function(event, action){    
+            var res = this._super(event, action)
+            if(!res){
+                
+                 var recID = 0;
+                 if(action && action.action){
+                     recID =  action.recID;
+                     action = action.action;
+                 }
+                
+                if(action=='edit_ext' && recID>0){
+                    var url = window.hWin.HAPI4.baseURL + "?fmt=edit&db="+window.hWin.HAPI4.database+"&recID="+recID;
+                    window.open(url, "_new");
+                    res = true;
+                }
+                
+            }
+            return res;
+    },
+    
     _initDialog: function(){
         
             if(this.options.edit_mode == 'editonly'){
