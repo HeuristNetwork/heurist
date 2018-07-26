@@ -161,10 +161,12 @@ $.widget( "heurist.mainMenu", {
 
         if(__include('Database')) this._initMenu('Database');            
         if(__include('Structure')) this._initMenu('Structure');
-        if(__include('Import')) this._initMenu('Import');
         if(__include('Verify')) this._initMenu('Verify');
-        if(__include('Archive')) this._initMenu('Archive');
+        if(__include('Import')) this._initMenu('Import');
+        if(__include('Management')) this._initMenu('Management');
         if(__include('Admin')) this._initMenu('Admin');
+            
+        if(__include('FAIMS')) this._initMenu('FAIMS');
         if(__include('Help')) this._initMenu('Help');
         
         this.divMainMenuItems.menu();
@@ -628,7 +630,7 @@ $.widget( "heurist.mainMenu", {
         if(!window.hWin.HEURIST4.util.isempty(href) && href!='#'){
     
             if(!(href.indexOf('http://')==0 || href.indexOf('https://')==0)){
-                href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
+                href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?')>=0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
             }
             
             if(!window.hWin.HEURIST4.util.isempty(target)){

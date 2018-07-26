@@ -20,80 +20,81 @@
 */
 -->
 
-                    <li>
-                        <a href="admin/verification/checkRectypeTitleMask.php?check=1" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Check correctness of each Record Type\'s title mask with respect to field definitions">
-                            Verify title masks
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin/verification/checkXHTML.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Check the wysiwyg text fields in records/blog entries for structural errors">
-                            Verify wysiwyg texts
-                        </a>
-                    </li>
-                    <li>
-                        <a href="verification/checkInvalidChars.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Check the text fields in records entries for invalid characters">
-                            Fix invalid characters
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin/verification/listUploadedFilesErrors.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Find errors in database uploaded files">
-                            Verify uploaded files 
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin/verification/verifyConceptCodes.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Find duplications of concept codes in all databases">
-                            Verify concept codes
-                        </a>
-                    </li>
-                    <li>
-                        <a href="<?=HEURIST_BASE_URL?>?w=bookmark&amp;q=-tag&amp;label=Bookmarks without tags&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
-                            title="Show bookmarked records which you have not tagged">
-                             Bookmarks w/o tags
-                        </a>
-                    </li>
-                    <li>
-                        <a href="<?=HEURIST_BASE_URL?>?q=_BROKEN_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
-                            title="Show records with URLs which point to a non-existant or otherwise faulty address - this only works if nightly verification is turned ON in Database > Properties">
-                             Broken URLs
-                        </a>
-                    </li>
-                    <li>
-                        <a href="<?=HEURIST_BASE_URL?>?q=_NOTLINKED_&amp;w=all&amp;db=<?=HEURIST_DBNAME?>" target="_blank"
-                            title="Show records with no outgoing or incoming pointers (includes records without any relationships)">
-                             Records without links
-                        </a>
-                    </li>
-                    
-                    <li>
-                        <a href="admin/verification/verifyInstallation.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Verifies that all required JS libraries, other components and directories are in expected locations">
-                            Verify installation
-                        </a>
-                    </li>
+<li id="menu-database-refresh">
+    <a href="#" id="menu-structure-refresh"
+        data-level="0" data-logaction="stRefresh"
+        title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
+        Refresh memory</a>
+</li>
 
-                    <li>
-                        <a href="admin/verification/fileLinkingError.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Find uploaded file records which point at non-existent files for all Heurist databases on this server">
-                            File linking errors
-                        </a>
-                    </li>
+<li>
+    <a href="admin/verification/listDatabaseErrorsInit.php"
+        data-level="1" data-logaction="stVerify" data-size="medium"
+        data-header="Verify &gt; Errors in database structure"
+        title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
+        Verify integrity</a>
+</li>
+
+<li>-</li>
+
+<li>
+    <a href="admin/verification/listDuplicateRecords.php?fuzziness=10"
+       data-level="1" data-size="medium"
+       data-header="Verify &gt; Potential duplicate records"
+       title="Fuzzy search to identify records which might contain duplicate data">
+       Potential duplicate records
+    </a>
+</li>
+<li>
+    <a href="?w=bookmark&q=-tag&label=Bookmarks without tags" target="_blank"
+        title="Show bookmarked records which you have not tagged">
+         Bookmarks w/o tags
+    </a>
+</li>
+<li>
+    <a href="?q=_BROKEN_&w=all" target="_blank"
+       title="Show records with URLs which point to a non-existant or otherwise faulty address - this only works if nightly verification is turned ON in Database > Properties">
+       Records with broken URLs
+    </a>
+</li>
+<li>
+    <a href="?q=_NOTLINKED_&w=all" target="_blank"
+        title="Show records with no outgoing or incoming pointers (includes records without any relationships)">
+        Records without links
+    </a>
+</li>
                     
-                    <li class="admin-only"><a href="admin/verification/listDatabaseErrorsInit.php?type=files" name="auto-popup" 
-                            data-logaction="uplVerifyfile" id="menulink-verify-files"
-                        class="large h3link embed"
-                        onClick="{return false;}" target="_blank"
-                        title="">
-                        Verify files</a>
-                    </li>
+<li>-</li>
+
+<li>
+    <a href="admin/verification/checkXHTML.php"
+        data-level="1"
+        data-header="Verify &gt; Verify wysiwyg texts"
+        title="Check the wysiwyg text fields in records/blog entries for structural errors">
+        Verify wysiwyg texts                           
+    </a>
+</li>
+<li>
+    <a href="admin/verification/checkInvalidChars.php"
+        data-level="1" 
+        data-header="Verify &gt; Fix invalid characters"
+        title="Check the text fields in records entries for invalid characters">
+        Fix invalid characters
+    </a>
+</li>
+
+<li class="admin-only">
+    <a href="admin/verification/listDatabaseErrorsInit.php?type=files"
+        data-level="1" data-size="medium"
+        data-header="Verify &gt; Files">
+        Verify files</a>
+</li>
+
+<li>
+    <a href="admin/verification/checkRectypeTitleMask.php?check=1"
+        data-level="1" data-size="medium"
+        data-header="Verify &gt; Title masks"
+        title="Check correctness of each Record Type\'s title mask with respect to field definitions">
+        Verify title masks
+    </a>
+</li>

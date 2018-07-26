@@ -20,38 +20,45 @@
 */
 -->
 
-                    <li>
-                        <a href="admin/verification/listDuplicateRecords.php?fuzziness=10" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Fuzzy search to identify records which might contain duplicate data">
-                            Find duplicate records
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin/verification/rebuildLuceneIndices.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Rebuilds the Lucene indices used by Elastic Search, for all record types - no result if Elastic server not specified in configuration">
-                            Rebuild Lucene index
-                        </a>
-                    </li>
-                    <li>
-                        <a href="hserver/utilities/recreateRecLinks.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Rebuild the cache of pointers and relationship records, which is used to speed search/filter actions">
-                            Rebuild relationships cache
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin/verification/removeDatabaseLocks.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">
-                            Clear database locks
-                        </a>
-                    </li>
-                    <li>
-                        <a href="admin/describe/dbStatistics.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}"
-                            title="Size and usage statistics for all Heurist databases on this server">
-                           Database usage statistics (all dbs - slow) 
-                        </a>
-                    </li>
+<li>
+    <a href="admin/describe/dbStatistics.php"
+        data-level="2" data-size="medium" data-header="Administration &gt; Server usage statistics"
+        title="Size and usage statistics for all Heurist databases on this server">
+       Server usage statistics
+    </a>
+</li>
+<!--
+<li>
+    <a href="admin/verification/listUploadedFilesErrors.php"
+        data-level="2" data-size="medium" data-header="Administration &gt; Server file errors"
+        title="Find errors in database uploaded files">
+        Server file errors
+    </a>
+</li>
+
+<li>
+    <a href="admin/verification/fileLinkingError.php"
+        data-level="2" data-size="medium" data-header="Administration &gt; File linking errors"        
+        title="Find uploaded file records which point at non-existent files for all Heurist databases on this server">
+        File linking errors
+    </a>
+</li>
+-->
+
+<li>
+    <a href="admin/verification/verifyConceptCodes.php"
+        data-level="1" data-size="medium" data-header="Administration &gt; Verify concept codes"
+        title="Find duplications of concept codes in all databases">
+        Verify concept codes
+    </a>
+</li>
+                    
+<li>
+    <a href="admin/verification/verifyInstallation.php" 
+        data-level="1" data-size="medium" data-header="Administration &gt; Verify installation"
+        title="Verifies that all required JS libraries, other components and directories are in expected locations">
+        Verify installation
+    </a>
+</li>
+
+ 

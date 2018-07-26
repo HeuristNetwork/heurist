@@ -1006,7 +1006,7 @@ function hLayout(args) {
 
         if(layout==null){
             window.hWin.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
-            if(layoutid!='H4Default') layout = layoutGetById('H4Default');
+            if(layoutid!='H5Default') layout = layoutGetById('H5Default');
             if(layout==null){
                 return;
             }

@@ -36,11 +36,45 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
         New</a>
 </li>
 
+<li><a href="admin/setup/dboperations/cloneDatabase.php"  name="auto-popup" class="h3link"
+        data-level="1"
+        title="Clones an identical database from the currrent database with all data, users, attached files, templates etc.">
+        Clone</a>
+</li>
+
+<li>-</li>
+
 <li><a href="#" id="menu-database-properties"
         data-level="1" data-logaction="dbProperties"
         title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
         Properties</a>
 </li>
+
+<li data-level="2">-</li>
+
+<li><a href="admin/setup/dboperations/deleteCurrentDB.php"
+        data-level="2" 
+        title="Delete the current database completely - cannot be undone, although data is copied to a backup which could be reloaded by a system administrator">
+        Delete</a>
+</li>
+
+<li><a href="admin/setup/dboperations/clearCurrentDB.php"
+        data-level="2" 
+        title="Clear all data (records, values, attached files) from the current database. Database structure - record types, fields, terms, constraints - is unaffected">
+        Delete content</a>
+</li>
+
+<li>-</li>
+
+<li class="admin-only"> <!-- admin/rollback/rollbackRecords.php -->
+    <a href="#"         
+        data-level="1"
+        title="Selectively roll back the data in the database to a specific date and time">
+        Rollback</a>
+</li>
+
+
+<!--
 
 <li>
     <a href="admin/setup/dbproperties/registerDB.php"
@@ -49,33 +83,4 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
         Register</a>
 </li>
 
-<li data-level="1">-</li>
-
-<li><a href="admin/setup/dboperations/cloneDatabase.php"  name="auto-popup" class="h3link"
-        data-level="1"
-        title="Clones an identical database from the currrent database with all data, users, attached files, templates etc.">
-        Clone database</a>
-</li>
-
-<li><a href="admin/setup/dboperations/deleteCurrentDB.php"
-        data-level="2" 
-        title="Delete the current database completely - cannot be undone, although data is copied to a backup which could be reloaded by a system administrator">
-        Delete entire database</a>
-</li>
-
-<li><a href="admin/setup/dboperations/clearCurrentDB.php"
-        data-level="2" 
-        title="Clear all data (records, values, attached files) from the current database. Database structure - record types, fields, terms, constraints - is unaffected">
-        Delete all records</a>
-</li>
-<!--
-<li class="admin-only">
-    <a href="admin/rollback/rollbackRecords.php"
-        data-level="1"
-        title="Selectively roll back the data in the database to a specific date and time">
-        Rollback</a>
-</li>
 -->
-
-
-

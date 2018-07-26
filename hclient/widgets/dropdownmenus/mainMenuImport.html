@@ -24,7 +24,15 @@
 Since Jan 2016 Vsn 3 code this is blank, as this code is at the same level as Vsn 4 code
 See mainMenu.js for sizes of popups defined by portrait, large, very large and so forth -->
 
-<li>IMPORT</li>
+
+    <li>
+        <a href="hclient/framecontent/recordAction.php?action=add_record"
+            data-logaction="addRec" data-header="Add new record"
+            title="Add new record of specified record type">
+            Add record</a>
+    </li>
+
+<li>-</li>
 
     <li>
         <a href="import/delimited/importRecordsCSV.php"
@@ -32,75 +40,56 @@ See mainMenu.js for sizes of popups defined by portrait, large, very large and s
             data-header="Import &gt; Records from CSV/TSV"
             data-help="importRecordsCSV"
             title="Import data from delimited text file. Supports matching, record creation, record update.">
-            Delimited text (csv, tsv)</a>
+            Delimited text / CSV</a>
     </li>
-
     <li>
         <a href="import/biblio/syncZotero.php"
             data-logaction="syncZotero" data-size="portrait"
             data-header="Import &gt; Synchronise with a Zotero web library"
             title="Synchronise with a Zotero web library - new records are added to Heurist, existing records updated">
-            Zotero synchronisation</a>
+            Zotero bibliography</a>
     </li>
-    
-    <!-- import/email/emailProcessingSetup.php -->
-    <li>
-        <a href="#" name="auto-popup"  
-            data-logaction="impEmails"
-            style="text-decoration:line-through"
-            title="Harvest email from a designated IMAP email server (set in database administrtion > Databsae > Advanced Properties)">
-            Harvest emails</a>
-    </li>
-
-    <li>
-        <a href="import/hyperlinks/importHyperlinks.php"
-            data-logaction="impHyperlinks" data-size="large"
-            data-header="Import &gt; Records from bookmakrs file ot web page hyperlinks"
-            title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
-            Import hyperlinks</a>
-    </li>
-
     <li>
         <a href="import/delimited/importRecordsCSV.php?format=kml"
             data-logaction="impKML" data-size="large"
             data-header="Import &gt; Records from KML"
             data-help="importRecordsCSV"
             title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
-            Import KML</a>
+            KML</a>
     </li>
-    
-     <!-- applications/faims/syncFAIMS.php -->
-    <li>
-        <a href="#"
-            data-logaction="syncFAIMS"
-            style="text-decoration:line-through"
-            title="Import structure and data into the current Heurist database from a FAIMS module tarball or direct from FAIMS server database">
-            FAIMS tablet data</a>
-    </li>
+
+<li>-</li>
     
     <li>
-        <!-- import/direct/getRecordsFromDB.php -->
-        <a href="#"
-            style="text-decoration:line-through"
-            title="Import records directly from one database to another, mapping record types, fields types and terms">
-            Inter-database transfer
-        </a>
-    </li>
-
-    <li>-</li>
-
-<li>FILES</li>
-
-    <li class="admin-only">
         <a href="import/utilities/manageFilesUpload.php"
-           data-size="medium"
+           data-level="1" data-size="medium"
+           data-header="Import &gt; Upload media files"
            title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
-           Multi-file upload</a>
+           Upload media files</a>
+    </li>
+    <li>
+        <a href="import/fieldhelper/synchroniseWithFieldHelper.php"
+           data-level="1" data-size="medium"
+           data-header="Import &gt; Index media files"
+           title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
+           Index media files</a>
     </li>
     
-    <li class="admin-only">
-        <a href="import/fieldhelper/synchroniseWithFieldHelper.php"
-           data-size="large"
-           title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
-           Index files</a>
+<li>-</li>
+    
+    <!-- import/email/emailProcessingSetup.php -->
+    <li>
+        <a href="#"
+            data-level="1" data-size="medium" data-logaction="impEmails"
+            data-header="Import &gt; Harvest emails"
+            style="text-decoration:line-through"
+            title="Harvest email from a designated IMAP email server (set in Database > Properties)">
+            Harvest emails</a>
+    </li>
+    <li>
+        <a href="import/hyperlinks/importHyperlinks.php"
+            data-logaction="impHyperlinks" data-size="medium"
+            data-header="Import &gt; Records from bookmakrs file ot web page hyperlinks"
+            title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
+            Harvest hyperlinks</a>
     </li>

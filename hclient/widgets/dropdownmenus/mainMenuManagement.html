@@ -1,0 +1,106 @@
+<!--
+/**
+* mainMenuManagement.html: top-level menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2018 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<li class="admin-only">
+    <!-- export/dbbackup/exportMyDataPopup.php?inframe=1 -->
+    <a href="#" name="auto-popup"
+        data-logaction="adminArchive"
+        style="text-decoration:line-through"
+        title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
+        Create data archive package</a>
+</li>
+
+<li>-</li>
+
+<li>
+    <a href="admin/verification/removeDatabaseLocks.php"
+        data-level="1" data-header="Management &gt; Remove database locks"
+        title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">
+        Clear database locks
+    </a>
+</li>
+<li>
+    <a href="admin/verification/recalcTitlesAllRecords.php"
+        data-level="1" data-logaction="stRebuildTitles" data-header="Management &gt; Rebuild record titles"
+        title="Rebuilds the constructed record titles listed in search results, for all records">
+        Rebuild record titles</a>
+</li>                    
+<li>
+    <a href="admin/verification/rebuildLuceneIndices.php"
+        data-level="1" data-header="Management &gt; Rebuild Lucene index"
+        title="Rebuilds the Lucene indices used by Elastic Search, for all record types - no result if Elastic server not specified in configuration">
+        Rebuild Lucene index
+    </a>
+</li>
+<li>
+    <a href="hserver/utilities/recreateRecLinks.php"
+        data-level="1" data-header="Management &gt; Rebuild relationships cache"
+        title="Rebuild the cache of pointers and relationship records, which is used to speed search/filter actions">
+        Rebuild relationships cache
+    </a>
+</li>
+                   
+<li>-</li>
+
+<li>
+    <!-- import/direct/getRecordsFromDB.php -->
+    <a href="#"
+        style="text-decoration:line-through"
+        title="Import records directly from one database to another, mapping record types, fields types and terms">
+        Inter-database transfer
+    </a>
+</li>
+
+<li>-</li>
+
+            <li>
+                <a href="admin/describe/listRectypeRelations.php?action=simple" data-size="medium"
+                    title="Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts">
+                    Simple fields schema</a>
+            </li>
+            <li>
+                <a href="admin/describe/listRectypeRelations.php?action=relations" data-size="medium"
+                    title="Display/print a listing of the record types and their pointer and relationship fields, including usage counts">
+                    Relationships schema</a>
+            </li>
+            <li>
+                <a href="admin/describe/listRectypeRelations.php?action=all" data-size="medium"
+                    title="Display/print a listing of the record types and all fields, including usage counts">
+                    Combined schema</a>
+            </li>
+
+            <li>
+                <a  href="admin/describe/getDBStructureAsXML.php"
+                    target="_blank"
+                    title="Lists the record type and field definitions in XML format (HML - Heurist Markup Language)">
+                   Structure (XML)
+                   </a>
+            </li>
+
+            <li>
+                <a href="admin/describe/getDBStructureAsSQL.php?pretty=1"
+                    target="_blank"
+                    title="Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)">
+                    Structure (SQL)</a>
+            </li>
+
+

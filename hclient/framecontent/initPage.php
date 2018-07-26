@@ -303,10 +303,11 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         var layoutid = '<?=@$_REQUEST['ll']?>';
         if(window.hWin.HEURIST4.util.isempty(layoutid)){
-            layoutid = window.hWin.HAPI4.get_prefs('layout_id');
+            layoutid = "H5Default";
+            /*layoutid = window.hWin.HAPI4.get_prefs('layout_id');
             if(window.hWin.HEURIST4.util.isempty(layoutid)){
-                layoutid = "H4Default";
-            }
+                layoutid = "H5Default";
+            }*/
         }
         if(!window.hWin.HAPI4.sysinfo['layout']){
             window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
