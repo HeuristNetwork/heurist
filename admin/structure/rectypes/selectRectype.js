@@ -46,7 +46,7 @@ var Dom = YAHOO.util.Dom,
 * save
 * cancel
 *
-* @author Artem Osmakov <osmakov@gmail.com>
+* @author Artem Osmakov <artem.osmakov@sydney.edu.au>
 * @version 2011.0427
 */
 function SelectRecordType(_isFilterMode, _isWindowMode) {

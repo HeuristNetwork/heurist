@@ -33,7 +33,7 @@ var detailTypeEditor;
 * save - sends data to server and closes the pop-up window in case of success
 * cancel - checks if changes were made, shows warning and closes the window
 *
-* @author Artem Osmakov <osmakov@gmail.com>
+* @author Artem Osmakov <artem.osmakov@sydney.edu.au>
 * @version 2011.0427
 */
 

@@ -48,7 +48,7 @@ function isnull(obj){
 * apply -
 * cancel -
 *
-* @author Artem Osmakov <osmakov@gmail.com>
+* @author Artem Osmakov <artem.osmakov@sydney.edu.au>
 * @version 2011.0427
 */
 function SelectDetailType() {

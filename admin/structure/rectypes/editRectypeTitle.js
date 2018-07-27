@@ -38,7 +38,7 @@ Hul = window.hWin.HEURIST4.util;
 /**
  * EditRectypeTitle - class for pop-up window to define recordtype title mask
  *
- * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Artem Osmakov <artem.osmakov@sydney.edu.au>
  * @version 2011.0919
  */
 function EditRectypeTitle() {

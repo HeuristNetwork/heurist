@@ -438,8 +438,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
             $email_title = 'New database: '.$targetdbname_full.' by '.$fullName.' ['.$user_record['ugr_eMail'].'] '
                 .'Cloned from  '.($isCloneTemplate?'template ':'database ').$source_database_full;
 
-            //$rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
-            $rv = sendEmail('osmakov@gmail.com', $email_title, $email_text, null);
+            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
     }
     
     return true;
