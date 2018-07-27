@@ -6,6 +6,7 @@
 * @see  hclient/framecontent/record for widgets
 * @see  migrated/search/actions
 * @see  record_action_help_xxxx in localization.js for description and help
+* @todo remove add record action to separate dialog
 
 IT USES
     window.hWin.HAPI4.currentRecordset
@@ -75,6 +76,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
             add_rec_prefs = [0, 0, 'viewable', '']; //default: rectype not defined, Everyone
         }
+        if(add_rec_prefs.length<5){
+            add_rec_prefs.push(''); //viewable groups
+        }
+        
         if(!(parseInt(add_rec_prefs[1])>=0)) add_rec_prefs[1] = 0;
         
         //fill selector for records: all, selected, by record type
@@ -87,6 +92,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             //record types
             $('#div_sel_rectype').find('label[for="sel_recordtype"]').text('Type of record to add:');
             $('#div_sel_rectype').show();
+            $('.popup_buttons_div').hide();
             
             if(init_scope_type!='popup'){
                 btn_start_action.parent().hide();
@@ -99,6 +105,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         new_record_params['OwnerUGrpID'] = add_rec_prefs[1];
                         new_record_params['NonOwnerVisibility'] = add_rec_prefs[2];
                         if(add_rec_prefs[3]) new_record_params['tag'] = add_rec_prefs[3];
+                        if(add_rec_prefs[4]) new_record_params['NonOwnerVisibilityGroups'] = add_rec_prefs[4];
                                             
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
                     }
@@ -119,6 +126,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             var $rec_select = _fillSelectRecordTypes();
             $rec_select.hSelect({change: _onSelectRecordType});
 
+            //define group selector
+            var ele = $('#sel_AccessGroups');
+            if(!ele.editing_input('instance')){
+                ele.empty();
+                _createGroupSelectorElement('sel_AccessGroups', add_rec_prefs[4]);    
+            }
+            
+            
             window.hWin.HAPI4.addEventListener(
                 that,
                 window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE,
@@ -135,7 +150,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('#sel_recordtype').val(add_rec_prefs[0]);
             $rec_select.hSelect('widget').find('.ui-selectmenu-text')
                 .text($('#sel_recordtype>option:selected').text());
-            
             
             $('#div_more_options').show();
             $('#btn_more_options').click(function(){
@@ -241,6 +255,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             add_rec_prefs[0] = $('#sel_recordtype').val();
             add_rec_prefs[1] = $('#sel_Ownership').val();
             add_rec_prefs[2] = $('#sel_Access').val(); //$('input[type="radio"][name="rb_Access"]:checked').val();
+
+            if(add_rec_prefs[2]=='viewable'){
+                $('#sel_AccessGroups').show();    
+                add_rec_prefs[4] = $('#sel_AccessGroups').editing_input('instance')?getFieldValue('sel_AccessGroups'):'';
+            }else{
+                $('#sel_AccessGroups').hide();    
+                add_rec_prefs[4] = '';
+            }
             
             url = window.hWin.HAPI4.baseURL+'hclient/framecontent/recordEdit.php?db='+window.hWin.HAPI4.database
             +'&rec_rectype=' + add_rec_prefs[0]+'&rec_owner='+add_rec_prefs[1]+'&rec_visibility='+add_rec_prefs[2];
@@ -250,6 +272,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 //encodeuricomponent
                 url = url + '&tag='+add_rec_prefs[3];    
             }
+            if(add_rec_prefs[4]){
+                url = url + '&visgroups='+add_rec_prefs[4];    
+            }
+            
             
 
             window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);        
@@ -445,11 +471,16 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                  {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}]);
 
         if(action_type!='add_record'){         
-             var ele = $('#sel_Access-viewable-group');
-             ele.empty().hide();
-             _createGroupSelectorElement('#sel_Access-viewable-group', '');    
-             ele.find('.input-cell').css({'display':'table-cell'});
-             ele.find('input').css('max-width','400px');
+             
+            //define group selector
+            var visgroups = window.hWin.HEURIST4.util.getUrlParameter('visgroups', window.location.search);
+            
+            var ele = $('#sel_AccessGroups');
+            if(!ele.editing_input('instance')){
+                ele.empty();
+                _createGroupSelectorElement('sel_AccessGroups', visgroups);    
+            }
+             
         }
 
         if(val_owner!=null && val_owner>=0){
@@ -465,6 +496,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     $('#sel_Access').val(add_rec_prefs[2]);
                     $('#sel_Ownership').change(_onAddRecordChange);;
                     $('#sel_Access').change(_onAddRecordChange);
+                                                         
                     _onAddRecordChange();
             }else{
                 var currentOwner = window.hWin.HEURIST4.util.getUrlParameter('owner', window.location.search);
@@ -477,9 +509,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 $('input[name="rb_Access"]').change(function(){
                     
                     if($('#rb_Access-viewable-group').prop('checked')){
-                        $('#sel_Access-viewable-group').show();
+                        $('#sel_AccessGroups').show();
                     }else{
-                        $('#sel_Access-viewable-group').hide();
+                        $('#sel_AccessGroups').hide();
                     }
                     
                 });
@@ -544,21 +576,31 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         var ed_options = {
             recID: -1,
-            dtID: 'group_selector',
+            dtID: input_id, //'group_selector',
             //rectypeID: rectypeID,
             //rectypes: window.hWin.HEURIST4.rectypes,
             values: init_value,
             readonly: false,
-            showclear_button: false,
+            showclear_button: true,
             dtFields:{
                 dty_Type:"resource",
                 rst_DisplayName:'Select Groups:', rst_DisplayHelpText:'',
                 rst_FieldConfig: {entity:'sysGroups', csv:true}
-            }
+            },
+            change:_onAddRecordChange
         };
 
+        /*
         $("<div>").attr('id','group_selector').editing_input(ed_options).appendTo($.find(input_id));
-        //$.find(input_id).editing_input(ed_options);
+        var ele = $('#group_selector');
+        ele.css('display','table');
+        ele.find('.header').css({'min-width':'150px','text-align':'right'})
+        */
+        
+        var ele = $('#'+input_id);
+        ele.editing_input(ed_options);
+        ele.find('.editint-inout-repeat-button').hide();
+        ele.find('.header').css('padding-right','16px');
     }
 
     //
@@ -643,8 +685,16 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         if(init_scope_type=='noscope'){   //change ownership/access from edit record
         
             if(action_type=='ownership'){
-                window.close({owner:$('#sel_Ownership').val(), 
-                              access:$('input[type="radio"][name="rb_Access"]:checked').val()});
+
+                var context = {OwnerUGrpID:$('#sel_Ownership').val(), 
+                              NonOwnerVisibility:$('input[type="radio"][name="rb_Access"]:checked').val(),
+                              NonOwnerVisibilityGroups:''};
+                
+                if($('#rb_Access-viewable-group').prop('checked')){
+                    context.NonOwnerVisibilityGroups =  $('#sel_AccessGroups').editing_input('instance')?getFieldValue('sel_AccessGroups'):'';
+                }
+                
+                window.close(context);
             }else{
                 //@todo implement noscope behviour for other types of action
                 window.close();
@@ -657,6 +707,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     new_record_params['RecTypeID'] = add_rec_prefs[0];
                     new_record_params['OwnerUGrpID'] = add_rec_prefs[1];
                     new_record_params['NonOwnerVisibility'] = add_rec_prefs[2];
+                    new_record_params['NonOwnerVisibilityGroups'] = add_rec_prefs[4];
                     if(add_rec_prefs[3]) new_record_params['tag'] = add_rec_prefs[3];
             
                 window.close(new_record_params);

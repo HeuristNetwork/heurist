@@ -667,7 +667,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     +that._getField('rec_OwnerUGrpID')+'</span><div class="btn-access non-owner-disable"/>'        
 +'</div>'
 +'<div><label class="small-header">Access:</label><span id="recAccess">'
-    +that._getField('rec_NonOwnerVisibility')+'</span>'
+    +that._getField('rec_NonOwnerVisibility')
+      
+    +'</span>'
 +'</div></div>'
 
 +'<div>'
@@ -781,6 +783,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database
                 +'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')
                 +'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
+        if ( that._getField('rec_NonOwnerVisibilityGroups') ) {
+           url = url + '&visgroups' + that._getField('rec_NonOwnerVisibilityGroups');
+        }        
+                
 
         window.hWin.HEURIST4.msg.showDialog(url, {height:300, width:620,
             padding: '0px',
@@ -788,30 +794,41 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             title: window.hWin.HR('ownership'),
             callback: function(context){
 
-                if(context && context.owner>=0 && context.access){
+                if(context && context.OwnerUGrpID>=0 && context.NonOwnerVisibility){
                     
                     var ele = that._editing.getFieldByName('rec_OwnerUGrpID');
                     var vals = ele.editing_input('getValues');
                     
-                    if(vals[0]!=context.owner){
-                        ele.editing_input('setValue',[context.owner]);
+                    if(vals[0]!=context.OwnerUGrpID){
+                        ele.editing_input('setValue',[context.OwnerUGrpID]);
                         ele.editing_input('isChanged', true);
                         
-                        window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.owner},
+                        //update user name
+                        window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.OwnerUGrpID},
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                    panel.find('#recOwner').html(response.data[context.owner]);
+                                    panel.find('#recOwner').html(response.data[context.OwnerUGrpID]);
                                 }
                             });
                     }
 
                     ele = that._editing.getFieldByName('rec_NonOwnerVisibility');
                     vals = ele.editing_input('getValues');
-                    if(vals[0]!=context.access){
-                        ele.editing_input('setValue',[context.access]);
+                    if(vals[0]!=context.NonOwnerVisibility){
+                        ele.editing_input('setValue',[context.NonOwnerVisibility]);
                         ele.editing_input('isChanged', true);
-                        panel.find('#recAccess').html(context.access);
+                        panel.find('#recAccess').html(context.NonOwnerVisibility);
                     }
+                    
+                    //change visibility per group
+                    ele = that._editing.getFieldByName('rec_NonOwnerVisibilityGroups');
+                    vals = ele.editing_input('getValues');
+                    if(vals[0]!=context.NonOwnerVisibilityGroups){
+                        //update usrRecPermissions
+                        ele.editing_input('setValue',[context.NonOwnerVisibility]);
+                        ele.editing_input('isChanged', true);
+                    }
+                    
                     that.onEditFormChange();
                 }
                 
@@ -1383,6 +1400,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             that.options.new_record_params['RecTypeID']  = context.RecTypeID;
                             that.options.new_record_params['OwnerUGrpID'] = context.OwnerUGrpID;
                             that.options.new_record_params['NonOwnerVisibility'] = context.NonOwnerVisibility;
+                            that.options.new_record_params['NonOwnerVisibilityGroups'] = context.NonOwnerVisibilityGroups;
                                                 
                             window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
                                     function(response){  
@@ -1404,6 +1422,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                     add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
                 }
+                if(add_rec_prefs.length<5){
+                    add_rec_prefs.push(''); //groups visibility
+                }
                 
                 if(!(that.options.new_record_params.OwnerUGrpID>=0)){
                     that.options.new_record_params.OwnerUGrpID = add_rec_prefs[1];    
@@ -1414,6 +1435,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(window.hWin.HEURIST4.util.isempty(that.options.new_record_params.NonOwnerVisibility)){
                     that.options.new_record_params.NonOwnerVisibility = add_rec_prefs[2];
                 }
+                that.options.new_record_params.NonOwnerVisibilityGroups = add_rec_prefs[4];
                 
                 //this._currentEditRecTypeID is set in add button
                 window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
@@ -1932,6 +1954,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                            URL: fields['rec_URL'],
                            OwnerUGrpID: fields['rec_OwnerUGrpID'],
                            NonOwnerVisibility: fields['rec_NonOwnerVisibility'],
+                           NonOwnerVisibilityGroups: fields['rec_NonOwnerVisibilityGroups'],
                            ScratchPad: fields['rec_ScratchPad'],
                            'details': fields};
         

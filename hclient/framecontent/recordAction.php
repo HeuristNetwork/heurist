@@ -187,13 +187,11 @@ if(!in_array($action_type, $allowed_actions)){
                     <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable">
                     Any logged-in user can view the record</label>
                 </div>
-<!--                
                 <div class="detailRow" style="padding-bottom:1em;">
                     <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable-group">
                     Members of selected groups can view the record</label>
-                    <div id="sel_Access-viewable-group" style="display:none;margin-left: -100px;margin-top: 10px;"></div>
+                    <div id="sel_AccessGroups" style="display:none;margin-left: -100px;margin-top: 10px;"></div>
                 </div>
--->                
                 <div class="detailRow" style="padding-bottom:1em;">
                     <label><input type="radio" name="rb_Access" value="pending" id="rb_Access-pending">
                     Flagged for external publication, any logged-in user</label>
@@ -210,13 +208,16 @@ if(!in_array($action_type, $allowed_actions)){
             <div id="div_sel_access2" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
                 <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Outside this group record is:</label></div>
             
-                            <select name="sel_Access" id="sel_Access" style="min-width: 3   00px;">
+                            <select name="sel_Access" id="sel_Access" style="min-width: 300px;">
                                 <option value="hidden">Hidden (restricted to owners)</option>
-                                <option value="viewable" selected>Viewable (logged-in users only)</option>
+                                <option value="viewable" selected>Viewable (for specific groups or any logged-in users)</option>
                                 <option value="pending">Pending (marked for potential publication)</option>
                                 <option value="public">Public (automatically published to hml etc.)</option>
                             </select>
+                            
             </div>
+
+            <div id="sel_AccessGroups"  style="padding: 0.2em; min-width: 600px;display:none;" class="input"></div>
             
 
             <div style="padding: 0.2em; width: 100%;" class="input">
@@ -244,7 +245,7 @@ if(!in_array($action_type, $allowed_actions)){
                 </div>
                 <textarea id="txt_add_link" readonly
                     onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"
-                    class="text ui-widget-content ui-corner-all" rows=8 style="width:110ex"></textarea>
+                    class="text ui-widget-content ui-corner-all" rows=5 style="width:70ex"></textarea>
             </div>
             
         </fieldset>

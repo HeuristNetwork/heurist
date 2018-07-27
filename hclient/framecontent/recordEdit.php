@@ -8,6 +8,7 @@
     *  
     *  otherwise it adds new record with 
     *  rec_rectype, rec_owner, rec_visibility, tag, t -  title, u - url, d - description
+    *  visgroups - csv group ids if rec_visibility viewable
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -179,6 +180,7 @@ else{
                         new_record_params['RecTypeID'] = rec_rectype;
                         new_record_params['OwnerUGrpID'] = __param('rec_owner');
                         new_record_params['NonOwnerVisibility'] = __param('rec_visibility');
+                        new_record_params['NonOwnerVisibilityGroups'] = __param('visgroups');
                         new_record_params['tag'] = __param('tag');
                         
                         new_record_params['Title'] = __param('t');

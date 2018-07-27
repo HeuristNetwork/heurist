@@ -67,6 +67,9 @@
             if (@$addRecDefaults[2]){
                 $userDefaultAccess = $addRecDefaults[2];
             }
+            if (@$addRecDefaults[4]){
+                $userDefaultAccessGroups = $addRecDefaults[4];
+            }
         }
 
 
@@ -77,10 +80,12 @@
             $rectype = @$record['RecTypeID'];
             $ownerid = @$record['OwnerUGrpID'];
             $access = @$record['NonOwnerVisibility'];
+            $access_grps = @$record['NonOwnerVisibilityGroups'];
         }else{
             $rectype = null;
             $ownerid = null;
             $access = null;
+            $access_grps = null;
         }
 
         // RECTYPE
@@ -95,11 +100,11 @@
 
         // OWNER -----------
         $ownerid = intval($ownerid);
-        if(!($ownerid>=0) && isset($userDefaultOwnerGroupID)){
+        if(!($ownerid>=0) && isset($userDefaultOwnerGroupID)){ //from user preferences
             $ownerid = $userDefaultOwnerGroupID;
         }
         if(!($ownerid>=0)){
-            $ownerid = @$sysvals['sys_NewRecOwnerGrpID'];
+            $ownerid = @$sysvals['sys_NewRecOwnerGrpID']; //from database properties
         }
         if(!($ownerid>=0)){
             $ownerid = $system->get_user_id();
@@ -115,7 +120,12 @@
         if(!$access){
             $access = 'viewable';
         }
-
+        //access groups
+        if($access!='viewable'){
+            $access_grps = null;
+        }else if($access_grps==null && isset($userDefaultAccessGroups)){
+            $access_grps = $userDefaultAccessGroups;
+        }
         
         if ($ownerid>0  && !($system->is_admin() || $system->is_member($ownerid))){ 
             $system->addError(HEURIST_REQUEST_DENIED,
@@ -160,15 +170,32 @@
 
             $response = $system->addError(HEURIST_DB_ERROR, "Cannot add record", $syserror);
 
-        }else if($return_id_only){
+        }else {
+            
+            if($access_grps!=null){
+                   $access_grps = prepareIds($access_grps);
+                   if(count($access_grps)>0){
+                        //add group record permissions
+                        $values = array();
+                        foreach ($access_grps as $grp_id){
+                              array_push($values,'('.$grp_id.','.$newId.')');
+                        }
+                        $query = 'INSERT INTO usrRecPermissions (rcp_UGrpID,rcp_RecID) VALUES '.implode(',',$values);
+                        $mysqli->query($query);
+                        //mysql__insertupdate($mysqli, 'usrRecPermissions', 'rcp', {rcp_ID:-1, rcp_UGrpID: rcp_RecID:$newId });
+                   }
+            }
+        
+            if($return_id_only){
 
-            $response = array("status"=>HEURIST_OK, "data"=> $newId);
+                $response = array("status"=>HEURIST_OK, "data"=> $newId);
 
-        }else{
+            }else{
 
-            $params = array("q"=>"ids:".$newId, 'detail'=>'complete', "w"=>"e");
-            //retrieve new record with structure
-            $response = recordSearch($system, $params, true, true);
+                $params = array("q"=>"ids:".$newId, 'detail'=>'complete', "w"=>"e");
+                //retrieve new record with structure
+                $response = recordSearch($system, $params, true, true);
+            }
         }
         return $response;
     }
@@ -679,6 +706,9 @@
                 $mysqli->query('delete from usrReminders where rem_RecID = ' . $id);
                 if ($mysqli->error) break;
 
+                $mysqli->query('delete from usrRecPermissions where rcp_RecID = ' . $id);
+                if ($mysqli->error) break;
+                
                 $mysqli->query('delete from recForwarding where rfw_NewRecID = ' . $id);
                 if ($mysqli->error) break;
                 
@@ -1380,6 +1410,9 @@ array_push($errorValues,
             $res = mysql__duplicate_table_record($mysqli, 'usrRecTagLinks', 'rtl_RecID', $id, $new_id);
             if(!is_int($res)){ $error = $res; break; }
 
+            $res = mysql__duplicate_table_record($mysqli, 'usrRecPermissions', 'rcp_RecID', $id, $new_id);
+            if(!is_int($res)){ $error = $res; break; }
+            
             //$res = mysql__duplicate_table_record($mysqli, 'recThreadedComments', 'cmt_RecID', $id, $new_id);
             //if(!is_int($res)){ $error = $res; break; }
 
