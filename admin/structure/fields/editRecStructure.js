@@ -1122,6 +1122,7 @@ function EditRecStructure() {
                             edt.value = $(edt).is(':checked')?1:0;
                     }
                     
+                    //values && k<values.length && 
                     if(values[k] !== edt.value){
 
                         if(fieldnames[k]=="rst_DisplayName"){

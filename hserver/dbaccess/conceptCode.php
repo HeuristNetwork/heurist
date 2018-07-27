@@ -21,7 +21,9 @@ private static function initialize()
     self::$system = $system;
     self::$initialized = true;
     
-    define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
+    if(!defined('HEURIST_DBID')){
+        define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
+    }
 }
 
 /**

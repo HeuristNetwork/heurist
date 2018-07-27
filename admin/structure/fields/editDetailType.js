@@ -953,12 +953,12 @@ function DetailTypeEditor() {
                 _recreateRecTypesPreview(that.keepType, null);
 
                 if((el.value=="freetext" || el.value=="blocktext") && _dtyID<0){
-                    if(hasH4()){
-                        $("#topdiv_closebtn").hide();
-                    }
+
+                    $("#topdiv_closebtn").hide();
                     $("#field_types_context_help").load(window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #content_body');
                     
-                    _dialogbox = Hul.popupElement(window, $("#info_div").get(0), {height: 550, width:800, title:"Choosing appropriate field types", modal:true} );
+                    _dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog({element:$("#info_div").get(0),
+                            height: 550, width:800, title:"Choosing appropriate field types", modal:true} );
                 }
             }
         }else{

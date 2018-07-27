@@ -32,6 +32,7 @@
 */
     require_once(dirname(__FILE__).'/../../hserver/utilities/titleMask.php');
     require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_records.php');  //to delete temporary records
+    require_once(dirname(__FILE__).'/../../hserver/dbaccess/conceptCode.php'); 
     require_once(dirname(__FILE__).'/../../common/php/imageLibrary.php');
 /* in imageLibrary we use 
 getRectypeIconURL    
@@ -537,7 +538,7 @@ copy_IconAndThumb_FromLibrary
 	function findTitleMaskEntries($rtyID, $dtyID) {
         global $mysqli;
 
-        $dtyID = getDetailTypeConceptID($dtyID);
+        $dtyID = ConceptCode::getDetailTypeConceptID( $dtyID );
 
 		$ret = array();
 

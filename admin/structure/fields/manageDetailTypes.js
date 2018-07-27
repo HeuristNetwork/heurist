@@ -533,7 +533,7 @@ function DetailTypeManager() {
                             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
                             var callback = _updateAfterDelete;
 
-                            var request = {method:'deleteDT', db:window.hWin.HAPI4.database, dty_ID:dty_ID};
+                            var request = {method:'deleteDT', db:window.hWin.HAPI4.database, dtyID:dty_ID};
                             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
                             
                         }
