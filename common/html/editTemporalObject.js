@@ -53,19 +53,33 @@ function calendarPopup(buttonElt) {
 	{
 		if (date) {
 			document.getElementById("simpleDate").value = date;
-			if(top.HEURIST.util.setDisplayPreference){
-					top.HEURIST.util.setDisplayPreference("record-edit-date", date);
-			}
+            
+			if(window.hWin && window.hWin.HAPI4) window.hWin.HAPI4.save_pref("record-edit-date", date);
 			calendarViewer.close();
 		}
 	}
 	var date = document.getElementById("simpleDate").value;
-	if(top.HEURIST.util.isempty(date) && top.HEURIST.util.getDisplayPreference){
-		date = top.HEURIST.util.getDisplayPreference("record-edit-date");
+    
+	if(window.hWin.HEURIST4.util.isempty(date) && window.hWin && window.hWin.HAPI4){
+		date = window.hWin.HAPI4.get_prefs_def('record-edit-date','');
     }
 
-    calendarViewer.showAt(top.HEURIST.util.getOffset(buttonElt), date, callback);
+    calendarViewer.showAt(getOffset(buttonElt), date, callback);
 }
+
+function getOffset(obj) {
+
+        var x = y = 0;
+        var sleft = 0;//obj.ownerDocument.body.scrollLeft;
+        var stop = 0; //obj.ownerDocument.body.scrollTop;
+        while (obj) {
+            x += obj.offsetLeft;
+            y += obj.offsetTop;
+            obj = obj.offsetParent;
+        }
+        return [x-sleft, y-stop];
+}
+
 
 function setPDBtoTPQ () {
 	var tpq = document.getElementById("TPQ");
@@ -464,7 +478,7 @@ var TemporalPopup = (function () {
                     {picker: $.calendars.picker.defaultRenderer.picker.
                         replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
                         replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
-            showTrigger: '<img src="'+top.HEURIST.baseURL+'common/images/cal.gif" alt="Popup" class="trigger">'}
+            showTrigger: '<img src="'+window.hWin.HAPI4.baseURL+'common/images/cal.gif" alt="Popup" class="trigger">'}
         );
 
         //change current calendar
