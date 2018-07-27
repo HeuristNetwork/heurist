@@ -674,7 +674,7 @@ function outputDetail($dt, $value, $rt, &$reverse_pointers, &$relationships, $de
 
 $typeDict = array(	"s" =>	"Simple Date",
 					"c" =>	"C14 Date",
-					"f" =>	"Aproximate Date",
+					"f" =>	"Approximate Date",
 					"p" =>	"Date Range",
 					"d" =>	"Duration"
 					);
