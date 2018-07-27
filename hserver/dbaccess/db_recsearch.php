@@ -559,7 +559,7 @@
     }
     
     //
-    //return linked record ids and their types
+    // return linked record ids and their types
     //
     function recordGetLinkedRecords($system, $recordID){
 

@@ -424,7 +424,7 @@
             //reset temporary flag for all relationship records
             if(count($relRecsIDs)>0){
                 foreach($relRecsIDs as $relID){
-                    $res = recordUpdateTitle($system, $relID, RT_RELATION, $mask);
+                    $res = recordUpdateTitle($system, $relID, $mask, 'Title Mask for Relationship not defined');
                 }
                 $query = 'UPDATE Records set rec_FlagTemporary=0 where rec_ID in ('.implode(',',$relRecsIDs).')';
                 $res = $mysqli->query($query);
@@ -439,7 +439,7 @@
                     .implode(',',$links_rectypes) .')');
 
                 foreach($links as $linkRecID=>$linkRecTypeID){
-                    $res = recordUpdateTitle($system, $linkRecID, $linkRecTypeID, $masks[$linkRecTypeID]);
+                    $res = recordUpdateTitle($system, $linkRecID, $masks[$linkRecTypeID], null);
                 }
             }
         }
@@ -981,11 +981,12 @@
 
 
     /**
-    * calculate title, do an update
-    *
-    * @param mixed $mysqli
+    * Calculate and update title mask
+    * 
+    * @param mixed $system
     * @param mixed $recID
-    * @param mixed $rectype
+    * @param mixed $rectype_or_mask - record type or title mask
+    * @param mixed $recTitleDefault - default title, null means don't update title if something goes wrong
     */
     function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
     {
@@ -995,7 +996,7 @@
         $mask = null;
         $rectype = null;
         
-        if(is_int($rectype_or_mask) && $rectype_or_mask>0){
+        if($rectype_or_mask>0){
             $rectype = $rectype_or_mask;
         }else if($rectype_or_mask!=null){
             $mask = $rectype_or_mask;
@@ -1041,6 +1042,8 @@
                 }
                 $stmt->close();
             }
+        }else{
+            $new_title = 'Can\'t get title for #'.$recID; 
         }
 
         return $new_title;
