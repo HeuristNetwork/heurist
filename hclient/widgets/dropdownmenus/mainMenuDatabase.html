@@ -4,7 +4,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -24,113 +24,63 @@
 From Jan 2016 this is blank as older (Vsn 3) code sits at the same level as Vsn 4
 See mainMenu.js for sizes of popups defined by portrait, large, very large and so forth -->
 
-<li>DATABASE</li>
-
-<li style="padding-left:5px;"><a href="common/connect/getListOfDatabases.php?popup=1&amp;v=4" name="auto-popup" class="portrait h3link"
-    onClick="{return false;}" data-nologin="1" 
-    title="Open and login to another Heurist database - current database remains open">
-    Open database</a>
+<li><a href="#" id="menu-database-browse"
+        data-level="-1" data-logaction="dbOpen"
+        title="Open and login to another Heurist database - current database remains open">
+        Open</a>
 </li>
 
-<li style="padding-left:5px;"><a href="admin/setup/dbcreate/createNewDB.php?popup=1" name="auto-popup" class="large h3link"
-    onClick="{return false;}"
-    title="Create a new database on the current server - essential structure elements are populated automatically">
-    New database</a>
+<li><a href="admin/setup/dbcreate/createNewDB.php" id="menu-database-create"
+        data-level="0" data-logaction="dbNew"
+        title="Create a new database on the current server - essential structure elements are populated automatically">
+        New</a>
+</li>
+
+<li><a href="admin/setup/dboperations/cloneDatabase.php"  name="auto-popup" class="h3link"
+        data-level="1"
+        title="Clones an identical database from the currrent database with all data, users, attached files, templates etc.">
+        Clone</a>
 </li>
 
 <li>-</li>
 
-<li>STRUCTURE</li>
-
-<!-- database name is appended automatically by auto-popup -->
-
-<li style="padding-left:5px;">
-    <a href="admin/structure/rectypes/manageRectypes.php?popup=1" name="auto-popup" class="verylarge h3link refresh_structure"
-        onClick="{return false;}"
-        title="Add new / modify existing record types - general characteristics, data fields and rules which compose a record">
-        Manage record types / fields</a>
+<li><a href="#" id="menu-database-properties"
+        data-level="1" data-logaction="dbProperties"
+        title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
+        Properties</a>
 </li>
 
-<li style="padding-left:5px;">
-    <a href="admin/structure/import/selectDBForImport.php?popup=1" name="auto-popup" class="verylarge h3link refresh_structure"
-        onClick="{return false;}"
-        title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
-        Browse templates</a>
+<li data-level="2">-</li>
+
+<li><a href="admin/setup/dboperations/deleteCurrentDB.php"
+        data-level="2" 
+        title="Delete the current database completely - cannot be undone, although data is copied to a backup which could be reloaded by a system administrator">
+        Delete</a>
 </li>
 
-<!-- Remarked temporarely 2016-05-11
-<li style="padding-left:5px;">
-    <a href="admin/structure/import/annotatedTemplate.php?popup=1" name="auto-popup" class="verylarge h3link refresh_structure"
-        onClick="{return false;}"
-        title="Browse documented record type templates on HeuristNetwork.org and selectively import into the current database">
-        Acquire from templates</a>
-</li>
--->
-
-<!-- Removed Ian 13 feb 16: this function is likely to confuse, better to have less in front page menus
-<li style="padding-left:5px;">
-    <a href="admin/structure/fields/manageDetailTypes.php?popup=1" name="auto-popup" class="verylarge h3link refresh_structure"
-        onClick="{return false;}"
-        title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
-        Manage base field types</a>
-</li>
--->
-
-<li style="padding-left:5px;">
-    <a href="admin/structure/terms/editTerms.php?popup=1" name="auto-popup" class="verylarge h3link refresh_structure"
-        onClick="{return false;}"
-        title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields">
-        Manage terms / relation types</a>
+<li><a href="admin/setup/dboperations/clearCurrentDB.php"
+        data-level="2" 
+        title="Clear all data (records, values, attached files) from the current database. Database structure - record types, fields, terms, constraints - is unaffected">
+        Delete content</a>
 </li>
 
-<li style="padding-left:5px;">
-    <a href="hclient/framecontent/visualize/databaseSummary.php?popup=1" name="auto-popup" class="large"
-        onClick="{return false;}"  id="menulink-database-summary"
-        title="Take a look at the internal connections between record types in this database">
-        Visualise structure</a>
+<li>-</li>
+
+<li class="admin-only"> <!-- admin/rollback/rollbackRecords.php -->
+    <a href="#"         
+        data-level="1"
+        title="Selectively roll back the data in the database to a specific date and time">
+        Rollback</a>
 </li>
 
-<li style="padding-left:5px;">
-    <a href="admin/verification/listDatabaseErrors.php?popup=1" name="auto-popup" class="verylarge h3link"
-        onClick="{return false;}"
-        title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
-        Verify structure and data</a>
-</li>
-
-<li style="padding-left:5px;" id="menu-database-refresh">
-    <a href="#" id="menulink-database-refresh"
-        onClick="{return false;}" data-nologin="1" 
-        title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
-        Refresh</a>
-</li>
 
 <!--
-<li style="padding-left:5px;"><a href="javascript:void(0)"
-onClick="{/*window.hWin.HEURIST4.util.reloadStrcuture()*/;}"
-title="Click to refresh the internal working memory - use to resynchronise if newly added structure elements do not show up" >
-Refresh</a>
+
+<li>
+    <a href="admin/setup/dbproperties/registerDB.php"
+        data-level="1" data-logaction="dbRegister"
+        title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
+        Register</a>
 </li>
+
 -->
-
-<li class="top-menu-only">-</li>
-
-<li class="top-menu-only">ANALYSE</li>
-
-<li style="padding-left:5px;" class="top-menu-only">
-    <a href="viewers/crosstab/crosstabs.php" name="auto-popup" class="verylarge currentquery h3link"
-        title="Tabulate one, two or three variables for the current query, with optional percentages, row and column totals" >
-        Crosstabs analysis</a>
-</li>
-
-<li>-</li>
-
-<li>ADMINISTRATION</li>
-
-<li class="admin-only" style="padding-left:5px;">
-    <a  href="#" id="menulink-database-admin"
-        onclick="{window.open(window.hWin.HAPI4.baseURL+'admin/adminMenuStandalone.php?db='+window.HAPI4.database, '_self'); return false;}"
-        title="Full set of database administration functions, utilities and special project extensions">
-        Full database administration, <br />utilities &amp; special functions</a>
-</li>
-
-

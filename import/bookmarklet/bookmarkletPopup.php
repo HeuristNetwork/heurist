@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -21,15 +21,19 @@
 */
 
 header('Content-type: text/javascript');
-require_once(dirname(__FILE__)."/../../common/config/initialise.php");
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+$system = new System();
+if(!$system->init(@$_REQUEST['db'])){
+    return;
+}    
 ?>
 var Heurist = {
 
 w: 370,
 h: 240,
 
-uriBase: "<?= HEURIST_BASE_URL ?>",
-uriHost: "<?= HEURIST_SERVER_URL ?>/",
+uriBase: "<?=HEURIST_BASE_URL ?>",
+uriHost: "<?=HEURIST_SERVER_URL ?>/",
 database:"<?=HEURIST_DBNAME?>",
 init: function () {
 	// toggle display if our div is already present in the DOM
@@ -145,7 +149,7 @@ render: function() {
 		a = td.appendChild(document.createElement("a"));
 		a.target = "_blank";
         a.href= Heurist.uriBase +'?fmt=edit&db='+Heurist.database+'&recID='+ HEURIST_url_bib_id;
-		//a.href= Heurist.uriBase +'records/edit/editRecord.html?db='+Heurist.database+'&bkmk_id=' + HEURIST_url_bkmk_id;
+
 		a.onclick = function() { Heurist.close() };
 		a.innerHTML = "edit record";
 
@@ -154,7 +158,7 @@ render: function() {
 		td.colSpan = "2";
 		td.style.height = "10px";
 
-	} else if (HEURIST_url_bib_id) { // The page has been bookmarked by someone but not current user
+	} else if (HEURIST_url_bib_id) { // The page has been already in database
 		var nobr = td.appendChild(document.createElement("nobr"));
 		nobr.appendChild(document.createTextNode("Page already in Heurist"));
 		nobr.style.color = "green";
@@ -171,7 +175,7 @@ render: function() {
 			button.type = "button";
 			button.value = "Bookmark Record";
 			button.onclick = function() {
-				Heurist.bookmark();
+				Heurist.doBookmark();
 			};
 		td.appendChild(button);
 
@@ -188,7 +192,7 @@ render: function() {
 		button = document.createElement("input");
 		button.type = "button";
 		button.value = "Bookmark as web page";
-		button.onclick = function() { Heurist.bookmark(); };
+		button.onclick = function() { Heurist.doBookmark(); };
 		td.appendChild(button);
 
         tr = t.appendChild(document.createElement("tr"));
@@ -209,7 +213,7 @@ render: function() {
         button.disabled = true;
         button.onclick = function() {
             var r = document.getElementById("rectype-select").value;
-            if (r) Heurist.bookmark(r);
+            if (r) Heurist.doBookmark(r);
         };
         td.appendChild(button);
 
@@ -347,7 +351,10 @@ findFavicon: function() {
 	return "";
 },
 
-bookmark: function(rectype) {
+//
+//  main method - add new record with extracted from page values 
+//
+doBookmark: function(rectype) {
 	Heurist.close();
 	var version='20060713';
 	var findSelection = function(w) {
@@ -368,12 +375,13 @@ bookmark: function(rectype) {
 	}
 	var favicon = Heurist.findFavicon();
 
-	var w = open(Heurist.uriBase +'records/add/addRecord.php?db='+Heurist.database+'&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) +
-				 '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) +
-				 (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '') +
-				 (favicon? ('&f=' + encodeURIComponent(favicon)) : '') +
-				 (rectype ? '&rec_rectype=' + rectype : '') +
-				 '&version=' + version);
+	var w = open(Heurist.uriBase +'?fmt=edit&db='+Heurist.database
+                + '&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) 
+				+ '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) 
+				+ (sel?('&d=' + Heurist.urlcleaner(encodeURIComponent(sel))) : '')
+				+ (favicon? ('&f=' + encodeURIComponent(favicon)) : '') 
+                + (rectype ? '&rec_rectype=' + rectype : '') 
+				+ '&version=' + version);
 	void(window.setTimeout('window.focus()',200));
 },
 

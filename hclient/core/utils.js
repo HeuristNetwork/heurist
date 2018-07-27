@@ -8,7 +8,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -519,32 +519,38 @@ window.hWin.HEURIST4.util = {
 
     //
     // we have to reduce the usage to minimum. Need to implement method in hapi via central controller
-    // this method is used for call H3 scripts in H4 code
+    // this method is used 
+    // 1) for call H3 scripts in H4 code
+    // 2) in case hapi is not inited 
     //
-    sendRequest: function(url, request, caller, callback){
-
-        if(!request.db){
+    sendRequest: function(url, request, caller, callback, dataType){
+        
+        if(!request.db && window.hWin && window.hWin.HAPI4){
             request.db = window.hWin.HAPI4.database;
         }
-
+        
         //note jQuery ajax does not properly in the loop - success callback does not work often
-        $.ajax({
+        var options = {
             url: url,
             type: "POST",
             data: request,
-            dataType: "json",
             cache: false,
             error: function(jqXHR, textStatus, errorThrown ) {
                 if(callback){
+                    
+                    //var UNKNOWN_ERROR = (window.hWin)
+                    //        ?window.hWin.ResponseStatus.UNKNOWN_ERROR:'unknown';
+                            
+                    var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
+                                            ?'Error_Connection_Reset':jqXHR.responseText;
+                    var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+                    
                     if(caller){
-                        callback(caller, {status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR,
-                                message: jqXHR.responseText });
+                        callback(caller, response);
                     }else{
-                        callback({status:window.hWin.HAPI4.ResponseStatus.UNKNOWN_ERROR,
-                                message: jqXHR.responseText });
+                        callback(response);
                     }
                 }
-                //message:'Error connecting server '+textStatus});
             },
             success: function( response, textStatus, jqXHR ){
                 if(callback){
@@ -554,8 +560,28 @@ window.hWin.HEURIST4.util = {
                         callback(response);    
                     }
                 }
+            },
+            fail: function(  jqXHR, textStatus, errorThrown ){
+                var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
+                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+
+                if(callback){
+                    if(caller){
+                        callback(caller, response);
+                    }else{
+                        callback(response);    
+                    }
+                }
             }
-        });
+        }
+
+        if(window.hWin.HEURIST4.util.isnull(dataType)){
+            options['dataType'] = 'json';
+        }else if(dataType!='auto'){
+            options['dataType'] = dataType;    
+        }
+        
+        $.ajax(options);
     },
 
     getScrollBarWidth: function() {
@@ -1236,6 +1262,8 @@ window.hWin.HEURIST4.util = {
     //not strict search - valuable for numeric vs string 
     findArrayIndex: function(elt, arr /*, from*/)
     {
+        if( window.hWin.HEURIST4.util.isempty(arr) ) return -1;
+        
         var len = arr.length;
 
         var from = Number(arguments[2]) || 0;
@@ -1265,6 +1293,8 @@ window.hWin.HEURIST4.util = {
     }
 
 }//end util
+
+//-------------------------------------------------------------
 
 String.prototype.htmlEscape = function() {
     return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;");

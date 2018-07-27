@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -48,30 +48,38 @@
                 }
             }
         }
+        
 
         //init bookmarklet
         // NOTE: bookmarklet source is duplicated in /import/bookmarklet/bookmarkletSource.js
         sel = $("#bookmarklet-link");
         if(sel.length==1){ //global variable defined in layout_default.js
             sel.attr('href',
-                "javascript:(function(){"
-                + "e=encodeURIComponent;d=document;h='" + window.hWin.HAPI4.baseURL + "';"
-                + "if(location.protocol=='https:'){if(window.confirm('Only the URL and web page title can be extracted from https:// pages."
+"javascript:(function(){"
+    + "e=encodeURIComponent;d=document;h='" + window.hWin.HAPI4.baseURL + "';"
+    + "if(location.protocol=='https:'){"
+        + "if(window.confirm('Only the URL and web page title can be extracted from https:// pages."
                 + "\\nAdditional information will need to be set manually."
                 + "\\n\\nClick OK to add a record for this page.')){"
-                + "window.open(h+'records/add/addRecord.php?addref=1&db="+window.hWin.HAPI4.database
-                + "&rec_rectype=2&rec_owner=1&rec_visibility=viewable&t='+e(d.title)+'&u='+e(location.href));}return;}"
+                    + "window.open(h+'?fmt=edit&db="+window.hWin.HAPI4.database
+                    + "&rec_rectype=2&rec_owner=1&rec_visibility=viewable&t='+e(d.title)+'&u='+e(location.href));"
+        + "}"
+    + "return;}"
 
-                + "c=d.contentType;"
-                + "if(c=='text/html'||!c){"
-                + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
-                + "s=d.createElement('script');s.type='text/javascript';"
-                + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+window.hWin.HAPI4.database+"';"
-                + "d.getElementsByTagName('head')[0].appendChild(s);}"
-                + "else{w=open(h+'records/add/addRecordPopup.php?db="+window.hWin.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
+    + "c=d.contentType;"
+    + "if(c=='text/html'||!c){"
+        + "if(d.getElementById('__heurist_bookmarklet_div'))return%20Heurist.init();"
+        
+        + "s=d.createElement('script');s.type='text/javascript';"
+        + "s.src=h+'import/bookmarklet/bookmarkletPopup.php?db="+window.hWin.HAPI4.database+"';"
+        + "d.getElementsByTagName('head')[0].appendChild(s);"
+    + "}"
+    + "else{"
+    +   "w=open(h+'?fmt=edit&db="+window.hWin.HAPI4.database+"&t='+e(d.title)+'&u='+e(location.href));"
                 //+ "window.setTimeout('w.focus()',200);}"
-                + "}})();"
+    + "}})();"
             );
+            
             sel.text('>> '+window.hWin.HAPI4.database)
         }
     }
@@ -96,12 +104,12 @@
     <h3>Filter</h3>
     <div>
         <div class="header"><label for="defaultSearch">Filter string to apply when loading main page</label></div>
-        <input name="defaultSearch" id="defaultSearch" class="text ui-widget-content ui-corner-all h3pref" style="min-width:300px"/>
+        <input name="defaultSearch" id="defaultSearch" class="text ui-widget-content ui-corner-all" style="min-width:300px"/>
     </div>
 
     <div>
         <div class="header"><label for="searchQueryInBrowser">Include current filter in URL for page</label></div>
-        <input type="checkbox" name="searchQueryInBrowser" id="searchQueryInBrowser" class="text ui-widget-content ui-corner-all h3pref"/>
+        <input type="checkbox" name="searchQueryInBrowser" id="searchQueryInBrowser" class="text ui-widget-content ui-corner-all"/>
     </div>
 
     <div>
@@ -132,7 +140,7 @@
                 Limit lines in interactive custom report output<br/><i>Heurist interface only, not external calls</i>
             </label>
         </div>
-        <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all h3pref" style="min-width:50px"
+        <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
             title="This limit does not apply to external calls or periodic report generation to file">
             <option value="50">50</option>
             <option value="200">200</option>
@@ -167,19 +175,19 @@
 
     <div>
         <div class="header"><label for="tagging-popup">Prompt for tags when saving records<br /><i>if no tags have been set</i></label></div>
-        <input type="checkbox" name="tagging-popup" id="tagging-popup" class="text ui-widget-content ui-corner-all h3pref"/>
+        <input type="checkbox" name="tagging-popup" id="tagging-popup" class="text ui-widget-content ui-corner-all"/>
     </div>
 -->
 
     <div>
         <div class="header"><label for="defaultRecentPointerSearch">Default to recent records search when editing<br />pointer fields <i>(otherwise All Records)</i></label></div>
-        <input type="checkbox" name="defaultRecentPointerSearch" id="defaultRecentPointerSearch" class="text ui-widget-content ui-corner-all h3pref"/>
+        <input type="checkbox" name="defaultRecentPointerSearch" id="defaultRecentPointerSearch" class="text ui-widget-content ui-corner-all"/>
     </div>
 
 <!-- 14/4/18: This does not appear to do anything, besides it should really be replaced by proper indexing using Elastic and specification of composite key for each record type 
     <div>
         <div class="header"><label for="findFuzzyMatches">Check for similar records on creation<br /><i>can slow new-record save</i></label></div>
-        <input type="checkbox" name="findFuzzyMatches" id="findFuzzyMatches" class="text ui-widget-content ui-corner-all h3pref"/>
+        <input type="checkbox" name="findFuzzyMatches" id="findFuzzyMatches" class="text ui-widget-content ui-corner-all"/>
     </div>
 -->
 

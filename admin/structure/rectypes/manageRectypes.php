@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 * 
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Juan Adriaanse
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -27,92 +27,78 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../../');  //need for proper path to js and css    
 
-// User must be system administrator or admin of the owners group for this database
-require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-
-if(isForAdminOnly("to modify database structure")){
-    return;
-}
+require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 ?>
-<html>
-    <head>
 
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>Record Types / Field Definitions</title>
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
 
-        <link rel="icon" href="../../../favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
+<!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
 
-        <!-- YUI -->
-        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
-        
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/tabview/tabview-min.js"></script>
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/dragdrop/dragdrop-min.js"></script>
-        <!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+<!-- DATATABLE DEFS -->
+<link type="text/css" rel="stylesheet" href="../../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+<!-- datatable Dependencies -->
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+<!-- Source files -->
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+<!-- END DATATABLE DEFS-->
+<!-- PAGINATOR -->
+<link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
+<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
+<!-- END PAGINATOR -->
 
-        <!-- DATATABLE DEFS -->
-        <link type="text/css" rel="stylesheet" href="../../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
-        <!-- datatable Dependencies -->
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
-        <!-- Source files -->
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
-        <!-- END DATATABLE DEFS-->
+<link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
+<link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
+<link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
 
-        <!-- PAGINATOR -->
-        <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/paginator/assets/skins/sam/paginator.css">
-        <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
-        <!-- END PAGINATOR -->
+<style>
+.yui-skin-sam .yui-dt td {
+    margin: 0;
+    padding: 0;
+    border: none;
+    text-align: left;
+}
+.yui-skin-sam .yui-dt tr.separator, .yui-skin-sam .yui-dt tr.separator td.yui-dt-asc, .yui-skin-sam .yui-dt tr.separator td.yui-dt-desc, .yui-skin-sam .yui-dt tr.separator td.yui-dt-asc, .yui-skin-sam .yui-dt tr.separator td.yui-dt-desc {
+    font-style: italic;
+    font-weight: bold;
+    font-size: 1.4em;
+}
+</style>
 
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-
-        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
-
-<script type="text/javascript">
-    //find heurist object in parent windows or init new one if current window is a top most
-    function _detectHeurist( win ){
-        if(win.HEURIST4){ //defined
-            return win;
-        }
-
-        try{
-            win.parent.document;
-        }catch(e){
-            // not accessible - this is cross domain
-            return win;
-        }
-        if (win.top == win.self) {
-            //we are in frame and this is top most window and Heurist is not defined
-            //lets current window will be heurist window
-            return window;
-        }else{
-            return _detectHeurist( win.parent );
-        }
-    }
-    //detect wether this window is top most or inside frame
-    window.hWin = _detectHeurist(window);
-</script>        
-            
-    </head>
-
-    <body class="popup yui-skin-sam">
-
-        <script src="../../../common/php/displayPreferences.php"></script>
-        <script src="../../../common/php/getMagicNumbers.php"></script>
-        <script src="../../../common/php/loadCommonInfo.php"></script>
-
-        <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-        <script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
-        <script type="text/javascript" src="../../../common/js/tabDragDrop.js"></script>
         <script type="text/javascript" src="manageRectypes.js"></script>
+        
+        <script type="text/javascript">
+            
+            function onPageInit(success){
+                
+                if(!success) return;
+                
+                window.rectypeManager = new RectypeManager();
+                window.rectypeManager.init()
 
-        <div>
+                window.onbeforeunload = function () {
+                    var changed = rectypeManager.hasChanges();
+                    if (changed) return "You have made changes.  If you continue, all changes will be lost.";
+                }
+            }
+        </script>
+        
+
+</head>
+<body class="popup yui-skin-sam">
+
+<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
+<script type="text/javascript" src="../../../common/js/tabDragDrop.js"></script>
+
+<div>
 <?php
 if(@$_REQUEST['popup']!=1){
 ?>    
@@ -122,7 +108,7 @@ if(@$_REQUEST['popup']!=1){
 ?>    
             <div id="page-inner" style="top:20;">
             
-                <h4>Use this function to build and extend your database by adding and modifying record (entity) types. 
+                <h4 style="line-height:2ex;padding:5px 0">Use this function to build and extend your database by adding and modifying record (entity) types. 
                 <br/>Allows the re-use of existing fields for consistency across entity types, as well as the creation of entirely new fields. 
                 <br/>New databases are pre-populated with a range of useful record types and term (category) vocabularies.</h4>
                 <!--
@@ -141,16 +127,8 @@ if(@$_REQUEST['popup']!=1){
                 <input id="yui-history-field" type="hidden">
 
                 <div id="modelTabs" class="yui-navset yui-navset-top">
-                    <script	 type="text/javascript">
-                        rectypeManager = new RectypeManager();
-                        YAHOO.util.Event.addListener(window, "load", rectypeManager.init());
-                        window.onbeforeunload = function () {
-                            var changed = rectypeManager.hasChanges();
-                            if (changed) return "You have made changes.  If you continue, all changes will be lost.";
-                        }
-                    </script>
                 </div>
             </div>
-        </div>
-    </body>
+</div>
+</body>
 </html>

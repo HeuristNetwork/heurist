@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -96,7 +96,7 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
                     //@todo all this stuff should be implemented on client side since header is not static content anymore  
 
                     // Put record types & counts in the table
-                    if($system->is_inted()){
+                    if($system->is_inited()){
                         $res = $system->get_mysqli()->query($query);
                         $stats = array();
                         

@@ -1,5 +1,5 @@
 /**
-* Search header for manageSysUsers manager
+* Search header for manageDefRecTypes manager
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -64,16 +64,12 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         }
         
         this._on(this.input_search_group,  { change:this.startSearch });
+        this._on(this.input_search_type,  { change:this.startSearch });
         
         //@todo - possible to remove
         if( this.options.rtg_ID>0 ){
             this.input_search_group.parent().hide();
             this.input_search_group.val(this.options.rtg_ID);
-            
-            if(!window.hWin.HAPI4.is_admin()){
-                this.btn_add_record.hide();
-                this.btn_find_record.hide();
-            }
         }else if( this.options.rtg_ID<0 ){  //addition of recctype to group
             //find any rt not in given group
             //exclude this group from selector
@@ -102,21 +98,13 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 request['rty_Name'] = this.input_search.val();
             }
             
-            if( this.options.rty_RecTypeGroupID<0 ){
-                //find any user not in given group
-                request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rty_RecTypeGroupID);
+            if( this.options.rtg_ID<0 ){
+                //not in given group
+                request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
             }
         
             if(this.input_search_group.val()>0){
-                
                 request['rty_RecTypeGroupID'] = this.input_search_group.val();
-                
-                if( window.hWin.HAPI4.has_access( this.input_search_group.val() )
-                    && this.options.edit_mode!='none'){
-                    this.btn_find_record.show();
-                }
-            }else{
-                this.btn_find_record.hide(); 
             }
             
             
@@ -126,22 +114,11 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             }else{
                 request['sort:rty_Name'] = '1';   
             }
-                 
+  
+            if(this.options.use_cache){
             
-/*
-            if(this.element.find('#cb_selected').is(':checked')){
-                request['ugr_ID'] = window.hWin.HAPI4.get_prefs('recent_Users');
-            }
-            if(this.element.find('#cb_modified').is(':checked')){
-                var d = new Date(); 
-                //d = d.setDate(d.getDate()-7);
-                d.setTime(d.getTime()-7*24*60*60*1000);
-                request['ugr_Modified'] = '>'+d.toISOString();
-            }
-*/            
-            
-            
-            
+                this._trigger( "onfilter", null, request);            
+            }else
             if(false && $.isEmptyObject(request)){
                 this._trigger( "onresult", null, {recordset:new hRecordSet()} );
             }else{
@@ -161,7 +138,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
            
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             that._trigger( "onresult", null, 
                                 {recordset:new hRecordSet(response.data), request:request} );
                         }else{

@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -184,7 +184,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                             ob_flush();flush();
 
 
-                            //echo  str_replace("(","\\(",$tarfile).">>>>".$tarfile."<br>";
+                            //echo  str_replace("(","\\(",$tarfile)."DEBUG>".$tarfile."<br>";
 
                             if(copy($tmp_name, $tarfile)){
                                 unlink($tmp_name);
@@ -444,7 +444,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
                     $fid = 'FAIMS.'.$attrID;
                     $ftype = faimsToHeurist_dt_mapping($row1[2]);
-                    //print ">>>>".$fid." ".$row1[1];
+                    //print "DEBUG>".$fid." ".$row1[1];
                     $dtyName = $row1[1] ?$row1[1] :"FAIMS_ID_".$attrID;
                     $dtyDescr = trim($row1[3]." FAIMS ID ".$attrID);
 

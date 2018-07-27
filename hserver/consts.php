@@ -7,7 +7,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -22,7 +22,7 @@
 */
 
 
-// TODO: Rationalise th duplication of constants across /php/consts.php and /common/connect/initialise.php
+// TODO: Rationalise the duplication of constants across /php/consts.php and /common/connect/initialise.php
 //       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
@@ -103,7 +103,7 @@ define('HEURIST_DB_PREFIX', $dbPrefix);
 
 //---------------------------------
 
-define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2016 The University of Sydney.');
+define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2018 The University of Sydney.');
 $talkToSysAdmin="Please advise your system administrator or email info - at - HeuristNetwork.org for assistance.";
 
 /**

@@ -1,10 +1,12 @@
 <?php
+//@TODO replace YUI dataTable to jQuery 
+
 /**
 * dbStatistics: shows a sortable list of databases on the server and their usage (record counts, access dates etc.)
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -19,49 +21,47 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-//require_once(dirname(__FILE__).'/../../configIni.php');
-
-if(isForAdminOnly("to get information on all databases on this server")){
-    return;
-}
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
+    
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
 set_time_limit(0); //no limit
 
-mysql_connection_select();
-$dbs = mysql__getdatabases(true);
+$mysqli = $system->get_mysqli();
+$dbs = mysql__getdatabases4($mysqli, true);
 
-$usrEmail = mysql__select_val('select ugr_eMail from sysUGrps where ugr_ID = '.get_user_id());
-$sysadmin = (defined('HEURIST_MAIL_TO_ADMIN') && ($usrEmail==HEURIST_MAIL_TO_ADMIN));
-//$sysadmin = is_systemadmin();
-//$sysadmin = true; // Force system admin rights
+$sysadmin = $system->is_system_admin();
+
+// Force system admin rights
+/*
 if($sysadmin){
     startMySession();
     $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['user_systemadmin'] = '1';
     session_write_close();
 }
+*/
 
 /**
 * Selects the value after a query
 * @param mixed $query Query to execute
 */
 function mysql__select_val($query) {
-    $res = mysql_query($query);
-    if (!$res) {
-        return 0;
-    }
-
-    $row = mysql_fetch_array($res);
-    if($row){
-        return $row[0];
-    }else{
-        0;
-    }
+    global $mysqli;
+    
+    $res = mysql__select_value($mysqli, $query);
+    if ($res==null) $res = 0;
+    
+    return $res;
 }
 
 /**
+* NOT USED HERE
+* 
 * Calculates the directory size
 * @param mixed $dir Directory to check
+* 
+* @todo move to utilities/utils_file.php
 */
 function dirsize($dir)
 {
@@ -113,22 +113,26 @@ function dirsize($dir)
         <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css">
         <script src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
 
-        <!-- Heurist CSS -->
-        <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
-
         <!-- jQuery UI -->
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css">
-        <!-- link rel="stylesheet" type="text/css" href="../../external/jquery/jquery-ui-1.10.2/themes/base/jquery.ui.dialog.css" -->
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        
+        <!-- Heurist CSS -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        <link rel="stylesheet" type="text/css" href="<?echo $cssLink;?>">
+
+        <!-- Heurist JS -->
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+
     </head>
 
     <body class="popup yui-skin-sam">
         <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
         <div id="page-inner">
-            <?php echo "System admin: <a class='dotted-link' href='mailto:" .$sysAdminEmail. "'>" .$sysAdminEmail. "</a>"; ?>
-            <?php if($sysadmin) { ?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button> <?php } ?>
+            <?php echo "System admin: <a class='dotted-link' href='mailto:" .HEURIST_MAIL_TO_ADMIN. "'>" .HEURIST_MAIL_TO_ADMIN. "</a>"; ?>
+            <?php if($sysadmin) { ?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button><br><br> <?php } ?>
             <div id="tabContainer"></div>
         </div>
 
@@ -137,7 +141,7 @@ function dirsize($dir)
          ?>
             <!-- Database verification dialog -->
             <div id="db-verification" title="Verification" style="display: none">
-                <div>
+                <div id="div-pw">
                     <span>Deletion password:</span>
                     <input id="db-password" type="password" placeholder="password">
                     <button id="pw-check" onclick="checkPassword()">Submit</button>
@@ -149,7 +153,7 @@ function dirsize($dir)
 
                     <div class="progress-bar">
                         <span class="progress">0/0</span>
-                        <progress class="bar" value="0" max="100"></progress>
+                        <div class="bar" value="0" max="100"></div>
                     </div>
                 </div>
 
@@ -197,7 +201,8 @@ function dirsize($dir)
                     $sysadmin."']";
 
                     $com = ",\n";
-
+                    $i++;
+                    //if($i>100) break;
                 }//foreach
                 ?>
             ];
@@ -233,7 +238,7 @@ function dirsize($dir)
                 */
                 { key: "date_mod", label: "Modified", sortable:true},
                 { key: "date_login", label: "Access", sortable:true},
-                { key: "owner", label: "Owner", formatter: function(elLiner, oRecord, oColumn, oData){
+                { key: "owner", label: "Owner", width:200, formatter: function(elLiner, oRecord, oColumn, oData){
                     elLiner.innerHTML = "<div style='max-width:100px' class='three-lines' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
                 }}
                 <?php if($sysadmin) { ?>
@@ -319,11 +324,11 @@ function dirsize($dir)
                         return false;
                     }
 
-                    // Verificate user
+                    // Verify user
                     $("#db-verification").dialog({
                         autoOpen: false,
                         modal: true,
-                        width: "90%"
+                        width: '550px'
                     })
                     .dialog("open");
 
@@ -336,21 +341,27 @@ function dirsize($dir)
                 function checkPassword() {
                     var submit = document.getElementById("pw-check");
                     submit.disabled = true;
-
-                    // Authenticate user
+                    
                     this.password = document.getElementById("db-password").value;
-                    $.post( '<?php echo HEURIST_BASE_URL; ?>admin/verification/deleteDB.php',
-                         {password: password}, function(response) {
-                        // Succesful, post requests to delete databases
-                        submit.parentNode.removeChild(submit);
-                        $("#authorized").slideDown(500);
-                        updateProgress(0);
-                        postDeleteRequest(0);
-                    }).fail(function(jqXHR, textStatus, errorThrown) {
-                        // Invalid
-                        alert(jqXHR.status + ": " + jqXHR.responseText);
-                        submit.disabled = false;
-                    });
+                    
+                    var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
+                    var request = {password: password, db:window.hWin.HEURIST4.util.getUrlParameter('db')};
+                    
+                    // Authenticate user
+                    window.hWin.HEURIST4.util.sendRequest(url, request, null,
+                        function(response){
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                submit.parentNode.removeChild(submit);
+                                $("#div-pw").hide();
+                                $("#authorized").slideDown(500);
+                                updateProgress(0);
+                                postDeleteRequest(0);
+                            }else{
+                                submit.disabled = false;
+                                window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                            }
+                        }
+                    );
                 }
 
                 /**
@@ -359,14 +370,39 @@ function dirsize($dir)
                 function postDeleteRequest(i) {
                     if(i < databases.length) {
                         // Delete database
-                        $.post("<?php echo HEURIST_BASE_URL; ?>admin/verification/deleteDB.php", {password: password, database: databases[i]}, function(response) {
-                            //alert(response);
-                            $("#authorized").append("<div>"+response+"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
+                        if(window.hWin.HEURIST4.util.getUrlParameter('db')==databases[i]){
+
+                            $("#authorized").append("<div>Current db "+databases[i] 
+                            +" is skipped</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
                             postDeleteRequest(i+1);
                             updateProgress(i+1);
-                        }).fail(function(jqXHR, textStatus, errorThrown) {
-                            alert(textStatus);
-                        });
+                            
+                        }else{
+                        
+                            var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
+                            var request = {password: password, 
+                                           db: window.hWin.HEURIST4.util.getUrlParameter('db'),
+                                           database: databases[i]};
+                        
+                            window.hWin.HEURIST4.util.sendRequest(url, request, null,
+                                function(response){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                        $("#authorized").append("<div>"+databases[i]
+                                        +"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
+                                        postDeleteRequest(i+1);
+                                        updateProgress(i+1);
+                                    }else{
+                                        
+                                        var msg = window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                                        
+                                        $("#authorized").append('<div class="ui-state-error" style="padding:4px;">'
+                                                    +databases[i]+' '+msg +"</div>");
+                                        
+                                    }
+                                }
+                            );
+                        }
+                        
                     }else{
                         // All post-requests have finished.
                         $("#authorized").append("<div style='margin-top: 10px'>The selected databases have been deleted!</div>");
@@ -381,6 +417,14 @@ function dirsize($dir)
                     $(".progress").text(count+"/"+databases.length);
                     $(".bar").attr("value", (count*100/databases.length));
                 }
+                
+                $(document).ready(function() {
+                    
+                    if(!window.hWin.HR){
+                        window.hWin.HR = function(token){return token};
+                    }
+                   $('button').button();
+                });                
             </script>
             <?php } ?>
     </body>

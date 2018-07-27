@@ -4,7 +4,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -19,7 +19,7 @@
 */
 require_once(dirname(__FILE__)."/../System.php");
 require_once(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
-require_once(dirname(__FILE__).'/../dbaccess/dbRecUploadedFiles.php');
+require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 require_once(dirname(__FILE__).'/../utilities/utils_file.php');
 
 $response = null;
@@ -58,7 +58,7 @@ if($system->init(@$_REQUEST['db'])){
 }
 
 if($response!=null){
-    header('Content-type: application/json');
+    header('Content-type: application/json;charset=UTF-8');
     print json_encode($response);
     exit();
 }
@@ -201,7 +201,7 @@ if($response!=null){
     if($response==null){
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
-    header('Content-type: application/json');
+    header('Content-type: application/json;charset=UTF-8');
     print json_encode($response);
     
 

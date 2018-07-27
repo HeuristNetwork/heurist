@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -23,7 +23,9 @@
 *
 * 'output' - full file path to be saved
 * 'mode' - if publish>0: js or html (default)
-* 'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only),
+* 'publish' - 0 vsn 3 UI (smarty tab),  
+*             1 - publish,  
+*             2 - no browser output (save into file only)
 *
 * other parameters are hquery's
 * 
@@ -36,7 +38,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -46,16 +48,11 @@
 
 /* TODO: rename to showReports.php */
 
-
-define('ISSERVICE',1);
-define('SEARCH_VERSION', 1);
-
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../records/files/downloadFile.php');
+require_once(dirname(__FILE__).'/../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_files.php');
 
 require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
-
-require_once(dirname(__FILE__).'/libs.inc.php');
 require_once(dirname(__FILE__).'/reportRecord.php');
 
 $outputfile = null;
@@ -71,55 +68,61 @@ $max_allowed_depth = 2;
 $publishmode = 0;
 $execution_counter = 0;
 $execution_total_counter = 0;
-$session_id = @$_REQUEST['session'];
-$mysqli = null;
+
+$system = new System(); 
+$system->init(@$_REQUEST['db']);
+
+require_once(dirname(__FILE__).'/libs.inc.php');
 
 if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 (array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
 {
-
-    executeSmartyTemplate($_REQUEST);
+    executeSmartyTemplate($system, $_REQUEST);
 }
-
+/*
+executeSmartyTemplate - main routine
+smarty_post_filter - SMARTY callback: adds a small piece of code in main loop with function smarty_function_progress - need to    
+                        maintain progress
+smarty_output_filter - SMARTY callback:  calls save_report_output2
+save_report_output2  - save report output as file (if there is parameter output)
+*/
 
 /**
 * Main function
 *
 * @param mixed $_REQUEST
 */
-function executeSmartyTemplate($params){
+function executeSmartyTemplate($system, $params){
 
-    global $smarty, $outputfile, $isJSout, $rtStructs, $dtStructs, $dtTerms, $gparams, $max_allowed_depth, $publishmode,
-    $execution_counter, $execution_total_counter, $session_id, $mysqli;
+    //$smarty is definedd in libs.inc.php
+    global $smarty, $outputfile, $isJSout, $gparams, $max_allowed_depth, $publishmode,
+           $execution_counter, $execution_total_counter;
 
-    set_time_limit(0); //no script execution time limit
-
-    mysql_connection_overwrite(DATABASE);
-
-    //AO: mysql_connection_select - does not work since there is no access to stored procedures(getTemporalDateString)
-    //    which Steve used in some queries
-    //TODO SAW  grant ROuser EXECUTE on getTemporalDate and any other readonly procs
-
-    //load definitions (USE CACHE)
-    //$rtStructs = getAllRectypeStructures(true);
-    //$dtStructs = getAllDetailTypeStructures(true);
-    //$dtTerms = getTerms(true);
-
-    $params["f"] = 1; //always search (do not use cache)
-
-    $isJSout	 = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
+    $isJSout     = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
     $outputfile  = (array_key_exists("output", $params)) ? $params["output"] :null;
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
     $emptysetmessage = (array_key_exists("emptysetmessage", $params))? $params['emptysetmessage']:null;
+           
+    if(!isset($system) || !$system->is_inited()){
+        smarty_error_output( $system, null );
+        return;
+    }
+           
+    $mysqli = $system->get_mysqli();
 
+    set_time_limit(0); //no script execution time limit
+
+    $session_id = @$params['session']; //session progress id
+    
+    $params["f"] = 1; //always search (do not use cache)
 
     $gparams = $params; //keep to use in other functions
 
     if( !array_key_exists("limit", $params) ){ //not defined
 
         if($publishmode==0){
-
-            $limit_for_interface = intval(@$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']["display-preferences"]['smarty-output-limit']);
+            $limit_for_interface = intval($system->user_GetPreference('smarty-output-limit'));
+            
             if (!$limit_for_interface || $limit_for_interface<1){
                 $limit_for_interface = 50; //default limit in dispPreferences
             }
@@ -142,49 +145,35 @@ function executeSmartyTemplate($params){
 
         //truncate recordset for output in smarty TAB - limit does not work for publish mode
         if($publishmode==0 && $qresult && array_key_exists('recIDs',$qresult)){
-            $recIDs = explode(',', $qresult['recIDs']);
+                        
+            $recIDs = prepareIds($qresult['recIDs']);
             if($params["limit"]<count($recIDs)){
-                $qresult['recIDs'] = implode(',', array_slice($recIDs, 0, $params["limit"]));
+                //$qresult['recIDs'] = implode(',', array_slice($recIDs, 0, $params["limit"]));
+                $qresult = array('records'=>array_slice($recIDs, 0, $params["limit"]) );
+                $qresult['reccount'] = count($recIDs);
+            }else{
+                $qresult = array('records'=>$recIDs );        
+                $qresult['reccount'] = count($qresult['records']);
             }
         }
 
-    }else if(@$params['h4']==1){ //search with h4 search engine and got list of ids
+    }else { //search with h4 search engine and got list of ids
 
-        /*    for future use 
-        require_once (dirname(__FILE__).'/../../hserver/System.php');
-        require_once (dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
-        
         $params['detail'] = 'ids'; // return ids only
-        $params['vo']     = 'h3';  // in h3 format
-        recordSearch($system, $params);
-        $response = array();
-        $system = new System();
-        if( ! $system->init(@$params['db']) ){
-            $response['resultCount'] == 0;
-        }else{    
-            $qresult = recordSearch($system, $params);
+        //$params['vo']     = 'h3';  // in h3 format
+        $qresult = recordSearch($system, $params); //see db_recsearch.php
+
+        if(@$qresult['status']==HEURIST_OK){
+            $qresult = $qresult['data'];
+        }else{
+           smarty_error_output( $system, null ); 
         }
-        */
-        
-        $url = "";
-        foreach($params as $key=>$value){
-            $url = $url.$key."=".urlencode($value)."&";
-        }
-
-        $url = HEURIST_BASE_URL."hserver/controller/record_search.php?".$url."&detail=ids&vo=h3";
-
-        $result = loadRemoteURLviaSocket($url);// loadRemoteURLContent($url);
-
-        $qresult = json_decode($result, true);
-
-    }else{
-        $qresult = loadSearch($params); //from search/getSearchResults.php - loads array of records based og GET request
     }
 
 
     // EMPTY RESULT SET - EXIT
-    if( !$qresult || ( !array_key_exists('recIDs',$qresult) && !array_key_exists('records',$qresult) ) ||  $qresult['resultCount']==0 )    {
-
+    if( !$qresult ||  !array_key_exists('records', $qresult) || !(intval(@$qresult['reccount'])>0) ){
+    
         if ($emptysetmessage) {
             $error = $emptysetmessage; // allows publisher of URL to customise the message if no records retrieved
         } else {
@@ -195,17 +184,8 @@ function executeSmartyTemplate($params){
                 $error = "<b><font color='#ff0000'>Search or Select records to see template output</font></b>";
             }
         }
-
-        if($isJSout){
-            $error = add_javascript_wrap4($error, null);
-        }
-
-        if($publishmode>0 && $outputfile!=null){ //save empty output into file
-            save_report_output2($error."<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
-        }else{
-            echo $error;    
-        }
-
+        
+        smarty_error_output( $system, $error );
         exit();
     }
 
@@ -223,10 +203,8 @@ function executeSmartyTemplate($params){
             $content = file_get_contents(HEURIST_SMARTY_TEMPLATES_DIR.$template_file);
         }else{
             $error = "<b><font color='#ff0000'>Template file $template_file does not exist</font></b>";
-            echo $error;
-            if($publishmode>0 && $outputfile!=null){ //save empty output into file
-                save_report_output2($error);
-            }
+            
+            smarty_error_output($sysem, $error);
             exit();
         }
     }else{
@@ -250,11 +228,7 @@ function executeSmartyTemplate($params){
                     .'<p>If you are stuck, please send your report template to <br/>'
                     .'support at HeuristNetwork dot org and we will adjust the template for you.</p>';
            
-           if($publishmode>0 && $outputfile!=null){
-                save_report_output2($error);
-           }else{
-                echo $error;
-           }
+           smarty_error_output($sysem, $error);
            exit();
     }
     
@@ -273,73 +247,17 @@ function executeSmartyTemplate($params){
     }
     //end pre-parsing of template
 
-
-    $mysqli = mysqli_connection_overwrite(DATABASE);
     if($publishmode==0 && $session_id!=null){
-        updateProgress($mysqli, $session_id, true, '0,0');
+        mysql__update_progress($mysqli, $session_id, true, '0,0');
     }
 
     //convert to array that will assigned to smarty variable
-    if(array_key_exists('recIDs',$qresult)){
-
-        $results =  explode(",", $qresult["recIDs"]);
-        $execution_total_counter = count($results);
-        
-/* OLD WAY
-        $records =  explode(",", $qresult["recIDs"]);
-        $results = array();
-        $k = 0;
-        $execution_total_counter = count($records); //'tot_count'=>$tot_count,
-
-        foreach ($records as $recordID){
-
-            if(smarty_function_progress(array('done'=>$k), $smarty)){
-                echo 'Execution was terminated';
-                return;
-            }
-
-            $rec = loadRecord($recordID, false, true); //from search/getSearchResults.php
-
-            $res1 = getRecordForSmarty($rec, 0, $k);
-            $res1["recOrder"]  = $k;
-            $k++;
-            array_push($results, $res1);
-        }
-*/
-    }else{
-
-        $records =  $qresult["records"];
-        $execution_total_counter = count($records); //'tot_count'=>$tot_count,
-        //v5.5+ $results =  array_column($records, 'recID');
-        
-        $results = array_map(function ($value) {
-                return  @$value['recID']?$value['recID']:array();
-            }, $records);
-        
-/*  OLD WAY        
-        $records =  $qresult["records"];
-        $execution_total_counter = count($records); //'tot_count'=>$tot_count,
-        $results = array();
-        $k = 0;
-        foreach ($records as $rec){
-
-            if(smarty_function_progress(array('done'=>$k), $smarty)){
-                echo 'Execution was terminated';
-                return;
-            }
-
-            $res1 = getRecordForSmarty($rec, 0, $k);
-            $res1["recOrder"]  = $k;
-            $k++;
-            array_push($results, $res1);
-        }
-*/
-    }
-    //activate default template - generic list of records
+    $results =  $qresult["records"];
+    $execution_total_counter = count($results); //$qresult["reccount"];
 
     //we have access to 2 methods getRecord and getRelatedRecords
     $heuristRec = new ReportRecord();
-    //$smarty->registerObject('heurist', $heuristRec, array('getRecord'), false);
+    
     $smarty->assignByRef('heurist', $heuristRec);
     
     $smarty->assign('results', $results); //assign 
@@ -371,7 +289,9 @@ function executeSmartyTemplate($params){
 
         //save temporary template
         //this is user name $template_file = "_temp.tpl";
-        $template_file = "_".get_user_username().".tpl";
+        $user = $system->getCurrentUser();
+        
+        $template_file = "_".$user['ugr_Name'].".tpl";
         $file = fopen ($smarty->template_dir.$template_file, "w");
         fwrite($file, $template_body);
         fclose ($file);
@@ -388,16 +308,16 @@ function executeSmartyTemplate($params){
         $smarty->error_reporting = 0;
 
         if($outputfile!=null){
-            $smarty->registerFilter('output', 'smarty_output_filter');
+            $smarty->registerFilter('output', 'smarty_output_filter');  //to preform output into file
         }else if($isJSout){
-            $smarty->registerFilter('output', 'add_javascript_wrap5');
+            $smarty->registerFilter('output', 'smarty_output_js_filter');
         }
     }
     //DEBUG   
-    $smarty->registerFilter('post','smarty_post_filter');
+    $smarty->registerFilter('post','smarty_post_filter'); //to add progress support
 
     if($publishmode==0 && $session_id!=null){
-        updateProgress($mysqli, $session_id, true, '0,'.count($results));
+        mysql__update_progress($mysqli, $session_id, true, '0,'.count($results));
         /*session_start();
         $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] = '0,'.count($results);
         session_write_close();*/
@@ -405,13 +325,17 @@ function executeSmartyTemplate($params){
     $execution_counter = -1;
     $execution_total_counter = count($results);
     try{
+        if($outputfile==null && $publishmode==1){
+            header("Content-type: text/html;charset=UTF-8");
+        }
         $smarty->display($template_file);
     } catch (Exception $e) {
-        echo 'Exception on execution: ', $e->getMessage(), "\n";
+        smarty_error_output($sysem, 'Exception on execution: '.$e->getMessage());
+        //echo 'Exception on execution: ', $e->getMessage(), "\n";
     }
 
     if($publishmode==0 && $session_id!=null){
-        updateProgress($mysqli, $session_id, false, 'REMOVE');
+        mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
     }
     $mysqli->close();        
     
@@ -420,12 +344,10 @@ function executeSmartyTemplate($params){
         .'Please use publish or print to get full set of records.<br Or increase the limit in preferences</b></div>';
     }
     
-
-
 }
 
 //
-// adds smarty_function_progress into main loop
+// adds a small piece of code in main loop with function smarty_function_progress - need to maintain progress
 //
 function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 {
@@ -446,13 +368,16 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 }
 
 //
-// save report output as file (if there is parameter output)
+// SMARTY callback:  calls save_report_output2
 //
 function smarty_output_filter($tpl_source, Smarty_Internal_Template $template)
 {
     save_report_output2($tpl_source);
 }
 
+//
+// save report output as file (if there is parameter output)
+//
 function save_report_output2($tpl_source){
 
     global $outputfile, $isJSout, $gparams, $publishmode;
@@ -496,7 +421,7 @@ function save_report_output2($tpl_source){
     }
     }
 
-    //$publishmode=2 download
+    //$publishmode=2 save into file or download (no browser output)
     if($publishmode!=1){
 
         if($errors!=null){
@@ -582,12 +507,10 @@ function save_report_output2($tpl_source){
     }
 }
 
-
-
 //
-// wrap smarty output into javascript function
+// wrap smarty output into javascript function document.write
 //
-function add_javascript_wrap5($tpl_source, Smarty_Internal_Template $template)
+function smarty_output_js_filter($tpl_source, Smarty_Internal_Template $template)
 {
     return add_javascript_wrap4($tpl_source);
 }
@@ -598,33 +521,6 @@ function add_javascript_wrap4($tpl_source)
     $tpl_source = str_replace("'","&#039;",$tpl_source);
     return "document.write('". $tpl_source."');";
 }
-
-
-
-// NOT USED
-// convert record or detail name string to PHP applicable variable name (index in smarty variable)
-// for field(detail) type it will  in low case
-//
-function getVariableNameForSmarty($name, $is_fieldtype = true){
-
-    //$dtname = strtolower(str_replace(' ','_',strtolower($dtNames[$dtKey]));
-    //'/[^(\x20-\x7F)\x0A]*/'     "/^[a-z0-9]+$/"
-
-    if($is_fieldtype){
-        $name = strtolower($name);
-    }
-
-    $goodname = preg_replace('~[^a-z0-9]+~i','_', $name);
-    $goodname = str_replace('__','_',$goodname);
-
-    return $goodname;
-}
-
-
-
-
-// Smarty plugin functions allow new functionality to be added to Smarty reports
-// Can be of particular use for complex functions or functions that are used repeatedly by particular installations
 
 
 //
@@ -659,7 +555,7 @@ function smarty_function_progress($params, &$smarty){
             //$mysqli = mysqli_connection_overwrite(DATABASE);
 
             //get 
-            $current_val = updateProgress($mysqli, $session_id, false, null);
+            $current_val = mysql__update_progress($mysqli, $session_id, false, null);
 
             if($current_val && $current_val=='terminate'){
 
@@ -674,7 +570,7 @@ function smarty_function_progress($params, &$smarty){
                 $session_val = $execution_counter.','.$tot_count;
             }
             //set
-            updateProgress($mysqli, $session_id, false, $session_val);
+            mysql__update_progress($mysqli, $session_id, false, $session_val);
 
             //$mysqli->close();
 
@@ -691,7 +587,6 @@ function smarty_function_progress($params, &$smarty){
 }
 
 
-
 //
 // smarty plugin function
 //
@@ -705,8 +600,6 @@ function smarty_function_out($params, &$smarty)
         return '';
     }
 }
-
-
 
 //
 // smarty plugin function
@@ -779,32 +672,37 @@ function smarty_function_wrap($params, &$smarty)
 
             if(!is_array($values) || !array_key_exists(0,$values)) $values = array($values);
 
-            foreach ($values as $idx => $value){
+            foreach ($values as $idx => $fileinfo){
 
                 if($limit>0 && $idx>=$limit) break;
 
-                $mimeType = $value['mimeType'];
-                
-                $value['playerURL'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$value['nonce'].'&mode=tag';
-                //$value['URL'] = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$value['nonce'];
-                
+                $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
+                $originalFileName = $fileinfo['ulf_OrigFileName'];
+                $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
+                    
+                $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
+                $file_thumbURL  = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&thumb='.$file_nonce;
+                $file_URL   = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce; //download
+                            
                 if($mode=="link") {
 
-                    $sname = ($value['origName']=='_remote')?$value['URL']:$value['origName'];
-                    $sres = $sres."<a href='".$value['URL']."' target='_blank' title='".$value['description']."'>".$sname."</a>";
+                    $sname = (!$originalFileName || $originalFileName=='_remote')?$external_url:$originalFileName;
+                    $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$fileinfo['ulf_Description']."'>".$sname."</a>";
                     
                 }else 
                 if($mode=="thumbnail" ){
 
-                    $sres = $sres."<a href='".$value['URL']."' target='_blank'>".
-                    "<img src='".$value['thumbURL']."' title='".$value['description']."'/></a>";
+                    $sres = $sres."<a href='".$file_URL."' target='_blank'>".
+                    "<img src='".$file_thumbURL."' title='".$fileinfo['ulf_Description']."'/></a>";
 
                 }else{ //player is default
 
+
+                    $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
+                    $params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
                     
-                    $sres = $sres.getPlayerTag($value['nonce'], $value['mimeType'], $value['URL'], $size);
-                    //$value['playerURL'] = $value['playerURL'].'&size='.$size;
-                    //it does not work  $sres = $sres.file_get_contents($value['playerURL']);
+                    //$sres = $sres.getPlayerTag($value['nonce'], $value['mimeType'], $value['URL'], $size);
+                    $sres = $sres.fileGetPlayerTag($file_nonce, $mimeType, $params, $external_url, $size); //see db_files
                     
                     /*
                     if($type_media == 'image'){
@@ -862,7 +760,7 @@ function smarty_function_wrap($params, &$smarty)
                         $res = '<a href="http://maps.google.com/maps?z=18&q='.$point->y().",".$point->x().'" target="_blank">'.$label."</a>";
                     }else{
                         $recid = $value['recid'];
-                        $url = HEURIST_BASE_URL."viewers/map/showMapUrl.php?".$mapsize."&q=ids:".$recid."&db=".HEURIST_DBNAME; //"&t="+d;
+                        $url = HEURIST_BASE_URL."viewers/map/mapStatic.php?".$mapsize."&q=ids:".$recid."&db=".HEURIST_DBNAME; //"&t="+d;
                         return "<img src=\"".$url."\" ".$size."/>";
                     }
                 }
@@ -878,7 +776,28 @@ function smarty_function_wrap($params, &$smarty)
     }
 }
 
+//
+//
+//
+function smarty_error_output($system, $error_msg){
+    global $isJSout, $publishmode, $outputfile;  
+    
+    if(!isset($error_msg)){
+        $error_msg = $system->getError();
+        $error_msg = $error_msg[0]['message'];
+    }
+ 
+    if($isJSout){
+        $error_msg = add_javascript_wrap4($error_msg, null);
+    }
 
+    if($publishmode>0 && $outputfile!=null){ //save empty output into file
+        save_report_output2($error_msg."<div style=\"padding:20px;font-size:110%\">Currently there are no results</div>");
+    }else{
+        echo $error_msg;    
+    }
+        
+}
 
 //-----------------------------------------------------------------------
 
@@ -901,4 +820,23 @@ function getSmartyVars($string){
     return array_unique($smartyVars);
 }
 
+
+// NOT USED
+// convert record or detail name string to PHP applicable variable name (index in smarty variable)
+// for field(detail) type it will  in low case
+//
+function getVariableNameForSmarty($name, $is_fieldtype = true){
+
+    //$dtname = strtolower(str_replace(' ','_',strtolower($dtNames[$dtKey]));
+    //'/[^(\x20-\x7F)\x0A]*/'     "/^[a-z0-9]+$/"
+
+    if($is_fieldtype){
+        $name = strtolower($name);
+    }
+
+    $goodname = preg_replace('~[^a-z0-9]+~i','_', $name);
+    $goodname = str_replace('__','_',$goodname);
+
+    return $goodname;
+}
 ?>

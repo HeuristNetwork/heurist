@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -34,7 +34,7 @@ var selectTerms;
 
 //aliases
 var Dom = YAHOO.util.Dom,
-	Hul = top.HEURIST.util;
+	Hul = window.hWin.HEURIST4.util;
 
 /**
 * SelectTerms
@@ -54,12 +54,13 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		_dtyID,
         _isNeedSave = false, //when it is invoked from editRecord - the changes are saved in defDetailType implicitely
 		_datatype,
+        _mode,
 		_allTerms, //all terms
 		_disTerms, //disabled terms
 		_callback_func; //callback function for non-window mode
 
-	var treesByDomain, //from HEURIST   - tree
-		termsByDomainLookup, //from HEURIST  - list
+	var treesByDomain, //from db strucute   - tree
+		termsByDomainLookup, //from db strucute  - list
 		existingTree = [],
 		disabledTermsList = [],	//array of disabled terms
 		disabledTermsListOriginal = [],	//array of originally disabled terms
@@ -81,11 +82,12 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		// otherwise try to get these parameters from request
 		//
 		if(Hul.isnull(dtyID) && (location.search.length > 1)) {
-				top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-				dtyID = top.HEURIST.parameters.detailTypeID;
-                _isNeedSave = (top.HEURIST.parameters.mode==="editrecord");
-
-				var _dt_id = top.HEURIST.parameters.dtname;
+				
+				dtyID = Hul.getUrlParameter('detailTypeID', location.search); 
+                _mode = Hul.getUrlParameter('mode', location.search);
+                _isNeedSave = (_mode==="editrecord");
+				var _dt_id = Hul.getUrlParameter('dtname', location.search);
+                
 				if(!Hul.isnull(_dt_id)){
 					if(_dt_id<0){
 						Dom.get("dtyName").innerHTML = "<h2 class='dtyName'>New Field Type</h2>";
@@ -94,7 +96,7 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 					}
 				}
 
-				if(top.HEURIST.parameters.selonly == "1"){
+				if(Hul.getUrlParameter('selonly', location.search) == "1"){
 					Dom.get("headerDiv").style.display = "none";
 					Dom.get("selectedTermsTree").className = "selectedTerms";
 				}
@@ -105,8 +107,8 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		if(!Hul.isnull(dtyID)){
 
 					_dtyID = dtyID;
-					var dt = top.HEURIST.detailTypes.typedefs[dtyID].commonFields,
-						fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+					var dt = window.hWin.HEURIST4.detailtypes.typedefs[dtyID].commonFields,
+						fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
 
 					if (!Hul.isnull(dt)) {
 						_datatype = dt[fi.dty_Type];
@@ -120,9 +122,9 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 					}
 		}
 		if(Hul.isnull(_datatype) && (location.search.length > 1)){
-						_datatype = top.HEURIST.parameters.datatype;
-						_allTerms = top.HEURIST.parameters.all;
-						_disTerms = top.HEURIST.parameters.dis;
+						_datatype = Hul.getUrlParameter('datatype', location.search);
+						_allTerms = Hul.getUrlParameter('all', location.search);
+						_disTerms = Hul.getUrlParameter('dis', location.search);
 		}
 
 		if(Hul.isnull(_datatype)) {
@@ -132,14 +134,14 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 		}
 
 				if(_datatype === "enum"){
-					treesByDomain = top.HEURIST.terms.treesByDomain['enum'];
-					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
+					treesByDomain = window.hWin.HEURIST4.terms.treesByDomain['enum'];
+					termsByDomainLookup = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'];
 
 				}else if(_datatype === "relation" || _datatype === "relationtype" || _datatype === "relmarker")
 				{
 					_datatype = "relation";
-					treesByDomain = top.HEURIST.terms.treesByDomain.relation;
-					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup.relation;
+					treesByDomain = window.hWin.HEURIST4.terms.treesByDomain.relation;
+					termsByDomainLookup = window.hWin.HEURIST4.terms.termsByDomainLookup.relation;
 
 				}else{
 					Dom.get("dtyName").innerHTML = "ERROR: Detailtype '" + _datatype + "' is of invalid base type";
@@ -147,11 +149,12 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 					return;
 				}
 
-				existingTree = Hul.expandJsonStructure(_allTerms);
-				disabledTermsList = Hul.expandJsonStructure(_disTerms);
+				
+                existingTree = expandJsonStructure(_allTerms);
+                disabledTermsList = expandJsonStructure(_disTerms);
 
 				///for filtered mode - to prevent enabling of originally disabled terms
-				disabledTermsListOriginal = Hul.expandJsonStructure(_disTerms);
+				disabledTermsListOriginal = expandJsonStructure(_disTerms);
 
 				//create trees
 				_treesInit();
@@ -161,12 +164,24 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 
 	}//end _init
 
+    
+    function expandJsonStructure(jsonString){
+        var retStruct = "";
+        if(jsonString && jsonString !== "") {
+            try {
+                retStruct = $.parseJSON(jsonString);
+            } catch(e) {
+            }
+        }
+        return retStruct;        
+    }
+    
 	//
 	function _getTitle(dt_id){
 			var dtname =  "<div style='display:inline-block;font-weight:800;'>field id:</div><h2 style='display:inline-block;padding-left:5px;'>" + dt_id + '</h2>';
-			var dt = top.HEURIST.detailTypes.typedefs[dt_id].commonFields;
+			var dt = window.hWin.HEURIST4.detailtypes.typedefs[dt_id].commonFields;
 			if (!Hul.isnull(dt)) {
-							dtname = dtname + " <div style='display:inline-block;font-weight:800;padding-left:20px;'>name:</div><h2 style='display:inline-block;padding-left:5px;'>"+dt[top.HEURIST.detailTypes.typedefs.fieldNamesToIndex.dty_Name]+"</h2>";
+							dtname = dtname + " <div style='display:inline-block;font-weight:800;padding-left:20px;'>name:</div><h2 style='display:inline-block;padding-left:5px;'>"+dt[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Name]+"</h2>";
 			}
 			return dtname;
 	}
@@ -278,19 +293,12 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 			oDetailType.detailtype.defs[_dtyID] = {};
 			oDetailType.detailtype.defs[_dtyID].common = [_allTerms, _disTerms];
 
-            str = YAHOO.lang.JSON.stringify(oDetailType);
-        }
-
-
-        if(str !== null) {
-
             // 3. sends data to server
-            var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-                                (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            var baseurl = top.HEURIST.baseURL + "admin/structure/saveStructure.php";
+            var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = null; //_updateResult;
-            var params = "method=saveDT&db="+db+"&data=" + encodeURIComponent(str);
-            Hul.getJsonData(baseurl, callback, params);
+            var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};
+            
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
         }
     }
 
@@ -671,8 +679,8 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 			sel.remove(0);
 		}*/
 
-		var prev = Dom.get("previewListDiv");
-        prev.innerHTML = "";
+		var prev = $("#previewListDiv");
+        prev.empty();
 		/*i, len = prev.children.length;
 		for (i = 0; i < len; i++) {
 			prev.removeChild(prev.childNodes[0]);
@@ -688,13 +696,12 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 			_setDisabledTerms();
 		}catch(e) { }
 
-
-		var el_sel = top.HEURIST.util.createTermSelect(termIDTree,
-													(disabledTermsList || ""),
-													_datatype,
-													null);
-		el_sel.className = "previewList";
-		prev.appendChild(el_sel);
+        $input = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
+                {datatype:_datatype, termIDTree:termIDTree, headerTermIDsList:(disabledTermsList || ""),
+                    defaultTermID:null, topOptions:false, supressTermCode:true, useHtmlSelect:false});
+        
+        
+        $input.addClass('previewList').appendTo($(prev));
 
 		//if (!defaultTermID) sel.selectedIndex = 0;
 	}
@@ -745,7 +752,7 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 			disabledTermsList.push(tempDisabledTerms[tempIndex]);
 			tempIndex++;
 		}
-		top.HEURIST.terms.selectedDisabled = disabledTermsList;*/
+		window.hWin.HEURIST4.terms.selectedDisabled = disabledTermsList;*/
 
 		// Fill the tree with all terms
 		_buildTermTree(_termTree.getRoot());
@@ -782,10 +789,9 @@ END TREE REALTED ROUTINES ---------------------------------------
 		}catch(e) { }
 
 
-	var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db : (top.HEURIST.database.name?top.HEURIST.database.name:''));
-
-	Hul.popupURL(top, top.HEURIST.baseURL + "admin/structure/terms/editTerms.php?popup=1&db="+db+"&treetype="+_datatype,
-		{
+	var sURL = window.hWin.HAPI4.baseURL + "admin/structure/terms/editTerms.php?popup=1&db="
+                    +window.hWin.HAPI4.database+"&treetype="+_datatype;
+    window.hWin.HEURIST4.msg.showDialog(sURL, {
 		"close-on-blur": false,
 		"no-resize": false,
         height: 750,     // height and width of term tree editing popup
@@ -793,36 +799,16 @@ END TREE REALTED ROUTINES ---------------------------------------
 		callback: function(needTreeReload) {
 			if(true || needTreeReload) { //refresh in any case
 
-				if(_datatype === "enum"){
-					treesByDomain = top.HEURIST.terms.treesByDomain['enum'];
-					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
-				}else if(_datatype === "relation" || _datatype === "relationtype" || _datatype === "relmarker")
+                var  _type = 'enum';
+                    
+				if(_datatype === "relation" || _datatype === "relationtype" || _datatype === "relmarker")
 				{
-					treesByDomain = top.HEURIST.terms.treesByDomain.relation;
-					termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup.relation;
-
+                        _type = 'relation';
 				}
+                
+                treesByDomain = window.hWin.HEURIST4.terms.treesByDomain[_type];
+                termsByDomainLookup = window.hWin.HEURIST4.terms.termsByDomainLookup[_type];
 				_treesInit();
-
-/* weird way - but it works
-				var callback = function (context){
-					eval(context.responseText);
-
-							if(_datatype === "enum"){
-								treesByDomain = top.HEURIST.terms.treesByDomain['enum'];
-								termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup['enum'];
-
-							}else if(_datatype === "relationtype" || _datatype === "relmarker")
-							{
-								treesByDomain = top.HEURIST.terms.treesByDomain.relation;
-								termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup.relation;
-
-							}
-							_treesInit();
-				}
-
-				top.HEURIST.util.sendRequest(top.HEURIST.baseURL+"common/php/loadCommonInfo.php", callback, null);
-*/
 
 			}
 		}

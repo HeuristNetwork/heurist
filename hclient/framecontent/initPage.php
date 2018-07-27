@@ -11,7 +11,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -31,9 +31,11 @@ if(defined('IS_INDEX_PAGE')){
     //if PDIR is defined this script is main (root)
     define('ERROR_REDIR','hserver/utilities/list_databases.php');
 }else{
-    if(!defined('PDIR')) define('PDIR','../../');
-    define('ERROR_REDIR', HEURIST_BASE_URL.'hclient/framecontent/errorPage.php?db='.@$_REQUEST['db']);
+    if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css
+    define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
 }
+
+
 
 $error_msg = '';
 $isSystemInited = false;
@@ -47,13 +49,7 @@ if(@$_REQUEST['db']){
 }
 
 if(!$isSystemInited){
-    if(defined('IS_INDEX_PAGE')){
-        require (ERROR_REDIR);
-    }else{
-        $err = $system->getError();
-        $error_msg = @$err['message']?$err['message']:'';
-        header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($error_msg));
-    }
+    include ERROR_REDIR;
     exit();
 }
 
@@ -64,16 +60,18 @@ $login_warning = 'To perform this action you must be logged in';
 // define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
 //
 if(defined('LOGIN_REQUIRED') && !$system->has_access()){
-    //No Need to show error message when login is required, login page ia already rendered
-    //header('Location: '.ERROR_REDIR); //'&msg='.rawurlencode($login_warning));
+    //No Need to show error message when login is required, login popup will be shown
+    //$message = $login_warning
+    //include ERROR_REDIR;
     exit();
-
 
 }else if(defined('MANAGER_REQUIRED') && !$system->is_admin() ){ //A member should also be able to create and open database
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Administrator of group \'Database Managers\''));
+    $message = $login_warning.' as Administrator of group \'Database Managers\'';
+    include ERROR_REDIR;
     exit();
 }else if(defined('OWNER_REQUIRED') && !$system->is_dbowner()){
-    header('Location: '.ERROR_REDIR.'&msg='.rawurlencode($login_warning.' as Database Owner'));
+    $message = $login_warning.' as Database Owner';
+    include ERROR_REDIR;
     exit();
 }
 
@@ -112,40 +110,9 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
     var _time_debug = new Date().getTime() / 1000;
     var _time_start = _time_debug;
     //console.log('ipage start');
-
-    //find heurist object in parent windows or init new one if current window is a top most
-    function _detectHeurist( win ){
-        if(win.HEURIST4){ //defined
-            return win;
-        }
-
-        try{
-            win.parent.document;
-        }catch(e){
-            // not accessible - this is cross domain
-            return win;
-        }
-        if (win.top == win.self) {
-            //we are in frame and this is top most window and Heurist is not defined
-            //lets current window will be heurist window
-            return window;
-        }else{
-            return _detectHeurist( win.parent );
-        }
-    }
-    //detect wether this window is top most or inside frame
-    window.hWin = _detectHeurist(window);
-
-    /*if (window.top != window.self) {
-    //this is frame
-    } else {
-    //top most window
-    window.h4win = window.top;
-    }*/
-
-
 </script>
 
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 <?php
 if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     ?>
@@ -277,7 +244,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                 }
 
                 window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                    if(response.status == window.hWin.ResponseStatus.OK){
                         window.hWin.HEURIST4.rectypes = response.data.rectypes;
                         window.hWin.HEURIST4.terms = response.data.terms;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
@@ -336,10 +303,11 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         var layoutid = '<?=@$_REQUEST['ll']?>';
         if(window.hWin.HEURIST4.util.isempty(layoutid)){
-            layoutid = window.hWin.HAPI4.get_prefs('layout_id');
+            layoutid = "H5Default";
+            /*layoutid = window.hWin.HAPI4.get_prefs('layout_id');
             if(window.hWin.HEURIST4.util.isempty(layoutid)){
-                layoutid = "H4Default";
-            }
+                layoutid = "H5Default";
+            }*/
         }
         if(!window.hWin.HAPI4.sysinfo['layout']){
             window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout

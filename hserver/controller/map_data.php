@@ -7,7 +7,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Jan Jaap de Groot  <jjedegroot@gmail.com>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -408,16 +408,14 @@ if( $system->init(@$_REQUEST['db']) ){
 
     $system->defineConstants();
     // Get all Map Documents
-    $documents = getMapDocuments($system, @$_REQUEST['id']);
+    $response = array("status"=>HEURIST_OK, "data"=>getMapDocuments($system, @$_REQUEST['id']));
 
-    // Return the response object as JSON
-    header('Content-type: application/json');
-    print json_encode($documents);
 }else {
     // Show construction error
-    echo $system->getError();
+    $response = $system->getError();
 }
 
-exit();
-
+// Return the response object as JSON
+header('Content-type: application/json;charset=UTF-8');
+print json_encode($response);
 ?>

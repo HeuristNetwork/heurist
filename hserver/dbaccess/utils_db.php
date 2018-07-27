@@ -1,15 +1,24 @@
 <?php
+//@TODO convert to class
 
     /**
     *  Database utilities :   mysql_ - prefix for function
     *
-    *  mysql_connection - establish connection
+    *  mysql__connection - establish connection
+    *  mysql__usedatabase
+    *  mysql__create_database
+    *  mysql__drop_database
+    * 
     *  mysql__getdatabases4 - get list of databases
     *  mysql__select_assoc2 - returns array  key_column=>val_column for given table
     *  mysql__select_list - returns array of column values
     *  mysql__select_value   - return the first column of first row
     *  mysql__select_row   - returns first row
+    *  mysql__select_row_assoc - returns first row assoc fieldnames
+    *  mysql__select_all
+    *  mysql__duplicate_table_record
     *  mysql__insertupdate
+    *  mysql__exec_param_query
     *  mysql__delete
     *  mysql__begin_transaction
     *
@@ -24,7 +33,7 @@
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -50,7 +59,7 @@
     *
     * @return a MySQL link identifier on success or array with code and error message on failure.
     */
-    function mysql_connection($dbHost, $dbUsername, $dbPassword){
+    function mysql__connection($dbHost, $dbUsername, $dbPassword){
 
 
         if(null==$dbHost || $dbHost==""){
@@ -82,10 +91,12 @@
     function mysql__usedatabase($mysqli, $dbname){
         
         if($dbname){
+            
+            list($database_name_full, $database_name) = mysql__get_names( $dbname );
 
-            $success = $mysqli->select_db($dbname);
+            $success = $mysqli->select_db($database_name_full);
             if(!$success){
-                return array(HEURIST_INVALID_REQUEST, "Could not open database ".$dbname);
+                return array(HEURIST_INVALID_REQUEST, "Could not open database ".$database_name);
             }
 
             $mysqli->query('set character set "utf8"');
@@ -93,6 +104,58 @@
 
         }
         return true;
+    }
+    
+    //
+    //
+    //
+    function mysql__create_database( $mysqli, $db_name ){
+
+        $res = false;
+
+        // Avoid illegal chars in db
+        if (preg_match('[\W]', $db_name)){
+            $res = array(HEURIST_INVALID_REQUEST, 
+                'Only letters, numbers and underscores (_) are allowed in the database name');
+        }else{
+            // Create database
+            $sql = "CREATE DATABASE `".$db_name."`";
+            if ($mysqli->query($sql)) {
+                $res = true;
+            } else {
+                $res = array(HEURIST_DB_ERROR, 
+                        'Unable to create database '.$db_name.' SQL error: '.$mysqli->error);
+            }
+        }
+        return $res;
+    }
+    
+    //
+    //
+    //
+    function mysql__drop_database( $mysqli, $db_name ){
+
+        return $mysqli->query('DROP DATABASE '.$db_name);
+    }
+
+    //
+    // get database name with and without hdb prefix
+    //
+    function mysql__get_names( $db=null ){
+    
+        if($db==null){
+            $database_name = HEURIST_DBNAME;
+            $database_name_full = HEURIST_DBNAME_FULL;
+        }else{
+            if(strpos($db, HEURIST_DB_PREFIX)===0){
+                $database_name_full = $db;
+                $database_name = substr($db,strlen(HEURIST_DB_PREFIX));
+            }else{
+                $database_name = $db;
+                $database_name_full = HEURIST_DB_PREFIX.$db;
+            }
+        }
+        return array($database_name_full, $database_name);
     }
     
     
@@ -170,7 +233,7 @@
         return $matches;
     }
     /**
-    * returns array of column values
+    * returns array of FIRST column values
     */
     function mysql__select_list2($mysqli, $query) {
 
@@ -189,6 +252,7 @@
 
         return $matches;
     }
+    
     function mysql__select_list($mysqli, $table, $column, $condition) {
         $query = "SELECT $column FROM $table WHERE $condition";
         return mysql__select_list2($mysqli, $query);
@@ -231,6 +295,28 @@
         }
         return $result;
     }
+
+    /**
+    * returns first row with assoc field names 
+    *
+    * @param mixed $mysqli
+    * @param mixed $query
+    */
+    function mysql__select_row_assoc($mysqli, $query) {
+        $result = null;
+        if($mysqli){
+            $res = $mysqli->query($query);
+            if($res){
+                $row = $res->fetch_assoc();
+                if($row){
+                    $result = $row;
+                }
+                $res->close();
+            }
+        }
+        return $result;
+    }
+
     
     /**
     * returns all rows as two dimensional array
@@ -238,7 +324,7 @@
     * @param mixed $mysqli
     * @param mixed $query
     * @param mixed $mode 
-    *                   0 - 2 dimensions array of records
+    *                   0 - two dimensional array of records
     *                   1 - array of records with index from first column
     * @return []
     */
@@ -249,12 +335,13 @@
             if ($res){
                 $result = array();
                 while ($row = $res->fetch_row()){
+                    
+                    if($i_trim>0) array_walk($row, 'trim_item', $i_trim);
+                    
                     if($mode==1){
                         $rec_id = array_shift($row);
-                        if($i_trim>0) array_walk($row, 'trim_item', $i_trim);
                         $result[$rec_id] = $row;  //stripAccents(trim($row[1]));
-                    }else{
-                        if($i_trim>0) array_walk($row, 'trim_item', $i_trim);
+                    }else {
                         array_push($result, $row);
                     }
                 }
@@ -462,28 +549,60 @@
         }else{
             $query = $query." where ".$primary_field."=".($primary_field_type=='integer'?$rec_ID:"'".$rec_ID."'");
         }
-/*        
-if($table_name=='usrTags'){
-error_log($query);        
-error_log(print_r($params, true));
-}
-*/
-        $stmt = $mysqli->prepare($query);
-        if($stmt){
-            call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
-            if(!$stmt->execute()){
-                $ret = $mysqli->error;
-            }else{
-                if($primary_field_type=='integer'){
-                    $ret = ($isinsert)?$stmt->insert_id:$rec_ID;
-                }//for non-numeric it returns null
+
+        $result = mysql__exec_param_query($mysqli, $query, $params);
+        
+        if($result==true){ //&& $primary_field_type=='integer'
+            $result = ($isinsert) ?$mysqli->insert_id :$rec_ID;
+        }//for non-numeric it returns null
+
+        return $result;
+    }
+
+    //
+    //
+    //
+    function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
+
+        if ($params == null || count($params) < 1) {// not parameterised
+            if ($result = $mysqli->query($query)) {
+
+                $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                
+            } else {
+                $result = $mysqli->error;
+                if ($result == "") {
+                   $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                }
             }
-            $stmt->close();
-        }else{
-            $ret = $mysqli->error;
+        }else{        
+
+            $stmt = $mysqli->prepare($query);
+            if($stmt){
+
+//error_log($query);
+//error_log(print_r($params, true));
+/*  faster
+                $refArr = referenceValues($params); 
+                $ref    = new ReflectionClass('mysqli_stmt'); 
+                $method = $ref->getMethod("bind_param"); 
+                $method->invokeArgs($stmt, $refArr); 
+*/                
+                call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
+                if(!$stmt->execute()){
+                    $result = $mysqli->error;
+                }else{
+                    $result = $return_affected_rows ?$mysqli->affected_rows  :true;
+                    //$result = $stmt->insert_id ?$stmt->insert_id :$mysqli->affected_rows;
+                }
+                $stmt->close();
+
+            }else{
+                $result = $mysqli->error;
+            }
         }
 
-        return $ret;
+        return $result;
     }
     /**
     * converts array of values to array of value references for PHP 5.3+
@@ -492,17 +611,19 @@ error_log(print_r($params, true));
     * @return   array of values or references to values
     */
     function referenceValues($arr) {
-        if (strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
+        if (true || strnatcmp(phpversion(), '5.3') >= 0) //Reference is required for PHP 5.3+
         {
             $refs = array();
-            foreach ($arr as $key => $value) $refs[$key] = & $arr[$key];
+            foreach ($arr as $key => $value) $refs[$key] = &$arr[$key];
             return $refs;
         }
         return $arr;
     }
 
     /**
-    * Returns values from sysIdentification
+    * Returns values from sysIdentification 
+    * 
+    * @todo move to specific entity class
     *
     * @param mixed $mysqli
     */
@@ -521,6 +642,9 @@ error_log(print_r($params, true));
         return $sysValues;
     }
     
+    //
+    //
+    //
     function updateDatabseToLatest($system){
         
         $mysqli = $system->get_mysqli();
@@ -550,6 +674,29 @@ error_log(print_r($params, true));
         if(!$res){
             $system->addError(HEURIST_DB_ERROR, 'Cannot create usrRecPermissions', $mysqli->error);
             return false;
+        }
+        
+        $query = 'DROP TRIGGER IF EXISTS update_sys_index_trigger';
+        $res = $mysqli->query($query);
+        
+        if(!array_key_exists('sys_TreatAsPlaceRefForMapping', $system->get_system())){
+            //add new field into table
+            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
+            $res = $mysqli->query($query);
+        }
+      
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
+        if($value==null || $value==""){        
+            $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
+                  ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
+                  ."`rcp_UGrpID` smallint(5) unsigned NOT NULL COMMENT 'ID of group',"
+                  ."`rcp_RecID` int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',"
+                  ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
+                  ."PRIMARY KEY  (rcp_ID),"
+                  ."UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)"
+                .") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records'";
+            
+            $mysqli->query($query);
         }
         
         //verify that required column exists in sysUGrps
@@ -598,6 +745,7 @@ error_log(print_r($params, true));
                 return false;
             }
         }
+
         
         //insert special field type - reference to parent record
         $dty_ID = mysql__select_value($mysqli,  
@@ -709,6 +857,19 @@ error_log(print_r($params, true));
         return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
     }    
 
+    function  trim_lower_accent($item){
+        return mb_strtolower(stripAccents($item));
+    }
+
+    function  trim_lower_accent2(&$item, $key){
+        $item = trim_lower_accent($item);
+    }
+
+    function mb_strcasecmp($str1, $str2, $encoding = null) {
+        if (null === $encoding) { $encoding = mb_internal_encoding(); }
+        return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
+    }
+
     //
     // $rec_IDs - may by csv string or array 
     // return array of integers
@@ -748,6 +909,32 @@ error_log(print_r($params, true));
         return $ids;
         
     }
+    
+
+    //
+    // returns null if some of csv is not integer - repalce with prepareIds?
+    //
+    function getCommaSepIds($value)
+    {
+        if(is_array($value)){
+            $a = $value;
+        }else{
+            if(substr($value, -1) === ','){
+                //remove last comma
+                $value = substr($value,0,-1);
+            }
+
+            $a = explode(',', $value);
+        }
+        $n = array_map('intval', $a);
+        
+        if(!array_diff($a, $n)){
+            return $value;
+        }else{
+            return null;
+        }
+    }
+    
     //
     //
     //
@@ -763,4 +950,53 @@ error_log(print_r($params, true));
         
     }
 
+    
+
+    //
+    // works with temporary table sysSessionProgress that allows trace long server side process like smarty report or csv import
+    //
+    function mysql__update_progress($mysqli, $session_id, $is_init, $value){
+        
+        $need_close = false;
+        /*
+        if($mysqli===null){
+            $need_close = true;
+            $mysqli = mysqli_connection_overwrite(DATABASE);
+        }*/
+        
+        if($is_init){
+            //check that session table exists
+            $from_res = $mysqli->query("show tables like 'sysSessionProgress'");
+            if ($from_res && $from_res->num_rows > 0) {
+                //remove old data
+                //mysql_query('DELETE FtmpUsrSession where field_id<'.);
+            }else{
+                //recreate
+                $mysqli->query('CREATE TABLE sysSessionProgress(stp_ID varchar(32) NOT NULL COMMENT "User session ID generated by the server", stp_Data varchar(32) COMMENT "Stores progress data for the session identified by the session ID", PRIMARY KEY (utp_ID))');
+                
+            }
+        }
+        
+        if($value==null){
+          
+            $query = "select field_data from sysSessionProgress where stp_ID=".$session_id;
+            $res = mysql__select_value($mysqli, $query);
+            return $res[0];
+
+        }else if($value=='REMOVE'){
+            $mysqli->query("DELETE FROM sysSessionProgress where stp_ID=".$session_id);
+        }else{
+            //write 
+            if($is_init){
+                $query = "insert into sysSessionProgress values (".$session_id.",'".$value."')";
+                $res = $mysqli->query($query);
+            }else{
+                $query = "update sysSessionProgress set stp_Data='".$value."' where stp_ID=".$session_id;
+                $res = $mysqli->query($query);
+            }
+            //$mysqli->commit();
+        }
+        if($need_close)  $mysqli->close();
+        return null;
+    }    
 ?>

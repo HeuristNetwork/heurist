@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -23,21 +23,22 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
-	require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-//	require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../common/php/utilsTitleMask.php');
-    require_once(dirname(__FILE__).'/../../records/edit/deleteRecordInfo.php');
+    require_once(dirname(__FILE__).'/../../hserver/utilities/titleMask.php');
+    require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_records.php');  //to delete temporary records
     require_once(dirname(__FILE__).'/../../common/php/imageLibrary.php');
-    require_once(dirname(__FILE__).'/../../common/php/utilsMail.php');
+/* in imageLibrary we use 
+getRectypeIconURL    
+getRectypeThumbURL
+copy_IconAndThumb_FromLibrary
+*/
+
 
     $rtyColumnNames = array(
         "rty_ID"=>"i",
@@ -212,7 +213,7 @@
 	* @return $ret an array of return values for the various data elements created or errors if they occurred
 	**/
 	function deleteRecType($rtyID) {
-        global $mysqli;
+        global $system, $mysqli;
 
 		$ret = array();
         
@@ -273,10 +274,14 @@
 
 				//delete temporary records
 				$query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=1";
-				$res = $mysqli->query($query);
+                $recIds = mysql__select_list2($mysqli, $query);
+                recordDelete($system, $recIds);
+                                
+				/* @todo old h3 code to delete
+                $res = $mysqli->query($query); 
 				while ($row =  $res->fetch_row() ) {
 					deleteRecord($row[0]);
-				}
+				}*/
 
 				$query = "delete from defRecTypes where rty_ID = $rtyID";
 				$res = $mysqli->query($query);
@@ -343,21 +348,18 @@
                 }
             }
             
-            $query_check = "SELECT rty_ID FROM defRecTypes where rty_Name='".mysql_real_escape_string($rty_Name)."'";
-            $res = mysql_query($query_check);
-            if($res){
-                $rty_ID = mysql_fetch_array($res);
-                if($rty_ID && @$rty_ID[0]>0){
+            $query_check = "SELECT rty_ID FROM defRecTypes where rty_Name='".$mysqli->real_escape_string($rty_Name)."'";
+            $rty_ID = mysql__select_value($mysqli, $query_check);
+            if($rty_ID>0){
                     return  "Record type with specified name already exists in the database, please use the existing record type\nThis type may be hidden - turn it on through Database > Manage structure";
-                }
             }
             
 
             $query = "insert into defRecTypes ($querycols) values ($query)";
 
-            $rows = execSQL($mysqli, $query, $parameters, true);
+            $rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
-            if($rows == "1062"){
+            if($rows === "1062"){
                 $ret =  "Record type with specified name already exists in the database, please use the existing record type\nThis type may be hidden - turn it on through Database > Manage structure";
             }else if ($rows==0 || is_string($rows) ) {
                 $ret = handleError("SQL error inserting data into table defRecTypes: ".$rows, $query);
@@ -369,7 +371,7 @@
                     $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.HEURIST_DBID
                         .', rty_NameInOriginatingDB=rty_Name'
                         .', rty_IDInOriginatingDB='.$rtyID.' WHERE rty_ID='.$rtyID;
-                        $res = mysql_query($query);
+                        $res = $mysqli->query($query);
                 }
                 
                 $ret = -$rtyID;
@@ -467,8 +469,8 @@
 				$query = "update defRecTypes set ".$query." where rty_ID = $rtyID";
 
 
-				$res = execSQL($mysqli, $query, $parameters, true);
-				if($res == "1062"){
+				$res = mysql__exec_param_query($mysqli, $query, $parameters, true);
+				if($res === "1062"){
 					$ret =  "Record type with specified name already exists in the database, please use the existing record type";
 				}else if(!is_numeric($res)){
                     $ret = handleError("SQL error updating record type $rtyID in updateRectype: ".$res, $query);
@@ -482,7 +484,7 @@
                         $query= 'UPDATE defRecTypes SET rty_NameInOriginatingDB=rty_Name '
                             .' WHERE rty_ID='.$rtyID
                             .' AND rty_IDInOriginatingDB='.$rtyID.' AND rty_OriginatingDBID='.HEURIST_DBID;
-                        $res = mysql_query($query);
+                        $res = $mysqli->query($query);
                     }
                     
 				}
@@ -507,7 +509,8 @@
 		$ret = 0;
 		if($mask){
                 $parameters = array("");
-				$val = titlemask_make($mask, $rtyID, 1, null, _ERR_REP_SILENT); //make coded
+				$val = TitleMask::execute($mask, $rtyID, 1, null, _ERR_REP_SILENT);//make coded
+
                 $parameters = addParam($parameters, "s", $val);
 
                 /* DEPRECATED
@@ -519,7 +522,7 @@
 
 				$query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rtyID";
 
-				$res = execSQL($mysqli, $query, $parameters, true);
+				$res = mysql__exec_param_query($mysqli, $query, $parameters, true);
 				if(!is_numeric($res)){
                     $ret = handleError("SQL error updating record type $rtyID in updateTitleMask: ".$res, $query);
                     $ret = $ret['error'];
@@ -608,11 +611,12 @@
 	//
 	function addDefaultFieldForNewRecordType($rtyID, $newfields)
 	{
+            global $system;
 
-			$dt = getAllDetailTypeStructures();
+			$dt = dbs_GetDetailTypes($system);
 			$dt = $dt['typedefs'];
 
-			$rv = getAllRectypeStructures();
+			$rv = dbs_GetRectypeStructures($system, null, 2);
 			$dtFieldNames = $rv['typedefs']['dtFieldNames'];
 
 			$di = $dt['fieldNamesToIndex'];
@@ -620,7 +624,7 @@
 
 			$data = array();
             
-            if($newfields){
+            if(is_string($newfields)){
                         $newfields = json_decode(urldecode($newfields), true);
             }
             
@@ -636,7 +640,7 @@
                 }
                 
                 $fields = $newfields['fields'];
-                $reqs   = $newfields['reqs'];
+                $reqs   = @$newfields['reqs']?$newfields['reqs']:array();
                 
                 $data['dtFields'] = array();
                 
@@ -758,7 +762,7 @@
 						$query = "update defRecStructure set ".$query." where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID";
 					}
 
-					$rows = execSQL($mysqli, $query, $parameters, true);
+					$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
 					if ( ($isInsert && $rows==0) || is_string($rows) ) {
 						$oper = (($isInsert)?"inserting":"updating");
@@ -771,7 +775,7 @@
 
 			if($wasLocallyModified){
 				$query = "update defRecTypes set rty_LocallyModified=1  where rty_ID = $rtyID";
-				execSQL($mysqli, $query, null, true);
+				mysql__exec_param_query($mysqli, $query, null, true);
 			}
 
 		} //if column names
@@ -848,7 +852,7 @@
 
 				$query = "insert into defRecTypeGroups ($colNames) values ($query)";
 
-				$rows = execSQL($mysqli, $query, $parameters, true);
+				$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
 				if ($rows==0 || is_string($rows) ) {
                     $ret = handleError("SQL error inserting data into defRecTypeGroups".$rows, $query);
@@ -923,7 +927,7 @@
 			if($query!=""){
 				$query = "update defRecTypeGroups set ".$query." where rtg_ID = $rtgID";
 
-				$rows = execSQL($mysqli, $query, $parameters, true);
+				$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 				if (is_string($rows) ) {
                     $ret = handleError("SQL error updating $colName in updateRectypeGroup "
                         .$rows.' params:'.print_r($parameters,true), $query);
@@ -1019,7 +1023,7 @@
 
 				$query = "insert into defDetailTypeGroups ($colNames) values ($query)";
 
-				$rows = execSQL($mysqli, $query, $parameters, true);
+				$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
 				if ($rows==0 || is_string($rows) ) {
                     $ret = handleError("SQL error inserting data into defDetailTypeGroups table".$rows, $query);
@@ -1094,7 +1098,7 @@
 			if($query!=""){
 				$query = "update defDetailTypeGroups set ".$query." where dtg_ID = $dtgID";
 
-				$rows = execSQL($mysqli, $query, $parameters, true);
+				$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 				if (is_string($rows) ) {
                     $ret = handleError("SQL error updating $colName in updateDettypeGroup".$rows, $query);
 				} else {
@@ -1183,9 +1187,9 @@
 
 			$query = "insert into defDetailTypes ($querycols) values ($query)";
 
-			$rows = execSQL($mysqli, $query, $parameters, true);
+			$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
-			if($rows == "1062"){
+			if($rows === "1062"){
 				$ret =  "Field type with specified name already exists in the database, please use the existing field type.\nThe field may be hidden - turn it on through Database > Manage base field types";
 			}else  if ($rows==0 || is_string($rows) ) {
 				$ret = "Error inserting data into defDetailTypes table: ".$rows;
@@ -1291,13 +1295,10 @@
                 
                 
                 if($dty_Name){
-                    $query_check = "SELECT dty_ID FROM defDetailTypes where dty_ID<>$dtyID AND dty_Name='".mysql_real_escape_string($dty_Name)."'";
-                    $res = mysql_query($query_check);
-                    if($res){
-                        $dty_ID = mysql_fetch_array($res);
-                        if($dty_ID && @$dty_ID[0]>0){
-                            return  "Field type with specified name already exists in the database, please use the existing field type";
-                        }
+                    $query_check = "SELECT dty_ID FROM defDetailTypes where dty_ID<>$dtyID AND dty_Name='".$mysqli->real_escape_string($dty_Name)."'";
+                    $dty_ID = mysql__select_value($mysqli, $query_check);
+                    if($dty_ID>0){
+                        return  "Field type with specified name already exists in the database, please use the existing field type";
                     }
                 }
             
@@ -1305,9 +1306,9 @@
 				$query = $query.", dty_LocallyModified=IF(dty_OriginatingDBID>0,1,0)";
 				$query = "update defDetailTypes set ".$query." where dty_ID = $dtyID";
 
-				$rows = execSQL($mysqli, $query, $parameters, true);
+				$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
-				if($rows == "1062"){
+				if($rows === "1062"){
 					$ret =  "Field type with specified name already exists in the database, please use the existing field type";
 				}else if ($rows!='' && is_string($rows)){  //(is_string($rows) || $rows==0)
                     $ret = handleError("SQL error updating field type $dtyID in updateDetailType: "
@@ -1425,13 +1426,13 @@
                 }
                 $dupquery .= " and (";
                 if($ch_code){
-                    $dupquery .= "(trm_Code = '".mysql_real_escape_string($ch_code)."')";
+                    $dupquery .= "(trm_Code = '".$mysqli->real_escape_string($ch_code)."')";
                 }
                 if($ch_label){
                     if($ch_code){
                         $dupquery .= " or ";
                     }
-                    $dupquery .= "(trm_Label = '".mysql_real_escape_string($ch_label)."')";
+                    $dupquery .= "(trm_Label = '".$mysqli->real_escape_string($ch_label)."')";
                 }
                 $dupquery .= ")";
 
@@ -1458,7 +1459,7 @@
 				}
 
 
-				$rows = execSQL($ext_db, $query, $parameters, true);
+				$rows = mysql__exec_param_query($ext_db, $query, $parameters, true);
 
 				if (is_string($rows) ) {      //ERROR
 					$oper = (($isInsert)?"inserting":"updating term ".$trmID);
@@ -1473,10 +1474,10 @@
 
                     if($inverse_termid!=null){
                         $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
-                        execSQL($ext_db, $query, null, true);
+                        mysql__exec_param_query($ext_db, $query, null, true);
                     }else if ($inverse_termid_old!=null){
                         $query = "update defTerms set trm_InverseTermId=null where trm_ID=$inverse_termid_old";
-                        execSQL($ext_db, $query, null, true);
+                        mysql__exec_param_query($ext_db, $query, null, true);
                     }
 
 
@@ -1582,58 +1583,6 @@
 		return $ret;
 	}
 
-    /**
-    * Returns all parents for given term
-    *
-    * @param mixed $termId
-    */
-    function getTermParents($termId){
-        global $mysqli;
-
-        $query = "select trm_ParentTermID from defTerms where trm_ID = ".$termId;
-        $res = $mysqli->query($query);
-        $row = $res->fetch_row();
-        if($row){
-            $parentId = $row[0];
-
-        }
-
-        $parentId = mysql_fetch_array(mysql_query($query));
-        if($parentId && @$parentId[0]){
-            return getTermTopMostParent($parentId[0]);
-        }else{
-            return $termId;
-        }
-    }
-    
-    
-    //
-    //
-    //
-    function getTermTopMostParent($termId, $terms=null){
-        global $mysqli;
-        
-        
-        if(!$terms) $terms = array($termId); //to prevent recursion
-
-        $query = "select trm_ParentTermID from defTerms where trm_ID = ".$termId;
-
-        $res = $mysqli->query($query);
-        $parentId = $res->fetch_row();
-        if($parentId && @$parentId[0]){
-            
-            if(in_array($parentId[0], $terms)){
-                return $termId;
-            }else{
-                array_push($terms, $parentId[0]);
-                return getTermTopMostParent($parentId[0]);
-            }
-        }else{
-            return $termId;
-        }
-    }
-    
-    
     /*
     
     check that rectype rty_ID is in use for pointer field dty_ID
@@ -1707,7 +1656,7 @@
     Report as above
 */    
         $ret = array();
-        $vocab_id = getTermTopMostParent($termID);
+        $vocab_id = getTermTopMostParent($mysqli, $termID);
         if($vocab_id>0){ //not vocab itself
          
                 $query = 'select dty_ID, dty_Name from defDetailTypes where '
@@ -1852,7 +1801,7 @@
         //find usage in recDetails
         if(!array_key_exists("error", $ret) && $indetails){
 
-            $query = "select distinct dtl_RecID from recDetails, defDetailTypes "
+                $query = "select distinct dtl_RecID from recDetails, defDetailTypes "
                     ."where (dty_ID = dtl_DetailTypeID ) and "
                     ."(dty_Type='enum' or dty_Type='relationtype') and "
                     ."(dtl_Value in (".implode(",",$children)."))";
@@ -1860,7 +1809,7 @@
                 $res = $mysqli->query($query);
                 if ($mysqli->error) {
                     $ret = handleError("SQL error in isTermInUse retreiving records which use term $termID", $query);
-                    break;
+                    return $ret;
                 }else{
                     $recCount = $res->num_rows;
                     if ($recCount>0) { // there are records existing of this rectype, need to return error and the recIDs
@@ -1997,7 +1946,7 @@
 			$query = "update defRelationshipConstraints set rcs_Description=?, rcs_TermID=".$terms[0].", rcs_TermLimit=".$terms[2].$where;
 		}
 
-		$rows = execSQL($mysqli, $query, $parameters, true);
+		$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 		if ( ($isInsert && $rows==0) || is_string($rows) ) {
                 $ret = handleError("SQL error in updateRelConstraint", $query);
                 $ret = $ret['error'];

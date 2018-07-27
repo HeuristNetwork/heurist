@@ -7,7 +7,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -99,7 +99,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     fieldtypes:allowed_fieldtypes},  //ART20150810 this.options.params.fieldtypes.join() },
 
                     function(response){
-                        if($.isArray(response) || response.status == window.hWin.HAPI4.ResponseStatus.OK){
+
+                        if($.isArray(response) || response.status == window.hWin.ResponseStatus.OK){
                 
                             if($.isArray(response)){
                                   treedata = response;
@@ -109,6 +110,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             }
                             treedata[0].expanded = true; //first expanded
 
+//console.log(response.data.rectypes);                            
                             //setTimeout(function(){
                             treediv.fancytree({
                                 //extensions: ["filter"],

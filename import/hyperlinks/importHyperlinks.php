@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -30,28 +30,17 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+define('LOGIN_REQUIRED',1);
+define('PDIR','../../');  //need for proper path to js and css    
 
-/* not suited to t-1000 */
+require_once (dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
+require_once (dirname(__FILE__).'/../../records/disambig/testSimilarURLs.php');
+require_once (dirname(__FILE__).'/../../hserver/entity/dbUsrTags.php');
+require_once (dirname(__FILE__).'/../../hserver/dbaccess/db_records.php');
 
-define('SAVE_URI', 'disabled');
-
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-
-require_once(dirname(__FILE__).'/../../records/disambig/testSimilarURLs.php');
-require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
-require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
-
-//require_once(dirname(__FILE__).'/../../common/t1000/.ht_stdefs');
-
-if (! is_logged_in()) {
-	header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-	return;
-}
-
-mysql_connection_overwrite(DATABASE);
 
 $nextmode = 'inputselect';
+$mysqli = $system->get_mysqli();
 
 if (@$_REQUEST['shortcut']) {
 
@@ -72,7 +61,6 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		$srcname = $_FILES['file']['name'];
 	} else if (@$_REQUEST['source'] == 'url') {
 		$_REQUEST['url'] = preg_replace('/#.*/', '', $_REQUEST['url']);
-
 
         $src = loadRemoteURLContentWithRange($_REQUEST['url'], null, false, 120);
 
@@ -107,8 +95,8 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 		preg_match_all('!(<a[^>]*?href=["\']?([^"\'>\s]+)["\']?[^>]*?'.'>(.*?)</a>.*?)(?=<a\s|$)!is', $src, $matches);
 
 		/* get a list of the link-texts that we are going to ignore */
-		$ignored = mysql__select_assoc('usrHyperlinkFilters', 'lcase(hyf_String)', -1,
-		                               'hyf_UGrpID is null or hyf_UGrpID='.get_user_id());
+		$ignored = mysql__select_assoc2($mysqli, 'SELECT lcase(hyf_String), -1 usrHyperlinkFilters '
+                        .' WHERE hyf_UGrpID is null or hyf_UGrpID='.$system->get_user_id());
                                        
 		$wildcard_ignored = array();
 		if($ignored){
@@ -122,12 +110,8 @@ if (@$_REQUEST['mode'] == 'Analyse') {
 			}
 		}
         
-		mysql_connection_select(USERS_DATABASE);
-		$res = mysql_query('select ugr_MinHyperlinkWords from '.USERS_TABLE.' where '.USERS_ID_FIELD.' = '.get_user_id());
-		$row = mysql_fetch_row($res);
-		$word_limit = $row[0];	// minimum number of words that must appear in the link
-		mysql_connection_overwrite(DATABASE);
-
+        // minimum number of words that must appear in the link
+		$word_limit = mysql__select_value($mysqli, 'select ugr_MinHyperlinkWords from sysUGrps where ugr_ID = '.$system->get_user_id());
 
 		$urls = array();
 		$notes = array();
@@ -226,7 +210,10 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 	foreach (@$_REQUEST['links'] as $linkno => $checked) {
 		if (! @$checked) continue;
 
-		$rec_id = records_check(@$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL), @$_REQUEST['rec_ID'][$linkno]);
+		$rec_id = records_check( @$_REQUEST['link'][$linkno], @$_REQUEST['title'][$linkno], 
+                                (@$_REQUEST['use_notes'][$linkno]? @$_REQUEST['notes'][$linkno] . @$notes_src_str : NULL), 
+                                 @$_REQUEST['rec_ID'][$linkno]);
+                                
 		if ($rec_id && is_array($rec_id)) {
 			// no exact match, just a list of nearby matches; get the user to select one
 			$disambiguate_rec_ids[$_REQUEST['link'][$linkno]] = $rec_id;
@@ -250,21 +237,22 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 		$data = array();
 		$data['rec_ids'] = $record_tobebookmarked;
         
-        if(!$kwd){
-            $res = bookmark_references($data);
+        $params = array(
+           'entity'=>'usrTags',
+           'mode'  =>'assign',
+           'tagIDs'=> $kwd,
+           'recIDs'=> $record_tobebookmarked
+        );
+        
+        $entity = new DbUsrTags($system, $params);
+        $res = $entity->batch_action();
+        
+        if( is_bool($res) && !$res ){
+            $error = $system->getError();
+            $error = $error['message'];
         }else{
-            $data['tagString'] = $kwd;
-		    $res = bookmark_and_tag_record_ids($data);
+            $success = 'Bookmarks added: '.$res['bookmarks'];
         }
-		if(@$res['ok']){
-			$success = $res['ok'];
-		}else if (@$res['none']){
-			$success = $res['none'];
-        }else if (@$res['execute']){
-            $success = 'Bookmarks added: '.count($res['execute'][3]);
-		}else{
-			$error = $res['problem'];
-		}
 
 	}else{
 		$error = "Nothing to bookmark. Select links";
@@ -287,7 +275,9 @@ if ((@$_REQUEST['mode'] == 'Bookmark checked links'  ||  @$_REQUEST['adding_tags
 
 // filter the URLs (get rid of the ones already bookmarked)
 if (@$urls) {
-	$bkmk_urls = mysql__select_assoc('usrBookmarks left join Records on rec_ID = bkm_recID', 'rec_URL', '1', 'bkm_UGrpID='.get_user_id());
+    $bkmk_urls = mysql__select_assoc2($mysqli, 'SELECT rec_URL, 1 FROM usrBookmarks '
+        .'left join Records on rec_ID = bkm_recID WHERE bkm_UGrpID='.$system->get_user_id());
+    
 	$ignore = array();
 	foreach ($urls as $url => $title){
 		if (@$bkmk_urls[$url]) $ignore[$url] = 1;
@@ -295,14 +285,10 @@ if (@$urls) {
 }
 
 ?>
-<html>
-<head>
 	<title>Import Hyperlinks</title>
 
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-	<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
-  	<link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/edit.css">
-   	<!-- link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/admin.css" -->
+	<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/global.css">
+  	<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>common/css/edit.css">
 
     <style type="text/css">
 		.input-header-cell {width:140px;min-width:140px;max-width:140px; vertical-align:baseline;}
@@ -313,13 +299,10 @@ if (@$urls) {
 		.similar_bm label{text-align: left;}
 	</style>
     
-    <script type="text/javascript" src="<?=HEURIST_BASE_URL?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-    
     <script type="text/javascript">
-            function onDocumentReady(){
-                //resize parent dialog
-                setTimeout(function(){
-
+        function onPageInit(success){ 
+                    $('input[type="button"]').button().css({'background-color':'#ddd','text-transform':'uppercase'});
+/* adjust size in case of dialog                    
                     var body = document.body,
                         html = document.documentElement;
 
@@ -331,24 +314,16 @@ if (@$urls) {
                     if(typeof doDialogResize != 'undefined' && doDialogResize.call && doDialogResize.apply) {
                         doDialogResize(desiredWidth, desiredHeight);              
                     }
-                }, 500);
-            }
+*/                    
+        }
+    
     </script>
 </head>
 
 
-<body class="popup" width=600 height=400 style="margin:10px;" onload="onDocumentReady()">
+<body class="popup" width=600 height=400 style="margin:10px;">
 
-<script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
-<script src="<?=HEURIST_BASE_URL?>common/js/utilsUI.js"></script>
-<script type="text/javascript">
-	top.HEURIST.baseURL="<?=HEURIST_BASE_URL?>";
-</script>
 <script src="importHyperlinks.js"></script>
-<script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
-<script>
-top.HEURIST.loadScript("<?=HEURIST_BASE_URL?>common/php/loadUserInfo.php?db=<?=HEURIST_DBNAME?>");
-</script>
 
 <?php //this frame is needed for title lookup ?>
 <form action="importHyperlinks.php?db=<?=HEURIST_DBNAME?>" method="post" 
@@ -399,17 +374,13 @@ hyperlinks of interest).</p>
 	} else if ($nextmode == 'printurls') {
 
 /* removed by saw 2010/11/12 doesn't seemed to be used anymore
-		$tags = mysql__select_array('usrTags', 'tag_Text', 'tag_UGrpID='.get_user_id().' order by tag_Text');
+		$tags = mysql__select_array('usrTags', 'tag_Text', 'tag_UGrpID='.$system->get_user_id().' order by tag_Text');
 		$tag_options = '';
 		foreach ($tags as $kwd)
 			$tag_options .= '<option value="'.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd)."</option>\n";
 */
-		mysql_connection_select(USERS_DATABASE);
-		$res = mysql_query('select ugr_MinHyperlinkWords from '.USERS_TABLE.' where '.USERS_ID_FIELD.' = '.get_user_id());
-		$row = mysql_fetch_row($res);
-		$word_limit = $row[0];	// minimum number of words that must appear in the link
-		mysql_connection_overwrite(DATABASE);
-
+		
+        $word_limit = mysql__select_value($mysqli, 'select ugr_MinHyperlinkWords from sysUGrps where ugr_ID = '.$system->get_user_id());
 ?>
 <h2 style="padding-left: 20px;">Import Hyperlinks</h2>
 <p style="padding-left: 20px;">
@@ -424,7 +395,7 @@ Note: the list only shows links which you have not already bookmarked.<br>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
   <input type="button"
-    onClick="{top.HEURIST.util.popupURL(top,'<?=HEURIST_BASE_URL?>admin/profile/configImportSettings.php?db=<?=HEURIST_DBNAME?>', 
+    onClick="{'<?php echo HEURIST_BASE_URL;?>import/hyperlinks/configImportSettings.php?db=<?php echo HEURIST_DBNAME;?>', 
   { title:'Bookmark import settings',
     width:700,
     height:400,
@@ -432,8 +403,6 @@ Note: the list only shows links which you have not already bookmarked.<br>
         if(context){
             document.forms[0].style.display = 'none';
             document.location.reload();
-            //window.hWin.HEURIST4.msg.showMsgDlg('Rerun '+context);
-            //document.forms[0].submit(); 
         }
     } });}" 
     value="Change settings">
@@ -460,7 +429,8 @@ We recommend bookmarking a few links at a time.<br />The list is reloaded after 
    &nbsp;&nbsp;
    <a href="#" onClick="unCheckAll(); return false;">Uncheck all</a>
    &nbsp;&nbsp;
-   <input type="button" name="mode" value="Bookmark checked links" style="font-weight: bold;" onClick="{doBookmark('<?=HEURIST_DBNAME?>');}">
+   <input type="button" name="mode" value="Bookmark checked links" style="font-weight: bold;" 
+        onClick="{doBookmark();}">
  </div>
 
 
@@ -500,6 +470,7 @@ We recommend bookmarking a few links at a time.<br />The list is reloaded after 
 <?php
 /* ----- END OF OUTPUT ----- */
 
+// search for existing record by id or url. if not found add new one
 function records_check($url, $title, $notes, $user_rec_id) {
 	/*
 	 * Look for a Records record corresponding to the given record;
@@ -508,24 +479,27 @@ function records_check($url, $title, $notes, $user_rec_id) {
 	 * return the rec_ID, or 0 on failure.
 	 * If there are a number of similar URLs, return a list of their rec_ids.
 	 */
+     global $system, $mysqli;
 
 	// saw FIXME this should be
-	$res = mysql_query('select rec_ID from Records where rec_URL = "'.mysql_real_escape_string($url).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
-	if (mysql_num_rows($res) > 0) {
-		$bib = mysql_fetch_assoc($res);
-		return $bib['rec_ID'];
+	$res = mysql__select_value($mysqli, 'select rec_ID from Records where rec_URL = "'
+                .$mysqli->real_escape_string($url)
+                .'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
+	if ($res>0) {
+		return $res;
 	}
 
 	if ($user_rec_id > 0) {
-		$res = mysql_query('select rec_ID from Records where rec_ID = "'.mysql_real_escape_string($user_rec_id).'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
-		if (mysql_num_rows($res) > 0) {
-			$bib = mysql_fetch_assoc($res);
-			return $bib['rec_ID'];
-		}
+        $res = mysql__select_value($mysqli, 'select rec_ID from Records where rec_ID = "'
+                .$mysqli->real_escape_string($user_rec_id)
+                .'" and (rec_OwnerUGrpID=0 or not rec_NonOwnerVisibility="hidden")');
+        if ($res>0) {
+            return $res;
+        }
 
 	} else if (! $user_rec_id) {
 
-		$rec_ids = similar_urls($url);
+		$rec_ids = similar_urls($mysqli, $url); //see testSimilarURls
 		if ($rec_ids) return $rec_ids;
 /*
 		$par_url = preg_replace('/[?].*'.'/', '', $url);
@@ -541,37 +515,34 @@ function records_check($url, $title, $notes, $user_rec_id) {
 		}
 */
 	}
+    
+    $system->defineConstants();
 
 	// no similar URLs, no exactly matching URL, or user has explicitly selected "add new URL"
 	//insert the main record
-	if (mysql__insert('Records', array(
-		'rec_RecTypeID' => RT_INTERNET_BOOKMARK,
-		'rec_URL' => $url,
-		'rec_Added' => date('Y-m-d H:i:s'),
-		'rec_Modified' => date('Y-m-d H:i:s'),
-		'rec_Title' => $title,
-		'rec_ScratchPad' => $notes,
-		'rec_AddedByUGrpID' => get_user_id()
-	))) {
-		$rec_id = mysql_insert_id();
-		//add title input-cell
-		mysql__insert('recDetails', array(
-			'dtl_RecID' => $rec_id,
-			'dtl_DetailTypeID' => DT_NAME,
-			'dtl_Value' => $title
-		));
-		//add notes input-cell
-		if($notes){
-			mysql__insert('recDetails', array(
-				'dtl_RecID' => $rec_id,
-				'dtl_DetailTypeID' => DT_EXTENDED_DESCRIPTION,
-				'dtl_Value' => $notes
-			));
-		}
-		return $rec_id;
-	}
+    $record = array();
+    $record['ID'] = -1;
+    $record['RecTypeID'] = RT_INTERNET_BOOKMARK;
+    $record['AddedByImport'] = 1;
+    $record['no_validation'] = true;
+    $record['Title'] = $title;
+    $record['URL'] = $url;
+    $record['ScratchPad'] = $notes;
+    $record['details'] = array();
+    $record['details']["t:".DT_NAME] = array("0"=>$title);
+    $record['details']["t:".DT_EXTENDED_DESCRIPTION] = array("0"=>$notes);
 
-	return 0;
+    
+    $out = recordSave($system, $record);  //see db_records.php    
+    
+    if ( @$out['status'] != HEURIST_OK ) {
+        //print "<div style='color:red'> Error: ".$out["message"]."</div>";
+        return 0;
+    }else{
+        
+        return intval($out['data']);
+    }
+    
 }
 
 
@@ -635,24 +606,22 @@ function print_link($url, $title) {
 	</div>
 
 <?php
-		$res = mysql_query('select * from Records where rec_ID in (' . join(',', $disambiguate_rec_ids[$url]) . ')');
-		$all_bibs = array();
-		while ($row = mysql_fetch_assoc($res))
-			$all_bibs[$row['rec_ID']] = $row;
+        $all_bibs = mysql__select_all($mysqli, 'SELECT rec_ID, rec_Title, rec_URL FROM Records '
+                    .'where rec_ID in (' . join(',', $disambiguate_rec_ids[$url]) . ')', 1);
 
 		foreach ($disambiguate_rec_ids[$url] as $rec_id) {
-			$row = $all_bibs[$rec_id];
+			$row = [$rec_id];
 ?>
 	<div class="similar_bm">
 		<span>
-			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?= $row['rec_ID'] ?>" onClick="selectExistingLink(<?= $linkno ?>);">
-			<?= htmlspecialchars($row['rec_Title']) ?>
+			<input type="radio" name="rec_ID[<?= $linkno ?>]" value="<?= $rec_id ?>" onClick="selectExistingLink(<?= $linkno ?>);">
+			<?php echo htmlspecialchars($row[0]); //'rec_Title' ?>
 		</span>&nbsp;&nbsp;
-		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row['rec_URL']) ?>"><?php
-				if (strlen($row['rec_URL']) < 100)
-					print (common_substring($row['rec_URL'], $url));
+		<a style ="font-size: 80%; text-decoration:none;" target="_testwindow" href="<?= htmlspecialchars($row[1]) ?>"><?php
+				if (strlen($row[1]) < 100) //'rec_URL'
+					print (common_substring($row[1], $url));
 				else
-					print (common_substring(substr($row['rec_URL'], 0, 90) . '...', $url));
+					print (common_substring(substr($row[1], 0, 90) . '...', $url));
 		?></a><br>
 	</div>
 
@@ -675,5 +644,4 @@ function common_substring($url, $base_url) {
 
 	return '<span style="color: black;">'.htmlspecialchars(substr($url, 0, $i)).'</span>'.htmlspecialchars(substr($url, $i));
 }
-
 ?>

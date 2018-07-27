@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -31,8 +31,7 @@
 var selectDetailType;
 
 //aliases
-var Dom = YAHOO.util.Dom,
-	Hul = top.HEURIST.util;
+var Hul = window.hWin.HEURIST4.util;
 
 /**
 *
@@ -111,25 +110,25 @@ function SelectDetailType() {
 		//refill array
 		// 1. Reads GET parameters
 		if (location.search && location.search.length > 1) {
-			//window.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-			top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-			rty_ID = top.HEURIST.parameters.rty_ID;
-			document.title = "Insert fields to " + top.HEURIST.rectypes.names[rty_ID];
+            
+            rty_ID = window.hWin.HEURIST4.util.getUrlParameter('rty_ID', location.search);
+            
+			document.title = "Insert fields to " + window.hWin.HEURIST4.rectypes.names[rty_ID];
 		}
 
 		//////////////////// create data table
 		var arr = [],
 			dty_ID,
-			fi = top.HEURIST.detailTypes.typedefs.fieldNamesToIndex;
+			fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
 
 		//2. create datatable and fill it values of particular group
-		for (dty_ID in top.HEURIST.detailTypes.typedefs) {
+		for (dty_ID in window.hWin.HEURIST4.detailtypes.typedefs) {
 			if(!isNaN(Number(dty_ID)))
 			{
-				var td = top.HEURIST.detailTypes.typedefs[dty_ID];
+				var td = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID];
 				var deftype = td.commonFields;
 
-				var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
+				var aUsage = window.hWin.HEURIST4.detailtypes.rectypeUsage[dty_ID];
 
 				if( deftype[fi.dty_ShowInLists]!="0" && (isnull(aUsage) || aUsage.indexOf(rty_ID)<0)){
 
@@ -207,7 +206,7 @@ function SelectDetailType() {
 								{ key: "type", label: "Data type", sortable:true,
 									formatter: function(elLiner, oRecord, oColumn, oData) {
 										var type = oRecord.getData("type");
-										elLiner.innerHTML = "<div style='width:80px'>"+top.HEURIST.detailTypes.lookups[type]+"</div>";
+										elLiner.innerHTML = "<div style='width:80px'>"+window.hWin.HEURIST4.detailtypes.lookups[type]+"</div>";
 									}
 								},
 								{ key: "status", label: "Status", hidden:true, sortable:false },
@@ -374,12 +373,12 @@ function SelectDetailType() {
 						if(column==="usage"){
 
 								//find all records that reference this type
-								var aUsage = top.HEURIST.detailTypes.rectypeUsage[dty_ID];
+								var aUsage = window.hWin.HEURIST4.detailtypes.rectypeUsage[dty_ID];
 								if(!isnull(aUsage)){
 									textTip = "<p><ul>";
 									var k;
 									for (k=0; k<aUsage.length; k++) {   //<a href='editRecordType.html'></a>
-										textTip = textTip + "<li>"+top.HEURIST.rectypes.names[aUsage[k]]+"</li>";
+										textTip = textTip + "<li>"+window.hWin.HEURIST4.rectypes.names[aUsage[k]]+"</li>";
 									}
 									textTip = textTip + "</ul></p>";
 								}
@@ -434,7 +433,7 @@ function SelectDetailType() {
 					var arr = value.split(","),
 					ind, dtName;
 					for (ind=0; ind<arr.length; ind++) {
-						dtName = top.HEURIST.rectypes.names[arr[ind]];
+						dtName = window.hWin.HEURIST4.rectypes.names[arr[ind]];
 						if(!Hul.isnull(dtName)){
 							txt = txt + (islist?"<li>":sep)+dtName+(islist?"</li>":"");
 							sep = ",";
@@ -487,17 +486,17 @@ function SelectDetailType() {
 	*/
 	function _initGroupComboBoxFilter()
 	{
-							filterByGroup = Dom.get('inputFilterByGroup');
+							filterByGroup = document.getElementById('inputFilterByGroup');
 							var dtg_ID,
 								index;
 
-				for (index in top.HEURIST.detailTypes.groups) {
+				for (index in window.hWin.HEURIST4.detailtypes.groups) {
 					if( !isNaN(Number(index)) ) {
 
-						dtg_ID = top.HEURIST.detailTypes.groups[index].id;
-						var grpName = top.HEURIST.detailTypes.groups[index].name;
+						dtg_ID = window.hWin.HEURIST4.detailtypes.groups[index].id;
+						var grpName = window.hWin.HEURIST4.detailtypes.groups[index].name;
 
-						Hul.addoption(filterByGroup, dtg_ID, grpName);
+						window.hWin.HEURIST4.ui.addoption(filterByGroup, dtg_ID, grpName);
 
 						if(filterByGroup.length==2){
 							filterByGroup.selectedIndex = 1;
@@ -535,7 +534,7 @@ function SelectDetailType() {
 	*/
 	function _initListeners()
 	{
-							filterByName = Dom.get('inputFilterByName');
+							filterByName = document.getElementById('inputFilterByName');
 							filterByName.onkeyup = function (e) {
 								filterByGroup.selectedIndex = 0;
 								clearTimeout(filterTimeout);
@@ -543,34 +542,33 @@ function SelectDetailType() {
 							};
 							setTimeout(function(){filterByName.focus();}, 1000);
 
-							filterBySelection1 = Dom.get('inputFilterBySelection1');
+							filterBySelection1 = document.getElementById('inputFilterBySelection1');
 							filterBySelection1.onchange = _updateFilter;
-							filterBySelection2 = Dom.get('inputFilterBySelection2');
+							filterBySelection2 = document.getElementById('inputFilterBySelection2');
 							filterBySelection2.onchange = _updateFilter;
 
-							lblSelect1 = Dom.get('lblSelect1');
-							lblSelect2 = Dom.get('lblSelect2');
-							var btnClear = Dom.get('btnClearSelection');
+							lblSelect1 = document.getElementById('lblSelect1');
+							lblSelect2 = document.getElementById('lblSelect2');
+							var btnClear = document.getElementById('btnClearSelection');
 							if(btnClear) btnClear.onclick = _clearSelection;
 	} //end init listener
 
 	function _onDefineNewType(){
 
-			var db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-								(top.HEURIST.database.name?top.HEURIST.database.name:''));
-			var url = top.HEURIST.baseURL + "admin/structure/fields/editDetailType.html?db="+db;
+			var sURL = window.hWin.HAPI4.baseURL 
+                    + "admin/structure/fields/editDetailType.html?db="+window.hWin.HAPI4.database;
 
-			popupSelect = Hul.popupURL(top, url,
-			{	"close-on-blur": false,
+			window.hWin.HEURIST4.msg.showDialog(sURL, {
+				"close-on-blur": false,
 				"no-resize": false,
                 title: 'Define new field type',
-			height: 700,
-			width: 840,
+			    height: 700,
+			    width: 840,
 				callback: function(context) {
 
 					if(!Hul.isnull(context)){
 						//refresh the local heurist
-						top.HEURIST.detailTypes = context.detailTypes;
+						window.hWin.HEURIST4.detailtypes = context.detailtypes;
 
 						var _dtyID = Number(context.result[0]);
 						if(!isNaN(_dtyID)){

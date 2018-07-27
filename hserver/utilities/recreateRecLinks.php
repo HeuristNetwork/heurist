@@ -14,7 +14,7 @@
         print '<span>You must be logged in as Database Administrator to perform this operation</span>';
     }
 
-    include(dirname(__FILE__).'/../dbaccess/utils_db_load_script.php'); // used to execute SQL script
+    include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to execute SQL script
 
     $isok = true;
     

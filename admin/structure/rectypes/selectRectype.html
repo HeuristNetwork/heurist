@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -66,15 +66,6 @@
 		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/paginator/paginator-min.js"></script>
 		<!-- END PAGINATOR -->
 
-		<!-- OVERLAYS
-		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/button/button-min.js"></script>
-		<script type="text/javascript" src="../../../external/yui/2.8.2r1/build/container/container-min.js"></script>
-		END OVERLAYS -->
-
-		<script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-		<!--
-		<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
-		-->
 
 		<style type="text/css">
 			.tooltip {
@@ -109,15 +100,20 @@
 			#filtertoolbar .input-row label {min-width:70px; width:70px}
 		</style>
 
+        <script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="selectRectype.js"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+                selectRecordType = new  SelectRecordType(false, true); //nonfilter, in window
+            });
+        </script>        
 	</head>
 
 
 	<body class="popup yui-skin-sam" style="overflow-y: scroll;overflow-x:hidden">
-
-		<script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-		<script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
-		<script src="../../../common/php/loadCommonInfo.php"></script>
-		<script type="text/javascript" src="selectRectype.js"></script>
 
 		<div class="tooltip" id="toolTip2"><p>popup popup</p></div>
 
@@ -172,14 +168,6 @@
 		    </div>
 
 		    <div id="tabContainer">
-			    <script  type="text/javascript">
-			        //  starts initialization on load completion of this window
-				        //
-			        function createSelectorObj(){
-				        selectRecordType = new  SelectRecordType(false, true); //nonfilter, in window
-			        }
-			        YAHOO.util.Event.addListener(window, "load", createSelectorObj);
-			    </script>
 		    </div>
 
 		    <div id="tb_bottom" style="height:30">

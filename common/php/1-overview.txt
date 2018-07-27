@@ -17,3 +17,10 @@ Notes:
 Code and resources which are largely restricted to a single domain eg. record editing or bibliographic output, should be placed within directories devoted to their specific area of applicability.
 
 Updated: 	28 March 2010
+
+
+converted and in use
+
+imageLibrary
+recordTypeTree
+Temporal

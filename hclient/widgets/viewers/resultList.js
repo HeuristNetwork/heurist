@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -34,6 +34,7 @@ $.widget( "heurist.resultList", {
         recordview_onselect: false, //show record viewer on select
         multiselect: true,    //allows highlight several records
         isapplication: true,  //if false it does not listen global events @todo merge with eventbased
+        eventbased:true,
 
         show_toolbar: true,
         show_menu: false,       //@todo ? - replace to action_select and action_buttons
@@ -43,7 +44,6 @@ $.widget( "heurist.resultList", {
         show_inner_header: false,   // show title of current search in header
 
         title: null,
-        eventbased:true,
         //searchsource: null,
 
         empty_remark:'No entries match the filter criteria',
@@ -393,7 +393,7 @@ $.widget( "heurist.resultList", {
                     var view_mode = btn.attr('value');
 
                     this.applyViewMode(view_mode);
-                    window.hWin.HAPI4.save_pref('rec_list_viewmode', view_mode);
+                    window.hWin.HAPI4.save_pref('rec_list_viewmode_'+this.options.entityName, view_mode);
         }});
 
         
@@ -657,7 +657,7 @@ $.widget( "heurist.resultList", {
         var allowed = ['list','icons','thumbs','thumbs3'];
 
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
-            newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode');
+            newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
         }
 
         if(!this.div_content.hasClass(newmode) || forceapply===true){
@@ -671,7 +671,7 @@ $.widget( "heurist.resultList", {
             }else{
                 //load saved value
                 if(!this.options.view_mode){
-                    this.options.view_mode = window.hWin.HAPI4.get_prefs('rec_list_viewmode');
+                    this.options.view_mode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
                 }
                 if(!this.options.view_mode){
                     this.options.view_mode = 'list'; //default value
@@ -1201,7 +1201,7 @@ $.widget( "heurist.resultList", {
                     recInfoUrl = this._currentRecordset.fld( this._currentRecordset.getById(selected_rec_ID), 'rec_InfoFull' );
                 }
                 if( !recInfoUrl ){
-                    recInfoUrl = window.hWin.HAPI4.baseURL + "records/view/renderRecordData.php?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
+                    recInfoUrl = window.hWin.HAPI4.baseURL + "viewers/record/renderRecordData.php?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
                 }
 
                 window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { width: 700, height: 800, title:'Record Info'});
@@ -1893,7 +1893,7 @@ $.widget( "heurist.resultList", {
     _onGetFullRecordData: function( response, rec_toload ){
 
         this.loadanimation(false);
-        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+        if(response.status == window.hWin.ResponseStatus.OK){
 
             if(response.data.pageno==this.current_page) { //response.data.queryid==this.current_page || 
 

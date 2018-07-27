@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -30,34 +30,33 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+define('MANAGER_REQUIRED',1);   
+define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
-define('dirname(__FILE__)', dirname(__FILE__));	// this line can be removed on new versions of PHP as dirname(__FILE__) is a magic constant
-require_once(dirname(__FILE__)."/../../common/php/dbMySqlWrappers.php");
-
-/* mysql_connection_select("heuristdb");	//FIXME:  need to use a configured value */
-mysql_connection_select(DATABASE);
+$mysqli = $system->get_mysqli();
 
 $woots = array();
-$res = mysql_query("select * from woots");// where woot_Title='record:96990'");
-while ($row = mysql_fetch_assoc($res)) {
-	array_push($woots, $row);
+$res = $mysqli->query("select * from woots");// where woot_Title='record:96990'");
+if($res){
+    while ($row = $res->fetch_assoc()) {
+        array_push($woots, $row);
+    }
+    $res->close();
 }
 ?>
 <html>
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Check Wysiwyg Texts</title>
-    	<link rel="stylesheet" type="text/css" href="../../common/css/global.css">
-    	<link rel="stylesheet" type="text/css" href="../../common/css/admin.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 	</head>
     
     <body class="popup">
         <div class="banner"><h2>Check Wysiwyg Texts</h2></div>
         
-        <div id="page-inner" style="overflow:auto;padding-left: 20px;">
+        <div id="page-inner" style="overflow:auto;padding-left: 6px;">
             <div>This function checks the WYSIWYG text data (personal and public notes, blog posts) for invalid XHTML<br>&nbsp;<hr /></div>
         
             <table class="wysiwygCheckTable">
@@ -69,14 +68,17 @@ while ($row = mysql_fetch_assoc($res)) {
 
 	                //print "\n\nchecking woot \"" . $woot["woot_Title"] . "\"... ";
 
-	                $res = mysql_query("select * from woot_Chunks where chunk_WootID = " . $woot["woot_ID"] . " and chunk_IsLatest and not chunk_Deleted");
-	                while ($row = mysql_fetch_assoc($res)) {
-		                $err = check($row["chunk_Text"]);
-		                if ($err) {
-			                $valid = false;
-			                array_push($errs, $err);
-		                }
-	                }
+	                $res = $mysqli->query("select * from woot_Chunks where chunk_WootID = " . $woot["woot_ID"] . " and chunk_IsLatest and not chunk_Deleted");
+                    if($res){
+                        while ($row = $res->fetch_assoc()) {
+                            $err = check($row["chunk_Text"]);
+                            if ($err) {
+                                $valid = false;
+                                array_push($errs, $err);
+                            }
+                        }
+                        $res->close();
+                    }
 
 	                if ($valid) {
 		                //print "ok\n";

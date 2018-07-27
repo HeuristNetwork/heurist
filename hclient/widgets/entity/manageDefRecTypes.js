@@ -1,5 +1,5 @@
 /**
-* manageSysUsers.js - main widget to manage sysUGrps users
+* manageDefRecTypes.js - main widget to manage defRecTypes users
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -17,18 +17,32 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/*
+we may take data from 
+1) use_cache = false  from server on every search request (live data) 
+2) use_cache = true   from client cache - it loads once per heurist session (actually we force load)
+3) use_cache = true + use_structure - use HEURSIT4.rectypes
+*/
 $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
    
     _entityName:'defRecTypes',
 
     //
-    //
+    //                                                  
     //    
     _init: function() {
         
+        //define it to load recordtypes from other server/database - if defined it allows selection only
+        if(!this.options.database_url){ //for example http://heurist.sydney.edu.au/heurist/?db=Heurist_Reference_Set
+            if(this.options.select_mode=='manager') this.options.select_mode='select_single';
+            this.options.use_cache = true;
+            this.options.use_structure = true;    
+        }else{
+            this.options.use_cache = true;
+            this.options.use_structure = true;
+        }
+        
         this.options.layout_mode = 'short';
-        this.options.use_cache = false;
         //this.options.edit_mode = 'popup';
         
         //this.options.select_return_mode = 'recordset';
@@ -50,6 +64,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
     
         this._super();
+        
     },
     
     //  
@@ -69,8 +84,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         //update dialog title
         if(this.options.isdialog){ // &&  !this.options.title
             var title = null;
-            var usr_ID = 0;
-            
             
             if(this.options.title){
                 title = this.options.title;
@@ -82,13 +95,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                title = 'Select Record Types'; 
               
               if(this.options.rtg_ID<0){ 
-                    usr_ID = Math.abs(this.options.rtg_ID);
                     title += ' to add to group '+window.hWin.HEURIST4.rectypes.groups[Math.abs(this.options.rtg_ID)].name;
               }
                
             }else
             if(this.options.rtg_ID>0){
-                usr_ID = this.options.rtg_ID;
                 title = 'Manage Record types of group '+window.hWin.HEURIST4.rectypes.groups[this.options.rtg_ID].name;
             }else{
                 title = 'Manage Record Types';    
@@ -129,6 +140,54 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //this.recordList.resultList('applyViewMode');
         }
 
+        
+        if(this.options.use_cache){
+            
+            if(this.options.use_structure){
+                
+                if(this.options.database_url!=''){
+                    
+                    window.hWin.HEURIST4.msg.bringCoverallToFront();
+                    
+                    window.hWin.HAPI4.SystemMgr.get_defs(
+                            {rectypes:'all', mode:2, remote:this.options.database_url}, function(response){
+                    
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                
+                                that._cachedRecordset = that._getRecordsetFromStructure( response.data.rectypes );
+                                that.recordList.resultList('updateResultSet', that._cachedRecordset);
+                                
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                    });                    
+                    
+                }else{
+                    //take recordset from HEURIST.rectypes format     
+                    this._cachedRecordset = this._getRecordsetFromStructure();
+                    this.recordList.resultList('updateResultSet', this._cachedRecordset);
+                }
+            }else{
+                this.options.database_url
+                
+                //usual way from server via entity
+                var that = this;
+                window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
+                    function(response){
+                        that._cachedRecordset = response;
+                        that.recordList.resultList('updateResultSet', response);
+                    });
+            }
+                
+            this._on( this.searchForm, {
+                "searchdefrectypesonfilter": this.filterRecordList
+                });
+                
+        }    
+            
+        
         this._on( this.searchForm, {
                 "searchdefrectypesonresult": this.updateRecordList,
                 "searchdefrectypesonadd": function() { this.addEditRecord(-1); }
@@ -137,8 +196,51 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         
         return true;
+    },            
+    
+    //
+    // get recordset from HEURIST4.rectypes
+    //
+    _getRecordsetFromStructure: function( rectypes ){
+        
+        var rdata = { 
+            entityName:'defRecTypes',
+            total_count: 0,
+            fields:[],
+            records:{},
+            order:[] };
+            
+        if(!rectypes){
+            rectypes = window.hWin.HEURIST4.rectypes;
+        } else {
+            //reload groups for remote rectypes            
+            
+            var ele = this.element.find('#input_search_group');   //rectype group
+            window.hWin.HEURIST4.ui.createRectypeGroupSelect(ele[0],
+                                        [{key:'any',title:'any group'}]);
+        }    
+
+
+        rdata.fields = rectypes.typedefs.commonFieldNames;
+        rdata.fields.unshift('rty_ID');
+
+
+        for (var r_id in rectypes.typedefs)
+        {
+            if(r_id>0){
+                var rectype = rectypes.typedefs[r_id].commonFields;
+                rectype.unshift(r_id);
+                rdata.records[r_id] = rectype;
+                rdata.order.push( r_id );
+            }
+        }
+
+        return new hRecordSet(rdata);
     },
     
+    //
+    //
+    //
     _initEditorOnly: function(){
         
             //load user for given record id
@@ -156,7 +258,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 var recset = new hRecordSet(response.data);
                                 if(recset.length()>0){
                                     that.updateRecordList(null, {recordset:recset});
@@ -267,7 +369,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     
     
     //-----
-    // adding group ID value for new user
+    //
+    // adding group ID value for new rectype
     //
     _afterInitEditForm: function(){
 
@@ -291,6 +394,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
     },    
     
+    //
     // update list after save (refresh)
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){

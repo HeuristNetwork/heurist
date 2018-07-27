@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   <stephen.white@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://Sydney.edu.au/Heurist
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -41,12 +41,10 @@
 
 <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
 
-<!-- YUI -->
-<link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
-<!--script type="text/javascript" src="../../external/yui/2.8.2r1/build/history/history-min.js"></script!-->
-<script type="text/javascript" src="../../external/yui/2.8.2r1/build/json/json-min.js"></script>
+<script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+<script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
 
 
 <style type="text/css">
@@ -83,34 +81,19 @@
 
 </style>
 
+        <script type="text/javascript" src="editReportSchedule.js"></script>
+        
+        <script type="text/javascript">
+            var reportScheduleEditor;
+            
+            $(document).ready(function() {
+                window.reportScheduleEditor = new ReportScheduleEditor();
+            });
+        </script>
+        
 </head>
 
 <body>
-        <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
-        <script src="../../common/php/displayPreferences.php"></script>
-
-        <!-- access to functions about current user
-        <script src="loadUserInfoShort.php"></script> -->
-        <script type="text/javascript" src="editReportSchedule.js"></script>
-
-        <script type="text/javascript">
-
-            if(Hul.isnull(top.HEURIST)) { top.HEURIST = {}; }
-
-            var _db = (top.HEURIST.parameters.db? top.HEURIST.parameters.db :
-                        (top.HEURIST.database.name?top.HEURIST.database.name:''));
-            var _url = top.HEURIST.baseURL +'export/publish/loadReports.php?method=getreport&db='+_db;
-
-            top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-            var _recID = top.HEURIST.parameters.recID;
-
-            if(Hul.isnull(_recID)) { _recID = 0; }
-            _url = _url + "&recID="+_recID;
-
-            //top.HEURIST.Hul.loadScript(_url, true);
-            Hul.loadScript2(this.document, _url); //load information about report schedule
-        </script>
-
 
 <div style="width:580;margin:auto;">
 <br/>
@@ -118,7 +101,7 @@
 <div id="detailTypeValues" style="padding:5px;">
 
     <div class="dtyField">
-        <label class="dtyLabel" for="rps_ID">ID:</label>
+        <label class="dtyLabel">ID:</label>
         <label id="rps_ID"></label>
     </div>
     <div class="dtyField">
@@ -160,7 +143,7 @@
     </div>
     <div class="dtyField">
         <label class="dtyLabel required" for="rps_Template">Template:</label>
-        <select id="rps_Template" style="max-width:400;" maxlength="64"></select>
+        <select id="rps_Template" style="max-width:400;"></select>
         <div class="help prompt help1">
             <label>The name of the template to be used in generating this report</label>
         </div>
@@ -183,23 +166,6 @@
 <input type="button" style="height: 25px; width: 99px" value="Close" onclick="window.close(null);" />
 </div>
 </div>
-
-<script type="text/javascript">
-
-    var reportScheduleEditor;
-
-    //
-    //  starts initialization on load completion of this window
-    //
-    function loadHandler(){
-
-        Dom.get("lblFilePathHelp").innerHTML = "Path to which report is published (leave blank for default path "+ _db+"/generated-reports)";
-
-        window.reportScheduleEditor = new ReportScheduleEditor();
-    }
-    YAHOO.util.Event.addListener(window, "load", loadHandler );
-
-</script>
 
 
 </body>

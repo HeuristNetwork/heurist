@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -21,20 +21,22 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+require_once(dirname(__FILE__).'/../../hserver/System.php');
 
-define("SAVE_URI", "disabled");
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-//require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-
-if (! is_logged_in()) {
-        header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db='.HEURIST_DBNAME);
-        return;
+$system = new System();
+if( !$system->init(@$_REQUEST['db']) ){
+    error_exit();
 }
 
-    header('Content-type: text/javascript');
+if(!$system->has_access()){
+   $system->addError(HEURIST_REQUEST_DENIED, 'To perform this action you must be logged in');
+   error_exit();
+}
 
-    $sys_usrReportSchedule_ColumnNames = array(
+header('Content-type: application/json;charset=UTF-8');
+
+$sys_usrReportSchedule_ColumnNames = array(
     "rps_ID"=>"i",
     "rps_Type"=>"s",
     "rps_Title"=>"s",
@@ -46,16 +48,16 @@ if (! is_logged_in()) {
     "rps_IntervalMinutes"=>"i"
     );
 
-    $metod = @$_REQUEST['method'];
+$metod = @$_REQUEST['method'];
+
+$mysqli = $system->get_mysqli();
 
     if($metod=="searchreports"){
-
-        mysql_connection_select(DATABASE);
 
         //search the list of users by specified parameters
         $f_id     = @$_REQUEST['recID'];
         $f_name = urldecode(@$_REQUEST['name']);
-        $f_userid     = @$_REQUEST['usrID']; //@todo
+        $f_userid = @$_REQUEST['usrID']; //@todo
 
         $records = array();
         $recordsCount = 0;
@@ -68,24 +70,24 @@ if (! is_logged_in()) {
             $query = $query." where rps_Title like '%".$f_name."%'";
         }
 
-        $res = mysql_query($query);
+        $res = $mysqli->query($query);
 
-        while ($row = mysql_fetch_assoc($res)) {
+        while ($row = $res->fetch_assoc()) {
 
             $row['status'] = getStatus($row);
 
             array_push($records, $row);
         }
+        $res->close();
 
-        print json_format($records);
+        $response = array("status"=>HEURIST_OK, "data"=>$records);
+        print json_encode($response);
 
     }else if($metod=="getreport"){ //-----------------
 
-        mysql_connection_select(DATABASE);
-
-        $groupID = @$_REQUEST['recID'];
-        if ($groupID==null) {
-            die("invalid call to loadReports, recID is required");
+        $recID = @$_REQUEST['recID'];
+        if ($recID==null) {
+              error_exit('Invalid call to loadReports, recID is required');
         }
 
         $colNames = array("rps_ID", "rps_Type", "rps_Title", "rps_FilePath", "rps_URL", "rps_FileName", "rps_HQuery", "rps_Template", "rps_IntervalMinutes");
@@ -94,64 +96,59 @@ if (! is_logged_in()) {
         $records['fieldNames'] = $colNames;
         $records['records'] = array();
 
-        $query = "select ".join(",", $colNames)." from ".USERS_DATABASE.".usrReportSchedule ";
+        $query = "select ".join(",", $colNames)." from usrReportSchedule ";
 
-        if($groupID!="0"){
-            $query = $query." where rps_ID=".$groupID;
-        }else{
-            $query = null;
-        }
-
-
-        if($query){
-            $res = mysql_query($query);
-            while ($row = mysql_fetch_row($res)) {
+        if($recID>0){
+            $query = $query." where rps_ID=".$recID;
+            $res = $mysqli->query($query);
+            while ($row = $res->fetch_row()) {
                 $records['records'][$row[0]] = $row;
             }
+            $res->close();
         }
 
-        print "top.HEURIST.reports = " . json_format($records) . ";\n";
-        print "\n";
+        $response = array("status"=>HEURIST_OK, "data"=>$records);
+        print json_encode($response);
 
     }else if($metod=="savereport"){ //-----------------
 
-        $db = mysqli_connection_overwrite(DATABASE);
-
-        $data  = json_decode(@$_REQUEST['data'], true);
+        $data  = @$_REQUEST['data'];
         $recID  = @$_REQUEST['recID'];
 
         if (!array_key_exists('report',$data) ||
         !array_key_exists('colNames',$data['report']) ||
         !array_key_exists('defs',$data['report'])) {
-            die("invalid data structure sent with savereport method call to loadReports.php");
+              error_exit('Invalid data structure sent with savereport method call to loadReports.php');
         }
 
         $colNames = $data['report']['colNames'];
 
-        $rv = array();
-        $rv['result'] = array(); //result
+        $rv = array(); //result
 
         foreach ($data['report']['defs'] as $recID => $rt) {
-            array_push($rv['result'], updateReportSchedule($colNames, $recID, $rt));
+            array_push($rv, updateReportSchedule($mysqli, $colNames, $recID, $rt));
         }
-        print json_format($rv);
-
+        
+        $response = array("status"=>HEURIST_OK, "data"=>$rv);
+        print json_encode($response);
+        
     }else if($metod=="deletereport"){
-
-
 
         $recID  = @$_REQUEST['recID'];
         $rv = array();
-        if (!$recID) {
-            $rv['error'] = "invalid or not ID sent with deletereport method call to loadReports.php";
+        if (!($recID>0)) {
+              error_exit('Invalid  or not ID sent with deletereport method call to loadReports.php');
         }else{
-            $rv = deleteReportSchedule($recID);
-            if (!array_key_exists('error',$rv)) {
-                //$rv['rectypes'] = getAllRectypeStructures();
+            $rv = deleteReportSchedule($mysqli, $recID);
+            if(@$rv['error']){
+                $response = $system->addError(HEURIST_ERROR, $rv['error']);
+            }else{
+                $response = array("status"=>HEURIST_OK, "data"=>$rv['result']);
             }
+            print json_encode($response);
         }
-        print json_format($rv);
-
+    }else{
+        error_exit('Invalid or no method provided to loadReports.php');
     }
 
 exit();
@@ -199,22 +196,18 @@ exit();
     * @param $recID record ID to delete
     * @return $ret record id that was deleted or error message
     **/
-    function deleteReportSchedule($recID) {
-
-        $db = mysqli_connection_overwrite(DATABASE);
+    function deleteReportSchedule($mysqli, $recID) {
 
         $ret = array();
 
         //delete references from user-group link table
         $query = "delete from usrReportSchedule where rps_ID=$recID";
-        $rows = execSQL($db, $query, null, true);
-        if (is_string($rows) ) {
-            $ret['error'] = "db error deleting record from report schedules - ".$rows;
+        $res = $mysqli->query($query);
+        if ( $mysqli->error ) {
+            $ret['error'] = 'Db error deleting record from report schedules';
         }else{
             $ret['result'] = $recID;
         }
-
-        $db->close();
 
         return $ret;
     }
@@ -226,15 +219,13 @@ exit();
     * @param mixed $recID
     * @param mixed $rt
     */
-    function updateReportSchedule($colNames, $recID, $values){
+    function updateReportSchedule($mysqli, $colNames, $recID, $values){
 
-        global $db, $sys_usrReportSchedule_ColumnNames;
+        global $sys_usrReportSchedule_ColumnNames;
 
         $ret = null;
 
         if (count($colNames) && count($values)){
-
-            $db = mysqli_connection_overwrite(DATABASE);
 
             $isInsert = ($recID<0);
 
@@ -272,33 +263,26 @@ exit();
                 }
                 
                 //temporary alter the structure of table 2016-05-17 - remark it in one year
-                $res = mysql_query("SHOW FIELDS FROM usrReportSchedule where Field='rps_IntervalMinutes'");
-                $struct = mysql_fetch_assoc($res);
+                $res = $mysqli->query("SHOW FIELDS FROM usrReportSchedule where Field='rps_IntervalMinutes'");
+                $struct = $res->fetch_assoc();
                 if(strpos($struct['Type'],'tinyint')!==false){
-                    mysql_query('ALTER TABLE `usrReportSchedule` CHANGE COLUMN `rps_IntervalMinutes` `rps_IntervalMinutes` INT NULL DEFAULT NULL');
+                    $mysqli->query('ALTER TABLE `usrReportSchedule` CHANGE COLUMN `rps_IntervalMinutes` `rps_IntervalMinutes` INT NULL DEFAULT NULL');
                 }
 
-
-                $rows = execSQL($db, $query, $parameters, true);
+                $rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
 
                 if ($rows==0 || is_string($rows) ) {
                     $oper = (($isInsert)?"inserting":"updating");
                     $ret = "error $oper in updateReportSchedule - ".$rows.' '.$query; //$msqli->error;
                 } else {
                     if($isInsert){
-                        $recID = $db->insert_id;
-                        $ret = -$recID;
-
-                    }//if $isInsert
-                    else{
-                        $ret = $recID;
+                        $ret = -$mysqli->insert_id;                
+                    }else{
+                        $ret = $recID;;
                     }
                 }
             }
 
-
-
-            $db->close();
         }//if column names
 
 
@@ -308,4 +292,19 @@ exit();
 
         return $ret;
     }
+
+//
+//
+//    
+function error_exit($msg){
+    global $system;
+    
+    header('Content-type: application/json;charset=UTF-8');
+    if($msg){
+        $system->addError(HEURIST_INVALID_REQUEST, $msg);
+    }
+
+    print json_encode( $system->getError() );
+    exit();
+}
 ?>

@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -151,22 +151,18 @@ function lookupTitle(button) {
 	document.forms['mainform'].elements['titlegrabber_lock'].value = buttonNum;
 	button.disabled = true;
 	titleElt.disabled = true;
-
-	var baseurl = 'getTitleFromURL.php?num='+buttonNum+'&url='+escape(urlElt.value);
     
-        $.ajax({
-            url: baseurl,
-            type: "GET",
-            data: null,
-            dataType: "json",
-            cache: false,
-            error: function( jqXHR, textStatus, errorThrown ) {
-                button.disabled = false;
-                titleElt.disabled = false;
-                window.hWin.HEURIST4.msg.showMsgErr(textStatus);
-            },
-            success: function( response, textStatus, jqXHR ){
-                    
+	var baseurl = window.hWin.HAPI4.baseURL+'import/hyperlinks/getTitleFromURL.php';//'?num='+buttonNum+'&url='+escape(urlElt.value);
+    
+    window.hWin.HEURIST4.util.sendRequest(baseurl, 
+            {db:window.hWin.HAPI4.database,
+             url:urlElt.value,
+             num:buttonNum},
+            null, 
+    function(response){
+        if(response.status==window.hWin.ResponseStatus.OK){
+            
+                    response = response.data;
                     if(!window.hWin.HEURIST4.util.isnull(response)){
                         var num = response.num;
                         
@@ -185,16 +181,41 @@ function lookupTitle(button) {
                             lockedTitleElt.value = response.title;
                         }
                     }
-            }
-        });
-    
+            
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr(response);    
+        }
+    },'json');
 }
 
 //
 //
 //
-function doBookmark(dbname){
+function doBookmark(){
+    
+   if ($('input.check_link:checked').length==0){
+        window.hWin.HEURIST4.msg.showMsgFlash('Select at least one link');
+        return;
+   }
+    
+   var opts = {
+       title: 'Bookmark selected URLs',
+       modes: ['bookmark_url'],
+       groups: 'personal',
+        onClose:
+           function( context ){
+               if(context){
+                     document.getElementById('wgTags').value = context.join(',');
+                     document.getElementById('adding_tags_elt').value = 1;
+                     document.forms[0].submit();
+               }
+           }
+   }; 
 
+
+   window.hWin.HEURIST4.ui.showRecordActionDialog('recordTag', opts); 
+    
+/*
    top.HEURIST.util.popupURL(window, top.HEURIST.baseURL+'records/tags/addTagsPopup.html?bookmark-only=1&db='+dbname,
    				{   
                     title: 'Add tags and bookmark',
@@ -211,6 +232,6 @@ function doBookmark(dbname){
                         }
    						}
    				} );
-
+*/
    return false;
 }

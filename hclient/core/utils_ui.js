@@ -35,6 +35,7 @@ getPlainTermsList
 getFullTermLabel
 
 createRectypeGroupSelect - get SELECT for record type groups
+createDetailtypeGroupSelect
 createRectypeSelect - get SELECT for record types   
 createRectypeDetailSelect - get SELECT for details of given recordtype
 createRectypeTreeSelect - get SELECT for hierarchy of record types   
@@ -91,6 +92,7 @@ window.hWin.HEURIST4.ui = {
     addoption: function(sel, value, text, disabled)
     {
         var option = document.createElement("option");
+        //option = new Option(text,value);
         option.text = text; //window.hWin.HEURIST4.util.htmlEscape(text);
         option.value = value;
         if(disabled===true){
@@ -199,6 +201,9 @@ window.hWin.HEURIST4.ui = {
         return selObj;
     },
 
+    //
+    //
+    //
     fillSelector: function(selObj, topOptions) {
         
         if(window.hWin.HEURIST4.util.isArray(topOptions)){
@@ -232,6 +237,13 @@ window.hWin.HEURIST4.ui = {
                     }
                 }
             }
+        }else  if(false && !$.isEmptyObject(topOptions) && Object.keys(topOptions).length>0 ) {
+           
+                for (var key in topOptions)
+                if(!window.hWin.HEURIST4.util.isempty(topOptions[key])){
+                        window.hWin.HEURIST4.ui.addoption(selObj, key, topOptions[key], false);
+                }
+            
         }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
             if(topOptions===true) topOptions ='';
             window.hWin.HEURIST4.ui.addoption(selObj, '', topOptions);
@@ -268,12 +280,8 @@ window.hWin.HEURIST4.ui = {
                 }
             }
             
-            var allterms;
-            if(top.HEURIST && top.HEURIST.terms){
-                allterms = top.HEURIST.terms;
-            }else if(window.hWin.HEURIST4 && window.hWin.HEURIST4.terms){
-                allterms = window.hWin.HEURIST4.terms;
-            }            
+            var allterms = window.hWin.HEURIST4.terms;
+ 
             
             var trmID, tree = allterms.treesByDomain[trm_ParentDomain];
             __getSiblings(tree);  
@@ -357,9 +365,9 @@ window.hWin.HEURIST4.ui = {
 
     },
 
-    // not used
+    // 
     //
-    //
+    // see crosstabs
     //
     getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         
@@ -376,7 +384,7 @@ window.hWin.HEURIST4.ui = {
             selObj = selObj[0];
             for (var i=0; i<selObj.length; i++){
                 if(!selObj.options[i].disabled){
-                    reslist.push({id:selObj.options[i].value, text:selObj.options[i].text});
+                    reslist.push({id: parseInt(selObj.options[i].value), text:selObj.options[i].text});
                 }
             }
         }
@@ -479,7 +487,7 @@ window.hWin.HEURIST4.ui = {
             headerTermIDsList =  options.headerTermIDsList,  //non selectable
             defaultTermID =  options.defaultTermID,
             topOptions =  options.topOptions,
-            needArray  =  options.needArray,
+            needArray  =  (options.needArray===true),
             supressTermCode = options.supressTermCode,
             useHtmlSelect  = (options.useHtmlSelect===true);
 
@@ -717,12 +725,13 @@ window.hWin.HEURIST4.ui = {
     //
     // get selector for record type groups
     //
-    createRectypeGroupSelect: function(selObj, topOptions) {
+    createRectypeGroupSelect: function(selObj, topOptions, rectypes) {
 
         window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
-        var rectypes = window.hWin.HEURIST4.rectypes,
-        index;
+        if(!rectypes) rectypes = window.hWin.HEURIST4.rectypes;
+        
+        var index;
 
         if(!rectypes) return selObj;
 
@@ -736,6 +745,32 @@ window.hWin.HEURIST4.ui = {
             var name = rectypes.groups[index].name;
             if(!window.hWin.HEURIST4.util.isnull(name)){
                 window.hWin.HEURIST4.ui.addoption(selObj, rectypes.groups[index].id, name);
+            }
+        }
+
+        return selObj;
+
+    },
+    
+    createDetailtypeGroupSelect: function(selObj, topOptions) {
+
+        window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
+
+        var detailtypes = window.hWin.HEURIST4.detailtypes,
+        index;
+
+        if(!detailtypes) return selObj;
+
+
+        for (index in detailtypes.groups){
+            if (index == "groupIDToIndex" ){
+                //rectypes.groups[index].showTypes.length < 1)
+                continue;
+            }
+
+            var name = detailtypes.groups[index].name;
+            if(!window.hWin.HEURIST4.util.isnull(name)){
+                window.hWin.HEURIST4.ui.addoption(selObj, detailtypes.groups[index].id, name);
             }
         }
 
@@ -1220,14 +1255,24 @@ window.hWin.HEURIST4.ui = {
                 }
             }
         }
-        if(groups){
+        if(groups){   //it may 1) array of group ids 2) [ids=>name] 3) [ids=a>rray(0,name,0)]
 
-            for (var groupID in groups)
+            for (var idx in groups)
             {
-                if(groupID>0 && addedontop.indexOf(groupID)<0){
-                    var name = groups[groupID];
-                    if($.isArray(name)) name = name[1] //backward
-                    if(!window.hWin.HEURIST4.util.isnull(name))
+                if(idx>=0){
+                    
+                    var groupID = groups[idx];
+                    var name = null;
+                    if(parseInt(groupID)>0){ //case 1
+                        name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                    }else{
+                        groupID = idx;
+                        name = groups[groupID];    
+                        if($.isArray(name)) name = name[1] //backward  case 3
+                    }
+                    
+                    if(window.hWin.HEURIST4.util.findArrayIndex(groupID,addedontop)<0 
+                        && !window.hWin.HEURIST4.util.isnull(name))
                     {
                         window.hWin.HEURIST4.ui.addoption(selObj, groupID, name);
                     }
@@ -1609,7 +1654,7 @@ window.hWin.HEURIST4.ui = {
                             window.hWin.HAPI4.RecordMgr.search(query_request, 
                             function( response ){
                                 //that.loadanimation(false);
-                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
                                     
                                     var recset = new hRecordSet(response.data);
                                     if(recset.length()>0){
@@ -1637,7 +1682,6 @@ window.hWin.HEURIST4.ui = {
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
                                     widget.closeEditDialog();
-                                    
                                 }
 
                             });
@@ -1694,7 +1738,7 @@ window.hWin.HEURIST4.ui = {
                 dwidth = usrPreferences.width;
                 */
             }else{
-                url = url + 'records/view/renderRecordData.php?db='+window.hWin.HAPI4.database
+                url = url + 'viewers/record/renderRecordData.php?db='+window.hWin.HAPI4.database
                 +'&recID='+ rec_ID;
                                                         
                 dtitle = 'Record Info';
@@ -1973,7 +2017,7 @@ window.hWin.HEURIST4.ui = {
         
         window.hWin.HAPI4.EntityMgr.doRequest(request,
                     function(response){
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             
                             var groups = new hRecordSet(response.data).makeKeyValueArray(fieldTitle);
                             
@@ -2023,7 +2067,7 @@ window.hWin.HEURIST4.ui = {
         
             var manage_dlg;
             
-            if(!options.container){
+            if(!options.container){ //container not defined - add new one to body
                 
                 manage_dlg = $('<div id="heurist-dialog-'+entityName+'-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( $('body') )
@@ -2063,6 +2107,50 @@ window.hWin.HEURIST4.ui = {
     },
 
     //
+    // show record action dialog
+    //
+    showRecordActionDialog: function(actionName, options){
+
+        
+        if(!options) options = {};
+        if(options.isdialog!==false) options.isdialog = true; //by default popup      
+
+        if($.isFunction($('body')[actionName])){ //OK! widget script js has been loaded
+        
+            var manage_dlg;
+            
+            if(!options.container){ //container not defined - add new one to body
+                
+                manage_dlg = $('<div id="heurist-dialog-'+actionName+'-'+window.hWin.HEURIST4.util.random()+'">')
+                    .appendTo( $('body') )
+                    [actionName]( options );
+            }else{
+                manage_dlg = $(options.container)[actionName]( options );
+            }
+            
+            return manage_dlg;
+        
+        }else{
+            
+            var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/record/';
+            var scripts = [ path+actionName+'.js'];
+            
+            //load missed javascripts
+            $.getMultiScripts(scripts)
+            .done(function() {
+                // all done
+                window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, options);
+            }).fail(function(error) {
+                // one or more scripts failed to load
+                window.hWin.HEURIST4.msg.showMsgWorkInProgress();
+            }).always(function() {
+                // always called, both on success and error
+            });
+            
+        }
+    },    
+    
+    //
     // 
     getRidGarbageHelp: function(help_text){
 
@@ -2077,8 +2165,113 @@ window.hWin.HEURIST4.ui = {
         }
         
         return help_text;        
-    }
+    },
     
+    
+    getMousePos: function(e){
+
+        var posx = 0;
+        var posy = 0;
+        if (!e) var e = window.event;
+        if (e.pageX || e.pageY)     {
+            posx = e.pageX;
+            posy = e.pageY;
+        }
+        else if (e.clientX || e.clientY)     {
+            posx = e.clientX
+            + document.documentElement.scrollLeft;
+            posy = e.clientY
+            + document.documentElement.scrollTop;
+        }
+
+        return [posx, posy];
+    },
+    
+    
+    validateName: function(name, lbl){
+      
+            var swarn = "";
+            var regex = /[\[\].\$]+/;
+            var name = name.toLowerCase();
+            if( name=="id" || name=="modified" || name=="rectitle"){
+                   swarn = lbl+", you defined, is a reserved word. Please try an alternative";
+            //}else if (name.indexOf('.')>=0 ) {  //regex.test(name)
+            }else if (name!=''  && !(/^[^.'"}{\[\]]+$/.test(name))) {
+                   swarn = lbl+" contains . [ ] { } ' \" restricted characters which are not permitted in this context. Please use alphanumeric characters.";
+            }else if (name.indexOf('<')>=0 && name.indexOf('<')< name.indexOf('>') ) {
+                   swarn = lbl+" contains '<>' characters which are not permitted in this context. Please use alphanumeric characters.";
+            }
+            return swarn;
+    },
+        
+    //
+    // prevents entering restricted characters
+    //
+    preventChars: function(event){
+
+        event = event || window.event;
+        var charCode = typeof event.which == "number" ? event.which : event.keyCode;
+        if (charCode && charCode > 31)
+        {
+            var keyChar = String.fromCharCode(charCode);
+            // Old test only allowed specific characters, far too restrictive. New test only restrcts characters which will pose a problem
+            // if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
+            var sWarn = '';
+            
+            var value = $(event.target).val();
+            if((value.indexOf('<')>=0 && keyChar=='>') || 
+               (value.indexOf('>')>0 && keyChar=='<')){
+                   sWarn = 'Both < and > are forbid';
+            }else
+            if(/^[{}'".\[\]]+$/.test(keyChar)){
+                sWarn = 'Restricted characters: . [ ] { } \' " ';
+            }
+            
+            if(sWarn!=''){
+                event.returnValue = false;
+                var trg = event.target;
+                
+                window.hWin.HEURIST4.util.stopEvent(event);
+                
+                window.hWin.HEURIST4.msg.showMsgFlash(sWarn,700,null, trg);
+                setTimeout(function(){
+                        $(trg).focus();
+                }, 750);
+                
+                return false;
+            }
+        }
+        return true;
+    },    
+    
+    preventNonNumeric: function(evt) {
+        var theEvent = evt || window.event;
+        var key = theEvent.keyCode || theEvent.which;
+        if(key==37 || key==39) return;
+        key = String.fromCharCode( key );
+        var regex = /[0-9]|\./;
+        if( !regex.test(key) ) {
+            theEvent.returnValue = false;
+            theEvent.preventDefault();
+        }
+    },
+
+    preventNonAlphaNumeric: function(evt) {
+        var theEvent = evt || window.event;
+        var key = theEvent.keyCode || theEvent.which;
+        if(key==37 || key==39) return;
+        key = String.fromCharCode( key );
+        if(!/^[a-zA-Z0-9$_]+$/.test(key)){
+            theEvent.returnValue = false;
+            theEvent.preventDefault();
+        }
+    },
+    
+    cleanFilename: function(filename) {
+        filename = filename.replace(/\s+/gi, '-'); // Replace white space with dash
+        filename= filename.split(/[^a-zA-Z0-9\-\_\.]/gi).join('_');
+        return filename;
+    },
     
 }//end ui
 

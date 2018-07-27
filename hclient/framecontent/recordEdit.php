@@ -1,11 +1,18 @@
 <?php
 
     /**
-    *  Standalone record edit page. It may be used separately or wihin widget (in iframe)
+    *  Standalone record edit page. It may be used separately or within widget (in iframe)
+    * 
+    *  Paramters
+    *  q or recID - edit set of records defined by q(uery) or one record defiend by recID 
+    *  
+    *  otherwise it adds new record with 
+    *  rec_rectype, rec_owner, rec_visibility, tag, t -  title, u - url, d - description
+    * 
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -19,6 +26,91 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
     require_once(dirname(__FILE__)."/initPage.php");
+    require_once(dirname(__FILE__)."/../../records/disambig/testSimilarURLs.php");
+   
+   
+//this is an addition/bookmark of URL - at the moment from bookmarklet only
+if(@$_REQUEST['u']){ 
+    
+    $url = $_REQUEST['u'];
+    
+// 1. check that this url already exists and bookmarked by current user  ------------------------
+//      (that's double precaution - it is already checked in bookmarkletPopup)    
+
+    //  fix url to be complete with protocol and remove any trailing slash
+    if (! preg_match('!^[a-z]+:!i', $url)) $url = 'http://' . $url;
+    if (substr($url, -1) == '/') $url = substr($url, 0, strlen($url)-1);
+
+    // look up the user's bookmark (usrBookmarks) table, see if they've already got this URL bookmarked -- if so, just edit it 
+    $res = mysql__select_row($mysqli, 'select bkm_ID, rec_ID from usrBookmarks left join Records on rec_ID=bkm_recID '
+                .'where bkm_UGrpID="'.$system->get_user_id().'" '
+                .' and (rec_URL="'.$mysqli->real_escape_string($url).'" or rec_URL="'.$mysqli->real_escape_string($url).'/")');
+                
+    if ($res[0] > 0) { //already bookmarked
+        print '<script>var prepared_params = {recID:'.$res[1].'};</script>';
+    }else if (false && exist_similar($mysqli, $url)) {  //@todo implement disambiguation dialog
+//----- 2. find similar url - show disambiguation dialog -----------------------------------------
+
+        //redirect to disambiguation
+         
+        exit();  
+    }else{
+// 3. otherwise prepare description and write parameters as json array in header of this page        
+        
+        // preprocess any description 
+        if (@$_REQUEST['d']) {
+            $description = $_REQUEST['d'];
+
+        // use UNIX-style lines
+            $description = str_replace("\r\n", "\n", $description);
+            $description = str_replace("\r", "\n", $description);
+
+        // liposuction away those unsightly double, triple and quadruple spaces 
+            $description = preg_replace('/ +/', ' ', $description);
+
+        // trim() each line 
+            $description = preg_replace('/^[ \t\v\f]+|[ \t\v\f]+$/m', '', $description);
+            $description = preg_replace('/^\s+|\s+$/s', '', $description);
+
+        // reduce anything more than two newlines in a row 
+            $description = preg_replace("/\n\n\n+/s", "\n\n", $description);
+
+            if (@$_REQUEST['version']) {
+                $description .= ' [source: web page ' . date('Y-m-d') . ']';
+            }
+            
+            $params = array('d'=>$description);
+            
+            // extract all id from descriptions for bibliographic references 
+            $dois = array();
+            if (preg_match_all('!DOI:\s*(10\.[-a-zA-Z.0-9]+/\S+)!i', $description, $matches, PREG_PATTERN_ORDER)){
+                $dois = array_unique($matches[1]);
+            }
+
+            $isbns = array();
+            if (preg_match_all('!ISBN(?:-?1[03])?[^a-z]*?(97[89][-0-9]{9,13}[0-9]|[0-9][-0-9]{7,10}[0-9X])\\b!i', $description, $matches, PREG_PATTERN_ORDER)) {
+                $isbns = array_unique($matches[1]);
+                if (! @$_REQUEST['rec_rectype'] && defined('RT_BOOK')) {
+                    $params['rec_rectype'] = RT_BOOK;
+                }
+            }
+
+            $issns = array();
+            if (preg_match_all('!ISSN(?:-?1[03])?[^a-z]*?([0-9]{4}-?[0-9]{3}[0-9X])!i', $description, $matches, PREG_PATTERN_ORDER)) {
+                $issns = array_unique($matches[1]);
+                if (! @$_REQUEST['rec_rectype'] && defined('RT_JOURNAL_ARTICLE')){
+                    $params['rec_rectype'] = RT_JOURNAL_ARTICLE;
+                }
+            }
+            
+            print '<script>var prepared_params = '.json_encode($params).';</script>';
+        }
+    }
+    
+}   
+else{
+    print '<script>var prepared_params = {};</script>';
+}    
 ?>
 <!-- <?php echo PDIR;?> -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/rec_relation.js"></script>
@@ -66,33 +158,41 @@
                         return;
                     }
                     
-                    // OLD H3 stuff - need to call edit rectype structure
-                    if(window.hWin){
-                        win = window.hWin;
-                    }else{
-                        win = window;
-                    }
-                    
-                    if(win.HEURIST && win.HAPI4.baseURL){
-                        win.HEURIST.baseURL  = win.HAPI4.baseURL;
-                        win.HEURIST.loadScript(win.HAPI4.baseURL+"common/php/loadUserInfo.php?db=" + win.HAPI4.database);
-                        win.HEURIST.iconBaseURL = win.HAPI4.iconBaseURL;
-                        win.HEURIST.database = {  name: win.HAPI4.database };
-                    }
-                    // end OLD H3 stuff
-                    
-                    
                     $container = $('<div>').appendTo($("body"));
                     
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
-                        
-                    var rec_rectype = window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search);
+                    
+                    function __param(pname){
+                        if($.isEmptyObject(prepared_params) || 
+                           window.hWin.HEURIST4.util.isempty(prepared_params[pname]))
+                        {
+                                return window.hWin.HEURIST4.util.getUrlParameter(pname, window.location.search);
+                        }else{
+                                return prepared_params[pname];
+                        }       
+                    }
+                    
+                    //some values for new record can be passed as url parameters   
+                    var rec_rectype = __param('rec_rectype');
                     var new_record_params = {};
                     if(rec_rectype>0){
-                        new_record_params['rt'] = rec_rectype;
-                        new_record_params['ro'] = window.hWin.HEURIST4.util.getUrlParameter('rec_owner', window.location.search);
-                        new_record_params['rv'] = window.hWin.HEURIST4.util.getUrlParameter('rec_visibility', window.location.search);
-                        new_record_params['tag'] = window.hWin.HEURIST4.util.getUrlParameter('tag', window.location.search);
+                        new_record_params['RecTypeID'] = rec_rectype;
+                        new_record_params['OwnerUGrpID'] = __param('rec_owner');
+                        new_record_params['NonOwnerVisibility'] = __param('rec_visibility');
+                        new_record_params['tag'] = __param('tag');
+                        
+                        new_record_params['Title'] = __param('t');
+                        new_record_params['URL']   = __param('u');
+                        
+                        /*
+                        $details = array();
+                        new_record_params['title'] = __param('d');
+                        new_record_params['title'] = __param('f'); //favicon
+                        
+                        if(count($details)>0)
+                            new_record_params['details'] = $details;
+                        */
+                        
                     }
 
 //todo use ui.openRecordEdit                    
@@ -115,8 +215,8 @@
                         +'</div>',
                         onInitFinished:function(){
                             
-                            var q = window.hWin.HEURIST4.util.getUrlParameter('q', window.location.search);
-                            var recID = window.hWin.HEURIST4.util.getUrlParameter('recID', window.location.search);
+                            var q = __param('q');
+                            var recID = __param('recID');
                             
                             if(!q && recID>0){
                                 q = 'ids:'+recID;
@@ -130,7 +230,7 @@
                                                 detail: 'ids'}, 
                                 function( response ){
                                     //that.loadanimation(false);
-                                    if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
                                         
                                         var recset = new hRecordSet(response.data);
                                         if(recset.length()>0){
@@ -160,7 +260,7 @@
                             
                             }else{
                                 
-                                $container.manageRecords('addEditRecord',-1);
+                                $container.manageRecords('addEditRecord',-1); //call widget method
                             }                            
                             
                         }
@@ -176,8 +276,6 @@
         </script>
     </head>
     <body>
-        <script src="<?=HEURIST_BASE_URL?>common/js/utilsLoad.js"></script>
-        <script src="<?=HEURIST_BASE_URL?>common/php/displayPreferences.php"></script>
     
     </body>
 </html>

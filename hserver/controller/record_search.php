@@ -6,7 +6,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -67,9 +67,20 @@
     if( @$_REQUEST['parentquery'] ) unset ($_REQUEST['parentquery'] );
     //if( @$_REQUEST['needall'] ) unset ($_REQUEST['needall'] );
 
+    //get list of registered database and master index db on the same server
+    if(@$_REQUEST['remote'] == 'master' &&
+       strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){
+       
+       unset($_REQUEST['remote']);
+       $_REQUEST['db'] = 'Heurist_Master_Index';
+       $_REQUEST['q'] = 't:49';
+    }
+    
     $response = array();
 
     $system = new System();
+    
+    
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
         $response = $system->getError();
@@ -87,26 +98,37 @@
         $response = recordSearchRelated($system, $_REQUEST['ids'], @$_REQUEST['direction']);
 
     }else {
+        
+        if(@$_REQUEST['remote'] == 'master'){
+            
+                $reg_url = HEURIST_INDEX_BASE_URL.'hserver/controller/record_search.php?db=Heurist_Master_Index&q=t:22';
+                $data = loadRemoteURLContent($reg_url);            
+            
+                $response = json_decode($data, true);
+            
+        }else{
 
-        // TODO: temporary (for backward compatibility) should be part of all databases
-        // Check whether recLinks (relationships cache) table exists and create if not
-        $isok = true;
-        $value = mysql__select_value($system->get_mysqli(), "SHOW TABLES LIKE 'recLinks'");
-        if($value==null || $value==""){
-            include(dirname(__FILE__).'/../dbaccess/utils_db_load_script.php'); // used to execute SQL script
+            // TODO: temporary (for backward compatibility) should be part of all databases
+            // Check whether recLinks (relationships cache) table exists and create if not
+            $isok = true;
+            $value = mysql__select_value($system->get_mysqli(), "SHOW TABLES LIKE 'recLinks'");
+            if($value==null || $value==""){
+                include(dirname(__FILE__).'/../dbaccess/utils_db_load_script.php'); // used to execute SQL script
 
-            if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../dbaccess/sqlCreateRecLinks.sql")){
-                $system->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");
-                $response = $system->getError();
-                $isok = false;
+                if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/../dbaccess/sqlCreateRecLinks.sql")){
+                    $system->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");
+                    $response = $system->getError();
+                    $isok = false;
+                }
             }
-        }
-        if($isok){
-            $response = recordSearch($system, $_REQUEST);
+            if($isok){
+                $response = recordSearch($system, $_REQUEST);
+            }
+        
         }
     }
 
-    header('Content-type: application/json'); //'text/javascript');
-    print json_encode($response);
-    exit();
+// Return the response object as JSON
+header('Content-type: application/json;charset=UTF-8');
+print json_encode($response);
 ?>

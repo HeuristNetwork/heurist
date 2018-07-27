@@ -1,14 +1,16 @@
 <?php
 
 /**
-* @todo
-* CRUD for files : recUploadedFiles - REPLACE to dbRecUploadedFiles
-
+* methods for recUploadedFiles
+* @todo - 1) some methods to dbRecUploadedFiles 2) some to utils_image
+* 
 * file - prefix for functions
 * 
 * 
+* fileRegister
 * fileGetByObfuscatedId - get id by obfuscated id
-* fileGetPath_URL_Type  - local paths, external links, mimetypes and parameters (mediatype and source)
+* fileGetByFileName
+* fileGetFullInfo  - local paths, external links, mimetypes and parameters (mediatype and source)
 * fileGetThumbnailURL - URL to thumbnail for given record ID
 * getImageFromFile - return image object for given file
 * getPrevailBackgroundColor2  - not used
@@ -16,7 +18,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -33,7 +35,54 @@
 
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/db_users.php');
+require_once (dirname(__FILE__).'/../utilities/utils_file.php');
+require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 
+/**
+* register file in recUploadedFiles
+* 
+* @param mixed $system
+* @param mixed $fullname
+*/
+function fileRegister($system, $fullname){
+    
+    
+    $file_id = fileGetByFileName($system, $fullname); //apparently it is already registered
+    
+    if(!($file_id>0)) {
+                            
+        $filesize = filesize($fullname);
+        $fileinfo = pathinfo($fullname);
+        
+        $mimetypeExt = strtolower($fileinfo['extension']);
+        $filename_base = $fileinfo['basename'];
+        $dir = $fileinfo['dirname'];
+        
+        // get relative path to db root folder
+        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dir);
+        
+        $fileinfo = array(
+            'entity'=>'recUploadedFiles', 
+            'fields'=>array(    
+                'ulf_OrigFileName' => $filename_base,
+                'ulf_MimeExt' => $mimetypeExt, //extension or mimetype allowed
+                'ulf_FileSizeKB' => ($filesize<1024?1:intval($filesize/1024)),
+                'ulf_FilePath' => $relative_path, //relative path to HEURIST_FILESTORE_DIR - db root
+                'ulf_FileName' => $filename_base
+            )
+        );
+        
+        $entity = new DbRecUploadedFiles($system, $fileinfo);
+        $ret = $entity->save();
+        if($ret!==false){
+            $records = $entity->records();
+            $file_id = $records[0]['ulf_ID'];
+        }
+    }
+    
+    
+    return $file_id;
+}
 
 /**
 * Get file IDs by Obfuscated ID
@@ -50,7 +99,29 @@ function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
     return $res;
 }
 
+/**
+* Get file ID by file $fullname
+*
+* @param mixed $fullname
+*/
+function fileGetByFileName($system, $fullname){
+    
+        $path_parts = pathinfo($fullname);
+        $dirname = $path_parts['dirname'].'/';
+        $filename = $path_parts['basename'];
+        
+        // get relative path to db root folder
+        $relative_path = getRelativePath(HEURIST_FILESTORE_DIR, $dirname);
+        
+        $mysqli = $system->get_mysqli();
+      
+        $file_id = mysql__select_value($mysqli, 'select ulf_ID from recUploadedFiles '
+            .'where ulf_FileName = "'.$mysqli->real_escape_string($filename).'" and '
+            .' (ulf_FilePath = "file_uploads/" or ulf_FilePath = "'.$mysqli->real_escape_string($relative_path).'")');
 
+        return $file_id;
+        
+}
 
 /**
 * Get array of local paths, external links, mimetypes and parameters (mediatype and source)
@@ -59,11 +130,15 @@ function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
 * @param mixed $system
 * @param mixed $file_ids
 */
-function fileGetPath_URL_Type($system, $file_ids){
+function fileGetFullInfo($system, $file_ids, $all_fields=false){
 
+    //@todo use prepareIds() and prepareStrIds
     if(is_string($file_ids)){
         $file_ids = explode(",", $file_ids);
+    }else if(!is_array($file_ids)){
+        $file_ids = array($file_ids);
     }
+    
     if(count($file_ids)>0){
 
         if(is_numeric($file_ids[0])){
@@ -72,8 +147,11 @@ function fileGetPath_URL_Type($system, $file_ids){
             $query = "ulf_ObfuscatedFileID in ('".implode("','", $file_ids)."')";
         }
 
-        $query = 'select concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
-        .'fxm_MimeType, ulf_Parameters, ulf_OrigFileName from recUploadedFiles '
+        $query = 'select ulf_ID, concat(ulf_FilePath,ulf_FileName) as fullPath, ulf_ExternalFileReference,'
+        .'fxm_MimeType, ulf_Parameters, ulf_OrigFileName, ulf_FileSizeKB,'
+        .' ulf_ObfuscatedFileID, ulf_Description, ulf_Added'
+        .($all_fields?', ulf_Thumbnail, ulf_MimeExt':'')
+        .' from recUploadedFiles '
         .' left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt where '
         .$query;
 
@@ -83,7 +161,7 @@ function fileGetPath_URL_Type($system, $file_ids){
         if ($res){
             $result = array();
 
-            while ($row = $res->fetch_row()){
+            while ($row = $res->fetch_assoc()){
                 array_push($result, $row);
 
                 /*
@@ -403,5 +481,165 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         
 
     }
+}
+
+//
+// output the appropriate html tag to view media content
+//
+function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null){ 
+
+    $result = '';    
+    
+    $is_video = (strpos($mimeType,"video/")===0 || strpos($params,"video")!==false);
+    $is_audio = (strpos($mimeType,"audio/")===0 || strpos($params,"audio")!==false);
+    $is_image = (strpos($mimeType,"image/")===0);
+
+    if($external_url){
+        $filepath = $external_url;  //external 
+    }else{
+        //to itself
+        $filepath = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&file=".$fileid;
+    }
+    $thumb_url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&thumb=".$fileid;
+
+    if ( $is_video ) {
+
+        if($size==null || $size==''){
+            $size = 'width="640" height="360"';
+        }
+
+        if ($mimeType=='video/youtube' || $mimeType=='video/vimeo'
+        || strpos($external_url, 'vimeo.com')>0
+        || strpos($external_url, 'youtu.be')>0
+        || strpos($external_url, 'youtube.com')>0)
+        {
+
+            $playerURL = getPlayerURL($mimeType, $external_url);
+
+            $result = '<iframe '.$size.' src="'.$playerURL.'" frameborder="0" '
+            . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
+
+        }else{
+            $player = HEURIST_BASE_URL."ext/mediaelement/flashmediaelement.swf";
+
+            //preload="none"
+            $result = '<video '.$size.' controls="controls">'
+            .'<source type="'.$mimeType.'" src="'.$filepath.'" />'
+            .'<!-- Flash fallback for non-HTML5 browsers -->'
+            .'<object '.$size.' type="application/x-shockwave-flash" data="'.$player.'">'
+            .'<param name="movie" value="'.$player.'" />'
+            .'<param name="flashvars" value="controls=true&file='.$filepath.'" />'
+            .'<img src="'.$thumb_url.'" width="320" height="240" title="No video playback capabilities" />'
+            .'</object>'
+            .'</video>';
+
+        }
+
+    }
+    else if ( $is_audio ) 
+    {
+
+        if ($mimeType=='audio/soundcloud'
+        || strpos($external_url, 'soundcloud.com')>0)
+        {
+
+            if($size==null || $size==''){
+                $size = 'width="640" height="166"';
+            }
+
+            $playerURL = getPlayerURL($mimeType, $external_url);
+
+            $result = '<iframe '.$size.' src="'.$playerURL.'" frameborder="0"></iframe>';                        
+
+        }else{
+            $result = '<audio controls="controls"><source src="'.$filepath
+            .'" type="'.$mimeType.'"/>Your browser does not support the audio element.</audio>';                        
+        }
+
+    }else 
+        if($is_image){
+
+            if($size==null || $size==''){
+                $size = 'width="300"';
+            }
+            $result = '<img '.$size.' src="'.$filepath.'"/>';
+
+    }else if($mimeType=='application/pdf'){
+        //error_log($filepath);                 
+        $result = '<embed width="100%" height="100%" name="plugin" src="'
+        .$filepath.'&embed=1'
+        .'" type="application/pdf" internalinstanceid="9">';
+
+    }else{
+        //not media - show thumb with download link
+        $result = '<a href="'.$filepath.'" target="_blank"><img src="'.$thumb_url.'"/></a>';
+
+        /*                
+        if($size==null || $size==''){
+        $size = 'width="420" height="345"';
+        }
+        print '<iframe '.$size.' src="'.$filepath.'" frameborder="0"></iframe>';                        
+        */    
+    }
+    return $result;
+}           
+
+//
+// get player url for youtube, vimeo, soundcloud
+//
+function getPlayerURL($mimeType, $url){
+    
+    if( $mimeType == 'video/youtube' 
+            || strpos($url, 'youtu.be')>0
+            || strpos($url, 'youtube.com')>0){ //match('http://(www.)?youtube|youtu\.be')
+            
+        $url = 'https://www.youtube.com/embed/'.youtube_id_from_url($url);
+        
+    }else if( $mimeType == 'video/vimeo' || strpos($url, 'viemo.com')>0){
+        
+        $hash = json_decode(loadRemoteURLContent("https://vimeo.com/api/oembed.json?url=".$url, false), true);
+        $video_id = @$hash['video_id'];
+        if($video_id>0){
+           $url =  'https://player.vimeo.com/video/'.$video_id;
+        }
+    }else if( $mimeType == 'audio/soundcloud' || strpos($url, 'soundcloud.com')>0){
+    
+        return 'https://w.soundcloud.com/player/?url='.$url
+                .'&amp;auto_play=false&amp;hide_related=false&amp;show_comments=false&amp;show_user=false&amp;'
+                .'show_reposts=false&amp;show_teaser=false&amp;visual=true';
+    } 
+    
+    return $url;
+}
+
+function youtube_id_from_url($url) {
+/*    
+    $pattern = 
+        '%^# Match any youtube URL
+        (?:https?://)?  # Optional scheme. Either http or https
+        (?:www\.)?      # Optional www subdomain
+        (?:             # Group host alternatives
+          youtu\.be/    # Either youtu.be,
+        | youtube\.com  # or youtube.com
+          (?:           # Group path alternatives
+            /embed/     # Either /embed/
+          | /v/         # or /v/
+          | /watch\?v=  # or /watch\?v=
+          )             # End path alternatives.
+        )               # End host alternatives.
+        ([\w-]{10,12})  # Allow 10-12 for 11 char youtube id.
+        $%x'
+        ;
+        
+    //$url = urldecode(rawurldecode($_GET["q"]));
+    $result = preg_match($pattern, $url, $matches);
+    if ($result) {
+        return $matches[1];
+    }
+    return false;
+*/    
+    # https://www.youtube.com/watch?v=nn5hCEMyE-E
+    preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/", $url, $matches);
+    return $matches[1];    
 }
 ?>

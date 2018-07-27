@@ -1,0 +1,37 @@
+<fieldset id="div_fieldset">
+<div style="padding: 0.2em; width: 100%;" class="input">
+    <div class="header" style="padding: 0 16px 0 16px;min-width:100px;width:100px">
+        <label for="sel_record_scope">Records scope:</label>
+    </div>
+    <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+</div>
+
+<div id="div_sel_ownership" style="padding: 0.2em; min-width: 600px;" class="input">
+    <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Record is editable by:</label></div>
+    <select id="sel_Ownership" style="max-width:30em;margin-bottom: 1em;"></select>
+</div>
+
+<div id="div_sel_access" style="padding: 0.2em; min-width: 600px;" class="input">
+    <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Access outside this group:</label></div>
+    
+    <div class="detailRow" style="padding-bottom:1em;">
+        <label><input type="radio" name="rb_Access" value="hidden" id="rb_Access-hidden">
+        Only members of this group can view the record</label>
+    </div>
+    <div class="detailRow" style="padding-bottom:1em;">
+        <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable">
+        Any logged-in user can view the record</label>
+    </div>
+    <div class="detailRow" style="padding-bottom:1em;">
+        <label><input type="radio" name="rb_Access" value="pending" id="rb_Access-pending">
+        Flagged for external publication, any logged-in user</label>
+        <div style="margin-left: 20px; font-style: italic;">No effect on existing external views - hml, html etc.</div>
+        <div style="margin-left: 20px; font-style: italic;">Can be auto-set whenever a public record is edited.</div>
+    </div>
+    <div class="detailRow" style="padding-bottom:20px">
+        <label>
+        <input type="radio" name="rb_Access" value="public" id="rb_Access-public">
+        Published - written automatically to external views</label>
+    </div>
+</div>
+</fieldset>

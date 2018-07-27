@@ -6,7 +6,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -50,11 +50,15 @@
 
             if($action=="a" || $action=="add"){
 
-                $record = array();
-                $record['RecTypeID'] = @$_REQUEST['rt'];
-                $record['OwnerUGrpID'] = @$_REQUEST['ro'];
-                $record['NonOwnerVisibility'] =  @$_REQUEST['rv'];
-                $record['FlagTemporary'] = @$_REQUEST['temp'];
+                if(@$_REQUEST['rt']>0){ //old
+                    $record = array();
+                    $record['RecTypeID'] = @$_REQUEST['rt'];
+                    $record['OwnerUGrpID'] = @$_REQUEST['ro'];
+                    $record['NonOwnerVisibility'] =  @$_REQUEST['rv'];
+                    $record['FlagTemporary'] = @$_REQUEST['temp'];
+                }else{ //new
+                    $record = $_REQUEST;
+                }
 
                 $response = recordAdd($system, $record);
 
@@ -65,6 +69,10 @@
             } else if (($action=="d" || $action=="delete") && @$_REQUEST['ids']){
 
                 $response = recordDelete($system, $_REQUEST['ids']);
+
+            } else if ($action=="access"){
+
+                $response = recordUpdateOwnerAccess($system, $_REQUEST);
 
             } else if ($action=="duplicate" && @$_REQUEST['id']) {
 
@@ -91,7 +99,7 @@
         }
     }
 
-    header('Content-type: text/javascript');
-    print json_encode($response);
-    exit();
+// Return the response object as JSON
+header('Content-type: application/json;charset=UTF-8');
+print json_encode($response);
 ?>

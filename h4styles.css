@@ -946,6 +946,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     width: auto;
 }
 
+
 /* Allow Font Awesome Icons in lieu of jQuery UI and only apply when using a FA icon
 Remove the jQuery UI Icon
 Remove the jQuery UI Text Indent
@@ -1024,8 +1025,12 @@ ul.fancytree-container ul{
     font-size:0.9em;
     opacity: 0.55;
 }
-
-
+.prompt {
+    color: #999999;
+    font-size: 10px;
+    font-weight: normal;
+    padding-top: 0.3em;
+}
 
 .svs-acordeon{
     border-bottom: #8ea9b9 1px solid;
@@ -1505,7 +1510,7 @@ option {padding-left:15px;}
     opacity: 1;
 }
 
-
+    
 .recordList > .table_header{
     height: 1.2em;
     width: 100%;
@@ -1572,3 +1577,66 @@ option {padding-left:15px;}
     font-size:10px;
 }
 
+P {
+    color: #333333;
+    font-size: 11px;
+    line-height: 21px;
+}
+A:link {
+    text-decoration: none;
+}
+A:hover {
+    text-decoration: underline;
+}
+a.bare {
+    color: black;
+    text-decoration: none;
+}
+body.popup {
+    padding: 10px;
+    background-color:white;
+    font-size: 11px;
+}
+.banner, body.popup #page-inner {
+    padding: 6px;
+}
+body.popup table{
+    font-size:11px;   
+}
+/*
+body.popup A:link {
+    color: #6A7C99;    
+}
+*/
+body.popup h3 {
+    color: #DC8501;
+    font-size: 12px;    
+    height: auto;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    margin: 10px 0 0 0;
+}
+.separator_row {
+    height: 1px;
+    border-bottom: 1px solid #A4B4CB;
+}
+.dotted-link { border-bottom: 1px dotted #6A7C99;}
+
+.yellow_star{
+    background-image: url(common/images/star-yellow.png);
+    display:block;
+    height:14px;
+}
+
+.h3button {
+    text-transform: uppercase !important;
+    display: inline-block !important;
+    color: #666;
+    cursor: pointer !important;
+    font-weight: bold !important;
+    border: 1px solid RGBA(0,0,0,0.2) !important;
+    padding: 0 3px;
+    height: 20px !important;
+    line-height: 19px !important;
+    font: 10px arial,helvetica,clean,sans-serif;
+}

@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -49,7 +49,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 <ul>
 
                     <li class="list-menu-only">
-                        <a href="records/add/addRecordPopup.php" id="menulink-add-record" name="auto-popup" xclass="h3link"
+                        <a href="#" id="menulink-add-record" name="auto-popup"
                             data-logaction="addRec"
                             title="Add new record of specified record type">
                             Add record</a>
@@ -98,9 +98,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             Index multimedia</a>
                     </li>
 
-                    <li><a href="import/email/emailProcessingSetup.php" name="auto-popup" class="fixed h3link embed"
+                    <!-- import/email/emailProcessingSetup.php -->
+                    <li><a href="#" name="auto-popup" class="fixed h3link embed"
                         data-logaction="impEmails"
                         onClick="{return false;}"
+                        style="text-decoration:line-through"
                         title="Harvest email from a designated IMAP email server (set in database administrtion > Databsae > Advanced Properties)">
                         Harvest emails</a>
                     </li>
@@ -119,9 +121,11 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             Import KML</a>
                     </li>
                     
-                    <li><a href="applications/faims/syncFAIMS.php" name="auto-popup" class="fixed h3link embed"
+                     <!-- applications/faims/syncFAIMS.php -->
+                    <li><a href="#" name="auto-popup" class="fixed h3link embed"
                             data-logaction="syncFAIMS"
                         onClick="{return false;}"
+                        style="text-decoration:line-through"
                         title="Import structure and data into the current Heurist database from a FAIMS module tarball or direct from FAIMS server database">
                         FAIMS tablet data</a>
                     </li>

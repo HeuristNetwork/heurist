@@ -7,7 +7,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -20,7 +20,26 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
+    
+    /*
+    folderExists
+    folderCreate
+    folderDelete
+    
+    folderCreate2
+    folderAddIndexHTML
+    folderRecurseCopy
+    
+    fileCopy
+    fileSave
+    
+    getRelativePath
+    
+    allowWebAccessForForlder
+    
+    zip
+    unzip
+    */
 
     // 1 - OK
     // -1  not exists
@@ -74,6 +93,77 @@
         return true;
     }
    
+   
+    /**
+    * create folder, check write permissions, add index.html, write htaccess 
+    * 
+    * @param mixed $folder
+    * @param mixed $message
+    * @param mixed $allowWebAccess
+    */
+    function folderCreate2($folder, $message, $allowWebAccess=false){
+        
+        $swarn = '';
+        
+        if (folderCreate($folder, true)){
+        
+            folderAddIndexHTML( $folder );
+            
+            if($allowWebAccess){
+                //copy htaccess
+                $res = allowWebAccessForForlder( $folder );
+                if(!$res){
+                    $swarn = "Cannot copy htaccess file for folder $folder<br>";
+                }
+            }
+            
+        }else{
+            $swarn = 'Unable to create folder '. $folder .'  '.$message.'<br>';
+        }
+        return $swarn;
+    }   
+    
+    /**
+    * add index.html to folder
+    * 
+    * @param mixed $directory
+    */
+    function folderAddIndexHTML($folder) {
+        
+        $filename = $folder."/index.html";
+        if(!file_exists($filename)){
+            $file = fopen($filename,'x');
+            if ($file) { // returns false if file exists - don't overwrite
+                fwrite($file,"Sorry, this folder cannot be browsed");
+                fclose($file);
+            }
+        }
+    }
+    
+   
+    /**
+    * clean folder and itseld
+    * 
+    * @param mixed $dir
+    */
+    function folderDelete($dir, $rmdir=true) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (filetype($dir."/".$object) == "dir") {
+                        folderDelete($dir."/".$object); //delte files
+                    } else {
+                        unlink($dir."/".$object);
+                    }
+                }
+            }
+            reset($objects);
+            if($rmdir)
+                rmdir($dir); //delete folder itself
+        }
+    }
+   
     
     //
     //
@@ -111,7 +201,224 @@
         }
     }
 
+ 
+    /**
+     * Returns the target path as relative reference from the base path.
+     *
+     * Only the URIs path component (no schema, host etc.) is relevant and must be given, starting with a slash.
+     * Both paths must be absolute and not contain relative parts.
+     * Relative URLs from one resource to another are useful when generating self-contained downloadable document archives.
+     * Furthermore, they can be used to reduce the link size in documents.
+     *
+     * Example target paths, given a base path of "/a/b/c/d":
+     * - "/a/b/c/d"     -> ""
+     * - "/a/b/c/"      -> "./"
+     * - "/a/b/"        -> "../"
+     * - "/a/b/c/other" -> "other"
+     * - "/a/x/y"       -> "../../x/y"
+     *
+     * @param string $basePath   The base path
+     * @param string $targetPath The target path
+     *
+     * @return string The relative target path
+     */
+    function getRelativePath($basePath, $targetPath)
+    {
+        
+        $targetPath = str_replace("\0", '', $targetPath);
+        $targetPath = str_replace('\\', '/', $targetPath);
+        
+        if( substr($targetPath, -1, 1) != '/' )  $targetPath = $targetPath.'/';
+        
+        if ($basePath === $targetPath) {
+            return '';
+        }
+        //else  if(strpos($basePath, $targetPath)===0){
+        //    $relative_path = $dirname;
+
+
+        $sourceDirs = explode('/', isset($basePath[0]) && '/' === $basePath[0] ? substr($basePath, 1) : $basePath);
+        $targetDirs = explode('/', isset($targetPath[0]) && '/' === $targetPath[0] ? substr($targetPath, 1) : $targetPath);
+        array_pop($sourceDirs);
+        $targetFile = array_pop($targetDirs);
+
+        foreach ($sourceDirs as $i => $dir) {
+            if (isset($targetDirs[$i]) && $dir === $targetDirs[$i]) {
+                unset($sourceDirs[$i], $targetDirs[$i]);
+            } else {
+                break;
+            }
+        }
+
+        $targetDirs[] = $targetFile;
+        $path = str_repeat('../', count($sourceDirs)).implode('/', $targetDirs);
+
+        // A reference to the same base directory or an empty subdirectory must be prefixed with "./".
+        // This also applies to a segment with a colon character (e.g., "file:colon") that cannot be used
+        // as the first segment of a relative-path reference, as it would be mistaken for a scheme name
+        // (see http://tools.ietf.org/html/rfc3986#section-4.2).
+        return '' === $path || '/' === $path[0]
+            || false !== ($colonPos = strpos($path, ':')) && ($colonPos < ($slashPos = strpos($path, '/')) || false === $slashPos)
+            ? './'.$path : $path;
+    }
     
+    
+/**
+* copy folder recursively
+*
+* @param mixed $src
+* @param mixed $dst
+* @param array $folders - zero level folders to copy
+*/
+function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_files_in_root=true) {
+    $res = false;
+
+    $src =  $src . ((substr($src,-1)=='/')?'':'/');
+
+    $dir = opendir($src);
+    if($dir!==false){
+
+        if (file_exists($dst) || @mkdir($dst, 0777, true)) {
+
+            $res = true;
+
+            while(false !== ( $file = readdir($dir)) ) {
+                if (( $file != '.' ) && ( $file != '..' )) {
+                    if ( is_dir($src . $file) ) {
+
+                        if($folders==null || count($folders)==0 || in_array($src.$file.'/',$folders))
+                        {
+                            if($file_to_copy==null || strpos($file_to_copy, $src.$file)===0 )
+                            {
+                                $res = folderRecurseCopy($src.$file, $dst . '/' . $file, null, $file_to_copy, true);
+                                if(!$res) break;
+                            }
+                        }
+
+                    }
+                    else if($copy_files_in_root && ($file_to_copy==null || $src.$file==$file_to_copy)){
+                        copy($src.$file,  $dst . '/' . $file);
+                        if($file_to_copy!=null) return false;
+                    }
+                }
+            }
+        }
+        closedir($dir);
+
+    }
+
+    return $res;
+}        
+    
+//------------------------------------------    
+/**
+* Zips everything in a directory
+*
+* @param mixed $source       Source folder or array of folders
+* @param mixed $destination  Destination file
+*/
+function zip($source, $folders, $destination, $verbose=true) {
+    if (!extension_loaded('zip')) {
+        echo "<br/>PHP Zip extension is not accessible";
+        return false;
+    }
+    if (!file_exists($source)) {
+        echo "<br/>".$source." is not found";
+        return false;
+    }
+
+
+    $zip = new ZipArchive();
+    if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
+        if($verbose) echo "<br/>Failed to create zip file at ".$destination;
+        return false;
+    }
+
+
+    $source = str_replace('\\', '/', realpath($source));
+
+    if (is_dir($source) === true) {
+
+
+        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+
+        foreach ($files as $file) {
+            $file = str_replace('\\', '/', $file);
+
+            // Ignore "." and ".." folders
+            if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
+                continue;
+
+            // Determine real path
+            $file = realpath($file);
+
+            //ignore files that are not in list of specifiede folders
+            $is_filtered = true;
+            if( is_array($folders) ){
+
+                $is_filtered = false;
+                foreach ($folders as $folder) {
+                    if( strpos($file, $source."/".$folder)===0 ){
+                        $is_filtered = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!$is_filtered) continue;
+
+            if (is_dir($file) === true) { // Directory
+                $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+            }
+            else if (is_file($file) === true) { // File
+                $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+            }
+        }
+    } else if (is_file($source) === true) {
+        $zip->addFromString(basename($source), file_get_contents($source));
+    }
+
+    // Close zip and show output if verbose
+    $numFiles = $zip->numFiles;
+    $zip->close();
+    $size = filesize($destination) / pow(1024, 2);
+
+    if($verbose) {
+        echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
+        echo "<br/>The zip file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+    }
+    return true;
+}
+
+function unzip($zipfile, $destination, $entries=null){
+
+    if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
+
+        $zip = new ZipArchive;
+        if ($zip->open($zipfile) === TRUE) {
+
+            /*debug to find proper name in archive 
+            for($i = 0; $i < $zip->numFiles; $i++) { 
+            $entry = $zip->getNameIndex($i);
+            error_log( $entry );
+            }*/
+            if($entries==null){
+                $zip->extractTo($destination, array());
+            }else{
+                $zip->extractTo($destination, $entries);
+            }
+            $zip->close();
+            return true;
+        } else {
+            return false;
+        }
+
+    }else{
+        return false;
+    }
+}
+    
+        
 //-----------------------  LOAD REMOTE CONTENT (CURL)
 //
 // if the same server - try to include script instead of full request
@@ -398,5 +705,22 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     
     return array('csv_linebreak'=>$csv_linebreak, 'csv_delimiter'=>$csv_delimiter, 'csv_enclosure'=>$csv_enclosure);
 }
-    
+
+function flush_buffers($start=true){
+    //ob_end_flush();
+    @ob_flush();
+    @flush();
+    if($start) @ob_start();
+}
+
+//
+//
+//
+function allowWebAccessForForlder($folder){
+    $res = true;
+    if(file_exists($folder) && is_dir($folder) && !file_exists($folder.'/.htaccess')){
+        $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'/.htaccess');
+    }
+    return $res;
+}
 ?>

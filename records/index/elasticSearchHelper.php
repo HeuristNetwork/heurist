@@ -1,11 +1,11 @@
 <?php
 
     /**
-     * elasticHelper.php: Functions to help interacting with ElasticSearch, mainly used by elasticSearchFunctions.php
+     * elasticHelper.php: Functions to help interacting with ElasticSearch, mainly used by elasticSearch.php
      *
      * @package     Heurist academic knowledge management system
      * @link        http://HeuristNetwork.org
-     * @copyright   (C) 2005-2016 University of Sydney
+     * @copyright   (C) 2005-2018 University of Sydney
      * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
      * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
      * @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
@@ -43,7 +43,10 @@
      * @return string Name of the ElasticSearch index
      */
     function getElasticIndex($dbName) {
-        $elasticIndex = strtolower($dbName); // Must be lowercase
+        
+        list($database_name_full, $database_name) = mysql__get_names( $dbName );
+        
+        $elasticIndex = strtolower($database_name); // Must be lowercase
         preg_replace('/[^A-Za-z0-9 ]/', '_', $elasticIndex); // Replace non-alphanumeric with underscore
         return $elasticIndex;
     }
@@ -245,67 +248,4 @@
             }
         }
     }
-
-    /**
-     * Attempts to retrieve the highest rec_Modified timestamp in the MySql database
-     * @return null|string Null, or timestamp in the following form: 2017-05-16 11:26:52
-     */
-    function getHighestMySqlTimestamp() {
-        $query = "SELECT MAX(rec_Modified) FROM Records";
-        $res = mysql_query($query);
-        if ($res) {
-            return mysql_result($res,0); // Gets the rec_Modified value from the first row.
-        } else {
-            error_log("[elasticSearchHelper.php] getHighestMySqlTimestamp failed - query: $query");
-        }
-        return NULL;
-    }
-
-    /**
-     * Attempts to retrieve the highest rec_Modified timestamp in the Elastic instance
-     * @return null|string Null, or timestamp in the following form: 2017-05-16 11:26:52
-     */
-    function getHighestElasticTimestamp() {
-        $address = getElasticAddress(DATABASE) . '/_search?size=1';
-        $query = '{
-                    "query": {
-                        "match_all": {}
-                    },
-                    "sort": {
-                        "Modified.raw": {
-                            "order" : "desc"
-                        }
-                    }
-                  }';
-        $json = postElastic($address, json_decode($query));
-
-        if ($json != NULL) {
-            $response = json_decode($json);
-            return $response->hits->hits[0]->_source->Modified; // Gets the Modified value from the first hit.
-        }else{
-            error_log("[elasticSearchHelper.php] getHighestElasticTimestamp failed - query: $query");
-        }
-
-        return NULL;
-    }
-
-    /**
-     * Checks if ElasticSearch is synchronised, called by functions in elasticSearchFunctions.php
-     */
-    function checkElasticSync() {
-        // 1. Retrieve highest MySQL timestamp
-        $mysqlTimestamp = getHighestMySqlTimestamp();
-
-        // 2. Retrieve highest Elastic timestamp
-        $elasticTimestamp = getHighestElasticTimestamp();
-
-        // 3. Compare timestamps
-        if($mysqlTimestamp != NULL && $elasticTimestamp != NULL) {
-            if(strcmp($mysqlTimestamp, $elasticTimestamp) !== 0) {
-                // The timestamps are not equal. Note that ElasticSearch indexing takes ~100ms.
-                //error_log("[elasticSearchHelper.php] mysqlTimestamp: $mysqlTimestamp & elasticTimestamp: $elasticTimestamp are not equal.");
-            }
-        }
-    }
-
 ?>

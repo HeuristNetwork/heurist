@@ -8,7 +8,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -412,7 +412,7 @@ $.widget( "heurist.dh_search", {
 
                         that.loadanimation(false);
 
-                        if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                        if(response.status == window.hWin.ResponseStatus.OK){
                             that._currentquery = query;
                             that._currenttype  = content_id;
                             that._resultset = new hRecordSet(response.data);
@@ -514,7 +514,7 @@ $.widget( "heurist.dh_search", {
 
         function __onResponse(response){
 
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
 
                 //@TODO that.cached_counts.push(response);
                 var allTerms = window.hWin.HEURIST4.terms;

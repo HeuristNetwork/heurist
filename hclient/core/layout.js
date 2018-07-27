@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -1006,7 +1006,7 @@ function hLayout(args) {
 
         if(layout==null){
             window.hWin.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
-            if(layoutid!='H4Default') layout = layoutGetById('H4Default');
+            if(layoutid!='H5Default') layout = layoutGetById('H5Default');
             if(layout==null){
                 return;
             }
@@ -1030,7 +1030,7 @@ function hLayout(args) {
             _initLayoutFree(layout, $container);
 
             
-            //speical styles case for default layout
+            //special styles case for default layout
             //@todo - definition of styles for tab control via layuot_default.js
             var tabb = $container.find('div[layout_id="main_header_tab"]');
             if(tabb.length>0){
@@ -1077,7 +1077,7 @@ function hLayout(args) {
                             
                 lis.each(function(idx,item){
                     
-                    if(idx==2) $(item).css({width:'300px'});
+                   if(idx == lis.length-1) $(item).css({width:'300px'});
                    //$(item).css({width:((idx+1)*100+'px')});
                    $(item).css({'z-index': count_lis - idx});
                    $(item).attr('data-zkeep', count_lis - idx);
@@ -1086,6 +1086,21 @@ function hLayout(args) {
                        //'padding-left':'12px', 
                        $(item).css({'margin-left':'-12px', 'border-left':'none'});
                    }
+                   
+                   if(idx==1){
+                       //DEBUG $(item).hide();
+                       
+                       $('<span class="ui-icon ui-icon-close" title="Close this tab" '
+                       +'style="font-size: 16px;width:24px;height:24px;position:absolute;right:10;top:20;z-index:2;cursor:pointer"></span>')
+                       .click(function(){ 
+                            $(item).hide(); 
+                            if($(tabb).tabs("option", "active")==1) $(tabb).tabs({active:0}); 
+                       })
+                       .appendTo($(item));
+                       
+                       //$(item).attr('admintab',1);
+                   }
+                   
                 });
                 
                 tabheader.parent().css({

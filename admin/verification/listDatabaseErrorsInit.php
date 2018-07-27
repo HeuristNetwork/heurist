@@ -1,15 +1,13 @@
 <?php
 
 /**
-* listDatabaseErrorsInit.php: Lists structural errors and records with errors:
-* invalid term codes, field codes, record types in pointers
-* pointer fields point to non-existent records or records of the wrong type
-*   single value fields with multiple values
-*   required fields with no value
+* listDatabaseErrorsInit.php: 
+* 
+* iframe (wait) wrapper for listUploadedFilesErrors and listDatabaseErrors
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>

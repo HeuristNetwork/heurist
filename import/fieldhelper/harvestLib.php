@@ -10,8 +10,8 @@
         HEURIST_FILESTORE_DIR."scratch/",
         HEURIST_FILESTORE_DIR."settings/",
         HEURIST_FILESTORE_DIR.'term-icons/',
-        HEURIST_SMARTY_TEMPLATES_DIR,
-        HEURIST_XSL_TEMPLATES_DIR);
+        HEURIST_SMARTY_TEMPLATES_DIR); 
+    if(defined('HEURIST_XSL_TEMPLATES_DIR')) array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);
     if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
     if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
 
@@ -23,18 +23,17 @@
 //
 // return folders and extents to index
 //
-function getMediaFolders() {
+function getMediaFolders($mysqli) {
     
     // Find out which folders to parse for XML manifests - specified for FieldHelper indexing in Advanced Properties
     $query1 = "SELECT sys_MediaFolders, sys_MediaExtensions from sysIdentification where 1";
-    $res1 = mysql_query($query1);
-    if (!$res1 || mysql_num_rows($res1) == 0) {
+    $row1 = mysql__select_row($mysqli, $query1);
+    if (!$row1) {
         return array('error'=>'Sorry, unable to read the sysIdentification from the current database '.HEURIST_DBNAME
             .'. Possibly wrong database format, please consult Heurist team');
     }
 
     // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
-    $row1 = $row = mysql_fetch_row($res1);
     $mediaFolders = $row1[0];
     
     if($mediaFolders==null || $mediaFolders==''){
@@ -205,7 +204,7 @@ function getRegInfoResult(){
 //
 function getFilesInDir($dir, $mediaExts, $imode) {
     
-    global $reg_info;
+    global $system, $reg_info;
     
     $all_files = scandir($dir);
     $registered = array();
@@ -225,7 +224,7 @@ function getFilesInDir($dir, $mediaExts, $imode) {
             {
                 if($imode==1){
                 
-                    $file_id = check_if_register_file($filename, false);
+                    $file_id = fileGetByFileName( $system, $filename);  //see db_files.php
 
                     if($file_id>0){
                         array_push($reg_info['reg'], $filename);

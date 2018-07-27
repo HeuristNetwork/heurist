@@ -1,5 +1,6 @@
 <?php
 /**
+* For Entities (for recUploadFiles see file_download.php)
 * 
 * fileGet.php - 1) get image for given entity, record ID, version and color 
 *               2) get or check file from code folders - tips, help, doc content
@@ -7,7 +8,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -158,19 +159,23 @@ if($filename){ //download from scratch
         }else{
         
             if($viewmode=='thumb'){
-                $filename = $path.'thumbnail/'.$rec_id.'.png'; 
+                $filename = $path.'thumbnail/'.$rec_id; 
             }else if($viewmode=='icon'){
-                $filename = $path.'icon/'.$rec_id.'.png';    
+                $filename = $path.'icon/'.$rec_id;    
             }else{
-                $exts = array('png','jpg','jpeg','gif');
-                foreach ($exts as $ext){
-                    if(file_exists($path.$rec_id.'.'.$ext)){
-                        $content_type = 'image/'.$ext;
-                        $filename = $path.$rec_id.'.'.$ext;
-                        break;
-                    }
+                $filename = $path.$rec_id;
+            }
+            
+            
+            $exts = array('png','jpg','jpeg','gif');
+            foreach ($exts as $ext){
+                if(file_exists($filename.'.'.$ext)){
+                    $content_type = 'image/'.$ext;
+                    $filename = $filename.'.'.$ext;
+                    break;
                 }
             }
+            
         }   
                    
         if(file_exists($filename)){

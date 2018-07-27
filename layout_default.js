@@ -1,7 +1,7 @@
 /**
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -111,11 +111,27 @@ var cfg_layouts = [
 
     // Default layout - the standard Heurist interface, used if no parameter provided
     // TODO: change the id and name to jsut HeuristDefault and Heurist Default - h4 and h3 are hangovers from old versions
-    {id:'H4Default', name:'Heurist Def v3', theme:'heurist', type:'free',
+    {id:'H5Default', name:'Heurist Def v5', theme:'heurist', type:'free',
         north_pane:{ dropable:false, dragable:false, 
                 css:{position:'absolute', top:0,left:0,height:'6em',right:0, 
                      'min-width':'75em'}, 
             apps:[{appid:'h3_mainMenu', hasheader:false, css:{height:'100%', border:'solid'} }] 
+        },
+        center_pane:{ dockable:false, dropable:false, dragable:false, 
+                css:{position:'absolute', top:'6em',left:0,bottom:0,right:0},
+            apps:[{appid:'include_layout', 
+                        name: 'Filter-Analyse-Publish',
+                        layout_id:'FAP',dragable:false,
+                        options:{ref: 'SearchAnalyze'}
+                        ,css:{position:'absolute', top:'0',left:0,bottom:'0.1em',right:0}}]
+        }    
+    },
+    
+    {id:'H4Default', name:'Heurist Def v4', theme:'heurist', type:'free',
+        north_pane:{ dropable:false, dragable:false, 
+                css:{position:'absolute', top:0,left:0,height:'6em',right:0, 
+                     'min-width':'75em'}, 
+            apps:[{appid:'h3_mainMenu', hasheader:false, css:{height:'100%', border:'solid'}, options:{topics:['help','profile']} }] 
         },
         center_pane:{ dockable:false, dropable:false, dragable:false, 
                 css:{position:'absolute', top:'6em',left:0,bottom:0,right:0},
@@ -128,9 +144,13 @@ var cfg_layouts = [
                       name: 'Manage<span class="ui-icon ui-icon-gears" style="display:inline-block;font-size:24px;margin-left:14px;margin-top:-0.2em;width:24px;height:24px;vertical-align:middle;"></span>',
                       dragable:false,
                       options:{url: 'hclient/framecontent/tabmenus/manageMenu.php?db=[dbname]', isframe:true}}
-                        //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0, 'min-width':'75em'}}             
                     ,{appid:'h4_static', 
-                    name: 'Add Data<span class="ui-icon ui-icon-addtodb-28" style="display:inline-block;margin-left:14px;vertical-align:middle;"></span>',
+                      name: 'Admin<span class="ui-icon ui-icon-gears" style="display:inline-block;font-size:24px;margin-left:14px;margin-top:-0.2em;width:24px;height:24px;vertical-align:middle;"></span>',
+                      dragable:false,
+                      closable:false,
+                      options:{url: 'hclient/framecontent/tabmenus/adminMenu.php?db=[dbname]', isframe:true}}
+                    ,{appid:'h4_static', 
+                      name: 'Add Data<span class="ui-icon ui-icon-addtodb-28" style="display:inline-block;margin-left:14px;vertical-align:middle;"></span>',
                         dragable:false,
                         options:{url: 'hclient/framecontent/tabmenus/addDataMenu.php?db=[dbname]', isframe:true}}
                         //,css:{position:'absolute', top:'4.5em',left:0,bottom:'0.2em',right:0,'min-width':'75em'}}
@@ -156,30 +176,6 @@ var cfg_layouts = [
                             options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
                             show_inner_header: true} }]}  //search result
      },
-      
-    // original layout with united top dropdown menu - all admin/import/export features are in popup dialogs
-    {id:'original', name:'Heurist Def Original', theme:'heurist', type:'cardinal',
-        north:{size:'13em', resizable:false, overflow:'hidden',
-            apps:[
-                {appid:'h3_mainMenu', hasheader:false, css:{position:'absolute', top:0,left:0,height:'6em',right:0, border:'none', 'background':'none', 'min-width':'75em'} },    //top panel
-                {appid:'h4_search', hasheader:false, 
-                    css:{position:'absolute', top:'6em', left:0, height:'7em', right:0, 
-                     'min-width':'75em'}, options:{has_paginator:false} },   //search '#8ea9b9'
-        ]},
-        west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} }]},  //saved searches
-        center:{minsize:300, dropable:false, 
-                apps:[{appid:'h3_resultList', hasheader:false, dockable:false, dragable:false, 
-                            css:{'background-color':'white'}, 
-                            options:{ empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header: true} }]},  //search result
-        east:{size:'50%', minsize:300, dropable:false,
-            tabs:[{dockable:true, dragable:false, resizable:false,
-                apps:[
-                    {appid:'h3_recordListExt', name: 'Record View', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    // H3 record viewer
-                    {appid:'ha51'}, // map viewer (map.php) inside widget (app_timemap.js)
-                    {appid:'h3_recordListExt', name: 'Custom Reports', options:{title:'Custom Reports', url: 'viewers/smarty/showReps.html?db=[dbname]'}},
-                    {appid:'h4_connections',   options:{title:'Network Diagram', url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]'}}            ]}]
-        }
-    },
 
     // 3 main tabs on top with accodion menu on each one - most of admin/import/export in iframes
     {id:'SearchAnalyze', name:'Search Analyze Publish', theme:'heurist', type:'cardinal',
@@ -211,7 +207,7 @@ var cfg_layouts = [
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
                     {appid:'h3_recordListExt', name: 'Record View', 
-                                options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', 
+                                options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', 
                                 is_single_selection:true, 'data-logaction':'viewRecord'}},    // H3 record viewer
                     {appid:'ha51', options:{'data-logaction':'viewMapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
                     {appid:'h3_recordListExt', name: 'Custom Reports', options:{title:'Custom Reports', 
@@ -240,7 +236,7 @@ var cfg_layouts = [
     {appid:'h4_search', hasheader:false, css:{width:'100%', border:'none', 'background':'none'} },
     {appid:'ha_search_tree', hasheader:false, css:{border:'none', 'background':'none'} },  //saved searches
     {appid:'h3_resultList', name: 'Search result' },
-    {appid:'h3_recordListExt', name: 'Record', options:{url: 'records/view/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
+    {appid:'h3_recordListExt', name: 'Record', options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', is_single_selection:true}},    //H3 record viewer
     {appid:'ha51'}, // H4 map V2
     {appid:'h3_recordListExt', options:{title:'Report', url: 'viewers/smarty/showReps.html'}},     //H3 smarty
     {appid:'h4_connections',   options:{title:'Network', url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]'}}  //H4 connections

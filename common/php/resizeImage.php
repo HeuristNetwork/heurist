@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -30,23 +30,26 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White   
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-
-
 header('Content-type: image/png');
 
-require_once(dirname(__FILE__).'/../connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/dbMySqlWrappers.php');
-require_once(dirname(__FILE__)."/../../records/files/uploadFile.php");
-require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
-require_once(dirname(__FILE__).'/../../common/php/utilsMail.php');
+require_once (dirname(__FILE__)."/../../hserver/System.php");
+require_once (dirname(__FILE__)."/../../hserver/utilities/utils_mail.php");
+require_once (dirname(__FILE__).'/../../hserver/dbaccess/db_files.php');
 
+$system = new System();
+
+if(!$system->init(@$_REQUEST['db'])){
+//    include dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
+    header('Location: ../images/100x100-check.gif');
+    exit();
+}
 
 if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$_REQUEST['maxh']) {
     $standard_thumb = true;
@@ -63,9 +66,9 @@ if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$
 }
 
 $img = null;
+$mysqli = $system->get_mysqli();
 
-mysql_connection_overwrite(DATABASE);
-mysql_query('set character set binary');
+$mysqli->query('set character set binary');
 
 if (array_key_exists('ulf_ID', $_REQUEST))
 {
@@ -80,14 +83,15 @@ if (array_key_exists('ulf_ID', $_REQUEST))
        echo readfile($thumbnail_file);
        return;
     }  
+  
+    $res = fileGetFullInfo($system, $mysqli->real_escape_string($_REQUEST['ulf_ID']), true);
+    if($res!==false){
+        $file = $res[0];    
+    }else{
+        header('Location: ../images/100x100-check.gif');
+        exit();
+    }
     
-    $res = mysql_query('select recUploadedFiles.*, defFileExtToMimetype.fxm_MimeType '
-    .'from recUploadedFiles, defFileExtToMimetype where (fxm_Extension=ulf_MimeExt) and ulf_ObfuscatedFileID = "' 
-    . mysql_real_escape_string($_REQUEST['ulf_ID']) . '"');
-    
-    if (mysql_num_rows($res) != 1) return;
-    $file = mysql_fetch_assoc($res);
-
     if ($standard_thumb  &&  $file['ulf_Thumbnail']) {
 
         //save as file - recreate from thumb blob from database
@@ -102,7 +106,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
     }
     
     $type_source = null;
-    if(@$file['ulf_Parameters']){
+    if(@$file['ulf_Parameters']){ //outdated
         $fileparams = parseParameters($file['ulf_Parameters']); //from uploadFile.php
         $type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
         $type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
@@ -119,6 +123,9 @@ if (array_key_exists('ulf_ID', $_REQUEST))
     }
 
     if($type_source==null || $type_source=='heurist') {
+        if (@$file['fullPath']){
+            $filename = $file['fullPath'];
+        }else
         if ($file['ulf_FileName']) {
             $filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
         } else {
@@ -177,8 +184,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             case 'png':
                 $is_image = true;
             
-                $mem_limit = ini_get ('memory_limit');
-                $mem_limit = _get_config_bytes($mem_limit);
+                $mem_limit = $system->get_php_bytes('memory_limit');
                 
                 $imageInfo = getimagesize($filename); 
                 if(is_array($imageInfo)){
@@ -193,9 +199,9 @@ if (array_key_exists('ulf_ID', $_REQUEST))
                         $too_large = true;
                         
                         //database, record ID and name of bad image
-                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.DATABASE, 
-                        'File ID#'.$file['ulf_ID'].'  '.$filename.' requires '.$memoryNeeded.
-                        ' bytes to be resized.  Available '.$mem_limit.' bytes.', null);
+                        sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME, 
+                            'File ID#'.$file['ulf_ID'].'  '.$filename.' requires '.$memoryNeeded.
+                            ' bytes to be resized.  Available '.$mem_limit.' bytes.', null);
                     }                
                 }
                 break;
@@ -217,7 +223,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
                     
                         $errline_prev=$errline;
                         //database, record ID and name of bad image
-                        $res = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.DATABASE, 
+                        $res = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME, 
                         'File ID#'.$file['ulf_ID'].'  '.$filename.' is corrupted. System message: '.$errstr, null);
                     
                 }
@@ -251,7 +257,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
         }
         restore_error_handler();
 
-    }else if($file['ulf_ExternalFileReference']){
+    }else if(@$file['ulf_ExternalFileReference']){  //remote 
 
         if($type_media=='image'){ //$type_source=='generic' &&
             //@todo for image services (panoramio, flikr) take thumbnails directly
@@ -344,7 +350,7 @@ $resized = file_get_contents($resized_file);
 
 if ($standard_thumb  &&  @$file) {
     // store to database
-    mysql_query('update recUploadedFiles set ulf_Thumbnail = "' . mysql_real_escape_string($resized) . '" where ulf_ID = ' . $file['ulf_ID']);
+    $mysqli->query('update recUploadedFiles set ulf_Thumbnail = "' . $mysqli->real_escape_string($resized) . '" where ulf_ID = ' . $file['ulf_ID']);
 }else{
     unlink($resized_file);
 }

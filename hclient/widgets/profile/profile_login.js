@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -88,7 +88,7 @@ function doLogin(isforsed){
                     if(window.hWin.HEURIST4.msg.checkLength( rusername, "username", message, 1, 0 ))
                     {
                         window.hWin.HAPI4.SystemMgr.reset_password({username: rusername.val()}, function(response){
-                            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                            if(response.status == window.hWin.ResponseStatus.OK){
                                 window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Password_Reset'), null, ""); // Title was an unhelpful and inelegant "Info"
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -109,7 +109,7 @@ function doLogin(isforsed){
                         //get hapi and perform login
                         window.hWin.HAPI4.SystemMgr.login({username: username.val(), password:password.val(), session_type:session_type.val()},
                             function(response){
-                                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                                if(response.status == window.hWin.ResponseStatus.OK){
 
                                     window.hWin.HAPI4.setCurrentUser(response.data.currentUser);
                                     window.hWin.HAPI4.sysinfo = response.data.sysinfo;
@@ -118,7 +118,7 @@ function doLogin(isforsed){
 
                                     $dlg.dialog( "close" );
                                     //that._refresh();
-                                }else if(response.status == window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED){
+                                }else if(response.status == window.hWin.ResponseStatus.REQUEST_DENIED){
                                     _setMessage(response.message);
                                     setTimeout(function(){ _setMessage(); }, 2000);
                                 }else {

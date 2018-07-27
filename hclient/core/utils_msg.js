@@ -45,7 +45,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             msg = response;
         }else{
             if(window.hWin.HEURIST4.util.isnull(response) || window.hWin.HEURIST4.util.isempty(response.message)){
-                if(response.status!=window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED){
+                if(response.status!=window.hWin.ResponseStatus.REQUEST_DENIED){
                         msg = 'Error_Empty_Message';
                 }
             }else{
@@ -55,7 +55,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             dlg_title = response.error_title;
 
-            if(response.sysmsg && response.status!=window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED){
+            if(response.sysmsg && response.status!=window.hWin.ResponseStatus.REQUEST_DENIED){
                 //sysmsg for REQUEST_DENIED is current user id - it allows to check if session is expired
                 
                 if(typeof response.sysmsg['join'] === "function"){
@@ -65,17 +65,17 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 }
 
             }
-            if(response.status==window.hWin.HAPI4.ResponseStatus.SYSTEM_FATAL
-            || response.status==window.hWin.HAPI4.ResponseStatus.SYSTEM_CONFIG){
+            if(response.status==window.hWin.ResponseStatus.SYSTEM_FATAL
+            || response.status==window.hWin.ResponseStatus.SYSTEM_CONFIG){
 
                 msg = msg + "<br><br>May result from a network outage, or because the system is not properly configured. "
                 +"If the problem persists, please report to your system administrator";
 
-            }else if(response.status==window.hWin.HAPI4.ResponseStatus.INVALID_REQUEST){
+            }else if(response.status==window.hWin.ResponseStatus.INVALID_REQUEST){
 
                 msg = msg + "<br><br>The number and/or set of request parameters is not valid. Please email the Heurist development team ( info at HeuristNetwork dot org)";
 
-            }else if(response.status==window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED){
+            }else if(response.status==window.hWin.ResponseStatus.REQUEST_DENIED){
                 
                 if(msg!='') msg = msg + '<br><br>';
 
@@ -87,7 +87,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     msg = msg + 'This action is not allowed for your current permissions';    
                 } 
                 
-            }else if(response.status==window.hWin.HAPI4.ResponseStatus.DB_ERROR){
+            }else if(response.status==window.hWin.ResponseStatus.DB_ERROR){
                 msg = msg + '<br><br>If this error occurs repeatedly, please contact '
                 +'your system administrator or email us (support at HeuristNetwork dot org)'
                 +' and describe the circumstances under which it occurs so that we/they can find a solution';
@@ -106,13 +106,14 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         buttons[window.hWin.HR('OK')]  = function() {
                     var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                     $dlg.dialog( "close" );
-                    if(response.status==window.hWin.HAPI4.ResponseStatus.REQUEST_DENIED && needlogin){
+                    if(response.status==window.hWin.ResponseStatus.REQUEST_DENIED && needlogin){
                             //window.hWin.HAPI4.setCurrentUser(null);
                             //$(top.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
                     }
                 }; 
         window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons, dlg_title, ext_options);
-        
+       
+        return msg; 
     },
 
     //
@@ -145,7 +146,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(isdlg){
             window.hWin.HEURIST4.msg.showMsgDlg(message, null, "Work in Progress");    
         }else{
-            window.hWin.HEURIST4.msg.showMsgFlash(message, 4000, "Work in Progress");
+            window.hWin.HEURIST4.msg.showMsgFlash(message, 4000, {title:'Work in Progress',height:160});
         }
         
     },
@@ -278,12 +279,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(options.title){
             options.title = window.hWin.HR(options.title);
         }
+        if(!(options.height>0)){
+            options.height = 90;
+        }
 
         $.extend(options, {
             resizable: false,
             width: 'auto',
             modal: false,
-            height: 80,
+            //height: 80,
             buttons: {}
         });
 
@@ -645,6 +649,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     
     //
     // take element and assign it to dialog, on dialog close place element back to original parent
+    // and dialog object will be destroed
     //
     showElementAsDialog: function(options){
 

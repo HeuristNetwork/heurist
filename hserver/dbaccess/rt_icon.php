@@ -5,7 +5,7 @@
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -51,17 +51,28 @@ id - record id
     if(@$_REQUEST['ent']=='term'){    //FOR H3 UI
     
         $term_id = @$_REQUEST['id'];
-        if(substr($term_id,-4,4) != ".png") $term_id = $term_id . ".png";  
+        
+        //if(substr($term_id,-4,4) != ".png") $term_id = $term_id . ".png";  
     
         $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$term_id;
+        
+        $exts = array('png','jpg','jpeg','gif');
+        foreach ($exts as $ext){
+            if(file_exists($filename.'.'.$ext)){
+                $content_type = 'image/'.$ext;
+                $filename = $filename.'.'.$ext;
+                break;
+            }
+        }
+    
         if (@$_REQUEST['checkmode']=='1'){
-            header('Content-type: text/javascript');
+            header('Content-type: application/json;charset=UTF-8');
             if(file_exists($filename)){
                 print '{"res":"ok"}';
             }else{
                 print '{"res":"notfound"}';
             }
-        }/*else if (@$_REQUEST['deletemode']=='1'){
+        }else if (@$_REQUEST['deletemode']=='1'){
             header('Content-type: text/javascript');
             //header('Content-type: text/html');
             if (@$_REQUEST['deletemode']=='1'){
@@ -72,7 +83,7 @@ id - record id
             }else{
                 print '{"res":"notfound"}';
             }
-        }*/else 
+        }else 
         if(file_exists($filename)){
             download_file($filename);
         }else if (@$_REQUEST['editmode']=='1'){ //show invitation to add image

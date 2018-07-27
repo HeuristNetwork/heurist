@@ -8,7 +8,7 @@
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -98,7 +98,7 @@ function haddDataMenu() {
                 
                 window.hWin.HAPI4.SystemMgr.verify_credentials(
                 function(){
-                   var url = window.hWin.HAPI4.baseURL + "hclient/framecontent/import/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
+                   var url = window.hWin.HAPI4.baseURL + "import/delimited/importRecordsCSV.php?db="+ window.hWin.HAPI4.database;
                    
                    var body = $(this.document).find('body');
                    var dim = {h:body.innerHeight(), w:body.innerWidth()};
@@ -123,7 +123,7 @@ function haddDataMenu() {
                 
                 window.hWin.HAPI4.SystemMgr.verify_credentials(
                 function(){
-                   var url = window.hWin.HAPI4.baseURL + "hclient/framecontent/import/importRecordsCSV.php?format=kml&db="+ window.hWin.HAPI4.database;
+                   var url = window.hWin.HAPI4.baseURL + "import/delimited/importRecordsCSV.php?format=kml&db="+ window.hWin.HAPI4.database;
                    
                    var body = $(this.document).find('body');
                    var dim = {h:body.innerHeight(), w:body.innerWidth()};

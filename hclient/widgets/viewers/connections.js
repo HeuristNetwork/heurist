@@ -3,7 +3,7 @@
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -218,7 +218,7 @@ $.widget( "heurist.connections", {
             var callback = function(response)
             {
                 var resdata = null;
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     // Store relationships
 //console.log("Successfully retrieved relationship data!", response.data);
                     that.option("relations", response.data);

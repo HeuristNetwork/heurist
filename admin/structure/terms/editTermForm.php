@@ -1,11 +1,11 @@
 <?php
-
+//@TODO use async instead of form submit
     /**
-    * editTermForm.php: add individual term for given vocabulary
+    * editTermForm.php: add individual term for given vocabulary (used in edit field type)
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2016 University of Sydney
+    * @copyright   (C) 2005-2018 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -21,20 +21,13 @@
     */
 
     // User must be system administrator or admin of the owners group for this database
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
-    require_once(dirname(__FILE__).'/../saveStructureLib.php');
+define('LOGIN_REQUIRED',1);   
+define('PDIR','../../../');  //need for proper path to js and css    
 
-    if (!is_logged_in()) {
-        print "<html><head>";
-        print '<meta http-equiv="content-type" content="text/html; charset=utf-8">';
-        print "<link rel=stylesheet href='../../../common/css/global.css'></head>".
-        "<body><div class=wrap><div id=errorMsg>".
-        "<span>You must be logged in to add terms to vocabulary</span>".
-        "<p><a href=".HEURIST_BASE_URL."common/connect/login.php?db=".HEURIST_DBNAME.
-        " target='_top'>Log in</a></p></div></div></body></html>";
-        return;
-    }
+require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPageMin.php");
+require_once(dirname(__FILE__).'/../saveStructureLib.php');
+
+    $mysqli = $system->get_mysqli();
 
     $parent_id = @$_REQUEST['parent'];
 
@@ -63,21 +56,19 @@
     }else if($parent_id==null){
         $local_message = "Parent vocabulary is not defined";
     }else if(@$_REQUEST['process']=="action"){
+        
+        
 
         if(@$_REQUEST['name']==null || $_REQUEST['name']==""){
-            $local_message = "<div style='color:red'>Term (label) is mandatory - you cannot have a term without a label representing the term</div>";
+            $local_message = "<div class='ui-state-error'>Term (label) is mandatory - you cannot have a term without a label representing the term</div>";
         }else{
 
-            $mysqli = mysqli_connection_overwrite(DATABASE); //artem's
-            
             $res = updateTerms(array('trm_Label','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'), null, //$parent_id."-1",
-                array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['treetype'], ($parent_id>0?$parent_id:null) ,"open",$_REQUEST['code']), $mysqli);
-
-            $mysqli->close();
+                array($_REQUEST['name'],$_REQUEST['description'],$_REQUEST['treetype'], ($parent_id>0?$parent_id:null) ,"open",$_REQUEST['code']), null); //$mysqli
 
             if(is_numeric($res)){
 
-                $local_message = "<script>top.HEURIST.terms = \n" . json_format(getTerms(),true) . ";\n</script>".
+                $local_message = "<script>window.hWin.HEURIST4.terms = \n" . json_encode(dbs_GetTerms($system)) . ";\n</script>".
                 "<span style='color:green; padding-left:50px;'>Added ".(($parent_id>0)?'term':'vocabulary').": <b>".$term_name."</b></span>";
                 if($return_res==""){
                     $return_res = ($parent_id==0)?$res:"ok";
@@ -99,20 +90,23 @@
 
 
     if($parent_id!=0){
-        $terms = getTerms(true);
+        $terms = dbs_GetTerms($system);
         $parent_name = $terms['termsByDomainLookup'][$_REQUEST['treetype']][$parent_id][0];
     }
 
 ?>
-
 <html>
 
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Add <?=($parent_id==0?"vocabulary":"term for: ".$parent_name)?></title>
 
-        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 
         <style type="text/css">
             .dtyField {
@@ -133,11 +127,13 @@
             var context_return_res = "<?=$return_res ?>";
 
             function showOtherTerms(){
-                top.HEURIST.util.popupURL(top, top.HEURIST.baseURL +
-                    "admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>&treetype=<?=$_REQUEST['treetype'] ?>&db=<?=$_REQUEST['db'] ?>",
-                    {
+                var sURL = '<?=HEURIST_BASE_URL?>admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>'
+                    + '&treetype=<?=$_REQUEST['treetype'] ?>&db=<?=HEURIST_DBNAME?>';
+                    
+                window.hWin.HEURIST4.msg.showDialog(sURL, {
                         "close-on-blur": false,
                         "no-resize": false,
+                        title: 'Manage terms',
                         height:750,     // height and width of term tree editing popup
                         width: 1200,
                         callback: function(needTreeReload) {
@@ -159,20 +155,25 @@
             },500);
 
             function submitAndClose(){
-                if(top.HEURIST.util.isempty(document.getElementById("trmName").value)){
+                if(window.hWin.HEURIST4.util.isempty(document.getElementById("trmName").value)){
                     window.close(context_return_res);
                 }else{
                     document.getElementById('close_on_save').value = 1;
                     document.forms[0].submit();
                 }
             }
+            
+            $(document).ready(function() {
+                document.getElementById('trmName').focus();
+                $('button').button();
+            });
+                 
         </script>
 
         
     </head>
 
-    <body class="popup" onload="{document.getElementById('trmName').focus();}">
-        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
+    <body class="popup">
         <div>
             <form name="main" action="editTermForm.php" method="post"
                 onsubmit="{document.getElementById('btnPanel').style.display = 'none'}">
@@ -247,23 +248,30 @@
 
                 <div style="padding-top: 20px;" id="btnPanel">
 <?php
-    if (is_admin()){
+    if ($system->is_admin()){
 ?>
                     <div style="float:left; padding-left:150px;">
-                        <input id="btnEditTree" type="button" value="Edit terms tree" onClick="{showOtherTerms();}"
-                            title="Add, edit and rearrange terms in the overall tree view of terms defined for this database"/>
+                        <button id="btnEditTree" onClick="{showOtherTerms();}"
+                            title="Add, edit and rearrange terms in the overall tree view of terms defined for this database">
+                            Edit terms tree
+                        </button>
                     </div>
 <?php        
     }
 ?>
                     <div style="float:right; padding-left:30px;">
-                        <input id="btnSaveAndClose" type="button" value="Done" onClick="{submitAndClose();}"
-                            title="Close this window and return to the selection of the vocabulary and terms for this field"/> &nbsp;&nbsp;
+                        <button id="btnSaveAndClose" onClick="{submitAndClose();}"
+                            title="Close this window and return to the selection of the vocabulary and terms for this field">
+                            Done
+                        </button>
+                       &nbsp;&nbsp;
                     </div>
                     <div style="float:right; text-align: right; padding-right:20px;">
-                        <input id="btnSave" type="submit" style="font-weight:bold !important; color:black; "
-                            value="&nbsp;Add <?=($parent_id==0?"vocabulary":"term")?>&nbsp;"
-                            title="Add <?=($parent_id==0?"top-level vocabulary":"the term to the current vocabulary")?>"/>&nbsp;&nbsp;
+                        <button id="btnSave" type="submit" style="font-weight:bold !important; color:black; "
+                            title="Add <?=($parent_id==0?"top-level vocabulary":"the term to the current vocabulary")?>">
+                            Add <?=($parent_id==0?"vocabulary":"term")?>
+                        </button>
+                        &nbsp;&nbsp;
                     </div>
                 </div>
             </form>

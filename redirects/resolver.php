@@ -12,7 +12,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -26,11 +26,6 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-if(!defined('NO_DB_ALLOWED')) define('NO_DB_ALLOWED',1);
-
-require_once(dirname(__FILE__).'/../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../records/view/findReplacedRecord.php');
-
 // Input is of the form .../redirects/resolver.php?db=mydatabase&recID=3456
 
 // TODO: future form accepting recID=123-3456 which redirects to record 3456 on database 123.
@@ -76,27 +71,22 @@ if ($database_id>0) {
     }
     
     if(isset($error_msg)){
-        print $error_msg;
-        return;
+        header('Location:../hclient/framecontent/infoPage.php?error='.rawurlencode($error_msg));
+        exit();
     }
 
 }
 
-if($recid>0){
-    $recid = get_replacement_bib_id($recid);
-}
-
 if($database_url!=null){ //redirect to resolver for another database
     $redirect = $database_url.'&recID='.$recid.'&fmt'.$format;
-}else if(!defined('HEURIST_DBNAME')){
-    print 'Database parameter is not defined';
-    return;
 }else if($format=='html'){
-    $redirect = HEURIST_BASE_URL.'records/view/viewRecord.php?db='.HEURIST_DBNAME.'&recID='.$recid;
+    $redirect = '../viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
 }else if($format=='edit'){
-    $redirect = HEURIST_BASE_URL.'hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'];
+    //todo include resolver recordSearchReplacement
+    $redirect = '../hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'];
 }else{
-    $redirect = HEURIST_BASE_URL.'export/xml/flathml.php?db='.HEURIST_DBNAME.'&depth=1&w=a&q=ids:'.$recid;
+    //todo include resolver  recordSearchReplacement
+    $redirect = '../export/xml/flathml.php?db='.$_REQUEST['db'].'&depth=1&w=a&q=ids:'.$recid;
 }
 
 header('Location: '.$redirect);

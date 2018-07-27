@@ -8,7 +8,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @note        Completely revised for Heurist version 4
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -45,7 +45,7 @@ function hSearchMinimal() {
         
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response){
-                if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+                if(response.status == window.hWin.ResponseStatus.OK){
                     
                     if(response.data  && response.data.memory_warning){
                            window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
@@ -111,7 +111,7 @@ function hSearchMinimal() {
     function _onSearchResult(response){
 
             var recordset = null;
-            if(response.status == window.hWin.HAPI4.ResponseStatus.OK){
+            if(response.status == window.hWin.ResponseStatus.OK){
 
                 if(_query_request!=null && response.data.queryid==_query_request.id) {
 

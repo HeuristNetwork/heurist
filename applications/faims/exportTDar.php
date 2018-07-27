@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -122,7 +122,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                 }
             }
 
-            //print ">>>>>".(function_exists('HTTP_Request2')?"YES":"NO")."<br>";
+            //print "DEBUG>".(function_exists('HTTP_Request2')?"YES":"NO")."<br>";
 
             print "<form name='startform' action='exportTDar.php' method='get'>";
             print "<input name='step' value='1' type='hidden'>";
@@ -960,7 +960,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             function post_request($url, $fusername, $fpwd, $postdata, $cookie_file, $is_save_cookies){
 
 
-                //print ">>>>>".HEURIST_HTTP_PROXY_AUTH."   ".HEURIST_HTTP_PROXY."<br>";
+                //print "DEBUG>".HEURIST_HTTP_PROXY_AUTH."   ".HEURIST_HTTP_PROXY."<br>";
 
                 $ch = curl_init();
                 curl_setopt($ch, CURLOPT_HEADER, $is_save_cookies); //Tell curl not to return headers, but do return the response

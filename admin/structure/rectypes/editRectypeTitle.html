@@ -1,7 +1,7 @@
 <!--
 
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.6
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -69,22 +69,27 @@
         <!-- TreeView source file -->
         <script type="text/javascript" src="../../../external/yui/2.8.2r1/build/treeview/treeview-min.js" ></script>
 
-        <!-- END TREEVIEW DEFS-->
-        <script type="text/javascript">
-            var editRectypeTitle;
-        </script>
-
         <style type="text/css">
             body {
                 font: 10px Verdana, Geneva, sans-serif;
             }
         </style>
+        
+        <script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
+        <script type="text/javascript" src="../../../hclient/core/recordset.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="editRectypeTitle.js"></script>
+
+        <script type="text/javascript">
+            var editRectypeTitle;
+            $(document).ready(function() {
+                editRectypeTitle = new  EditRectypeTitle();
+            });
+        </script>        
     </head>
 
     <body class="yui-skin-sam">
-        <script type="text/javascript" src="../../../common/js/utilsLoad.js"></script>
-        <script type="text/javascript" src="../../../common/js/utilsUI.js"></script>
-        <script type="text/javascript" src="../../../admin/structure/rectypes/editRectypeTitle.js"></script>
 
         <div style="position:absolute;top:0px;bottom:0px;left:0px;width:202px;">
             <div align="left">
@@ -177,15 +182,6 @@
             function onSave() {
                 window.editRectypeTitle.doSave();
             }
-
-            //
-            //  starts initialization on load completion of this window
-            //
-            function loadHandler(){
-                window.editRectypeTitle = new EditRectypeTitle();
-            }
-
-            YAHOO.util.Event.addListener(window, "load", loadHandler );
         </script>
     </body>
 </html>

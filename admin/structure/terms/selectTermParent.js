@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2005-2016 University of Sydney
+* Copyright (C) 2005-2018 University of Sydney
 *
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
 * in compliance with the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Stephen White
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2016 University of Sydney
+* @copyright   (C) 2005-2018 University of Sydney
 * @link        http://HeuristNetwork.org
 * @version     3.1.0
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -33,7 +33,7 @@ var selectTermParent;
 
 //aliases
 var Dom = YAHOO.util.Dom,
-Hul = top.HEURIST.util;
+Hul = window.hWin.HEURIST4.util;
 
 /**
 * SelectTerms - class for pop-up window to select terms for editing detail type
@@ -51,6 +51,7 @@ function SelectTermParent() {
     _childTerm,
     _currentNode,
     _termTree,
+    _mode,
     _target_parent_id = null;
 
     /**
@@ -65,22 +66,23 @@ function SelectTermParent() {
         // otherwise try to get these parameters from request
         //
         if(location.search.length > 1) {
-            top.HEURIST.parameters = top.HEURIST.parseParams(location.search);
-            _childTerm = top.HEURIST.parameters.child;
-            _currentDomain = top.HEURIST.parameters.domain;
-            _target_parent_id = top.HEURIST.parameters.parent;
+
+            _childTerm = Hul.getUrlParameter('child', location.search);
+            _currentDomain = Hul.getUrlParameter('domain', location.search);
+            _target_parent_id = Hul.getUrlParameter('parent', location.search);
+            _mode = Hul.getUrlParameter('mode', location.search);
 
             var childTermName = '';
             if(_childTerm){
-                childTermName = top.HEURIST.terms.termsByDomainLookup[_currentDomain][_childTerm]
-                [top.HEURIST.terms.fieldNamesToIndex.trm_Label];
+                childTermName = window.hWin.HEURIST4.terms.termsByDomainLookup[_currentDomain][_childTerm]
+                [window.hWin.HEURIST4.terms.fieldNamesToIndex.trm_Label];
             }
-
-            if(top.HEURIST.parameters.mode==1){
-                Dom.get('header1').innerHTML = 'Select term you wish to merge into '+ childTermName;
-                Dom.get('btnSet').innerHTML = 'SELECT';
+            
+            if(_mode==1){
+                $('#header1').html('Select term you wish to merge into '+ childTermName);
+                $('#btnSet').html('SELECT');
                 //Dom.get('divParentIsRoot').style.display = 'none';
-                Dom.get("childTermName").innerHTML = "";
+                $('#childTermName').empty();
             }else
                 if(_childTerm){
                     Dom.get("childTermName").innerHTML = "<h2 class='dtyName'>"+childTermName+"</h2>";
@@ -121,7 +123,7 @@ function SelectTermParent() {
         if(isRoot){
             window.close("root");
         }else if(_currentNode){
-            if(top.HEURIST.parameters.mode==1){
+            if(_mode==1){
                 if (_currentNode === _findTopLevelForId(_currentNode.data.id)){
                     alert("You can't select a top level vocabulary for merge.");
                     return;
@@ -142,9 +144,9 @@ function SelectTermParent() {
         var termid,
         tv_parent = tv.getRoot(),
         first_node,
-        treesByDomain = top.HEURIST.terms.treesByDomain[_currentDomain],
-        termsByDomainLookup = top.HEURIST.terms.termsByDomainLookup[_currentDomain],
-        fi = top.HEURIST.terms.fieldNamesToIndex;
+        treesByDomain = window.hWin.HEURIST4.terms.treesByDomain[_currentDomain],
+        termsByDomainLookup = window.hWin.HEURIST4.terms.termsByDomainLookup[_currentDomain],
+        fi = window.hWin.HEURIST4.terms.fieldNamesToIndex;
 
         var node_tomove = null;
 
