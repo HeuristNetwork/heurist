@@ -173,17 +173,7 @@
         }else {
             
             if($access_grps!=null){
-                   $access_grps = prepareIds($access_grps);
-                   if(count($access_grps)>0){
-                        //add group record permissions
-                        $values = array();
-                        foreach ($access_grps as $grp_id){
-                              array_push($values,'('.$grp_id.','.$newId.')');
-                        }
-                        $query = 'INSERT INTO usrRecPermissions (rcp_UGrpID,rcp_RecID) VALUES '.implode(',',$values);
-                        $mysqli->query($query);
-                        //mysql__insertupdate($mysqli, 'usrRecPermissions', 'rcp', {rcp_ID:-1, rcp_UGrpID: rcp_RecID:$newId });
-                   }
+                updateUsrRecPermissions($mysqli, $newId, $access_grps);
             }
         
             if($return_id_only){
@@ -342,6 +332,10 @@
                 return $system->addError(HEURIST_DB_ERROR, 'Cannot save record', $syserror);
             }
             $stmt->close();
+            
+            //updata group view permission
+            $access_grps = ($access=='viewable)'?@$record['NonOwnerVisibilityGroups']:null;
+            updateUsrRecPermissions($mysqli, $recID, $access_grps);
 
             //delete ALL existing details
             $query = "DELETE FROM recDetails where dtl_RecID=".$recID;
@@ -1491,8 +1485,30 @@ array_push($errorValues,
         
     }
     
+    //
+    //
+    //
+    function updateUsrRecPermissions($mysqli, $recID, $access_grps){
+
+           $query = 'DELETE FROM usrRecPermissions WHERE rcp_RecID='.$recID;
+           $mysqli->query($query);
+        
+           $access_grps = prepareIds($access_grps);
+           if(count($access_grps)>0){
+                //add group record permissions
+                $values = array();
+                foreach ($access_grps as $grp_id){
+                      array_push($values,'('.$grp_id.','.$recID.')');
+                }
+                $query = 'INSERT INTO usrRecPermissions (rcp_UGrpID,rcp_RecID) VALUES '.implode(',',$values);
+                $mysqli->query($query);
+                //mysql__insertupdate($mysqli, 'usrRecPermissions', 'rcp', {rcp_ID:-1, rcp_UGrpID: rcp_RecID:$newId });
+           }
+        
+    }
     
-    // @todo all these functions are duplicated in VerifyValue and db_structure
+    
+    // @todo REMOVE - all these functions are duplicated in VerifyValue and db_structure
 
     /**
     * check that rectype is valid for given detail (constrained pointer)

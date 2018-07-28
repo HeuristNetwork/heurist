@@ -536,6 +536,45 @@
 
     }
 
+    /**
+    * get all view group permissions for given set of records
+    *     
+    * @param mixed $system
+    * @param mixed $ids
+    */
+    function recordSearchPermissions($system, $ids){
+        if(!@$ids){
+            return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
+        }
+
+        $ids = preapreIds($ids);
+        
+        $permissions = array();
+              
+        $query = 'SELECT rcp_RecID, rcp_UGrpID FROM usrRecPermissions '
+                .' WHERE rcp_RecID IN ('.implode(",", $ids).')';
+        $res = $mysqli->query($query);
+        if (!$res){
+            return $system->addError(HEURIST_DB_ERROR, "Search query error on search permissions. Query ".$query, $mysqli->error);
+        }else{
+            
+                while ($row = $res->fetch_row()) {
+                    if(@$permissions[$row[0]]){
+                        array_push($permissions[$row[0]], $row[1]);
+                    }else{
+                        $permissions[$row[0]] = array($row[1]);     
+                    } 
+                }
+                $res->close();
+        }
+        
+        $response = array("status"=>HEURIST_OK, "data"=>$permissions);
+
+
+        return $response;
+        
+    }
+    
     //
     // returns only first relationship type ID for 2 given records
     //
@@ -702,10 +741,11 @@
         $istimemap_counter = 0; //total records with timemap data
         $needThumbField = false;
         $needThumbBackground = false;
-        $needCompleteInformation = false; //if true - get all header fields, relations, ful file info
+        $needCompleteInformation = false; //if true - get all header fields, relations, full file info
         $needTags = (@$params['tags']>0)?$system->get_user_id():0;
 
         $relations = null;
+        $permissions = null;
 
         if(@$params['detail']=='complete'){
             $params['detail'] = 'detail';
@@ -1474,6 +1514,11 @@ $loop_cnt++;
                                 if($relations['status']==HEURIST_OK){
                                     $relations = $relations['data'];
                                 }
+                                
+                                $permissions = recordSearchPermissions($system, $all_rec_ids);
+                                if($permissions['status']==HEURIST_OK){
+                                    $permissions = $permissions['data'];
+                                }
                                 //array("direct"=>$direct, "reverse"=>$reverse, "headers"=>$headers));
                             }
             
@@ -1510,6 +1555,9 @@ $loop_cnt++;
                         }
                         if(is_array($relations)){
                                 $response['data']['relations'] =  $relations;
+                        }
+                        if(is_array($permissions)){
+                                $response['data']['permissions'] =  $permissions;
                         }
 
                 }//$is_ids_only

@@ -91,6 +91,15 @@
                         "rst_DisplayHelpText": "" ,
                         "rst_Display": "hidden"
                     }
+                },
+                {
+                    "dtID": "rec_NonOwnerVisibilityGroups",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "dty_Size":2000,
+                        "rst_Display": "hidden"
+                    }
                 }
         ]
 }

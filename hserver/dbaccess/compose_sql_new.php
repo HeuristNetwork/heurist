@@ -121,7 +121,8 @@ $top_query;
 // w - domain all or bookmarked or e(everything)
 // limit and offset
 // nested = false - to avoid nested queries - it allows performs correct count for distinct target record type (see faceted search)
-// @todo s - sort
+// s - sort
+// @todo vt - visibility type 
 // @todo publiconly
 //
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
@@ -264,7 +265,13 @@ class HQuery {
         }else{
             $this->from_clause =  "Records r".$this->level;
         }
-
+        
+        //add usrRecPermission join
+        if($this->level=='0' && !$publicOnly && $this->currUserID>0 && $this->currUserID!=2){
+                $this->from_clause = $this->from_clause.' LEFT JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID ';
+        }            
+            
+        // add tables from other    
         foreach($this->top_limb->tables as $table){
             $this->from_clause =  $this->from_clause.", ".$table; //.$this->level;    ART20150807
             if($table=="recDetails rd"){
@@ -285,14 +292,27 @@ class HQuery {
             if($recVisibilityType && $recVisibilityType!="hidden"){
                 $where2 = '(r0.rec_NonOwnerVisibility="'.$recVisibilityType.'")';  //'pending','public','viewable'
             }else{
+                
                 $where2_conj = '';
                 if($recVisibilityType){ //hidden
                     $where2 = '(r0.rec_NonOwnerVisibility="hidden")';
                     $where2_conj = ' and ';
-                }else if($this->currUserID!=2){ //not database owner
-                    $where2 = '(not r0.rec_NonOwnerVisibility="hidden")';
+                }else if($this->currUserID!=2){ //by default always exclude "hidden" for not database owner
+                    //$where2 = '(not r0.rec_NonOwnerVisibility="hidden")';
+                
+                    $where2 = '(r0.rec_NonOwnerVisibility in ("public","pending"))';
+                    if ($this->currUserID>0){ //logged in
+                    
+                        //if there is entry for record in usrRecPermissions current user must be member of allowed groups
+                        $where2 = $where2.' or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in (3,9)))';
+                        
+                        //.'((select count(rcp_UGrpID) from usrRecPermissions WHERE rcp_RecID=r0.rec_ID)=0)'
+                        //.'OR (select 1 from usrRecPermissions WHERE rcp_RecID=r0.rec_ID and rcp_UGrpID in (' . join(',', $wg_ids).') )=1';
+                    }
+                    
                     $where2_conj = ' or ';
                 }
+                
                 if(count($wg_ids)>0){
                     $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
                 }

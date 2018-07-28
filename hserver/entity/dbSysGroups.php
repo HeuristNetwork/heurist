@@ -336,6 +336,8 @@ class DbSysGroups extends DbEntityBase
         $res = $mysqli->query($query);
         $query = 'DELETE FROM usrTags  WHERE tag_UGrpID in (' . implode(',', $this->recordIDs) . ')';
         $res = $mysqli->query($query);
+        $query = 'DELETE FROM usrRecPermissions  WHERE rcp_UGrpID in (' . implode(',', $this->recordIDs) . ')';
+        $res = $mysqli->query($query);
         
         if($ret){
             $ret = parent::delete();

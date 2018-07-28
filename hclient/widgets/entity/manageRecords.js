@@ -641,6 +641,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         switch(idx){
             case 0:   //admins -------------------------------------------------------
+       
+               var sAccessGroups = '';
+               if(that._getField('rec_NonOwnerVisibility')=='viewable' && that._getField('rec_NonOwnerVisibilityGroups')){
+                   sAccessGroups = that._getField('rec_NonOwnerVisibilityGroups');
+                   var cnt = sAccessGroups.split(',').length;
+                   if(cnt>0){
+                       sAccessGroups = ' for '+cnt+' group'+(cnt>1?'s':'');
+                   }
+               }
             
                 var recRecTypeID = that._getField('rec_RecTypeID');
                 sContent =  
@@ -667,8 +676,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     +that._getField('rec_OwnerUGrpID')+'</span><div class="btn-access non-owner-disable"/>'        
 +'</div>'
 +'<div><label class="small-header">Access:</label><span id="recAccess">'
-    +that._getField('rec_NonOwnerVisibility')
-      
+    + that._getField('rec_NonOwnerVisibility')
+    + sAccessGroups  
     +'</span>'
 +'</div></div>'
 
@@ -780,6 +789,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     .css({float: 'right','margin': '0 0 0.8em 7px', 'font-size': '0.8em', height: '14px', width: '14px'})
                     .click(function(){
 
+                        
+        //show dialog that changes ownership and view access                         
+                        
         var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database
                 +'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')
                 +'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
@@ -788,7 +800,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }        
                 
 
-        window.hWin.HEURIST4.msg.showDialog(url, {height:300, width:620,
+        window.hWin.HEURIST4.msg.showDialog(url, {height:400, width:620,
             padding: '0px',
             resizable:false,
             title: window.hWin.HR('ownership'),
@@ -825,7 +837,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     vals = ele.editing_input('getValues');
                     if(vals[0]!=context.NonOwnerVisibilityGroups){
                         //update usrRecPermissions
-                        ele.editing_input('setValue',[context.NonOwnerVisibility]);
+                        ele.editing_input('setValue',[context.NonOwnerVisibilityGroups]);
                         ele.editing_input('isChanged', true);
                     }
                     
@@ -1362,7 +1374,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         if(recID==null){
             this._editing.initEditForm(null, null); //clear and hide
-        }else if(recID>0){ //edit existing record
+        }else if(recID>0){ //edit existing record  - load complete information - full file info, relations, permissions
         
             window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"complete", l:1}, 
                         function(response){ response.is_insert=false; that._initEditForm_step4(response); });
@@ -1435,7 +1447,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(window.hWin.HEURIST4.util.isempty(that.options.new_record_params.NonOwnerVisibility)){
                     that.options.new_record_params.NonOwnerVisibility = add_rec_prefs[2];
                 }
-                that.options.new_record_params.NonOwnerVisibilityGroups = add_rec_prefs[4];
+                if(that.options.new_record_params.NonOwnerVisibility=='viewable'){
+                    that.options.new_record_params.NonOwnerVisibilityGroups = add_rec_prefs[4];
+                }
                 
                 //this._currentEditRecTypeID is set in add button
                 window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
