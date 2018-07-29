@@ -190,7 +190,6 @@ if(!in_array($action_type, $allowed_actions)){
                 <div class="detailRow" style="padding-bottom:1em;">
                     <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable-group">
                     Members of selected groups can view the record</label>
-                    <div id="sel_AccessGroups" style="display:none;margin-left: -100px;margin-top: 10px;"></div>
                 </div>
                 <div class="detailRow" style="padding-bottom:1em;">
                     <label><input type="radio" name="rb_Access" value="pending" id="rb_Access-pending">

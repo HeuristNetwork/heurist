@@ -1670,8 +1670,8 @@ window.hWin.HEURIST4.ui = {
                                     else {
                                         
                                         var sMsg = ' does not exist in database or has status "hidden" for non owners';
-                                        if(recID>0){
-                                            sMsg = 'Record id#'+recID + sMsg;
+                                        if(rec_ID>0){
+                                            sMsg = 'Record id#'+rec_ID + sMsg;
                                         }else{
                                             sMsg = 'Record '+ sMsg;                                                    
                                         }

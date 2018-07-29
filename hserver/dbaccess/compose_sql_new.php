@@ -304,7 +304,8 @@ class HQuery {
                     if ($this->currUserID>0){ //logged in
                     
                         //if there is entry for record in usrRecPermissions current user must be member of allowed groups
-                        $where2 = $where2.' or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in (3,9)))';
+                        $where2 = $where2.' or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in ('
+                                .join(',', $wg_ids).')))';
                         
                         //.'((select count(rcp_UGrpID) from usrRecPermissions WHERE rcp_RecID=r0.rec_ID)=0)'
                         //.'OR (select 1 from usrRecPermissions WHERE rcp_RecID=r0.rec_ID and rcp_UGrpID in (' . join(',', $wg_ids).') )=1';

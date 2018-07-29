@@ -645,7 +645,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                var sAccessGroups = '';
                if(that._getField('rec_NonOwnerVisibility')=='viewable' && that._getField('rec_NonOwnerVisibilityGroups')){
                    sAccessGroups = that._getField('rec_NonOwnerVisibilityGroups');
-                   var cnt = sAccessGroups.split(',').length;
+                   if(!$.isArray(sAccessGroups)){  sAccessGroups = sAccessGroups.split(','); }
+                   var cnt = sAccessGroups.length;
                    if(cnt>0){
                        sAccessGroups = ' for '+cnt+' group'+(cnt>1?'s':'');
                    }
@@ -796,7 +797,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 +'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')
                 +'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
         if ( that._getField('rec_NonOwnerVisibilityGroups') ) {
-           url = url + '&visgroups' + that._getField('rec_NonOwnerVisibilityGroups');
+           url = url + '&visgroups=' + that._getField('rec_NonOwnerVisibilityGroups');
         }        
                 
 

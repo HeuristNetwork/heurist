@@ -458,12 +458,20 @@ $.widget( "heurist.search", {
                     if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                         add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
                     }
+                    if(add_rec_prefs.length<5){ //visibility groups
+                        add_rec_prefs.push('');
+                    }
                         
                     var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database
                             +'&action=ownership&owner='+add_rec_prefs[1]
                             +'&scope=noscope&access='+add_rec_prefs[2];
+                            
+                    if ( add_rec_prefs[4] ) {
+                        url = url + '&visgroups=' + add_rec_prefs[4];
+                    }        
+                            
 
-                    window.hWin.HEURIST4.msg.showDialog(url, {height:300, width:620,
+                    window.hWin.HEURIST4.msg.showDialog(url, {height:400, width:620,
                         padding: '0px',
                         resizable:false,
                         title: window.hWin.HR('Default ownership and access for new record'),
@@ -472,15 +480,24 @@ $.widget( "heurist.search", {
                             if(context && (context.owner>=0) && context.access && 
                                 (context.access!=add_rec_prefs[2] || context.owner!=add_rec_prefs[1])){
                                 
-                                add_rec_prefs[1] = context.owner;  
-                                add_rec_prefs[2] = context.access;  
+                                add_rec_prefs[1] = context.OwnerUGrpID;  
+                                add_rec_prefs[2] = context.NonOwnerVisibility;  
+                                add_rec_prefs[4] = context.NonOwnerVisibilityGroups;  
                                 
-                                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.owner},
+                                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.OwnerUGrpID},
                                 function(response){
                                     if(response.status == window.hWin.ResponseStatus.OK){
+                                        
+                                        var access = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
+                                        if(context.NonOwnerVisibilityGroups){
+                                            access = 'Groups';
+                                        }else{
+                                            access = access[context.NonOwnerVisibility];
+                                        }
+
                                         btn_select_owner.button({'label'
                                             :'<div style="text-align:left;display:inline-block">'
-                                                +response.data[context.owner]+'<br>'+context.access+'</div>'});
+                                                +response.data[context.OwnerUGrpID]+'<br>'+access+'</div>'});
                                     }       
                                 });                                
                                 
@@ -654,6 +671,9 @@ $.widget( "heurist.search", {
         if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
             add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
         }
+        if(add_rec_prefs.length<4){
+            add_rec_prefs.push(''); //visibility groups
+        }
         
         if(add_rec_prefs[0]>0) {
             this.select_rectype_addrec.val(add_rec_prefs[0]); 
@@ -666,11 +686,16 @@ $.widget( "heurist.search", {
         function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
                 
-                var owner = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
+                var access = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
+                if(add_rec_prefs[4]){
+                    access = 'Groups';
+                }else{
+                    access = access[add_rec_prefs[2]];
+                }
                 
                 that.btn_select_owner.button({'label':
                     '<div style="text-align:left;display:inline-block">'
-                    +response.data[add_rec_prefs[1]]+'<br>'+owner[add_rec_prefs[2]]+'</div>'});
+                    +response.data[add_rec_prefs[1]]+'<br>'+access+'</div>'});
             }       
         });                                
         

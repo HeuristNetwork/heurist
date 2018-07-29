@@ -334,7 +334,7 @@
             $stmt->close();
             
             //updata group view permission
-            $access_grps = ($access=='viewable)'?@$record['NonOwnerVisibilityGroups']:null;
+            $access_grps = ($access=='viewable')?@$record['NonOwnerVisibilityGroups']:null;
             updateUsrRecPermissions($mysqli, $recID, $access_grps);
 
             //delete ALL existing details

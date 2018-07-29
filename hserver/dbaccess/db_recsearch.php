@@ -547,9 +547,10 @@
             return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
         }
 
-        $ids = preapreIds($ids);
+        $ids = prepareIds($ids);
         
         $permissions = array();
+        $mysqli = $system->get_mysqli();
               
         $query = 'SELECT rcp_RecID, rcp_UGrpID FROM usrRecPermissions '
                 .' WHERE rcp_RecID IN ('.implode(",", $ids).')';
@@ -1274,6 +1275,7 @@
                     
                     if($needThumbField) array_push($fields, 'rec_ThumbnailURL');
                     if($needThumbBackground) array_push($fields, 'rec_ThumbnailBg');
+                    
                     //array_push($fields, 'rec_Icon'); //last one -icon ID
                     if($needTags>0) array_push($fields, 'rec_Tags');
                     
@@ -1518,6 +1520,14 @@ $loop_cnt++;
                                 $permissions = recordSearchPermissions($system, $all_rec_ids);
                                 if($permissions['status']==HEURIST_OK){
                                     $permissions = $permissions['data'];
+                                    
+                                    array_push($fields, 'rec_NonOwnerVisibilityGroups');
+                                    $group_perm_index = array_search('rec_NonOwnerVisibilityGroups', $fields);
+                                    
+                                    foreach ($permissions as $recid=>$groups){
+                                        $records[$recid][$group_perm_index] = implode(',', $groups);    
+                                    }
+                                    
                                 }
                                 //array("direct"=>$direct, "reverse"=>$reverse, "headers"=>$headers));
                             }
@@ -1556,9 +1566,9 @@ $loop_cnt++;
                         if(is_array($relations)){
                                 $response['data']['relations'] =  $relations;
                         }
-                        if(is_array($permissions)){
-                                $response['data']['permissions'] =  $permissions;
-                        }
+                        //if(is_array($permissions)){
+                        //        $response['data']['permissions'] =  $permissions;
+                        //}
 
                 }//$is_ids_only
 

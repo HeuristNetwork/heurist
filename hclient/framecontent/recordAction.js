@@ -480,7 +480,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 ele.empty();
                 _createGroupSelectorElement('sel_AccessGroups', visgroups);    
             }
-             
         }
 
         if(val_owner!=null && val_owner>=0){
@@ -501,9 +500,12 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             }else{
                 var currentOwner = window.hWin.HEURIST4.util.getUrlParameter('owner', window.location.search);
                 var currentAccess = window.hWin.HEURIST4.util.getUrlParameter('access', window.location.search);
+                var visgroups = window.hWin.HEURIST4.util.getUrlParameter('visgroups', window.location.search);
+                
                 if(currentOwner>=0 && currentAccess){
                     fieldSelect.val(currentOwner);
-                    $('#rb_Access-'+currentAccess).prop('checked', true);
+                    $('#rb_Access-'+currentAccess+(visgroups?'-group':'')).prop('checked', true);
+                    //rb_Access-viewable-group
                 }
                 
                 $('input[name="rb_Access"]').change(function(){
@@ -579,7 +581,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             dtID: input_id, //'group_selector',
             //rectypeID: rectypeID,
             //rectypes: window.hWin.HEURIST4.rectypes,
-            values: init_value,
+            values: [init_value],
             readonly: false,
             showclear_button: true,
             dtFields:{
