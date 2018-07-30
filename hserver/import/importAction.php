@@ -1149,7 +1149,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = self::validateResourcePointers($query, $imp_session, $field, $dt_mapping[$field], $idx, $recStruc, $recordType);
+            $wrong_records = self::validateResourcePointers($mysqli, $query, $imp_session, 
+                                        $field, $dt_mapping[$field], $idx, $recStruc, $recordType);
 
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
@@ -1423,8 +1424,8 @@ private static function validateEnumerations($query, $imp_session, $fields_check
 * @param mixed $field_idx - index of validation field in query result (to get value)
 * @param mixed $recStruc - record type structure
 */
-private static function validateResourcePointers($mysqli, $query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType){
-
+private static function validateResourcePointers($mysqli, $query, $imp_session, 
+                                        $fields_checked, $dt_id, $field_idx, $recStruc, $recordType){
 
     $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
     $idx_pointer_types = $recStruc['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
@@ -2431,7 +2432,7 @@ public static function performImport($params, $mode_output){
 
                 }
 
-                $rep_processed++;
+                self::$rep_processed++;
 
                 if ($mode_output=='html' && self::$rep_processed % $step == 0) {
                     ob_start();
