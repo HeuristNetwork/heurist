@@ -893,6 +893,9 @@
         $ownerid_old = $record["rec_OwnerUGrpID"]; //current ownership
         if(!($ownerid>=0)){  
             $ownerid = $record["rec_OwnerUGrpID"];
+            if(!($ownerid>=0)){  //rare case when current record has wrong value
+                $ownerid = $system->get_user_id();
+            }
         }
         
         //1. Can current user edit this record?

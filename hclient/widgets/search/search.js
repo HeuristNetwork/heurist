@@ -477,8 +477,10 @@ $.widget( "heurist.search", {
                         title: window.hWin.HR('Default ownership and access for new record'),
                         callback: function(context){
 
-                            if(context && (context.owner>=0) && context.access && 
-                                (context.access!=add_rec_prefs[2] || context.owner!=add_rec_prefs[1])){
+                            if(context && (context.OwnerUGrpID>=0) && context.NonOwnerVisibility && 
+                                (context.NonOwnerVisibility!=add_rec_prefs[2] || 
+                                 context.OwnerUGrpID!=add_rec_prefs[1] ||
+                                 context.NonOwnerVisibilityGroups!=add_rec_prefs[4])){
                                 
                                 add_rec_prefs[1] = context.OwnerUGrpID;  
                                 add_rec_prefs[2] = context.NonOwnerVisibility;  

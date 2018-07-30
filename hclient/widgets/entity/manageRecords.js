@@ -1382,7 +1382,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         }else if(recID<0){ //add new record
         
-            if(!that.options.new_record_params) that.options.new_record_params = {};
+            if(!that.options.new_record_params){
+                that.options.new_record_params = {};  
+            }else{ 
+                //short version of new record params
+                if(that.options.new_record_params['rt']>0) that.options.new_record_params['RecTypeID'] = that.options.new_record_params['rt'];
+                if(that.options.new_record_params['ro']>=0) that.options.new_record_params['OwnerUGrpID'] = that.options.new_record_params['ro'];
+                if(that.options.new_record_params['rv']!='') that.options.new_record_params['NonOwnerVisibility'] = that.options.new_record_params['rv'];
+                if(that.options.new_record_params['url']!='') that.options.new_record_params['URL'] = that.options.new_record_params['url'];
+                if(that.options.new_record_params['desc']!='') that.options.new_record_params['ScratchPad'] = that.options.new_record_params['desc'];
+            }
         
             if(that._currentEditRecTypeID>0){
                 that.options.new_record_params['RecTypeID'] = that._currentEditRecTypeID;

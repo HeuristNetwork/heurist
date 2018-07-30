@@ -203,6 +203,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 $('#cb_add_tags').parent().hide();
                 $('#div_sel_ownership').show();
                 $('#div_sel_access').show();
+                $('#div_sel_access3').show();
                 _fillOwnership();
             }
             
@@ -215,6 +216,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             if(action_type=='ownership'){
                 $('#div_sel_ownership').show();
                 $('#div_sel_access').show();
+                $('#div_sel_access3').show();
                 _fillOwnership();
             }
             
@@ -504,8 +506,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 
                 if(currentOwner>=0 && currentAccess){
                     fieldSelect.val(currentOwner);
-                    $('#rb_Access-'+currentAccess+(visgroups?'-group':'')).prop('checked', true);
-                    //rb_Access-viewable-group
+                    
+                    if(currentAccess=='viewable' && visgroups){
+                        $('#rb_Access-'+currentAccess+'-group').prop('checked', true);
+                    }else{
+                        $('#rb_Access-'+currentAccess).prop('checked', true);
+                        $('#sel_AccessGroups').hide();    
+                    }
                 }
                 
                 $('input[name="rb_Access"]').change(function(){
