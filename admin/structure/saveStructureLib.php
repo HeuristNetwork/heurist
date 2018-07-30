@@ -454,8 +454,7 @@ copy_IconAndThumb_FromLibrary
                     //since 28-June-2013 - title mask and canonical are the same @todo remove canonical at all
 					if($colName == "rty_TitleMask"){
                         //array_push($parameters, ""); //empty title mask - store only canonical!
-						$val = titlemask_make($val, $rtyID, 1, null, _ERR_REP_SILENT); //make canonical
-
+                        $val = TitleMask::execute($val, $rtyID, 1, null, _ERR_REP_SILENT);//make coded
                     }
 
                     $parameters = addParam($parameters, $rtyColumnNames[$colName], $val);
@@ -691,9 +690,9 @@ copy_IconAndThumb_FromLibrary
 		$ret = array(); //result
 		$ret[$rtyID] = array();
 
-		$mysqli->query("select rty_ID from defRecTypes where rty_ID = $rtyID");
+        $res = mysql__select_value($mysqli, "select rty_ID from defRecTypes where rty_ID = $rtyID");
 
-		if ($mysqli->affected_rows<1){
+		if (!($res>0)) {
 			array_push($ret, "invalid rty_ID ($rtyID) passed in data to updateRectype");
 			return $ret;
 		}
@@ -713,17 +712,17 @@ copy_IconAndThumb_FromLibrary
 				$fieldNames = "";
 				$parameters = array(""); //list of field date types
 
+                $row = mysql__select_row_assoc($mysqli,
+                    "select rst_ID, rst_OriginatingDBID from defRecStructure where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID");
 
-				$res = $mysqli->query("select rst_OriginatingDBID from defRecStructure where rst_RecTypeID = $rtyID and rst_DetailTypeID = $dtyID");
-
-				$isInsert = ($mysqli->affected_rows<1);
+				$isInsert = !(@$row['rst_ID']>0);
+                
 				if($isInsert){
 					$fieldNames = $fieldNames.", rst_LocallyModified";
 					$query2 = "9";
 				}else{
-					$row = $res->fetch_object();
-					$query2 = "rst_LocallyModified=".(($row->rst_OriginatingDBID>0)?"1":"0");
-					$wasLocallyModified = ($wasLocallyModified || ($row->rst_OriginatingDBID>0));
+					$query2 = "rst_LocallyModified=".(($row['rst_OriginatingDBID']>0)?"1":"0");
+					$wasLocallyModified = ($wasLocallyModified || ($row['rst_OriginatingDBID']>0));
 				}
 
 				//$fieldNames = "rst_RecTypeID,rst_DetailTypeID,".join(",",$dtFieldNames);
@@ -747,10 +746,12 @@ copy_IconAndThumb_FromLibrary
 							$query = $query."$colName = ?";
 						}
 
-						//special beviour
+						//special behaviour
 						if($colName=='rst_MaxValues' && $val==0){
 							$val = null;
-						}
+						}else if($colName=='rst_Modified' && $val==''){
+                            $val = null;    
+                        }
 
                         $parameters = addParam($parameters, $rstColumnNames[$colName], $val);
 					}
@@ -764,10 +765,11 @@ copy_IconAndThumb_FromLibrary
 					}
 
 					$rows = mysql__exec_param_query($mysqli, $query, $parameters, true);
-
+                    
 					if ( ($isInsert && $rows==0) || is_string($rows) ) {
 						$oper = (($isInsert)?"inserting":"updating");
-						array_push($ret[$rtyID], "Error on ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure: ".$rows);
+						$ret = "Error on ".$oper." field type ".$dtyID." for record type ".$rtyID." in updateRecStructure: ".$rows;
+                        return $ret;
 					} else {
 						array_push($ret[$rtyID], $dtyID);
 					}
@@ -843,8 +845,8 @@ copy_IconAndThumb_FromLibrary
 				}
 
 				if($rtg_Name){
-					$mysqli->query("select rtg_ID from defRecTypeGroups where rtg_Name = '$rtg_Name'");
-					if ($mysqli->affected_rows==1){
+					$rtgId = mysql__select_value($mysqli, "select rtg_ID from defRecTypeGroups where rtg_Name = '$rtg_Name'");
+					if ($rtgId>0){
 						$ret['error'] = "There is already record type group with name '$rtg_Name'";
 						return $ret;
 					}
@@ -885,9 +887,9 @@ copy_IconAndThumb_FromLibrary
 	function updateRectypeGroup($columnNames, $rtgID, $rt) {
 		global $mysqli, $rtgColumnNames;
 
-		$mysqli->query("select * from defRecTypeGroups where rtg_ID = $rtgID");
+		$rtg_ID = mysql__select_value($mysqli, "select rtg_ID from defRecTypeGroups where rtg_ID = $rtgID");
 
-		if ($mysqli->affected_rows<1){
+		if (!($rtg_ID>0)){
 			return array("error" => "Error: invalid record type group ID (rtg_ID) $rtgID passed in data to updateRectypeGroup");
 		}
 
@@ -917,8 +919,8 @@ copy_IconAndThumb_FromLibrary
 			//
 
 			if($rtg_Name){
-				$res = $mysqli->query("select rtg_ID from defRecTypeGroups where rtg_Name = '$rtg_Name' and rtg_ID != $rtgID");
-				if ($mysqli->affected_rows==1){
+                $rtg_ID = mysql__select_value($mysqli, "select rtg_ID from defRecTypeGroups where rtg_Name = '$rtg_Name' and rtg_ID != $rtgID");
+				if (rtg_ID>0){
 					$ret['error'] = "There is already group with name '$rtg_Name'";
 					return $ret;
 				}
@@ -1014,8 +1016,9 @@ copy_IconAndThumb_FromLibrary
 				}
 
 				if($dtg_Name){
-					$mysqli->query("select dtg_ID from defDetailTypeGroups where dtg_Name = '$dtg_Name'");
-					if ($mysqli->affected_rows==1){
+					$dtg_ID = mysql__select_value($mysqli, "select dtg_ID from defDetailTypeGroups where dtg_Name = '$dtg_Name'");
+                    
+					if ($dtg_ID>0){
 						$ret['error'] = "There is already detail group with name '$dtg_Name'";
 						return $ret;
 					}
@@ -1056,9 +1059,9 @@ copy_IconAndThumb_FromLibrary
 	function updateDettypeGroup($columnNames, $dtgID, $rt) {
 		global $mysqli, $dtgColumnNames;
 
-		$mysqli->query("select * from defDetailTypeGroups where dtg_ID = $dtgID");
+		$dtg_ID = mysql__select_value($mysqli, "select dtg_ID from defDetailTypeGroups where dtg_ID = $dtgID");
 
-		if ($mysqli->affected_rows<1){
+		if (!(dtg_ID>0)){
 			return array("error" => "Error: looking for invalid field type group ID (dtg_ID) $dtgID in defDetailTypeGroups table");
 		}
 
@@ -1088,8 +1091,9 @@ copy_IconAndThumb_FromLibrary
 			//
 
 			if($dtg_Name){
-				$mysqli->query("select dtg_ID from defDetailTypeGroups where dtg_Name = '$dtg_Name' and dtg_ID!=$dtgID");
-				if ($mysqli->affected_rows==1){
+                
+				$dtg_ID = mysql__select_value($mysqli, "select dtg_ID from defDetailTypeGroups where dtg_Name = '$dtg_Name' and dtg_ID!=$dtgID");
+				if ($dtg_ID>0){
 					$ret['error'] = "There is already group with name '$dtg_Name'";
 					return $ret;
 				}
@@ -1226,28 +1230,23 @@ copy_IconAndThumb_FromLibrary
          global $mysqli;
 
 		$ret = array();
-		$query = "select dtl_ID from recDetails where dtl_DetailTypeID =$dtyID";
-		$res = $mysqli->query($query);
-		if ($mysqli->error) {
-            $ret = handleError("SQL error: unable to retrieve fields of type $dtyID from recDetails table", $query);
-		} else {
-			$dtCount = $res->num_rows;
-			if ($dtCount) { // there are records existing of this rectype, need to return error and the recIDs
-				$ret['error'] = "You cannot delete field type $dtyID as it is used $dtCount times in the data";
-				$ret['dtlIDs'] = array();
-				while ($row = $res->fetch_row()) {
-					array_push($ret['dtlIDs'], $row[0]);
-				}
-			} else { // no records ok to delete this rectype. Not that this should cascade for all dependent definitions
-				$query = "delete from defDetailTypes where dty_ID = $dtyID";
-				$res = $mysqli->query($query);
-				if ($mysqli->error) {
-                    $ret = handleError("SQL error deleting field type $dtyID from defDetailTypes table", $query);
-				} else {
-					$ret['result'] = $dtyID;
-				}
+        $dtCount = mysql__select_value($mysqli, "select count(dtl_ID) from recDetails where dtl_DetailTypeID =$dtyID");
+		if ($dtCount) { // there are records existing of this rectype, need to return error and the recIDs
+			$ret['error'] = "You cannot delete field type $dtyID as it is used $dtCount times in the data";
+			$ret['dtlIDs'] = array();
+			while ($row = $res->fetch_row()) {
+				array_push($ret['dtlIDs'], $row[0]);
+			}
+		} else { // no records ok to delete this rectype. Not that this should cascade for all dependent definitions
+			$query = "delete from defDetailTypes where dty_ID = $dtyID";
+			$res = $mysqli->query($query);
+			if ($mysqli->error) {
+                $ret = handleError("SQL error deleting field type $dtyID from defDetailTypes table", $query);
+			} else {
+				$ret['result'] = $dtyID;
 			}
 		}
+		
 		return $ret;
 	}
 
@@ -1258,14 +1257,13 @@ copy_IconAndThumb_FromLibrary
 
 		$ret = null;
 
-		$res = $mysqli->query("select dty_OriginatingDBID from defDetailTypes where dty_ID = $dtyID");
+		$dty_ID = mysql__select_value($mysqli, "select dty_ID from defDetailTypes where dty_ID = $dtyID");
 
-		if ($res->num_rows<1){ //$mysqli->affected_rows<1){
+		if (!($dty_ID>0)){ 
 			$ret = "invalid dty_ID ($dtyID) passed in data to updateDetailType";
 			return $ret;
 		}
-		//$row = $res->fetch_object();
-		//$query = "dty_LocallyModified=".(($row->dty_OriginatingDBID>0)?"1":"0").",";
+
 		$query = "";
         $dty_Name = null;
 

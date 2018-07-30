@@ -566,7 +566,7 @@ function RectypeManager() {
                     }else if(elLink.hash === "#addrec") {
                         
                         var new_record_params = {};
-                        new_record_params['rt'] = rectypeID;
+                        new_record_params['RecTypeID'] = rectypeID;
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
 
                     }else if(elLink.hash === "#edit_rectype") {

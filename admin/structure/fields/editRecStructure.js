@@ -1107,6 +1107,7 @@ function EditRecStructure() {
             var dataupdate = oRecInfo.record.getData();
 
             var values = arrStrucuture[__rst_ID];
+            
             var k;
             for(k=0; k<fieldnames.length; k++){
                 var ed_name = 'ed'+__rst_ID+'_'+fieldnames[k];
@@ -1710,7 +1711,7 @@ function EditRecStructure() {
 
             $("#recStructure_toolbar").hide();
 
-            _updateOrderAfterInsert( data_toadd[data_toadd.length-1]['rst_ID'] );
+            //ART 2018-07-30 _updateOrderAfterInsert( data_toadd[data_toadd.length-1]['rst_ID'] );
         }
 
     }//end _addDetails
@@ -1904,6 +1905,7 @@ function EditRecStructure() {
     */
     function _saveUpdates(needClose)
     {
+        
         var orec = _getUpdates();
         //if(str!=null)	alert(str);  //you can check the strcuture here
         //clear all trace of changes
@@ -1914,8 +1916,10 @@ function EditRecStructure() {
         btnSaveOrder.style.visibility = "hidden";
 
         if(!$.isEmptyObject(orec)){
-            
+
             var updateResult = function(response){
+                
+                _isServerOperationInProgress = false;
                 
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
@@ -1924,11 +1928,13 @@ function EditRecStructure() {
                     window.hWin.HEURIST4.terms = response.data.terms;
                     
                     editStructure._structureWasUpdated = true;
-                }
-                _isServerOperationInProgress = false;
-                if(needClose){
-                    window.close(editStructure._structureWasUpdated);
-                }
+                    if(needClose){
+                        window.close(editStructure._structureWasUpdated);
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);            
+                }                                                 
+                
             };
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = updateResult;
@@ -1983,17 +1989,20 @@ function EditRecStructure() {
             function (response) {
                 if(response.status != window.hWin.ResponseStatus.OK || response.message){
 
-                    var ele = document.getElementById("dlgWrongTitleMask");
+                      var ele = document.getElementById("dlgWrongTitleMask");
+                    
+                      window.hWin.HEURIST4.msg.showElementAsDialog({
+                          element:ele,
+                          close: function(){ _doEditTitleMask(true); },
+                          title:'Wrong title mask',height:400, height:160}
+                      );
 
-                    var $dlg_warn = Hul.popupTinyElement(window, ele,
-                        { "no-titlebar": false, "no-close": false, width: 400, height:160 });
-
-                    $(ele).find("#dlgWrongTitleMask_closeBtn").click(function(){
+                    /*$(ele).find("#dlgWrongTitleMask_closeBtn").click(function(){
                         if($dlg_warn!=null){
                             $dlg_warn.dialog('close');
                         }
                         _doEditTitleMask(true);
-                    });
+                    });*/
                     
                 }else{ //correct mask
                     if(callback){
@@ -2773,30 +2782,23 @@ function onReqtypeChange(evt){
         
             el.value = curr_value; //restore
             
-            var ele = document.getElementById("change_Req");
-            $("#change_Req").css("display","block");
-            $("#reqText").text("This is a reserved field which may be required by a specific function such as Zotero import or mapping. "+
-                "Reserved fields can be marked as Recommended or Optional rather than Required, however we recommend thinking " +
-                "carefully about whether the value is required before changing this setting.")
-
-            $("#change_Btn").click(function(){
-                $(el).attr('data-original', new_value); //reset - to show this warning once only
-                el.value = new_value;
-                ___onReqtypeChange_continue();
-                $_dialogbox.dialog($_dialogbox).dialog("close");
-            });
-            $("#cancel_Btn").click(function(){
-                $_dialogbox.dialog($_dialogbox).dialog("close");
-            });
             //show confirmation dialog
-            $_dialogbox = Hul.popupElement(top, ele,
-                {
-                    "close-on-blur": false,
-                    "no-resize": true,
-                    title: '',
-                    height: 140,
-                    width: 600
-            });
+            var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+            'This is a reserved field which may be required by a specific function such as Zotero import or mapping. '+
+                'Reserved fields can be marked as Recommended or Optional rather than Required, however we recommend thinking ' +
+                'carefully about whether the value is required before changing this setting.',
+             {'Change' :function(){ 
+                    $(el).attr('data-original', new_value); //reset - to show this warning once only
+                    el.value = new_value;
+                    ___onReqtypeChange_continue();
+                    $_dialogbox.dialog($_dialogbox).dialog("close");
+                    
+                    $__dlg.dialog( "close" );
+                },
+             'Cancel':function(){ 
+                    $__dlg.dialog( "close" );
+                }},
+                {title:'Confirm', width:600});
             
             
         }
@@ -3090,8 +3092,8 @@ function _setDefTermValue(event){
 */
 function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms, defvalue ) {
 
-    allTerms = Hul.expandJsonStructure(allTerms);
-    disabledTerms = Hul.expandJsonStructure(disabledTerms);
+    //allTerms = Hul.expandJsonStructure(allTerms);
+    //disabledTerms = Hul.expandJsonStructure(disabledTerms);
 
     if (typeof disabledTerms.join === "function") {
         disabledTerms = disabledTerms.join(",");
@@ -3113,17 +3115,18 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
             for (i = 0; i < parent.children.length; i++) {
                 parent.removeChild(parent.childNodes[0]);
             }
-
+            
             //el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, datatype, _defvalue, isdefselector);
             el_sel = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
                     {datatype:datatype, termIDTree:allTerms, headerTermIDsList:disabledTerms,
                      defaultTermID:_defvalue, topOptions:null, needArray:false, useHtmlSelect:false});
             el_sel = el_sel[0];
             
-            el_sel.id = 'ed'+rst_ID+'_rst_DefaultValue';
+            el_sel.id = isdefselector?('ed'+rst_ID+'_rst_DefaultValue'):'termsPreview_select';
             el_sel.style.backgroundColor = bgcolor;
             el_sel.onchange =  onchangehandler;
             el_sel.className = "previewList"; //was for enum only?
+            el_sel.style.display = 'block';
             parent.appendChild(el_sel);
         }//end __recreate
 

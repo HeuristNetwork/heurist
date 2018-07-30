@@ -153,7 +153,12 @@ else
 
                 //actually client sends the definition only for one record type
                 foreach ($data['rectype']['defs'] as $rtyID => $rt) {
-                    array_push($rv['result'], updateRecStructure($dtFieldNames, $rtyID, $rt));
+                    $res = updateRecStructure($dtFieldNames, $rtyID, $rt);
+                    if( is_array( $res ) ){
+                        array_push($rv['result'], $res);
+                    }else{
+                        error_exit( $res );   
+                    }
                 }
                 $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
                 $rv['detailtypes'] = dbs_GetDetailTypes($system);
@@ -161,7 +166,7 @@ else
                 break;
 
             case 'deleteRTS':
-
+ 
                 $rtyID = @$_REQUEST['rtyID'];
                 $dtyID = @$_REQUEST['dtyID'];
 
