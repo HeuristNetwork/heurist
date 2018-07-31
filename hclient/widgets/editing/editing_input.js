@@ -1008,7 +1008,11 @@ $.widget( "heurist.editing_input", {
                 */                                           
                                         
                                         if( $inputdiv.find('.link-div').length>0 ){ //hide this button if there are links
-                                            $inputdiv.find('.sel_link2').hide(); //was that.element
+                                            $input.show();
+                                            $inputdiv.find('.sel_link2').hide(); 
+                                        }else{
+                                            $input.hide();
+                                            $inputdiv.find('.sel_link2').show();
                                         }
                                         
                                      }
@@ -1180,7 +1184,7 @@ $.widget( "heurist.editing_input", {
                     popup_options.width = Math.max(usrPreferences.width,710);
                     popup_options.height = usrPreferences.height;
                     
-                    //init selection dialog
+                    //init related/liked records selection dialog
                     window.hWin.HEURIST4.ui.showEntityDialog(that.configMode.entity, popup_options);
             }
 
@@ -1198,10 +1202,6 @@ $.widget( "heurist.editing_input", {
             
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
 
-            if($inputdiv.find('.link-div').length>0){
-                $inputdiv.find('.sel_link2').hide();
-            }
-           
             /* IJ asks to disable this feature 
             if( this.inputs.length>0 || this.element.find('.link-div').length>0){ //hide this button if there are links
                 $inputdiv.find('.sel_link2').hide();
@@ -1218,6 +1218,118 @@ $.widget( "heurist.editing_input", {
 
             
         } 
+        
+        else if(this.detailType=='resource')
+        {
+            
+            //replace input with div
+            $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
+                            .uniqueId().appendTo( $inputdiv );
+                            
+                            
+            //define explicit add relationship button
+            $( "<button>", {title: "Select"})
+                        .button({icon:"ui-icon-triangle-1-e",
+                               label:('&nbsp;&nbsp;&nbsp;select')})
+                        .addClass('sel_link2').hide()
+                        .appendTo( $inputdiv );
+            
+            var $input_img, $gicon;
+            var select_return_mode = 'ids';
+            
+            var icon_for_button = 'ui-icon-pencil'; //was -link
+            if(this.configMode.select_return_mode &&
+               this.configMode.select_return_mode!='ids'){
+                 select_return_mode = 'recordset'
+            }
+                
+            $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
+            +'style="display:inline-block;vertical-align:top;margin-left:8px;padding-top:8px;cursor:hand"></span>')
+            .insertBefore( $input );
+            
+            $input.addClass('entity_selector').css({'margin-left': '-24px'});
+
+            $input.css({'min-wdith':'22ex'});
+
+            var ptrset = that.f('rst_PtrFilteredIDs');
+
+            var __show_select_dialog = null;
+            /* 2017-11-08 no more buttons
+            var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
+            .addClass('smallicon ui-icon '+icon_for_button)
+            .appendTo( $inputdiv );
+            */
+            //.button({icons:{primary: icon_for_button},text:false});
+             
+            var popup_options = {
+                isdialog: true,
+                select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
+                select_return_mode:select_return_mode, //ids or recordset(for files)
+                filter_group_selected:null,
+                filter_groups: this.configMode.filter_group,
+                onselect:function(event, data){
+
+                 if(data){
+
+                        if(select_return_mode=='ids'){
+                            
+                            
+                            var newsel = window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection)?data.selection:[];
+                            
+                            //config and data are loaded already, since dialog was opened
+                            that._findAndAssignTitle($input, newsel);
+                            that.newvalues[$input.attr('id')] = newsel.join(',');
+                            that._onChange();
+                            
+                        }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                            //todo
+
+                        }
+                 }//data
+
+                }
+            };//popup_options
+                        
+
+            $input.hide();
+            that._findAndAssignTitle($input, value);
+
+            __show_select_dialog = function(event){
+                
+                    if(that.is_disabled) return;
+
+                    event.preventDefault();
+                    
+                    var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
+                        {width: null,  //null triggers default width within particular widget
+                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+        
+                    popup_options.width = usrPreferences.width;
+                    popup_options.height = usrPreferences.height;
+                    var sels = this.newvalues[$input.attr('id')];//$(event.target).attr('id')];
+                    /*if(!sels && this.options.values && this.options.values[0]){
+                         sels = this.options.values[0];
+                    }*/ 
+                    
+                    if(!window.hWin.HEURIST4.util.isempty(sels)){
+                        popup_options.selection_on_init = sels.split(',');
+                    } else {
+                        popup_options.selection_on_init = null;    
+                    }                                                                                       
+                    
+                    //init dialog to select related entities
+                    window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
+            }
+            
+            
+            //no more buttons this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+            this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
+            this._on( $gicon, { click: __show_select_dialog } );
+            this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
+            
+            this.newvalues[$input.attr('id')] = value;    
+
+        }
         else{
             $input = $( "<input>")
             .uniqueId()
@@ -1476,65 +1588,50 @@ $.widget( "heurist.editing_input", {
                 $input.change();   
                                      
             }else 
-            if(this.detailType=='resource' || this.isFileForRecord)
-            {
+            if(this.isFileForRecord){
+                
                         var $input_img, $gicon;
-                        var select_return_mode = 'ids';
-                        if(this.isFileForRecord){
+                        
+                        var icon_for_button = 'ui-icon-folder-open';
+                        var select_return_mode = 'recordset';
+                        
+                        $input.css({'padding-left':'30px', cursor:'hand'});
+                        //folder icon in the begining of field
+                        $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
+                            .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
+                        
+                        //container for image
+                        $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
+                        + '<img class="image_input"></div>')
+                        .css({'position':'absolute','display':'none','z-index':9999})
+                        .appendTo( $inputdiv ); 
+                        
+                        $input.change(function(){
                             
-                            icon_for_button = 'ui-icon-folder-open';
-                            select_return_mode = 'recordset';
-                            
-                            $input.css({'padding-left':'30px', cursor:'hand'});
-                            //folder icon in the begining of field
-                            $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
-                                .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
-                            
-                            //container for image
-                            $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
-                            + '<img class="image_input"></div>')
-                            .css({'position':'absolute','display':'none','z-index':9999})
-                            .appendTo( $inputdiv ); 
-                            
-                            $input.change(function(){
-                                if(!(that.newvalues[$input.attr('id')]>0)){
-                                    $input.val('');
-                                }
-                                if(window.hWin.HEURIST4.util.isempty($input.val())){
-                                     $input_img.find('img').attr('src','');    
-                                }
-                                that._onChange(); 
-                            });
-                            
-                            var hideTimer = 0;
-                            $input.mouseover(function(){
-                                if(!window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'))){
-                                    if (hideTimer) {
-                                        window.clearTimeout(hideTimer);
-                                        hideTimer = 0;
-                                    }
-                                    $input_img.show();
-                                }
-                            });
-                            $input.mouseout(function(){
-                                if($input_img.is(':visible')){
-                                    hideTimer = window.setTimeout(function(){$input_img.hide(1000);}, 500);
-                                }});
-                                
-                        }else{
-                            icon_for_button = 'ui-icon-pencil'; //was -link
-                            if(this.configMode.select_return_mode &&
-                               this.configMode.select_return_mode!='ids'){
-                                 select_return_mode = 'recordset'
+                            if(!(that.newvalues[$input.attr('id')]>0)){
+                                $input.val('');
                             }
+                            if(window.hWin.HEURIST4.util.isempty($input.val())){
+                                 $input_img.find('img').attr('src','');    
+                            }
+                            that._onChange(); 
+                        });
+                        
+                        var hideTimer = 0;
+                        $input.mouseover(function(){
+                            if(!window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'))){
+                                if (hideTimer) {
+                                    window.clearTimeout(hideTimer);
+                                    hideTimer = 0;
+                                }
+                                $input_img.show();
+                            }
+                        });
+                        $input.mouseout(function(){
+                            if($input_img.is(':visible')){
+                                hideTimer = window.setTimeout(function(){$input_img.hide(1000);}, 500);
+                            }});
                             
-                            $gicon = $('<span class="ui-icon ui-icon-triangle-1-e" '
-                            +'style="display:inline-block;vertical-align:middle;margin-left:8px;cursor:hand"></span>')
-                            .insertBefore( $input );
-                            
-                            $input.css({'margin-left': '-24px', 'padding-left': '30px', 'cursor':'hand'});
-                        }
-
                         $input.css({'min-wdith':'22ex'});
 
                         var ptrset = that.f('rst_PtrFilteredIDs');
@@ -1546,38 +1643,10 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv );
                         */
                         //.button({icons:{primary: icon_for_button},text:false});
-
-
-/*          //SELECTOR in POPUP URL
-    
-                                var url = window.hWin.HAPI4.baseURL +
-                                'hclient/framecontent/recordSelect.php?db='+window.hWin.HAPI4.database+
-                                '&rectype_set='+that.f('rst_PtrFilteredIDs');
-                                
-                                if(that.f('rst_PtrFilteredIDs')==1){
-                                    url =  url + '&parententity=' + that.options.recID;
-                                }
-                                
-                                
-                                window.hWin.HEURIST4.msg.showDialog(url, {height:600, width:600,
-                                    title: window.hWin.HR('Select linked record'),
-                                    window:  window.hWin, //opener is top most heurist window
-                                    class:'ui-heurist-bg-light',
-                                    callback: function(recordset){
-                                        if( window.hWin.HEURIST4.util.isRecordSet(recordset) ){
-                                            var record = recordset.getFirstRecord();
-                                            var rec_Title = recordset.fld(record,'rec_Title');
-                                            that.newvalues[$input.attr('id')] = recordset.fld(record,'rec_ID');
-                                            window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title);
-                                            $input.change();
-                                        }
-                                    }
-                                } );
-*/                                 
                          
                         var popup_options = {
                             isdialog: true,
-                            select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
+                            select_mode: 'select_single',
                             select_return_mode:select_return_mode, //ids or recordset(for files)
                             filter_group_selected:null,
                             filter_groups: this.configMode.filter_group,
@@ -1585,8 +1654,6 @@ $.widget( "heurist.editing_input", {
 
                              if(data){
                                 
-                                if(that.isFileForRecord){
-
                                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                         var recordset = data.selection;
                                         var record = recordset.getFirstRecord();
@@ -1604,26 +1671,6 @@ $.widget( "heurist.editing_input", {
 
                                         $input.change();
                                     }
-
-                                }
-                                else if( data ){
-
-                                    if(select_return_mode=='ids'
-                                        && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ){
-                                        //config and data are loaded already, since dialog was opened
-                                        window.hWin.HAPI4.EntityMgr.getTitlesByIds(that.configMode.entity, data.selection,
-                                            function( display_value ){
-                                                var rec_Title = display_value.join(',');
-                                                window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title, 10);
-                                        });
-                                        that.newvalues[$input.attr('id')] = data.selection.join(',');
-                                        $input.change();
-                                    }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                        //todo
-
-                                    }
-
-                                }
                                 
                              }//data
 
@@ -1654,9 +1701,7 @@ $.widget( "heurist.editing_input", {
                                 } else {
                                     popup_options.selection_on_init = null;    
                                 }                                                                                       
-                                
-                                
-                                //init dialog
+                                //init dialog to select related entities
                                 window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
                         }
                         
@@ -1668,12 +1713,10 @@ $.widget( "heurist.editing_input", {
                         
                         if(this.isFileForRecord && value){
                             this.newvalues[$input.attr('id')] = value.ulf_ID;
-                        }else{
-                            this.newvalues[$input.attr('id')] = value;    
                         }
-                        
-
-            }else 
+                
+            }
+            else
             if( this.detailType=='file' ){
                 
                         //url for thumb
@@ -2002,15 +2045,15 @@ $.widget( "heurist.editing_input", {
     //
     _findAndAssignTitle: function(ele, value, selector_function){
         
-        if(!value){
-            window.hWin.HEURIST4.ui.setValueAndWidth(ele, '');
-            return;
-        }
-        
         var that = this;
         
         if(this.isFileForRecord){   //FILE FOR RECORD
             
+            if(!value){
+                window.hWin.HEURIST4.ui.setValueAndWidth(ele, '');
+                return;
+            }
+        
             var rec_Title = value.ulf_ExternalFileReference;
             if(window.hWin.HEURIST4.util.isempty(rec_Title)){
                 rec_Title = value.ulf_OrigFileName;
@@ -2077,16 +2120,59 @@ $.widget( "heurist.editing_input", {
                             }
                         );
                     }
+                    
+                    
                 }else{
                     window.hWin.HEURIST4.ui.setValueAndWidth(ele, '');
                 }
+                
+                //hide this button if there are links
+                if( ele.parent().find('.link-div').length>0 ){ 
+                    ele.show();
+                    ele.parent().find('.sel_link2').hide();
+                }else{
+                    ele.hide();
+                    ele.parent().find('.sel_link2').show();
+                }
+                    
+                
         }else{    
             //related entity                 
-            window.hWin.HAPI4.EntityMgr.getTitlesByIds(this.configMode.entity, value.split(','),
+            if(value==null) value = [];
+            value = $.isArray(value)?value:value.split(',');
+            if(value.length==0){
+                ele.empty();
+                ele.hide();
+                ele.parent().find('.sel_link').hide();
+                ele.parent().find('.sel_link2').show();
+                
+            }else{
+                window.hWin.HAPI4.EntityMgr.getTitlesByIds(this.configMode.entity, value,
                    function( display_value ){
-                        var rec_Title  = display_value.join(',');           
-                        window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
+                       ele.empty();
+                       hasValues = false;
+                       if(display_value && display_value.length>0){
+                           for(var i=0; i<display_value.length; i++){
+                               if(display_value[i]){
+                                    $('<div class="link-div">'+display_value[i]+'</div>').appendTo(ele);     
+                                    hasValues = true;
+                               }
+                           }
+                       }
+                       if(hasValues){
+                           ele.show();
+                           ele.parent().find('.sel_link').show();
+                           ele.parent().find('.sel_link2').hide();
+                       }else{
+                           ele.hide();
+                           ele.parent().find('.sel_link').hide();
+                           ele.parent().find('.sel_link2').show();
+                       }
+                       
+                        ///var rec_Title  = display_value.join(',');           
+                        //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
                    });
+            }
         }
         
     },
@@ -2224,10 +2310,13 @@ $.widget( "heurist.editing_input", {
                 
                 if(that.detailType=='file'){
                     that.input_cell.find('img.image_input').prop('src','');
-                }else if(that.detailType=='resource' && that.configMode.entity == 'records'){
+                }else if(that.detailType=='resource'){
+                    
                     $input.parent().find('.sel_link').hide();
                     $input.parent().find('.sel_link2').show();
                     $input.empty();
+                    $input.hide();
+                    
                 }else if(that.detailType=='relmarker'){    
                     this.element.find('.rel_link').show();
                 }else{
