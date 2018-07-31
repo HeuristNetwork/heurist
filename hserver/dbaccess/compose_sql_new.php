@@ -806,11 +806,14 @@ class HPredicate {
         $val = $this->getFieldValue();
         if(!$val) return null;
         
+        $ignoreApostrophe = false;
+        
         $sHeaderField = null;
         
         if($this->pred_type=='title' || $this->field_id=='title'){
-
-            $sHeaderField = "rec_Title";
+            
+            $sHeaderField = 'rec_Title';
+            $ignoreApostrophe = (strpos($val, 'LIKE')==1);
 
         }else if($this->pred_type=='modified' || $this->field_id=='modified'){
 
@@ -822,7 +825,8 @@ class HPredicate {
 
         }else if($this->pred_type=='notes' || $this->field_id=='notes'){
             
-            $sHeaderField = "rec_ScratchPad";
+            $sHeaderField = 'rec_ScratchPad';
+            $ignoreApostrophe = (strpos($val, 'LIKE')==1);
         }
             
           
@@ -833,7 +837,11 @@ class HPredicate {
             if($is_empty){
                 $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField=='')";    
             }else{
-                $res = "(r".$this->qlevel.".$sHeaderField ".$val.")";    
+                if($ignoreApostrophe){
+                    $res = "( replace( r".$this->qlevel.".$sHeaderField, \"'\", \"\")".$val.")";     
+                }else{
+                    $res = "(r".$this->qlevel.".$sHeaderField ".$val.")";    
+                }
             }
             
             
@@ -856,7 +864,13 @@ class HPredicate {
             }else if($this->field_type == 'file'){
                 $field_name = $p."dtl_UploadedFileID ";  //only for search non empty values
             }else{
+                
                 $field_name = $p."dtl_Value ";
+                
+                $ignoreApostrophe = (strpos($val, 'LIKE')==1);
+                if($ignoreApostrophe){
+                    $field_name = 'replace('.$field_name.", \"'\", \"\") ";                   
+                }
             }
 
             //old $res = $p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val;
@@ -888,6 +902,16 @@ class HPredicate {
         $this->value = $keep_val;
         $val = $this->getFieldValue();
         if(!$val) return null;
+        
+        $field_name1 =  $p.'dtl_Value ';
+        $field_name2 =  'link.rec_Title ';
+        
+        $ignoreApostrophe = (strpos($val, 'LIKE')==1);
+        if($ignoreApostrophe){
+            $field_name1 = 'replace('.$field_name1.", \"'\", \"\") ";                   
+            $field_name2 = 'replace('.$field_name2.", \"'\", \"\") ";                   
+        }
+        
 
         $res = 'exists (select dtl_ID from recDetails '.$p
         . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
@@ -895,8 +919,8 @@ class HPredicate {
         .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID '
         .'  and if(dty_Type != "resource", '
                 .' if(dty_Type="enum", '.$p.'dtl_Value'.$val_enum 
-                   .', '.$p.'dtl_Value'.$val
-                   .'), link.rec_Title '.$val.'))';   //'like "%'.$mysqli->real_escape_string($this->value).'%"))';
+                   .', '.$field_name1.$val
+                   .'), '.$field_name2.$val.'))';   //'LIKE "%'.$mysqli->real_escape_string($this->value).'%"))';
 
         return array("where"=>$res);
     }
@@ -1247,7 +1271,7 @@ class HPredicate {
                 return "> '$datestamp'";
             }
             else {
-                return "like '$datestamp%'";
+                return "LIKE '$datestamp%'";
 
                 //old way
                 // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
@@ -1261,7 +1285,7 @@ class HPredicate {
                 else {
                     $date = date('Y-m-d', $timestamp);
                 }
-                return "like '$date%'";
+                return "LIKE '$date%'";
             }
         }
     }
@@ -1326,7 +1350,7 @@ class HPredicate {
                 if($this->exact){
                     $res  =  $res.'="'.$value.'"'; 
                 } else {
-                    $res  =  $res.'like "%'.$value.'%"';
+                    $res  =  $res.'LIKE "%'.$value.'%"';
                 }
                 $res  =  $res.' or trm_Code="'.$value.'")';
             }
@@ -1385,7 +1409,7 @@ class HPredicate {
                 }else{
 
                     if($eq=='=' && !$this->exact){
-                        $eq = 'like';
+                        $eq = 'LIKE';
                         $k = strpos($this->value,"%");
                         if($k===false || ($k>0 && $k+1<strlen($this->value))){
                             $this->value = '%'.$this->value.'%';
