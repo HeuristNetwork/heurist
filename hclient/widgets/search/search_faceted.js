@@ -138,9 +138,9 @@ $.widget( "heurist.search_faceted", {
         .appendTo( this.div_toolbar )
         .button();
         
-        this.btn_reset = $( "<button>", {title:window.hWin.HR("Reset all the filters to their initial states") })
+        this.btn_reset = $( "<button>", {title:window.hWin.HR("Clear all fields / Reset all the filters to their initial states") })
         .appendTo( this.div_toolbar )
-        .button({label: window.hWin.HR("Reset"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' }).hide();
+        .button({label: window.hWin.HR("RESET"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' }).hide();
         
         this.btn_save = $( "<button>", { text: window.hWin.HR("Save state") })
         .appendTo( this.div_toolbar )
@@ -605,7 +605,7 @@ $.widget( "heurist.search_faceted", {
                     inpt.find('input').removeClass('text').css({'width':'150px'});
                     inpt.find('select').removeClass('text').css({'width':'150px'});
                     
-                    var btn_add = $( "<button>")
+                    var btn_add = $( "<button>",{title:'To clear previous search click the RESET button'})
                     .addClass("smallbutton")
                     //.css('position','absolute')
                     .insertBefore( inpt.find('.input-cell .heurist-helper1') )

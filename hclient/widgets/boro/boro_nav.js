@@ -382,8 +382,8 @@ $.widget( "heurist.boro_nav", {
                     var smenu = '';
                     for (var svsID in response.data)
                     {
-                        smenu = smenu + '<li data-search-id="' + svsID 
-                                      + '"><a href="#" class="nav-link">'+ response.data[svsID][_NAME] + '</a></li>';
+                        smenu = '<li data-search-id="' + svsID 
+                                      + '"><a href="#" class="nav-link">'+ response.data[svsID][_NAME] + '</a></li>' + smenu;
                     }
                     
                     that.search_menu = $('<ul>'+smenu+'</ul>')
@@ -874,7 +874,9 @@ $.widget( "heurist.boro_nav", {
                         });
                         res = [];
                         for(var k=0; k<timeline.length; k++){
-                            if(timeline[k].story) res.push(timeline[k].story);
+                            if(timeline[k].story){  //timeline[k].placeID==recID && 
+                                 res.push(timeline[k].story);
+                            }
                         }
                         story = ' '+that.__joinAnd(res) + ' here';
                     }
@@ -918,11 +920,18 @@ $.widget( "heurist.boro_nav", {
                     forceZoom:true, //force zoom after addition
                     min_zoom: 0.06 //in degrees
                 };            
-                $('#cp_mapframe_container').show()
-                var mapping = $('#cp_mapframe')[0].contentWindow.mapping;
-                if(mapping && mapping.map_control){
-                    mapping.map_control.addRecordsetLayer(params);
-                }
+                
+                $('#cp_mapframe_container').show();
+                var interval = setInterval(function(){
+                    var mapping = $('#cp_mapframe')[0].contentWindow.mapping;
+                    if(mapping && mapping.map_control){
+                        mapping.map_control.addRecordsetLayer(params);
+                        clearInterval(interval);
+                    }else{
+                        //console.log('wait for map loading');
+                    }
+                },500);
+                
                 
             }else{
                 $('#cp_mapframe_container').hide()  
@@ -1063,12 +1072,15 @@ $.widget( "heurist.boro_nav", {
                     
                     if(placeID==0){
                         that.__setPlaceDesc(place, 'birth', 'Birth '+(sDate?(that.__formatDate(sDate)):''));//' on '+ 
-                    }else{
-                        that.__setPlaceDesc(place);                                         
+                    }else {
+                                that.__setPlaceDesc(place);                                         
                     }
                 }
             }
             var birthYear = that.__getYear(sDate,1);
+            
+            if(placeID==0 || window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0){
+            
             timeline.push({year:birthYear,            //for sort
                         date: that.__getYear(sDate),  //year to display
                         date2: sDate,
@@ -1076,6 +1088,7 @@ $.widget( "heurist.boro_nav", {
                         description: 'Birth'+(html
                                 ?(' '+place.link+' '+(sDate?(that.__formatDate(sDate)):'') ) //' on '+
                                 :'') });
+            }
                                                         
             var deathID = that.recset.fld(person, 95);
             place = {ids:[0], link:''};
@@ -1099,18 +1112,21 @@ $.widget( "heurist.boro_nav", {
             
                     if(placeID==0){  
                         that.__setPlaceDesc(place, 'death', sDeathType+' '+(sDate?(that.__formatDate(sDate)):'')); //' on '
-                    }else{
+                    }else {
                         that.__setPlaceDesc(place);                                         
                     }
                     
                 }
             }
-            timeline.push({year:that.__getYear(sDate,9998),   //sort year
+            
+            if(placeID==0 || window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0){
+                timeline.push({year:that.__getYear(sDate,9998),   //sort year
                         date: that.__getYear(sDate), 
                         date2: sDate,
                         story: sDeathType.toLowerCase(),
                         description: (sDeathType?(sDeathType+' '+place.link+' '+(sDate?(that.__formatDate(sDate)):'')) //' on '+
                                                 :'Death' ) });
+            }
             
             leftside['p_lifetime'] = html;
             
@@ -1146,7 +1162,7 @@ $.widget( "heurist.boro_nav", {
                             html = html + '<li>'+sEduInst
                                         +'<span class="bor-group-date">&nbsp;'+that.__formatDate(sDate)+'</span></li>';
                                  
-                            if(placeID==0 || place.ids.indexOf(placeID)>=0){
+                            if(placeID==0 || window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0){     
                                         timeline.push({year:that.__getYear(sDate,birthYear+1), 
                                                 date: that.__getYear(sDate), 
                                                 date2: null,
@@ -1203,7 +1219,7 @@ $.widget( "heurist.boro_nav", {
                                     + sDegree
                                     +'<span class="bor-group-date">&nbsp;'+that.__formatDate(sDate)+'</span></li>';
                                     
-                        if(placeID==0 || place.ids.indexOf(placeID)>=0){
+                        if(placeID==0 || (place!=null && window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0)){     
                             
                             var year_main = that.__getYear(sDate,birthYear+2);
                             var year_end = that.__getYear(that.__getDate(record, [11,206]), year_main);
@@ -1220,7 +1236,7 @@ $.widget( "heurist.boro_nav", {
                         if(place!=null){
                             if(placeID==0){
                                 that.__setPlaceDesc(place, 'tertiary-study', (is_awarded?'Awarded ':'Studied ')+sDegree+' at '+sEduInst);                              
-                            }else{
+                            }else {
                                 that.__setPlaceDesc(place);                                         
                             }
                         }
@@ -1265,12 +1281,12 @@ $.widget( "heurist.boro_nav", {
                             if(placeID==0){
                                 that.__setPlaceDesc(place, (termID==4254)?'married':'lived',
                                                         sEventType+' '+eventDate.desc);                    
-                            }else{
+                            }else {
                                 that.__setPlaceDesc(place);                                         
                             }
                         }
                         
-                        if(placeID==0 || place.ids.indexOf(placeID)>=0){
+                        if(placeID==0 || window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0){
                             
                             if(termID==3302){
                                 enlistedDateOrder = that.__getYear(eventDate.date, ord);
@@ -1320,7 +1336,7 @@ $.widget( "heurist.boro_nav", {
                         var termID = that.recset.fld(record, 150);
                         var sOccupationTitle = that.__getTerm(termID);
                         
-                        if(placeID==0 || place.ids.indexOf(placeID)>=0){
+                        if(placeID==0 || (place!=null && window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0)){     
 
                             var year_main = that.__getYear(eventDate.date, 1920);
                             var year_end = that.__getYear(eventDate.date_end, year_main);
@@ -1440,7 +1456,7 @@ $.widget( "heurist.boro_nav", {
                                     + sRank
                                     + (sUnit?' with '+sUnit:'');
                     
-                    if(placeID==0 || place.ids.indexOf(placeID)>=0){            
+                    if(placeID==0 || (place!=null && window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0)){     
                         
                             var year_main = that.__getYear(eventDate.date, ord);
                             var year_end = that.__getYear(eventDate.date_end, year_main);
@@ -1605,7 +1621,7 @@ $.widget( "heurist.boro_nav", {
                             + fval+'">Australian War Memorial</a></li>'
             }
             
-            that.recset.values(person, 108); //Additional resources
+            fval = that.recset.values(person, 108); //Additional resources
             if($.isArray(fval)){
                 idx = 0;
                 for (idx in fval)
@@ -1824,11 +1840,16 @@ $.widget( "heurist.boro_nav", {
                     forceZoom:true, //force zoom after addition
                     min_zoom: 0.06 //in degrees
                 };            
-                $('#p_mapframe_container').show()
-                var mapping = $('#p_mapframe')[0].contentWindow.mapping;
-                if(mapping && mapping.map_control){
-                    mapping.map_control.addRecordsetLayer(params);
-                }
+                $('#p_mapframe_container').show();
+                var interval = setInterval(function(){
+                    var mapping = $('#p_mapframe')[0].contentWindow.mapping;
+                    if(mapping && mapping.map_control){
+                        mapping.map_control.addRecordsetLayer(params);
+                        clearInterval(interval);
+                    }else{
+                        //console.log('wait for map loading');
+                    }
+                },500);
                 
             }else{
                 $('#p_mapframe_container').hide()  
