@@ -702,7 +702,8 @@ public static function validateImport($params) {
     }
     
     if(intval($recordType)<1){
-        return array("status"=>HEURIST_INVALID_REQUEST, "message"=>'Record type not defined');
+        self::$system->addError(HEURIST_INVALID_REQUEST, 'Record type not defined');
+        return false;
     }
 
     $import_table = $imp_session['import_table'];
@@ -734,7 +735,8 @@ public static function validateImport($params) {
                 array_push($sel_query, $field_name);
             }
         }else{
-            return array("status"=>HEURIST_INVALID_REQUEST, "message"=>'Mapping not defined');
+            self::$system->addError(HEURIST_INVALID_REQUEST, 'Mapping not defined');
+            return false;
         }
     }
     else{
@@ -756,7 +758,8 @@ public static function validateImport($params) {
             }
         }
         if(count($sel_query)<1){
-            return array("status"=>HEURIST_INVALID_REQUEST, "message"=>'Mapping not defined');
+            self::$system->addError(HEURIST_INVALID_REQUEST, 'Mapping not defined');
+            return false;
         }
     
         $imp_session['validation']['mapped_fields'] = $mapped_fields;
@@ -796,7 +799,8 @@ public static function validateImport($params) {
                 $wrong_records['validation']['mapped_fields'][$id_field] = 'id';
                 $imp_session = $wrong_records;
             }else if($wrong_records) { //error
-                return $wrong_records;
+                self::$system->addError(HEURIST_ERROR, $wrong_records);
+                return false;
             }
 
             if(!$ignore_insert){      //WARNING - it ignores possible multivalue index field
@@ -829,7 +833,9 @@ public static function validateImport($params) {
                 $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query);
 
         }else if($cnt==null){
-            return "SQL error: Cannot execute query to calculate number of records to be updated!";
+            self::$system->addError(HEURIST_DB_ERROR,
+                    'SQL error: Cannot execute query to calculate number of records to be updated!', $mysqli->error);
+            return false;
         }
 
         if(!$ignore_insert){
@@ -1035,8 +1041,9 @@ public static function validateImport($params) {
         ($imp_session['validation']['count_insert']>0   // there are records to be inserted
             //  || ($params['sa_upd']==2 && $params['sa_upd2']==1)   // Delete existing if no new data supplied for record
         )){
-            return 'The following fields are required fields. You will need to map 
-them to incoming data before you can import new records:<br><br>'.implode(",", $missed);
+            self::$system->addError(HEURIST_ERROR, 'The following fields are required fields. You will need to map 
+them to incoming data before you can import new records:<br><br>'.implode(",", $missed));
+            return false;
     }
 
     if($id_field){ //validate only for defined records IDs
@@ -1091,7 +1098,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
 
        }else if($wrong_records) {
-            return $wrong_records;
+            self::$system->addError(HEURIST_ERROR, $wrong_records);
+            return false;
        }
     }
     //3. In DB: Verify that enumeration fields have correct values =====================================
@@ -1135,14 +1143,15 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
         }else if($wrong_records) {
-            return $wrong_records;
+            self::$system->addError(HEURIST_ERROR, $wrong_records);
+            return false;
         }
     }
     //4. In DB: Verify resource fields ==================================================
     $k=0;
     foreach ($query_res as $field){
 
-        if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
+         if(true || in_array(intval(substr($field,6)), $imp_session['multivals'])){ //this is multivalue field - perform special validation
 
             $query = "select imp_id, ".implode(",",$sel_query)
             ." from $import_table where ".$only_for_specified_id." 1";
@@ -1167,7 +1176,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
         }else if($wrong_records) {
-            return $wrong_records;
+            self::$system->addError(HEURIST_ERROR, $wrong_records);
+            return false;
         }
     }
 
@@ -1200,7 +1210,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
         }else if($wrong_records) {
-            return $wrong_records;
+            self::$system->addError(HEURIST_ERROR, $wrong_records);
+            return false;
         }
     }
     
@@ -1232,7 +1243,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         if(is_array($wrong_records)) {
             $imp_session = $wrong_records;
         }else if($wrong_records) {
-            return $wrong_records;
+            self::$system->addError(HEURIST_ERROR, $wrong_records);
+            return false;
         }
     }
 

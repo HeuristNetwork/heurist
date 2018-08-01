@@ -48,7 +48,7 @@ if($res){
     $res->close();
 }
     
-$names = mysql__select_assoc2($mysqli, 'select rty_ID, rty_Name from  defRecTypes WHERE rty_ID in ('.$recTypeIds.')');
+$rt_names = mysql__select_assoc2($mysqli, 'select rty_ID, rty_Name from  defRecTypes WHERE rty_ID in ('.$recTypeIds.')');
 
 $masks = mysql__select_assoc2($mysqli, 'select rty_ID, rty_TitleMask from  defRecTypes WHERE rty_ID in ('.$recTypeIds.')');
 

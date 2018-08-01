@@ -253,12 +253,12 @@ public static function isValidPointer($constraints, $rec_id, $dtyID ){
     $isvalid = false;
     
     if(isset($rec_id) && is_numeric($rec_id) && $rec_id>0){
+        
+        self::initialize();
+        
+        $tempRtyID = mysql__select_value( self::$mysqli, "select rec_RecTypeID from Records where rec_ID = ".$rec_id);
     
-        $res = mysql_query("select rec_RecTypeID from Records where rec_ID = ".$rec_id);
-        if ($res){
-            $tempRtyID = mysql_fetch_row($res);
-            if ($tempRtyID){
-                $tempRtyID = @$tempRtyID[0];
+        if ($tempRtyID>0){
 
                 $allowed_types = "all";
                 if ($constraints!=null && $constraints != "") {
@@ -269,8 +269,6 @@ public static function isValidPointer($constraints, $rec_id, $dtyID ){
                 }
 
                 $isvalid = ($allowed_types === "all" || in_array($tempRtyID, $allowed_types));
-
-            }
         }
     }
     return $isvalid;

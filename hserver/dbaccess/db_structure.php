@@ -225,9 +225,8 @@
                         array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['showTypes'], $rtyID);
                     }
                 }
+                $commonFields = array_slice($row, 3);
                 if($imode>0){
-                    $commonFields = array_slice($row, 3);
-                    
                     //convert concept code title mask to human readable
                     $mask_concept_codes = $commonFields[$ind_TitleMask];
                     $commonFields[$ind_CanonicalTitleMask] = $mask_concept_codes; //keep
