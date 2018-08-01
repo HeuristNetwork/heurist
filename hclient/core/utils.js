@@ -1286,7 +1286,7 @@ window.hWin.HEURIST4.util = {
     // assumed that sdate is in UTC
     //
     getTimeForLocalTimeZone: function (sdate){
-        var date = new Date(sdate+" UTC");
+        var date = new Date(sdate+"+00:00");
         return (''+date.getHours()).padStart(2, "0")
                 +':'+(''+date.getMinutes()).padStart(2, "0")
                 +':'+(''+date.getSeconds()).padStart(2, "0");
