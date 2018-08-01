@@ -45,8 +45,7 @@ function EditRectypeTitle() {
 
     var _className = "EditRectypeTitle",
     _rectypeID,
-    _varsTree, //treeview object
-    _db;
+    _varsTree; //treeview object
 
     /**
      * Initialization of input form
@@ -595,7 +594,8 @@ console.log(context);
     * Third step - update records - change title
     */
     function _updateTitleMask(){
-        var sURL = window.hWin.HAPI4.baseURL + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+_db+"&recTypeIDs="+_rectypeID;
+        var sURL = window.hWin.HAPI4.baseURL + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="
+                            +window.hWin.HAPI4.database+"&recTypeIDs="+_rectypeID;
 
         window.hWin.HEURIST4.msg.showDialog(sURL, {
 

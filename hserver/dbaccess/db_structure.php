@@ -1,4 +1,5 @@
 <?php
+    require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 //@TODO convert to class
     /**
     * @package     Heurist academic knowledge management system
@@ -140,6 +141,12 @@
         $rtStructs['names'] = array();
         $rtStructs['pluralNames'] = array();
 
+        $columns = __getRectypeColNames();
+        $ind_TitleMask = array_search('rty_TitleMask', $columns);
+        $ind_CanonicalTitleMask = array_search('rty_CanonicalTitleMask', $columns);
+        $ind_Name = array_search('rty_Name', $columns);
+        $ind_Plural = array_search('rty_Plural', $columns);
+        
         if($imode!=1){
             $rtStructs['groups'] = dbs_GetRectypeGroups($mysqli);
         }
@@ -151,8 +158,8 @@
         if($imode>0){   //structure description
 
             $rtStructs['dtDisplayOrder'] = array();
-            $rtStructs['typedefs'] = array('commonFieldNames' => __getRectypeColNames(),
-                'commonNamesToIndex' => __getColumnNameToIndex(__getRectypeColNames()),
+            $rtStructs['typedefs'] = array('commonFieldNames' => $columns,
+                'commonNamesToIndex' => __getColumnNameToIndex( $columns ),
                 'dtFieldNamesToIndex' => __getColumnNameToIndex(__getRectypeStructureFieldColNames()),
                 'dtFieldNames' => __getRectypeStructureFieldColNames());
 
@@ -176,8 +183,9 @@
 
         }
 
+        
         // get rectypes ordered by the RecType Group order, then by Group Name, then by rectype order in group and then by rectype name
-        $query = "select rty_ID, rtg_ID, rtg_Name, " . join(",", __getRectypeColNames());
+        $query = "select rty_ID, rtg_ID, rtg_Name, " . join(",", $columns);
         $query = preg_replace("/rty_ConceptID/", "", $query);
         if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
             $query.= " if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID";
@@ -199,6 +207,9 @@
         $res = $mysqli->query($query);
         if($res){
             while ($row = $res->fetch_row()) {
+                
+                $rtyID = $row[0];
+                
                 if($imode!=1){
                     $rtg_ID = $row[1];
                     if(!@$rtStructs['groups']['groupIDToIndex'][$rtg_ID]){
@@ -209,17 +220,23 @@
                         $rtg_ID = $idxs[0];
                     }
                     
-                    array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['allTypes'], $row[0]);
+                    array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['allTypes'], $rtyID);
                     if ($row[14]) { //rty_ShowInList
-                        array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['showTypes'], $row[0]);
+                        array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['showTypes'], $rtyID);
                     }
                 }
                 if($imode>0){
                     $commonFields = array_slice($row, 3);
-                    $rtStructs['typedefs'][$row[0]]['commonFields'] = $commonFields;
+                    
+                    //convert concept code title mask to human readable
+                    $mask_concept_codes = $commonFields[$ind_TitleMask];
+                    $commonFields[$ind_CanonicalTitleMask] = $mask_concept_codes; //keep
+                    $commonFields[$ind_TitleMask] = TitleMask::execute($mask_concept_codes, $rtyID, 2, null, _ERR_REP_SILENT);
+                    
+                    $rtStructs['typedefs'][$rtyID]['commonFields'] = $commonFields;
                 }
-                $rtStructs['names'][$row[0]] = $row[3];
-                $rtStructs['pluralNames'][$row[0]] = $row[8];
+                $rtStructs['names'][$rtyID] = $commonFields[$ind_Name];
+                $rtStructs['pluralNames'][$rtyID] = $commonFields[$ind_Plural];
             }
             $res->close();
         }else{

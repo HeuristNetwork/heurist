@@ -740,7 +740,8 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         $inner_rectype_name = '';
         $inner_rectype_cc = '';
         $pos = strpos($inner_field_name, ".");
-        if ( $pos>0 &&  strpos($inner_field_name, "}") < $pos ) { 
+        $pos2 = strpos($inner_field_name, "}");
+        if ( $pos>0 &&  $pos2>0 && $pos2 < $pos ) { 
             $inner_rectype_search = substr($inner_field_name, 1, $pos-2); 
             list($inner_rectype, $inner_rectype_cc, $inner_rectype_name) = self::__get_rt_id( $inner_rectype_search ); 
             $inner_field_name = substr($inner_field_name, $pos+1); 

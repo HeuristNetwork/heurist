@@ -136,7 +136,7 @@ function getRecordTypeTree($recTypeId, $recursion_depth, $forpurpose=null){
     
     $res = array();
     
-    if($recTypeId && is_numeric($recTypeId)){
+    if($recTypeId && $recTypeId>0){
         $res['rt_id'] = $recTypeId;
         $res['rt_name'] = $rtStructs['names'][$recTypeId];
     }
