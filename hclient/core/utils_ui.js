@@ -1848,7 +1848,25 @@ window.hWin.HEURIST4.ui = {
                           var recID = ele.attr('data-relID');
                          
                           if(recID>0){  
-                         
+                              
+                              window.hWin.HAPI4.RecordMgr.remove({ids: recID}, 
+                                function(response){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                        
+                                          ele.trigger('remove');
+                                          ele.remove();
+                                          window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Relation has been deleted'));
+
+                                          if($(container).find('.link-div').length==0){
+                                                $(container).find('.add-rel-button').show();
+                                          }
+                                          
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr( response );
+                                    }
+                                });
+
+                              /*  
                               var url = window.hWin.HAPI4.baseURL + 'hapi/php/deleteRecord.php';
 
                               var request = {
@@ -1872,6 +1890,7 @@ window.hWin.HEURIST4.ui = {
                                       }
                                   }
                               });
+                              */
                           
                           }else{
                               //remove link field

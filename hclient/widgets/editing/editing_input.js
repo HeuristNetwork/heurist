@@ -2089,7 +2089,7 @@ $.widget( "heurist.editing_input", {
                                              rec_IsChildRecord: isChildRecord
                                              },
                                              selector_function);
-
+                                             
                             //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
                         }
                     }
@@ -2112,6 +2112,11 @@ $.widget( "heurist.editing_input", {
                                                  rec_RecTypeID: rec_RecType,
                                                  rec_IsChildRecord: isChildRecord
                                                  }, selector_function);
+                                                 
+                                       ele.show();
+                                       ele.parent().find('.sel_link').show();
+                                       ele.parent().find('.sel_link2').hide();
+                                                 
                                     }else{
                                         that._removeInput( ele.attr('id') );
                                     }
