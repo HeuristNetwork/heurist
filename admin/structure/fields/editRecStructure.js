@@ -438,15 +438,21 @@ function EditRecStructure() {
                         if (reqtype && reqtype.length > 0){
                             var type = oRecord.getData("dty_Type");
                             if( type=='enum' ){
-                                var term = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][reqtype];
-                                if(term){
-                                    reqtype = term[0].substring(0,15);
+                                if(reqtype>0){
+                                    var term = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][reqtype];
+                                    if(term){
+                                        reqtype = term[0].substring(0,15);
+                                    }
+                                }else{
+                                    reqtype = '';
                                 }
                             }else{
                                 reqtype = reqtype.substring(0,9);// Artem, why do we do this??
                             }
 
                             elLiner.innerHTML = reqtype;
+                        }else{
+                            elLiner.innerHTML = '';
                         }
                     }
                 },
@@ -1626,7 +1632,7 @@ function EditRecStructure() {
                 var arrs = detTypes[dty_ID].commonFields;
                 // add new detail type
                 // note that integer, boolean, year, urlinclude can no longer be created but are retained for backward compatibility
-                var def_width = 100, def_height = 0;  // default width, used by single line text fields
+                var def_width = 80, def_height = 0;  // default width, used by single line text fields
                 var dt_type = arrs[fi.dty_Type];
 
                 if (_isNoWidth(dt_type))  // types which have no intrinsic width ie. adapt to content
@@ -1707,15 +1713,22 @@ function EditRecStructure() {
             dragDropDisable();
             dragDropEnable();
 
-            _saveUpdates(false);
+            _saveUpdates(false, function(){
+                
+                //ART 2018-07-30 
+                _updateOrderAfterInsert( data_toadd[data_toadd.length-1]['rst_ID'] );
+                
+            });
 
             $("#recStructure_toolbar").hide();
 
-            //ART 2018-07-30 _updateOrderAfterInsert( data_toadd[data_toadd.length-1]['rst_ID'] );
         }
 
     }//end _addDetails
 
+    //
+    //
+    //
     function _updateOrderAfterInsert( lastID ) {
 
         var recs = _myDataTable.getRecordSet(),
@@ -1766,6 +1779,7 @@ function EditRecStructure() {
         
         //remark this exit to prevent expand after insert
         if($('#showEditOnNewField').is(':checked')){
+            
             //emulate click on just added row
             setTimeout(function(){
                 
@@ -1903,7 +1917,7 @@ function EditRecStructure() {
     *
     * @needClose - if true closes this popup window, but it is always false now
     */
-    function _saveUpdates(needClose)
+    function _saveUpdates(needClose, callback_after_save)
     {
         
         var orec = _getUpdates();
@@ -1930,6 +1944,8 @@ function EditRecStructure() {
                     editStructure._structureWasUpdated = true;
                     if(needClose){
                         window.close(editStructure._structureWasUpdated);
+                    }else if($.isFunction(callback_after_save)){
+                        callback_after_save.call();
                     }
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);            
@@ -3119,7 +3135,9 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
             //el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, datatype, _defvalue, isdefselector);
             el_sel = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
                     {datatype:datatype, termIDTree:allTerms, headerTermIDsList:disabledTerms,
-                     defaultTermID:_defvalue, topOptions:null, needArray:false, useHtmlSelect:false});
+                     defaultTermID:_defvalue, 
+                     topOptions:isdefselector?[{key:'',title:'<blank value>'}]:null,
+                     needArray:false, useHtmlSelect:false});
             el_sel = el_sel[0];
             
             el_sel.id = isdefselector?('ed'+rst_ID+'_rst_DefaultValue'):'termsPreview_select';

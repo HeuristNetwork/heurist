@@ -77,7 +77,7 @@
                 
                 for(var idx=0; idx< fields.length; idx++){
                     var dty_ID = fields[idx];
-                    _checked = ''
+                    _checked = (idx==0)?'checked':'';
                     
             $('<tr><td style="padding:10px" align="center"><input type="checkbox" class="ids" data-id="'+dty_ID+'" '+_checked
             +'></td>'
