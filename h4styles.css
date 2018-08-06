@@ -38,6 +38,7 @@ outline: 0;
 .logo {
     background-image: url("hclient/assets/h4logo_small.png") !important;
     background-repeat: no-repeat !important;
+    background-size: contain;
     width: 190px;
     height: 38px;
 }
@@ -995,20 +996,15 @@ span.fancytree-checkbox{
     width:26;
 }
 
-.fancytree-has-children span.fancytree-checkbox
+.tree-facets .fancytree-has-children span.fancytree-checkbox
 {
     background-position: 0px -176px
-    /* 
-    0px -48px; - circle
-    none
-    background-position: 0 -176px;
-    width:0;*/
 }
-.fancytree-has-children.fancytree-partsel span.fancytree-checkbox
+.tree-facets .fancytree-has-children.fancytree-partsel span.fancytree-checkbox
 {
     background-position: -64px -176px;
 }
-.fancytree-has-children.fancytree-selected span.fancytree-checkbox:hover
+.tree-facets .fancytree-has-children.fancytree-selected span.fancytree-checkbox:hover
 {
     background-position: -64px -48px;
 }

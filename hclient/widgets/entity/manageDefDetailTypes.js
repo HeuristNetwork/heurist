@@ -53,7 +53,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         this._super();
     },
         
-    //  
+    /*  
     // invoked from _init after load entity config    
     //
     _initControls: function() {
@@ -74,7 +74,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 
         this.recordList.resultList('option', 'show_toolbar', false);
     },
-    
+    */
     
     
     //  
@@ -211,6 +211,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 rdata.order.push( r_id );
             }
         }
+        rdata.count = rdata.order.length;
 
         return new hRecordSet(rdata);
     },
@@ -224,7 +225,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             //load user for given record id
             if(this.options.dty_ID>0){
                     var request = {};
-                    request['rty_ID']  = this.options.dty_ID;
+                    request['dty_ID']  = this.options.dty_ID;
                     request['a']          = 'search'; //action
                     request['entity']     = this.options.entity.entityName;
                     request['details']    = 'full';

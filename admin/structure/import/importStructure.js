@@ -18,7 +18,6 @@
 */
 
 //  recordList_dbs for database browse = list of records from main index database
-//  recordList_rty - select record type
 //  record type - treeview with individual fields selection
 
 //
@@ -55,6 +54,9 @@ $.widget( "heurist.importStructure", {
     //cached records hRecordSet for databases
     _cachedRecordset_dbs:null,
     
+    _selectedDB:null, //name of currently selected database
+    _selectedRtyID:null,
+    
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
@@ -79,8 +81,16 @@ $.widget( "heurist.importStructure", {
                         +    '<div class="ent_content_full recordList"/>'
                         +'</div>'
                         +'<div class="ent_wrapper" id="panel_rty" style="display:none">'
-                        //+    '<div class="ent_header searchForm"/>'
-                        //+    '<div class="ent_content_full recordList"/>'
+                        
+                            +'<div class="ent_wrapper" id="panel_rty_list">'
+                            +'</div>'
+                            
+                            +'<div class="ent_wrapper" id="panel_rty_tree" style="display:none;top:0;left:321px">'
+                            +    '<div class="ent_header rtt-toolbar" style="padding:10px;height:8.6em;border-left:1px lightgray solid">'
+                                        +'<div id="btn_close_panel_rty_tree"></div></div>'
+                            +    '<div class="ent_content_full rtt-tree" style="top:10.4em"/>'
+                            +'</div>'
+                            
                         +'</div>'
                 +'</div>';
         $(layout).appendTo(this.element);
@@ -88,9 +98,6 @@ $.widget( "heurist.importStructure", {
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
         this.recordList_dbs = this.element.find('#panel_dbs .recordList');
         this.searchForm_dbs = this.element.find('#panel_dbs .searchForm');
-
-        //this.recordList_rty = this.element.find('#panel_rty .recordList');
-        //this.searchForm_rty = this.element.find('#panel_rty .searchForm');
 
         var that = this;
         //init record list for dbs and rty
@@ -158,73 +165,6 @@ $.widget( "heurist.importStructure", {
             
         });
         
-//------------------------ rty panel
-
-        /*init record list for dbs and rty
-        this.recordList_rty
-            .resultList({
-                       eventbased: false, 
-                       isapplication: false, //do not listent global events @todo merge with eventbased
-                       multiselect: false,
-                       select_mode: 'select_single', // none
-                       
-                       entityName: 'defRecTypes',
-                       view_mode: 'list',
-                       
-                       pagesize: (this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
-                       empty_remark: '<div style="padding:1em 0 1em 0">No record types found</div>',
-
-                       rendererHeader:
-                            function(){
-                                var s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
-                                            +'<div style="width:13em">Name</div>'
-                                            +'<div style="width:20em;border:none;">Description</div>';
-                                    
-                                if (false && window.hWin.HAPI4.is_admin()){
-                                        s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
-                                }
-                                    
-                                return s;
-                            }
-            });     
-            
-        this._on( this.recordList_rty, {
-                        "resultlistonselect": function(event, selected_recs){
-                            // show list of record types for selected database
-                            //that.
-                            
-                        },
-                        "resultlistonaction": this._onActionListener        
-        });
-        
-        //init search panel
-        this.searchForm_rty.load(window.hWin.HAPI4.baseURL
-                    +'hclient/widgets/entity/searchDefRecTypes.html?t'
-                    +window.hWin.HEURIST4.util.random(), 
-        function(response, status, xhr){
-            
-            //init buttons
-            that.btn_search_start_rty = that.searchForm_rty.find('#btn_search_start')
-                //.css({'width':'6em'})
-                .button({label: window.hWin.HR("Start search"), showLabel:false, 
-                        icon:"ui-icon-search", iconPosition:'end'});
-                 
-                    
-            //this is default search field - define it in your instance of html            
-            that.input_search_rty = that.searchForm_rty.find('#input_search');
-            
-            that._on( that.input_search, { keypress: function(e){that.startSearchOnEnterPress(e,'rty')} });
-            that._on( that.btn_search_start_rty, { click: that.startSearch_rty });            
-            
-            that.input_search_group_rty = that.searchForm_rty.find('#input_search_group');
-            that._on(that.input_search_group_rty,  { change:that.startSearch_rty });
-            
-            that.input_sort_type_rty = that.searchForm_rty.find('#input_sort_type');
-            that._on(that.input_sort_type_rty,  { change:that.startSearch_rty });
-            
-        });
-        */
-
 
 //----------------------       
         //show dialog if required 
@@ -322,39 +262,176 @@ $.widget( "heurist.importStructure", {
     },
 
     //
-    //
+    // init manageDefRecTypes widget on panel_rty
     //
     _loadRecordTypesForDb: function(db_ids){
+
+        var that = this;
+        var panel_dbs = this.element.find('#panel_dbs');
+        var panel_rty = this.element.find('#panel_rty');
         
         var record = db_ids.getFirstRecord();//this._cachedRecordset_dbs.getById(db_ids[0]);
         
         var sURL  = db_ids.fld(record, 'rec_URL');
         var sDB   = db_ids.fld(record, 'rec_Title');
         
-        var options = {
-            isdialog: false,
-            container: '#panel_rty',
-            select_mode: 'select_single',
-            database_url:  (sURL+'?db='+sDB),
+        
+        if(this._selectedDB != sDB){
             
-            onselect:function(event, data){
+            this._selectedDB = sDB;
+            
+            var options = {
+                isdialog: false,
+                container: '#panel_rty_list',
+                select_mode: 'select_single',
                 
-                var s = 'Selected ';
-                if(data && data.selection)
-                for(i in data.selection){
-                    if(i>=0)
-                        s = s+data.selection[i]+'<br>';
+                import_structure:{
+                       database: sDB,      //database name
+                       databaseURL: sURL,
+                       database_url:  (sURL+'?db='+sDB),
+                       btn_back_to_databases: function(){
+                            panel_dbs.show();
+                            panel_rty.hide();
+                       }
+                },
+                
+                onselect:function(event, data){
+                    
+                    //show treeview
+                    if(data && data.selection && data.selection.length>0){
+                        that._loadRecordTypesTreeView(data.selection[0]);
+                    }
+                    
+                    
+                    
                 }
-                alert(s);
-            }
-        };
+            };
 
-        this.element.find('#panel_dbs').hide();
-        this.element.find('#panel_rty').show();
+            this.element.find('#panel_rty_list').empty();
+            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', options);
+            
+        }
+        panel_dbs.hide();
+        panel_rty.show();
         
-        window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', options);
         
+    },
+    
+    //
+    // show treeview with record type structure
+    //
+    _loadRecordTypesTreeView: function(rtyID){
         
+        var panel_rty = this.element.find('#panel_rty_list').css({right:'300px'});
+        var panel_rty_structure = this.element.find('#panel_rty_tree')
+                .css({left: this.element.find('#panel_rty').width()-300 }).show();
+        
+        if( this._selectedRtyID!=rtyID ){
+        
+            if(this._selectedRtyID==null){
+                //first time init
+                panel_rty_structure.find('#btn_close_panel_rty_tree').button({icon: 'ui-icon-carat-1-e', label:'Close'})
+                    .css({'line-height': '0.9em'})
+                    .click(function(){
+                        panel_rty.css({right:'1px'});
+                        panel_rty_structure.hide();
+                    });
+            }
+                
+            this._selectedRtyID = rtyID;
+            
+            //generate treedata from rectype structure
+            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 5, rtyID, 'all' );
+            
+            treedata[0].expanded = true; //first expanded
+            
+            //load treeview
+            var treediv = this.element.find('.rtt-tree');
+            if(!treediv.is(':empty')){
+                treediv.fancytree("destroy");
+            }
+            
+            treediv.fancytree({
+                //extensions: ["filter"],
+                //            extensions: ["select"],
+                checkbox: true,
+                selectMode: 3,  // hierarchical multi-selection
+                source: treedata,
+                beforeSelect: function(event, data){
+                    // A node is about to be selected: prevent this, for folder-nodes:
+                    if( data.node.hasChildren() ){
+                        return false;
+                    }
+                },
+                lazyLoad: function(event, data){
+                    var node = data.node;
+                    var parentcode = node.data.code; 
+                    var rectypes = node.data.rt_ids;
+                    
+                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 5, rectypes, null, parentcode );
+    //console.log(res);      
+                    if(res.length>1){
+                        data.result = res;
+                    }else{
+                        data.result = res[0].children;
+                    }
+                    
+                    return data;                                                   
+                },
+                loadChildren: function(e, data){
+                    /* 
+                        var showrev = $('#fsw_showreverse').is(":checked");
+                        var tree = treediv.fancytree("getTree");
+                        tree.visit(function(node){
+                            if(node.data.isreverse==1){ 
+                                if(showrev===true){
+                                    $(node.li).show();
+                                }else{
+                                    $(node.li).hide();
+                                }
+                            }
+                        });
+                        
+                        that._assignSelectedFacets();
+                     */   
+                },
+                select: function(e, data) {
+                },
+                click: function(e, data){
+                   if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                       data.node.setExpanded(!data.node.isExpanded());
+                       //treediv.find('.fancytree-expander').hide();
+                       
+                   }else if( data.node.lazy) {
+                       data.node.setExpanded( true );
+                   }
+                },
+                dblclick: function(e, data) {
+                    data.node.toggleSelected();
+                },
+                keydown: function(e, data) {
+                    if( e.which === 32 ) {
+                        data.node.toggleSelected();
+                        return false;
+                    }
+                }
+            });
+
+            //check and disable nodes for entities that are already in database
+            var tree = treediv.fancytree("getTree");            
+            tree.visit(function(node){
+                if(node.data.dtyID_local>0){
+                     node.setSelected(true);
+                     node.unselectable = true;
+                     //node.unselectableStatus = true;
+                      $(node.li).css('color','gray');
+                     
+                }
+            });
+            
+            //treediv.find('.fancytree-expander').hide();
+        
+        }
     },
     
     //Called whenever the option() method is called
@@ -515,6 +592,6 @@ $.widget( "heurist.importStructure", {
         }
         return subset;
     },
-
+    
+    
 });
-

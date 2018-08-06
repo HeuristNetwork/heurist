@@ -868,7 +868,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             }
 
                             //setTimeout(function(){
-                            treediv.fancytree({
+                            treediv.addClass('tree-facets').fancytree({
                                 //extensions: ["filter"],
                                 //            extensions: ["select"],
                                 checkbox: true,
@@ -979,9 +979,11 @@ $.widget( "heurist.search_faceted_wiz", {
                             //change default checkbox for branch root
                             var cb = treediv.find("span.fancytree-checkbox");
                             if(cb.length>0){
+                                /* temp
                                 $(cb[0]).removeClass("fancytree-checkbox");
                                 var stit = treediv.find("span.fancytree-title"); // :first
                                 $(stit[0]).css({'font-size':'1.2em', 'font-weight':'bold'});
+                                */
                             }
                             
                             //hide all folder triangles

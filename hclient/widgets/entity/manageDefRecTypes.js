@@ -33,7 +33,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     _init: function() {
         
         //define it to load recordtypes from other server/database - if defined it allows selection only
-        if(!this.options.database_url){ //for example http://heurist.sydney.edu.au/heurist/?db=Heurist_Reference_Set
+        if(this.options.import_structure){ //for example http://heurist.sydney.edu.au/heurist/?db=Heurist_Reference_Set
             if(this.options.select_mode=='manager') this.options.select_mode='select_single';
             this.options.use_cache = true;
             this.options.use_structure = true;    
@@ -41,6 +41,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.options.use_cache = true;
             this.options.use_structure = true;
         }
+        
+        //this.options.use_cache = false;
         
         this.options.layout_mode = 'short';
         //this.options.edit_mode = 'popup';
@@ -107,7 +109,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             this._as_dialog.dialog('option','title', title);    
         }
-        
         // init search header
         this.searchForm.searchDefRecTypes(this.options);
         
@@ -115,8 +116,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
-        this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '730px'});
-        this.recordList.css({'top':iheight+0.5+'em', 'min-width': '730px'});
+        this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '530px'});
+        this.recordList.css({'top':iheight+0.5+'em', 'min-width': '530px'});
         //init viewer 
         var that = this;
         
@@ -143,18 +144,23 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         if(this.options.use_cache){
             
-            if(this.options.use_structure){
+            if(this.options.use_structure){  //get recordset from HEURIST4.rectypes
                 
-                if(this.options.database_url!=''){
-                    
+                if(this.options.import_structure){
+                    //take recordset from REMOTE HEURIST.rectypes format     
                     window.hWin.HEURIST4.msg.bringCoverallToFront();
                     
                     window.hWin.HAPI4.SystemMgr.get_defs(
-                            {rectypes:'all', mode:2, remote:this.options.database_url}, function(response){
+                            {rectypes:'all', mode:2, remote:this.options.import_structure.database_url}, function(response){
                     
                             window.hWin.HEURIST4.msg.sendCoverallToBack();
                             
                             if(response.status == window.hWin.ResponseStatus.OK){
+                                
+                                window.hWin.HEURIST4.remote = {};
+                                window.hWin.HEURIST4.remote.rectypes = response.data.rectypes;
+                                //window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
+                                //window.hWin.HEURIST4.remote.terms = response.data.terms;
                                 
                                 that._cachedRecordset = that._getRecordsetFromStructure( response.data.rectypes );
                                 that.recordList.resultList('updateResultSet', that._cachedRecordset);
@@ -165,12 +171,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     });                    
                     
                 }else{
-                    //take recordset from HEURIST.rectypes format     
+                    //take recordset from LOCAL HEURIST.rectypes format     
                     this._cachedRecordset = this._getRecordsetFromStructure();
                     this.recordList.resultList('updateResultSet', this._cachedRecordset);
                 }
             }else{
-                this.options.database_url
+                //this.options.database_url
                 
                 //usual way from server via entity
                 var that = this;
@@ -182,7 +188,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             }
                 
             this._on( this.searchForm, {
-                "searchdefrectypesonfilter": this.filterRecordList
+                "searchdefrectypesonfilter": this.filterRecordList  
                 });
                 
         }    
@@ -212,28 +218,45 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
         if(!rectypes){
             rectypes = window.hWin.HEURIST4.rectypes;
-        } else {
+        }else{
             //reload groups for remote rectypes            
+            //var ele = this.element.find('#input_search_group');   //rectype group
+            this.searchForm.searchDefRecTypes('reloadGroupSelector',rectypes);
             
-            var ele = this.element.find('#input_search_group');   //rectype group
-            window.hWin.HEURIST4.ui.createRectypeGroupSelect(ele[0],
-                                        [{key:'any',title:'any group'}]);
-        }    
-
+            //var ele = this.searchForm.find('#input_search_group');
+            //window.hWin.HEURIST4.ui.createRectypeGroupSelect(ele[0],
+            //                            [{key:'any',title:'any group'}], rectypes);
+        }
 
         rdata.fields = rectypes.typedefs.commonFieldNames;
         rdata.fields.unshift('rty_ID');
+        
+        var idx_ccode = 0;
+        if(this.options.import_structure){
+            rdata.fields.push('rty_ID_local');
+            idx_ccode = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
+        }
 
 
         for (var r_id in rectypes.typedefs)
         {
             if(r_id>0){
                 var rectype = rectypes.typedefs[r_id].commonFields;
+                
+                if(this.options.import_structure){
+                    var concept_code =  rectype[ idx_ccode ];
+                    var local_rtyID = window.hWin.HEURIST4.dbs.findByConceptCode( concept_code, 
+                                                            window.hWin.HEURIST4.rectypes.typedefs, idx_ccode );
+                    rectype.push( local_rtyID );
+                }
+                
                 rectype.unshift(r_id);
                 rdata.records[r_id] = rectype;
                 rdata.order.push( r_id );
+                
             }
         }
+        rdata.count = rdata.order.length;
 
         return new hRecordSet(rdata);
     },
@@ -303,13 +326,26 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         //var recTitle = fld2('ugr_ID','3em')+fld2('ugr_Name','10em')+fld('ugr_FirstName')+' '+fld('ugr_LastName');
         var recTitleHint = fld('ugr_Organisation');
         
-        var recTitle = fld2('rty_ID','3.5em')
-                    + fld2('rty_Name','15em')
+        var recTitle = fld2('rty_ID','3.5em');
+        
+        if(this.options.import_structure){
+            recTitle = recTitle + fld2('rty_ID_local','3.5em');
+        }
+            
+        recTitle = recTitle + fld2('rty_Name','15em')
                     + fld2('rty_Description','45em');
         
         var rtIcon = window.hWin.HAPI4.iconBaseURL+recID;// window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
         //var rtThumb = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'thumb');
         var recThumb = window.hWin.HAPI4.iconBaseURL+'thumb/th_'+recID; //window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', 2, this.options.database);
+        
+        if(this.options.import_structure){
+            rtIcon = this.options.import_structure.databaseURL
+                                + '/hserver/dbaccess/rt_icon.php?db='
+                                + this.options.import_structure.database + '&id=';
+            recThumb = rtIcon+'thumb/th_'+recID;
+            rtIcon = rtIcon + recID;
+        }
         
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);">'
         +'</div>';

@@ -24,10 +24,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         
         var that = this;
         
-        this.input_search_group = this.element.find('#input_search_group');   //rectype group
-        window.hWin.HEURIST4.ui.createRectypeGroupSelect(this.input_search_group[0],
-                                        [{key:'any',title:'any group'}]);
-
+        //this.widgetEventPrefix = 'searchDefRecTypes';
+        
         this._super();
 
         //hide all help divs except current mode
@@ -63,7 +61,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             */                       
         }
         
-        this._on(this.input_search_group,  { change:this.startSearch });
+        this.reloadGroupSelector();
+        
         this._on(this.input_search_type,  { change:this.startSearch });
         
         //@todo - possible to remove
@@ -82,8 +81,22 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         this._on(this.input_sort_type,  { change:this.startSearch });
                       
         this.startSearch();            
+        
+        
+        if( this.options.import_structure ){
+            this.element.find('#btn_back_to_databases').button({label:'Back to Databases'})
+                .click(this.options.import_structure.btn_back_to_databases);
+        }
     },  
-
+    
+    reloadGroupSelector: function (rectypes){
+        
+        this.input_search_group = this.element.find('#input_search_group');   //rectype group
+        window.hWin.HEURIST4.ui.createRectypeGroupSelect(this.input_search_group[0],
+                                        [{key:'any',title:'any group'}], rectypes);
+        this._on(this.input_search_group,  { change:this.startSearch });
+        
+    },
     
     //
     // public methods

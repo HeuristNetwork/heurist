@@ -186,11 +186,6 @@
                     if($dt_type=='resource' || $dt_type=='relmarker'){
                             array_push($new_pointer_fields, $dtID);
                     }
-                }
-                
-                foreach ($details as $dtID => $dtValue){
-                    
-                    if($dtValue[$dbs_rtStructs['typedefs']['dtFieldNamesToIndex']['rst_RequirementType']]=='forbidden') continue;
                     
                     $res_dt = __getDetailSection($system, $recTypeId, $dtID, $recursion_depth, $mode, 
                                                             $fieldtypes, null, $new_pointer_fields);
@@ -257,7 +252,6 @@
     
     //
     // returns array of record types that are linked to given record type
-    //
     //
     function __getReverseLinkedRecordTypes($rt_ID){
         
