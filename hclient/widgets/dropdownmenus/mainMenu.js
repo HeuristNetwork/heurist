@@ -23,6 +23,8 @@ $.widget( "heurist.mainMenu", {
     // default options
     options: {
     },
+    
+    menues:{},
 
     _current_query_string:'',
 
@@ -35,8 +37,8 @@ $.widget( "heurist.mainMenu", {
             .disableSelection();// prevent double click to select text
 
         this.div_logo = $( "<div>")
-        .addClass('logo')
-        .css({'width':'198px', 'height':'56px', 'float':'left', 'margin-top':'6px'})
+        .addClass('logo')   //width was 198
+        .css({'width':'150px', 'height':'56px', 'float':'left', 'margin-top':'6px'})
         .appendTo( this.element );
 
         if(window.hWin.HAPI4.get_prefs('layout_theme')!='heurist'){
@@ -49,8 +51,8 @@ $.widget( "heurist.mainMenu", {
             sUpdate = '&nbsp;<span class="ui-icon ui-icon-alert" style="width:16px;display:inline-block;vertical-align: middle;cursor:pointer">';
         }
 
-        $("<div>")
-            .css({'font-size':'0.8em', 'text-align':'center', 'margin-left': '100px', 'padding-top':'16px', 'width':'100%'})
+        $("<div>")                                               
+            .css({'font-size':'0.8em', 'text-align':'center', 'margin-left': '85px', 'padding-top':'12px', 'width':'100%'})
             .html('<span style="padding-left:20px">v'+window.hWin.HAPI4.sysinfo.version+sUpdate+'</span>').appendTo( this.div_logo );
             
         // bind click events
@@ -70,21 +72,30 @@ $.widget( "heurist.mainMenu", {
             }
         });
 
+        
+        this.divProfileMenu = $( "<div>")
+        .css({'float':'right', 'margin-top':'1em' })  //one rows 'padding-right':'2em', 
+        //.css({'position':'absolute', 'right':10, 'padding-right':'2em', 'padding-top':'1em' })  //one rows
+        //.addClass('logged-in-only')
+        .appendTo(this.element);
+        
+        
         this.div_dbname = $( "<div>")
-            .css({'float':'left', 'padding-left':'2em', 'margin-top':'1.6em', 'text-align':'center' })
+            //.css({'position':'absolute', 'right':300, 'padding-right':'2em', 'padding-top':'1em' })
+            .css({'float':'right', 'margin-top':'1.2em', 'padding-right':'2em' })
             .appendTo(this.element);
             
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.sysinfo.dbrecent)){
             
             this.div_dbname.css({
-                'margin-left':'50px',
                 'background-position': 'left center',
                 'background-repeat': 'no-repeat',
                 'background-image': 'url("'+window.hWin.HAPI4.baseURL+'hclient/assets/database.png")'});
             
             var wasCtrl = false;
             var selObj = window.hWin.HEURIST4.ui.createSelector(null, window.hWin.HAPI4.sysinfo.dbrecent);        
-            $(selObj).css({'font-size':'1.3em', 'font-weight':'bold','border':'none', 'min-width':'150px' })
+            $(selObj).css({'font-size':'1.3em', 'font-weight':'bold','border':'none', outline:0,
+                           'min-width':'150px', 'margin-left':'25px', })
             .click(function(event){
                 wasCtrl = event.shiftKey;
 //console.log('1'+wasCtrl+'  '+event.metaKey);                
@@ -126,68 +137,46 @@ $.widget( "heurist.mainMenu", {
         // MAIN MENU-----------------------------------------------------
 
         this.divMainMenu = $( "<div>")
-        //.css({'float':'right', 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })
-        //.css({'position':'absolute', 'right':0, 'padding-right':'2em', 'padding-top':'0.2em', 'text-align':'right', 'width':'40em' })  //two rows
-        .css({'position':'absolute', 'right':0, 'padding-right':'2em', 'padding-top':'1.5em', 'text-align':'right' })  //one rows
-        .addClass('logged-in-only')
+        .css({'position':'absolute', 'left':10, bottom:2, 'text-align':'left'})  //one rows
+        //.addClass('logged-in-only')
         .appendTo(this.element);
-
-        /* moved to Profile menu
-        var logout = $('<a>',{text: 'log out', href:'#' })
-        .css({'font-size':'1.1em', 'padding-top':'0.5em', 'padding-left':'0.5em', 'float':'right'})
-        .appendTo(this.divMainMenu);
-        this._on(logout, { click: this.logout });
-
-        //current user name is displayed as Profile menu header
-        this.divCurrentUser = $( "<div>",{'id':'divCurrentUser'})
-        .css({'font-size':'1.1em', 'padding-top':'0.5em', 'float':'right'})
-        .appendTo(this.divMainMenu);
-        */
-
+        
 
         this.divMainMenuItems = $('<ul>')
-        .addClass('horizontalmenu')
-        .css({'float':'left', 'padding-right':'2em'})
-        .appendTo( this.divMainMenu );
+                .addClass('horizontalmenu')
+                .css({'float':'left', 'padding-right':'4em'})
+                .appendTo( this.divMainMenu );
 
         /* new entityfeatures*/
-        this.divProfileItems = $( "<ul>").css('float','right').addClass('horizontalmenu').appendTo( this.divMainMenu );
+        this.divProfileItems = $( "<ul>")
+                .css('float','right')
+                .addClass('horizontalmenu')
+                .appendTo( this.divProfileMenu );
         
         function __include(topic){
              return (!that.options.topics || that.options.topics.indexOf(topic.toLowerCase())>=0);
         }
         
-        if(__include('profile')) this._initMenu('Profile', this.divProfileItems);
+        if(__include('profile')) this._initMenu('Profile', -1, this.divProfileItems);
 
-        if(__include('Database')) this._initMenu('Database');            
-        if(__include('Structure')) this._initMenu('Structure');
-        if(__include('Verify')) this._initMenu('Verify');
-        if(__include('Import')) this._initMenu('Import');
-        if(__include('Management')) this._initMenu('Management');
-        if(__include('Admin')) this._initMenu('Admin');
+        if(__include('Database')) this._initMenu('Database', -1);            
+        if(__include('Structure')) this._initMenu('Structure', 1);
+        if(__include('Verify')) this._initMenu('Verify', 0);
+        if(__include('Import')) this._initMenu('Import', 0);
+        if(__include('Management')) this._initMenu('Management', 0);
+        if(__include('Admin')) this._initMenu('Admin', 1);
             
-        if(__include('FAIMS')) this._initMenu('FAIMS');
-        if(__include('Help')) this._initMenu('Help');
+        if(__include('FAIMS')) this._initMenu('FAIMS', 0);
+        if(__include('Help')) this._initMenu('Help', -1);
         
         this.divMainMenuItems.menu();
-        this.divProfileItems.menu();
-        //this.divProfileItems3.menu();
-        
-        this.divProfileItems.find('.ui-menu-item').css({'padding':'0em !important'});
-
-
-        //logout case
-        this.divMainMenuItems_lo = $('<ul>')
-        .addClass('horizontalmenu')
-        .addClass('logged-out-only')
-        .css({'float':'right'})
-        .appendTo( this.element );
-
-        this._initMenu('Database_lo', this.divMainMenuItems_lo); //logout case
-        this._initMenu('Help_lo', this.divMainMenuItems_lo);
-        
-        this.menu_Help_lo.find('.logged-in-only').hide();
-        this.divMainMenuItems_lo.menu();
+        this.divProfileItems.menu().removeClass('ui-menu-icons');
+                        /*if(name=="Profile"){
+                    //.removeClass('ui-menu-item')
+                    that.divProfileItems.find('.ui-menu-item').css({'padding-left':'0px !important'});//'0em '});            
+console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left')        );
+                }*/
+            
 
 
         // LISTENERS --------------------------------------------------
@@ -238,21 +227,44 @@ $.widget( "heurist.mainMenu", {
     */
     _refresh: function(){
 
+        /*
         if(window.hWin.HAPI4.has_access()){
-            //this.divCurrentUser.html( window.hWin.HAPI4.currentUser.ugr_FullName );
-            //': <a href="../../common/connect/login.php?logout=1&amp;db='+window.hWin.HAPI4.database+'">log&nbsp;out</a>');
-
             $(this.element).find('.logged-in-only').show();
             $(this.element).find('.logged-out-only').hide();
-
-            //this.menu_Help.find('.logged-in-only').show();
-
         }else{
-            //not logged -guest
             $(this.element).find('.logged-in-only').hide();
             $(this.element).find('.logged-out-only').show();
-            //this.divCurrentUser.empty();
+        }*/
+        
+        function ___set_menu_item_visibility(idx, item){
+
+                var lvl = $(item).attr('data-level');
+                if(lvl>=0){
+                    //@todo lvl=1 is_admin
+                    var is_visible = window.hWin.HAPI4.has_access(lvl);
+                    var item = $(item).is('li')?item:$(item).parent();
+                    if(is_visible){
+                        $(item).show();
+                    }else{
+                        $(item).hide();
+                    }
+                }            
         }
+        
+        //  0 - logged in                 
+        //  1 - db admin (admin of group #1)
+        //  2 - db owner
+        for (var key in this.menues){
+            var menu = this.menues[key];
+            if(menu.is('li')){
+                ___set_menu_item_visibility(0, menu);                
+            }else{
+                $(menu).find('li,a').each(___set_menu_item_visibility);
+            }
+        }
+            
+            
+
 
         /* new
         if(window.hWin.HAPI4.is_admin()){
@@ -293,10 +305,6 @@ $.widget( "heurist.mainMenu", {
         this.menu_Export.remove();
         this.btn_Help.remove();
         this.menu_Help.remove();
-
-        this.btn_Database_lo.remove();
-        this.btn_Help_lo.remove();
-        this.menu_Help_lo.remove();
         */
     },
 
@@ -304,7 +312,7 @@ $.widget( "heurist.mainMenu", {
     //
     // menu element is <li> (button) for horizontal meny and drop-down that is loaded from html
     //
-    _initMenu: function(name, parentdiv){
+    _initMenu: function(name, access_level, parentdiv){
 
         var that = this;
         var myTimeoutId = -1;
@@ -318,37 +326,19 @@ $.widget( "heurist.mainMenu", {
         },
         _show = function(ele, parent) {
             clearTimeout(myTimeoutId);
-
+            
             $('.menu-or-popup').hide(); //hide other
             var menu = $( ele )
             //.css('width', this.btn_user.width())
             .show()
-            .position({my: "center top", at: "center bottom", of: parent });
+            .position({my: "left-2 top", at: "left bottom", of: parent });
             //$( document ).one( "click", function() { menu.hide(); });
             return false;
         };
 
         var link;
 
-        if(name=='Database_lo'){
-            link = $('<a>',{
-                text: 'Open database',
-                href: window.hWin.HAPI4.baseURL + 'common/connect/getListOfDatabases.php?popup=1&v=4&db=' 
-                        + window.hWin.HAPI4.database,
-                target: '_blank'
-            });
-
-            this._on(link, {
-                click:
-                function(event){
-                    $(menu).hide()
-                    that._onPopupLink(event);
-                }
-                //that._onPopupLink
-            });
-
-        }
-        else if(name=='Profile'){
+        if(name=='Profile'){
             
             //profile menu header consists of two labels: Settings and Current user name
             
@@ -361,7 +351,7 @@ $.widget( "heurist.mainMenu", {
         }
         else{
             link = $('<a>',{
-                text: window.hWin.HR((name=='Help_lo'?'Help':name)), href:'#'
+                text: window.hWin.HR(name), href:'#'
             });
             
             /*if(name=='Help'){
@@ -369,55 +359,55 @@ $.widget( "heurist.mainMenu", {
             }*/            
         }
         
-        this['btn_'+name] = $('<li>').append(link)
-        .appendTo( parentdiv?parentdiv:this.divMainMenuItems );
-
+        this.menues['btn_'+name] = $('<li>')
+            .css({'padding-right':'1em'})
+            .append(link)
+            .appendTo( parentdiv?parentdiv:this.divMainMenuItems );
+        if(access_level>=0){
+            this.menues['btn_'+name].attr('data-level', access_level);
+        }    
         
         // Load content for all menus except Database when user is logged out
-        if(name!='Database_lo'){
+
+        this.menues['menu_'+name] = $('<ul>')
+        .load(
+            window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu'+name+'.html',
+          function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
+         
+            that.menues['menu_'+name].find('.list-menu-only').hide();
+         
+            that.menues['menu_'+name].addClass('menu-or-popup')
+            .css({'position':'absolute', 'padding':'5px'})
+            .appendTo( that.document.find('body') )
+            //.addClass('ui-menu-divider-heurist')
+            .menu({select: function(event, ui){ 
+                    that._menuActionHandler(event, ui.item.find('a'));
+                    return false; 
+            }});
             
-            var name2 = (name=='Help_lo'?'Help':name);
+            that.menues['menu_'+name].find('a').each(function(idx,item){
+                var href = $(item).attr('href');
+                if(href!='#' && !window.hWin.HEURIST4.util.isempty(href)){
+                    $(item).attr('href','#')
+                    $(item).attr('data-link', href);
+                }
+            });
+            
+            that._refresh();
+            
+         
+        })
+        //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
+        .hide();
 
-            this['menu_'+name] = $('<ul>')
-            .load(
-                window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu'+name2+'.html',
-              function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
-             
-                that['menu_'+name].find('.list-menu-only').hide();
-             
-                that['menu_'+name].addClass('menu-or-popup')
-                .css({'position':'absolute', 'padding':'5px'})
-                .appendTo( that.document.find('body') )
-                //.addClass('ui-menu-divider-heurist')
-                .menu({select: function(event, ui){ 
-                        that._menuActionHandler(event, ui.item.find('a'));
-                        return false; 
-                }});
 
-                that['menu_'+name].find('a').each(function(idx,item){
-                    var href = $(item).attr('href');
-                    if(href!='#' && !window.hWin.HEURIST4.util.isempty(href)){
-                        $(item).attr('href','#')
-                        $(item).attr('data-link', href);
-                    }
-                });
-                
-                that._refresh();
-                
-                //that._initLinks(that['menu_'+name]);
-            })
-            //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
-            .hide();
-
-        }
-
-        this._on( this['btn_'+name], {
-            mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
-            mouseleave : function(){_hide(this['menu_'+name])}
+        this._on( this.menues['btn_'+name], {
+            mouseenter : function(){_show(this.menues['menu_'+name], this.menues['btn_'+name])},
+            mouseleave : function(){_hide(this.menues['menu_'+name])}
         });
-        this._on( this['menu_'+name], {
-            mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
-            mouseleave : function(){_hide(this['menu_'+name])}
+        this._on( this.menues['menu_'+name], {
+            mouseenter : function(){_show(this.menues['menu_'+name], this.menues['btn_'+name])},
+            mouseleave : function(){_hide(this.menues['menu_'+name])}
         });
 
     },
@@ -479,55 +469,6 @@ $.widget( "heurist.mainMenu", {
 
         event.preventDefault();
         return false;
-    },
-
-
-    //init listeners for auto-popup links
-    _initLinks: function(menu){
-
-        var that = this;
-
-        menu.find('a').each(function(){
-            var ele = $(this);
-            var href = ele.attr('href');
-            if(!window.hWin.HEURIST4.util.isempty(href)){
-                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
-
-                if(ele.hasClass('h3link')){
-                    href = window.HAPI4.baseURL + href;
-                    //h3link class on menus implies location of older (vsn 3) code
-                }
-                
-                ele.attr('href', href);
-                that._on(ele, {
-                    click:
-                    //that._onPopupLink
-                    function(event){
-                        $(menu).hide()
-                        that._onPopupLink(event);
-                    }
-
-                    //
-                });
-            }
-        });
-
-        menu.find("a[href^='mailto']").click(function(e)
-        {
-          var el = $(this);
-          //window.hWin.HEURIST4.util.checkProtocolSupport(el.data("href"));
-          var t;
-          $(window).blur(function() {
-                // The browser apparently responded, so stop the timeout.
-                clearTimeout(t);
-          });
-
-          t = setTimeout(function() {
-                // The browser did not respond after 500ms, so open an alternative URL.
-                window.hWin.HEURIST4.msg.showMsgErr('mailto_fail');
-          }, 500);
-        });
-
     },
 
     //
