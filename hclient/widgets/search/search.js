@@ -750,7 +750,10 @@ $.widget( "heurist.search", {
                     that._refresh();
                 }
 
-                if(window.hWin.HAPI4.get_prefs('searchQueryInBrowser') == "true"){
+                var is_keep = window.hWin.HAPI4.get_prefs('searchQueryInBrowser');
+                is_keep = (is_keep==1 || is_keep==true || is_keep=='true');
+                
+                if(is_keep){
                     window.history.pushState("object or string", "Title", location.pathname+'?'+
                         window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true) );
                 }
