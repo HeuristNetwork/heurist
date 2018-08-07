@@ -137,7 +137,7 @@ $.widget( "heurist.mainMenu", {
         // MAIN MENU-----------------------------------------------------
 
         this.divMainMenu = $( "<div>")
-        .css({'position':'absolute', 'left':10, bottom:2, 'text-align':'left'})  //one rows
+        .css({'position':'absolute', 'left':24, bottom:2, 'text-align':'left'})  //one rows
         //.addClass('logged-in-only')
         .appendTo(this.element);
         
