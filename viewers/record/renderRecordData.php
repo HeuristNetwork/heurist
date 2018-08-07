@@ -34,6 +34,7 @@ require_once(dirname(__FILE__)."/../../hserver/System.php");
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 
 $system = new System();
+$inverses = null;
 
 if(!$system->init(@$_REQUEST['db'])){
     include dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
@@ -1038,6 +1039,31 @@ function fetch_relation_details($recID, $i_am_primary) {
     return $bd;
 }
 
+/**
+* determine the inverse of a relationship term
+* @global    array llokup of term inverses by trmID to inverseTrmID
+* @param     int $relTermID reltionship trmID
+* @return    int inverse trmID
+* @todo      modify to retrun -1 in case not inverse defined
+*/
+function reltype_inverse($relTermID) { //saw Enum change - find inverse as an id instead of a string
+
+    global $system, $inverses;
+    
+    $mysqli = $system->get_mysqli();
+
+    if (!$relTermID) return;
+    if (!$inverses) {
+        $inverses = mysql__select_assoc2($mysqli, 
+                "SELECT A.trm_ID, B.trm_ID FROM defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID"
+                ." WHERE A.trm_Label is not null and B.trm_Label is not null");
+    }
+    $inverse = @$inverses[$relTermID];
+    if (!$inverse) $inverse = array_search($relTermID, $inverses);//do an inverse search and return key.
+    if (!$inverse) $inverse = $relTermID; //'Inverse of ' . FIXME: This should be -1 indicating no inverse found.
+    return $inverse;
+}
+
 function print_relation_details($bib) {
 
         global $system, $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
@@ -1060,7 +1086,7 @@ function print_relation_details($bib) {
             ' and dtl_Value = ' . $bib['rec_ID']);          //linked resource
 
         if (($from_res==false || $from_res->num_rows <= 0)  &&  
-             ($to_res==false || $to_res->num_rows)){
+             ($to_res==false || $to_res->num_rows<=0)){
                return;  
         } 
 
