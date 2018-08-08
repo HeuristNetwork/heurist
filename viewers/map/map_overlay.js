@@ -1227,8 +1227,9 @@ map.data.addListener('mouseover', function(event) {
 
                 }else{
 
-                
-                    if(lt=='boro'){ //customized popup for boro
+                    var symbology = {iconColor:source.color, iconMarker:source.iconMarker};
+                    
+                    if(lt=='boro'){ //customized symbology and popup for boro
                         recset.calcfields['rec_Info'] = function(record, fldname){
                             
                             var title = this.fld(record, 'rec_Title');
@@ -1244,12 +1245,17 @@ map.data.addListener('mouseover', function(event) {
                                         + 'onclick="{window.hWin.boroResolver(event);}" class="bor-button bor-map-button">See connections</a>'
                                     +'</div></div>';                            
                         }
+                        
+                        symbology.stroke = 'rgb(128,0,128)';
+                        symbology.fill   = 'rgb(128,0,128)';
+                        symbology['fill-opacity'] = 0.1;
                     }
                     
                     
-                    mapdata = recset.toTimemap(source.id, null, {iconColor:source.color, iconMarker:source.iconMarker});
+                    mapdata = recset.toTimemap(source.id, null, symbology);
+                        
 
-                    if(source.color) mapdata.color = source.color;
+                    if(source.color) mapdata.color = source.color; //from layer
                     if(source.iconMarker) {
                         mapdata.iconMarker = source.iconMarker;    
                     }else{

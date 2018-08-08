@@ -157,13 +157,26 @@ function hRecordSet(initdata) {
             
         dataset_name = dataset_name || "main";
         
-        var iconColor, iconMarker = null;
+        var iconColor, fillColor, lineColor, fillOpacity, iconMarker = null;
         if(symbology){
             iconColor = symbology.iconColor;
             iconMarker = symbology.iconMarker;
+            
+            //fill: red; stroke: blue; stroke-width: 3  , fill-opacity, stroke-opacity
+            fillColor   = symbology.fill;
+            lineColor   = symbology.stroke;
+            fillOpacity = symbology['fill-opacity'];
         }
-        iconColor = iconColor || 'rgb(255, 0, 0)'; //'#f00';    
-         
+        iconColor = iconColor || 'rgb(255, 0, 0)'; 
+        fillColor = fillColor || 'rgb(255, 0, 0)';
+        lineColor = lineColor || 'rgb(255, 0, 0)'; 
+        fillOpacity = fillOpacity || 0.3;
+/*      
+                                fillOpacity:0.3,// 0.3,
+                                lineColor:lineColor,
+                                strokeOpacity:1,
+                                strokeWeight:6,
+*/         
 
         var geofields = [], timefields = [];
         
@@ -359,8 +372,15 @@ function hRecordSet(initdata) {
                                 
                                 //color on dataset level works once only - timemap bug
                                 color: iconColor,
-                                lineColor: iconColor,
-                                fillColor: iconColor,
+                                fillColor: fillColor,
+                                fillOpacity:fillOpacity,
+                                lineColor:lineColor,
+                                /* neither work
+                                strokeOpacity:0.3,
+                                strokeWeight:6,
+                                width:10,
+                                opacity:0.1,
+                                */
                                 
                                 start: (startDate || ''),
                                 end: (endDate && endDate!=startDate)?endDate:'',
@@ -403,6 +423,8 @@ function hRecordSet(initdata) {
                 type: "basic",
                 timeenabled: timeenabled,
                 color: iconColor,
+                fillColor: fillColor, 
+                lineColor: lineColor, 
                 visible: true, 
                 mapenabled: mapenabled,
                 options: { items: aitems },
