@@ -106,20 +106,15 @@ if (array_key_exists('ulf_ID', $_REQUEST))
     }
     
     $type_source = null;
-    if(@$file['ulf_Parameters']){ //outdated
-        $fileparams = parseParameters($file['ulf_Parameters']); //from uploadFile.php
-        $type_media	 = (array_key_exists('mediatype', $fileparams)) ?$fileparams['mediatype']:null;
-        $type_source = (array_key_exists('source', $fileparams)) ?$fileparams['source']:null;
-    }else{
-        list($type_media, $ext) = explode('/',$file['fxm_MimeType']);
-        
-        if(@$file['ulf_ExternalFileReference']==null || @$file['ulf_ExternalFileReference']==''){
-            $type_source = 'heurist';    
-        }else if( $file['fxm_MimeType'] == 'video/youtube' 
-            || strpos($file['ulf_ExternalFileReference'], 'youtu.be')>0
-            || strpos($file['ulf_ExternalFileReference'], 'youtube.com')>0){ //match('http://(www.)?youtube|youtu\.be')
-            $type_source = 'youtube';
-        }
+
+    list($type_media, $ext) = explode('/',$file['fxm_MimeType']);
+    
+    if(@$file['ulf_ExternalFileReference']==null || @$file['ulf_ExternalFileReference']==''){
+        $type_source = 'heurist';    
+    }else if( $file['fxm_MimeType'] == 'video/youtube' 
+        || strpos($file['ulf_ExternalFileReference'], 'youtu.be')>0
+        || strpos($file['ulf_ExternalFileReference'], 'youtube.com')>0){ //match('http://(www.)?youtube|youtu\.be')
+        $type_source = 'youtube';
     }
 
     if($type_source==null || $type_source=='heurist') {
