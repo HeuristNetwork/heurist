@@ -266,7 +266,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                         </div>
                         <div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term</label>
                             <input id="edInverseTerm" readonly="readonly" style="width:250px;background-color:#DDD;"/>
-                            <input type="button" value="clear" id="btnInverseSetClear" style="width:45px"/>
+                            <input type="button" value="clear" id="btnInverseSetClear" style="width:60px"/>
                         </div>
                         <input id="edInverseTermId" type="hidden"/>
 

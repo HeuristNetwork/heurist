@@ -427,7 +427,7 @@ function EditTerms() {
     function _optionReserved(isAdd){
         var selstatus = $("#trm_Status")[0];
         if(isAdd && selstatus.length<4){
-            Hul.addoption(selstatus, "reserved", "reserved");
+            window.hWin.HEURIST4.ui.addoption(selstatus, "reserved", "reserved");
         }else if (!isAdd && selstatus.length===4){
             selstatus.length=3;
             //selstaus.remove(3);
@@ -501,7 +501,7 @@ function EditTerms() {
                     if(!Hul.isnull(ind)){
                         var node = nodes[ind];
 
-                        var option = Hul.addoption(sel, node.data.id, getParentLabel(node));
+                        var option = window.hWin.HEURIST4.ui.addoption(sel, node.data.id, getParentLabel(node));
                         option.title = option.text;
                     }
                 }//for
@@ -761,7 +761,7 @@ function EditTerms() {
             }
             if((_currentDomain=="relation") && document.getElementById ('cbInverseTermOther').checked && iInverseId==null){
                 alert("Please select the inverse term, or select non-directional in the radio buttons");
-                document.getElementById ('edInverseTermId').setFocus();
+                $('#edInverseTermId').focus();
                 return;
             }
             
@@ -770,8 +770,6 @@ function EditTerms() {
 
             if(needConfirm){
                 
-                if(hasH4()){
-                    
                      var buttons = {};
                      buttons['Yes'] = function() {
                             var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
@@ -788,20 +786,9 @@ function EditTerms() {
 
                      window.hWin.HEURIST4.msg.showMsgDlg("Term "+
                         _currentNode.data.id+'  '
-                        +_currentNode.data.label+',  '+sName
+                        +_currentNode.data.label //+',  '+sName
                         +" was modified. Save it?", buttons, "");
-                }else{
-                    var r = confirm("Term was modified. Save it?");
-                    if (!r) {
-                        //if new - remove from tree
-                        if( !isExistingNode(nodeForAction) ){
-                            _doDelete2(nodeForAction, false);           //@todo - not removed from fancytree
-                        }
-                        return;
-                    }else{
-                        __doSave_continue();
-                    }
-                }
+                        
             }else{
                 __doSave_continue();
             }
@@ -922,7 +909,7 @@ function EditTerms() {
                         if(!Hul.isnull(ind)){
                             var item = response.data.result[ind];
                             if(isNaN(item)){
-                                Hul.showError(item);
+                                window.hWin.HEURIST4.msg.showMsgErr(item);
                                 error = true;
                             }else{
 
@@ -1431,15 +1418,10 @@ function EditTerms() {
     function _import_complete(context){
         if(!Hul.isnull(context) && !Hul.isnull(context.terms))
         {
-            if(hasH4()){
-                window.hWin.HEURIST4.msg.showMsgDlg(context.result.length
-                    + ' term'
-                    + (context.result.length>1?'s were':' was')
-                    + ' added.', null, 'Terms imported');
-                window.hWin.HEURIST4.terms = context.terms;
-            }
-
-
+            window.hWin.HEURIST4.msg.showMsgDlg(context.result.length
+                + ' term'
+                + (context.result.length>1?'s were':' was')
+                + ' added.', null, 'Terms imported');
             window.hWin.HEURIST4.terms = context.terms;
             
             var res = context.result,
@@ -1673,7 +1655,7 @@ function EditTerms() {
                                     if(!Hul.isnull(ind)){
                                         var item = response.data.result[ind];
                                         if(isNaN(item)){
-                                            Hul.showError(item);
+                                            window.hWin.HEURIST4.msg.showMsgErr(item);
                                             error = true;
                                         }else{
                                             detailTypeID = Number(item);
@@ -2568,7 +2550,7 @@ function doSearch(event){
             if(!Hul.isnull(ind)){
                 var node = nodes[ind];
 
-                var option = Hul.addoption(sel, node.data.id, getParentLabel(node));
+                var option = window.hWin.HEURIST4.ui.addoption(sel, node.data.id, getParentLabel(node));
                 option.title = option.text;
             }
         }//for
