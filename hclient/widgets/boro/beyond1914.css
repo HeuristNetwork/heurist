@@ -6120,3 +6120,15 @@ a.facet_link span:first-child:focus {
     outline: 5px auto -webkit-focus-ring-color;
     outline-offset: -2px;
 }
+
+.float-panel {
+    position: absolute;
+    width: 120px;
+    height: 65px;
+    padding:4px;
+    top: 180px;
+    right: 10px;
+    background-color: #1ABC9C;
+    color: #fff;
+    text-align: center;
+}

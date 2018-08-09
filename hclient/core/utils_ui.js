@@ -2337,3 +2337,27 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
   }
 });
 
+$.fn.sideFollow = function(dtime) {
+
+    var floating = $(this);
+    var originalTop = 180;// parseInt($(this).css('top'));
+
+    dtime ? dtime = dtime : dtime = 1000;
+
+    goFollow();
+
+    $(window).scroll(function() {
+        goFollow();
+    });
+
+    function goFollow() {
+        var scrollTop = $(this).scrollTop();
+        floating.animate({
+            top: originalTop + scrollTop
+        }, {
+            duration: dtime,
+            queue: false
+        });
+    }
+
+}

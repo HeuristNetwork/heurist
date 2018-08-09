@@ -42,6 +42,7 @@ $.widget( "heurist.boro_nav", {
     search_menu:null,
     
     history:[], 
+    historyNav:[],
     
     recset: null, //current recordset
     
@@ -95,9 +96,21 @@ $.widget( "heurist.boro_nav", {
         
         // Sets up element to apply the ui-state-focus class on focus.
         //this._focusable($element);
+        $('.float-panel').sideFollow();
+        var ele = $('.float-panel > select');
+        ele.change(function(e){
+                var idx = $(e.target).val();
+                that._setOptions( that.historyNav[idx] );
+        });
+        ele = $('.float-panel > a');
+        ele.click(function(e){
+            if(that.historyNav.length>1){
+                that._setOptions( that.historyNav[that.historyNav.length-2] );
+            }
+        });
 
         this._refresh();
-
+        
     }, //end _create
 
     // Any time the widget is called with no arguments or with only an option hash,
@@ -111,12 +124,15 @@ $.widget( "heurist.boro_nav", {
     //Overriding this is useful if you can defer processor-intensive changes for multiple option change
     _setOptions: function( ) {
 
+        
         if((arguments[0] && arguments[0]['page_name']) || arguments['page_name'] ){
             var page_name = arguments['page_name']?arguments['page_name']:arguments[0]['page_name'];
             var page_id;
+            
+            
             if(page_name=='search'){
                 
-//console.log('history set');                
+                //                
                 var svsID = arguments['svsID']?arguments['svsID']:arguments[0]['svsID'];
                 this.__selectSearchPage(svsID);
                 
@@ -138,8 +154,10 @@ $.widget( "heurist.boro_nav", {
                               arguments['entityID']!=this.options.entityID);
             this._superApply( arguments );
             
+            
             if(wasChanged){
-                this.history.push({entityType:this.options.entityType, entityID:this.options.entityID});
+                
+                this.addToHistory({entityType:this.options.entityType, entityID:this.options.entityID});
                 this.resolveEntity();
             }
         }
@@ -275,7 +293,7 @@ $.widget( "heurist.boro_nav", {
 
             var hdoc = $(window.hWin.document);
             
-            that.history.push({page_name:recID});
+            that.addToHistory({page_name:recID});
             
             if(recID=='people'){ //people by first char
             
@@ -474,7 +492,8 @@ $.widget( "heurist.boro_nav", {
             var hdoc = $(window.hWin.document);
             //hide all 
             hdoc.find('#main_pane > .clearfix').hide(); //hide all
-            that.history.push({page_name:'search','svsID':svsID});
+            
+            that.addToHistory({page_name:'search','svsID':svsID})
 
             if(that.currentSearchID == svsID){
                 
@@ -709,6 +728,9 @@ $.widget( "heurist.boro_nav", {
                 title = that.__getTerm( recID );
             }
             $('#cp_header').text(title);
+            
+            
+            that.resolveHistory(entType, recID, title);
             
             // loop for persons and create new recordset to be sent to boro_persons widget
             var res_records = {}, res_orders = [];
@@ -1547,6 +1569,8 @@ $.widget( "heurist.boro_nav", {
             //-----------------            
             var person = that.recset.getById(recID);
             var fullName = that.__composePersonName(person);
+            
+            that.resolveHistory('profile', recID, fullName);
    
             //IMAGE AND NAME
             var html_thumb = '<a class="bor-emblem-portrait" href="#">';
@@ -2224,13 +2248,85 @@ $.widget( "heurist.boro_nav", {
         
     },
     
+    //
+    // navigation to history
+    //
     stepBack: function(){
+        return; //ignore
+        
         if(this.history.length>1){
                 this.history.pop(); //current page
                 var step = this.history.pop(); //previous
                 this._setOptions(step);
         }
-    }    
+    },
+    
+    resolveHistory: function(entityType, recID, title){
+        
+            for (var idx in this.historyNav){
+                    var nav = this.historyNav[idx];
+                    if(nav.entityType == entityType && nav.entityID==recID){
+                        this.historyNav[idx].title = title;
+                    }
+            }
+            
+            if(this.historyNav.length>1){
+                
+                var ele = $('.float-panel > select');
+                ele.empty();
+                
+                for (var idx=this.historyNav.length-2; idx>=0; idx--){
+                    var nav = this.historyNav[idx];
+                    var text = nav.page_name?nav.page_name:nav.title;   //(nav.entityType+'  '+nav.entityID);
+                    window.hWin.HEURIST4.ui.addoption(ele[0], idx, text);
+                }
+                
+                $('.float-panel').show();
+            }else{
+                $('.float-panel').hide();    
+            }
+            
+    },
+    
+    addToHistory: function(opt){
+        
+            this.history.push(opt);        
+
+            /*
+            {entityType:this.options.entityType, entityID:this.options.entityID}
+            {page_name:recID}
+            {page_name:'search','svsID':svsID}
+            */
+            
+            if(opt.page_name=='search' || opt.page_name=='people' || opt.entityType)
+            {
+            
+                //console.log(opt);
+                
+                //historyNav
+                //find entry in history and put in t the end of array
+                var is_not_found = true;
+                for (var idx in this.historyNav){
+                    var nav = this.historyNav[idx];
+                    if ((nav.entityType && nav.entityType==opt.entityType && nav.entityID==opt.entityID)
+                        || (nav.page_name && nav.page_name==opt.page_name) ) 
+                    {
+                        is_not_found = false;
+                        
+                        this.historyNav.splice(idx, 1);
+                        this.historyNav.push(nav); //add current as a last
+                        
+                        break;
+                    }
+                }
+                if(is_not_found){
+                    this.historyNav.push(opt);
+                }
+                
+            }else if(this.historyNav.length < 2){
+                $('.float-panel').hide();    
+            }
+    }
     
      
      
