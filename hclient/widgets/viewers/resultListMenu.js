@@ -24,7 +24,8 @@ $.widget( "heurist.resultListMenu", {
     // default options
     options: {
         // callbacks
-        show_searchmenu:false
+        show_searchmenu:false,
+        menu_class:null,
     },
 
     _query_request: {}, //keep current query request
@@ -43,7 +44,7 @@ $.widget( "heurist.resultListMenu", {
         .css('font-size', '0.9em')
         // prevent double click to select text
         .disableSelection();
-
+        
         this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
 
         if(this.options.show_searchmenu) this._initMenu('Search');
@@ -55,7 +56,11 @@ $.widget( "heurist.resultListMenu", {
 
         this.divMainMenuItems.find('li').css({'padding':'0 3px'}); //reduce gap
 
-        this.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');
+        if(this.options.menu_class!=null){
+             this.element.addClass( this.options.menu_class );   
+        }else{
+            this.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');    
+        }
 
         //-----------------------     listener of global events
         var sevents = window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
@@ -359,7 +364,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         }else if(action == "menu-selected-ownership"){
 
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {onClose:
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {width:800, height:480, onClose:
                function( context ){
                    if(context){
                        //@todo refresh page

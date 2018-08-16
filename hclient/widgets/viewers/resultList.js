@@ -42,6 +42,7 @@ $.widget( "heurist.resultList", {
         show_counter: true,
         show_viewmode: true,
         show_inner_header: false,   // show title of current search in header
+        header_class: null,       //class name for menu
 
         title: null,
         //searchsource: null,
@@ -149,6 +150,11 @@ $.widget( "heurist.resultList", {
                             //new search from outside
                             var new_title = window.hWin.HR(data.qname || that.options.title || 'Filtered Result');
                             that._clearAllRecordDivs(new_title);
+                            
+                            if(!data.qname && that.search_save_hint){
+                                that.search_save_hint.show();
+                            }
+                            
 
                             if(!window.hWin.HEURIST4.util.isempty(data.q)){
                                 that.loadanimation(true);
@@ -190,7 +196,10 @@ $.widget( "heurist.resultList", {
 
                         if(that.btn_search_save) that.btn_search_save.hide();
                     }else{
-                        if(that.btn_search_save) that.btn_search_save.show();
+                        if(that.btn_search_save) {
+                            that.btn_search_save.show();
+                            setTimeout(function(){that.search_save_hint.hide();},3000);
+                        }
                     }
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
@@ -258,7 +267,7 @@ $.widget( "heurist.resultList", {
         $('<h3>'+window.hWin.HR('Filtered Result')+'</h3>')
         .css('padding','0.7em 0 0 0.7em')
         .appendTo(this.div_header);
-
+        
         //add label to display number of selected, button and selected onlu checkbox
         if(this.options.select_mode=='select_multi'){
             this.show_selected_only = $( "<div>" )
@@ -289,7 +298,7 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" )
         .addClass('div-result-list-toolbar ent_header ui-heurist-bg-light')
-        //.css({'border-bottom':'1px solid #cccccc'})
+        .css({'width':'100%'})
         .appendTo( this.element );
 
         this.div_content = $( "<div>" )
@@ -398,38 +407,12 @@ $.widget( "heurist.resultList", {
 
         
 
-        if(this.options.show_savefilter){
-            //special feature to save current filter
-            //.css({position:'absolute',bottom:0,left:0,top:'2.8em'})
-            var btndiv = $('<div>').css({display:'inline-block','vertical-align':'top','padding-bottom':'4px'}).appendTo(this.div_toolbar);
-            this.btn_search_save = $( "<button>", {
-                text: window.hWin.HR('Save Filter'),
-                title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
-            })
-            .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none', color: 'rgb(142, 169, 185)'})
-            .addClass('ui-state-focus')
-            .appendTo( btndiv )
-            .button({icons: {
-                primary: 'ui-icon-arrowthick-1-w'
-            }}).hide();
-
-            this.btn_search_save.find('.ui-button-icon-primary').css({'left':'0.1em'});
-
-            this._on( this.btn_search_save, {  click: function(){
-                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
-                    var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
-                    if(app && app.widget){
-                        $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
-                    }
-                });
-            } });    
-        }             
         if(this.options.show_menu){
             if($.isFunction($('body').resultListMenu)){
                 this.div_actions = $('<div>')
                 .css({display:'inline-block','padding-bottom':'4px'})
                 //.css({'position':'absolute','top':3,'left':2})
-                .resultListMenu()
+                .resultListMenu({menu_class:this.options.header_class})
                 .appendTo(this.div_toolbar);
             }
         }    
@@ -444,6 +427,50 @@ $.widget( "heurist.resultList", {
         //.css({'float':'right','padding':'0.6em 0.5em 0 0','font-style':'italic'})
         .appendTo( this.div_toolbar );
 
+        //
+        //
+        if(this.options.show_savefilter){
+            //special feature to save current filter
+            //.css({position:'absolute',bottom:0,left:0,top:'2.8em'})
+            var btndiv = $('<div>').css({display:'block','vertical-align':'top',
+                padding: '5px', 'margin-top': '2px', height:'1.8em'})
+                .addClass('ui-widget-content')
+                .appendTo(this.div_toolbar);
+            this.btn_search_save = $( "<button>", {
+                text: window.hWin.HR('Save Filter'),
+                title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
+            })
+            .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none', color: 'rgb(142, 169, 185)'})
+            .addClass('ui-state-focus')
+            .appendTo( btndiv )
+            .button({icons: {
+                primary: 'ui-icon-arrowthick-1-w'
+            }}).hide();
+            
+            this.search_save_hint = $('<span style="padding-left:10px;font-size:0.8em">click me to save the current filter for future navigation</span>')
+                    .appendTo( btndiv ).hide();
+
+            this.btn_search_save.find('.ui-button-icon-primary').css({'left':'0.1em'});
+
+            this._on( this.btn_search_save, {  click: function(){
+                window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
+                    var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
+                    if(app && app.widget){
+                        $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
+                    }
+                });
+            } });    
+        }             
+        
+        
+        
+        if(this.options.header_class){
+            this.div_header.addClass(this.options.header_class);
+            this.div_toolbar.removeClass('ui-heurist-bg-light').addClass(this.options.header_class);
+            this.view_mode_selector.find('button').addClass(this.options.header_class).css({'border':'none'});
+            this.span_pagination.find('button').addClass(this.options.header_class).css({'border':'none'});
+        }
+        
         this._showHideOnWidth();
 
         //-----------------------
@@ -706,7 +733,8 @@ $.widget( "heurist.resultList", {
         if(this.view_mode_selector){
             this.view_mode_selector.find('button').removeClass('ui-heurist-btn-header1');
             var btn =   this.view_mode_selector.find('button[value="'+newmode+'"]');
-            btn.addClass('ui-heurist-btn-header1')                
+            
+            if(this.options.header_class==null) btn.addClass('ui-heurist-btn-header1')                
             //this.view_mode_selector.controlgroup('refresh');
         }
         
@@ -1661,6 +1689,11 @@ $.widget( "heurist.resultList", {
                 }
             });
 
+        }
+        
+        
+        if(this.options.header_class){
+            this.span_pagination.find('button').addClass(this.options.header_class).css({'border':'none'});
         }
 
         this._showHideOnWidth();

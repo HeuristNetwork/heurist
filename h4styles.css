@@ -1196,7 +1196,10 @@ background: #8ea9b9
 }
 
 
-.div-result-list-toolbar{padding:0.2em 0.5em}
+.div-result-list-toolbar{
+    padding:0;
+    /*padding:0.2em 0.5em*/
+}
 /*
 .ent_editor{position:absolute; top:0;bottom:0;left:1px;right:1px;font-size:0.9em;overflow:auto;
     display:none;background-color:green} 

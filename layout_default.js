@@ -202,7 +202,7 @@ var cfg_layouts = [
         ]},
         center:{minsize:300, dropable:false, apps:[{appid:'h3_resultList', hasheader:false, 
                      dockable:false, dragable:false, css:{'background-color':'white'}, 
-                     options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true} }]},  //search result
+                     options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true, header_class:'ui-heurist-header2'} }]},  //search result
         east:{size:'50%', minsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false,
                 apps:[
