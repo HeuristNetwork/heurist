@@ -223,7 +223,8 @@ if(!$is_map_popup){
                 }
             }
 
-            // @to reimplement
+            //
+            // catch click on a href and opens it in popup dialog
             //
             function link_open(link) {
                 <?php if($is_reloadPopup){ ?>
@@ -233,12 +234,10 @@ if(!$is_map_popup){
                 }else{
                 ?>    
                 try{
-                if (top.HEURIST  &&  top.HEURIST.util  &&  top.HEURIST.util.popupURL) {
-                    top.HEURIST.util.popupURL(top, link.href, { title:'.', width: 600, height: 500, modal:false });
-                    return false;
-                }
-                else return true;
+                   window.hWin.HEURIST4.msg.showDialog(link.href, { title:'.', width: 600, height: 500, modal:false });
+                   return false;
                 }catch(e){
+                   return true; 
                 }
                 <?php
                 } 
@@ -931,11 +930,15 @@ function print_public_details($bib) {
 
 
 function print_other_tags($bib) {
+    return;
+    //@todo implement
         ?>
         <div class="detailRow">
             <div class="detailType">Tags</div>
             <div class="detail">
-                <a target="_new" href="<?=HEURIST_BASE_URL?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&recID=<?=$bib['rec_ID']?>" target=_top onclick="return link_open(this);">[Other users' tags]</a>
+                <a target="_new" 
+                    href="<?=HEURIST_BASE_URL?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&recID=<?=$bib['rec_ID']?>" 
+                    target=_top onclick="return link_open(this);">[Other users' tags]</a>
             </div>
         </div>
         <?php
