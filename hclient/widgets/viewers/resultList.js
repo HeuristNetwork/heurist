@@ -152,7 +152,7 @@ $.widget( "heurist.resultList", {
                             that._clearAllRecordDivs(new_title);
                             
                             if(!data.qname && that.search_save_hint){
-                                that.search_save_hint.show();
+                                that.search_save_hint.show('slide', {}, 1000); //.animate({left: '250px'});
                             }
                             
 
@@ -198,7 +198,7 @@ $.widget( "heurist.resultList", {
                     }else{
                         if(that.btn_search_save) {
                             that.btn_search_save.show();
-                            setTimeout(function(){that.search_save_hint.hide();},3000);
+                            setTimeout(function(){that.search_save_hint.hide('puff');},3000);
                         }
                     }
 
@@ -418,12 +418,14 @@ $.widget( "heurist.resultList", {
         }    
 
         this.span_pagination = $( "<div>")
-        .css({'display':'inline-block','vertical-align':'top','padding': '3px 0.5em 0 0'})
+        .css({'float':'right','padding': '3px 0.5em 0 0'})
+        //'vertical-align':'top',
         //.css({'float':'right','padding':'6px 0.5em 0 0'})
         .appendTo( this.div_toolbar );
 
         this.span_info = $( "<div>")
-        .css({'display':'inline-block','vertical-align':'top','padding': '3px 0.5em 0 0','font-style':'italic'})
+        .css({'float':'right','padding': '6px 0.5em 0 0','font-style':'italic'})
+        //'vertical-align':'top',
         //.css({'float':'right','padding':'0.6em 0.5em 0 0','font-style':'italic'})
         .appendTo( this.div_toolbar );
 
@@ -433,7 +435,7 @@ $.widget( "heurist.resultList", {
             //special feature to save current filter
             //.css({position:'absolute',bottom:0,left:0,top:'2.8em'})
             var btndiv = $('<div>').css({display:'block','vertical-align':'top',
-                padding: '5px', 'margin-top': '2px', height:'1.8em'})
+                padding: '5px', 'margin-top': '4px', height:'1.6em'})
                 .addClass('ui-widget-content')
                 .appendTo(this.div_toolbar);
             this.btn_search_save = $( "<button>", {
@@ -731,10 +733,11 @@ $.widget( "heurist.resultList", {
         //this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);
 
         if(this.view_mode_selector){
-            this.view_mode_selector.find('button').removeClass('ui-heurist-btn-header1');
+            this.view_mode_selector.find('button').removeClass('ui-heurist-btn-header1').css({'border':'none'});
             var btn =   this.view_mode_selector.find('button[value="'+newmode+'"]');
             
             if(this.options.header_class==null) btn.addClass('ui-heurist-btn-header1')                
+            btn.css({'border':'solid 1px'});
             //this.view_mode_selector.controlgroup('refresh');
         }
         
@@ -1591,12 +1594,14 @@ $.widget( "heurist.resultList", {
         if (start != 1) {    //force first page
             if(ismenu){
                 smenu = smenu + '<li id="page0"><a href="#">1</a></li>'
-                if(start!=2){                                                                              6
+                if(start!=2){                                                                              
                     smenu = smenu + '<li>...</li>';
                 }
             }else{
                 $( "<button>", { text: "1"}).css({'font-size':'0.7em'}).button()
-                .appendTo( span_pages ).on("click", function(){ that._renderPage(0); } );
+                .appendTo( span_pages ).on("click", function(){ 
+                    that._renderPage(0); 
+                } );
                 if(start!=2){
                     $( "<span>" ).html("..").appendTo( span_pages );
                 }
@@ -1614,7 +1619,7 @@ $.widget( "heurist.resultList", {
                     that._renderPage(page);
                 } );
                 if(i-1==currentPage){
-                    $btn.button('disable').addClass('ui-state-active').removeClass('ui-state-disabled');
+                    //$btn.button('disable').addClass('ui-state-active').removeClass('ui-state-disabled');
                 }
             }
         }
