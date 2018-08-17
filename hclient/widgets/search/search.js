@@ -1117,7 +1117,7 @@ $.widget( "heurist.search", {
 
                             window.hWin.HEURIST4.ui.createTermSelectExt2(select_terms.get(0),
                             {datatype:detailType, termIDTree:allTerms, headerTermIDsList:disabledTerms, defaultTermID:null, 
-                                topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:window.hWin.HR('<blank>')}], 
+                                topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:'&nbsp;'}], //window.hWin.HR('<blank>')
                                 needArray:false, useHtmlSelect:false});
                                                  
                             that._on( select_terms, { change: function(event){
