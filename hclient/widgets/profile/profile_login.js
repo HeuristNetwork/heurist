@@ -117,6 +117,19 @@ function doLogin(isforsed){
                                     $(document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, [window.hWin.HAPI4.currentUser]);
 
                                     $dlg.dialog( "close" );
+                                    
+                                    if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
+                                        || window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
+                                    
+                                        var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
+                                        if(!window.hWin.HEURIST4.util.isempty(init_search)){
+                                            var request = {q: init_search, w: 'a', f: 'map', source:'init' };
+                                            setTimeout(function(){
+                                                window.hWin.HAPI4.SearchMgr.doSearch(document, request);
+                                            }, 3000);
+                                        }
+                                    }
+                                    
                                     //that._refresh();
                                 }else if(response.status == window.hWin.ResponseStatus.REQUEST_DENIED){
                                     _setMessage(response.message);
