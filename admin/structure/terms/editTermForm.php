@@ -126,7 +126,8 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
             var context_return_res = "<?=$return_res ?>";
 
-            function showOtherTerms(){
+            function showOtherTerms(event){
+                
                 var sURL = '<?=HEURIST_BASE_URL?>admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>'
                     + '&treetype=<?=$_REQUEST['treetype'] ?>&db=<?=HEURIST_DBNAME?>';
                     
@@ -166,6 +167,14 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
             $(document).ready(function() {
                 document.getElementById('trmName').focus();
                 $('button').button();
+                $('input').on("keypress",function(event){
+                    var code = (event.keyCode ? event.keyCode : event.which);
+                    if (code == 13) {
+                        document.forms[0].submit();
+                    }
+                });
+                
+                
             });
                  
         </script>
@@ -245,13 +254,13 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
                         May also be used for a local code value to be used in importing data.
                     </div>
                 </div>
-
+             </form>
                 <div style="padding-top: 20px;" id="btnPanel">
 <?php
     if ($system->is_admin()){
 ?>
                     <div style="float:left; padding-left:150px;">
-                        <button id="btnEditTree" onClick="{showOtherTerms();}"
+                        <button id="btnEditTree" onClick="{showOtherTerms(event);}"  tabindex="-1"
                             title="Add, edit and rearrange terms in the overall tree view of terms defined for this database">
                             Edit terms tree
                         </button>
@@ -260,21 +269,21 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
     }
 ?>
                     <div style="float:right; padding-left:30px;">
-                        <button id="btnSaveAndClose" onClick="{submitAndClose();}"
+                        <button id="btnSaveAndClose" onClick="{submitAndClose();}"  tabindex="0"
                             title="Close this window and return to the selection of the vocabulary and terms for this field">
                             Done
                         </button>
                        &nbsp;&nbsp;
                     </div>
                     <div style="float:right; text-align: right; padding-right:20px;">
-                        <button id="btnSave" type="submit" style="font-weight:bold !important; color:black; "
+                        <button id="btnSave" onClick="{document.forms[0].submit()}" style="font-weight:bold !important; color:black; "
                             title="Add <?=($parent_id==0?"top-level vocabulary":"the term to the current vocabulary")?>">
                             Add <?=($parent_id==0?"vocabulary":"term")?>
                         </button>
                         &nbsp;&nbsp;
                     </div>
                 </div>
-            </form>
+           
         </div>
     </body>
 </html>
