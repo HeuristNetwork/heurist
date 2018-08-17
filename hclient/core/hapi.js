@@ -985,9 +985,14 @@ function hAPI(_db, _oninit) { //, _currentUser
                 {layout_language:'en',
                  layout_theme: 'heurist',
                  search_result_pagesize:100,
-                 search_detail_limit: 2000, 'help_on':'0', 
+                 search_detail_limit: 2000,
                  userCompetencyLevel: 2, //'beginner',
-                 mapcluster_on: true};
+                 deriveMapLocation: true,
+                 help_on: true, 
+                 optfields: true,
+                 mapcluster_on: true,
+                 searchQueryInBrowser:true
+                };
             }
             if(window.hWin.HEURIST4.util.isempty(name)){
                 return that.currentUser['ugr_Preferences'];

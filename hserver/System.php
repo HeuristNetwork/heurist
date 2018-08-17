@@ -747,9 +747,21 @@ error_log(print_r($_REQUEST, true));
     *
     * @param mixed $ug - user ID to check
     */
-    public function is_member($ug){
-        return ( $ug==0 || $ug==null || in_array($ug, $this->get_user_group_ids()) );  
-        //$this->get_user_id()==$ug ||  @$this->current_User['ugr_Groups'][$ug]);
+    public function is_member($ugs){
+        
+        if($ugs==0 || $ugs==null ||count($ugs)==0 || @$ugs[0]==0){
+            return true;
+        }
+        
+        $current_user_grps = $this->get_user_group_ids();
+        $ugs = prepareIds($ugs);
+        foreach ($ugs as $ug){
+            if (in_array($ug, $current_user_grps)){
+                return true;   
+            }
+        }
+        return false;        
+        //return ( $ug==0 || $ug==null || in_array($ug, $this->get_user_group_ids()) );  
     }
 
     /**

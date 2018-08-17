@@ -259,14 +259,20 @@
         return array(
         "layout_language" => "en",
         "layout_theme" => "heurist",
+        'search_result_pagesize' => 100,
         'search_detail_limit' => 2000,
-        'userCompetencyLevel' => "beginner",
+        'userCompetencyLevel' => 2, //'beginner'
         
-        'deriveMapLocation ' => 1,
+        'deriveMapLocation ' => true,
 
-        "edit_open_in_new_window" => "0",
-        "edit_force_tags" => "1",
-        "edit_pointer_recentsearch" => "1"
+        "edit_open_in_new_window" => false,
+        "edit_force_tags" => true,
+        "edit_pointer_recentsearch" => true,
+        
+        'help_on' => true, 
+        'optfields' => true,
+        'mapcluster_on' => true,
+        'searchQueryInBrowser' => true
         );
     }
 
