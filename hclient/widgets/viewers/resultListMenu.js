@@ -50,6 +50,7 @@ $.widget( "heurist.resultListMenu", {
         if(this.options.show_searchmenu) this._initMenu('Search');
         this._initMenu('Selected');
         this._initMenu('Collected');
+        this._initMenu('Recode');
         this._initMenu('Shared');
         //this._initMenu('Layout');
         this.divMainMenuItems.menu();
@@ -123,6 +124,7 @@ $.widget( "heurist.resultListMenu", {
 
             this.menu_Selected.find('.logged-in-only').show();
             this.menu_Collected.find('.logged-in-only').show();
+            this.menu_Recode.show();
             this.btn_Shared.show();
 
             //$(this.element).find('.logged-in-only').show();//.css('visibility','visible');
@@ -130,6 +132,7 @@ $.widget( "heurist.resultListMenu", {
             //$(this.element).find('.logged-in-only').hide();//.css('visibility','hidden');
             this.menu_Selected.find('.logged-in-only').hide();
             this.menu_Collected.find('.logged-in-only').hide();
+            this.menu_Recode.hide();
             this.btn_Shared.hide();
         }
     },
@@ -148,6 +151,8 @@ $.widget( "heurist.resultListMenu", {
         this.menu_Selected.remove();
         this.btn_Collected.remove();
         this.menu_Collected.remove();
+        this.btn_Recode.remove();
+        this.menu_Recode.remove();
         this.btn_Shared.reSmove();
         this.menu_Shared.remove();
         this.divMainMenuItems.remove();
@@ -303,10 +308,13 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             this.fixDuplicatesPopup();
 
         }else if(action == "menu-selected-tag" || action == "menu-selected-bookmark" || action == "menu-selected-wgtags"){
+           
+            if(this.isResultSetEmpty()) return;
             
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             
             var opts = {
+                width:700,
                 groups: (action == "menu-selected-wgtags")?'grouponly':'personal',
                 onClose:
                    function( context ){
@@ -327,6 +335,8 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         }else if(action == "menu-selected-unbookmark"){
 
+            if(this.isResultSetEmpty()) return;
+            
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordBookmark', {onClose:
                    function( context ){
@@ -339,11 +349,15 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         }else if(action == "menu-selected-rate"){
 
+            if(this.isResultSetEmpty()) return;
+            
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordRate');
 
         }else if(action == "menu-selected-delete"){
 
+            if(this.isResultSetEmpty()) return;
+            
             var recIDs_list = this.getSelectionIds("Please select at least one record to delete");
             if(Hul.isempty(recIDs_list)) return;
             
@@ -359,10 +373,14 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         }else if(action == "menu-selected-email") {
 
+            if(this.isResultSetEmpty()) return;
+            
             this.openEmailForm();
 
         }else if(action == "menu-selected-ownership"){
 
+            if(this.isResultSetEmpty()) return;
+            
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {width:800, height:480, onClose:
                function( context ){
@@ -374,6 +392,8 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             });
 
         }else if(action == "menu-selected-notify"){
+            
+            if(this.isResultSetEmpty()) return;
 
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordNotify');
@@ -585,7 +605,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
         }else{
             //window.hWin.HR('Collected')
-            this.menu_Collected_link.html( 'Collected' + (this._collection.length>0?':'+this._collection.length:''));
+            this.menu_Collected_link.html( window.hWin.HR('Collected') + (this._collection.length>0?':'+this._collection.length:''));
         }
     },
 
@@ -612,18 +632,27 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
     },
 
+    
+    isResultSetEmpty: function(){
+        var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
+        if (Hul.isempty(recIDs_all)) {
+            window.hWin.HEURIST4.msg.showMsgDlg('No results found. '
+            +'Please run a query with at least one result record. You can use selection to direct your change.');
+            return true;
+        }else{
+            return false;
+        }
+    },
+    
 
     //-------------------------------------- ADD, REPLACE, DELETE FIELD VALUES -------------------------------
     //
     //  MAIN  in use
     //  
     detailBatchEditPopup: function(action_type) {
+        
+        if(this.isResultSetEmpty()) return;
 
-        var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
-        if (Hul.isempty(recIDs_all)) {
-            window.hWin.HEURIST4.msg.showMsgDlg("No results found. Please run a query with at least one result record. You can use selection to direct your change.");
-            return;
-        }
         window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds();
         
         var script_name = 'recordAction';

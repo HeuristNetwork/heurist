@@ -86,7 +86,10 @@ regional['en'] = {
     'record_action_limitted_delete_detail': 'Skipped because required field cannot be deleted',
     'record_action_errors': 'Database SQL errors',
 
-    'thumbs3':'preview'
+    'thumbs3':'preview',
+    
+    'Collected':'Collect',
+    'Shared':'Share',
 
 };
 
