@@ -974,7 +974,8 @@ $.widget( "heurist.svs_list", {
                 preventRecursiveMoves: true,
                 autoExpandMS: 400,
                 dragStart: function(node, data) {
-                    return (node.key && node.key[0]=='_')?false:true;
+                    //return (node.key && node.key[0]=='_')?false:true; //disable folder dnd
+                    return true;
                 },
                 dragEnter: function(node, data) {
                     // return ["before", "after"];

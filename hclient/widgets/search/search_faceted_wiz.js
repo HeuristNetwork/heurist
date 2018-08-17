@@ -389,7 +389,7 @@ $.widget( "heurist.search_faceted_wiz", {
             
                 var svs_name = this.step0.find('#svs_Name');
                 var message = this.step0.find('.messages');
-                var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 30 );
+                var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 64 );
                 if(!bValid){
                     svs_name.focus();
                     //window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR("Define Saved search name"), 2000, "Required", svs_name);
@@ -401,7 +401,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
                 
                 var svs_title = this.step0.find('#svs_Title');
-                bValid = window.hWin.HEURIST4.msg.checkLength( svs_title, 'Title', message, 0, 30 );
+                bValid = window.hWin.HEURIST4.msg.checkLength( svs_title, 'Title', message, 0, 64 );
                 if(!bValid){
                     svs_title.focus();                
                     return;
@@ -628,7 +628,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_ugrid.removeAttr('disabled');;
                 //svs_ugrid.parent().show();
                 $dlg.find('#svs_Title').val('');
-                $dlg.find('#svs_SearchOnReset').attr('checked', false);
+                $dlg.find('#svs_SearchOnReset').attr('checked', true);
             }
 
             if(isEdit && this.options.params.rectypes[0]==this.originalRectypeID)
@@ -1508,7 +1508,7 @@ $.widget( "heurist.search_faceted_wiz", {
         var allFields = $dlg.find('input');
         allFields.removeClass( "ui-state-error" );
 
-        var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 25 );
+        var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 64 );
         if(!bValid){
             this._showStep(0);
             return false;

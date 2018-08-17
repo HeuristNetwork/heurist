@@ -1486,9 +1486,10 @@ div.coverall-div {
     border-radius: 10px;
 }
 .bor-toggler{
-    text-align:center;
+    text-align:left;
     cursor:pointer;
     color: #999999;
+    padding-top:16px;
 }
 .bor-toggler > span >span{
     display:inline-block;

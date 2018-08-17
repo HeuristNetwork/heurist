@@ -362,7 +362,7 @@ function hSvsEdit(args) {
 
                     allFields.removeClass( "ui-state-error" );
 
-                    var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 30 );
+                    var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 64 );
 
                     if(bValid){
 

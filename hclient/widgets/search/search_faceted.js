@@ -126,7 +126,7 @@ $.widget( "heurist.search_faceted", {
         
         if(!this.options.ispreview){                       //padding-top:1.4em;
             this.div_title = $('<div>')
-            .css({padding:'1em 0em 0 1em','font-size':'1.4em','font-weight':'bold',color:'rgb(142, 169, 185)','max-width':'90%'})
+            .css({padding:'1em 0em 0.7em 1em','font-size':'1.4em','font-weight':'bold',color:'rgb(142, 169, 185)','max-width':'90%'})
 //style='text-align:left;margin:4px 0 0 0!important;padding-left:1em;width:auto, max-width:90%'></h3")
                     .addClass('truncate').appendTo( this.div_header );
         }
@@ -160,7 +160,7 @@ $.widget( "heurist.search_faceted", {
 
 
         this.facets_list_container = $( "<div>" )
-        .css({"top":((this.div_title)?'5em':'2em'),"bottom":0,"left":'1em',"right":'0.5em',"position":"absolute"}) //was top 3.6
+        .css({"top":((this.div_title)?'6em':'2em'),"bottom":0,"left":'1em',"right":'0.5em',"position":"absolute"}) //was top 3.6
         .appendTo( this.element );
 
         this.facets_list = $( "<div>" )
@@ -1166,8 +1166,8 @@ $.widget( "heurist.search_faceted", {
                     function __drawToggler($facet_values, display_mode){
                         
                         $('<div class="bor-filter-expand bor-toggler">'
-                            +'<span class="bor-toggle-show-on" style="display:none"><span class="ui-icon ui-icon-circle-arrow-n"></span><span>Show less&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-n"></span></span>'
-                            +'<span class="bor-toggle-show-off"><span class="ui-icon ui-icon-circle-arrow-s"></span><span> Show more&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-s"></span></span>'
+                            +'<span class="bor-toggle-show-on" style="display:none"><span class="ui-icon ui-icon-circle-arrow-n"></span><span>&nbsp;Show less&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-n"></span></span>'
+                            +'<span class="bor-toggle-show-off"><span class="ui-icon ui-icon-circle-arrow-s"></span><span>&nbsp;Show more&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-s"></span></span>'
                          +'</div>').click(function(event){ 
                                             var ele = $(event.target).parents('div.bor-toggler');
                                             var mode = ele.attr('data-mode');
