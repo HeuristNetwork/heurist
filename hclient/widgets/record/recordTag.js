@@ -23,7 +23,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
     options: {
     
         height: 500,
-        width:  540,
+        width:  700,
         modal:  true,
         init_scope: 'selected',
         title:  'Add or Remove Tags for Records',
@@ -40,18 +40,18 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         var sMsg;
         if(this.options.modes=='bookmark_url'){ //selection only - no scope needed
             this.element.find('#div_fieldset').hide();
-            sMsg = 'Select tags to be added to bookmarks for choosen URLs<br>';
+            sMsg = 'Select tags to be added to bookmarks for chosen URLs<br>';
         }else{
-            sMsg = 'Select tags to be added or removed for choosen record scope<br>';
+            sMsg = 'Select tags to be added or removed for chosen record scope<br>';
         }   
         sMsg = sMsg 
-            +'Type tag in input. Tags may contain spaces.<br>'
+            //+'Type tag in input. Tags may contain spaces.<br>'
             +'Matching tags are shown as you type. Click on a listed tag to add it.<br>'
-            +'New tags are added automatically and are specific to each user.<br>';
-        
+            +'Unrecognised tags are added automatically as user-specific tags <br>'
+            +'(group tags must be added explicitly by a group administrator). Tags may contain spaces.';
         
         this.element.find('#div_header')
-            .css({'line-height':'21px'})
+            //.css({'line-height':'21px'})
             .addClass('heurist-helper1')
             .html(sMsg);
         
