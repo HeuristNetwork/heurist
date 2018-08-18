@@ -315,7 +315,8 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             
             var opts = {
                 width:700,
-                groups: (action == "menu-selected-wgtags")?'grouponly':'personal',
+                groups: (action == "menu-selected-bookmark")?'personal':'all',
+                //(action == "menu-selected-wgtags")?'grouponly':'personal',
                 onClose:
                    function( context ){
                        if(context){

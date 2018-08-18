@@ -152,7 +152,8 @@ $.widget( "heurist.resultList", {
                             that._clearAllRecordDivs(new_title);
                             
                             if(!data.qname && that.search_save_hint){
-                                that.search_save_hint.show('slide', {}, 1000); //.animate({left: '250px'});
+                                that.search_save_hint.show();
+                                //that.search_save_hint.show('slide', {}, 1000); //.animate({left: '250px'});
                             }
                             
 
@@ -198,7 +199,8 @@ $.widget( "heurist.resultList", {
                     }else{
                         if(that.btn_search_save) {
                             that.btn_search_save.show();
-                            setTimeout(function(){that.search_save_hint.hide('puff');},3000);
+                            setTimeout(function(){that.search_save_hint.hide('slide', {}, 3000);}, 2000);
+                            //setTimeout(function(){that.search_save_hint.hide('puff');},3000);
                         }
                     }
 

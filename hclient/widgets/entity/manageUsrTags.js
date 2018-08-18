@@ -589,7 +589,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
        panel.empty().css({'font-size': '0.9em'});
        
        if(that.options.show_top_n_recent){
-            $('<div class="header header-label"><label>Picked:</label></div>')
+            $('<div class="header header-label"><label>Tags to assign:</label></div>')
                 .css({display:'inline-block', 'vertical-align': 'top', 'padding-top': '3px',
                             width: '98px', 'text-align': 'right'}).hide()
                 .appendTo(panel);
@@ -781,14 +781,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     
                 }else if(input_tag.val().length>2){
                     that.list_div.empty();
-                    $('<div style="min-width:150px"><span class="ui-icon ui-icon-check" style="display:inline-block;vertical-align:bottom"/>Confirm&nbsp;New&nbsp;Tag</div>')
+                    $('<div style="min-width:160px;font-size:0.8em"><span class="ui-icon ui-icon-check" style="display:inline-block;vertical-align:bottom"/>Confirm&nbsp;and&nbsp;assign&nbsp;new&nbsp;Tag</div>')
                         .appendTo(that.list_div)
                             .click( function(event){
                                     btn_add.click();
                                     that.list_div.hide();
                             });
                     that.list_div.show()
-                        .position({my:'left top', at:'left bottom', of:input_tag}).css({'max-width':'120px'});
+                        .position({my:'left top', at:'left bottom', of:input_tag}).css({'max-width':'160px'});
                       
                 }else{
                     that.list_div.hide();  
