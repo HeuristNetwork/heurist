@@ -151,8 +151,8 @@ $.widget( "heurist.resultList", {
                             var new_title = window.hWin.HR(data.qname || that.options.title || 'Filtered Result');
                             that._clearAllRecordDivs(new_title);
                             
-                            if(!data.qname && that.search_save_hint){
-                                that.search_save_hint.show();
+                            if(that.search_save_hint){
+                                that.search_save_hint.attr('show_hint', data.qname?0:1);
                                 //that.search_save_hint.show('slide', {}, 1000); //.animate({left: '250px'});
                             }
                             
@@ -199,7 +199,11 @@ $.widget( "heurist.resultList", {
                     }else{
                         if(that.btn_search_save) {
                             that.btn_search_save.show();
-                            setTimeout(function(){that.search_save_hint.hide('slide', {}, 3000);}, 2000);
+                            if(that.search_save_hint.attr('show_hint')==1){
+                                that.search_save_hint.show('fade',{},1000);
+                                setTimeout(function(){that.search_save_hint.hide('slide', {}, 6000);}, 3000);    
+                            }
+                            
                             //setTimeout(function(){that.search_save_hint.hide('puff');},3000);
                         }
                     }
