@@ -78,14 +78,14 @@
 
         if($record){
             $rectype = @$record['RecTypeID'];
-            $ownerid = @$record['OwnerUGrpID'];
             $access = @$record['NonOwnerVisibility'];
             $access_grps = @$record['NonOwnerVisibilityGroups'];
+            $owner_grps = prepareIds(@$record['OwnerUGrpID'], true);
         }else{
             $rectype = null;
-            $ownerid = null;
             $access = null;
             $access_grps = null;
+            $owner_grps = array();
         }
 
         // RECTYPE
@@ -99,15 +99,18 @@
         }
 
         // OWNER -----------
-        $ownerid = intval($ownerid);
-        if(!($ownerid>=0) && isset($userDefaultOwnerGroupID)){ //from user preferences
-            $ownerid = $userDefaultOwnerGroupID;
-        }
-        if(!($ownerid>=0)){
-            $ownerid = @$sysvals['sys_NewRecOwnerGrpID']; //from database properties
-        }
-        if(!($ownerid>=0)){
-            $ownerid = $system->get_user_id();
+        if(count($owner_grps)==0 || !($owner_grps[0]>=0)){
+            $ownerid = -1;
+            if(isset($userDefaultOwnerGroupID)){ //from user preferences
+                $ownerid = $userDefaultOwnerGroupID;
+            }
+            if(!($ownerid>=0)){
+                $ownerid = @$sysvals['sys_NewRecOwnerGrpID']; //from database properties
+            }
+            if(!($ownerid>=0)){
+                $ownerid = $system->get_user_id();
+            }
+            $owner_grps = array($ownerid);
         }
 
         // ACCESS -------------
@@ -127,6 +130,7 @@
             $access_grps = $userDefaultAccessGroups;
         }
         
+        //@todo correct for multi owners !!!!!!
         if ($ownerid>0  && !($system->is_admin() || $system->is_member($ownerid))){ 
             $system->addError(HEURIST_REQUEST_DENIED,
                     'Current user does not have sufficient authority to add record with default ownership ('.$ownerid
@@ -158,7 +162,7 @@
         //DateTime('now')->format('Y-m-d H:i:s') is same as date('Y-m-d H:i:s')
         $data_add = date('Y-m-d H:i:s');
         
-        $stmt->bind_param('iiissssiis', $currentUserId, $rectype, $ownerid, $access,
+        $stmt->bind_param('iiissssiis', $currentUserId, $rectype, $owner_grps[0], $access,
             $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp, $rec_title);
         $stmt->execute();
         $newId = $stmt->insert_id;
@@ -172,8 +176,9 @@
 
         }else {
             
-            if($access_grps!=null){
-                updateUsrRecPermissions($mysqli, $newId, $access_grps);
+            array_shift( $owner_grps ); //remove first
+            if($access_grps!=null || count($owner_grps)>0){
+                updateUsrRecPermissions($mysqli, $newId, $access_grps, $owner_grps);
             }
         
             if($return_id_only){
@@ -301,11 +306,12 @@
 
         }else{  //UPDATE EXISTING ONE
 
-            $ownerid = @$record['OwnerUGrpID'];
+            $owner_grps = prepareIds(@$record['OwnerUGrpID'], true); //list of owner groups
+            
             $access = @$record['NonOwnerVisibility'];
             $rectypes = array();
 
-            if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes)){
+            if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $owner_grps, $access, $rectypes)){
                 return $system->getError();
             }
 
@@ -322,7 +328,7 @@
             $rec_url = @$record['URL'];
             $rec_spad = @$record['ScratchPad'];
 
-            $stmt->bind_param('siisss', $rec_mod, $rectype, $ownerid, $access, $rec_url, $rec_spad);
+            $stmt->bind_param('siisss', $rec_mod, $rectype, $owner_grps[0], $access, $rec_url, $rec_spad);
 
             if(!$stmt->execute()){
                 $syserror = $mysqli->error;
@@ -333,9 +339,10 @@
             }
             $stmt->close();
             
-            //updata group view permission
+            //update group view and edit permissions
             $access_grps = ($access=='viewable')?@$record['NonOwnerVisibilityGroups']:null;
-            updateUsrRecPermissions($mysqli, $recID, $access_grps);
+            array_shift($owner_grps); //remove first
+            updateUsrRecPermissions($mysqli, $recID, $access_grps, $owner_grps);
 
             //delete ALL existing details
             $query = "DELETE FROM recDetails where dtl_RecID=".$recID;
@@ -587,13 +594,16 @@
         $recids = prepareIds($recids);
         if(count($recids)>0){
 
-            $ownerid = @$params['OwnerUGrpID'];
+            $owner_grps = prepareIds( @$params['OwnerUGrpID'], true);
             $access = @$params['NonOwnerVisibility'];
 
-            if($ownerid==null ||$access==null){             
-                $this->system->addError(HEURIST_INVALID_REQUEST, 'Neithwe owner nor visibility parameters defined');
+            if($owner_grps==null || count($owner_grps)==0 || $access==null){             
+                $system->addError(HEURIST_INVALID_REQUEST, 'Neither owner nor visibility parameters defined');
                 return false;
             }
+            
+            
+           $mysqli = $system->get_mysqli();  
             
             //narrow by record type
             $rec_RecTypeID = @$params['rec_RecTypeID'];
@@ -602,7 +612,7 @@
                     .implode(',', $recids).') and rec_RecTypeID='. $rec_RecTypeID);
                     
                 if($recids==null || count($recids)==0){             
-                    $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
+                    $system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
                     return false;
                 }
             }
@@ -614,7 +624,7 @@
             $allowed_recids = array();
 
             foreach ($recids as $recID) {
-                if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes)){
+                if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $owner_grps, $access, $rectypes)){
                     $noaccess_count++;
                 }else{
                     array_push($allowed_recids, $recID);
@@ -636,7 +646,7 @@
 
             $rec_mod = date('Y-m-d H:i:s');
 
-            $stmt->bind_param('sis', $rec_mod, $ownerid, $access);
+            $stmt->bind_param('sis', $rec_mod, $owner_grps[0], $access);
 
             if(!$stmt->execute()){
                 $syserror = $mysqli->error;
@@ -647,6 +657,12 @@
             }else{
                 $updated_count = $mysqli->affected_rows;
                 $stmt->close();
+                
+                
+                $access_grps = @$params['NonOwnerVisibilityGroups'];
+                array_shift( $owner_grps );
+                updateUsrRecPermissions($mysqli, $allowed_recids, $access_grps, $owner_grps);
+                
                 $mysqli->commit();
                 
                 $res = array("status"=>HEURIST_OK, 
@@ -870,11 +886,11 @@
     *
     * @param mixed $system
     * @param mixed $recID
-    * @param mixed $ownerid
+    * @param mixed $owner_grps
     * @param mixed $access
     *   $rectypes  - return record type of current record
     */
-    function recordCanChangeOwnerwhipAndAccess($system, $recID, &$ownerid, &$access, &$rectypes)
+    function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$access, &$rectypes)
     {
         
         $mysqli = $system->get_mysqli();
@@ -889,54 +905,81 @@
             $system->addError(HEURIST_DB_ERROR, 'Cannot get record', $mysqli->error);
             return false;
         }
+        //get group permissions
+        $isEveryOne = true;
+        $current_owner_groups = null;
+        if($record["rec_OwnerUGrpID"]>0){ //not everyone
+            $isEveryOne = false;
+            $query = 'select rcp_UGrpID from usrRecPermissions where rcp_Level="edit" AND rec_ID = '.$recID;
+            $current_owner_groups = mysql__select_list2($mysqli, $query);
+            
+        }
+        if(!$current_owner_groups) $current_owner_groups = array();
+        array_unshift($current_owner_groups, $record["rec_OwnerUGrpID"]);
         
-        $ownerid_old = $record["rec_OwnerUGrpID"]; //current ownership
-        if(!($ownerid>=0)){  
-            $ownerid = $record["rec_OwnerUGrpID"];
-            if(!($ownerid>=0)){  //rare case when current record has wrong value
-                $ownerid = $system->get_user_id();
-            }
+        if(count($current_owner_groups)==1 && !($current_owner_groups[0]>=0)){  
+            //rare case when current record has wrong value
+            $current_owner_groups = array($system->get_user_id());
+        }
+        
+        //$ownerid_old = @$record["rec_OwnerUGrpID"]; //current ownership
+        //new owners are not defined - take current one
+        if($owner_grps==null || count($owner_grps)==0 || !($owner_grps[0]>=0)){  
+            $owner_grps = $current_owner_groups;
+        }
+        if(array_search(0, $owner_grps, true)!==false){ //there is "everyone" 
+            $owner_grps = array(0); 
         }
         
         //1. Can current user edit this record?
         // record is not "everyone" and current user is_admin or itself or member of group
-        if ($ownerid_old>0  && !($system->is_admin() || $system->is_member($ownerid_old))){ 
+        if (!$isEveryOne  && !($system->is_admin() || $system->is_member($current_owner_groups))){ 
 
             $system->addError(HEURIST_REQUEST_DENIED,
                     'Current user does not have sufficient authority to change the record ID:'.$recID
-                    .'. User must be either the owner or member of the group that owns this record');
+                    .'. User must be either the database administrator or member of the group'
+                    .(count($current_owner_groups)>1?'s':'')
+                    .' that own'
+                    .(count($current_owner_groups)>1?'':'s').' this record');
             return false;
         }  
         
         //2. Can current user change ownership of this record?
-        if($ownerid != $ownerid_old && !$system->is_admin()){
+        if(!$system->is_admin()){
             
-            $res = true;
-            //A. Has rights for current ownership 
-            //current user is db admin or itself or admin of currrent onwership group
-            if($ownerid_old>0 && ! ($system->is_admin() || $system->has_access($ownerid_old)) ) {  //changing ownership
-
-                $system->addError(HEURIST_REQUEST_DENIED,
-                    'Cannot change ownership. User does not have ownership rights. '
-                    .'User must be either database administrator, record owner or administrator or record\'s ownership group');
-                $res = false;
-            }
-            //B. Has rights for new ownership 
-            else if ($ownerid>0 && !$system->is_member($ownerid)){
-                
-                $system->addError(HEURIST_REQUEST_DENIED,
-                    'Cannot set ownership of record to the group without membership in this group');
-                $res = false;
-            
-            //C. Only DB admin can change "Everyone" record to group record
-            }else if($ownerid_old == 0 && $ownerid>0) {
+            if($isEveryOne  && $owner_grps[0]>0){
+                //C. Only DB admin can change "Everyone" record to group record
                 $system->addError(HEURIST_REQUEST_DENIED,
                     'User does not have sufficient authority to change public record to group record');
-                $res = false;
-            }
-            if(!$res){
                 return false;
+                
+            }else{
+                
+                //check that new ownership is different
+                //A. new owners
+                foreach($owner_grps as $grp){
+                   if(array_search($grp, $current_owner_groups)===false){
+                        if(!$system->is_member($grp)){
+                            $system->addError(HEURIST_REQUEST_DENIED,
+                                'Cannot set ownership of record to the group without membership in this group', 'Group#'.grp);
+                            return false;
+                        }
+                   }
+                }
+                //B. owners to remove
+                foreach($current_owner_groups as $grp){
+                   if(array_search($grp, $owner_grps)===false){
+                        if(!$system->has_access($grp)){
+                            $system->addError(HEURIST_REQUEST_DENIED,
+                        'Cannot change ownership. User does not have ownership rights. '
+                        .'User must be either database administrator, record owner or administrator or record\'s ownership group',
+                         'Group#'.grp);
+                            return false;
+                        }
+                   }
+                }
             }
+            
         }
 
 
@@ -1491,21 +1534,32 @@ array_push($errorValues,
     //
     //
     //
-    function updateUsrRecPermissions($mysqli, $recID, $access_grps){
-
-           $query = 'DELETE FROM usrRecPermissions WHERE rcp_RecID='.$recID;
-           $mysqli->query($query);
+    function updateUsrRecPermissions($mysqli, $recIDs, $access_grps, $owner_grps){
         
-           $access_grps = prepareIds($access_grps);
-           if(count($access_grps)>0){
-                //add group record permissions
-                $values = array();
-                foreach ($access_grps as $grp_id){
-                      array_push($values,'('.$grp_id.','.$recID.')');
-                }
-                $query = 'INSERT INTO usrRecPermissions (rcp_UGrpID,rcp_RecID) VALUES '.implode(',',$values);
-                $mysqli->query($query);
-                //mysql__insertupdate($mysqli, 'usrRecPermissions', 'rcp', {rcp_ID:-1, rcp_UGrpID: rcp_RecID:$newId });
+           $recIDs = prepareIds($recIDs);
+           
+           if(count($recIDs)>0){
+
+               $query = 'DELETE FROM usrRecPermissions WHERE rcp_RecID in ('.implode(',', $recIDs).')';
+               $mysqli->query($query);
+            
+               $access_grps = prepareIds($access_grps);
+               $owner_grps = prepareIds($owner_grps, true);
+               if(count($access_grps)>0 || count($owner_grps)>0){
+                    //add group record permissions
+                    $values = array();
+                    foreach($recIDs as $recID){
+                        foreach ($access_grps as $grp_id){
+                              array_push($values,'('.$grp_id.','.$recID.',"view")');
+                        }
+                        foreach ($owner_grps as $grp_id){
+                              array_push($values,'('.$grp_id.','.$recID.',"edit")');
+                        }
+                    }
+                    $query = 'INSERT INTO usrRecPermissions (rcp_UGrpID,rcp_RecID,rcp_Level) VALUES '.implode(',',$values);
+                    $mysqli->query($query);
+                    //mysql__insertupdate($mysqli, 'usrRecPermissions', 'rcp', {rcp_ID:-1, rcp_UGrpID: rcp_RecID:$newId });
+               }
            }
         
     }

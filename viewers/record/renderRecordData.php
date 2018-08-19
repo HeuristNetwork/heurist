@@ -44,6 +44,9 @@ if(!$system->init(@$_REQUEST['db'])){
 //require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
 require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_files.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_users.php');
+
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
@@ -425,14 +428,36 @@ function print_header_line($bib) {
 function print_private_details($bib) {
     global $system;
 
-    $row = mysql__select_row($system->get_mysqli(),    
-        'select grp.ugr_Name,grp.ugr_Type,concat(grp.ugr_FirstName," ",grp.ugr_LastName) from Records, '
-            .'sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and rec_ID='.$bib['rec_ID']);
+    if($bib['rec_OwnerUGrpID']==0){
+        
+        $workgroup_name = 'Everyone';
+        
+    }else{
     
-    $workgroup_name = NULL;
-    // check to see if this record is owned by a workgroup
-    if ($row!=null) {
-        $workgroup_name = $row[1] == 'user'? $row[2] : $row[0];
+        $permissions = recordSearchPermissions($system, $bib['rec_ID']);
+        if($permissions['status']==HEURIST_OK){
+            $groups = @$permissions['edit'][$bib['rec_ID']];
+            if(is_array($groups)){
+                array_unshift($groups, $bib['rec_OwnerUGrpID']);
+            }else{
+                $groups = array($bib['rec_OwnerUGrpID']);
+            }
+            
+            $workgroup_name = user_getNamesByIds( $system, $groups );
+            $workgroup_name = implode(', ',$workgroup_name);
+        
+        }else{
+
+            $row = mysql__select_row($system->get_mysqli(),    
+                'select grp.ugr_Name,grp.ugr_Type,concat(grp.ugr_FirstName," ",grp.ugr_LastName) from Records, '
+                    .'sysUGrps grp where grp.ugr_ID=rec_OwnerUGrpID and rec_ID='.$bib['rec_ID']);
+            
+            $workgroup_name = NULL;
+            // check to see if this record is owned by a workgroup
+            if ($row!=null) {
+                $workgroup_name = $row[1] == 'user'? $row[2] : $row[0];
+            }
+        }
     }
     
     // check for workgroup tags

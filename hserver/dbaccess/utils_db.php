@@ -874,7 +874,7 @@
     // $rec_IDs - may by csv string or array 
     // return array of integers
     //
-    function prepareIds($ids){
+    function prepareIds($ids, $can_be_zero=false){
         
         if($ids!=null){
             if(!is_array($ids)){
@@ -887,13 +887,22 @@
                     $ids = explode(',', $ids);
                 }
             }
+            
+            $res = array();
+            foreach($ids as $v){
+                if (is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0))){
+                    $res[] = $v;
+                }
+            }
+            return $res;
+            /*
             $ids = array_filter($ids, function ($v) {
-                 return (is_numeric($v) && $v > 0);
+                 return (is_numeric($v) && ($v > 0 || ($can_be_zero && $v==0)) );
             });
+            */
         }else{
-            $ids = array();
+            return array();
         }
-        return $ids;
     }
 
     function prepareStrIds($ids){

@@ -32,7 +32,7 @@ $.widget( "heurist.recordAction", {
         helpContent: null,
         
         //parameters
-        scope_types: null, // [all, selected, current, rectype ids]
+        scope_types: null, // [all, selected, current, rectype ids, none]
         init_scope: '',  // inital selection
         
         //listeners
@@ -320,13 +320,20 @@ $.widget( "heurist.recordAction", {
     //
     _fillSelectRecordScope: function (){
 
+        var scope_types = this.options.scope_types;
+        this.selectRecordScope.empty();
+        
+        if(scope_types=='none'){
+            this.selectRecordScope.parent().hide();
+            return;    
+        }
+        
         this.selectRecordScope.empty();
 
         var opt, selScope = this.selectRecordScope.get(0);
 
         window.hWin.HEURIST4.ui.addoption(selScope,'','please select the records to be affected …');
         
-        var scope_types = this.options.scope_types;
         var is_initscope_empty = window.hWin.HEURIST4.util.isempty(scope_types);
         if(is_initscope_empty) scope_types = [];   
         

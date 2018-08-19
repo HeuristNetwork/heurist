@@ -98,6 +98,10 @@
             }
         }
     }
+    
+if($response==false){
+    $response = $system->getError();
+}    
 
 // Return the response object as JSON
 header('Content-type: application/json;charset=UTF-8');

@@ -367,26 +367,48 @@ function hAPI(_db, _oninit) { //, _currentUser
             //get user full names by id
             ,usr_names:function(request, callback){
 
-                //first try to take on client side
-                var sUserName = null;
-                var usr_ID = Number(request.UGrpID);
+                var ugrp_ids = request.UGrpID;
+                ugrp_ids = (!$.isArray(ugrp_ids)?ugrp_ids.split(','):ugrp_ids);    
                 
-                if(usr_ID==0){
-                    sUserName = window.hWin.HR('Everyone');
-                }else if(usr_ID == window.hWin.HAPI4.currentUser['ugr_ID']){
-                    sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
-                }else if( window.hWin.HAPI4.sysinfo.db_usergroups && window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID]){
-                    sUserName = window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID];
+                
+                //first try to take on client side
+                var sUserNames = {};
+                request.UGrpID = [];
+                
+                for(var idx in ugrp_ids){
+                
+                    var usr_ID = Number(ugrp_ids[idx]);    
+                    var sUserName = null;
+                
+                    if(usr_ID==0){
+                        sUserName = window.hWin.HR('Everyone');
+                    }else if(usr_ID == window.hWin.HAPI4.currentUser['ugr_ID']){
+                        sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
+                    }else if( window.hWin.HAPI4.sysinfo.db_usergroups && window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID]){
+                        sUserName = window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID];
+                    }
+                    if(sUserName){
+                        sUserNames[usr_ID] = sUserName;
+                    }else{
+                        request.UGrpID.push(usr_ID);
+                    }
+                
                 }
                 
-                if(sUserName){
-                    var res = {};
-                    res[usr_ID] = sUserName;
-                    callback.call(this, {status:window.hWin.ResponseStatus.OK, data:res} );
+                
+                if(request.UGrpID.length==0){ //all names are resolved on client side
+                    callback.call(this, {status:window.hWin.ResponseStatus.OK, data:sUserNames} );
                 }else{
                     //search on server
                     if(request) request.a = 'usr_names';
-                    _callserver('usr_info', request, callback);
+                    _callserver('usr_info', request, function(context){
+                        if(context.status==window.hWin.ResponseStatus.OK){
+                            
+                            $.extend(sUserNames, data);
+                            
+                            callback.call(this, {status:window.hWin.ResponseStatus.OK, data:sUserNames} );       
+                        }
+                    });
                 }
             }
 

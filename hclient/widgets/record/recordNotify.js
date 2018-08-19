@@ -61,7 +61,9 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
         });
         
         
-        this.element.find('#div_fieldset .header').css('padding','0px 25px 0px 40px');
+        //align scope selector and edit form
+        this.element.find('#div_fieldset').css({'padding':'10px 0px'});
+        this.element.find('#div_fieldset .header').css({'padding':'0 24px 0 0'});
         
         return this._super();
     },
@@ -89,8 +91,6 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
         var fields = editForm._getValidatedValues();//this._reminderWidget.manageUsrReminders('_getValidatedValues'); 
         if(fields==null) return; //validation failed
 
-console.log(fields);
-        
         var scope = [], 
         rec_RecTypeID = 0;
         

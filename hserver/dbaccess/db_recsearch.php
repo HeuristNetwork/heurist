@@ -552,27 +552,26 @@
         $permissions = array();
         $mysqli = $system->get_mysqli();
               
-        $query = 'SELECT rcp_RecID, rcp_UGrpID FROM usrRecPermissions '
+        $query = 'SELECT rcp_RecID, rcp_UGrpID, rcp_Level FROM usrRecPermissions '
                 .' WHERE rcp_RecID IN ('.implode(",", $ids).')';
         $res = $mysqli->query($query);
         if (!$res){
             return $system->addError(HEURIST_DB_ERROR, "Search query error on search permissions. Query ".$query, $mysqli->error);
         }else{
             
+                $response = array("status"=>HEURIST_OK, "view"=>array(), "edit"=>array());
+            
                 while ($row = $res->fetch_row()) {
-                    if(@$permissions[$row[0]]){
-                        array_push($permissions[$row[0]], $row[1]);
-                    }else{
-                        $permissions[$row[0]] = array($row[1]);     
-                    } 
+                        if(@$response[$row[2]][$row[0]]){
+                            array_push($response[$row[2]][$row[0]], $row[1]);
+                        }else{
+                            $response[$row[2]][$row[0]] = array($row[1]);     
+                        } 
                 }
                 $res->close();
+                
+                return $response;
         }
-        
-        $response = array("status"=>HEURIST_OK, "data"=>$permissions);
-
-
-        return $response;
         
     }
     
@@ -974,7 +973,7 @@
 
             $is_get_relation_records = (@$params['getrelrecs']==1); //get all related and relationship records
 
-            foreach($flat_rules as $idx => $rule){ //loop fro all rules
+            foreach($flat_rules as $idx => $rule){ //loop for all rules
                 if($idx==0) continue;
 
                 $is_last = (@$rule['islast']==1);
@@ -1519,12 +1518,18 @@ $loop_cnt++;
                                 
                                 $permissions = recordSearchPermissions($system, $all_rec_ids);
                                 if($permissions['status']==HEURIST_OK){
-                                    $permissions = $permissions['data'];
+                                    $view_permissions = $permissions['view'];
                                     
                                     array_push($fields, 'rec_NonOwnerVisibilityGroups');
                                     $group_perm_index = array_search('rec_NonOwnerVisibilityGroups', $fields);
+                                    foreach ($view_permissions as $recid=>$groups){
+                                        $records[$recid][$group_perm_index] = implode(',', $groups);    
+                                    }
                                     
-                                    foreach ($permissions as $recid=>$groups){
+                                    $edit_permissions = $permissions['edit'];
+                                    $group_perm_index = array_search('rec_OwnerUGrpID', $fields);
+                                    foreach ($edit_permissions as $recid=>$groups){
+                                        array_unshift($groups, $records[$recid][$group_perm_index]);
                                         $records[$recid][$group_perm_index] = implode(',', $groups);    
                                     }
                                     

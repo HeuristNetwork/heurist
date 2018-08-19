@@ -1,27 +1,59 @@
 <fieldset id="div_fieldset">
 <div style="padding: 0.2em; width: 100%;" class="input">
-    <div class="header" style="padding: 0 16px 0 16px;min-width:100px;width:100px">
+    <div class="header" style="padding: 0 16px 0 16px;">
         <label for="sel_record_scope">Records scope:</label>
     </div>
     <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
 </div>
 
+<hr style="margin:5px"/>
+
 <div id="div_sel_ownership" style="padding: 0.2em; min-width: 600px;" class="input">
-    <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Record is editable by:</label></div>
+    <div class="header" style="padding: 0 16px 0 16px;"><label>Record is editable by:</label></div>
+    
+    <div class="detailRow" style="padding-bottom:1em;">
+        <label><input type="radio" name="rb_Owner" value="everyone" id="rb_Owner-everyone">
+        Everyone (no restriction)</label>
+    </div>
+    <div class="detailRow" style="padding-bottom:1em;">
+        <label><input type="radio" name="rb_Owner" value="user" id="rb_Owner-user">
+        Current user</label>
+    </div>
+    <div class="detailRow" style="padding-bottom:1em;">
+        <label><input type="radio" name="rb_Owner" value="group" id="rb_Owner-group">
+        Members of selected groups can edit the record</label>
+    </div>
+    
+<!--    
     <select id="sel_Ownership" style="max-width:30em;margin-bottom: 1em;"></select>
+-->    
 </div>
 
+<div id="sel_OwnerGroups"  style="padding: 0.2em; min-width: 600px;display:none;" class="input"></div>
+
+<hr style="margin:5px"/>
+
 <div id="div_sel_access" style="padding: 0.2em; min-width: 600px;" class="input">
-    <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Access outside this group:</label></div>
+    <div class="header" style="padding: 0 16px 0 16px;"><label>Record is viewable for:</label></div>
     
     <div class="detailRow" style="padding-bottom:1em;">
         <label><input type="radio" name="rb_Access" value="hidden" id="rb_Access-hidden">
-        Only members of this group can view the record</label>
+        Only user with editor rights can view the record</label>
     </div>
     <div class="detailRow" style="padding-bottom:1em;">
         <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable">
         Any logged-in user can view the record</label>
     </div>
+    <div class="detailRow" style="padding-bottom:1em;">
+        <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable-group">
+        Members of selected groups can view the record</label>
+    </div>
+</div>
+
+<div id="sel_AccessGroups"  style="padding: 0.2em; min-width: 600px;display:none;" class="input"></div>
+            
+<div  id="div_sel_access3" style="padding: 0.2em; min-width: 600px;" class="input">
+    <div class="header" style="padding: 0 16px 0 16px;"><label>&nbsp;</label></div>    
     <div class="detailRow" style="padding-bottom:1em;">
         <label><input type="radio" name="rb_Access" value="pending" id="rb_Access-pending">
         Flagged for external publication, any logged-in user</label>

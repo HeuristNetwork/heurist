@@ -629,9 +629,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     _fillSummaryPanel: function(panel){
         
+        var that = this;
         var sContent = '';
         var idx = Number(panel.attr('data-id'));
-        var that = this;
         
         var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
         
@@ -784,30 +784,50 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     });
                     
 
-                panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access rights'),
+           //
+           //
+           //   
+           function __getUserNames(){
+               
+               var ele = that._editing.getFieldByName('rec_OwnerUGrpID');
+               var vals = ele.editing_input('getValues');
+               vals = vals[0];
+                
+                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:vals},
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            var txt = [], title = [], cnt = 0;
+                            for(var ugr_id in response.data){
+                                if(cnt<2){
+                                    txt.push(response.data[ugr_id]);    
+                                }
+                                title.push(response.data[ugr_id]);
+                                cnt++;
+                            }
+                            txt = txt.join(', ');
+                            if(cnt>2){
+                               txt = txt + '...'; 
+                            }
+                            panel.find('#recOwner').text(txt).attr('title',title.join(', '));
+                        }
+                });
+            
+           }
+            
+                    
+                    
+            panel.find('.btn-access').button({text:false,label:top.HR('Change ownership and access rights'),
                         icons:{primary:'ui-icon-pencil'}})
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'right','margin': '0 0 0.8em 7px', 'font-size': '0.8em', height: '14px', width: '14px'})
                     .click(function(){
+           
+           //
+           //
+           //             
+           function __assignOwnerAccess(context){
 
-                        
-        //show dialog that changes ownership and view access                         
-                        
-        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database
-                +'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')
-                +'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
-        if ( that._getField('rec_NonOwnerVisibilityGroups') ) {
-           url = url + '&visgroups=' + that._getField('rec_NonOwnerVisibilityGroups');
-        }        
-                
-
-        window.hWin.HEURIST4.msg.showDialog(url, {height:400, width:620,
-            padding: '0px',
-            resizable:false,
-            title: window.hWin.HR('ownership'),
-            callback: function(context){
-
-                if(context && context.OwnerUGrpID>=0 && context.NonOwnerVisibility){
+               if(context && context.NonOwnerVisibility){
                     
                     var ele = that._editing.getFieldByName('rec_OwnerUGrpID');
                     var vals = ele.editing_input('getValues');
@@ -817,12 +837,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         ele.editing_input('isChanged', true);
                         
                         //update user name
-                        window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.OwnerUGrpID},
-                            function(response){
-                                if(response.status == window.hWin.ResponseStatus.OK){
-                                    panel.find('#recOwner').html(response.data[context.OwnerUGrpID]);
-                                }
-                            });
+                        __getUserNames();
                     }
 
                     ele = that._editing.getFieldByName('rec_NonOwnerVisibility');
@@ -845,17 +860,36 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     that.onEditFormChange();
                 }
                 
-            } } );                    //, class:'ui-heurist-bg-light'
-                    
-                    });
+        }                        
+                        
+        //show dialog that changes ownership and view access                   
+        window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {
+               currentOwner:  that._getField('rec_OwnerUGrpID'),
+               currentAccess: that._getField('rec_NonOwnerVisibility'),
+               currentAccessGroups: that._getField('rec_NonOwnerVisibilityGroups'),
+               scope_types: 'none',
+               width:800, height:480, onClose: __assignOwnerAccess
+        });
+              
+        /* old way                
+        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database
+                +'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')
+                +'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
+        if ( that._getField('rec_NonOwnerVisibilityGroups') ) {
+           url = url + '&visgroups=' + that._getField('rec_NonOwnerVisibilityGroups');
+        }        
+
+        window.hWin.HEURIST4.msg.showDialog(url, {height:400, width:620,
+            padding: '0px',
+            resizable:false,
+            title: window.hWin.HR('ownership'),
+            callback: __assignOwnerAccess } );                    //, class:'ui-heurist-bg-light'
+       */
+       
+                    }); //on edit ownership click
             
-            //
-            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:that._getField('rec_OwnerUGrpID')},
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        panel.find('#recOwner').text(response.data[that._getField('rec_OwnerUGrpID')]);
-                    }
-            });
+            
+            __getUserNames();
             
   
                 break;
