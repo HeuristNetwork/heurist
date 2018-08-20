@@ -27,6 +27,7 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
         this._on(this.input_search_type,  { change:this.startSearch });
 
         this.input_sort_type = this.element.find('#input_sort_type');
+        this.input_sort_type.parent().hide();
         this._on(this.input_sort_type,  { change:this.startSearch });
     },  
 
@@ -46,6 +47,7 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
             if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
                 request['sus_Role'] = this.input_search_type.val();
             }
+            
             
             if(this.input_sort_type.val()=='name'){
                 request['sort:sys_Database'] = 1;
