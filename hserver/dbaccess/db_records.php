@@ -56,13 +56,17 @@
 //IMPORTANT !!!!        to implement
 //$addRecDefaults = getDefaultOwnerAndibility($_REQUEST);
 
-        $addRecDefaults = @$_SESSION[$system->dbname_full()]["preferences"]['record-add-defaults'];
+        $addRecDefaults = $system->user_GetPreference('record-add-defaults');
         if ($addRecDefaults){
             if (@$addRecDefaults[0]){
                 $userDefaultRectype = intval($addRecDefaults[0]);
             }
-            if (@$addRecDefaults[1]){
-                $userDefaultOwnerGroupID = intval($addRecDefaults[1]);
+            if (@$addRecDefaults[1]){ //default ownership
+                if(is_string($addRecDefaults[1])){
+                    $userDefaultOwnerGroupID = explode(',', $addRecDefaults[1]);
+                }else if($addRecDefaults[1]!=''){
+                    $userDefaultOwnerGroupID = intval($addRecDefaults[1]);
+                }
             }
             if (@$addRecDefaults[2]){
                 $userDefaultAccess = $addRecDefaults[2];
@@ -104,13 +108,17 @@
             if(isset($userDefaultOwnerGroupID)){ //from user preferences
                 $ownerid = $userDefaultOwnerGroupID;
             }
-            if(!($ownerid>=0)){
+            if(!is_array($ownerid) || !($ownerid>=0)){
                 $ownerid = @$sysvals['sys_NewRecOwnerGrpID']; //from database properties
             }
-            if(!($ownerid>=0)){
-                $ownerid = $system->get_user_id();
+            if(!is_array($ownerid) || !($ownerid>=0)){
+                $ownerid = $system->get_user_id(); //by default current user
             }
-            $owner_grps = array($ownerid);
+            if(is_array($ownerid)){
+                $owner_grps = $ownerid;
+            }else if($ownerid>=0){
+                $owner_grps = array($ownerid);
+            }
         }
 
         // ACCESS -------------
@@ -131,10 +139,10 @@
         }
         
         //@todo correct for multi owners !!!!!!
-        if ($ownerid>0  && !($system->is_admin() || $system->is_member($ownerid))){ 
+        if (!($system->is_admin() || $system->is_member($owner_grps))){ 
             $system->addError(HEURIST_REQUEST_DENIED,
-                    'Current user does not have sufficient authority to add record with default ownership ('.$ownerid
-                    .'). User must be member of the group that will own this record');
+                    'Current user does not have sufficient authority to add record with default ownership. '
+                    .'User must be member of the group that will own this record', 'Default ownership: '.implode(',', $owner_grps));
             return false;
         }  
             
@@ -1549,11 +1557,11 @@ array_push($errorValues,
                     //add group record permissions
                     $values = array();
                     foreach($recIDs as $recID){
-                        foreach ($access_grps as $grp_id){
-                              array_push($values,'('.$grp_id.','.$recID.',"view")');
-                        }
                         foreach ($owner_grps as $grp_id){
                               array_push($values,'('.$grp_id.','.$recID.',"edit")');
+                        }
+                        foreach ($access_grps as $grp_id){
+                              array_push($values,'('.$grp_id.','.$recID.',"view")');
                         }
                     }
                     $query = 'INSERT INTO usrRecPermissions (rcp_UGrpID,rcp_RecID,rcp_Level) VALUES '.implode(',',$values);

@@ -787,13 +787,21 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
            //
            //
            //   
-           function __getUserNames(){
+           function __getUserNames(stype){
                
-               var ele = that._editing.getFieldByName('rec_OwnerUGrpID');
+               if(stype=='access'){
+                   sField = 'rec_NonOwnerVisibilityGroups';
+                   sPanel = '#recAccess';
+               }else{
+                   sField = 'rec_OwnerUGrpID';
+                   sPanel = '#recOwner';
+               }
+               
+               var ele = that._editing.getFieldByName(sField);
                var vals = ele.editing_input('getValues');
                vals = vals[0];
-                
-                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:vals},
+               
+               window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:vals},
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             var txt = [], title = [], cnt = 0;
@@ -808,7 +816,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             if(cnt>2){
                                txt = txt + '...'; 
                             }
-                            panel.find('#recOwner').text(txt).attr('title',title.join(', '));
+                            panel.find(sPanel).text(txt).attr('title',title.join(', '));
                         }
                 });
             
@@ -837,7 +845,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         ele.editing_input('isChanged', true);
                         
                         //update user name
-                        __getUserNames();
+                        __getUserNames('owner');
                     }
 
                     ele = that._editing.getFieldByName('rec_NonOwnerVisibility');
@@ -855,6 +863,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         //update usrRecPermissions
                         ele.editing_input('setValue',[context.NonOwnerVisibilityGroups]);
                         ele.editing_input('isChanged', true);
+                        if(context.NonOwnerVisibility=='viewable') __getUserNames('access');
                     }
                     
                     that.onEditFormChange();
@@ -867,8 +876,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                currentOwner:  that._getField('rec_OwnerUGrpID'),
                currentAccess: that._getField('rec_NonOwnerVisibility'),
                currentAccessGroups: that._getField('rec_NonOwnerVisibilityGroups'),
-               scope_types: 'none',
-               width:800, height:480, onClose: __assignOwnerAccess
+               scope_types: 'none', onClose: __assignOwnerAccess
         });
               
         /* old way                
@@ -889,7 +897,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     }); //on edit ownership click
             
             
-            __getUserNames();
+            __getUserNames('owner');
+            if(that._getField('rec_NonOwnerVisibility')=='viewable') __getUserNames('access');
             
   
                 break;
@@ -1899,8 +1908,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             //show coverall to prevnt edit
             //1. No enough premission
-            var no_access = that._getField('rec_OwnerUGrpID')>0 &&  //0 is everyone
-                            !(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(that._getField('rec_OwnerUGrpID')));
+            //var no_access = that._getField('rec_OwnerUGrpID')!=0 &&  //0 is everyone
+            var no_access = !(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(that._getField('rec_OwnerUGrpID')));
                             //!window.hWin.HAPI4.is_admin()
             
             //2. Popup for resource field

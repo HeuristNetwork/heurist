@@ -383,7 +383,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             if(this.isResultSetEmpty()) return;
             
             window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {width:800, height:480, onClose:
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {height:540, onClose:
                function( context ){
                    if(context){
                        //@todo refresh page

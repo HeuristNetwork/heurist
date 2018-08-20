@@ -245,7 +245,7 @@ window.hWin.HEURIST4.ui = {
                 }
             
         }else if(!window.hWin.HEURIST4.util.isempty(topOptions) && topOptions!==false){
-            if(topOptions===true) topOptions = '&nbsp;';  // <blank>
+            if(topOptions===true) topOptions = '  ';  // <blank>
             window.hWin.HEURIST4.ui.addoption(selObj, '', topOptions);
         }
 

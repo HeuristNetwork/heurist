@@ -368,8 +368,11 @@ function hAPI(_db, _oninit) { //, _currentUser
             ,usr_names:function(request, callback){
 
                 var ugrp_ids = request.UGrpID;
-                ugrp_ids = (!$.isArray(ugrp_ids)?ugrp_ids.split(','):ugrp_ids);    
-                
+                if(ugrp_ids>=0){
+                    ugrp_ids = [ugrp_ids];
+                }else{                
+                    ugrp_ids = (!$.isArray(ugrp_ids)?ugrp_ids.split(','):ugrp_ids);    
+                }
                 
                 //first try to take on client side
                 var sUserNames = {};
@@ -404,7 +407,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                     _callserver('usr_info', request, function(context){
                         if(context.status==window.hWin.ResponseStatus.OK){
                             
-                            $.extend(sUserNames, data);
+                            sUserNames = $.extend(sUserNames, context.data);
                             
                             callback.call(this, {status:window.hWin.ResponseStatus.OK, data:sUserNames} );       
                         }
@@ -968,9 +971,30 @@ function hAPI(_db, _oninit) { //, _currentUser
         * Returns true if currentUser is member of given group ID or itself
         * @param ug
         */
-        is_member: function(ug){
-            return (ug==0 || that.currentUser['ugr_ID']==ug ||
-                (that.currentUser['ugr_Groups'] && that.currentUser['ugr_Groups'][ug]));
+        is_member: function(ugs){
+            //return (ug==0 || that.currentUser['ugr_ID']==ug ||
+            //    (that.currentUser['ugr_Groups'] && that.currentUser['ugr_Groups'][ug]));
+                
+                
+            if(ugs==0 || ugs==null){
+                return true;
+            }
+            
+            if(ugs>0){
+                ugs = [ugs];
+            }else{
+                ugs = $.isArray(ugs) ?ugs: ugs.split(',')
+            }
+            
+            for (var idx in ugs){
+                var ug = ugs[idx];
+                if (ug==0 || that.currentUser['ugr_ID']==ug ||
+                    (that.currentUser['ugr_Groups'] && that.currentUser['ugr_Groups'][ug])){
+                    return true;   
+                }
+            }
+            return false;        
+                
         },
 
         /**

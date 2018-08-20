@@ -661,19 +661,25 @@
         }
         
         //create new table
-        $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
-              ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
-              ."`rcp_UGrpID` smallint(5) unsigned NOT NULL COMMENT 'ID of group',"
-              ."`rcp_RecID` int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',"
-              ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
-              ."PRIMARY KEY  (rcp_ID),"
-              ."UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)"
-            .") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records'";
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
+        if($value==null || $value==""){        
         
-        $res = $mysqli->query($query);
-        if(!$res){
-            $system->addError(HEURIST_DB_ERROR, 'Cannot create usrRecPermissions', $mysqli->error);
-            return false;
+            $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
+                  ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
+                  ."`rcp_UGrpID` smallint(5) unsigned NOT NULL COMMENT 'ID of group',"
+                  ."`rcp_RecID` int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',"
+                  ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
+                  ."PRIMARY KEY  (rcp_ID)"
+                .") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records'";
+            
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot create usrRecPermissions', $mysqli->error);
+                return false;
+            }
+        }else{
+            $query = 'DROP INDEX rcp_composite_key ON usrRecPermissions';
+            $res = $mysqli->query($query);
         }
         
         $query = 'DROP TRIGGER IF EXISTS update_sys_index_trigger';
@@ -683,20 +689,6 @@
             //add new field into table
             $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
             $res = $mysqli->query($query);
-        }
-      
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
-        if($value==null || $value==""){        
-            $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
-                  ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
-                  ."`rcp_UGrpID` smallint(5) unsigned NOT NULL COMMENT 'ID of group',"
-                  ."`rcp_RecID` int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',"
-                  ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
-                  ."PRIMARY KEY  (rcp_ID),"
-                  ."UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)"
-                .") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records'";
-            
-            $mysqli->query($query);
         }
         
         //verify that required column exists in sysUGrps

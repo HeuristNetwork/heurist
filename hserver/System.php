@@ -749,14 +749,14 @@ error_log(print_r($_REQUEST, true));
     */
     public function is_member($ugs){
         
-        if($ugs==0 || $ugs==null ||count($ugs)==0 || @$ugs[0]==0){
+        if($ugs==0 || $ugs==null ||count($ugs)==0){
             return true;
         }
         
         $current_user_grps = $this->get_user_group_ids();
-        $ugs = prepareIds($ugs);
+        $ugs = prepareIds($ugs, true); //include zero
         foreach ($ugs as $ug){
-            if (in_array($ug, $current_user_grps)){
+            if ($ug==0 || in_array($ug, $current_user_grps)){
                 return true;   
             }
         }

@@ -28,7 +28,8 @@
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.2.0");
 define('HEURIST_HELP', "http://heurist.sydney.edu.au/help");
-define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/heurist/");
+define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h4-ao/");
+//define('HEURIST_INDEX_BASE_URL', "http://127.0.0.1/h4-ao");
 
 if (@$httpProxy != '') {
     define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request

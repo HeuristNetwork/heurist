@@ -40,8 +40,8 @@ class DbUsrRecPermissions extends DbEntityBase
               ."`rcp_UGrpID` smallint(5) unsigned NOT NULL COMMENT 'ID of group',"
               ."`rcp_RecID` int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',"
               ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
-              ."PRIMARY KEY  (rcp_ID),"
-              ."UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)"
+              ."PRIMARY KEY  (rcp_ID)"
+              //."UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)"
             .") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records'";
         
             if (!$mysqli->query($query)) {
@@ -50,6 +50,9 @@ class DbUsrRecPermissions extends DbEntityBase
             }else{
                 $this->is_table_exists = true;
             }
+        
+            $query = 'DROP INDEX IF EXISTS rcp_composite_key ON usrRecPermissions';
+            $res = $mysqli->query($query);
         
         }
         

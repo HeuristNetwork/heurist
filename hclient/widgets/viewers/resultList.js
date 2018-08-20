@@ -441,7 +441,7 @@ $.widget( "heurist.resultList", {
             //special feature to save current filter
             //.css({position:'absolute',bottom:0,left:0,top:'2.8em'})
             var btndiv = $('<div>').css({display:'block','vertical-align':'top',
-                padding: '5px', 'margin-top': '4px', height:'1.6em'})
+                padding: '5px', 'margin-top': '4px', height:'2.4em'})
                 .addClass('ui-widget-content')
                 .appendTo(this.div_toolbar);
             this.btn_search_save = $( "<button>", {

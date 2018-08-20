@@ -462,6 +462,7 @@ $.widget( "heurist.search", {
                         add_rec_prefs.push('');
                     }
                         
+                    /*        
                     var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database
                             +'&action=ownership&owner='+add_rec_prefs[1]
                             +'&scope=noscope&access='+add_rec_prefs[2];
@@ -475,9 +476,19 @@ $.widget( "heurist.search", {
                         padding: '0px',
                         resizable:false,
                         title: window.hWin.HR('Default ownership and access for new record'),
-                        callback: function(context){
+                        callback:  });*/
+                        
+                    //show dialog that changes ownership and view access                   
+                    window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {
+                           currentOwner:  add_rec_prefs[1],
+                           currentAccess: add_rec_prefs[2],
+                           currentAccessGroups: add_rec_prefs[4],
+                           scope_types: 'none',
+                           title: window.hWin.HR('Default ownership and access for new record'),
+                           onClose:                         
+                           function(context){
 
-                            if(context && (context.OwnerUGrpID>=0) && context.NonOwnerVisibility && 
+                            if(context && context.NonOwnerVisibility && 
                                 (context.NonOwnerVisibility!=add_rec_prefs[2] || 
                                  context.OwnerUGrpID!=add_rec_prefs[1] ||
                                  context.NonOwnerVisibilityGroups!=add_rec_prefs[4])){
@@ -486,22 +497,7 @@ $.widget( "heurist.search", {
                                 add_rec_prefs[2] = context.NonOwnerVisibility;  
                                 add_rec_prefs[4] = context.NonOwnerVisibilityGroups;  
                                 
-                                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:context.OwnerUGrpID},
-                                function(response){
-                                    if(response.status == window.hWin.ResponseStatus.OK){
-                                        
-                                        var access = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
-                                        if(context.NonOwnerVisibilityGroups){
-                                            access = 'Groups';
-                                        }else{
-                                            access = access[context.NonOwnerVisibility];
-                                        }
-
-                                        btn_select_owner.button({'label'
-                                            :'<div style="text-align:left;display:inline-block">'
-                                                +response.data[context.OwnerUGrpID]+'<br>'+access+'</div>'});
-                                    }       
-                                });                                
+                                that.setOwnerAccessButtonLabel( add_rec_prefs );
                                 
                                 window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);
                                 window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
@@ -580,6 +576,48 @@ $.widget( "heurist.search", {
 
     }, //end _create
 
+    
+   //
+   // set label for default ownership/access button
+   //   
+   setOwnerAccessButtonLabel: function( add_rec_prefs ){
+       
+        var that = this;
+       
+        window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:add_rec_prefs[1]},
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    var ownership = [], title = [], cnt = 0;
+                    for(var ugr_id in response.data){
+                        if(cnt<1){
+                            ownership = response.data[ugr_id];    
+                        }
+                        title.push(response.data[ugr_id]);
+                        cnt++;
+                    }
+                    if(cnt>1){
+                       ownership = cnt + ' groups'; 
+                       title = 'Default owners: '+title.join(', ')+'. ';
+                    }else{
+                       title = '';
+                    }
+                    
+                    var access = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
+                    if(add_rec_prefs[4]){
+                        access = 'Groups';
+                        title = title + 'Viewable for '+(add_rec_prefs[4].split(',').length)+' groups';
+                    }else{
+                        access = access[add_rec_prefs[2]];
+                    }
+                    
+                    that.btn_select_owner.button({'label':
+                        '<div style="text-align:left;display:inline-block" title="'+title+'">'
+                        +ownership+'<br>'+access+'</div>'});
+                }
+        });
+        
+   },
+    
     
     _showhide_input_prompt:function() {
                 if(this.input_search.val()==''){
@@ -683,24 +721,8 @@ $.widget( "heurist.search", {
             this.btn_add_record.button({label: 'Add '+opt.text()});
         }
        
-        var that = this;
-        window.hWin.HAPI4.SystemMgr.usr_names({UGrpID:add_rec_prefs[1]},
-        function(response){
-            if(response.status == window.hWin.ResponseStatus.OK){
-                
-                var access = {hidden:'Owner only', viewable:'Logged-in', pending:'Public pending', public:'Public'};
-                if(add_rec_prefs[4]){
-                    access = 'Groups';
-                }else{
-                    access = access[add_rec_prefs[2]];
-                }
-                
-                that.btn_select_owner.button({'label':
-                    '<div style="text-align:left;display:inline-block">'
-                    +response.data[add_rec_prefs[1]]+'<br>'+access+'</div>'});
-            }       
-        });                                
-        
+        this.setOwnerAccessButtonLabel( add_rec_prefs );
+       
         this._showhide_input_prompt();
     },
 
@@ -1117,7 +1139,7 @@ $.widget( "heurist.search", {
 
                             window.hWin.HEURIST4.ui.createTermSelectExt2(select_terms.get(0),
                             {datatype:detailType, termIDTree:allTerms, headerTermIDsList:disabledTerms, defaultTermID:null, 
-                                topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:'&nbsp;'}], //window.hWin.HR('<blank>')
+                                topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:'  '}], //window.hWin.HR('<blank>')
                                 needArray:false, useHtmlSelect:false});
                                                  
                             that._on( select_terms, { change: function(event){

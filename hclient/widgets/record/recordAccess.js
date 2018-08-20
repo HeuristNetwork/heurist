@@ -22,8 +22,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     // default options
     options: {
     
-        height: 340,
-        width:  640,
+        height: 520,
+        width:  800,
         modal:  true,
         init_scope: 'selected',
         title:  'Change Record Access and Ownership',
@@ -111,11 +111,16 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             that._onRecordScopeChange();
         });
         
-        this._onRecordScopeChange();
+        if(this.options.scope_types=='none'){
+            this._onRecordScopeChange();    
+        }
         
         return this._super();
     },
-    
+
+    //    
+    //
+    //
     _getActionButtons: function(){
         var res = this._super();
         res[1].text = window.hWin.HR('Apply');
@@ -270,7 +275,7 @@ console.log(ownership);
     //
     _onRecordScopeChange: function () 
     {
-        var scope_val = (this.options.scope_types=='none')?'1':this.selectRecordScope.val();
+        var scope_val = (this.options.scope_types=='none' || !this.selectRecordScope)?'1':this.selectRecordScope.val();
         var ownership = this.element.find('input[type="radio"][name="rb_Owner"]:checked').val();
         var visibility = this.element.find('input[type="radio"][name="rb_Access"]:checked').val();
             
