@@ -50,9 +50,9 @@ $is_check = @$_REQUEST["check"];
 if($is_check){ // check is set to 1 when this is called to contact the Heurist reference server.
     // If HEURIST_INDEX_BASE_URL==HEURIST_BASE_URL, this script is running on the reference server
     //return current db and code versions
-    $db_version = $this->get_system('sys_dbVersion').'.'
-        .$this->get_system('sys_dbSubVersion').'.'
-        .$this->get_system('sys_dbSubSubVersion');
+    $db_version = $system->get_system('sys_dbVersion').'.'
+        .$system->get_system('sys_dbSubVersion').'.'
+        .$system->get_system('sys_dbSubSubVersion');
     
     
     echo HEURIST_VERSION."|".$db_version;
