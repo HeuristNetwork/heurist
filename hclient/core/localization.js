@@ -38,6 +38,12 @@ regional['en'] = {
     +'This may be due to server load or to requesting too large a result set, or a query that fails to resolve. '
     +'If the problem persists, please email a bug report to the Heurist team so we can investigate.',
 
+    'New_Function_Conversion':'This function has not yet been converted from Heurist version 4 to version 5 (2018). ',
+    
+    'New_Function_Contact_Team':'If you need this function please send an email to heuristnetwork dot org or '
+    +'click on the Bug report/feature request entry in the Help menu - we may already have an alpha version '
+    +'that you can use or can prioritise development.',
+    
     //OLD VERSION    No response from server. This may be due to too many simultaneous requests or a coding problem. Please report to Heurist developers if this reoccurs.',
 
     'mailto_fail': 'You have not set an email handler for mailto: links. '

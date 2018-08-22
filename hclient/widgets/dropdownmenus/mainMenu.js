@@ -519,7 +519,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(action == "menu-database-properties"){
             
                 window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
+        }else
+        if(action == "menu-database-rollback"){
            
+            window.hWin.HEURIST4.msg.showMsgDlg('Although rollback data has been recorded, '
+                    + 'there is currently no end-user interface way of rolling '
+                    + 'back the database. <br><br>'+window.hWin.HR('New_Function_Contact_Team'));
         }else 
         if(action == "menu-structure-mimetypes"){
             
@@ -532,6 +537,15 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
                                                 
+        }else 
+        if(action == "menu-import-email" || 
+           action == "menu-manage-backup" || action == "menu-manage-interdbtransfer" ||
+           action == "menu-faims-import" || action == "menu-faims-export"
+           ){
+
+            window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('New_Function_Conversion')
+                    + '<br><br>'+window.hWin.HR('New_Function_Contact_Team'));
+            
         }else 
         if(action == "menu-help-bugreport"){
             
