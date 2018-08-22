@@ -201,7 +201,7 @@ $.widget( "heurist.resultList", {
                             that.btn_search_save.show();
                             if(that.search_save_hint.attr('show_hint')==1){
                                 that.search_save_hint.show('fade',{},1000);
-                                setTimeout(function(){that.search_save_hint.hide('slide', {}, 6000);}, 3000);    
+                                setTimeout(function(){that.search_save_hint.hide('slide', {}, 6000);}, 5000);    
                             }
                             
                             //setTimeout(function(){that.search_save_hint.hide('puff');},3000);
@@ -455,7 +455,8 @@ $.widget( "heurist.resultList", {
                 primary: 'ui-icon-arrowthick-1-w'
             }}).hide();
             
-            this.search_save_hint = $('<span style="padding-left:10px;font-size:0.8em">click me to save the current filter for future navigation</span>')
+            this.search_save_hint = $('<span style="padding-left:10px;font-size:0.8em">'
+            +'<span class="ui-icon ui-icon-arrow-1-w" style="font-size:0.9em"/>click me to save the current filter for future navigation &nbsp;</span>')
                     .appendTo( btndiv ).hide();
 
             this.btn_search_save.find('.ui-button-icon-primary').css({'left':'0.1em'});
@@ -1604,7 +1605,7 @@ $.widget( "heurist.resultList", {
                     smenu = smenu + '<li>...</li>';
                 }
             }else{
-                $( "<button>", { text: "1"}).css({'font-size':'0.7em'}).button()
+                $( "<button>", { text: "1", id:'page0'}).css({'font-size':'0.7em'}).button()
                 .appendTo( span_pages ).on("click", function(){ 
                     that._renderPage(0); 
                 } );
@@ -1639,11 +1640,10 @@ $.widget( "heurist.resultList", {
                 if(finish!= pageCount-1){
                     $( "<span>" ).html("..").appendTo( span_pages );
                 }
-                $( "<button>", { text: ''+pageCount }).css({'font-size':'0.7em'}).button()
+                $( "<button>", { text: ''+pageCount, id:'page'+finish }).css({'font-size':'0.7em'}).button()
                 .appendTo( span_pages ).on("click", function(){ that._renderPage(pageCount-1); } );
             }
         }
-
 
         if(ismenu){
             //show as menu
@@ -1706,6 +1706,9 @@ $.widget( "heurist.resultList", {
         if(this.options.header_class){
             this.span_pagination.find('button').addClass(this.options.header_class).css({'border':'none'});
         }
+        if(!ismenu)
+            span_pages.find('#page'+currentPage).css({'border':'1px solid white'});
+
 
         this._showHideOnWidth();
     }
