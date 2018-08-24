@@ -108,6 +108,8 @@ $.widget( "heurist.boro_nav", {
                 that._setOptions( that.historyNav[that.historyNav.length-2] );
             }
         });
+        
+        $('body').css({'background':'none'});
 
         this._refresh();
         
@@ -2341,7 +2343,7 @@ function boroLink(type, id, tag){
   
    var link = window.hWin.HAPI4.baseURL;
    if(true){
-       link = link + '?db='+window.hWin.HAPI4.database+'&a=2&ll=boro&'+type+'id='+id;
+       link = link + '?db='+window.hWin.HAPI4.database+'&a=2&ll='+window.hWin.HAPI4.sysinfo['layout']+'&'+type+'id='+id;
    }else{
        //place/'+ placeID+'/a       
        link = link + type+'/'+ id+'/'+tag;       

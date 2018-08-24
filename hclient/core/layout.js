@@ -400,11 +400,6 @@ function hLayout(args) {
 
         //$container.hide();
 
-        if(!Hul.isempty(layout.cssfile)){
-            $("head").append($('<link rel="stylesheet" type="text/css" href="'+layout.cssfile+'?t='+(new Date().getTime())+'">'));
-            layout.cssfile = null;
-        }
-        
         //find main container and load template
         if(layout['template']){
                $container.hide();
@@ -1017,7 +1012,14 @@ function hLayout(args) {
         
         //add style to header
         if(!Hul.isempty(layout.cssfile)){
-            $("head").append($('<link rel="stylesheet" type="text/css" href="'+layout.cssfile+'?t='+(new Date().getTime())+'">'));
+            
+            if(!$.isArray(layout.cssfile)){
+                layout.cssfile = [layout.cssfile];
+            }
+            for (var idx in layout.cssfile){
+                $("head").append($('<link rel="stylesheet" type="text/css" href="'+layout.cssfile[idx]+'?t='+(new Date().getTime())+'">'));
+            }
+            layout.cssfile = null;
         }
         
 

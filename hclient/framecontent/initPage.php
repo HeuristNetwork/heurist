@@ -102,6 +102,8 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
 <meta content="telephone=no" name="format-detection">
 
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">

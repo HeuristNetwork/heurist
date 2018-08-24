@@ -250,7 +250,6 @@ var cfg_layouts = [
        //widgets will be loaded into divs with id "result_pane" and "search_pane" in boro_main.html         
        ,boro_place:{dropable:false,css:{},
                 apps:[                           
-                //creates navigation menu and loads info pages
                 {appid:'boro_place', 
                     options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
                                 multiselect:false, show_menu: false},
@@ -263,7 +262,8 @@ var cfg_layouts = [
        ,search_pane:{dropable:false,css:{},
                 apps:[                           
                 //prod 
-                {appid:'dh_search', options:{UGrpID:48, search_at_init:152}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
+                {appid:'dh_search', options:{UGrpID:48, search_at_init:152}, hasheader:false, css:{border:'none', 'background':'none'} }]       }  
+                //faceted/forms searches
                 //dev
                 //{appid:'dh_search', options:{UGrpID:18, Xsearch_at_init:110}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
        ,boro_nav:{dropable:false,css:{},
@@ -274,6 +274,37 @@ var cfg_layouts = [
 /*       ,search_pane:{dropable:false,apps:[{appid:'boro_search', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]}
        ,result_pane:{dropable:false,apps:[{appid:'boro_reslist', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]} */
     },
+
+    {id:'adel', name:'Beyond 1914 - Book of Rememberance', theme:'heurist', type:'free', 
+                cssfile:['hclient/widgets/boro/beyond1914.css',
+                'hclient/widgets/boro/assets/css/header-footer.css',
+                'hclient/widgets/boro/assets/css/global-assets.css'], 
+                template: 'hclient/widgets/boro/adel_main.html'
+       //widgets will be loaded into divs with id "result_pane" and "search_pane" in boro_main.html         
+       ,boro_place:{dropable:false,css:{},
+                apps:[                           
+                {appid:'boro_place', 
+                    options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
+                                multiselect:false, show_menu: false},
+                hasheader:false, css:{border:'none', 'background':'none'} }]}
+       ,result_pane:{dropable:false,css:{},
+                apps:[{appid:'boro_results', 
+                    options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
+                    multiselect:false, show_menu: false},
+                hasheader:true, css:{border:'none', 'background':'none'} }]}
+       ,search_pane:{dropable:false,css:{},
+                apps:[                           
+                //prod 
+                {appid:'dh_search', options:{UGrpID:55, search_at_init:196}, hasheader:false, 
+                css:{border:'none', 'background':'none'} }]         
+       }
+       ,boro_nav:{dropable:false,css:{},
+                apps:[                           
+                //creates navigation menu and loads info pages
+                {appid:'boro_nav', options:{menu_div:'bor-navbar-collapse', search_UGrpID:55}, hasheader:false, 
+                            css:{border:'none', 'background':'none'} }]}
+    },
+
     
     {id:'DigitalHarlem', name:'Digital Harlem', theme:'heurist', type:'cardinal', cssfile:'hclient/widgets/digital_harlem/dh_style.css',
         north:{size:140, resizable:false, overflow:'hidden',

@@ -75,10 +75,15 @@
     */
     function svsGetByUser($system, $ugrID=null){
 
+        $mysqli = $system->get_mysqli();
+        
         //user id is not defined - take current user
         if (!$ugrID) {
             $ugrID = $system->get_user_id();
 
+            //$groups = user_getWorkgroups($mysqli, $ugrID); 
+            //if( $groups && count($groups)>0){
+                
             $current_User = $system->getCurrentUser();
             if($current_User && @$current_User['ugr_Groups'] && count(array_keys($current_User['ugr_Groups']))>0 ){
                 $ugrID = implode(',', array_keys($current_User['ugr_Groups'])).",".$ugrID;
@@ -96,10 +101,11 @@
         }
 
 
-        $mysqli = $system->get_mysqli();
+        
 
         $query = "SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_UGrpID in (".$ugrID.")";
 
+//error_log($query);        
         $res = $mysqli->query($query);
 
         if ($res){

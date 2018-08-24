@@ -1,49 +1,81 @@
-<nav class="navbar navbar-default bor-utility-nav" role="navigation">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bor-navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="fa fa-bars"></span>
-            </button>
-            <a class="navbar-brand bor-sydney-logo" href="javascript:window.location.reload(true)">Book of Remembrance</a>
-        </div>
+<div class="o-off-canvas__wrapper">
 
+    <div id="ua-search"></div>
+
+
+    <div class="o-off-canvas__content" data-off-canvas-content>
+
+      <header class="o-layout__header" id="ua-top" role="banner">
+        <div class="c-header__title-bar">
+          <div class="c-header__title-bar-left">
+            <a href="/" class="c-header__logo--mobile">
+              <img src="hclient/widgets/boro/assets/img/ua-logo.png">
+            </a>
+          </div>
+          <div class="c-header__title-bar-right">
+            <a href="#0" class="c-header__title-bar-icon" data-toggle="ua-search"><i class="fa fa-search"></i></a>
+            <a href="#0" class="c-header__title-bar-icon" data-toggle="ua-header-menu"><i class="fa fa-chevron-down"></i></a>
+          </div>
+        </div>
+        
+        <div class="c-header" id="ua-header-menu">
+        
+          <div class="c-header__topbar-first">
+            <div class="c-header__container">
+              <a href="/" class="c-header__logo">
+                <img src="hclient/widgets/boro/assets/img/ua-logo.png">
+              </a>
+              <div class="c-header__column">
+                <div id="ua-header-quicklinks">
+                  <nav>
+                    <ul class="c-header-quicklinks">
+                      <li><a href="#0">Students</a></li>
+                      <li><a href="#0">Staff</a></li>
+                      <li><a href="#0">Quicklinks</a></li>
+                      <li class="c-header__search"><a href="#"><i class="fa fa-search"></i></a></li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="c-header__topbar-second">
+            <div class="c-header__container">
+              <div class="c-header__column">
+                <div id="ua-mega-menu">
+                  <nav>
+                    <ul class="c-mega-menu">
+                      <li class="c-mega-menu__item is-dropdown-submenu-parent"><a href="#0">Study</a></li>
+                      <li class="c-mega-menu__item is-dropdown-submenu-parent"><a href="#0">Research &amp; Innovation</a></li>
+                      <li class="c-mega-menu__item is-dropdown-submenu-parent"><a href="#0">Engage</a></li>
+                      <li class="c-mega-menu__item is-dropdown-submenu-parent"><a href="#0">About</a></li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </div>
+        
+          <button class="c-header__close-button" data-close aria-label="Close reveal" type="button">
+            Menu
+            <span aria-hidden="true">&times;</span>
+          </button>
+        
+        </div> <!-- #ua-header-menu -->
+      </header>
+
+      <div class="o-layout__container">
+        <div class="o-layout__app">
+<!-- APPLICATION CONTENT -->       
+
+    <nav class="navbar navbar-default bor-utility-nav" role="navigation" style="position:inherit;z-index:0">
+        <div class="container">
         <div class="collapse navbar-collapse bor-nav" id="bor-navbar-collapse">
         </div>
-    </div>
-</nav>
-
-<div class="container">
-    <header class="bor-header">
-        <a href="javascript:window.location.reload(true)" class="bor-logo">
-            <h1 class="bor-header-title sr-only">Beyond 1914</h1>
-
-            <p class="bor-header-sub-title sr-only">The University of Sydney and the Great War</p>
-        </a>
-
-
-        <div class="form-horizontal bor-header-search">
-            <fieldset>
-                <legend class="sr-only">Search BOR</legend>
-                <div class="form-group">
-                    <label class="col-lg-12 control-label sr-only" for="query">Enter your search terms to search the BOR database</label>
-                    <div class="col-lg-12 bor-search-body">
-                        <input id="search_query" type="search" placeholder="Find people and places" style="min-width: 40ex;"
-                            class="form-control input-lg" value="">
-                        <button id="search_button" class="submit fa-search ui-icon ui-icon-search" style="height:30px"><i>&nbsp;</i></button>
-                    </div>
-                    <div class="col-lg-12">
-                        <a target="blank"  style="color:white;text-decoration:underline" 
-                        href="hclient/widgets/boro/bundles/usydbookofremembrancewebsite/documents/help_search.html">How do I use this?</a>
-                    </div>
-                </div>
-            </fieldset>
         </div>
+    </nav>
 
-
-
-    </header>
-    
     <div id="main_pane" class="bor-page clearfix">
        
         <!-- people by first character --> 
@@ -243,7 +275,7 @@
                 <div class="bor-map" id="cp_mapframe_container" 
                     style="position: relative; background-color: rgb(229, 227, 223); overflow: hidden;min-height:100px" >
                     <iframe id="cp_mapframe" 
-                        src='http://heurist.sydney.edu.au/h5-ao/viewers/map/map.php?ll=boro&db=ExpertNation&header=off&legend=off' 
+                        src='http://heurist.sydney.edu.au/h5-ao/viewers/map/map.php?ll=adel&db=ExpertNation&header=off&legend=off' 
                         width="100%" height="100%" border="0"></iframe>
                 </div>
 
@@ -302,7 +334,7 @@
                         style="position: relative; overflow: hidden;min-height:100px">
                     <div style="height: 100%; width: 100%; position: absolute; top: 0px; left: 0px; background-color: rgb(229, 227, 223);">
                     <iframe id="p_mapframe" 
-            src='http://heurist.sydney.edu.au/h5-ao/viewers/map/map.php?ll=boro&db=ExpertNation&header=off&legend=off' 
+            src='http://heurist.sydney.edu.au/h5-ao/viewers/map/map.php?ll=adel&db=ExpertNation&header=off&legend=off' 
                     width="100%" height="100%" frameborder="0"></iframe>
                     </div>
                 </div>
@@ -367,54 +399,133 @@
             </div>
     </div>
     <!-- end main pane -->    
-        
-    <footer class="bor-footer">
-            <div class="bor-social-badges">
-            
-                <a href="https://www.facebook.com/sydneyuni" target="_blank"><img src="hclient/widgets/boro/bundles/usydbookofremembrancewebsite/images/common/facebook-logo.png" width="30" title="Facebook"/></a>
-                <a href="http://twitter.com/sydney_uni" target="_blank"><img src="hclient/widgets/boro/bundles/usydbookofremembrancewebsite/images/common/twitter-logo.png" width="30" title="Twitter"/></a>
-                <a href="http://beyond1914.tumblr.com/archive" target="_blank"><img src="hclient/widgets/boro/bundles/usydbookofremembrancewebsite/images/common/tumblr-logo.png" width="30" title="Tumblr"/></a>
-<!---            
-                <a href="https://www.facebook.com/sydneyuni"><span class="fa fa-facebook bor-social-badge"><span class="sr-only">Facebook</span></span></a>
-                <a href="http://twitter.com/sydney_uni"><span class="fa fa-twitter bor-social-badge"><span class="sr-only">Twitter</span></span></a>
-                <a href="http://beyond1914.tumblr.com/archive"><span class="fa fa-tumblr bor-social-badge"><span class="sr-only">Tumblr</span></span></a>
--->                
-            </div>
-            <div>
-                <hr class="bor-footer-separator">
-                <span class="bor-footer-separator-icon">❉</span>
-                <hr class="bor-footer-separator">
-            </div>
-            <div class="bor-sponsors">
-                <div>Generously supported by:</div>
-                <div>
-                    <p class="lead">The University of Sydney Chancellor’s Committee</p>
-                    <p>with additional support from</p>
-                    <img class="bor-sponsors-logo" src="hclient/widgets/boro/bundles/usydbookofremembrancewebsite/images/common/sponsors/SAC.png" alt="Saint Andrew's College">
-                    <img class="bor-sponsors-logo" src="hclient/widgets/boro/bundles/usydbookofremembrancewebsite/images/common/sponsors/StJohns.png" alt="St John's College">
-                    <img class="bor-sponsors-logo" src="hclient/widgets/boro/bundles/usydbookofremembrancewebsite/images/common/sponsors/st-pauls-college.png" alt="Saint Paul's College">
-                    <img class="bor-sponsors-logo" src="hclient/widgets/boro/bundles/usydbookofremembrancewebsite/images/common/sponsors/WC.png" alt="The Women's College">
-                </div>
-            </div>
-            <div class="bor-photographer">
-                <p>Background photograph by Sam Hood, taken at the University of Sydney in 1927.</p>
-                <p>Courtesy of the <a href="http://www.acmssearch.sl.nsw.gov.au/search/itemDetailPaged&#10;&#9;&#9;&#9;&#9;.cgi?itemID=7544" target="_blank">collections of the State Library of NSW</a></p>
-            </div>
-            <div>
-                <hr class="bor-footer-separator">
-                <span class="bor-footer-separator-icon">❉</span>
-                <hr class="bor-footer-separator">
-            </div>
-            <div class="bor-legal">
-                <small>© 2002-14 The University of Sydney. ABN: 15 211 513 464. CRICOS Number: 00026A.</small>
-            </div>
-        </footer>
-        
-</div>
 
-<div class="float-panel" data-top="180" style="display:none">
+
+
+        </div>
+      </div>
+
+      <div class="o-layout__local-footer">
+        <div class="o-layout__container">
+          <div class="c-local-footer">
+            <div class="c-local-footer__container">
+              <section class="c-local-footer__column is-first-column">
+                <p class="u-lead-text">Division of the Deputy Vice-Chancellor & Vice-President Academic</p>
+                <a href="#0" class="c-btn c-btn--large">Large</a>
+                <p><a href="#0" class="c-btn c-btn--large">Large</a></p>
+              </section>
+              <section class="c-local-footer__column is-second-column">
+                <h4 class="c-local-footer__title">Address</h4>
+                <p>Level 7, Wills Building<br>
+                  North Terrace Campus</p>
+                <p>The <a href="#0">University of Adelaide</a><br>
+                  South Australia 5005<br>
+                  Australia</p>
+              </section>
+              <section class="c-local-footer__column is-third-column">
+                <h4 class="c-local-footer__title">Contact</h4>
+                <nav>
+                  <ul class="c-local-footer__menu">
+                    <li><a href="tel:1112223334" title="">T +61 8313 5901</a></li>
+                    <li><a href="tel:1112223334" title="">T +61 8313 8333</a></li>
+                    <li><a href="mailto:demo@nowhere.com" title="">dvca@adelaide.edu.au</a></li>
+                  </ul>
+                </nav>
+                <div class="c-social-icon-block">
+                  <a href="#0" class="ua-social-icon" title=""><img src="hclient/widgets/boro/assets/img/social/facebook.png" alt=""></a>
+                  <a href="#0" class="ua-social-icon" title=""><img src="hclient/widgets/boro/assets/img/social/twitter.png" alt=""></a>
+                  <a href="#0" class="ua-social-icon" title=""><img src="hclient/widgets/boro/assets/img/social/instagram.png" alt=""></a>
+                  <a href="#0" class="ua-social-icon" title=""><img src="hclient/widgets/boro/assets/img/social/youtube.png" alt=""></a>
+                  <a href="#0" class="ua-social-icon" title=""><img src="hclient/widgets/boro/assets/img/social/linkedin.png" alt=""></a>
+                  <a href="#0" class="ua-social-icon" title=""><img src="hclient/widgets/boro/assets/img/social/snapchat.png" alt=""></a>
+                  <a href="#0" class="ua-social-icon" title=""><img src="hclient/widgets/boro/assets/img/social/gplus.png" alt=""></a>
+                  <a href="#0" class="ua-social-icon" title=""><img src="hclient/widgets/boro/assets/img/social/rss.png" alt=""></a>
+                </div>
+              </section>
+              <section class="c-local-footer__column is-fourth-column">
+                <figure class="c-image">
+                  <a href="#0" class="c-image__link"><img src="https://via.placeholder.com/1166x875/" alt="" class="c-image--small"></a>
+                </figure>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer  class="o-layout__footer">
+        <div id="ua-footer"></div>
+        <div class="c-footer-meta">
+          <div class="c-footer-meta__container">
+            <nav>
+              <ul class="c-footer-meta__menu">
+                <li>
+                  Authorised by: <a href="mailto:">Email address of role responsible for authorising this site and its content</a>
+                </li>
+                <li>
+                  Maintained by: <a href="mailto:">Email address of role responsible for updating the content of this site</a>
+                </li>
+                <li>Last updated: 18 May 2017</li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+
+
+<script src="hclient/widgets/boro/assets/js/app.js"></script>
+<script src="hclient/widgets/boro/assets/js/header-footer.js"></script>
+
+
+<script src="hclient/widgets/boro/assets/js/plugins/global-assets-loader.js?t=1533859963648"></script>
+<script>
+console.log('load global assets!!!');
+    if (window.location.origin.indexOf('adelaide.edu.au') > -1) {
+      var _globalassets = new GlobalAssetsLoader({
+        "quicklinks": {
+          "path": "//global.adelaide.edu.au/v/style-guide2/includes/common/static-quicklinks-menu.html",
+          "selector": "ua-header-quicklinks"
+        },
+        "search": {
+          "path": "//global.adelaide.edu.au/v/style-guide2/includes/common/static-search.html",
+          "selector": "ua-search"
+        },
+        "megamenu": {
+          "path": "//global.adelaide.edu.au/v/style-guide2/includes/common/static-mega-menu.html",
+          "selector": "ua-mega-menu"
+        },
+        "footer": {
+          "path": "//global.adelaide.edu.au/v/style-guide2/includes/common/static-global-footer.html",
+          "selector": "ua-footer"
+        }
+      });
+    } else {
+      var _globalassets = new GlobalAssetsLoader({
+        "quicklinks": {
+          "path": "/h5-ao/hclient/widgets/boro/assets/partials/static-quicklinks-menu.html",
+          "selector": "ua-header-quicklinks"
+        },
+        "search": {
+          "path": "/h5-ao/hclient/widgets/boro/assets/partials/static-search.html",
+          "selector": "ua-search"
+        },
+        "megamenu": {
+          "path": "/h5-ao/hclient/widgets/boro/assets/partials/static-mega-menu.html",
+          "selector": "ua-mega-menu"
+        },
+        "footer": {
+          "path": "/h5-ao/hclient/widgets/boro/assets/partials/static-global-footer.html",
+          "selector": "ua-footer"
+        }
+      });
+    }
+</script>
+
+<div class="float-panel" data-top="110" style="display:none;background: rgba(38, 38, 38, 0.9);">
     <a href='#' style="color:white">BACK TO</a><br>
     <select style="min-width:90px;max-width:110px;color:black"></select>
     <!-- SEARCH <br> RESULTS -->  
 </div>
-

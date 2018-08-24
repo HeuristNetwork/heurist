@@ -2340,7 +2340,8 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 $.fn.sideFollow = function(dtime) {
 
     var floating = $(this);
-    var originalTop = 180;// parseInt($(this).css('top'));
+    var originalTop =  parseInt(floating.attr('data-top'));
+    if(!(originalTop>=0)) originalTop = 180;
 
     dtime ? dtime = dtime : dtime = 1000;
 
