@@ -1224,7 +1224,7 @@ console.log('tileloaded 2');
             }
             
             var lt = window.hWin.HAPI4.sysinfo['layout'];  
-            if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0)){
+            if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0 || lt.indexOf('adel')==0) ){
                 useMarkerClusterer = false;
             }
 

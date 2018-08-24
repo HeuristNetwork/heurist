@@ -126,7 +126,7 @@ $system->defineConstants();
         if(!success) return;
         
         var lt = window.hWin.HAPI4.sysinfo['layout'];
-        if(lt=='boro'){
+        if(lt=='boro' || lt=='adel'){
                 $("head").append($('<link rel="stylesheet" type="text/css" href="'
                     +window.hWin.HAPI4.baseURL+'hclient/widgets/boro/beyond1914.css?t='+(new Date().getTime())+'">'));
         }        

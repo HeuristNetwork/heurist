@@ -116,9 +116,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
                     menu_mapdocuments.hide();
                     
-                    var lt = window.hWin.HAPI4.sysinfo['layout'];   
-                    
-                    if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0)){
+                    if(_isPublicSite()){
                         menu_mapdocuments.hide();
                     }else if($.isFunction(onload_callback)) {
                         onload_callback.call();
@@ -1034,8 +1032,7 @@ map.data.addListener('mouseover', function(event) {
             //request['getrelrecs'] = 1;  //return all related records including relationship records
             request['detail'] = 'timemap'; //request.rules?'detail':'timemap'; //@todo on server side timemap details for rules
             
-            var lt = window.hWin.HAPI4.sysinfo['layout'];   
-            if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0)){
+            if(_isPublicSite()){
                 request['suppres_derivemaplocation']=1;
             }
 
@@ -1103,6 +1100,14 @@ map.data.addListener('mouseover', function(event) {
     var myColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(34,177,76)','rgb(0,177,232)','rgb(163,73,164)','rgb(255,127,39)'];
     var colors_idx = -1;
 
+    //
+    //
+    //    
+    function _isPublicSite(){
+        var lt = window.hWin.HAPI4.sysinfo['layout'];   
+        return lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0 || lt.indexOf('adel')==0);
+    }
+
     /**
     *  if recordset has property mapenabled = true, convert recordset to timemap and vis_timeline formats 
     *  if mapenabled = false the request to server side is performed for first 1000 map/time enabled records
@@ -1131,8 +1136,7 @@ map.data.addListener('mouseover', function(event) {
                         detail: 'timemap'
                     };
                     
-                    var lt = window.hWin.HAPI4.sysinfo['layout'];   
-                    if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0)){
+                    if(_isPublicSite()){
                         request['suppres_derivemaplocation']=1;
                     }
 
@@ -1229,7 +1233,7 @@ map.data.addListener('mouseover', function(event) {
 
                     var symbology = {iconColor:source.color, iconMarker:source.iconMarker};
                     
-                    if(lt=='boro'){ //customized symbology and popup for boro
+                    if(lt=='boro' || lt=='adel'){ //customized symbology and popup for boro
                         recset.calcfields['rec_Info'] = function(record, fldname){
                             
                             var title = this.fld(record, 'rec_Title');

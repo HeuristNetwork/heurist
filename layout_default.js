@@ -269,7 +269,7 @@ var cfg_layouts = [
        ,boro_nav:{dropable:false,css:{},
                 apps:[                           
                 //creates navigation menu and loads info pages
-                {appid:'boro_nav', options:{menu_div:'bor-navbar-collapse', search_UGrpID:48}, hasheader:false, 
+                {appid:'boro_nav', options:{menu_div:'bor-navbar-collapse', search_UGrpID:48, uni_ID:4705}, hasheader:false, 
                             css:{border:'none', 'background':'none'} }]}
 /*       ,search_pane:{dropable:false,apps:[{appid:'boro_search', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]}
        ,result_pane:{dropable:false,apps:[{appid:'boro_reslist', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]} */
@@ -301,7 +301,7 @@ var cfg_layouts = [
        ,boro_nav:{dropable:false,css:{},
                 apps:[                           
                 //creates navigation menu and loads info pages
-                {appid:'boro_nav', options:{menu_div:'bor-navbar-collapse', search_UGrpID:55}, hasheader:false, 
+                {appid:'boro_nav', options:{menu_div:'bor-navbar-collapse', search_UGrpID:55, uni_ID:4710}, hasheader:false, 
                             css:{border:'none', 'background':'none'} }]}
     },
 

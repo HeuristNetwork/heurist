@@ -32,7 +32,8 @@ $.widget( "heurist.boro_nav", {
        menu_div:'',   // id of navigation menu div
        entityType:'',
        entityID:null,
-       search_UGrpID:48  //usergroup for searches that will be displayed in search dropdown menu
+       search_UGrpID:48,  //usergroup for searches that will be displayed in search dropdown menu
+       uni_ID: 4705
     },
     
     data_content:{},
@@ -177,7 +178,7 @@ $.widget( "heurist.boro_nav", {
             var details = [this.DT_NAME, this.DT_ORDER, this.DT_EXTENDED_DESCRIPTION];
 
             var request = request = {q: 't:'+window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']
-                     +' sortby:f:'+this.DT_ORDER,
+                     +' f:196:'+this.options.uni_ID+' sortby:f:'+this.DT_ORDER,
                      w: 'all', detail:details };
 
             window.hWin.HAPI4.SearchMgr.doSearchWithCallback( request, function( recordset )
@@ -626,16 +627,17 @@ $.widget( "heurist.boro_nav", {
             
             request['q'] = 'ids:'+recID;
             request['rules'] = [{"query":"t:24,26,29,33,37 linked_to:25 ", //eventlet,edu inst,mil service,death,occupation
-                        "levels":[{"query":"t:10 linkedfrom:24,29,33,37 f:196:4705"}, //persons only form UnySyd
+                        "levels":[{"query":"t:10 linkedfrom:24,29,33,37 f:196:"+this.options.uni_ID}, //persons only form UnySyd
                                     //persons vis tertiary and schooling
-                                  {"query":"t:27,31 linked_to:26-97","levels":[{"query":"t:10 linked_to:27,31 f:196:4705"}]} ] }];
-                                                                            //or linkedfrom via field 16
+                                  {"query":"t:27,31 linked_to:26-97",
+                                        "levels":[{"query":"t:10 linked_to:27,31 f:196:"+this.options.uni_ID}]} ] }];
+            //or linkedfrom via field 16
             //{"f:196":"4705"}
         }else if(entType=='institution'){
 
             request['q'] = 'ids:'+recID;  //find institute
             request['rules'] = [{"query":"t:27,31 linked_to:26-97",   //find education records
-                                            "levels":[{"query":"t:10 linked_to:27,31 f:196:4705"}]},  //find linked persons
+                                            "levels":[{"query":"t:10 linked_to:27,31 f:196:"+this.options.uni_ID}]},  //find linked persons
                                 {"query":"t:25 linkedfrom:26-78"}]; //find place
             
         }else if(entType=='tertiary-study'){
@@ -643,12 +645,12 @@ $.widget( "heurist.boro_nav", {
             request['q'] = [{"t":27},{"f:80":recID}];  //tert study
             
             request['rules'] = [{"query":"t:26 linkedfrom:27-97","levels": [{"query":"t:25 linkedfrom:26-78"}]}, //edu inst
-                                {"query":"t:10 linked_to:27-102 f:196:4705"}];
+                                {"query":"t:10 linked_to:27-102 f:196:"+this.options.uni_ID}];
                                 
         }else if(entType=='military-award'){
             //by award term id
             request['q'] = [{"t":28},{"f:98":recID}];  //awards
-            request['rules'] = [{"query":"t:10 linked_to:28-87 f:196:4705"}];
+            request['rules'] = [{"query":"t:10 linked_to:28-87 f:196:"+this.options.uni_ID}];
             
         }else if(entType=='military-service'){
             //by rank and unit term id
@@ -664,7 +666,7 @@ $.widget( "heurist.boro_nav", {
             }
 
             request['q'] = mil_service;
-            request['rules'] = [{"query":"t:10 linked_to:29-88 f:196:4705"}];
+            request['rules'] = [{"query":"t:10 linked_to:29-88 f:196:"+this.options.uni_ID}];
             
             //request['q'] = [{"t":10},{"linked_to:88":mil_service}];
         }else{
@@ -1005,7 +1007,7 @@ $.widget( "heurist.boro_nav", {
         var request = {
             w: 'a',
             detail: [that.DT_NAME, that.DT_GIVEN_NAMES, that.DT_INITIALS, that.DT_HONOR, 'rec_ThumbnailURL', 'rec_ThumbnailBg'], 
-            q: [{"t":"10"},{"f:196":"4705"},{"f:1":firstChar+'%'},{"sortby":"t"}],//,{"sortby":"t"}
+            q: [{"t":"10"},{"f:196":this.options.uni_ID},{"f:1":firstChar+'%'},{"sortby":"t"}],//,{"sortby":"t"}
             //sortby:'t',
             //id: random
             source:this.element.attr('id')};
