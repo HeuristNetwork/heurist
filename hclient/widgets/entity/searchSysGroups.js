@@ -82,6 +82,10 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
         }
            
         this.input_sort_type = this.element.find('#input_sort_type');
+        
+        if( !window.hWin.HEURIST4.util.isempty(this.options.sort_type_int) ){
+            this.input_sort_type.val(this.options.sort_type_int)
+        }
         this._on(this.input_sort_type,  { change:this.startSearch });
         
         this.startSearch();            
