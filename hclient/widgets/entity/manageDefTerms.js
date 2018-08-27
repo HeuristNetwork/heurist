@@ -338,8 +338,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                   }          
                 );
                 
-            }else if(action=='merge'){
-                
+            }else if(action=='merge'){ //@todo
+                /*
                 var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='
                         +window.hWin.HAPI4.database+'&action=merge_term&value='+encodeURIComponent();
 
@@ -347,7 +347,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     padding: '0px',
                     title: window.hWin.HR(action_type),
                     class:'ui-heurist-bg-light'} );
-                
+               */ 
             }
         }else{
             window.hWin.HEURIST4.msg.showMsgFlash('Save current term before adding a child term');

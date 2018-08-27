@@ -218,6 +218,9 @@ function haddDataMenu() {
 
         if(link.attr('id')=='menulink-add-record'){
             
+            window.hWin.HEURIST4.ui.openRecordEdit(-1, null, null);
+            
+            /*
             window.hWin.HAPI4.SystemMgr.verify_credentials(function(){    
                 $('.accordion_pnl').find('a').parent().removeClass('item-selected');
                 link.parent().addClass('item-selected');
@@ -227,6 +230,7 @@ function haddDataMenu() {
                             +'&action=add_record';
                 __load_frame_content(url);
             });
+            */
             
             event.preventDefault();
             return false;

@@ -45,7 +45,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         */         
 
         //define group selector for edit
-        var ele = $('#sel_OwnerGroups');
+        var ele = this.element.find('#sel_OwnerGroups');
         if(!ele.editing_input('instance')){
             ele.empty();
             this._createGroupSelectorElement('sel_OwnerGroups', null);    
@@ -54,7 +54,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         
         
         //define group selector for access
-        var ele = $('#sel_AccessGroups');
+        var ele = this.element.find('#sel_AccessGroups');
         if(!ele.editing_input('instance')){
             ele.empty();
             this._createGroupSelectorElement('sel_AccessGroups', this.options.currentAccessGroups);    
@@ -64,12 +64,12 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         if(!window.hWin.HEURIST4.util.isempty(this.options.currentOwner)){
             
             if(this.options.currentOwner==0){
-                $('#rb_Owner-everyone').prop('checked', true);    
+                this.element.find('#rb_Owner-everyone').prop('checked', true);    
             }else if(this.options.currentOwner == window.hWin.HAPI4.currentUser['ugr_ID']){
-                $('#rb_Owner-user').prop('checked', true);    
+                this.element.find('#rb_Owner-user').prop('checked', true);    
             }else{
-                $('#rb_Owner-group').prop('checked', true);    
-                $('#sel_OwnerGroups').show().editing_input('setValue', [this.options.currentOwner]);
+                this.element.find('#rb_Owner-group').prop('checked', true);    
+                this.element.find('#sel_OwnerGroups').show().editing_input('setValue', [this.options.currentOwner]);
             }
         }
         
@@ -77,10 +77,10 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             //fieldSelect.val(this.options.currentOwner);
             
             if(this.options.currentAccess=='viewable' && this.options.currentAccessGroups){
-                $('#rb_Access-viewable-group').prop('checked', true);
-                $('#sel_AccessGroups').show();
+                this.element.find('#rb_Access-viewable-group').prop('checked', true);
+                this.element.find('#sel_AccessGroups').show();
             }else{
-                $('#rb_Access-'+this.options.currentAccess).prop('checked', true);
+                this.element.find('#rb_Access-'+this.options.currentAccess).prop('checked', true);
                 
             }
         }
@@ -88,12 +88,12 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         var that = this;
 
 
-        $('input[name="rb_Owner"]').change(function(){
+        this.element.find('input[name="rb_Owner"]').change(function(){
             
-            if($('#rb_Owner-group').prop('checked')){
-                $('#sel_OwnerGroups').show();
+            if(that.element.find('#rb_Owner-group').prop('checked')){
+                that.element.find('#sel_OwnerGroups').show();
             }else{
-                $('#sel_OwnerGroups').hide();
+                that.element.find('#sel_OwnerGroups').hide();
             }
             
             that._onRecordScopeChange();
@@ -166,47 +166,68 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     //
     //
     //
+    getSelectedParameters: function( showWarning ){
+       
+        var ownership = this.element.find('input[type="radio"][name="rb_Owner"]:checked').val();
+                    //this.element.find('#sel_Ownership').val();
+        if(ownership=='everyone') {
+            ownership = 0;
+        } else if(ownership=='user') {
+            ownership = window.hWin.HAPI4.currentUser['ugr_ID'];
+        } else {
+            ownership = $('#sel_OwnerGroups').editing_input('getValues');
+            if(ownership && ownership.length>0){
+                ownership = ownership[0];
+            }
+            if(!ownership){
+                if(showWarning)
+                    window.hWin.HEURIST4.msg.showMsgFlash('Select group with edit permission');
+                return false;
+            }
+        }
+        
+        
+        var visibility = this.element.find('input[type="radio"][name="rb_Access"]:checked').val();
+        if(!visibility){
+                if(showWarning)
+                    window.hWin.HEURIST4.msg.showMsgFlash('Select access permission');
+                return false;
+        }
+        
+        var visibility_groups = '';
+        
+        if(visibility=='viewable' && $('#sel_AccessGroups').editing_input('instance')){
+            var sel = $('#sel_AccessGroups').editing_input('getValues');
+            if(sel && sel.length>0){
+                visibility_groups = sel[0];
+            }
+        }
+            
+        this.options.currentOwner = ownership;           
+        this.options.currentAccess = visibility;
+        this.options.currentAccessGroups = visibility_groups;
+        
+        return true;
+    },
+    
+    //
+    //
+    //
     doAction: function(){
 
             var scope_val = this.selectRecordScope.val();
-            var ownership = this.element.find('input[type="radio"][name="rb_Owner"]:checked').val();
-                        //this.element.find('#sel_Ownership').val();
-            if(ownership=='everyone') {
-                ownership = 0;
-            } else if(ownership=='user') {
-                ownership = window.hWin.HAPI4.currentUser['ugr_ID'];
-            } else {
-                ownership = $('#sel_OwnerGroups').editing_input('getValues');
-                if(ownership && ownership.length>0){
-                    ownership = ownership[0];
-                }
-                if(!ownership){
-                    window.hWin.HEURIST4.msg.showMsgFlash('Select group with edit permission');
-                    return;
-                }
-            }        
             
-            var visibility = this.element.find('input[type="radio"][name="rb_Access"]:checked').val();
-            var visibility_groups = '';
-            
+            var scope_val = this.selectRecordScope.val();
             if (window.hWin.HEURIST4.util.isempty(scope_val) 
-                && window.hWin.HEURIST4.util.isempty(ownership) 
-                && window.hWin.HEURIST4.util.isempty(visibility))  return;
-        
-            if(visibility=='viewable' && $('#sel_AccessGroups').editing_input('instance')){
-                var sel = $('#sel_AccessGroups').editing_input('getValues');
-                if(sel && sel.length>0){
-                    visibility_groups = sel[0];
-                }
-            }
-        
+                && !this.getSelectedParameters(true))  return;
+            
         
             if(this.options.scope_types=='none'){
                 //return values as context
                 this._context_on_close = {
-                'OwnerUGrpID': ownership,
-                'NonOwnerVisibility': visibility,
-                'NonOwnerVisibilityGroups':visibility_groups,
+                'OwnerUGrpID': this.options.currentOwner,
+                'NonOwnerVisibility': this.options.currentAccess,
+                'NonOwnerVisibilityGroups':this.options.currentAccessGroups,
                 };
                 
                 this.closeDialog();
@@ -225,17 +246,12 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 }   
             }
             
-/*            
-console.log(visibility_groups);            
-console.log(ownership);
-*/
-            
             var request = {
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'ids'  : scope,
-                'OwnerUGrpID': ownership,
-                'NonOwnerVisibility': visibility,
-                'NonOwnerVisibilityGroups':visibility_groups,
+                'OwnerUGrpID': this.options.currentOwner,
+                'NonOwnerVisibility': this.options.currentAccess,
+                'NonOwnerVisibilityGroups':this.options.currentAccessGroups,
                 };
                 
             if(rec_RecTypeID>0){
@@ -275,14 +291,12 @@ console.log(ownership);
     //
     _onRecordScopeChange: function () 
     {
-        var scope_val = (this.options.scope_types=='none' || !this.selectRecordScope)?'1':this.selectRecordScope.val();
-        var ownership = this.element.find('input[type="radio"][name="rb_Owner"]:checked').val();
-        var visibility = this.element.find('input[type="radio"][name="rb_Access"]:checked').val();
+        
+        var scope_val = (this.options.scope_types=='none')?'any':this.selectRecordScope.val();
+        var isdisabled = !(scope_val!='' && this.getSelectedParameters(false))
             
-        var isdisabled = (!(scope_val!='' && ownership && visibility));
-
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );
-    },
+    }
   
 });
 

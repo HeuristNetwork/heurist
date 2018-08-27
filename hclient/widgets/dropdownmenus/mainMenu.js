@@ -538,6 +538,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
                                                 
         }else 
+        if(action == "menu-import-add-record"){
+            
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd');
+            
+        }else 
         if(action == "menu-import-email" || 
            action == "menu-manage-backup" || action == "menu-manage-interdbtransfer" ||
            action == "menu-faims-import" || action == "menu-faims-export"

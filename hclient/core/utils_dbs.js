@@ -249,7 +249,10 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
-    //
+    // returns rectype structure as treeview data
+    // there is similar method on client side - however on clinet side it is faster
+    // used for treeview in import structure
+    // todo - facet search wiz, smarty
     //
     createRectypeStructureTree: function( db_structure, $mode, rectypeids, fieldtypes, parentcode ) {
         
@@ -627,6 +630,10 @@ window.hWin.HEURIST4.dbs = {
             fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker'];
         }else if(!$.isArray(fieldtypes) && fieldtypes!='all'){
             fieldtypes = fieldtypes.split(',');
+        }
+        
+        if(db_structure==null){
+            db_structure = window.hWin.HEURIST4;
         }
 
         var rtypes = db_structure.rectypes['names'];

@@ -462,22 +462,6 @@ $.widget( "heurist.search", {
                         add_rec_prefs.push('');
                     }
                         
-                    /*        
-                    var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database
-                            +'&action=ownership&owner='+add_rec_prefs[1]
-                            +'&scope=noscope&access='+add_rec_prefs[2];
-                            
-                    if ( add_rec_prefs[4] ) {
-                        url = url + '&visgroups=' + add_rec_prefs[4];
-                    }        
-                            
-
-                    window.hWin.HEURIST4.msg.showDialog(url, {height:400, width:620,
-                        padding: '0px',
-                        resizable:false,
-                        title: window.hWin.HR('Default ownership and access for new record'),
-                        callback:  });*/
-                        
                     //show dialog that changes ownership and view access                   
                     window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {
                            currentOwner:  add_rec_prefs[1],

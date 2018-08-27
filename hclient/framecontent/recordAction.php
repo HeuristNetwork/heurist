@@ -1,19 +1,10 @@
 <?php
 
 /**
-* Page for popup modal dialog to perform various actions related to records
+* Page for popup modal dialog to perform record batch actions
 *
 *    add/edit/delete details
-*    set relationship
-*    bookmark/unbookmark
-*    assign personal tags
-*    assign wg tags
-*    rating
-*    ownership(who can edit), access(visibility)
-*
-*    merge
-*    delete
-*    mailing list based on records
+*    change record type
 *
 *    STRUCTURE:
 *    header that describes the action
@@ -87,7 +78,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 
 //verify parameter action
 $action_type = @$_REQUEST['action'];
-$allowed_actions = array('add_record','add_detail','replace_detail','delete_detail','merge_term','rectype_change','ownership');
+$allowed_actions = array('add_detail','replace_detail','delete_detail','rectype_change');
 if(!in_array($action_type, $allowed_actions)){
     //@todo - it does not work since initPage already produces some output
     // need to call this piece of code with callback function in initPage after system itit
@@ -169,87 +160,10 @@ if(!in_array($action_type, $allowed_actions)){
                 <div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>
             </div>
 
-<!-- OWNERSHIP/ACCESS -->
-            
-            <div id="div_sel_ownership" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
-                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Record is editable by:</label></div>
-                <select id="sel_Ownership" style="max-width:30em;margin-bottom: 1em;"></select>
-            </div>
-            
-            <div id="div_sel_access2" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
-                <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_Ownership">Outside this group record is:</label></div>
-            
-                            <select name="sel_Access" id="sel_Access" style="min-width: 300px;">
-                                <option value="hidden">Hidden (restricted to owners)</option>
-                                <option value="viewable" selected>Viewable (for specific groups or any logged-in users)</option>
-                                <option value="pending">Pending (marked for potential publication)</option>
-                                <option value="public">Public (automatically published to hml etc.)</option>
-                            </select>
-                            
-            </div>
-
-            <div id="div_sel_access" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
-                <div class="header" style="padding: 0 16px 0 16px;"><label>Access outside this group:</label></div>
-                
-                <div class="detailRow" style="padding-bottom:1em;">
-                    <label><input type="radio" name="rb_Access" value="hidden" id="rb_Access-hidden">
-                    Only members of this group can view the record</label>
-                </div>
-                <div class="detailRow" style="padding-bottom:1em;">
-                    <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable">
-                    Any logged-in user can view the record</label>
-                </div>
-                <div class="detailRow" style="padding-bottom:1em;">
-                    <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable-group">
-                    Members of selected groups can view the record</label>
-                </div>
-            </div>
-                
-            <div id="sel_AccessGroups"  style="padding: 0.2em; min-width: 600px;display:none;" class="input"></div>
-            
-            <div  id="div_sel_access3" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
-                <div class="header" style="padding: 0 16px 0 16px;"><label>&nbsp;</label></div>
-                <div class="detailRow" style="padding-bottom:1em;">
-                    <label><input type="radio" name="rb_Access" value="pending" id="rb_Access-pending">
-                    Flagged for external publication, any logged-in user</label>
-                    <div style="margin-left: 20px; font-style: italic;">No effect on existing external views - hml, html etc.</div>
-                    <div style="margin-left: 20px; font-style: italic;">Can be auto-set whenever a public record is edited.</div>
-                </div>
-                <div class="detailRow" style="padding-bottom:20px">
-                    <label>
-                    <input type="radio" name="rb_Access" value="public" id="rb_Access-public">
-                    Published - written automatically to external views</label>
-                </div>
-            </div>
-            
-            
 
             <div style="padding: 0.2em; width: 100%;" class="input">
                 <div class="header" style="padding:16px;"><label for="cb_add_tags">Tag affected records (auto-generated tag)</label></div>
                 <input id="cb_add_tags" type="checkbox" class="text ui-widget-content ui-corner-all">
-            </div>
-            
-            <div id="div_more_options" style="padding: 0.2em; width: 100%;display:none">
-                <div id="btn_more_options" style="cursor:pointer;float:right;color:#7D9AAA;padding:2px 4px;">show more options</div>
-            </div>
-
-            <hr class="add_record" style="display:none;color:#6A7C99"/>
-            
-            <div style="padding: 0.2em; min-width: 600px;display:none;border-top:1px solid #6A7C99" class="add_record">
-                <div class="header" style="padding:0 16px;padding-top:20px;text-align:left"><label>ADVANCED</label></div>
-            </div>
-            
-            <div id="div_sel_tags" style="padding: 0.2em; min-width: 600px;display:none;" class="add_record">
-                <div class="header" style="padding:0 16px;"><label>Add these tags:</label></div>
-                <div id="div_sel_tags2" style="padding-bottom:20px"></div>
-            </div>
-            <div id="div_add_link" style="padding: 0.2em; min-width: 600px;display:none;" class="input add_record">
-                <div class="header" style="padding: 0 16px;vertical-align:top">
-                        <label for="txt_add_link">Hyperlink this URL in a web page, browser bookmark or desktop shortcut to provide one-click addition of records:</label>
-                </div>
-                <textarea id="txt_add_link" readonly
-                    onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"
-                    class="text ui-widget-content ui-corner-all" rows=5 style="width:70ex"></textarea>
             </div>
             
         </fieldset>

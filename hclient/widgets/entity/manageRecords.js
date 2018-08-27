@@ -879,21 +879,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                scope_types: 'none', onClose: __assignOwnerAccess
         });
               
-        /* old way                
-        var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='+window.hWin.HAPI4.database
-                +'&action=ownership&owner='+that._getField('rec_OwnerUGrpID')
-                +'&scope=noscope&access='+that._getField('rec_NonOwnerVisibility');
-        if ( that._getField('rec_NonOwnerVisibilityGroups') ) {
-           url = url + '&visgroups=' + that._getField('rec_NonOwnerVisibilityGroups');
-        }        
-
-        window.hWin.HEURIST4.msg.showDialog(url, {height:400, width:620,
-            padding: '0px',
-            resizable:false,
-            title: window.hWin.HR('ownership'),
-            callback: __assignOwnerAccess } );                    //, class:'ui-heurist-bg-light'
-       */
-       
                     }); //on edit ownership click
             
             
@@ -1448,37 +1433,24 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(!(that.options.new_record_params['RecTypeID']>0)){
                 
                 //record type not defined - show popup with rectype selection
-                var url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/recordAction.php?db='
-                        + window.hWin.HAPI4.database
-                        + '&action=add_record&scope=popup';
-
-                window.hWin.HEURIST4.msg.showDialog(url, {height:600, width:700,
-                    padding: '0px',
-                    //resizable:false,
-                    title: window.hWin.HR('add_record'),
-                    callback: function(context){
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
+                    onClose: function(context){
                         if(context && context.RecTypeID>0){
-
+                            
                             that._currentEditRecTypeID = context.RecTypeID;
                             that.options.new_record_params =  context;
-                            
-                            that.options.new_record_params['RecTypeID']  = context.RecTypeID;
-                            that.options.new_record_params['OwnerUGrpID'] = context.OwnerUGrpID;
-                            that.options.new_record_params['NonOwnerVisibility'] = context.NonOwnerVisibility;
-                            that.options.new_record_params['NonOwnerVisibilityGroups'] = context.NonOwnerVisibilityGroups;
-                                                
+                                
                             window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
                                     function(response){  
                                             response.is_insert=true; 
                                             //add details from new_record_params
                                             //@todo
                                             that._initEditForm_step4(response); });
-                            
                         }else{
                              that.closeDialog();
                         }
-                    }
-                });
+                            
+                }});
 
             }else{
                 
