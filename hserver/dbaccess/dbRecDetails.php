@@ -497,7 +497,6 @@ class DbRecDetails
                 }else{
                     $newVal = $this->data['rVal'];
                 }
-                $newVal = $mysqli->real_escape_string($newVal);
          
                 $dtl['dtl_ID'] = $dtlID;
                 $dtl['dtl_Value'] = $newVal;
