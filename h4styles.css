@@ -1008,6 +1008,12 @@ span.fancytree-checkbox{
 {
     background-position: -64px -48px;
 }
+.tree-facets .fancytree-expander{
+    display:none;
+}
+.tree-facets .graytext{
+    color: lightgray;
+}
 
 /* indent for folders */
 ul.fancytree-container ul{
