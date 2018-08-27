@@ -773,94 +773,24 @@ $.widget( "heurist.search_faceted_wiz", {
 
                 var allowed_fieldtypes = ['enum','freetext',"year","date","integer","float","resource","relmarker"];
                 
+                var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
+/*                
                 //load definitions for given rectypes
                 window.hWin.HAPI4.SystemMgr.get_defs({rectypes: rectype,
                     mode:5, //special node - returns data for treeview
                     fieldtypes:allowed_fieldtypes},  //ART20150810 this.options.params.fieldtypes.join() },
-
                     function(response){
 
                         if($.isArray(response) || response.status == window.hWin.ResponseStatus.OK){
 
                             //create unique identificator=code for each leaf fields - rt:ft:rt:ft....
-                            /*
-                            function __set_queries(parentquery, recordtype, fields){
-
-                            var j;
-                            for(j=0; j<fields.length; j++){
-
-                            var field = fields[j];
-                            var recordtype_new = null;
-                            var parentquery_new = null;
-
-                            if(field.type=='rectype'){
-                            recordtype_new  = field.key;
-                            }else if(field.type=='resource' || field.type=='relmarker'){
-                            //@todo for relmarker - separate case
-                            var prefix;
-                            if(field['reverse']=='yes'){
-                            if(field.type=='resource'){
-                            prefix = 'lf'
-                            }else{
-                            prefix = 'rf';
-                            }
-                            }else {
-                            if(field.type=='resource'){
-                            prefix = 'lt'
-                            }else{
-                            prefix = 'rt';
-                            }
-                            }
-
-
-                            var q = recordtype + ':' + prefix + field.key.substr(2);
-                            if(parentquery!=''){
-                            q = parentquery + ':' + q;
-                            }
-                            parentquery_new = q;
-
-                            //unconstrained or one-type constraint
-                            if(window.hWin.HEURIST4.util.isempty(field.rt_ids)
-                            || Number(field.rt_ids) === field.rt_ids
-                            || field.rt_ids.indexOf(',')<0){
-                            recordtype_new = field.rt_ids;
-                            recordtype = field.rt_ids;
-                            }
-
-                            }
-
-                            if(field.children && field.children.length>0){
-                            __set_queries(parentquery_new?parentquery_new:parentquery,
-                            recordtype_new?recordtype_new:recordtype, field.children);
-                            //__set_queries(parentquery, recordtype_new?recordtype_new:recordtype, field.children);
-                            }else{
-
-                            var q = field.key;
-                            if(q=="recTitle") q = "title"
-                            else if(q=="recModified") q = "modified"
-                            else q = q.substr(2);
-
-                            q = recordtype + ':' + q
-                            if(parentquery!=''){
-                            q = parentquery + ':' + q;
-                            //var nums = parentquery.split('(');
-                            //q = q + new Array( nums.length+1 ).join(')');
-                            }
-                            fields[j].code = q;
-                            }
-
-                            }
-                            }//function
-
-                            __set_queries('', '', response.data.rectypes);
-                            */
-
                             if($.isArray(response)){
                                   treedata = response;
                             }else 
                             if(response.data.rectypes) {
                                 treedata = response.data.rectypes;
                             }
+*/
                             treedata[0].expanded = true; //first expanded
                             
                             if(!treediv.is(':empty')){
@@ -881,19 +811,28 @@ $.widget( "heurist.search_faceted_wiz", {
                                     }
                                 },
                                 lazyLoad: function(event, data){
+                                    
+                                    var node = data.node;
+                                    var parentcode = node.data.code; 
+                                    var rectypes = node.data.rt_ids;
+                                    
+                                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectypes, allowed_fieldtypes, parentcode );
+                                    if(res.length>1){
+                                        data.result = res;
+                                    }else{
+                                        data.result = res[0].children;
+                                    }
+                                    
+                                    return data;                                                   
+                                    /* from server
                                     var node = data.node;
                                     var sURL = window.hWin.HAPI4.baseURL + "hserver/controller/sys_structure.php";
-                                    /*"?db="
-                                        + window.hWin.HAPI4.database
-                                        +'&mode=4&rectypes='+data.node.key
-                                        +'&fieldtypes='+allowed_fieldtypes.join(',');
-                                    */                    
                                     data.result = {
                                         url: sURL,
                                         data: {db:window.hWin.HAPI4.database, mode:5, parentcode:node.data.code, 
                                             rectypes:node.data.rt_ids, fieldtypes:allowed_fieldtypes}
                                     } 
-                                                                       
+                                    */                                   
                                 },
                                 loadChildren: function(e, data){
                                         var showrev = $('#fsw_showreverse').is(":checked");
@@ -930,7 +869,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                 click: function(e, data){
                                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                                        data.node.setExpanded(!data.node.isExpanded());
-                                       treediv.find('.fancytree-expander').hide();
+                                       //treediv.find('.fancytree-expander').hide();
                                        
                                    }else if( data.node.lazy) {
                                        data.node.setExpanded( true );
@@ -987,7 +926,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             }
                             
                             //hide all folder triangles
-                            treediv.find('.fancytree-expander').hide();
+                            //treediv.find('.fancytree-expander').hide();
 
                             that.current_tree_rectype_ids = rectypeIds;
 
@@ -1011,12 +950,13 @@ $.widget( "heurist.search_faceted_wiz", {
                             $("#fsw_showreverse").attr('checked', false);
                             $("#fsw_showreverse").change();
 
-
+/* server response
                         }else{
                             window.hWin.HEURIST4.msg.redirectToError(response.message);
                         }
                         window.hWin.HEURIST4.util.setDisabled($('#btnNext'), false);
                 });
+                */
 
             }
         }
