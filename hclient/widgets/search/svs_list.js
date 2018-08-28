@@ -445,10 +445,6 @@ $.widget( "heurist.svs_list", {
                 else{
                     that._validate_TreeData();
                 }
-
-                //add missed entries
-
-
                 that._updateAccordeon();
             } );
 
