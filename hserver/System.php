@@ -712,13 +712,13 @@ error_log(print_r($_REQUEST, true));
     /**
     * Returns array of ID of all groups for current user plus current user ID
     */
-    public function get_user_group_ids($level=null){
+    public function get_user_group_ids($level=null, $refresh=false){
     
         $ugrID = $this->get_user_id();
 
         if($ugrID>0){
             $groups = @$this->current_User['ugr_Groups'];
-            if(!is_array($groups)){
+            if($refresh || !is_array($groups)){
                 $groups = $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
             }
             if($level!=null){

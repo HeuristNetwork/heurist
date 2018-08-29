@@ -210,7 +210,7 @@
         $personal_data = array();
 
         $ugrID = $system->get_user_id();
-        $ugr_groups = $system->get_user_group_ids();
+        $ugr_groups = $system->get_user_group_ids(null, true); //always get latest
         $lastID = null;
 
         foreach($groups as $id=>$treedata){
@@ -248,7 +248,10 @@
             return $date;
         }
 
-        $system->addError(HEURIST_INVALID_REQUEST, 'No data provided to update tree on server side');
+        $system->addError(HEURIST_INVALID_REQUEST, 'No data provided to update tree on server side.'
+        .' This may be due to a network outage or minor database corruption. It means the changes you have just made may not have been'
+        . 'written into the database - please reload the page and check to see if they have been saved, try again, and advise us if '
+        .' the problem persists');
         return false;
     }
 

@@ -25,7 +25,7 @@ require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
 require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
 require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
-require_once(dirname(__FILE__).'/../../records/files/fileUtils.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_files.php');
 
 require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
 
@@ -46,7 +46,7 @@ $mode = @$_REQUEST['mode'];
 
 // Download the dumped data as a zip file
 if($mode=='2' && file_exists($folder.".zip") ){
-    downloadFile('application/zip', $folder.".zip");
+    downloadFile('application/zip', $folder.".zip"); //see db_files.php
     exit();
 }
 
@@ -292,62 +292,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
             }
 
-            //this coode not used anymore - we copy entire content of file_uploads
-            if(false && $_REQUEST['includeresources']){
-                echo_flush("Exporting resources (indexed/uploaded files)<br>");
-
-                $squery = "select rec_ID, ulf_ID, ulf_FilePath, ulf_FileName, ulf_OrigFileName, ulf_MimeExt ";
-                $ourwhere = " and (dtl_RecID=rec_ID) and (ulf_ID = dtl_UploadedFileID) ";
-                $detTable = ", recDetails, recUploadedFiles ";
-                $params = array();
-                $params["q"] = $q;
-
-                $query = prepareQuery($params, $squery, BOTH, $detTable, $ourwhere);
-
-                $mysqli = mysqli_connection_overwrite(DATABASE);
-
-                $res = $mysqli->query($query);
-                if (!$res){
-                    print "<p class='error'>Failed to obtain list of file resources from MySQL database.$please_advise</p>";
-                }else{
-                    //loop for records/details
-                    while ($row = $res->fetch_row()) {  //$row = $res->fetch_assoc()) {
-                        $filename_orig = $row[4];
-                        $filename_insys = null;
-                        
-                        if(@$row[2] || @$row[3]){
-                            $filename_insys = @$row[2].@$row[3];
-                            $filename_insys = resolveFilePath($filename_insys);
-                        }
-                        
-                        if($filename_insys && $row[1] && $filename_orig){
-
-                            if(file_exists($filename_insys)){
-                                //get relative path
-                                $imgfolder = $folder.'/resources/';
-                                if(!file_exists($imgfolder) && !mkdir($imgfolder, 0777, true)){
-                                    print "<p class='error'>'Failed to create folder for file resources: ".$imgfolder."$please_advise</p>";
-                                    break;
-                                }else{
-                                    $filename = $imgfolder.$filename_orig;
-                                    //copy file
-                                    copy($filename_insys, $filename);
-                                }
-
-                            }else{
-                                print "<p class='error'>File not found: ".$filename_insys.
-                                    "<br>Name indicated includes relative path from database file store directory".
-                                    "$please_advise</p>";
-                            }
-
-                        }
-                    }
-                }
-
-            }
-
             // Create a zipfile of the definitions and data which have been dumped to disk
-
             if(file_exists($folder.".zip")) unlink($folder.".zip");
             chdir($folder); 
             $cmdline = "zip -r ".$folder.".zip *"; //archive everything within folder, keep folder strcuture
