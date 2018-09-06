@@ -1163,7 +1163,7 @@ copy_IconAndThumb_FromLibrary
 	* @return $ret an array of return values for the various data elements created or errors if they occurred
 	**/
 
-	function createDetailTypes($commonNames,$dt) {
+	function createDetailTypes($commonNames, $dt) {
 		global $mysqli, $dtyColumnNames;
 
 		$ret = null;

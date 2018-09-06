@@ -656,10 +656,42 @@ $.widget( "heurist.importStructure", {
             }};
 
 */
+
+        var oData = {
+            rectype:{
+                colNames:{ common:[ window.hWin.HEURIST4.rectypes.typedefs.commonFieldNames ], 
+                           dtFields:[ window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames ]},
+                defs: {} 
+                },
+            detailtype:{
+                colNames:{ common:[ window.hWin.HEURIST4.detailtypes.typedefs.commonFieldNames ] },
+                defs: {}
+                }
+        };
+        
+        //rectypes and fields to be added
+        var rectypes_tba = [];
+        var details_tba = [];
+        
+        var idx_ccode_rt = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
+        var idx_ccode_dt = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
+        
+        var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 
+                                                5, this._selectedRtyID, 'all' );
+        for 
         
         var tree = treediv.fancytree("getTree");
         tree.visit(function(node){
-            if(node.isSelected()){
+            if(true || node.isSelected()){
+                
+                if(node.data.type=='rectype' && !(node.data.rtyID_local>0)) { //rectype to be added
+                
+                    
+                }
+                
+                window.hWin.HEURIST4.dbs.findByConceptCode($rt_conceptcode, 
+                                window.hWin.HEURIST4.rectypes.typedefs, idx_ccode);
+                
                 
             }
             

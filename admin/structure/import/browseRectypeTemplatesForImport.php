@@ -16,7 +16,7 @@
 
 /**
 * browseRectypeTemplatesForImport.php
-* Browse through a seeries of documented record type templates on the Heursit Network site, HeuristNetwork.org
+* Browse through a series of documented record type templates on the Heursit Network site, HeuristNetwork.org
 * and allow the user a one-click download of the record type and all its associated record types, fields and terms 
 *
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>

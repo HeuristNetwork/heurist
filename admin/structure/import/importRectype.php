@@ -26,8 +26,8 @@ if($outputFormat=="json"){
 
 require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
-require_once(dirname(__FILE__).'/../../../records/files/fileUtils.php');
-require_once(dirname(__FILE__).'/../../../common/php/utilsMail.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_mail.php');
+require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
 // User must be system administrator or admin of the owners group for this database
@@ -38,7 +38,7 @@ if( !is_admin() ){
 $excludeDuplication = (@$_REQUEST["dup"]!="1"); //by default exclude duplication of existing record types (identified by concept IDs)
 
 //combination of db and record type id eg. 1126-13
-// TODO: Artem, is this meant to be the concept ID for the record type? or si the record type referenced by local ID?
+// TODO: Artem, is this meant to be the concept ID for the record type? or is the record type referenced by local ID?
 $code = @$_REQUEST['code'];
 $req_import_types  = @$_REQUEST["import"];
 $req_correspondence = @$_REQUEST["correspondence"];
@@ -52,7 +52,7 @@ if(!$code){
     $is_checkonly = false;
 }
 
-global $database_id;
+global $database_id; //source database id - taken from rectype concept code
 
 if(!$code){
     error_exit("Record type code not defined in call to importRectype.php - should be two numbers separated by a dash(program glitch)");
@@ -79,7 +79,7 @@ if(!(is_numeric($database_id) && is_numeric($rectype_id))){
 //    Limit maximum number of repeats to 10
 // 5. With list of all record types, build a list of all the base field types:
 // 6. With list of all base field types: Return data for all terms used
-// 7. Perform database action - add reccords, structure, fields and terms into our database
+// 7. Perform database action - add rectypes, structure, fields and terms into our database
 
 
 // ------------------------------------------------------------------------------------------------

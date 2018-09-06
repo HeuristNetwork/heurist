@@ -248,12 +248,22 @@ window.hWin.HEURIST4.dbs = {
         return window.hWin.HEURIST4.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
     },
     
-    //
-    // returns rectype structure as treeview data
-    // there is similar method on client side - however on clinet side it is faster
-    // used for treeview in import structure
-    // todo - facet search wiz, smarty
-    //
+    /*
+     
+      returns rectype structure as treeview data
+      there is similar method on client side - however on clinet side it is faster
+      used for treeview in import structure, facet wiz
+      todo - use it in smarty editor
+     
+      fieldtypes - array of fieldtypes, if 'all' header of rectype is not included   
+      $mode 
+         4 - find reverse links and relations   
+         5 for lazy treeview  
+       returns:
+         
+       children:[{key: field#, type: fieldtype, title:'', code , name, conceptCode, dtyID_local, children:[]},... ]
+     
+    */
     createRectypeStructureTree: function( db_structure, $mode, rectypeids, fieldtypes, parentcode ) {
         
         
@@ -278,13 +288,21 @@ window.hWin.HEURIST4.dbs = {
                 //array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
             }
 
-            if($recTypeId>0){
+            if($recTypeId>0 && rectypes['typedefs'][$recTypeId]){
 
                 $res['key'] = $recTypeId;
                 $res['title'] = rectypes['names'][$recTypeId];
                 $res['type'] = 'rectype';
+                
+                var idx_ccode = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
+            
+                var $rt_conceptcode = rectypes['typedefs'][$recTypeId]['commonFields'][idx_ccode];
+                $res['conceptCode'] = $rt_conceptcode;
+                $res['rtyID_local'] = window.hWin.HEURIST4.dbs.findByConceptCode($rt_conceptcode, 
+                                window.hWin.HEURIST4.rectypes.typedefs, idx_ccode);
+                
                                                                                                                   
-                if(rectypes['typedefs'][$recTypeId] && ($mode!=5 || $recursion_depth==0)){
+                if(($mode!=5 || $recursion_depth==0)){
                     $details = rectypes['typedefs'][$recTypeId]['dtFields'];
                     
                     var $children_links = [];
@@ -670,6 +688,8 @@ window.hWin.HEURIST4.dbs = {
 
     //
     //  find by concept code in local definitions
+    //
+    // entities - rectypes, detailtypes, terms
     //
     findByConceptCode: function(concept_code, entities, idx_ccode){
 
