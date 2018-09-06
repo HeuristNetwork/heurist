@@ -684,8 +684,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
 +'<div>'
 +'<div><label class="small-header">Added By:</label><span id="recAddedBy">'+that._getField('rec_AddedByUGrpID')+'</span></div>'
-+'<div><label class="small-header">Added:</label>'+that._getField('rec_Added')
-                +' ('+window.hWin.HEURIST4.util.getTimeForLocalTimeZone(that._getField('rec_Added'))+' local)</div>'
++ ((that._getField('rec_Added')=='')?'':
+  '<div><label class="small-header">Added:</label>'+that._getField('rec_Added')
+                +' ('+window.hWin.HEURIST4.util.getTimeForLocalTimeZone(that._getField('rec_Added'))+' local)</div>')
 +'<div><label class="small-header">Updated:</label>'+that._getField('rec_Modified')
                 +' ('+window.hWin.HEURIST4.util.getTimeForLocalTimeZone(that._getField('rec_Modified'))+' local)</div>'
 +'</div>'

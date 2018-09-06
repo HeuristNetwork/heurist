@@ -1298,9 +1298,13 @@
                         
                         //convert add and modified date to UTC
                         if($date_add_index!==false) {
-                            $row[$date_add_index] = DateTime::createFromFormat('Y-m-d H:i:s', $row[$date_add_index])
+                            if($row[$date_add_index]=='0000-00-00 00:00:00'){ //not defined
+                                $row[$date_add_index] = '';    
+                            }else{
+                                $row[$date_add_index] = DateTime::createFromFormat('Y-m-d H:i:s', $row[$date_add_index])
                                                 ->setTimezone(new DateTimeZone('UTC'))
                                                 ->format('Y-m-d H:i:s');
+                            }
                         }
                         if($date_mod_index!==false) {
                             $row[$date_mod_index] = DateTime::createFromFormat('Y-m-d H:i:s', $row[$date_mod_index])

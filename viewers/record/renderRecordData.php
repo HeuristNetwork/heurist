@@ -895,7 +895,8 @@ function print_public_details($bib) {
     }
 
     $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']); //get form database in server time
-    if($add_date){
+    
+    if($add_date && $bib['rec_Added']!='0000-00-00 00:00:00'){
         $add_date = $add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
         $add_date_local = ' (<span id="lt0"></span><script type="text/javascript">printLTime("'.  //output in js in local time
                             $add_date.'", "lt0")</script> local)';
