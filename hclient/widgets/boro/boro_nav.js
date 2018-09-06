@@ -246,7 +246,9 @@ $.widget( "heurist.boro_nav", {
                     if(name.toLowerCase()!=='contribute'){
                         //add registration form
                         ele = $('<div>').attr('data-recID', recID).appendTo(ele); 
-                        ele.load(window.hWin.HAPI4.baseURL + 'hclient/widgets/boro/boro_subscribe.html',
+                        
+                        var lt = window.hWin.HAPI4.sysinfo['layout'];  
+                        ele.load(window.hWin.HAPI4.baseURL + 'hclient/widgets/boro/'+lt+'_subscribe.html',
                         function(){
                             var recID = $(this).attr('data-recID');
                             var edit_form = $('.bor-page-'+recID).find('.newsletter-form');

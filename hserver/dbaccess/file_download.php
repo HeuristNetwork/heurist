@@ -122,5 +122,16 @@ if($db){
         }
 
     }
+    else if (@$_REQUEST['rurl'] && $db=='ExpertNation'){ //
+        //load remote content from uni adelaide 
+        $remote_path = 'http://global.adelaide.edu.au/v/style-guide2/includes/common/'.$_REQUEST['rurl'];
+        //if(strpos($remote_path,'global.adelaide.edu.au/v/style-guide2/includes/common/')>0){
+            
+            $system->initPathConstants($db);
+            $heurist_path = tempnam(HEURIST_FILESTORE_DIR, "_proxyremote_");        
+            downloadViaProxy($heurist_path, "text/html", $remote_path, false);
+            unlink($heurist_path);
+        //}
+    }
 }
 ?>

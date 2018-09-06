@@ -427,9 +427,44 @@ function resolveFilePath($path){
         return $path;
 }
 
+/**
+* download remote url as file - this is our proxy for download annotations and adelaide web site
+* 
+* @param mixed $filename
+* @param mixed $mimeType
+* @param mixed $url
+* @param mixed $bypassProxy
+*/
+function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true){
+
+    //if(!file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
+
+    $rawdata = loadRemoteURLContent($url, $bypassProxy);
+
+    fileSave($rawdata, $filename);
+        /*
+        if ($raw) {
+
+        if(file_exists($filename)){
+        unlink($filename);
+        }
+        $fp = fopen($filename, "w");
+        //$fp = fopen($filename, "x");
+        fwrite($fp, $raw);
+        //fflush($fp);    // need to insert this line for proper output when tile is first requestet
+        fclose($fp);
+        }
+        */
+    //}
+
+    if(file_exists($filename)){
+        downloadFile($mimeType, $filename);
+    }
+}
+
 
 /**
-* direct file download
+* direct file download - move to utils_file
 *
 * @param mixed $mimeType
 * @param mixed $filename

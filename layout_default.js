@@ -187,7 +187,7 @@ var cfg_layouts = [
         center:{minsize:300, dropable:false,
             apps:[{appid:'include_layout', name: 'AAA', layout_id:'FAP2',dragable:false,
                         options:{ref: 'SearchAnalyze2'}
-                        ,xcss:{position:'absolute', top:'4.5em',left:0,bottom:'0.1em',right:0,'font-size':'0.9em'}}]
+                        ,css:{position:'absolute', top:0,left:0,bottom:'0.1em',right:0}}] //,'font-size':'0.9em'
     
         }
     },
@@ -277,8 +277,9 @@ var cfg_layouts = [
 
     {id:'adel', name:'Beyond 1914 - Book of Rememberance', theme:'heurist', type:'free', 
                 cssfile:['hclient/widgets/boro/beyond1914.css',
-                'hclient/widgets/boro/assets/css/header-footer.css',
-                'hclient/widgets/boro/assets/css/global-assets.css'], 
+                'https://global.adelaide.edu.au/style-guide-v2/latest/css/global-assets.css',
+                'https://global.adelaide.edu.au/style-guide-v2/0.24.0/css/header-footer.css',
+                'hclient/widgets/boro/adel.css'], 
                 template: 'hclient/widgets/boro/adel_main.html'
        //widgets will be loaded into divs with id "result_pane" and "search_pane" in boro_main.html         
        ,boro_place:{dropable:false,css:{},

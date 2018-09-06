@@ -28,9 +28,10 @@
 }
 body {
     font-family: Helvetica,Arial,sans-serif;
-    /*font-family: Verdana,Arial,sans-serif;*/
+    /*
     font-size: 0.7em;
-    /*padding:10px;*/
+    font-family: Verdana,Arial,sans-serif;
+    padding:10px;*/
 }
 a{
 outline: 0;

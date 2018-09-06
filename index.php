@@ -34,7 +34,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] ){
     }
     header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format);
     return;
-}else if (@$_REQUEST['file'] || @$_REQUEST['thumb'] ){
+}else if (@$_REQUEST['file'] || @$_REQUEST['thumb'] || @$_REQUEST['rurl']){
     header( 'Location: hserver/dbaccess/file_download.php?'.$_SERVER['QUERY_STRING'] );
     return;
 }
@@ -137,7 +137,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         
         <!-- os, browser detector -->
         <script type="text/javascript" src="ext/js/platform.js"></script>
-
+        
+        
         <script type="text/javascript">
 
            function onPageInit(success){

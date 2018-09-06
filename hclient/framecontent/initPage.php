@@ -92,10 +92,14 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 // BASE tag is convenient however it does not suit
 // reason: some jquery widgets uses href (tabcontrol for example)
 // <base href="<?php echo PDIR;">
-//<meta http-equiv="X-UA-Compatible" content="IE=edge">
-//<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+/*
+<!doctype html>
+<html  class="no-js" lang="en" dir="ltr">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+*/
 ?>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
 <html>
 <head>
 <title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
@@ -324,8 +328,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                 });
             }
         }
-
-
+        if(window.hWin.HAPI4.sysinfo['layout']!='adel'){
+            $('body').css({'font-size':'0.7em'});
+        }
 
         //add version to title
         window.document.title = window.document.title+' V'+window.hWin.HAPI4.sysinfo.version;
