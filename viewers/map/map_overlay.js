@@ -1236,14 +1236,18 @@ map.data.addListener('mouseover', function(event) {
                     if(lt=='boro' || lt=='adel'){ //customized symbology and popup for boro
                         recset.calcfields['rec_Info'] = function(record, fldname){
                             
-                            var title = this.fld(record, 'rec_Title');
-                            if(title.indexOf('bor-map-infowindow-heading')<0){
-                                title = '<div class="bor-map-infowindow-heading">'+title+'</div>';
+                            var info_content = this.fld(record, 'rec_Description');
+                            if(window.hWin.HEURIST4.util.isempty(info_content)){
+                                info_content = this.fld(record, 'rec_Title');
+                            }
+
+                            if(info_content.indexOf('bor-map-infowindow-heading')<0){
+                                info_content = '<div class="bor-map-infowindow-heading">'+info_content+'</div>';
                             }
                             
                             return '<div style="display: inline-block; overflow: auto; max-height: 369px; max-width: 260px;">'
                                     +'<div class="bor-map-infowindow">'
-                                        + title
+                                        + info_content
                                         + '<a href="'
                                         + window.hWin.HAPI4.baseURL+'place/'+this.fld(record,'rec_ID')+'/a" '
                                         + 'onclick="{window.hWin.boroResolver(event);}" class="bor-button bor-map-button">See connections</a>'

@@ -350,7 +350,6 @@ function hRecordSet(initdata) {
                             iconImg = window.hWin.HAPI4.iconBaseURL + iconId + 'm.png&color='+encodeURIComponent(iconColor);
                         }
                         
-                       
                         item = {
                             title: recName,
                             start: (startDate || ''),

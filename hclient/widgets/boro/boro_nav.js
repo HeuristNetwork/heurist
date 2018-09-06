@@ -352,7 +352,7 @@ $.widget( "heurist.boro_nav", {
         +'<li data-resource-id="education"><a href="#" class="nav-link">Education resources</a></li>'
         +'</ul>')
                 .addClass('top-menu-dropdown').hide()
-                .css({'position':'absolute', 'padding':'5px'})
+                .css({'position':'absolute', 'padding':'5px', 'font-size': '15px'})
                 .appendTo( that.document.find('body') )
                 .menu({select: function(event, ui){ 
                     
@@ -411,7 +411,7 @@ $.widget( "heurist.boro_nav", {
                     
                     that.search_menu = $('<ul>'+smenu+'</ul>')
                         .addClass('top-menu-dropdown').hide()
-                        .css({'position':'absolute', 'padding':'5px'})
+                        .css({'position':'absolute', 'padding':'5px', 'font-size': '15px'})
                         .appendTo( that.document.find('body') )
                         .menu({select: function(event, ui){ 
                                     window.hWin.HEURIST4.util.stopEvent(event);
@@ -701,7 +701,7 @@ $.widget( "heurist.boro_nav", {
             //get title - this is name of instition, place name or term value
             if(entType=='place'){
                 var place = that.recset.getById(recID);
-                place = that.__getPlace(place, 0); 
+                place = that.__getPlace(place, 2); 
                 if(place.link){
                     title = place['names'][0]; //full place name  
                     
@@ -940,6 +940,14 @@ $.widget( "heurist.boro_nav", {
             if(mapids.length>0){
                 var map_recset = that.recset.getSubSetByIds(mapids);
                 map_recset.setMapEnabled();
+                
+                //reset description of place - since one place connected with many persons
+                if(entType=='place'){
+                    var idx, records = map_recset.getRecords();
+                    for(idx in records){
+                        map_recset.setFld(records[idx], 'rec_Description', '');
+                    }
+                }
                 
                 var params = {id:'main',
                     title: 'Current query',
@@ -2130,11 +2138,16 @@ $.widget( "heurist.boro_nav", {
             if(place_rec){
                 
                 if(description){
-                    this.recset.setFld(place_rec, 'rec_Title', 
+                    this.recset.setFld(place_rec, 'rec_Description', 
                         '<div class="bor-map-infowindow-heading">'+description+'</div>'+
                         '<div class="bor-map-infowindow-description">'+place.names[i]+'</div>'
                     );   
-                }
+                }    
+                this.recset.setFld(place_rec, 'rec_Title', place.names[i]);
+                        //'<div class="bor-map-infowindow-heading">'+description+'</div>'+
+                        //'<div class="bor-map-infowindow-description">'+place.names[i]+'</div>'
+                       
+                
                 
                 if(!icon) {
                     icon = 'place';

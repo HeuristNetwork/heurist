@@ -140,7 +140,7 @@ $.widget( "heurist.search_faceted", {
         
         this.btn_reset = $( "<button>", {title:window.hWin.HR("Clear all fields / Reset all the filters to their initial states") })
         .appendTo( this.div_toolbar )
-        .button({label: window.hWin.HR("RESET"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' }).hide();
+        .button({label: window.hWin.HR("RESET FILTERS"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' }).hide();
         
         this.btn_save = $( "<button>", { text: window.hWin.HR("Save state") })
         .appendTo( this.div_toolbar )

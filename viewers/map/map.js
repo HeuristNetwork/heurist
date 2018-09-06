@@ -1106,16 +1106,23 @@ console.log('tileloaded 2');
                     });*/
 
 //console.log('after map init DELAYED');
-
+                    var lt = window.hWin.HAPI4.sysinfo['layout'];  
+                    var scrollwheel = true;
+                    if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0 || lt.indexOf('adel')==0) ){
+                         scrollwheel = false;
+                    }   
+                    
                     // Add controls if the map is not initialized yet
                     var mapOptions = {
-                        panControl: true,
+                        //panControl: true,
                         zoomControl: true,
                         mapTypeControl: true,
-                        scaleControl: true,
+                        //scaleControl: true,
                         overviewMapControl: true,
-                        rotateControl: true,
-                        scrollwheel: true,
+                        //rotateControl: true,
+                        scrollwheel: scrollwheel, // enable  zoom by mouse scroll
+                        //gestureHandling: 'cooperative',
+                        
                         mapTypeControlOptions: {
                             mapTypeIds: ["terrain","roadmap","hybrid","satellite","tile"]
                         }

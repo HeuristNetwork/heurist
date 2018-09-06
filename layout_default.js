@@ -245,7 +245,7 @@ var cfg_layouts = [
     },
     */
 
-    {id:'boro', name:'Beyond 1914 - Book of Rememberance', theme:'heurist', type:'free', 
+    {id:'boro', name:'Beyond 1914 / Book of Remembrance, University of Sydney, built with Heurist', theme:'heurist', type:'free', 
                 cssfile:'hclient/widgets/boro/beyond1914.css', template: 'hclient/widgets/boro/boro_main.html'
        //widgets will be loaded into divs with id "result_pane" and "search_pane" in boro_main.html         
        ,boro_place:{dropable:false,css:{},
@@ -275,7 +275,7 @@ var cfg_layouts = [
        ,result_pane:{dropable:false,apps:[{appid:'boro_reslist', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]} */
     },
 
-    {id:'adel', name:'Beyond 1914 - Book of Rememberance', theme:'heurist', type:'free', 
+    {id:'adel', name:'Beyond 1918, University of Adelaide, built with Heurist', theme:'heurist', type:'free', 
                 cssfile:['hclient/widgets/boro/beyond1914.css',
                 'https://global.adelaide.edu.au/style-guide-v2/latest/css/global-assets.css',
                 'https://global.adelaide.edu.au/style-guide-v2/0.24.0/css/header-footer.css',

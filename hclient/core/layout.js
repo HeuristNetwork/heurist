@@ -1006,6 +1006,12 @@ function hLayout(args) {
                 return;
             }
         }
+        
+        if(layoutid.indexOf('DigitalHarlem')==0 || layoutid.indexOf('boro')==0 || layoutid.indexOf('adel')==0){
+            //name of application to window title
+            window.hWin.document.title = layout.name;
+        }
+        
 
         var $container = $(containerid);
         $container.empty();

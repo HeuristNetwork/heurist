@@ -95,8 +95,6 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 /*
 <!doctype html>
 <html  class="no-js" lang="en" dir="ltr">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 */
 ?>
 <!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
@@ -107,6 +105,9 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 
 <meta name="SKYPE_TOOLBAR" content="SKYPE_TOOLBAR_PARSER_COMPATIBLE" />
 <meta content="telephone=no" name="format-detection">
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
 <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
@@ -328,12 +329,14 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                 });
             }
         }
-        if(window.hWin.HAPI4.sysinfo['layout']!='adel'){
+        
+        if(layoutid!='adel' && layoutid!='boro'){
             $('body').css({'font-size':'0.7em'});
         }
 
         //add version to title
         window.document.title = window.document.title+' V'+window.hWin.HAPI4.sysinfo.version;
+
     }
 
 </script>
