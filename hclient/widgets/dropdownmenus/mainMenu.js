@@ -526,6 +526,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     + 'there is currently no end-user interface way of rolling '
                     + 'back the database. <br><br>'+window.hWin.HR('New_Function_Contact_Team'));
         }else 
+        if(action == "menu-structure-import"){
+
+            var manage_dlg = $('<div id="heurist-dialog-importRectypes-'+window.hWin.HEURIST4.util.random()+'">')
+                    .appendTo( $('body') )
+                    .importStructure( {isdialog: true} );
+            
+        }else 
         if(action == "menu-structure-mimetypes"){
             
                 window.hWin.HEURIST4.ui.showEntityDialog('defFileExtToMimetype',

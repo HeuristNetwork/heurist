@@ -25,6 +25,13 @@
                     }
                 },
                 {
+                    "dtID": "rty_ID_local",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"virtual"
+                    }
+                },
+                {
                     "dtID": "rty_Thumb",
                     "dtFields":{
                         "dty_Type":"file",

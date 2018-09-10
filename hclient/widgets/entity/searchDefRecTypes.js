@@ -86,6 +86,10 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         if( this.options.import_structure ){
             this.element.find('#btn_back_to_databases').button({label:'Back to Databases'})
                 .click(this.options.import_structure.btn_back_to_databases);
+                
+            this.element.find('#div_show_already_in_db').css({'display':'inline-block'});    
+            this.chb_show_already_in_db = this.element.find('#chb_show_already_in_db');
+            this._on(this.chb_show_already_in_db,  { change:this.startSearch });
         }
     },  
     
@@ -121,9 +125,15 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             }
             
             
+            if(this.chb_show_already_in_db && !this.chb_show_already_in_db.is(':checked')){
+                    request['rty_ID_local'] = '=0';
+            }
+            
             this.input_sort_type = this.element.find('#input_sort_type');
             if(this.input_sort_type.val()=='recent'){
                 request['sort:rty_Modified'] = '-1' 
+            }else if(this.input_sort_type.val()=='id'){
+                request['sort:rty_ID'] = '1';   
             }else{
                 request['sort:rty_Name'] = '1';   
             }

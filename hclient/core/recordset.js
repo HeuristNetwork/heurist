@@ -949,12 +949,16 @@ function hRecordSet(initdata) {
             if(fields==null || $.isEmptyObject(fields)) return null;
             if(request==null || $.isEmptyObject(request)) return this;
             
-            function __getDataType(fieldname){
+            function __getDataType(fieldname, struct){
                 var idx;
-                if(structure!=null){
-                    for (idx in structure){
-                        if(structure[idx]['dtID']==fieldname){
-                              return structure[idx]['dtFields']['dty_Type'];
+                if(struct!=null){
+                    for (idx in struct){
+                        if(struct[idx]['children']){
+                            return __getDataType(fieldname, struct[idx]['children']);
+                        }else
+                        if(struct[idx]['dtID']==fieldname){
+                              var res = struct[idx]['dtFields']['dty_Type'];  
+                              return (res=='resource' || res=='enum')?'integer':res;
                         }
                     }
                     return null;
@@ -975,7 +979,7 @@ function hRecordSet(initdata) {
                         delete request[fieldName];    
                     }else if(fieldName.indexOf('sort:')<0){
                         //find data type
-                        dataTypes[fieldName] = __getDataType(fieldName);
+                        dataTypes[fieldName] = __getDataType(fieldName, structure);
                         
                         if(dataTypes[fieldName]=='freetext' 
                             || dataTypes[fieldName]=='blocktext' 
@@ -1008,7 +1012,7 @@ function hRecordSet(initdata) {
                         var realFieldName = fieldName.substr(5);
                         sortFieldsOrder.push(Number(request[fieldName])); //1 - ASC, -1 DESC
                         sortFields.push(realFieldName);
-                        dataTypes[realFieldName] = __getDataType(realFieldName);
+                        dataTypes[realFieldName] = __getDataType(realFieldName, structure);
                     }
                 }
             }            
@@ -1025,39 +1029,45 @@ function hRecordSet(initdata) {
                         if(dataTypes[fieldName]=='freetext' 
                             || dataTypes[fieldName]=='blocktext'
                             || dataTypes[fieldName]=='integer'){
+                                
+                            var fldvalue = this.fld(record,fieldName);
                             
-                            if(window.hWin.HEURIST4.util.isnull(this.fld(record,fieldName))){
+                            if(window.hWin.HEURIST4.util.isnull(fldvalue)){
                                 isOK = false;
                                 break;                            
-                            }else
-                            if(isnegate[fieldName]){
-                                isOK = (this.fld(record,fieldName).toLowerCase() != request[fieldName]);
-                                if(!isOK) break;                            
-                            }else 
-                            if(isexact[fieldName]){
-                                isOK = (this.fld(record,fieldName).toLowerCase() == request[fieldName]);
-                                if(!isOK) break;                            
-                            }else
-                            if(isless[fieldName]){
+                            }else{
+                                var cmp_value;
                                 if(dataTypes[fieldName]=='integer'){
-                                    isOK = (Number(this.fld(record,fieldName)) < Number(request[fieldName]));
+                                    fldvalue = Number(fldvalue);
+                                    cmp_value = Number(request[fieldName]);
+                                }else{
+                                    fldvalue = fldvalue.toLowerCase();
+                                    cmp_value = request[fieldName];
+                                }
+                                
+                                if(isnegate[fieldName]){
+                                    isOK = (fldvalue != cmp_value);
+                                    if(!isOK) break;                            
+                                }else 
+                                if(isexact[fieldName]){
+                                    isOK = (fldvalue == cmp_value);
+                                    if(!isOK) break;                            
                                 }else
-                                    isOK = (this.fld(record,fieldName).toLowerCase() < request[fieldName]);
-                                if(!isOK) break;                            
-                            }else
-                            if(isgreat[fieldName]){
-                                if(dataTypes[fieldName]=='integer'){
-                                    isOK = (Number(this.fld(record,fieldName)) > Number(request[fieldName]));
+                                if(isless[fieldName]){
+                                    isOK = (fldvalue < cmp_value);
+                                    if(!isOK) break;                            
                                 }else
-                                    isOK = (this.fld(record,fieldName).toLowerCase() > request[fieldName]);
-                                if(!isOK) break;                            
-                            }else
-                            if(this.fld(record,fieldName).toLowerCase().indexOf(request[fieldName])<0){ //contain
-                                isOK = false;
-                                break;                            
+                                if(isgreat[fieldName]){
+                                    isOK = (fldvalue > cmp_value);
+                                    if(!isOK) break;                            
+                                }else
+                                if(fldvalue.indexOf(cmp_value)<0){ //contain
+                                    isOK = false;
+                                    break;                            
+                                }
                             }
                             
-                        }else if(this.fld(record,fieldName)!=request[fieldName]){
+                        }else if(fldvalue!=request[fieldName]){
                             isOK = false;
                             break;                            
                         }

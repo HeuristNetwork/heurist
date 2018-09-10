@@ -249,7 +249,7 @@ copy_IconAndThumb_FromLibrary
             if(@$places[0] && $places[0]!=''){
                 $places = explode(',', $places[0]);
             
-                if (in_array($rtyID, $palces)) {
+                if (in_array($rtyID, $places)) {
                     $ret['error'] = "Error: You cannot delete record type $rtyID. "
                                 ." It is referenced as 'treat as places for mapping' in database properties";
                     return $ret;
@@ -1424,11 +1424,11 @@ copy_IconAndThumb_FromLibrary
                     $dupquery .= " and (trm_ID <>".$trmID.")";
                 }
                 $dupquery .= " and (";
-                if($ch_code){
+                if($ch_code && $ch_code!=''){
                     $dupquery .= "(trm_Code = '".$mysqli->real_escape_string($ch_code)."')";
                 }
                 if($ch_label){
-                    if($ch_code){
+                    if($ch_code && $ch_code!=''){
                         $dupquery .= " or ";
                     }
                     $dupquery .= "(trm_Label = '".$mysqli->real_escape_string($ch_label)."')";
@@ -1776,7 +1776,7 @@ copy_IconAndThumb_FromLibrary
                     $dtCount = $res->num_rows;
                     if ($dtCount>0) { 
                         
-                        $labels = getTermLabels(array($trmID, $termID));
+                        $labels = getTermLabels($mysqli, array($trmID, $termID));
                         
                         $ret['error'] = "You cannot delete term $trmID [{$labels[$trmID]}]. "
                                     .(($trmID==$termID)?"It":"Its child term $termID [{$labels[$termID]}]")

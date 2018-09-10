@@ -1013,7 +1013,7 @@ span.fancytree-checkbox{
     display:none;
 }
 .tree-facets .graytext{
-    color: lightgray;
+    color: #AAA;
 }
 
 /* indent for folders */

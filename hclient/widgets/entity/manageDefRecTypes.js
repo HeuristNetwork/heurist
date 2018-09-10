@@ -148,7 +148,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 
                 if(this.options.import_structure){
                     //take recordset from REMOTE HEURIST.rectypes format     
-                    window.hWin.HEURIST4.msg.bringCoverallToFront();
+                    window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
                     
                     window.hWin.HAPI4.SystemMgr.get_defs(
                             {rectypes:'all', mode:2, remote:this.options.import_structure.database_url}, function(response){
@@ -164,7 +164,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 
                                 that._cachedRecordset = that._getRecordsetFromStructure( response.data.rectypes );
                                 that.recordList.resultList('updateResultSet', that._cachedRecordset);
-                                
+                                that.searchForm.searchDefRecTypes('startSearch');
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
@@ -215,13 +215,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             fields:[],
             records:{},
             order:[] };
-            
+      
+
         if(!rectypes){
-            rectypes = window.hWin.HEURIST4.rectypes;
+            rectypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes);
         }else{
             //reload groups for remote rectypes            
             //var ele = this.element.find('#input_search_group');   //rectype group
-            this.searchForm.searchDefRecTypes('reloadGroupSelector',rectypes);
+            rectypes = window.hWin.HEURIST4.util.cloneJSON(rectypes);
+            this.searchForm.searchDefRecTypes('reloadGroupSelector', rectypes);
             
             //var ele = this.searchForm.find('#input_search_group');
             //window.hWin.HEURIST4.ui.createRectypeGroupSelect(ele[0],

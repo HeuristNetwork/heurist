@@ -11,6 +11,7 @@
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     3.2
 */
+//http://127.0.0.1/h4-ao/admin/structure/import/importRectype.php?db=osmak_5&code=2-4
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -19,33 +20,36 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-$outputFormat = @$_REQUEST["output"]; //html (default) or json
-if($outputFormat=="json"){
-    define('ISSERVICE',1);
-}
+require_once(dirname(__FILE__).'/../../../hserver/System.php');
+require_once(dirname(__FILE__).'/../../../hserver/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../../hserver/structure/dbsTerms.php');
 
-require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../../common/php/getRecordInfoLibrary.php');
 require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_mail.php');
 require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
-// User must be system administrator or admin of the owners group for this database
-if( !is_admin() ){
-    error_exit("Sorry, you need to be a database owner to be able to modify the database structure");
+
+$system = new System();
+
+$outputFormat = 'json';
+
+if( !$system->init(@$_REQUEST['db']) ){
+    $system->error_exit();
+}
+
+if(!$system->is_admin()){
+    $system->error_exit('To perform this action you must be logged in as Administrator of group \'Database Managers\'',
+            HEURIST_REQUEST_DENIED);
 }
 
 $excludeDuplication = (@$_REQUEST["dup"]!="1"); //by default exclude duplication of existing record types (identified by concept IDs)
 
 //combination of db and record type id eg. 1126-13
-// TODO: Artem, is this meant to be the concept ID for the record type? or is the record type referenced by local ID?
-$code = @$_REQUEST['code'];
+$code = @$_REQUEST['code']; //concept code of record type is source database
 $req_import_types  = @$_REQUEST["import"];
 $req_correspondence = @$_REQUEST["correspondence"];
 
 if(!$code){
-    
-//print print_r($_REQUEST, true);    
     $code = @$_REQUEST["checkid"];
     $is_checkonly = true;
 }else{
@@ -55,17 +59,15 @@ if(!$code){
 global $database_id; //source database id - taken from rectype concept code
 
 if(!$code){
-    error_exit("Record type code not defined in call to importRectype.php - should be two numbers separated by a dash(program glitch)");
+    $system->error_exit('Record type code not defined in call to importRectype.php - should be two numbers separated by a dash');
 }
 
 $req_rectype_code = $code;
 
-$code = explode("-",$code);
-$database_id = @$code[0];
-$rectype_id = @$code[1];
+list($database_id, $rectype_id) = explode("-",$code);
 
-if(!(is_numeric($database_id) && is_numeric($rectype_id))){
-    error_exit("Record type code passed to importRectype.php ( $code ) has wrong format - should be two numbers separated by dash (program glitch)");
+if(!(is_numeric($database_id) && $database_id>0 && is_numeric($rectype_id) && $rectype_id>0)){
+    $system->error_exit("Record type code passed to importRectype.php ( $code ) has wrong format - should be two numbers separated by dash");
 }
 
 
@@ -92,64 +94,59 @@ if(!(is_numeric($database_id) && is_numeric($rectype_id))){
     }
     
     if(isset($error_msg)){
-        error_exit($error_msg);
+        $system->error_exit($error_msg);
         return;
     }
-    $reg_url = $database_url;
-
-/* OLD WAY   
-$reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getDatabaseURL.php" . "?db=Heurist_Master_Index&id=".$database_id;
-
-$data = loadRemoteURLContentSpecial($reg_url);
-
-if (!$data) {
-    error_exit("Unable to contact Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".
-        "URL requested: ".$reg_url);
-}
-
-$data = json_decode($data, true);
-
-// Artem TODO: What circumstance would give rise to this? Explain how the data is 'wrong'/'incorrect'
-if(!@$data['rec_URL']){
-    error_exit("Heurist Master Index returns incorrect data for registered database # ".$database_id.
-        " The page may contain an invalid database reference (0 indicates no reference has been set)");
-}
-
-$reg_url = $data['rec_URL'];         //base url for source database
-*/
-
 // ------------------------------------------------------------------------------------------------
 
 // 2. get definitions from remote database
 
-$reg_url = explode("?",$reg_url);
-
-$remote_url_params = @$reg_url[1];
+$reg_url = explode("?",$database_url);
 $remote_url = @$reg_url[0];
-if(!$remote_url_params || !$remote_url){
-    error_exit("Heurist Master Index returns incorrect data for registered database # ".$database_id.
+
+preg_match("/db=([^&]*).*$/", $database_url, $match);
+$remote_dbname = $match[1];
+
+//$remote_url_params = @$reg_url[1];
+
+if(!$remote_dbname || !$remote_url){
+    $system->error_exit("Heurist Master Index returns incorrect data for registered database # ".$database_id.
         " The page may contain an invalid database reference (0 indicates no reference has been set)");
 }
 
-$reg_url = $remote_url."common/php/reloadCommonInfo.php?".$remote_url_params;
 
-//$defs = loadRemoteURLContent($reg_url); it does not because of proxy settings on usyd server
+//2a if the same server - just call dbs_GetRectypeStructures for specific database
+if(strpos($database_url, HEURIST_SERVER_URL)===0){ //same domain
 
-$defs = loadRemoteURLContentSpecial($reg_url);
+  $defs = array();  
+  
+  $system2 = new System();
+  $system2->init($remote_dbname, true, false); //init without paths and consts
+  
 
-if (!$defs) {
-    error_exit("Unable to contact the selected source database, possibly due to a timeout or proxy setting");
+  $defs['rectypes'] = dbs_GetRectypeStructures($system2, 'all', 2 );
+  $defs["detailtypes"] = dbs_GetDetailTypes($system2, 'all', 2 );
+  $defs["terms"] = dbs_GetTerms($system2);
+  
+}else{
+//2b. if remote server - call sys_strcture.php with loadRemoteURLContentWithRange
+   $remoteURL = $remote_url.'hserver/controller/sys_structure.php?rectypes=all&detailtypes=all&terms=all&mode=2&db='.$remote_dbname;
+
+   $defs = loadRemoteURLContent($remoteURL);            
+   $defs = json_decode(gzdecode($defs), true);
+   if (!$defs || @$defs['status']!=HEURIST_OK) {
+        $system->error_exit("Unable to contact the selected source database, possibly due to a timeout or proxy setting");
+   }
+   $defs = $defs['data'];
+   if (!($defs['rectypes'] && $defs['detailtypes'] && $defs['terms'])) {
+        $system->error_exit("Structure definitions read from source database # $database_id are invalid. Please advise Heurist development team");
+   }
 }
+$sourceIconURL = $remote_url.'hserver/dbaccess/rt_icon.php?db='.$remote_dbname.'&id=';
 
-$defs = json_decode($defs, true);
-
-if (!($defs['rectypes'] && $defs['detailTypes'] && $defs['terms'])) {
-    error_exit("Structure definitions read from source database # $database_id are invalid. Please advise Heurist development team");
-}
-
-//remote database
+//remote(source) database
 $def_rts = $defs['rectypes']['typedefs'];
-$def_dts = $defs['detailTypes']['typedefs'];
+$def_dts = $defs['detailtypes']['typedefs'];
 
 
 // ------------------------------------------------------------------------------------------------
@@ -157,7 +154,7 @@ $def_dts = $defs['detailTypes']['typedefs'];
 // 3. Add the record type as the first element in a list
 
 if(!@$def_rts[$rectype_id]){
-    error_exit("Sorry, record type $rectype_id was not found in source database # $database_id. Please advise Heurist development team");
+    $system->error_exit("Sorry, record type $rectype_id was not found in source database # $database_id. Please advise Heurist development team");
 }
 
 if($is_checkonly){
@@ -167,17 +164,15 @@ if($is_checkonly){
 }
 
 
-$sourceIconURL = $defs['icon_url'];
-
 //target(local) definitions
-$trg_rectypes = getAllRectypeStructures();
+$trg_rectypes = dbs_GetRectypeStructures($system, null, 2);
 
-//definitions to be imported - list of ids
+//definitions to be imported - list of source local ids
 $imp_recordtypes = array();
 $imp_fieldtypes = array();
 $imp_terms = array("enum"=>array(), "relation"=>array());
 
-//source id => target id
+//source id => target id  - local ids 
 $fields_correspondence = array();  //import field id -> target id - IMPORTANT for proper titlemask conversion
 $fields_correspondence_existed = array();
 $rectypes_correspondence = array(); //source rectypeID => new (target) rectype ID
@@ -186,6 +181,7 @@ $terms_correspondence_existed = array();
 $group_ft_ids = array();
 $group_rt_ids = array();
 
+//list of rectypes to be imported from url parameter
 if(is_array($req_import_types) && count($req_import_types)>0){
 
     //rectypes that will be imported - list of source rectype ids
@@ -214,6 +210,7 @@ if(is_array($req_import_types) && count($req_import_types)>0){
     // Limit maximum number of repeats to 10
     $imp_recordtypes_tree = array();
     $imp_recordtypes_tree[$rectype_id] = findDependentRecordTypes($rectype_id, 0);
+    if(FALSE) //without preview
     if(count($imp_recordtypes)>1 || count($rectypes_correspondence)>0){
         renderPreviewForm();
         exit();
@@ -221,18 +218,21 @@ if(is_array($req_import_types) && count($req_import_types)>0){
 
 }
 
-//other target definitions
-$trg_fieldtypes = getAllDetailTypeStructures();
-$trg_terms = getTerms();
+//target(local) definitions
+$trg_fieldtypes = dbs_GetDetailTypes($system, null, 2);
+$trg_terms = dbs_GetTerms($system);
 
+define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
 
 // ------------------------------------------------------------------------------------------------
 
-// 5. With list of all record types, build a list of all the base field types
+// 5. With list of all record types, build a list of all base field types
 
 $idx_type = $def_rts['dtFieldNamesToIndex']['dty_Type'];
 $idx_ccode = $def_dts['fieldNamesToIndex']['dty_ConceptID'];
 $idx_terms = $def_dts['fieldNamesToIndex']['dty_JsonTermIDTree'];
+
+$sourceTerms = new DbsTerms(null, $defs['terms']);
 
 foreach ($imp_recordtypes as $rty_id){
     $fields = $def_rts[$rty_id]['dtFields'];
@@ -265,12 +265,28 @@ foreach ($imp_recordtypes as $rty_id){
     }
 }
 
+/* DEBUG
+echo '<br>rectypes:'.print_r($imp_recordtypes, true);
+echo '<br>fields:'.print_r($imp_fieldtypes, true);
+echo '<br>terms:'.print_r($imp_terms, true);
+echo '<hr><br>';
+echo print_r($fields_correspondence, true);
+echo print_r($fields_correspondence_existed, true);
+echo '<hr><br>';
+echo print_r($rectypes_correspondence, true);
+
+
+header("Content-type: text/javascript");
+echo json_encode($defs);
+exit();
+*/
+
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 // 7. Perform database action - add records, structure, fields and terms into our target database
 
-$mysqli = mysqli_connection_overwrite(DATABASE); // mysqli
+$mysqli = $system->get_mysqli();
 $mysqli->autocommit(FALSE);
 
 // I. Add Terms (whole vocabulary)
@@ -287,16 +303,16 @@ foreach ($imp_recordtypes as $recId){
     $rt_name = @$defs['rectypes']['names'][$recId];
     if(!@$def_rts[$recId]){
         if(!$rt_name){
-            error_exit("Can't find record type #'".$recId."'. in source database");
+            error_exit2("Can't find record type #'".$recId."'. in source database");
         }else{
-            error_exit("Can't find definitions for record type #'".$recId."'. \"$rt_name\" in source database");
+            error_exit2("Can't find definitions for record type #'".$recId."'. \"$rt_name\" in source database");
         }
     }
 
     $grp_id = @$def_rts[$recId]['commonFields'][$idx_rt_grp];
 
     if(!$grp_id){
-        error_exit("Group ID is not defined for record type #'".$recId."'. \"$rt_name\" in source database");
+        error_exit2("Group ID is not defined for record type #'".$recId."'. \"$rt_name\" in source database");
     }
 
     $src_group=null;
@@ -315,10 +331,10 @@ foreach ($imp_recordtypes as $recId){
     }
 
     if($src_group==null){
-        error_exit("Can't find group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");
+        error_exit2("Can't find group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");
     }
     if(!$grp_name){
-        error_exit("Name of group is empty. Can't add group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");
+        error_exit2("Name of group is empty. Can't add group #".$grp_id." for record type #'".$recId."'. \"$rt_name\" in source database");
     }
 
     //get name and try to find in target
@@ -343,7 +359,7 @@ foreach ($imp_recordtypes as $recId){
             $group_rt_ids[$grp_id] = $new_grp_id;
             $trg_rectypes['groups'][$new_grp_id] = array('name'=>$grp_name);
         }else{
-            error_exit("Can't add record type group '".$grp_name."'. ".@$res['error']);
+            error_exit2("Can't add record type group '".$grp_name."'. ".@$res['error']);
         }
     }
 }
@@ -375,7 +391,7 @@ foreach ($imp_recordtypes as $rtyID){
     $def_rectype[$idx_name] = doDisambiguate($def_rectype[$idx_name], $trg_rectypes['names']);
 
     //assign canonical to title mask (since in DB we store only rty_TitleMask)
-    $def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
+    //$def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
 
     //fill original ids if missed
     if($def_rectype[$idx_ccode] && (!$def_rectype[$idx_origin_dbid] || !$def_rectype[$idx_origin_id])){
@@ -397,7 +413,7 @@ foreach ($imp_recordtypes as $rtyID){
 
     }else{
 
-        error_exit("Cannot add record type for id#".$recId.". ".$res);
+        error_exit2("Cannot add record type for id#".$recId.". ".$res);
 
     }
 }
@@ -416,7 +432,7 @@ foreach ($imp_fieldtypes as $ftId){
         continue;
     }
 
-    foreach ($defs['detailTypes']['groups'] as $idx=>$group){
+    foreach ($defs['detailtypes']['groups'] as $idx=>$group){
         if(is_numeric($idx) && $group['id']==$grp_id){
             $src_group = $group;
             $grp_name = $src_group['name'];
@@ -448,7 +464,7 @@ foreach ($imp_fieldtypes as $ftId){
 
         }else{
 
-            error_exit("Can't add field type group for '".$grp_name."'. ".$res['error']);
+            error_exit2("Can't add field type group for '".$grp_name."'. ".$res['error']);
 
         }
     }
@@ -508,7 +524,7 @@ foreach ($imp_fieldtypes as $ftId){
         $fields_correspondence[$ftId] = abs($res);
         $trg_fieldtypes['names'][abs($res)] = $def_field[$idx_name-1]; //new name
     }else{
-        error_exit("Can't add field type for id#".$ftId.". ".$res);
+        error_exit2("Can't add field type for id#".$ftId.". ".$res);
     }
 }
 
@@ -549,14 +565,14 @@ foreach ($imp_recordtypes as $rtyID){
             foreach($ret as $id=>$res2){
                 foreach($res2 as $dtid=>$res){
                     if(!is_numeric($res)){
-                        error_exit("Can't update record type structure rectype#".$id.". ".$res);
+                        error_exit2("Can't update record type structure rectype#".$id.". ".$res);
                     }
                 }
             }
 
         }else{
 
-            error_exit("Can't update record type structure rectype#".$rectypes_correspondence[$rtyID].". ".$ret);
+            error_exit2("Can't update record type structure rectype#".$rectypes_correspondence[$rtyID].". ".$ret);
 
         }
     }
@@ -567,36 +583,118 @@ foreach ($imp_recordtypes as $rtyID){
 
 // VII. Update titlemasks with new ids
 
-$mysqli->commit();
+//$mysqli->commit();
 
 foreach ($imp_recordtypes as $rtyID){
     if(@$rectypes_correspondence[$rtyID]){
 
-        $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask_canonical];
-
+        $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask];
+//echo $mask;
         // note we use special global array $fields_correspondence - for proper conversion of remote id to concept code
         $res = updateTitleMask( $rectypes_correspondence[$rtyID], $mask);
         if(!is_numeric($res)){
-            error_exit($res);
+            error_exit2($res);
         }
     }
 }
 
 $mysqli->commit();
-$mysqli->close();
+//$mysqli->close();
 
 
 // ------------------------------------------------------------------------------------------------
 
 // Confirmation of import results
 
-if($outputFormat=="json"){
-    header("Content-type: text/javascript");
+//reload structures
+$trg_rectypes = null;
+$trg_fieldtypes = null;
+$trg_terms = null;
+
+$idx_name  = $def_rts['commonNamesToIndex']['rty_Name'];
+$idx_ccode = $def_rts['commonNamesToIndex']["rty_ConceptID"];
+
+$sRectypes = '';
+$sFields  = '';
+$sTerms  = '';
+
+foreach ($imp_recordtypes as $imp_id){
+    if(@$rectypes_correspondence[$imp_id]){
+        $trg_id = $rectypes_correspondence[$imp_id];
+        
+        if($trg_rectypes==null){
+            $trg_rectypes = dbs_GetRectypeStructures($system, null, 2);
+        }
+
+        $sRectypes = $sRectypes."<tr><td>$imp_id</td><td>".$def_rts[$imp_id]['commonFields'][$idx_name]
+        ."</td><td>"
+        .$def_rts[$imp_id]['commonFields'][$idx_ccode]
+        ."</td><td>$trg_id</td><td>"
+        .$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_name]
+        ."</td>" //."<td>".$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_titlemask_canonical]."</td>"
+        ."</tr>";
+    }
+}
+
+$idx_name  = $def_dts['fieldNamesToIndex']['dty_Name'];
+$idx_ccode = $def_dts['fieldNamesToIndex']["dty_ConceptID"];
+
+foreach ($fields_correspondence as $imp_id=>$trg_id){
+
+    if(@$fields_correspondence_existed[$imp_id]) continue;
+
+    if($trg_fieldtypes==null){
+        $trg_fieldtypes = dbs_GetDetailTypes($system, null, 2);
+    }
+
+    $sFields = $sFields."<tr><td>$imp_id</td><td>".$def_dts[$imp_id]['commonFields'][$idx_name]
+    ."</td><td>"
+    .$def_dts[$imp_id]['commonFields'][$idx_ccode]
+    ."</td><td>$trg_id</td><td>"
+    .$trg_fieldtypes['typedefs'][$trg_id]['commonFields'][$idx_name]."</td></tr>";
+}
+
+$idx_name  = $defs['terms']['fieldNamesToIndex']['trm_Label'];
+$idx_ccode = $defs['terms']['fieldNamesToIndex']["trm_ConceptID"];
+
+foreach ($terms_correspondence as $imp_id=>$trg_id){
+    if(@$terms_correspondence_existed[$imp_id]) continue;
+
+    if(@$defs['terms']['termsByDomainLookup']['enum'][$imp_id]){
+        $domain = 'enum';
+    }else{
+        $domain = 'relation';
+    }
+
+    if($trg_terms==null){
+        $trg_terms = dbs_GetTerms($system);
+    }
+
+    $sTerms = $sTerms . "<tr><td>$imp_id</td><td>".$defs['terms']['termsByDomainLookup'][$domain][$imp_id][$idx_name]
+    ."</td><td>"
+    .$defs['terms']['termsByDomainLookup'][$domain][$imp_id][$idx_ccode]
+    ."</td><td>$trg_id</td><td>"
+    .$trg_terms['termsByDomainLookup'][$domain][$trg_id][$idx_name]."</td></tr>";
+}
+
+
+
+if($outputFormat=='json'){
+    
+    $response = array("status"=>HEURIST_OK, 
+        "data"=>array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_fieldtypes,'terms'=>$trg_terms),
+        "report"=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms) );
+        
+    ob_start(); 
+    echo json_encode($response);
+    $output = gzencode(ob_get_contents(),6); 
+    ob_end_clean(); 
+    header('Content-Encoding: gzip');
+    header('Content-type: application/json;charset=UTF-8');
+    echo $output; 
+    unset($output);   
 
 }else{
-    $trg_rectypes = getAllRectypeStructures();
-    $trg_fieldtypes = getAllDetailTypeStructures();
-    $trg_terms = getTerms();
     ?>
 
     <html>
@@ -617,22 +715,7 @@ if($outputFormat=="json"){
                 <tr><th colspan="2">Source</th><th>Concept ID</th><th colspan="3">Target</th></tr>
                 <tr><th>ID</th><th>Name</th><th>&nbsp;</th><th>ID</th><th>Name</th><th></th></tr>
                 <?php
-                $idx_name  = $def_rts['commonNamesToIndex']['rty_Name'];
-                $idx_ccode = $def_rts['commonNamesToIndex']["rty_ConceptID"];
-
-                foreach ($imp_recordtypes as $imp_id){
-                    if(@$rectypes_correspondence[$imp_id]){
-                        $trg_id = $rectypes_correspondence[$imp_id];
-
-                        print "<tr><td>$imp_id</td><td>".$def_rts[$imp_id]['commonFields'][$idx_name]
-                        ."</td><td>"
-                        .$def_rts[$imp_id]['commonFields'][$idx_ccode]
-                        ."</td><td>$trg_id</td><td>"
-                        .$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_name]
-                        ."</td><td>".$trg_rectypes['typedefs'][$trg_id]['commonFields'][$idx_titlemask_canonical]
-                        ."</td></tr>";
-                    }
-                }
+                    echo $sRectypes;
                 ?>
             </table>
 
@@ -644,19 +727,7 @@ if($outputFormat=="json"){
                 <tr><th colspan="2">Source</th><th>Concept ID</th><th colspan="3">Target</th></tr>
                 <tr><th>ID</th><th>Name</th><th>&nbsp;</th><th>ID</th><th>Name</th><th></th></tr>
                 <?php
-                $idx_name  = $def_dts['fieldNamesToIndex']['dty_Name'];
-                $idx_ccode = $def_dts['fieldNamesToIndex']["dty_ConceptID"];
-
-                foreach ($fields_correspondence as $imp_id=>$trg_id){
-
-                    if(@$fields_correspondence_existed[$imp_id]) continue;
-
-                    print "<tr><td>$imp_id</td><td>".$def_dts[$imp_id]['commonFields'][$idx_name]
-                    ."</td><td>"
-                    .$def_dts[$imp_id]['commonFields'][$idx_ccode]
-                    ."</td><td>$trg_id</td><td>"
-                    .$trg_fieldtypes['typedefs'][$trg_id]['commonFields'][$idx_name]."</td></tr>";
-                }
+                    echo $sFields;
                 ?>
             </table>
 
@@ -668,24 +739,7 @@ if($outputFormat=="json"){
                 <tr><th colspan="2">Source</th><th>Concept ID</th><th colspan="3">Target</th></tr>
                 <tr><th>ID</th><th>Name</th><th>&nbsp;</th><th>ID</th><th>Name</th><th></th></tr>
                 <?php
-                $idx_name  = $defs['terms']['fieldNamesToIndex']['trm_Label'];
-                $idx_ccode = $defs['terms']['fieldNamesToIndex']["trm_ConceptID"];
-
-                foreach ($terms_correspondence as $imp_id=>$trg_id){
-                    if(@$terms_correspondence_existed[$imp_id]) continue;
-
-                    if(@$defs['terms']['termsByDomainLookup']['enum'][$imp_id]){
-                        $domain = 'enum';
-                    }else{
-                        $domain = 'relation';
-                    }
-
-                    print "<tr><td>$imp_id</td><td>".$defs['terms']['termsByDomainLookup'][$domain][$imp_id][$idx_name]
-                    ."</td><td>"
-                    .$defs['terms']['termsByDomainLookup'][$domain][$imp_id][$idx_ccode]
-                    ."</td><td>$trg_id</td><td>"
-                    .$trg_terms['termsByDomainLookup'][$domain][$trg_id][$idx_name]."</td></tr>";
-                }
+                    echo $sTerms;
                 ?>
             </table>
 
@@ -707,12 +761,33 @@ exit();
 //
 // Report an error on exit
 //
-function error_exit($msg){
-    global $outputFormat, $mysqli, $database_id;
+function error_exit2($msg){
+    global $outputFormat, $system, $database_id;
+    
+    $mysqli = $system->get_mysqli();
 
+    if(isset($mysqli)){
+        $mysqli->rollback();
+        $mysqli->close();
+        if($outputFormat!='json') {
+            //ROLLBACK
+            print '<div style="text-align:left;padding:40px;">No record types, fields or terms have been imported</div>';
+        }
+    }
+
+    if(false && checkSmtp()){
+    
+        $email_title = 'Annotated template. Error on import record type definitions into '.HEURIST_DBNAME;
+        $email_text = 'Database '.HEURIST_DBNAME."\n\n".
+                      (isset($database_id)?'Source databse #: '.$database_id."\n\n":'').
+                      'Error Message: '.$msg;
+        sendEmail(HEURIST_MAIL_TO_BUG, $email_title, $email_text, null);
+    }
+    
     if($outputFormat=="json"){
-        header("Content-type: text/javascript");
-        print json_format(array("error"=>$msg));
+        
+        $system->error_exit($msg);
+        
     }else{
         ?>
 
@@ -727,33 +802,18 @@ function error_exit($msg){
         </html>
 
         <?php
+        exit();
     }
 
-    if(isset($mysqli)){
-        $mysqli->rollback();
-        $mysqli->close();
-        if($outputFormat!="json") {
-            //ROLLBACK
-            print '<div style="text-align:left;padding:40px;">No record types, fields or terms have been imported</div>';
-        }
-    }
-
-    if(checkSmtp()){
-    
-        $email_title = 'Annotated template. Error on import record type definitions into '.HEURIST_DBNAME;
-        $email_text = 'Database '.HEURIST_DBNAME."\n\n".
-                      (isset($database_id)?'Source databse #: '.$database_id."\n\n":'').
-                      'Error Message: '.$msg;
-        sendEmail(HEURIST_MAIL_TO_BUG, $email_title, $email_text, null);
-    }
-    exit;
 }
 
-
 //
-// find all dependend record types in constraints
+// search source defintions
+// find all dependend record types in pointer constraints
+// 1) returns rt tree 2) fills $imp_recordtypes, $rectypes_correspondence
 //
 function findDependentRecordTypes($rectype_id, $depth){
+    
     global $trg_rectypes, $imp_recordtypes, $defs, $excludeDuplication, $rectypes_correspondence;
 
     if(!$rectype_id || in_array($rectype_id, $imp_recordtypes) || $depth>9){
@@ -762,19 +822,20 @@ function findDependentRecordTypes($rectype_id, $depth){
     }
 
     $def_rts = $defs['rectypes']['typedefs'];
-    $def_dts = $defs['detailTypes']['typedefs'];
+    $def_dts = $defs['detailtypes']['typedefs'];
     $idx_type = $def_rts['dtFieldNamesToIndex']['dty_Type'];
     $idx_ccode = intval($def_rts['commonNamesToIndex']["rty_ConceptID"]);
     $idx_constraints = $def_dts['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
 
     $ccode = $def_rts[$rectype_id]['commonFields'][$idx_ccode];
 
-    if(false && $excludeDuplication){
+    if($excludeDuplication){
         $local_recid = findByConceptCode($ccode, $trg_rectypes['typedefs'], $idx_ccode);
         if($local_recid){  //already exist
             $rectypes_correspondence[$rectype_id] = $local_recid;
             return false; //rectype with the same concept code is already in database
         }
+        $correspondence = array();
     }else{
         $correspondence = findByConceptCode($ccode, $trg_rectypes['typedefs'], $idx_ccode, true);
         if(count($correspondence)>0){
@@ -867,16 +928,17 @@ function replaceTermIds( $sterms, $domain ) {
 //
 // Fill global $imp_terms with the top most vocabulary
 // $terms_ids - list of terms (json or csv) from field definition
+// $imp_terms - list of source vocabulary ids to be imported
 //
 function getTopMostVocabulary($terms_ids, $domain){
-    global $imp_terms;
+    global $imp_terms, $sourceTerms;
 
     if($domain=="relationtype") $domain = "relation";
 
     //array of valid ids
-    $terms_ids =  getTermsFromFormat($terms_ids, $domain);
+    $terms_ids =  $sourceTerms->getTermsFromFormat($terms_ids, $domain);
     foreach ($terms_ids as $term_id){
-        $topmost = getTopMostTermParent($term_id, $domain);
+        $topmost = $sourceTerms->getTopMostTermParent($term_id, $domain);
         if($topmost && !in_array($topmost, $imp_terms[$domain])){
             array_push($imp_terms[$domain], $topmost);
         }
@@ -890,7 +952,7 @@ function getTopMostVocabulary($terms_ids, $domain){
 //
 function importVocabulary($term_id, $domain, $children=null){
 
-    global $defs, $imp_terms, $terms_correspondence, $terms_correspondence_existed, $trg_terms, $excludeDuplication;
+    global $system, $defs, $imp_terms, $terms_correspondence, $terms_correspondence_existed, $trg_terms, $excludeDuplication;
 
     $terms = $defs['terms'];
 
@@ -914,7 +976,10 @@ function importVocabulary($term_id, $domain, $children=null){
 
         //find term by concept code among local terms
         if(true || $excludeDuplication){
-            $new_term_id = findTermByConceptCode($term_import[$idx_ccode], $domain);
+            
+            $targetTerms = new DbsTerms($system, $trg_terms);
+            $new_term_id = $targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
+            
         }else{
             $new_term_id = null;
         }
@@ -950,11 +1015,11 @@ function importVocabulary($term_id, $domain, $children=null){
                 }
             }
 
-            $res = updateTerms($columnNames, null, $term_import, null);
+            $res = updateTerms($columnNames, null, $term_import, null); //see saveStructureLib
             if(is_numeric($res)){
                 $new_term_id = $res;
             }else{
-                error_exit("Can't add term ".print_r($term_import, true)."  ".$res);
+                error_exit2("Can't add term ".print_r($term_import, true)."  ".$res);
             }
         }
 
@@ -1047,25 +1112,6 @@ function doDisambiguate($newvalue, $entities){
 
 
 //
-//
-//
-function findTermByConceptCode($ccode, $domain){
-    global $trg_terms;
-
-    $terms = $trg_terms['termsByDomainLookup'][$domain];
-    $idx_ccode = intval($trg_terms['fieldNamesToIndex']["trm_ConceptID"]);
-
-    foreach ($terms as $term_id => $def) {
-        if(is_numeric($term_id) && $def[$idx_ccode]==$ccode){
-            return $term_id;
-        }
-    }
-    return null;
-}
-
-
-
-//
 //  find by concept code in local definitions
 //
 function findByConceptCode($ccode, $entities, $idx_ccode, $sall=false){
@@ -1084,80 +1130,6 @@ function findByConceptCode($ccode, $entities, $idx_ccode, $sall=false){
     return ($sall)?$res:null;
 }
 
-
-
-// a couple of function from h4/db_records.php
-// TODO: Put these in a library
-
-
-
-// REPLACE with db_structure function
-// get terms from json string
-//
-function getTermsFromFormat($formattedStringOfTermIDs, $domain) {
-
-    global $defs;
-
-    $terms = $defs['terms'];
-
-    $validTermIDs = array();
-    if (!$formattedStringOfTermIDs || $formattedStringOfTermIDs == "") {
-        return $validTermIDs;
-    }
-
-    if (strpos($formattedStringOfTermIDs,"{")!== false) {
-        $temp = preg_replace("/[\{\}\",]/","",$formattedStringOfTermIDs);
-        if (strrpos($temp,":") == strlen($temp)-1) {
-            $temp = substr($temp,0, strlen($temp)-1);
-        }
-        $termIDs = explode(":",$temp);
-    } else {
-        $temp = preg_replace("/[\[\]\"]/","",$formattedStringOfTermIDs);
-        $termIDs = explode(",",$temp);
-    }
-
-    // Validate termIDs
-    $TL = $terms['termsByDomainLookup'][$domain];
-
-    foreach ($termIDs as $trmID) {
-        // check that the term valid
-        if ( $trmID && array_key_exists($trmID,$TL) && !in_array($trmID, $validTermIDs)){ // valid trm ID
-            array_push($validTermIDs,$trmID);
-        }
-    }
-    return $validTermIDs;
-}
-
-
-
-//
-//  Find vocabulary ID
-//
-function getTopMostTermParent($term_id, $domain, $topmost=null) {
-    global $defs;
-
-    $terms = $defs['terms'];
-
-    if(is_array($domain)){
-        $lvl = $domain;
-    }else{
-        $lvl = $terms['treesByDomain'][$domain];
-    }
-    foreach($lvl as $sub_term_id=>$childs){
-
-        if($sub_term_id == $term_id){
-            return $topmost?$topmost:$term_id;
-        }else if( count($childs)>0 ) {
-
-            $res = getTopMostTermParent($term_id, $childs, $topmost?$topmost:$sub_term_id );
-            if($res) return $res;
-        }
-    }
-    return null; //not found
-}
-
-
-
 //
 // Copy record type icon and thumbnail from source to destination database
 //
@@ -1170,14 +1142,12 @@ function copyRectypeIcon($source_RtyID, $target_RtyID, $thumb=""){
     //print "<br>sourcce=".$sourceURL;
     //print "<br>path=".$targetPath;
 
-    saveURLasFile($sourceURL, $targetPath);
+    saveURLasFile($sourceURL, $targetPath); //see utils_file
 
     if($thumb==""){
         copyRectypeIcon($source_RtyID, $target_RtyID, "thumb/th_");
     }
 }
-
-
 
 //
 // Show the form with list of record types to be imported

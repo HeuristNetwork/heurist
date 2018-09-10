@@ -295,12 +295,15 @@ window.hWin.HEURIST4.dbs = {
                 $res['type'] = 'rectype';
                 
                 var idx_ccode = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
-            
                 var $rt_conceptcode = rectypes['typedefs'][$recTypeId]['commonFields'][idx_ccode];
+
                 $res['conceptCode'] = $rt_conceptcode;
                 $res['rtyID_local'] = window.hWin.HEURIST4.dbs.findByConceptCode($rt_conceptcode, 
                                 window.hWin.HEURIST4.rectypes.typedefs, idx_ccode);
-                
+                                
+                //$res['title'] = $res['title']+" <span style='font-size:0.6em'>(" + $rt_conceptcode
+                //            +','+$res['rtyID_local']+ ")</span>";   
+                                
                                                                                                                   
                 if(($mode!=5 || $recursion_depth==0)){
                     $details = rectypes['typedefs'][$recTypeId]['dtFields'];
@@ -441,7 +444,7 @@ window.hWin.HEURIST4.dbs = {
     $dtID   - detail type ID
     $dtValue - record type structure definition
     returns display name  or if enum array
-    $mode - 3 all, 4,5 for treeview (5 lazy) , 6 - for import csv(dependencies)
+    $mode - 3 all, 4, 5 for treeview (5 lazy) , 6 - for import csv(dependencies)
     */
     function __getDetailSection($recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId, $pointer_fields){
 
@@ -613,8 +616,8 @@ window.hWin.HEURIST4.dbs = {
             $res['dtyID_local'] = window.hWin.HEURIST4.dbs.findByConceptCode($dt_conceptcode, 
                         window.hWin.HEURIST4.detailtypes.typedefs, idx_ccode);
             
-            $res['title'] = $res['title']+" <span style='font-size:0.6em'>(" + $dt_conceptcode
-                            +','+$res['dtyID_local']+ ")</span>";   
+            //$res['title'] = $res['title']+" <span style='font-size:0.6em'>(" + $dt_conceptcode
+            //                +','+$res['dtyID_local']+ ")</span>";   
         }            
         return $res;
     }
@@ -707,7 +710,7 @@ window.hWin.HEURIST4.dbs = {
                 }
             }
         }
-        return (sall)?res:null;
+        return (sall)?res:0;
     }
 
     

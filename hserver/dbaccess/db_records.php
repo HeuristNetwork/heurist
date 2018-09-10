@@ -1615,7 +1615,7 @@ array_push($errorValues,
     }
 
     
-    
+    // @todo REMOVE - all these functions are duplicated in VerifyValue and db_structure
     //
     // get terms from json string
     //
@@ -1651,7 +1651,7 @@ array_push($errorValues,
         return $validTermIDs;
     }
 
-
+    // @todo REMOVE - all these functions are duplicated in VerifyValue and db_structure
     function getTermsByParent($term_id, $domain, $getalldescents = true)
     {
         global $terms;
@@ -1702,6 +1702,7 @@ array_push($errorValues,
         return null; //not found
     }
 
+    // see VerifyValue
     function isValidTerm($system, $term_tocheck, $domain, $dtyID, $rectype)
     {
         global $recstructures, $detailtypes;

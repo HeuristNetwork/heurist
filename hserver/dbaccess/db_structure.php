@@ -1,6 +1,7 @@
 <?php
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 //@TODO convert to class
+
     /**
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -46,6 +47,7 @@
     * getTermById
     * getTermFullLabel
     * getTermListAll
+    * getTermLabels
     *
     * INTERNAL FUNCTIONS
     * __getRectypeColNames
@@ -185,7 +187,7 @@
                 }
                 $res->close();
             }else{
-                error_log('DATABASE: '.HEURIST_DBNAME.'. Error retrieving rectype structure '.$mysqli->error);
+                error_log('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
             }
 
         }
@@ -246,7 +248,7 @@
             }
             $res->close();
         }else{
-            error_log('DATABASE: '.HEURIST_DBNAME.'. Error retrieving rectype structure '.$mysqli->error);
+            error_log('DATABASE: '.$system->dbname().'. Error retrieving rectype structure '.$mysqli->error);
         }
 
 
@@ -442,7 +444,7 @@ function dbs_GetRectypeConstraint($system) {
         array_push($terms['commonFieldNames'],'trm_HasImage');        
             
         if($res){
-            $lib_dir = HEURIST_FILESTORE_DIR . 'term-images/';
+            $lib_dir = HEURIST_FILESTORE_ROOT. $system->dbname() . '/term-images/';  //HEURIST_FILESTORE_DIR . 'term-images/';
             
             while ($row = $res->fetch_row()) {
                 $terms['termsByDomainLookup'][$row[9]][$row[0]] = array_slice($row, 1);
@@ -452,7 +454,7 @@ function dbs_GetRectypeConstraint($system) {
             
             $res->close();
         }else{
-            error_log('DATABASE: '.HEURIST_DBNAME.'. Error retrieving terms '.$mysqli->error);
+            error_log('DATABASE: '.$system->dbname().'. Error retrieving terms '.$mysqli->error);
         }
         $terms['treesByDomain'] = array(
                 'relation' => __getTermTree($mysqli, "relation", "prefix"), 
@@ -607,6 +609,17 @@ function dbs_GetRectypeConstraint($system) {
     }
 
 
+    //
+    //
+    //
+    function getTermLabels($mysqli, $termIDs) {
+        $labels = array();
+        if ($termIDs) {
+            $labels = mysql__select_assoc2($mysqli, 
+            'select trm_ID, LOWER(trm_Label) from defTerms where trm_ID in ('.implode(',', $termIDs).')');
+        }
+        return $labels;
+    }    
     //
     // find tree in term tree
     // return branch with childs
@@ -805,7 +818,7 @@ function dbs_GetRectypeConstraint($system) {
                         if(array_search($gChildID, $parents)===false){
                             $terms = __attachChild($childIndex, $gChildID, $terms, $parents);//depth first recursion
                         }else{
-                            error_log('Recursion in '.HEURIST_DBNAME.'.defTerms!!! Tree '.implode('>',$parents)
+                            error_log('Recursion in '.$system->dbname().'.defTerms!!! Tree '.implode('>',$parents)
                                     .'. Can\'t add term '.$gChildID);
                         }
                     }
@@ -1022,7 +1035,7 @@ function dbs_GetRectypeConstraint($system) {
         try{
             if(!$res){
                 error_log('FAILED QUERY: '.$mysqli->error);//$query);
-                error_log('Database: '.HEURIST_DBNAME);
+                error_log('Database: '.$system->dbname());
             }else{
                 while ($row = $res->fetch_row()) {
                     if($imode!=1){
@@ -1039,7 +1052,7 @@ function dbs_GetRectypeConstraint($system) {
             //trying to find veird error - missed trm_Modified column
             error_log('Message: ' .$e->getMessage());
             error_log('QUERY: '.$query);
-            error_log('Database: '.HEURIST_DBNAME);
+            error_log('Database: '.$system->dbname());
         }
         
         //SPECIAL CASE for relation type #6

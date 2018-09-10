@@ -579,6 +579,7 @@ $.widget( "heurist.resultList", {
         }
 
         var has_content_header = this.div_content_header && this.div_content_header.is(':visible');
+        //!window.hWin.HEURIST4.util.isempty(this.div_content_header.html());
         
         if(has_content_header){ //table_header
             top = top + this.div_content_header.height();
@@ -716,27 +717,26 @@ $.widget( "heurist.resultList", {
             }
             this.div_content.removeClass('list icons thumbs thumbs3');
             this.div_content.addClass(newmode);
-
-            //show hide table header
-            if($.isFunction(this.options.rendererHeader)){
-                
-                var header_html = (newmode=='list')?this.options.rendererHeader():'';
-                
-                //create div for table header
-                if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
-                        this.div_content_header = $('<div>').addClass('table_header')
-                        .insertBefore(this.div_content);
-                }
-                if(window.hWin.HEURIST4.util.isempty(header_html)){
-                    this.div_content_header.hide();
-                }else{
-                    this.div_content_header.html( header_html ).show();
-                }
-            } 
-                
-            this._adjustHeadersPos();
-
         }
+        
+        //show hide table header
+        if($.isFunction(this.options.rendererHeader)){
+            
+            var header_html = (newmode=='list')?this.options.rendererHeader():'';
+            
+            //create div for table header
+            if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
+                    this.div_content_header = $('<div>').addClass('table_header')
+                    .insertBefore(this.div_content);
+            }
+            if(window.hWin.HEURIST4.util.isempty(header_html)){
+                this.div_content_header.hide();
+            }else{
+                this.div_content_header.html( header_html ).show();
+            }
+        } 
+    
+        this._adjustHeadersPos();
         //this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);
 
         if(this.view_mode_selector){
@@ -1935,6 +1935,10 @@ $.widget( "heurist.resultList", {
             this.options.onPageRender.call(this);
         }
 
+        if(this.div_content_header){
+            this._adjustHeadersPos();
+        }
+        
     },
 
     _onGetFullRecordData: function( response, rec_toload ){

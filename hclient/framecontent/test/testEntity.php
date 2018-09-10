@@ -134,7 +134,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
             function testImportStruc(){
 
-                $('#main_div').empty().importStructure( {isdialog: false} );
+                if(false){
+                    var manage_dlg = $('<div id="heurist-dialog-importRectypes-'+window.hWin.HEURIST4.util.random()+'">')
+                    .appendTo( $('body') )
+                    .importStructure( {isdialog: true} );
+                }else{
+                    $('#main_div').empty().importStructure( {isdialog: false} );
+                }
              
             }
             // to remove 

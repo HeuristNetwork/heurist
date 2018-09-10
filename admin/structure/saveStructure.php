@@ -68,19 +68,19 @@ if ($method && !in_array($_REQUEST['method'],$legalMethods)) {
 }
 
 if(!$method){
-    error_exit('Invalid call to saveStructure, there is no valid "method" parameter');
+    $system->error_exit('Invalid call to saveStructure, there is no valid "method" parameter');
 }
 else
 {
 
         if( !$system->init(@$_REQUEST['db']) ){
-            error_exit();
+            $system->error_exit();
         }
 
         if(!$system->is_admin()){
             $system->addError(HEURIST_REQUEST_DENIED, 
                 'To perform this action you must be logged in as Administrator of group \'Database Managers\'');
-            error_exit();
+            $system->error_exit();
         }
         
         define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
@@ -113,7 +113,7 @@ else
                 if (!array_key_exists('rectype',$data) ||
                     !array_key_exists('colNames',$data['rectype']) ||
                     !array_key_exists('defs',$data['rectype'])) {
-                    error_exit("Invalid data structure sent with saveRectype method call to saveStructure.php");
+                    $system->error_exit("Invalid data structure sent with saveRectype method call to saveStructure.php");
                 }
                 $commonNames = $data['rectype']['colNames']['common'];
                 //$dtFieldNames = $rtData['rectype']['colNames']['dtFields'];
@@ -143,7 +143,7 @@ else
                     !array_key_exists('colNames',$data['rectype']) ||
                     !array_key_exists('defs',$data['rectype']))
                 {
-                    error_exit("Invalid data structure sent with updateRecStructure method call to saveStructure.php");
+                    $system->error_exit("Invalid data structure sent with updateRecStructure method call to saveStructure.php");
                 }
 
                 //$commonNames = $rtData['rectype']['colNames']['common'];
@@ -157,7 +157,7 @@ else
                     if( is_array( $res ) ){
                         array_push($rv['result'], $res);
                     }else{
-                        error_exit( $res );   
+                        $system->error_exit( $res );   
                     }
                 }
                 $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
@@ -246,7 +246,7 @@ else
                 if (!array_key_exists('rectypegroups',$data) ||
                     !array_key_exists('colNames',$data['rectypegroups']) ||
                     !array_key_exists('defs',$data['rectypegroups'])) {
-                    error_exit("Invalid data structure sent with saveRectypeGroup method call to saveStructure.php");
+                    $system->error_exit("Invalid data structure sent with saveRectypeGroup method call to saveStructure.php");
                 }
                 $colNames = $data['rectypegroups']['colNames'];
                 $rv['groups'] = array();
@@ -266,7 +266,7 @@ else
 
                 $rtgID = @$_REQUEST['rtgID'];
                 if (!$rtgID) {
-                    error_exit("Invalid or no record type group ID sent with deleteRectypeGroup method call to saveStructure.php");
+                    $system->error_exit("Invalid or no record type group ID sent with deleteRectypeGroup method call to saveStructure.php");
                 }
                 $rv = deleteRectypeGroup($rtgID);
                 if (!array_key_exists('error',$rv)) {
@@ -279,7 +279,7 @@ else
                 if (!array_key_exists('dettypegroups',$data) ||
                     !array_key_exists('colNames',$data['dettypegroups']) ||
                     !array_key_exists('defs',$data['dettypegroups'])) {
-                    error_exit("Invalid data structure sent with saveDetailTypeGroup method call to saveStructure.php");
+                    $system->error_exit("Invalid data structure sent with saveDetailTypeGroup method call to saveStructure.php");
                 }
                 $colNames = $data['dettypegroups']['colNames'];
                 $rv['groups'] = array();
@@ -302,7 +302,7 @@ else
 
                 $dtgID = @$_REQUEST['dtgID'];
                 if (!$dtgID) {
-                    error_exit("Invalid or no detail type group ID sent with deleteDetailType method call to saveStructure.php");
+                    $system->error_exit("Invalid or no detail type group ID sent with deleteDetailType method call to saveStructure.php");
                 }
                 $rv = deleteDettypeGroup($dtgID);
                 if (!array_key_exists('error',$rv)) {
@@ -322,7 +322,7 @@ else
                 if (!array_key_exists('detailtype',$data) ||
                     !array_key_exists('colNames',$data['detailtype']) ||
                     !array_key_exists('defs',$data['detailtype'])) {
-                    error_exit("Invalid data structure sent with saveDetailType method call to saveStructure.php");
+                    $system->error_exit("Invalid data structure sent with saveDetailType method call to saveStructure.php");
                 }
                 $commonNames = $data['detailtype']['colNames']['common'];
                 $rv['result'] = array(); //result
@@ -378,7 +378,7 @@ else
                 if (!array_key_exists('terms',$data) ||
                     !array_key_exists('colNames',$data['terms']) ||
                     !array_key_exists('defs',$data['terms'])) {
-                    error_exit("Invalid data structure sent with saveTerms method call to saveStructure.php");
+                    $system->error_exit("Invalid data structure sent with saveTerms method call to saveStructure.php");
                 }
                 
                 $colNames = $data['terms']['colNames'];
@@ -419,7 +419,7 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
                 $retain_id = @$_REQUEST['retain'];
                 $merge_id = @$_REQUEST['merge'];
                 if($retain_id==null || $merge_id==null || $retain_id == $merge_id){
-                    error_exit("Invalid data structure sent with mergeTerms method call to saveStructure.php");
+                    $system->error_exit("Invalid data structure sent with mergeTerms method call to saveStructure.php");
                 }
 
                 $colNames = $data['terms']['colNames'];
@@ -485,20 +485,4 @@ header('Content-Encoding: gzip');
 header('Content-type: text/javascript; charset=utf-8');
 echo $output; 
 unset($output);
-
-
-//
-//
-//
-function error_exit($msg){
-    global $system;
-    
-    header('Content-type: application/json;charset=UTF-8');
-    if($msg){
-        $system->addError(HEURIST_INVALID_REQUEST, $msg);
-    }
-
-    print json_encode( $system->getError() );
-    exit();
-}
 ?>

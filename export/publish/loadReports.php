@@ -26,12 +26,11 @@ require_once(dirname(__FILE__).'/../../hserver/System.php');
 
 $system = new System();
 if( !$system->init(@$_REQUEST['db']) ){
-    error_exit();
+    $system->error_exit();
 }
 
 if(!$system->has_access()){
-   $system->addError(HEURIST_REQUEST_DENIED, 'To perform this action you must be logged in');
-   error_exit();
+   $system->error_exit( 'To perform this action you must be logged in',  HEURIST_REQUEST_DENIED);
 }
 
 header('Content-type: application/json;charset=UTF-8');
@@ -87,7 +86,7 @@ $mysqli = $system->get_mysqli();
 
         $recID = @$_REQUEST['recID'];
         if ($recID==null) {
-              error_exit('Invalid call to loadReports, recID is required');
+              $system->error_exit('Invalid call to loadReports, recID is required');
         }
 
         $colNames = array("rps_ID", "rps_Type", "rps_Title", "rps_FilePath", "rps_URL", "rps_FileName", "rps_HQuery", "rps_Template", "rps_IntervalMinutes");
@@ -118,7 +117,7 @@ $mysqli = $system->get_mysqli();
         if (!array_key_exists('report',$data) ||
         !array_key_exists('colNames',$data['report']) ||
         !array_key_exists('defs',$data['report'])) {
-              error_exit('Invalid data structure sent with savereport method call to loadReports.php');
+              $system->error_exit('Invalid data structure sent with savereport method call to loadReports.php');
         }
 
         $colNames = $data['report']['colNames'];
@@ -137,7 +136,7 @@ $mysqli = $system->get_mysqli();
         $recID  = @$_REQUEST['recID'];
         $rv = array();
         if (!($recID>0)) {
-              error_exit('Invalid  or not ID sent with deletereport method call to loadReports.php');
+              $system->error_exit('Invalid  or not ID sent with deletereport method call to loadReports.php');
         }else{
             $rv = deleteReportSchedule($mysqli, $recID);
             if(@$rv['error']){
@@ -148,7 +147,7 @@ $mysqli = $system->get_mysqli();
             print json_encode($response);
         }
     }else{
-        error_exit('Invalid or no method provided to loadReports.php');
+        $system->error_exit('Invalid or no method provided to loadReports.php');
     }
 
 exit();
@@ -292,19 +291,4 @@ exit();
 
         return $ret;
     }
-
-//
-//
-//    
-function error_exit($msg){
-    global $system;
-    
-    header('Content-type: application/json;charset=UTF-8');
-    if($msg){
-        $system->addError(HEURIST_INVALID_REQUEST, $msg);
-    }
-
-    print json_encode( $system->getError() );
-    exit();
-}
 ?>

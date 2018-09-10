@@ -462,7 +462,6 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true){
     }
 }
 
-
 /**
 * direct file download - move to utils_file
 *

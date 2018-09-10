@@ -44,6 +44,7 @@
             unset($_REQUEST['remote']);
             $_REQUEST['db'] = $match[1];
        }else{
+           //load structure from remote server
                 $splittedURL = explode('?', $remoteURL);
                    
                 $remoteURL = $splittedURL[0].'hserver/controller/sys_structure.php?db='.$match[1];
@@ -99,7 +100,6 @@
             }else{
                 $mode = 0;
             }
-
 
             if($mode==5){
                 if(count($data["rectypes"])==1){

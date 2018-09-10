@@ -102,7 +102,7 @@ class System {
                     
                     if($this->dbname_full){
                     
-                        if(!defined('HEURIST_DBNAME')){
+                        if(!defined('HEURIST_DBNAME')){ //init once for first systrem - preferable use methods 
                             define('HEURIST_DBNAME', $this->dbname);
                             define('HEURIST_DBNAME_FULL', $this->dbname_full);
                         }
@@ -539,6 +539,10 @@ error_log(print_r($_REQUEST, true));
         return $this->dbname_full;
     }
 
+    public function dbname(){
+        return $this->dbname;
+    }
+    
     /**
     * set dbname and dbname_full properties
     * 
@@ -576,6 +580,25 @@ error_log(print_r($_REQUEST, true));
         $this->errors = array();
     }
 
+    /**
+    * terminate execution of script 
+    * 
+    * @param mixed $message
+    */
+    public function error_exit( $message, $error_code=null ) {
+        
+        header('Content-type: application/json;charset=UTF-8');
+        if($message){
+            if($error_code==null){
+                $error_code = HEURIST_INVALID_REQUEST;
+            }
+            $this->addError($error_code, $message);
+        }
+
+        print json_encode( $this->getError() );
+        exit();
+    }
+    
 
     /**
     * keep error message (for further use with getError)

@@ -201,6 +201,19 @@
         }
     }
 
+    
+    /**
+    * save remote url as file and returns the size of saved file
+    *
+    * @param mixed $url
+    * @param mixed $filename
+    */
+    function saveURLasFile($url, $filename)
+    { //Download file from remote server
+        $rawdata = loadRemoteURLContent($url);
+        return fileSave($rawdata, $filename);
+    }
+    
  
     /**
      * Returns the target path as relative reference from the base path.

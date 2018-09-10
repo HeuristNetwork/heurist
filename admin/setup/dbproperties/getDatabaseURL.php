@@ -63,7 +63,7 @@
     }else{
         
         $system2 = new System();
-        $system2->init('hdb_Heurist_Master_Index', true, false);
+        $system2->init('hdb_Heurist_Master_Index', true, false); //init without paths and consts
 
         if(@$_REQUEST['remote']){ 
             $database_id = @$_REQUEST["id"];   

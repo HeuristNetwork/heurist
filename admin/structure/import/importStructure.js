@@ -51,10 +51,10 @@ $.widget( "heurist.importStructure", {
     
         //DIALOG section       
         isdialog: false,  // show as dialog @see  _initDialog(), popupDialog(), closeDialog
-        height: 400,
-        width:  760,
+        height: 600,
+        width:  1100,
         modal:  true,
-        title:  '',
+        title:  'Import structural definitions into current database',
         
         //LIST section 
         pagesize: 200      // page size in resultList 
@@ -63,7 +63,7 @@ $.widget( "heurist.importStructure", {
     //cached records hRecordSet for databases
     _cachedRecordset_dbs:null,
     
-    _selectedDB:null, //name of currently selected database
+    _selectedDB:null, //regid of currently selected database
     _selectedRtyID:null,
     
     // the widget's constructor
@@ -97,6 +97,7 @@ $.widget( "heurist.importStructure", {
                             +'<div class="ent_wrapper" id="panel_rty_tree" style="display:none;top:0;left:321px">'
                             +    '<div class="ent_header rtt-toolbar" style="padding:10px;height:8.6em;border-left:1px lightgray solid">'
                                         +'<div id="btn_close_panel_rty_tree"></div><div id="btn_start_import"></div>'
+                                        +'<div class="heurist-helper1" style="padding:4px;">Explore structure of record type to be imported. Grayed out fields are already in current database. Mouse over the field in tree to show a local correspond field</div>'
                             +    '</div>'
                             +    '<div class="ent_content_full rtt-tree" style="top:10.4em"/>'
                             +'</div>'
@@ -126,8 +127,8 @@ $.widget( "heurist.importStructure", {
                        empty_remark: '<div style="padding:1em 0 1em 0">No registered databases found</div>',
 
                        rendererHeader:  function(){
-        sHeader = '<div style="width:62px">Reg#</div><div style="width:13em">Database Name</div>'
-                +'<div style="width:28em">Description</div>'
+        sHeader = '<div style="width:62px">Reg#</div><div style="width:23em">Database Name</div>'
+                +'<div style="width:31em">Description</div>'
                 +'<div style="width:5em">URL</div>';
                             return sHeader;
                        },
@@ -186,6 +187,8 @@ $.widget( "heurist.importStructure", {
 
         var that = this;
         
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+        
         window.hWin.HAPI4.EntityMgr.getEntityConfig('records', 
         function(entity){
             that.options.entity = entity;
@@ -194,9 +197,9 @@ $.widget( "heurist.importStructure", {
             var query_request = {remote:'master'};
             window.hWin.HAPI4.RecordMgr.search(query_request, 
                 function( response ){
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                    
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        
-                        window.hWin.HEURIST4.msg.sendCoverallToBack();
                         
                         response.data.fields.push('rec_ScratchPad');
                         
@@ -218,7 +221,7 @@ $.widget( "heurist.importStructure", {
                                 this.setFld(record, 'rec_ScratchPad', recDesc);
                         });
                         
-                        that.filterRecordList_dbs({}); 
+                        that.startSearch_dbs(); //filterRecordList_dbs({}); 
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -282,13 +285,19 @@ $.widget( "heurist.importStructure", {
         
         var record = db_ids.getFirstRecord();//this._cachedRecordset_dbs.getById(db_ids[0]);
         
+        var sDB_ID = db_ids.fld(record, 'rec_ID');
         var sURL  = db_ids.fld(record, 'rec_URL');
         var sDB   = db_ids.fld(record, 'rec_Title');
         
         
-        if(this._selectedDB != sDB){
+        if(this._selectedDB != sDB_ID){
             
-            this._selectedDB = sDB;
+            this._selectedDB = sDB_ID;
+            
+            //TEMP replace all folders to h5-ao to get correct output
+            if(sURL.indexOf('http://heurist.sydney.edu.au/')==0){
+                sURL = 'http://heurist.sydney.edu.au/h5-ao/'    
+            }
             
             var options = {
                 isdialog: false,
@@ -300,8 +309,9 @@ $.widget( "heurist.importStructure", {
                        databaseURL: sURL,
                        database_url:  (sURL+'?db='+sDB),
                        btn_back_to_databases: function(){
-                            panel_dbs.show();
-                            panel_rty.hide();
+                           
+                            that._backToDatabases();
+                           
                        }
                 },
                 
@@ -327,6 +337,17 @@ $.widget( "heurist.importStructure", {
         
     },
     
+    _backToDatabases: function(){
+        this._hideRectypeTree();
+        this.element.find('#panel_rty').hide();
+        this.element.find('#panel_dbs').show();
+    },
+    
+    _hideRectypeTree: function(){
+        this.element.find('#panel_rty_list').css({right:'1px'});
+        this.element.find('#panel_rty_tree').hide();
+    },
+    
     //
     // show treeview with record type structure
     //
@@ -335,6 +356,7 @@ $.widget( "heurist.importStructure", {
         var panel_rty = this.element.find('#panel_rty_list').css({right:'300px'});
         var panel_rty_structure = this.element.find('#panel_rty_tree')
                 .css({left: this.element.find('#panel_rty').width()-300 }).show();
+        var that = this;
         
         if( this._selectedRtyID!=rtyID ){
         
@@ -342,18 +364,20 @@ $.widget( "heurist.importStructure", {
                 //first time init
                 
                 // CLOSE BUTTON
-                panel_rty_structure.find('#btn_close_panel_rty_tree').button({icon: 'ui-icon-carat-1-e', label:'Close'})
-                    .css({'line-height': '0.9em'})
+                panel_rty_structure.find('#btn_close_panel_rty_tree')
+                    .button({icon: 'ui-icon-circle-close', showLabel:false, label:'Close'})
+                    .css({'line-height': '0.9em', float:'right'})
                     .click(function(){
-                        panel_rty.css({right:'1px'});
-                        panel_rty_structure.hide();
+                        that._hideRectypeTree();
                     });
                     
                 // START IMPORT 
                 panel_rty_structure.find('#btn_start_import')
                     .button({icon: 'ui-icon-carat-1-s', iconPosition:'right', label:'Start Import'})
                     .css({'line-height': '0.9em'})
-                    .click(this.startImport);
+                    .click(function(){
+                        that.startImport();
+                    });
                     
             }
                 
@@ -401,20 +425,23 @@ $.widget( "heurist.importStructure", {
 //console.log(data);                     
 //                        var tree = treediv.fancytree("getTree");
                         data.node.visit(function(node){
-                            if(node.data.dtyID_local>0){
+                            var lcode = node.data.dtyID_local>0 ?node.data.dtyID_local:node.data.rtyID_local;
+                            if(lcode>0){
                                  node.setSelected(true);
                                  node.unselectable = true;
+                                 node.extraClasses = 'graytext';
+                                 node.tooltip = (window.hWin
+                                    .HEURIST4[node.data.dtyID_local>0?'detailtypes':'rectypes'].names[lcode])+' #'+lcode;
                                  //node.unselectableStatus = true;
-                                 if(!node.hasChildren()){
-                                    node.hideCheckbox = true;
-                                    node.extraClasses = 'graytext';
-                                    /*var ele = $(node.li).find('.fancytree-title');
-                                    console.log(ele.text());
-                                    ele.css({'color':'red !important'});*/
-                                 }
-                                  
-                                 
                             }                     
+                            //hide checkbox for all expcet resource
+                            if(!(node.data.type=='resource' || 
+                                 node.data.type=='relmarker' || 
+                                 node.data.type=='rectype'))
+                            {
+                                node.hideCheckbox = true;    
+                            }
+                            
                         });
                 },
                 select: function(e, data) {
@@ -531,10 +558,11 @@ $.widget( "heurist.importStructure", {
         +'</div>';
         
         var recTitle = '<div class="item" style="width:3em">'+recID+'</div>'
-                      +'<div class="item" style="width:15em;'+(recID<1000?'font-weight:bold':'')
+                      +'<div class="item" style="width:25em;'+(recID<1000?'font-weight:bold':'')
                                                         +'">'+dbName+'</div>'
-                      +'<div class="item" style="width:30em">'+recTitle+'</div>'
-                      +'<div class="item" style="width:20em"><a href="'+recURL+'?db='+dbName+'" target="_blank">'
+                      +'<div class="item" style="width:35em" title="'+recTitle+'">'+recTitle+'</div>'
+                      +'<div class="item" style="width:20em;padding-left:4px"><a href="'
+                                +recURL+'?db='+dbName+'" target="_blank">'
                         + window.hWin.HEURIST4.util.htmlEscape(recURL)+'</a></div>';
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
@@ -571,6 +599,7 @@ $.widget( "heurist.importStructure", {
             if(options['height']>maxh) options['height'] = maxh*0.95;
             
             //this.options.window = window.hWin;
+            this.element.addClass('ui-heurist-bg-light');
             
             var $dlg = this.element.dialog({
                 autoOpen: false ,
@@ -584,7 +613,8 @@ $.widget( "heurist.importStructure", {
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
                 close:function(){
-                    $dlg.parent().remove();    
+                    $dlg.parent().remove(); 
+                    that.element.remove();
                 }
             }); 
             this._as_dialog = $dlg; 
@@ -624,95 +654,66 @@ $.widget( "heurist.importStructure", {
     //
     startImport: function(){
         
-        this.gatherDataToImport();
+        this._hideRectypeTree();
         
-        alert('start import '+this._selectedRtyID);
+        var rtyCode = this._selectedDB + '-' + this._selectedRtyID;
         
-        //get current record type and types to be imported and its structure
-        //this._selectedRtyID
+        var request = {code:rtyCode, db:window.hWin.HAPI4.database}
         
-        //get selected fields in tree
+        var url = window.hWin.HAPI4.baseURL + 'admin/structure/import/importRectype.php';
         
-        //get terms to be imported
+        var that = this;
         
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
         
-    },
-    
-    //
-    // scan treeview and gather data to be imported
-    // terms, fields, rt structure, rectype
-    gatherDataToImport: function(){
+        window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){    
 
-/*        
-        var oRectype = {rectype:{
-                colNames:{common:[], dtFields:[]},  - header
-                defs: {rtid:{common: , dtFields:  },  }   - values
-        }};
-        
-        
-            var oDetailType = {detailtype:{
-                colNames:{common:[]},
-                defs: {}
-            }};
+            window.hWin.HEURIST4.msg.sendCoverallToBack(); 
 
-*/
-
-        var oData = {
-            rectype:{
-                colNames:{ common:[ window.hWin.HEURIST4.rectypes.typedefs.commonFieldNames ], 
-                           dtFields:[ window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames ]},
-                defs: {} 
-                },
-            detailtype:{
-                colNames:{ common:[ window.hWin.HEURIST4.detailtypes.typedefs.commonFieldNames ] },
-                defs: {}
-                }
-        };
-        
-        //rectypes and fields to be added
-        var rectypes_tba = [];
-        var details_tba = [];
-        
-        var idx_ccode_rt = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
-        var idx_ccode_dt = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
-        
-        var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 
-                                                5, this._selectedRtyID, 'all' );
-        for 
-        
-        var tree = treediv.fancytree("getTree");
-        tree.visit(function(node){
-            if(true || node.isSelected()){
+            if(response.status == window.hWin.ResponseStatus.OK){
                 
-                if(node.data.type=='rectype' && !(node.data.rtyID_local>0)) { //rectype to be added
+                if(response.data.rectypes) window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                if(response.data.detailtypes) window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
+                if(response.data.terms) window.hWin.HEURIST4.terms = response.data.terms;
                 
-                    
+                var report = ''
+                var theader = '<table style="padding: 5px;font-size: 1em;">'
+                +'<tr><th colspan="2">Source</th><th>Concept ID</th><th colspan="3">Target</th></tr>'
+                +'<tr><th>ID</th><th>Name</th><th>&nbsp;</th><th>ID</th><th>Name</th><th></th></tr>';
+                
+                if(response.report.rectypes) {
+            report = report + '<h3>Record types</h3>'+theader
+                + response.report.rectypes
+                + '</table>';
                 }
                 
-                window.hWin.HEURIST4.dbs.findByConceptCode($rt_conceptcode, 
-                                window.hWin.HEURIST4.rectypes.typedefs, idx_ccode);
+                if(response.report.detailtypes) {
+            report = report + '<h3>Field types</h3>'+theader
+                + response.report.detailtypes
+                + '</table>';
+                }
                 
+                if(response.report.terms) {
+            report = report + '<h3>Terms</h3>'+theader
+                + response.report.terms
+                + '</table>';
+                }
+               
+                if(report!=''){ 
+                    report = '<div style="font-size:0.9em;"><h2>Record type and associated structures imported</h2>'+report+'</div>';
+                    window.hWin.HEURIST4.msg.showMsgDlg(report);
+                }else{
+                    report = 'Nothing imported. '+
+                    'Record types (and associated strucures) you selected to be imported are in this database already';
+                }
+                window.hWin.HEURIST4.msg.showMsgDlg(report);
                 
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
             
-            if(node.data.dtyID_local>0){
-                 node.setSelected(true);
-                 node.unselectable = true;
-                 //node.unselectableStatus = true;
-                 if(!node.hasChildren()){
-                    node.hideCheckbox = true;
-                    node.extraClasses = 'graytext';
-                    /*var ele = $(node.li).find('.fancytree-title');
-                    console.log(ele.text());
-                    ele.css({'color':'red !important'});*/
-                 }
-                  
-                 
-            }                     
         });
         
     }
-    
-    
     
 });
