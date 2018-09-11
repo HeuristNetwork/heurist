@@ -19,6 +19,7 @@
 
 $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
+    _rectypes:null, //keep rectypes whil loading
     //
     _initControls: function() {
         
@@ -61,8 +62,6 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             */                       
         }
         
-        this.reloadGroupSelector();
-        
         this._on(this.input_search_type,  { change:this.startSearch });
         
         //@todo - possible to remove
@@ -79,27 +78,38 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
              
         this.input_sort_type = this.element.find('#input_sort_type');
         this._on(this.input_sort_type,  { change:this.startSearch });
+           
+        this.reloadGroupSelector( this._rectypes );
                       
-        this.startSearch();            
-        
-        
         if( this.options.import_structure ){
-            this.element.find('#btn_back_to_databases').button({label:'Back to Databases'})
-                .click(this.options.import_structure.btn_back_to_databases);
+            if(this.options.import_structure.btn_back_to_databases){
+                this.element.find('#btn_back_to_databases')
+                    .button({label:'Back to Databases'})
+                    .show()
+                    .click(this.options.import_structure.btn_back_to_databases);
+            }
                 
             this.element.find('#div_show_already_in_db').css({'display':'inline-block'});    
             this.chb_show_already_in_db = this.element.find('#chb_show_already_in_db');
             this._on(this.chb_show_already_in_db,  { change:this.startSearch });
         }
+        
+        this.startSearch();            
     },  
     
+    //
+    //
+    //
     reloadGroupSelector: function (rectypes){
         
         this.input_search_group = this.element.find('#input_search_group');   //rectype group
-        window.hWin.HEURIST4.ui.createRectypeGroupSelect(this.input_search_group[0],
-                                        [{key:'any',title:'any group'}], rectypes);
-        this._on(this.input_search_group,  { change:this.startSearch });
-        
+        if(this.input_search_group.length==0){
+            this._rectypes = rectypes;            
+        }else{
+            window.hWin.HEURIST4.ui.createRectypeGroupSelect(this.input_search_group[0],
+                                            [{key:'any',title:'any group'}], rectypes);
+            this._on(this.input_search_group,  { change:this.startSearch });
+        }
     },
     
     //

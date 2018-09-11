@@ -73,7 +73,7 @@
        
        unset($_REQUEST['remote']);
        $_REQUEST['db'] = 'Heurist_Master_Index';
-       $_REQUEST['q'] = 't:22';
+       if(!@$_REQUEST['q']) $_REQUEST['q'] = 't:22';
     }
     
     $response = array();
@@ -101,7 +101,9 @@
         
         if(@$_REQUEST['remote'] == 'master'){
             
-                $reg_url = HEURIST_INDEX_BASE_URL.'hserver/controller/record_search.php?db=Heurist_Master_Index&q=t:22';
+                if(!@$_REQUEST['q']) $_REQUEST['q'] = 't:22'; //all registred db
+            
+                $reg_url = HEURIST_INDEX_BASE_URL.'hserver/controller/record_search.php?db=Heurist_Master_Index&q='.$_REQUEST['q'];
                 $data = loadRemoteURLContent($reg_url);            
             
                 $response = json_decode($data, true);

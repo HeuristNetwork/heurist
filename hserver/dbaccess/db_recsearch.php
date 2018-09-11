@@ -1184,6 +1184,7 @@
 
         }
         
+//error_log($query);
 
         $res = $mysqli->query($query);
         if (!$res){

@@ -64,7 +64,9 @@ $.widget( "heurist.resultList", {
 
         navigator:'auto',  //none, buttons, menu, auto
 
-        entityName:'records'   //records by default
+        entityName:'records',   //records by default
+        
+        recordDiv_class:null,  //additional class for recordDiv
     },
 
 
@@ -1809,6 +1811,18 @@ $.widget( "heurist.resultList", {
         });*/
 
         $allrecs = this.div_content.find('.recordDiv');
+        
+        if(this.options.recordDiv_class){
+            //$allrecs.addClass(this.options.recordDiv_class);    
+            var that = this;
+            $allrecs.each(function(idx, item){
+                if(idx % 2 ==0){
+                    $(item).addClass(that.options.recordDiv_class);    
+                }
+            });
+        }
+        
+        
         this._on( $allrecs, {
             click: this._recordDivOnClick,
             mouseover: this._recordDivOnHover,

@@ -427,6 +427,12 @@ div.recordDiv:hover {
     background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
 }
 
+.list div.recordDiv_blue, .list div.recordDiv_blue:hover{
+    background:-moz-linear-gradient(center top, #b8cef2, #b8cef2) repeat scroll 0 0 transparent;
+    background:-webkit-gradient(linear, left top, left bottom, from(#b8cef2), to(#b8cef2));
+}
+
+
 H2 {
     color: #6A7C99;
     font-size:1.2em;

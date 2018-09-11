@@ -55,6 +55,7 @@ $.widget( "heurist.importStructure", {
         width:  1100,
         modal:  true,
         title:  'Import structural definitions into current database',
+        source_database_id: 0,
         
         //LIST section 
         pagesize: 200      // page size in resultList 
@@ -123,134 +124,145 @@ $.widget( "heurist.importStructure", {
             that.panel_report.hide();
             that.element.find('#panel_rty').show();
             //refresh
-            that.element.find('#panel_rty_list').manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes);
+            var ele = that.element.find('#panel_rty_list')
+            ele.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes, true);
         });
         
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
         this.recordList_dbs = this.element.find('#panel_dbs .recordList');
         this.searchForm_dbs = this.element.find('#panel_dbs .searchForm');
 
-        
-        //init record list for dbs and rty
-        this.recordList_dbs
-            .resultList({
-                       eventbased: false, 
-                       isapplication: false, //do not listent global events @todo merge with eventbased
-                       multiselect: false,
-                       select_mode: 'select_single', // none
-                       
-                       entityName: 'Records',
-                       view_mode: 'list',
-                       show_viewmode: false,
-                       
-                       pagesize: (this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
-                       empty_remark: '<div style="padding:1em 0 1em 0">No registered databases found</div>',
+            //init record list for dbs and rty
+            this.recordList_dbs
+                .resultList({
+                           eventbased: false, 
+                           isapplication: false, //do not listent global events @todo merge with eventbased
+                           multiselect: false,
+                           select_mode: 'select_single', // none
+                           
+                           entityName: 'Records',
+                           view_mode: 'list',
+                           show_viewmode: false,
+                           
+                           recordDiv_class: 'recordDiv_blue',
+                           
+                           pagesize: (this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
+                           empty_remark: '<div style="padding:1em 0 1em 0">No registered databases found</div>',
 
-                       rendererHeader:  function(){
-        sHeader = '<div style="width:62px">Reg#</div><div style="width:23em">Database Name</div>'
-                +'<div style="width:31em">Description</div>'
-                +'<div style="width:5em">URL</div>';
-                            return sHeader;
-                       },
-                       renderer:
-                       function(recordset, record){ 
-                                return that._recordListItemRenderer_dbs(recordset, record); 
-                       }
-            });     
+                           rendererHeader:  function(){
+            sHeader = '<div style="width:62px">Reg#</div><div style="width:23em">Database Name</div>'
+                    +'<div style="width:31em">Description</div>'
+                    +'<div style="width:5em">URL</div>';
+                                return sHeader;
+                           },
+                           renderer:
+                           function(recordset, record){ 
+                                    return that._recordListItemRenderer_dbs(recordset, record); 
+                           }
+                });     
+                
+            this._on( this.recordList_dbs, {
+                            "resultlistonselect": function(event, selected_recs){
+                                // show list of record types for selected database
+                                that._loadRecordTypesForDb( selected_recs );
+                                
+                            },
+                            "resultlistonaction": this._onActionListener        
+            });
+                  
+            //init search panel
+            this.searchForm_dbs.load(window.hWin.HAPI4.baseURL
+                        +'hclient/widgets/entity/searchSysDatabases.html?t'
+                        +window.hWin.HEURIST4.util.random(), 
+            function(response, status, xhr){
+                
+                //init buttons
+                that.btn_search_start = that.searchForm_dbs.find('#btn_search_start')
+                    //.css({'width':'6em'})
+                    .button({label: window.hWin.HR("Start search"), showLabel:false, 
+                            icon:"ui-icon-search", iconPosition:'end'});
+                     
+                        
+                //this is default search field - define it in your instance of html            
+                that.input_search = that.searchForm_dbs.find('#input_search');
+                
+                that._on( that.input_search, { keypress: that.startSearchOnEnterPress });
+                that._on( that.btn_search_start, { click: that.startSearch_dbs });            
+                
+                that.searchForm_dbs.find('#input_search_type_div2').show();
+                that.input_search_type = that.searchForm_dbs.find('#input_search_type2');
+                that._on(that.input_search_type,  { change:that.startSearch_dbs });
+                
+                that.input_sort_type = that.searchForm_dbs.find('#input_sort_type');
+                that.input_sort_type.val('register');
+                that._on(that.input_sort_type,  { change:that.startSearch_dbs });
+                
+            });
             
-        this._on( this.recordList_dbs, {
-                        "resultlistonselect": function(event, selected_recs){
-                            // show list of record types for selected database
-                            that._loadRecordTypesForDb( selected_recs );
+
+    //----------------------       
+            var that = this;
+            
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+            
+            window.hWin.HAPI4.EntityMgr.getEntityConfig('records', 
+            function(entity){
+                that.options.entity = entity;
                             
-                        },
-                        "resultlistonaction": this._onActionListener        
-        });
-              
-        //init search panel
-        this.searchForm_dbs.load(window.hWin.HAPI4.baseURL
-                    +'hclient/widgets/entity/searchSysDatabases.html?t'
-                    +window.hWin.HEURIST4.util.random(), 
-        function(response, status, xhr){
+                //retrieve all template databases from master index server
+                var query_request = {remote:'master'};
+                if(that.options.source_database_id>0){
+                    query_request['q'] = 'ids:'+that.options.source_database_id;
+                }
+                
+                window.hWin.HAPI4.RecordMgr.search(query_request, 
+                    function( response ){
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            response.data.fields.push('rec_ScratchPad');
+                            
+                            that._cachedRecordset_dbs = new hRecordSet(response.data);
+                            
+                            //prepare recordset - extract database name and transfer title to notes
+                            that._cachedRecordset_dbs.each(function(recID, record){
+                                
+                                    var recURL  = this.fld(record, 'rec_URL');
+                                    var recDesc = this.fld(record, 'rec_Title');
+                            
+                                    var splittedURL = recURL.split('?');
+                                    var dbURL = splittedURL[0];
+                                    var matches = recURL.match(/db=([^&]*).*$/);
+                                    var dbName = (matches && matches.length>1)?matches[1]:'';
             
-            //init buttons
-            that.btn_search_start = that.searchForm_dbs.find('#btn_search_start')
-                //.css({'width':'6em'})
-                .button({label: window.hWin.HR("Start search"), showLabel:false, 
-                        icon:"ui-icon-search", iconPosition:'end'});
-                 
-                    
-            //this is default search field - define it in your instance of html            
-            that.input_search = that.searchForm_dbs.find('#input_search');
-            
-            that._on( that.input_search, { keypress: that.startSearchOnEnterPress });
-            that._on( that.btn_search_start, { click: that.startSearch_dbs });            
-            
-            that.searchForm_dbs.find('#input_search_type_div2').show();
-            that.input_search_type = that.searchForm_dbs.find('#input_search_type2');
-            that._on(that.input_search_type,  { change:that.startSearch_dbs });
-            
-            that.input_sort_type = that.searchForm_dbs.find('#input_sort_type');
-            that.input_sort_type.val('register');
-            that._on(that.input_sort_type,  { change:that.startSearch_dbs });
-            
-        });
-        
+                                    this.setFld(record, 'rec_URL', dbURL);
+                                    this.setFld(record, 'rec_Title', dbName);
+                                    this.setFld(record, 'rec_ScratchPad', recDesc);
+                            });
+                            
+                            if(that.options.source_database_id>0){
+                                var selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
+                                that._loadRecordTypesForDb( selected_recs );
+                            }else{
+                                that.startSearch_dbs(); //filterRecordList_dbs({}); 
+                            }
 
-//----------------------       
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                );
+                            
+            });
+
+        //----------------------------                
         //show dialog if required 
         if(this.options.isdialog){
             this.popupDialog();
         }
         
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
-
-        var that = this;
-        
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
-        
-        window.hWin.HAPI4.EntityMgr.getEntityConfig('records', 
-        function(entity){
-            that.options.entity = entity;
-                        
-            //retrieve all template databases from master index server
-            var query_request = {remote:'master'};
-            window.hWin.HAPI4.RecordMgr.search(query_request, 
-                function( response ){
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
-                    
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        
-                        response.data.fields.push('rec_ScratchPad');
-                        
-                        that._cachedRecordset_dbs = new hRecordSet(response.data);
-                        
-                        //prepare recordset - extract database name and transfer title to notes
-                        that._cachedRecordset_dbs.each(function(recID, record){
-                            
-                                var recURL  = this.fld(record, 'rec_URL');
-                                var recDesc = this.fld(record, 'rec_Title');
-                        
-                                var splittedURL = recURL.split('?');
-                                var dbURL = splittedURL[0];
-                                var matches = recURL.match(/db=([^&]*).*$/);
-                                var dbName = (matches && matches.length>1)?matches[1]:'';
-        
-                                this.setFld(record, 'rec_URL', dbURL);
-                                this.setFld(record, 'rec_Title', dbName);
-                                this.setFld(record, 'rec_ScratchPad', recDesc);
-                        });
-                        
-                        that.startSearch_dbs(); //filterRecordList_dbs({}); 
-
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                }
-            );
-                        
-        });
-                
         
     },
 
@@ -328,7 +340,10 @@ $.widget( "heurist.importStructure", {
                        database: sDB,      //database name
                        databaseURL: sURL,
                        database_url:  (sURL+'?db='+sDB),
-                       btn_back_to_databases: function(){
+                       btn_back_to_databases: 
+                       this.options.source_database_id>0
+                       ?null
+                       :function(){
                            
                             that._backToDatabases();
                            

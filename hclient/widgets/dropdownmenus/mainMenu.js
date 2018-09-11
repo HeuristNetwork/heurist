@@ -526,11 +526,17 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     + 'there is currently no end-user interface way of rolling '
                     + 'back the database. <br><br>'+window.hWin.HR('New_Function_Contact_Team'));
         }else 
-        if(action == "menu-structure-import"){
+        if(action == "menu-structure-import" || action == "menu-structure-import-express"){
 
+            var opts = {isdialog: true};
+            if(action == "menu-structure-import-express"){
+                opts['source_database_id'] = 3;    
+                opts['title'] = 'Import structural definitions into current database from Heurist Reference Set';
+            }
+            
             var manage_dlg = $('<div id="heurist-dialog-importRectypes-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( $('body') )
-                    .importStructure( {isdialog: true} );
+                    .importStructure( opts );
             
         }else 
         if(action == "menu-structure-mimetypes"){

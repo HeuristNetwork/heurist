@@ -162,7 +162,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 //window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
                                 //window.hWin.HEURIST4.remote.terms = response.data.terms;
                                 
-                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes );
+                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, false );
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
@@ -204,7 +204,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     // get recordset from HEURIST4.rectypes
     //
-    getRecordsetFromStructure: function( rectypes ){
+    getRecordsetFromStructure: function( rectypes, is_startsearch ){
         
         var rdata = { 
             entityName:'defRecTypes',
@@ -259,9 +259,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         
         this._cachedRecordset = new hRecordSet(rdata);
-        
         this.recordList.resultList('updateResultSet', this._cachedRecordset);
-        this.searchForm.searchDefRecTypes('startSearch');
+        
+        if(is_startsearch===true){
+            this.searchForm.searchDefRecTypes('startSearch');
+        }
         
         return this._cachedRecordset;
     },
