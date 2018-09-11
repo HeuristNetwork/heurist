@@ -73,7 +73,7 @@
        
        unset($_REQUEST['remote']);
        $_REQUEST['db'] = 'Heurist_Master_Index';
-       $_REQUEST['q'] = 't:49';
+       $_REQUEST['q'] = 't:22';
     }
     
     $response = array();

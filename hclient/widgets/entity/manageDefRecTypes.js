@@ -162,9 +162,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 //window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
                                 //window.hWin.HEURIST4.remote.terms = response.data.terms;
                                 
-                                that._cachedRecordset = that._getRecordsetFromStructure( response.data.rectypes );
-                                that.recordList.resultList('updateResultSet', that._cachedRecordset);
-                                that.searchForm.searchDefRecTypes('startSearch');
+                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes );
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
@@ -172,8 +170,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     
                 }else{
                     //take recordset from LOCAL HEURIST.rectypes format     
-                    this._cachedRecordset = this._getRecordsetFromStructure();
-                    this.recordList.resultList('updateResultSet', this._cachedRecordset);
+                    this._cachedRecordset = this.getRecordsetFromStructure();
                 }
             }else{
                 //this.options.database_url
@@ -203,11 +200,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         return true;
     },            
-    
+
     //
     // get recordset from HEURIST4.rectypes
     //
-    _getRecordsetFromStructure: function( rectypes ){
+    getRecordsetFromStructure: function( rectypes ){
         
         var rdata = { 
             entityName:'defRecTypes',
@@ -223,7 +220,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //reload groups for remote rectypes            
             //var ele = this.element.find('#input_search_group');   //rectype group
             rectypes = window.hWin.HEURIST4.util.cloneJSON(rectypes);
-            this.searchForm.searchDefRecTypes('reloadGroupSelector', rectypes);
+            this.searchForm.searchDefRecTypes('reloadGroupSelector', rectypes); //get remote groups
             
             //var ele = this.searchForm.find('#input_search_group');
             //window.hWin.HEURIST4.ui.createRectypeGroupSelect(ele[0],
@@ -260,7 +257,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
         rdata.count = rdata.order.length;
 
-        return new hRecordSet(rdata);
+        
+        this._cachedRecordset = new hRecordSet(rdata);
+        
+        this.recordList.resultList('updateResultSet', this._cachedRecordset);
+        this.searchForm.searchDefRecTypes('startSearch');
+        
+        return this._cachedRecordset;
     },
     
     //

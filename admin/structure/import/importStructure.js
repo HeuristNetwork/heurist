@@ -66,6 +66,8 @@ $.widget( "heurist.importStructure", {
     _selectedDB:null, //regid of currently selected database
     _selectedRtyID:null,
     
+    _wDefRecTypes:null, //widget for remote record types
+    
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
@@ -77,6 +79,7 @@ $.widget( "heurist.importStructure", {
     //
     _init: function() {
 
+        var that = this;  
             
         if(this.options.isdialog){  //show this widget as popup dialog
             this._initDialog();
@@ -96,21 +99,38 @@ $.widget( "heurist.importStructure", {
                             
                             +'<div class="ent_wrapper" id="panel_rty_tree" style="display:none;top:0;left:321px">'
                             +    '<div class="ent_header rtt-toolbar" style="padding:10px;height:8.6em;border-left:1px lightgray solid">'
-                                        +'<div id="btn_close_panel_rty_tree"></div><div id="btn_start_import"></div>'
-                                        +'<div class="heurist-helper1" style="padding:4px;">Explore structure of record type to be imported. Grayed out fields are already in current database. Mouse over the field in tree to show a local correspond field</div>'
+                                        +'<div id="btn_close_panel_rty_tree"/>'
+                                        +'<div class="heurist-helper1" style="padding:27px 4px 4px 4px;">'
+                                        +'Explore structure of record type to be imported. Grayed out fields are already in current database. Mouse over the field in tree to show a local correspond field</div>'
+                                        +'<div style="text-align:center"><div id="btn_start_import"></div></div>'
                             +    '</div>'
                             +    '<div class="ent_content_full rtt-tree" style="top:10.4em"/>'
                             +'</div>'
-                            
+                        +'</div>'
+                        +'<div class="ent_wrapper" id="panel_report" style="display:none">'
+                            +    '<div class="ent_content_full" style="bottom:2.8em;top:0;padding:10px"/>'
+                            +    '<div class="ent_footer" style="text-align:center"><div id="btn_close_panel_report"/></div>'
                         +'</div>'
                 +'</div>';
         $(layout).appendTo(this.element);
+        
+        this.panel_report = this.element.find('#panel_report');
+
+        this.panel_report.find('#btn_close_panel_report')
+        .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
+        .css({'line-height': '0.9em'})
+        .click(function(){
+            that.panel_report.hide();
+            that.element.find('#panel_rty').show();
+            //refresh
+            that.element.find('#panel_rty_list').manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes);
+        });
         
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
         this.recordList_dbs = this.element.find('#panel_dbs .recordList');
         this.searchForm_dbs = this.element.find('#panel_dbs .searchForm');
 
-        var that = this;
+        
         //init record list for dbs and rty
         this.recordList_dbs
             .resultList({
@@ -326,9 +346,9 @@ $.widget( "heurist.importStructure", {
                     
                 }
             };
-
+            
             this.element.find('#panel_rty_list').empty();
-            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', options);
+            this._wDefRecTypes = window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', options);
             
         }
         panel_dbs.hide();
@@ -700,13 +720,22 @@ $.widget( "heurist.importStructure", {
                 }
                
                 if(report!=''){ 
-                    report = '<div style="font-size:0.9em;"><h2>Record type and associated structures imported</h2>'+report+'</div>';
-                    window.hWin.HEURIST4.msg.showMsgDlg(report);
+                    report = '<div style="font-size:0.9em;"><h2>Record type and associated structures imported</h2>'
+                                +report
+                                +'</div>'
+                                +'<div id="btn_back_to_rty"></div>';
+                                
+                    that.element.find('#panel_rty').hide();
+                    that.panel_report.find('.ent_content_full').html(report);
+                    that.panel_report.show();
+                    
+                
                 }else{
                     report = 'Nothing imported. '+
                     'Record types (and associated strucures) you selected to be imported are in this database already';
+                    
+                    window.hWin.HEURIST4.msg.showMsgDlg(report);
                 }
-                window.hWin.HEURIST4.msg.showMsgDlg(report);
                 
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);

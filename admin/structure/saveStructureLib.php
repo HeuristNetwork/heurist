@@ -371,7 +371,8 @@ copy_IconAndThumb_FromLibrary
                 if(HEURIST_DBID>0){
                     $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.HEURIST_DBID
                         .', rty_NameInOriginatingDB=rty_Name'
-                        .', rty_IDInOriginatingDB='.$rtyID.' WHERE rty_ID='.$rtyID;
+                        .', rty_IDInOriginatingDB='.$rtyID
+                        .' WHERE (NOT rty_OriginatingDBID>0) AND rty_ID='.$rtyID;
                         $res = $mysqli->query($query);
                 }
                 

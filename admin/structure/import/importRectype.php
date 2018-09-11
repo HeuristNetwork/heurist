@@ -88,15 +88,15 @@ if(!(is_numeric($database_id) && $database_id>0 && is_numeric($rectype_id) && $r
 
 // 1. get database url by looking it up from the Heusit Master index using database registered ID
    
-    $to_include = dirname(__FILE__).'/../../setup/dbproperties/getDatabaseURL.php';
-    if (is_file($to_include)) {
-        include $to_include;
-    }
-    
-    if(isset($error_msg)){
-        $system->error_exit($error_msg);
-        return;
-    }
+$to_include = dirname(__FILE__).'/../../setup/dbproperties/getDatabaseURL.php';
+if (is_file($to_include)) {
+    include $to_include;
+}
+
+if(isset($error_msg)){
+    $system->error_exit($error_msg);
+    return;
+}
 // ------------------------------------------------------------------------------------------------
 
 // 2. get definitions from remote database
@@ -107,16 +107,19 @@ $remote_url = @$reg_url[0];
 preg_match("/db=([^&]*).*$/", $database_url, $match);
 $remote_dbname = $match[1];
 
-//$remote_url_params = @$reg_url[1];
+//TEMP
+if(strpos($database_url, 'http://heurist.sydney.edu.au/')===0){
+    $remote_url = 'http://heurist.sydney.edu.au/h5-ao/';
+}
+
 
 if(!$remote_dbname || !$remote_url){
     $system->error_exit("Heurist Master Index returns incorrect data for registered database # ".$database_id.
         " The page may contain an invalid database reference (0 indicates no reference has been set)");
 }
 
-
 //2a if the same server - just call dbs_GetRectypeStructures for specific database
-if(strpos($database_url, HEURIST_SERVER_URL)===0){ //same domain
+if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same domain
 
   $defs = array();  
   
@@ -124,8 +127,8 @@ if(strpos($database_url, HEURIST_SERVER_URL)===0){ //same domain
   $system2->init($remote_dbname, true, false); //init without paths and consts
   
 
-  $defs['rectypes'] = dbs_GetRectypeStructures($system2, 'all', 2 );
-  $defs["detailtypes"] = dbs_GetDetailTypes($system2, 'all', 2 );
+  $defs['rectypes'] = dbs_GetRectypeStructures($system2, null, 2 );
+  $defs['detailtypes'] = dbs_GetDetailTypes($system2, null, 2 );
   $defs["terms"] = dbs_GetTerms($system2);
   
 }else{
@@ -138,9 +141,9 @@ if(strpos($database_url, HEURIST_SERVER_URL)===0){ //same domain
         $system->error_exit("Unable to contact the selected source database, possibly due to a timeout or proxy setting");
    }
    $defs = $defs['data'];
-   if (!($defs['rectypes'] && $defs['detailtypes'] && $defs['terms'])) {
-        $system->error_exit("Structure definitions read from source database # $database_id are invalid. Please advise Heurist development team");
-   }
+}
+if (!($defs['rectypes'] && $defs['detailtypes'] && $defs['terms'])) {
+    $system->error_exit("Structure definitions read from source database # $database_id are invalid. Please advise Heurist development team");
 }
 $sourceIconURL = $remote_url.'hserver/dbaccess/rt_icon.php?db='.$remote_dbname.'&id=';
 
@@ -154,7 +157,8 @@ $def_dts = $defs['detailtypes']['typedefs'];
 // 3. Add the record type as the first element in a list
 
 if(!@$def_rts[$rectype_id]){
-    $system->error_exit("Sorry, record type $rectype_id was not found in source database # $database_id. Please advise Heurist development team");
+    $system->error_exit("Sorry, record type $rectype_id was not found in source database # $database_id."
+    ." Please advise Heurist development team");
 }
 
 if($is_checkonly){

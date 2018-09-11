@@ -2179,7 +2179,7 @@ public static function performImport($params, $mode_output){
                             $values = array( $mapping_keys_values_curr[$field_indexes[$index]] );
                         }else
                         if(strpos($row[$index], $csv_mvsep)!==false){ //multivalue
-                            $values = getMultiValues($row[$index], $csv_enclosure, $csv_mvsep);
+                            $values = self::getMultiValues($row[$index], $csv_enclosure, $csv_mvsep);
                         }else{
                             $values = array($row[$index]);
                         }
