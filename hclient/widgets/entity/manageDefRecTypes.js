@@ -142,8 +142,18 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
 
         
+        this._on( this.searchForm, {
+                "searchdefrectypesonresult": this.updateRecordList,
+                "searchdefrectypesonadd": function() { this.addEditRecord(-1); }
+                });
+        
         if(this.options.use_cache){
-            
+           
+           this._on( this.searchForm, {
+                "searchdefrectypesonfilter": this.filterRecordList  
+           });
+                
+
             if(this.options.use_structure){  //get recordset from HEURIST4.rectypes
                 
                 if(this.options.import_structure){
@@ -162,7 +172,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 //window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
                                 //window.hWin.HEURIST4.remote.terms = response.data.terms;
                                 
-                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, false );
+                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes );
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
@@ -181,22 +191,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     function(response){
                         that._cachedRecordset = response;
                         that.recordList.resultList('updateResultSet', response);
+                        that.searchForm.searchDefRecTypes('startSearch');
                     });
             }
                 
-            this._on( this.searchForm, {
-                "searchdefrectypesonfilter": this.filterRecordList  
-                });
-                
         }    
-            
-        
-        this._on( this.searchForm, {
-                "searchdefrectypesonresult": this.updateRecordList,
-                "searchdefrectypesonadd": function() { this.addEditRecord(-1); }
-                });
-
-
         
         return true;
     },            
@@ -204,7 +203,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     // get recordset from HEURIST4.rectypes
     //
-    getRecordsetFromStructure: function( rectypes, is_startsearch ){
+    getRecordsetFromStructure: function( rectypes){
         
         var rdata = { 
             entityName:'defRecTypes',
@@ -261,9 +260,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         this._cachedRecordset = new hRecordSet(rdata);
         this.recordList.resultList('updateResultSet', this._cachedRecordset);
         
-        if(is_startsearch===true){
-            this.searchForm.searchDefRecTypes('startSearch');
-        }
+        this.searchForm.searchDefRecTypes('startSearch');
         
         return this._cachedRecordset;
     },

@@ -3368,14 +3368,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
                         
                     if(dt_id>0 && detDefs[dt_id]['commonFields'][idx_dt_type]=='enum'){ //button to add terms
-                        s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;">'
-                        +'Adds '+tabs[k]['values_error'].length+' new terms to the field "'+
-                         detDefs[dt_id]['commonFields'][idx_dt_name]+'"</button>';
-                        
-                        s = s + '&nbsp;<button class="add_all_terms" style="padding: 4px 8px !important;display:none">'
-                              +'Adds new terms to all fields</button>';
-                         
-                        s += '<br><br>';     
+                    
+                        var cnt = ($.isArray(tabs[k]['values_error']) && tabs[k]['values_error'].length>0)
+                                        ?tabs[k]['values_error'].length:0;
+                        if(cnt>0){                 
+                            s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;">'
+                            +'Adds '+cnt+' new terms to the field "'+
+                             detDefs[dt_id]['commonFields'][idx_dt_name]+'"</button>';
+                            
+                            s = s + '&nbsp;<button class="add_all_terms" style="padding: 4px 8px !important;display:none">'
+                                  +'Adds new terms to all fields</button>';
+                             
+                            s += '<br><br>';     
+                        }
                     }
     
     

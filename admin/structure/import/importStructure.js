@@ -125,7 +125,7 @@ $.widget( "heurist.importStructure", {
             that.element.find('#panel_rty').show();
             //refresh
             var ele = that.element.find('#panel_rty_list')
-            ele.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes, true);
+            ele.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
         });
         
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
@@ -469,9 +469,12 @@ $.widget( "heurist.importStructure", {
                                     .HEURIST4[node.data.dtyID_local>0?'detailtypes':'rectypes'].names[lcode])+' #'+lcode;
                                  //node.unselectableStatus = true;
                             }                     
+                            
+                            //debug node.tooltip = node.data.rt_ids+'  '+node.data.type;
+                            
                             //hide checkbox for all expcet resource
-                            if(!(node.data.type=='resource' || 
-                                 node.data.type=='relmarker' || 
+                            if(!(((node.data.type=='resource' || 
+                                 node.data.type=='relmarker') && node.data.rt_ids) || 
                                  node.data.type=='rectype'))
                             {
                                 node.hideCheckbox = true;    
