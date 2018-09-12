@@ -26,6 +26,7 @@ we may take data from
 $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
    
     _entityName:'defRecTypes',
+    _isremote:false,
 
     //
     //                                                  
@@ -34,6 +35,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         //define it to load recordtypes from other server/database - if defined it allows selection only
         if(this.options.import_structure){ //for example http://heurist.sydney.edu.au/heurist/?db=Heurist_Reference_Set
+            this._isremote = true;
             if(this.options.select_mode=='manager') this.options.select_mode='select_single';
             this.options.use_cache = true;
             this.options.use_structure = true;    
@@ -140,6 +142,24 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 );
             //this.recordList.resultList('applyViewMode');
         }
+        
+        if(this.options.grouped===true){
+            this.recordList.resultList('option', 'groupByField', 'rty_RecTypeGroupID');
+            
+            this.recordList.resultList('option', 'rendererGroupHeader', function(grp_val){
+                    
+                var rectypes = that._isremote?window.hWin.HEURIST4.remote.rectypes :window.hWin.HEURIST4.rectypes;
+                var idx = rectypes.groups.groupIDToIndex[grp_val];
+                
+                return rectypes.groups[idx]?('<div data-grp="'+grp_val
+                    +'" style="width:100%;font-size:0.9em;padding:4px 0 4px 40px;border-bottom:1px solid lightgray">'
+                    +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-carat-1-s"></span>'
+                    +'<div style="display:inline-block;width:70%">'
+                    +'<h2>'+rectypes.groups[idx].name+'</h2>'
+                    +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
+            });
+            
+        }
 
         
         this._on( this.searchForm, {
@@ -215,7 +235,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         if(!rectypes){
             rectypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes);
+            this._isremote = false;
         }else{
+            this._isremote = true;
             //reload groups for remote rectypes            
             //var ele = this.element.find('#input_search_group');   //rectype group
             rectypes = window.hWin.HEURIST4.util.cloneJSON(rectypes);

@@ -149,6 +149,21 @@ $.widget( "heurist.importStructure", {
                            pagesize: (this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
                            empty_remark: '<div style="padding:1em 0 1em 0">No registered databases found</div>',
 
+                           groupByField: 'rec_RecTypeID',
+                           rendererGroupHeader: function(grp_val){
+                               if(grp_val==0){
+                                   return '<div style="width:100%;padding:4px 0 4px 40px;border-bottom:1px solid lightgray">'
+                                   +'<h2>Curated templates</h2>'
+                                   +'<div style="padding-top:4px;"><i>Databases curated by the Heurist team as a source of useful entity types for new databases</i></div></div>';
+                               }else{
+                                   return '<div style="width:100%;padding:4px 0 4px 40px;border-bottom:1px solid lightgray">'
+                                   +'<h2>User databases</h2>'
+                                   +'<div style="padding-top:4px"><i>Databases registered by Heurist users - use with care, look for entity types with good internal documentation</i></div></div>';
+                               }
+                               
+                               
+                           },
+                           
                            rendererHeader:  function(){
             sHeader = '<div style="width:62px">Reg#</div><div style="width:23em">Database Name</div>'
                     +'<div style="width:31em">Description</div>'
@@ -239,6 +254,7 @@ $.widget( "heurist.importStructure", {
                                     this.setFld(record, 'rec_URL', dbURL);
                                     this.setFld(record, 'rec_Title', dbName);
                                     this.setFld(record, 'rec_ScratchPad', recDesc);
+                                    this.setFld(record, 'rec_RecTypeID', recID<1000?0:1);
                             });
                             
                             if(that.options.source_database_id>0){
@@ -335,6 +351,8 @@ $.widget( "heurist.importStructure", {
                 isdialog: false,
                 container: '#panel_rty_list',
                 select_mode: 'select_single',
+                
+                grouped: true,
                 
                 import_structure:{
                        database: sDB,      //database name

@@ -49,12 +49,15 @@ $.widget( "heurist.resultList", {
 
         empty_remark:'No entries match the filter criteria',
         pagesize: -1,
+        
+        groupByField:null,
 
         renderer: null,    // custom renderer function to draw item
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
+        rendererGroupHeader: null,   // renderer function for group header (see groupByField)
         searchfull: null,  // search full list data
         
-        sortable: false,
+        sortable: false, //allows drag and sort entries
         onSortStop: null,
 
         //event
@@ -1767,18 +1770,26 @@ $.widget( "heurist.resultList", {
         var rec_toload = [];
         var rec_onpage = [];
 
-        var html = '', recID;
+        var html = '', html_groups = {}, recID;
 
         for(; (idx<len && this._count_of_divs<pagesize); idx++) {
             recID = rec_order[idx];
             if(recID){
                 if(recs[recID]){
                     //var recdiv = this._renderRecord(recs[recID]);
-                    html  += this._renderRecord_html(recordset, recs[recID]);
+                    var rec_div = this._renderRecord_html(recordset, recs[recID]);
+                    if(this.options.groupByField){
+                        var grp_val = recordset.fld(recs[recID], this.options.groupByField);
+                        if(!html_groups[grp_val]) html_groups[grp_val] = '';
+                        html_groups[grp_val] += rec_div;
+                    }else{
+                        html  += rec_div;
+                    }
                     rec_onpage.push(recID);
+                    
                 }else{
                     //record is not loaded yet
-                    html  += this._renderRecord_html_stub( recID );
+                    html  += this._renderRecord_html_stub( recID );    
                     rec_toload.push(recID);
                 }
 
@@ -1788,7 +1799,40 @@ $.widget( "heurist.resultList", {
                 });*/
             }
         }
+        if(this.options.groupByField){
+            //Object.keys(html_groups);
+            var hasRender = $.isFunction(this.options.rendererGroupHeader);
+            
+            for (var grp_val in html_groups){
+                var gheader = (hasRender)
+                    ?this.options.rendererGroupHeader.call(this, grp_val)
+                    :'<div style="width:100%"> Group '+grp_val+'</div>';
+                //group header
+                html += (gheader+'<div data-grp-content="'+grp_val+'">'+html_groups[grp_val]+'</div>');
+            }
+        }
+        
         this.div_content[0].innerHTML += html;
+        
+        if(this.options.groupByField){ //init show/hide btn for groups
+            this.div_content.find('div[data-grp]')
+                    .click(function(event){
+                        var btn = $(event.target);
+                        var grp_val = btn.attr('data-grp');
+                        if(!grp_val){
+                            btn = $(event.target).parents('div[data-grp]');
+                            grp_val = btn.attr('data-grp');
+                        }
+                        var ele = that.div_content.find('div[data-grp-content="'+grp_val+'"]');
+                        if(ele.is(':visible')){
+                            ele.hide();
+                            btn.find('span.ui-icon').removeClass('ui-icon-carat-1-s').addClass('ui-icon-carat-1-e');
+                        }else{
+                            ele.show();
+                            btn.find('span.ui-icon').removeClass('ui-icon-carat-1-e').addClass("ui-icon-carat-1-s");
+                        }
+                    });
+        }
 
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
