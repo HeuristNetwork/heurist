@@ -51,6 +51,7 @@ $.widget( "heurist.resultList", {
         pagesize: -1,
         
         groupByField:null,
+        groupOnlyOneVisible:false,
 
         renderer: null,    // custom renderer function to draw item
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
@@ -91,6 +92,8 @@ $.widget( "heurist.resultList", {
     _startupInfo:null,
 
     _init_completed:false,
+    
+    _grp_keep_status:{}, //expanded groups
 
     // the constructor
     _create: function() {
@@ -1803,12 +1806,27 @@ $.widget( "heurist.resultList", {
             //Object.keys(html_groups);
             var hasRender = $.isFunction(this.options.rendererGroupHeader);
             
+            //
+            if(this.options.groupOnlyOneVisible && 
+                $.isEmptyObject(this._grp_keep_status))
+            { //initially expand first only
+                var isfirst = true;
+                for (var grp_val in html_groups){
+                    this._grp_keep_status[grp_val] = isfirst?1:0;
+                    isfirst = false;
+                }
+            }
+            
+            //
             for (var grp_val in html_groups){
                 var gheader = (hasRender)
-                    ?this.options.rendererGroupHeader.call(this, grp_val)
+                    ?this.options.rendererGroupHeader.call(this, grp_val, this._grp_keep_status)
                     :'<div style="width:100%"> Group '+grp_val+'</div>';
-                //group header
-                html += (gheader+'<div data-grp-content="'+grp_val+'">'+html_groups[grp_val]+'</div>');
+                
+                var is_expanded = (this._grp_keep_status[grp_val]!=0);
+                html += (gheader+'<div data-grp-content="'+grp_val
+                    +'" style="display:'+(is_expanded?'block':'none')
+                    +'">'+html_groups[grp_val]+'</div>');
             }
         }
         
@@ -1825,11 +1843,25 @@ $.widget( "heurist.resultList", {
                         }
                         var ele = that.div_content.find('div[data-grp-content="'+grp_val+'"]');
                         if(ele.is(':visible')){
+                            that._grp_keep_status[grp_val] = 0;
                             ele.hide();
-                            btn.find('span.ui-icon').removeClass('ui-icon-carat-1-s').addClass('ui-icon-carat-1-e');
+                            btn.find('span.ui-icon').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
                         }else{
+                            if(that.options.groupOnlyOneVisible){
+                                //collapse other groups
+                                that.div_content.find('div[data-grp]')
+                                        .find('span.ui-icon')
+                                        .removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
+                                that.div_content.find('div[data-grp-content]').hide();
+                                that._grp_keep_status = {};
+                                that._grp_keep_status[grp_val] = 1;    
+                            }else{
+                                that._grp_keep_status[grp_val] = 1;    
+                            }
+                            
+                            
                             ele.show();
-                            btn.find('span.ui-icon').removeClass('ui-icon-carat-1-e').addClass("ui-icon-carat-1-s");
+                            btn.find('span.ui-icon').removeClass('ui-icon-triangle-1-e').addClass("ui-icon-triangle-1-s");
                         }
                     });
         }

@@ -26,7 +26,6 @@ we may take data from
 $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
    
     _entityName:'defRecTypes',
-    _isremote:false,
 
     //
     //                                                  
@@ -35,7 +34,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         //define it to load recordtypes from other server/database - if defined it allows selection only
         if(this.options.import_structure){ //for example http://heurist.sydney.edu.au/heurist/?db=Heurist_Reference_Set
-            this._isremote = true;
             if(this.options.select_mode=='manager') this.options.select_mode='select_single';
             this.options.use_cache = true;
             this.options.use_structure = true;    
@@ -111,10 +109,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             this._as_dialog.dialog('option','title', title);    
         }
-        // init search header
-        this.searchForm.searchDefRecTypes(this.options);
         
-        var iheight = 7;
+        var iheight = this.options.grouped?3:7;
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
@@ -143,35 +139,66 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //this.recordList.resultList('applyViewMode');
         }
         
+        //renderers for grouped list
         if(this.options.grouped===true){
             this.recordList.resultList('option', 'groupByField', 'rty_RecTypeGroupID');
             
-            this.recordList.resultList('option', 'rendererGroupHeader', function(grp_val){
+            if(this.options.import_structure){
+                this.recordList.resultList('option', 'groupOnlyOneVisible', true);
+            }
+            
+            this.recordList.resultList('option', 'rendererGroupHeader', function(grp_val, grp_keep_status){
                     
-                var rectypes = that._isremote?window.hWin.HEURIST4.remote.rectypes :window.hWin.HEURIST4.rectypes;
+                var rectypes = that.options.import_structure
+                                    ?window.hWin.HEURIST4.remote.rectypes :window.hWin.HEURIST4.rectypes;
                 var idx = rectypes.groups.groupIDToIndex[grp_val];
                 
+                var is_expanded = (grp_keep_status[grp_val]!=0);
+                
                 return rectypes.groups[idx]?('<div data-grp="'+grp_val
-                    +'" style="width:100%;font-size:0.9em;padding:4px 0 4px 40px;border-bottom:1px solid lightgray">'
-                    +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-carat-1-s"></span>'
+                    +'" style="font-size:0.9em;padding:14px 0 4px 40px;border-bottom:1px solid lightgray">'
+                    +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                     +'<div style="display:inline-block;width:70%">'
-                    +'<h2>'+rectypes.groups[idx].name+'</h2>'
+                    +'<h2>'+grp_val+' '+rectypes.groups[idx].name+'</h2>'
                     +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
             });
             
         }
 
-        
-        this._on( this.searchForm, {
-                "searchdefrectypesonresult": this.updateRecordList,
-                "searchdefrectypesonadd": function() { this.addEditRecord(-1); }
-                });
+        // init search header
+        this.options.onInitCompleted = function(){
+            that._loadData();
+        };
+        this.searchForm.searchDefRecTypes(this.options);
         
         if(this.options.use_cache){
            
            this._on( this.searchForm, {
-                "searchdefrectypesonfilter": this.filterRecordList  
+                "searchentityonfilter": this.filterRecordList  //searchdefrectypesonfilter
            });
+        }else{
+            this._on( this.searchForm, {
+                "searchdefrectypesonresult": this.updateRecordList,
+                "searchdefrectypesonadd": function() { this.addEditRecord(-1); }
+                });
+        }
+        
+        
+        return true;
+    },            
+    
+    //
+    // invoked after all elements are inited 
+    //
+    _loadData: function(){
+        
+        var that = this;
+      
+        if(this.options.use_cache){
+           
+           /*this._on( this.searchForm, {
+                "searchdefrectypesonfilter": this.filterRecordList  
+           });*/
                 
 
             if(this.options.use_structure){  //get recordset from HEURIST4.rectypes
@@ -202,7 +229,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     //take recordset from LOCAL HEURIST.rectypes format     
                     this._cachedRecordset = this.getRecordsetFromStructure();
                 }
-            }else{
+            }
+            else{
                 //this.options.database_url
                 
                 //usual way from server via entity
@@ -217,8 +245,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 
         }    
         
-        return true;
-    },            
+    },
 
     //
     // get recordset from HEURIST4.rectypes
@@ -235,9 +262,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         if(!rectypes){
             rectypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes);
-            this._isremote = false;
         }else{
-            this._isremote = true;
             //reload groups for remote rectypes            
             //var ele = this.element.find('#input_search_group');   //rectype group
             rectypes = window.hWin.HEURIST4.util.cloneJSON(rectypes);
