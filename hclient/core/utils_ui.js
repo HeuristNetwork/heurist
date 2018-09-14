@@ -846,6 +846,8 @@ window.hWin.HEURIST4.ui = {
                     $(opt).attr('group', 1);
                 }
 
+                var idx_desc = rectypes.typedefs.commonNamesToIndex.rty_Description;
+                
                 for (var recTypeIDIndex in rectypes.groups[index].showTypes)
                 {
                     var rectypeID = rectypes.groups[index].showTypes[recTypeIDIndex];
@@ -856,6 +858,9 @@ window.hWin.HEURIST4.ui = {
                     {
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                         $(opt).attr('depth', 1);
+                        
+                        var desc = rectypes.typedefs[rectypeID].commonFields[idx_desc];
+                        $(opt).attr('title', desc);
                     }
                 }
                 
@@ -2134,14 +2139,15 @@ window.hWin.HEURIST4.ui = {
         if(!options) options = {};
         if(options.isdialog!==false) options.isdialog = true; //by default popup      
 
-        if($.isFunction($('body')[actionName])){ //OK! widget script js has been loaded
+        var  doc_body = $(window.hWin.document).find('body');
+        if($.isFunction(doc_body[actionName])){ //OK! widget script js has been loaded
         
             var manage_dlg;
             
             if(!options.container){ //container not defined - add new one to body
                 
                 manage_dlg = $('<div id="heurist-dialog-'+actionName+'-'+window.hWin.HEURIST4.util.random()+'">')
-                    .appendTo( $('body') )
+                    .appendTo( doc_body )
                     [actionName]( options );
             }else{
                 manage_dlg = $(options.container)[actionName]( options );

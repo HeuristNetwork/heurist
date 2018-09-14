@@ -255,7 +255,9 @@ window.hWin.HEURIST4.dbs = {
       used for treeview in import structure, facet wiz
       todo - use it in smarty editor
      
-      fieldtypes - array of fieldtypes, if 'all' header of rectype is not included   
+      fieldtypes - 
+            array of fieldtypes, and 'all', 'header', 'header_ext'
+            header - all+header fields
       $mode 
          4 - find reverse links and relations   
          5 for lazy treeview  
@@ -274,7 +276,15 @@ window.hWin.HEURIST4.dbs = {
             var $children = [];
             
             //add default fields
-            if($recursion_depth==0 && $fieldtypes!='all') {
+            if($recursion_depth==0 && 
+                ($fieldtypes.indexOf('header')>=0 || $fieldtypes.indexOf('header_ext')>=0) ) {
+
+                if($fieldtypes.indexOf('header_ext')>=0){
+                    $children.push({key:'recID', type:'integer',
+                        title:"ID  <span style='font-size:0.7em'>(integer)</span>", 
+                        code:($recTypeId+':id'), name:'Record ID'});
+                }
+
                 
                 $children.push({key:'recTitle', type:'freetext',
                     title:"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 
@@ -286,6 +296,17 @@ window.hWin.HEURIST4.dbs = {
                     
                 //array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL', 'code'=>$recTypeId.":url"));
                 //array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
+                
+                if($fieldtypes.indexOf('header_ext')>=0){
+                    $children.push({key:'recURL', type:'freetext',
+                        title:"URL  <span style='font-size:0.7em'>(freetext)</span>", 
+                        code:($recTypeId+':url'), name:'Record URL'});
+                        
+                    $children.push({key:'recTags', type:'freetext',
+                        title:"Tags  <span style='font-size:0.7em'>(freetext)</span>", 
+                        code:($recTypeId+':url'), name:'Record Tags'});
+                }
+                
             }
 
             if($recTypeId>0 && rectypes['typedefs'][$recTypeId]){
@@ -468,7 +489,7 @@ window.hWin.HEURIST4.dbs = {
         //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
         //$issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1)?"true":"false";
         
-        if (($mode==3) || $fieldtypes=='all' 
+        if (($mode==3) || $fieldtypes.indexOf('all')>=0 
             || window.hWin.HEURIST4.util.findArrayIndex($detailType, $fieldtypes)>=0) //$fieldtypes - allowed types
         {
 

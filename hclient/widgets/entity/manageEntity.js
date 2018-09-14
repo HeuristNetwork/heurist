@@ -161,7 +161,7 @@ $.widget( "heurist.manageEntity", {
                     +'</div>'
                     +'<div class="ent_content_full editForm" style="left:251px"/>'
                 +'</div>';
-        
+
         }else if(this.options.layout_mode=='short'){ //the same as above, short toolbar above edit on right side
         
             layout = 

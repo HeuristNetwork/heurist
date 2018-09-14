@@ -52,6 +52,7 @@ $.widget( "heurist.resultList", {
         
         groupByField:null,
         groupOnlyOneVisible:false,
+        groupByCss:null, //css for group content
 
         renderer: null,    // custom renderer function to draw item
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
@@ -1833,6 +1834,10 @@ $.widget( "heurist.resultList", {
         this.div_content[0].innerHTML += html;
         
         if(this.options.groupByField){ //init show/hide btn for groups
+            if(this.options.groupByCss!=null){
+                this.div_content.find('div[data-grp-content]').css( this.options.groupByCss );
+            }
+        
             this.div_content.find('div[data-grp]')
                     .click(function(event){
                         var btn = $(event.target);

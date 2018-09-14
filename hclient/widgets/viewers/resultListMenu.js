@@ -90,6 +90,8 @@ $.widget( "heurist.resultListMenu", {
                 if(data && data.source!=that.element.attr('id')) {
                     if(data) data = data.selection;
                     that._selection = window.hWin.HAPI4.getSelection(data, false);
+                    
+                    window.hWin.HAPI4.currentRecordsetSelection = that.getSelectionIds();
                 }
             }
             //that._refresh();
@@ -311,8 +313,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
            
             if(this.isResultSetEmpty()) return;
             
-            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
-            
             var opts = {
                 width:700,
                 groups: (action == "menu-selected-bookmark")?'personal':'all',
@@ -338,7 +338,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             if(this.isResultSetEmpty()) return;
             
-            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordBookmark', {onClose:
                    function( context ){
                        if(context){
@@ -352,17 +351,15 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             if(this.isResultSetEmpty()) return;
             
-            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordRate');
 
         }else if(action == "menu-selected-delete"){
 
             if(this.isResultSetEmpty()) return;
             
-            var recIDs_list = this.getSelectionIds("Please select at least one record to delete");
-            if(Hul.isempty(recIDs_list)) return;
+            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds("Please select at least one record to delete");
+            if(Hul.isempty(window.hWin.HAPI4.currentRecordsetSelection)) return;
             
-            window.hWin.HAPI4.currentRecordsetSelection = recIDs_list;
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {onClose:
                function( context ){
                    if(context){
@@ -382,7 +379,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             if(this.isResultSetEmpty()) return;
             
-            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {height:540, onClose:
                function( context ){
                    if(context){
@@ -396,7 +392,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             
             if(this.isResultSetEmpty()) return;
 
-            window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds(); //we can pass selection as option
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordNotify');
 
         }else if(action == "menu-selected-value-add"){
@@ -654,8 +649,6 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         
         if(this.isResultSetEmpty()) return;
 
-        window.hWin.HAPI4.currentRecordsetSelection = this.getSelectionIds();
-        
         var script_name = 'recordAction';
         var callback = null;
         

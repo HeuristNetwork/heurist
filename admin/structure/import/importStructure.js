@@ -58,7 +58,7 @@ $.widget( "heurist.importStructure", {
         source_database_id: 0,
         
         //LIST section 
-        pagesize: 200      // page size in resultList 
+        pagesize: 2000      // page size in resultList 
     },
    
     //cached records hRecordSet for databases
@@ -96,37 +96,49 @@ $.widget( "heurist.importStructure", {
                         +'<div class="ent_wrapper" id="panel_rty" style="display:none">'
                         
                             +'<div class="ent_header" style="padding:4px;">'
-                               +'<div style="width:49%;height:200%;border-right:1px solid lightgray;float:left">'
-                                    +'<h3 id="h_source_rty"></h3>'     
+                               +'<div style="position:absolute;right:450px;left:0">'
+                                    +'<h4  style="padding:4 0 0 4" id="h_source_rty"></h4>'     
+                                    +'<div id="btn_back_to_databases" style="position:absolute;right:4px;top:2px"/>'
                                     +'</div>'
-                               +'<div style="width:49%;float:right">'
-                                    +'<h3>Current entities in database</h3>'
-                                    +'<div id="btn_back_to_databases" style="position:absolute;right:10px;top:4px"/></div>'
-                            +'</div>'
-                        
-                            +'<div class="ent_wrapper" id="panel_rty_list" style="top:2.8em;border-right:1px solid lightgray;float:left">'
+                               +'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
+                                    +'<h4 style="padding:4 0 0 4">Entity to be imported</h4>'
+                                    +'</div>'
+                               +'<div '
+                               +'style="border-left:1px solid lightgray;position:absolute;right:0px;width:223px;height:2.8em;">'
+                                    +'<h4 style="padding:4 0 0 4">Current entities in database</h4>'
+                                    +'</div>'
                             +'</div>'
 
-                            +'<div class="ent_wrapper" id="panel_rty_list_target" style="top:2.8em;">'
+                            //left - source                                
+                            +'<div class="ent_wrapper" id="panel_rty_list" style="top:2.8em;right:450px;border-right:1px solid lightgray">'
+                            +'</div>'
+
+                            //structure of selected record type - popup
+                            +'<div id="panel_rty_tree" '
+                                +'style="visibility:hidden;position:absolute; top:2.8em;bottom:0;right:225px; overflow:hidden;width:225px;">'
+                            +    '<div class="ent_header rtt-toolbar" style="text-align:right">'
+                                        +'<div id="btn_start_import"></div>'
+                            +    '</div>'
+                            +    '<div class="ent_content rtt-tree" style="bottom:6em"/>'
+                            +    '<div class="ent_footer heurist-helper1" style="height:6em;font-size:0.8em">'
+                                        +'Grayed out fields are already in current database.<br>'
+                                        +'Arrows are record pointer fields<br>'
+                                        +'Mouse over to view more information'
+                            +    '</div>'
+                            +'</div>'
+                            
+                            //target
+                            +'<div id="panel_rty_list_target" '
+                                +'style="position:absolute; top:2.8em;bottom:0;right:0px; overflow:hidden;width:225px;">'
+                                +'<select id="select_rty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid"/>'
                             +'</div>'
                             
                         +'</div>'
+                        
                         //report after comletion of import
                         +'<div class="ent_wrapper" id="panel_report" style="display:none">'
                             +    '<div class="ent_content_full" style="bottom:2.8em;top:0;padding:10px"/>'
                             +    '<div class="ent_footer" style="text-align:center"><div id="btn_close_panel_report"/></div>'
-                        +'</div>'
-                        //structure of selected record type - popup
-                        +'<div class="ent_wrapper" id="panel_rty_tree" style="display:none;">'
-                        +    '<div class="ent_header rtt-toolbar" style="text-align:center">'
-                                    +'<div id="btn_start_import"></div>'
-                        +    '</div>'
-                        +    '<div class="ent_content rtt-tree" style="bottom:5em"/>'
-                        +    '<div class="ent_footer heurist-helper1" style="height:5em">'
-                                    +'Grayed out fields are already in current database.<br>'
-                                    +'Arrows are record pointer fields<br>'
-                                    +'Mouse over to view more information'
-                        +    '</div>'
                         +'</div>'
                         
                 +'</div>';
@@ -136,17 +148,20 @@ $.widget( "heurist.importStructure", {
         this.panel_rty = this.element.find('#panel_rty');
         this.panel_rty_list = this.element.find('#panel_rty_list');
         this.panel_rty_list_target = this.element.find('#panel_rty_list_target');
-
+        this.select_rty_list_target = this.element.find('#select_rty_list_target');
+        this.panel_rty_structure = this.element.find('#panel_rty_tree');
+            
         this.panel_report.find('#btn_close_panel_report')
         .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
-        .css({'line-height': '0.9em'})
+        //.css({'line-height': '0.9em'})
         .click(function(){
             that.panel_report.hide();
             that.panel_rty.show();
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             //refresh target
-            that.panel_rty_list_target.manageDefRecTypes('getRecordsetFromStructure');
+            //that.panel_rty_list_target.manageDefRecTypes('getRecordsetFromStructure');
+            window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
         });
         
         
@@ -381,7 +396,7 @@ $.widget( "heurist.importStructure", {
                 container: '#panel_rty_list',
                 select_mode: 'select_single',
                 
-                grouped: true,
+                simpleSearch: true,
                 
                 import_structure:{
                        database: sDB,      //database name
@@ -398,6 +413,30 @@ $.widget( "heurist.importStructure", {
                     
                     
                     
+                },
+                
+                recordList:{
+                    show_toolbar: false,
+                    pagesize: 4999, 
+                    view_mode:'list',
+                    simpleSearch:true,
+                    groupByField:'rty_RecTypeGroupID',
+                    groupOnlyOneVisible: true,
+                    groupByCss:'0 1.5em',
+                    rendererGroupHeader: function(grp_val, grp_keep_status){
+
+                        var rectypes = window.hWin.HEURIST4.remote.rectypes;
+                        var idx = rectypes.groups.groupIDToIndex[grp_val];
+
+                        var is_expanded = (grp_keep_status[grp_val]!=0);
+
+                        return rectypes.groups[idx]?('<div data-grp="'+grp_val
+                            +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
+                            +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
+                            +'<div style="display:inline-block;width:70%">'
+                            +'<h2>'+grp_val+' '+rectypes.groups[idx].name+'</h2>'
+                            +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
+                    }
                 }
             };
             
@@ -410,20 +449,57 @@ $.widget( "heurist.importStructure", {
         
 
         if( this._init_local_rty_once ){
-            this._init_local_rty_once = false
+            
+            this._init_local_rty_once = false;
+            
+            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rty_list_target[0],null,null,true);
+            
+            /*
             //load list of locat rtys        
             window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', {                
                 isdialog: false,
                 container: '#panel_rty_list_target',
                 select_mode: 'select_single',
-                grouped: true
+                recordList:{
+                    show_toolbar: false,
+                    pagesize: 4999, 
+                    view_mode:'list',
+                    groupByField:'rty_RecTypeGroupID',                    
+                    groupByCss: {padding:'0 1.5em'},
+                    renderer: function( recordset, record ){
+                        
+                        var recTitle = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rec_Title'));
+                        return '<div class="recordDiv" style="padding-left:3em">AAAA'+recTitle+'</div>';
+                    },
+                    rendererGroupHeader: function(grp_val, grp_keep_status){
+                    
+                        var rectypes = window.hWin.HEURIST4.rectypes;
+                        var idx = rectypes.groups.groupIDToIndex[grp_val];
+                
+                        var is_expanded = (grp_keep_status[grp_val]!=0);
+                
+                        return rectypes.groups[idx]?('<div data-grp="'+grp_val
+                            +'" style="font-size:0.9em;padding:14px 0 4px 0px">'
+                            +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" '
+                                    +'class="ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
+                            +'<div style="display:inline-block;font-weight:bold;width:70%">'
+                            +rectypes.groups[idx].name+'</div></div>'):'';
+                    }
+                },
+                layout_mode: ('<div class="ent_wrapper">'
+                        +  '<div class="ent_header searchForm" style="display:none;"/>'     
+                        +  '<div class="ent_content_full recordList"/>'
+                +'</div>')
             });
+            */
         }
     },
     
     _backToDatabases: function(){
         this.panel_rty.hide();
         this.element.find('#panel_dbs').show();
+        this.panel_rty_structure.css({visibility:'hidden'});
+        this._selectedRtyID = null;
     },
     
    
@@ -433,27 +509,28 @@ $.widget( "heurist.importStructure", {
     _loadRecordTypesTreeView: function(rtyID){
         
         //var panel_rty = this.panel_rty_list.css({right:'300px'});
-        var panel_rty_structure = this.element.find('#panel_rty_tree');
+        
                 //.css({left: this.element.find('#panel_rty').width()-300 }).show();
         var that = this;
         
-        if( true || this._selectedRtyID!=rtyID ){
+        if(this._selectedRtyID!=rtyID ){
         
             if(this._selectedRtyID==null){
                 // START IMPORT 
-                panel_rty_structure.find('#btn_start_import')
-                    .button({icon: 'ui-icon-arrowthick-1-e', iconPosition:'end', label:'Add to Database'})
-                    .css({'line-height': '0.9em'})
+                this.panel_rty_structure.find('#btn_start_import')
+                    .button({icon: 'ui-icon-arrowthick-1-e', iconPosition:'begin', label:'add to database'})
+                    //.css({'line-height': '0.9em'})
                     .click(function(){
                         that.startImport();
                     });
+                this.panel_rty_structure.find('.ui-icon').css({'color':'red'});
                     
             }
                 
             this._selectedRtyID = rtyID;
             
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 5, rtyID, 'all' );
+            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 5, rtyID, ['all'] );
             
             treedata[0].expanded = true; //first expanded
             
@@ -480,7 +557,8 @@ $.widget( "heurist.importStructure", {
                     var parentcode = node.data.code; 
                     var rectypes = node.data.rt_ids;
                     
-                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 5, rectypes, 'all', parentcode );
+                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 
+                                        5, rectypes, ['all'], parentcode );
                     if(res.length>1){
                         data.result = res;
                     }else{
@@ -554,11 +632,12 @@ $.widget( "heurist.importStructure", {
             */
             //hide all folder triangles
             //treediv.find('.fancytree-expander').hide();
-            
+            /*
             this.dlgRtTree = window.hWin.HEURIST4.msg.showElementAsDialog({element:panel_rty_structure[0],height:400, width:300});
             this.dlgRtTree.addClass('ui-heurist-bg-light');
-            
-            panel_rty_structure.find('#btn_start_import').focus();
+            */
+            this.panel_rty_structure.css({visibility:'visible'});
+            this.panel_rty_structure.find('#btn_start_import').focus();
         }
     },
     
@@ -699,8 +778,8 @@ $.widget( "heurist.importStructure", {
             var correctWidth = this.element.parent().width()-24;
             this.element.css({overflow: 'none !important','width':correctWidth });
             
-            this.panel_rty_list.css({'width': correctWidth/2});
-            this.panel_rty_list_target.css({'left': correctWidth/2+1});
+            /*this.panel_rty_list.css({'width': correctWidth/2});
+            this.panel_rty_list_target.css({'left': correctWidth/2+1});*/
     },
     
     //
@@ -737,10 +816,13 @@ $.widget( "heurist.importStructure", {
     //
     startImport: function(){
         
+        this.panel_rty_structure.css({visibility:'hidden'});
+        /*
         if(this.dlgRtTree) {
             this.dlgRtTree.dialog('close');   
             this.dlgRtTree = null;
         }
+        */
         
         var rtyCode = this._selectedDB + '-' + this._selectedRtyID;
         

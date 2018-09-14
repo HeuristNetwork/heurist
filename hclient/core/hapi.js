@@ -1130,6 +1130,8 @@ function hAPI(_db, _oninit) { //, _currentUser
         // 2) to get selected records by ids
         // 3) to pass result set into popup record action dialogs
         currentRecordset: null,
+        
+        currentRecordsetSelection:[],  //selected record ids - main assignment in lister of resultListMenu
 
 
         getClass: function () {return _className;},

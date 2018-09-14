@@ -358,7 +358,7 @@ optgroup {
     font-weight:bold;
     background-color: #ECF1FB;
     padding:0;
-    border-top:1px solid #A4B4CB;
+    /*border-top:1px solid #A4B4CB;-*/
     margin-top:5px;
     text-indent: 5px;
 }

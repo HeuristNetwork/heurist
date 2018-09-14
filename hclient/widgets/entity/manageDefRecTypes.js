@@ -42,10 +42,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.options.use_structure = true;
         }
         
-        //this.options.use_cache = false;
-        
-        this.options.layout_mode = 'short';
-        //this.options.edit_mode = 'popup';
+        if(!this.options.layout_mode) this.options.layout_mode = 'short';
         
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
@@ -110,12 +107,19 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this._as_dialog.dialog('option','title', title);    
         }
         
-        var iheight = this.options.grouped?3:7;
-        if(this.options.edit_mode=='inline'){            
-            iheight = iheight + 6;
+        var iheight = 0;
+        if(this.searchForm.css('display')=='none'){
+        
+        }else{
+            iheight = this.options.simpleSearch?3:7;
+            if(this.options.edit_mode=='inline'){            
+                iheight = iheight + 6;
+            }
+            this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '530px'});
+            iheight = iheight+0.5;
         }
-        this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '530px'});
-        this.recordList.css({'top':iheight+0.5+'em', 'min-width': '530px'});
+        this.recordList.css({'top':iheight+'em', 'min-width': '530px'});
+        
         //init viewer 
         var that = this;
         
@@ -139,29 +143,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //this.recordList.resultList('applyViewMode');
         }
         
-        //renderers for grouped list
-        if(this.options.grouped===true){
-            this.recordList.resultList('option', 'groupByField', 'rty_RecTypeGroupID');
+        //may overwrite resultList behaviour
+        if(this.options.recordList){
             
-            if(this.options.import_structure){
-                this.recordList.resultList('option', 'groupOnlyOneVisible', true);
-            }
-            
-            this.recordList.resultList('option', 'rendererGroupHeader', function(grp_val, grp_keep_status){
-                    
-                var rectypes = that.options.import_structure
-                                    ?window.hWin.HEURIST4.remote.rectypes :window.hWin.HEURIST4.rectypes;
-                var idx = rectypes.groups.groupIDToIndex[grp_val];
-                
-                var is_expanded = (grp_keep_status[grp_val]!=0);
-                
-                return rectypes.groups[idx]?('<div data-grp="'+grp_val
-                    +'" style="font-size:0.9em;padding:14px 0 4px 40px;border-bottom:1px solid lightgray">'
-                    +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
-                    +'<div style="display:inline-block;width:70%">'
-                    +'<h2>'+grp_val+' '+rectypes.groups[idx].name+'</h2>'
-                    +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
-            });
+            this.recordList.resultList( this.options.recordList );
             
         }
 
@@ -173,8 +158,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         if(this.options.use_cache){
            
+            //if there are many widgets need to use base searchentityonfilter
            this._on( this.searchForm, {
-                "searchentityonfilter": this.filterRecordList  //searchdefrectypesonfilter
+                "searchdefrectypesonfilter": this.filterRecordList  
            });
         }else{
             this._on( this.searchForm, {
@@ -377,10 +363,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         //var recTitle = fld2('ugr_ID','3em')+fld2('ugr_Name','10em')+fld('ugr_FirstName')+' '+fld('ugr_LastName');
         var recTitleHint = fld('ugr_Organisation');
         
-        var recTitle = fld2('rty_ID','3.5em');
+        var recTitle = ''
         
-        if(this.options.import_structure){
-            recTitle = recTitle + fld2('rty_ID_local','3.5em');
+        if(false &&  this.options.import_structure){ //Ian dwi
+            recTitle = recTitle + fld2('rty_ID','3.5em')+fld2('rty_ID_local','3.5em');
         }
             
         recTitle = recTitle + fld2('rty_Name','15em')
@@ -389,31 +375,42 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         var rtIcon = window.hWin.HAPI4.iconBaseURL+recID;// window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
         //var rtThumb = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'thumb');
         var recThumb = window.hWin.HAPI4.iconBaseURL+'thumb/th_'+recID; //window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', 2, this.options.database);
+
+        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);">'
+        +'</div>';
         
         if(this.options.import_structure){
+            //Ian dwi
             rtIcon = this.options.import_structure.databaseURL
                                 + '/hserver/dbaccess/rt_icon.php?db='
                                 + this.options.import_structure.database + '&id=';
             recThumb = rtIcon+'thumb/th_'+recID;
             rtIcon = rtIcon + recID;
+            
+            html_thumb = '';
+            rtIcon = '';
         }
         
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);">'
-        +'</div>';
+        var html_icon = '<div class="recordIcons" style="min-width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
+        + '</div>';
+        
+        
+        var has_buttons = (this.options.select_mode=='manager' && this.options.edit_mode=='popup');
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb
         + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordIcons" style="min-width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
-        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-        +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
-        + '</div>'
-        + '<div class="recordTitle recordTitle2" style="right:60px">'
+        + html_icon
+        + '<div class="recordTitle recordTitle2" title="'+fld('rty_Description')
+                        +'" style="right:'+(has_buttons?'60px':'10px')
+                        + (this.options.import_structure?';left:30px':'')+'">'
         +     recTitle
         + '</div>';
         
         // add edit/remove action buttons
-        if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+        if(has_buttons){
         
                 
                html = html 

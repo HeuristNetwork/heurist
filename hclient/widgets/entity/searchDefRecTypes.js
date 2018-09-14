@@ -81,12 +81,13 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         this.reloadGroupSelector();
                       
         if( this.options.import_structure ){
-            this.element.find('#div_show_already_in_db').css({'display':'inline-block'});    
+            //this.element.find('#div_show_already_in_db').css({'display':'inline-block'});    
             this.chb_show_already_in_db = this.element.find('#chb_show_already_in_db');
             this._on(this.chb_show_already_in_db,  { change:this.startSearch });
         }
-        if( this.options.grouped){
+        if( this.options.simpleSearch){
             this.element.find('#div_search_group').hide();
+            this.element.find('#input_sort_type_div').hide();
         }
         
        
