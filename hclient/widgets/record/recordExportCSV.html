@@ -1,0 +1,43 @@
+<fieldset id="div_fieldset">
+
+<div style="padding: 0.2em; width: 100%;" class="input">
+    <div class="header" style="padding: 0 16px 0 16px;">
+        <label for="sel_record_scope">Records scope:</label>
+    </div>
+    <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+</div>
+
+<hr style="margin:5px"/>
+
+<div style="padding: 0.2em; min-width: 600px;" class="input">
+    <div class="header" style="padding: 0 16px 0 16px;"><label>Select fields to export:</label></div>
+    
+    <div class="detailRow rtt-tree" style="padding-bottom:1em;max-height:280px;overflow-y: auto;outline: none;" id="rectype_tree">
+    </div>
+</div>
+
+<hr style="margin:5px"/>
+
+<div style="padding: 0.2em; min-width: 600px;" class="input">
+    <div class="header" style="padding: 0 16px 0 16px;"><label>Field delimeter:</label></div>
+    
+    <div class="detailRow" style="padding-bottom:1em;">
+        <select style="width:80px" id="delimiterSelect">
+            <option value="," selected>comma</option><option value="&#9;" >tab</option>
+        </select>
+        &nbsp;&nbsp;&nbsp;Quotemark:
+        <select  style="width:40px" id="quoteSelect">
+            <option selected value='0'>&nbsp;</option><option value='"' selected>"</option><option value="'">'</option>
+        </select>
+    </div>
+</div>
+
+<div style="padding: 0.2em; min-width: 600px;" class="input">
+    <div class="header" style="padding: 0 16px 0 16px;"><label>Include field names as first output row:</label></div>
+    
+    <div class="detailRow" style="padding-bottom:1em;">
+        <input type="checkbox" checked id="cbNamesAsFirstRow"/>
+    </div>
+</div>    
+
+</fieldset>

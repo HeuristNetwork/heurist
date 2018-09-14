@@ -387,6 +387,8 @@ $.widget( "heurist.recordAction", {
     {
         var isdisabled = (this.selectRecordScope.val()=='');
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );
+        
+        return isdisabled;
     },
   
 });

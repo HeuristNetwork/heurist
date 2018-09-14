@@ -191,6 +191,19 @@ function hexportMenu() {
         return false;
     }
     
+    //
+    // similar in resultListMenu
+    //
+    function isResultSetEmpty(){
+        var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
+        if (window.hWin.HEURIST4.util.isempty(recIDs_all)) {
+            window.hWin.HEURIST4.msg.showMsgDlg('No results found. '
+            +'Please run a query with at least one result record. You can use selection to direct your change.');
+            return true;
+        }else{
+            return false;
+        }
+    }
     
     //
     //
@@ -204,8 +217,16 @@ function hexportMenu() {
         window.hWin.HAPI4.SystemMgr.verify_credentials(
         function(){
         
+        if(action == "menu-export-csv"){
         
-        if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
+           
+            if(isResultSetEmpty()) return;
+            
+            //window.hWin.HAPI4.currentRecordsetSelection is assigned in resultListMenu
+
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV');
+            
+        }else if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
             _exportHML(true,false,false); // isAll, includeRelated, multifile = separate files
         }else if(action == "menu-export-hml-selected"){ // Currently selected records only
             _exportHML(false,false,false);

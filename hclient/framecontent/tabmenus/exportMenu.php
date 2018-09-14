@@ -48,11 +48,12 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
         <br><br>
 
-        <div class="admin-only" style="padding-left:5px;">
+        <div id="menu-export-csv" style="padding-left:5px;">
             <button class="export-button">CSV</button>
-            <a href="export/delimited/exportDelimitedForRectype.html" class="fixed2"
+            <a href="#"
                 data-logaction="expCSV"
-                title="Export records as delimited text (comma/tab), applying record type and additional Heurist search filter as required">
+                data-action="menu-export-csv"
+                title="Export records as delimited text (comma/tab), applying record type">
                 Comma or tab-separated text file</a>
         </div>
 

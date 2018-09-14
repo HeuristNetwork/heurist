@@ -771,7 +771,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
-                var allowed_fieldtypes = ['enum','freetext',"year","date","integer","float","resource","relmarker"];
+                var allowed_fieldtypes = ['header', 'enum','freetext',"year","date","integer","float","resource","relmarker"];
                 
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
 /*                
