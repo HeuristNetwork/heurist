@@ -55,7 +55,7 @@ $.widget( "heurist.importStructure", {
         width:  1100,
         modal:  true,
         title:  'Import structural definitions into current database',
-        source_database_id: 0,
+        source_database_id: 0,  //predefined database id ( skip database list selection )
         
         //LIST section 
         pagesize: 2000      // page size in resultList 
@@ -99,12 +99,12 @@ $.widget( "heurist.importStructure", {
                                +'<div style="position:absolute;right:450px;left:0">'
                                     +'<h4  style="padding:4 0 0 4" id="h_source_rty"></h4>'     
                                     +'<div id="btn_back_to_databases" style="position:absolute;right:4px;top:2px"/>'
-                                    +'</div>'
+                               +'</div>'
                                +'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
                                     +'<h4 style="padding:4 0 0 4">Entity to be imported</h4>'
-                                    +'</div>'
-                               +'<div '
-                               +'style="border-left:1px solid lightgray;position:absolute;right:0px;width:223px;height:2.8em;">'
+                               +'<div class="heurist-helper1" style="text-align:center;margin-top:200px">On the left panel: Expand record type groups in template database and Select record type to be imported</div>'
+                               +'</div>'
+                               +'<div style="border-left:1px solid lightgray;position:absolute;right:0px;width:223px;height:2.8em;">'
                                     +'<h4 style="padding:4 0 0 4">Current entities in database</h4>'
                                     +'</div>'
                             +'</div>'
@@ -115,7 +115,7 @@ $.widget( "heurist.importStructure", {
 
                             //structure of selected record type - popup
                             +'<div id="panel_rty_tree" '
-                                +'style="visibility:hidden;position:absolute; top:2.8em;bottom:0;right:225px; overflow:hidden;width:225px;">'
+                                +'style="visibility:hidden;background:white;position:absolute; top:2.8em;bottom:0;right:225px; overflow:hidden;width:225px;">'
                             +    '<div class="ent_header rtt-toolbar" style="text-align:right">'
                                         +'<div id="btn_start_import"></div>'
                             +    '</div>'
@@ -167,7 +167,12 @@ $.widget( "heurist.importStructure", {
         
         var ele = this.element.find('#btn_back_to_databases')
                     .button({label:'Back to Databases'});
-        this._on( ele, {'click':this._backToDatabases} );
+        if(that.options.source_database_id>0){
+            ele.hide();
+        }else{
+            this._on( ele, {'click':this._backToDatabases} );    
+        }
+        
         
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
         this.recordList_dbs = this.element.find('#panel_dbs .recordList');
@@ -225,6 +230,15 @@ $.widget( "heurist.importStructure", {
                             },
                             "resultlistonaction": this._onActionListener        
             });
+            
+            //help text
+            $('<div>')
+                .text('Please select a database in the list below to see entity (record) types wich you might wish to import')
+                .addClass('heurist-helper1')
+                .css({padding:'7px 30px'})
+                .appendTo(this.recordList_dbs.find('.div-result-list-toolbar'));
+                
+
                   
             //init search panel
             this.searchForm_dbs.load(window.hWin.HAPI4.baseURL
