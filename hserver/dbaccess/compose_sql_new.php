@@ -121,7 +121,7 @@ $top_query;
 // w - domain all or bookmarked or e(everything)
 // limit and offset
 // nested = false - to avoid nested queries - it allows performs correct count for distinct target record type (see faceted search)
-// s - sort
+// NOT USED - s - sort 
 // @todo vt - visibility type 
 // @todo publiconly
 //

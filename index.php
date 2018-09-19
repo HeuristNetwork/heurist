@@ -78,6 +78,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="common/js/temporalObjectLibrary.js"></script>
 
         <script type="text/javascript" src="hclient/widgets/record/recordAction.js"></script>
+        <script type="text/javascript" src="hclient/widgets/record/recordExportCSV.js"></script>
         
         
         <!-- DOCUMENTATION TODO: explain this -->

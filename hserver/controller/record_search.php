@@ -3,6 +3,15 @@
     /**
     * Application interface. See hRecordMgr in hapi.js
     * Record search
+    * 
+    * parameters
+    * db - heurist database
+    * remote=master - request to Heurist_Master_Index
+    * a  - action 
+    *       minmax - seach numeric min and max value for "dt" (field) or "rt" (record type)
+    *       getfacets -   finds all possible facet values for current query and calculates counts for every value 
+    *       related -   finds all related record IDs for given set record "ids"
+    *       search - default
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -69,7 +78,7 @@
 
     //get list of registered database and master index db on the same server
     if(@$_REQUEST['remote'] == 'master' &&
-       strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){
+       strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){ //the same server  - switch database only
        
        unset($_REQUEST['remote']);
        $_REQUEST['db'] = 'Heurist_Master_Index';

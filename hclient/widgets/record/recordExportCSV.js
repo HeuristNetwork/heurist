@@ -25,8 +25,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         height: 520,
         width:  800,
         modal:  true,
-        init_scope: 'selected',
-        title:  'Change Record Access and Ownership',
+        init_scope: 'current',
+        title:  'Export records to comma or tab separated text files',
         currentOwner: 0,
         currentAccess: null,
         currentAccessGroups: null,
@@ -40,7 +40,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     _getActionButtons: function(){
         var res = this._super();
+        var that = this;
         res[1].text = window.hWin.HR('Download');
+        res[0].text = window.hWin.HR('Close');
+        /*
         res.push({text:window.hWin.HR('Export'),
                     id:'btnDoAction2',
                     disabled:'disabled',
@@ -48,7 +51,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     click: function() { 
                             that.doAction( 1 ); 
                     }});
-        
+       */ 
         return res;
     },    
         
@@ -71,20 +74,97 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 }   
             }
             
+            
+            var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
+            function __removeLinkType(dtid){
+                if(header_fields[dtid]){
+                    dtid = header_fields[dtid];
+                }else{
+                    var linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
+                    if(isNaN(Number(linktype))){
+                        dtid = dtid.substr(2);
+                    }
+                }
+                return dtid;
+            }
+            function __addSelectedField(ids, lvl, constr_rt_id){
+                
+                if(ids.length < lvl) return;
+                
+                //take last two - these are rt:dt
+                var rtid = ids[ids.length-lvl-1];
+                var dtid = __removeLinkType(ids[ids.length-lvl]);
+                
+                if(!selectedFields[rtid]){
+                    selectedFields[rtid] = [];    
+                }
+                if(constr_rt_id>0){
+                    dtid = dtid+':'+constr_rt_id;
+                }
+                
+                //window.hWin.HEURIST4.util.findArrayIndex( dtid, selectedFields[rtid] )<0
+                if( selectedFields[rtid].indexOf( dtid )<0 ) {
+                    
+                    selectedFields[rtid].push(dtid);    
+                    
+                    //add resource field for parent recordtype
+                    __addSelectedField(ids, lvl+2, rtid);
+                }
+            }
+            
+            //get selected fields from treeview
+            var selectedFields = {};
+            var tree = this.element.find('.rtt-tree').fancytree("getTree");
+            var fieldIds = tree.getSelectedNodes(false);
+            var k, len = fieldIds.length;
+            
+            if(scope.length<1){
+                window.hWin.HEURIST4.msg.showMsgFlash('No results found. '
+                +'Please run a query with at least one result record. You can use selection to direct your change.', 2000);
+                return;
+            }
+            if(len<1){
+                window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
+            +'Please select at least one field in tree', 2000);
+                return;
+            }
+            
+            
+            for (k=0;k<len;k++){
+                var node =  fieldIds[k];
+                
+                var ids = node.data.code.split(":");
+                
+                __addSelectedField(ids, 1, 0);
+                
+                //DEBUG console.log( node.data.code );
+            }
+            //DEBUG console.log( selectedFields );
+            
+            
             var request = {
                 'request_id' : window.hWin.HEURIST4.util.random(),
+                'db': window.hWin.HAPI4.database,
                 'ids'  : scope,
+                'format': 'csv',
+                'prefs':{
                 'fields': selectedFields,
-                'csv_delimiter':  this.elemenet.find('#elimiterSelect').val(),
-                'csv_enclosure':  this.elemenet.find('#quoteSelect').val(),
+                'csv_delimiter':  this.element.find('#delimiterSelect').val(),
+                'csv_enclosure':  this.element.find('#quoteSelect').val(),
                 'csv_mvsep':'|',
-                'csv_linebreak':'nix',
-                'csv_header': this.elemenet.find('#quoteSelect').is(':checked')
-                };
+                'csv_linebreak':'nix', //not used at tne moment
+                'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked')
+                }};
                 
             if(rec_RecTypeID>0){
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
+            
+            var url = window.hWin.HAPI4.baseURL + 'hserver/controller/record_output.php'
+            
+            this.element.find('#postdata').val( JSON.stringify(request) );
+            this.element.find('#postform').attr('action', url);
+            this.element.find('#postform').submit();
                 
             if(mode==1){ //open in new window
                 
@@ -155,7 +235,6 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             //load treeview
             var treediv = this.element.find('.rtt-tree');
             if(!treediv.is(':empty') && treediv.fancytree("instance")){
-console.log('destr');                
                 treediv.fancytree("destroy");
             }
             

@@ -24,6 +24,18 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*
+parameters 
+$OUTPUT_STUBS, stub  - output only record header fields (see outputRecordStub)
+$REVERSE,  rev  - yes|no include reverse pointer fields
+$EXPAND_REV_PTR, revexpand   yes|no
+
+$WOOT, woot default to not output text content
+$USEXINCLUDELEVEL, hinclude  default to not output xinclude format for related records until beyound 99 degrees of separation
+$USEXINCLUDE hinclude default to not output xinclude format for related records
+$INCLUDE_FILE_CONTENT fc default to expand xml file content
+
+*/
 
 /**
 * @todo

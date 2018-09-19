@@ -413,7 +413,7 @@
     }
     
     /**
-    * Find all related record IDs for given set record IDs
+    * Finds all related record IDs for given set record IDs
     *
     * @param mixed $system
     * @param mixed $ids -
@@ -701,7 +701,7 @@
     *       w (=all|bookmark a|b) - search among all or bookmarked records
     *       limit  - limit for sql query is set explicitely on client side
     *       offset - offset parameter value for sql query
-    *       s - sort order
+    *       s - sort order - if defined it overwrites sortby in q param
     *
     *       OUTPUT parameters
     *       vo (=h3) - output format in h3 for backward capability (for detail=ids only)
@@ -1693,7 +1693,7 @@ $loop_cnt++;
     } 
     
 //------------------------
-    function recordSearchByID($system, $id) 
+    function recordSearchByID($system, $id, $need_details = true) 
     {
         $mysqli = $system->get_mysqli();
         $record = mysql__select_row_assoc( $mysqli, 
@@ -1712,16 +1712,16 @@ $loop_cnt++;
             rec_Hash
             from Records
             where rec_ID = $id");
-        if ($record) {
-            recordSearchDetails($system, $record);
+        if ($need_details !== false && $record) {
+            recordSearchDetails($system, $record, $need_details);
         }
         return $record;
     }
 
     //
-    // load details for given record
+    // load details for given record plus id,type and title for linked records
     //    
-    function recordSearchDetails($system, &$record) {
+    function recordSearchDetails($system, &$record, $need_details) {
 
         $recID = $record["rec_ID"];
         $squery =
@@ -1739,7 +1739,11 @@ $loop_cnt++;
         left join defDetailTypes on dty_ID = dtl_DetailTypeID
         left join Records on rec_ID = dtl_Value and dty_Type = 'resource'
         where dtl_RecID = $recID";
-
+        
+        if(is_array($need_details) && count($need_details)>0 ){
+            $squery = $squery. ' AND dtl_DetailTypeID in ('.implode(',',$need_details).')';
+        }
+        
         $mysqli = $system->get_mysqli();
         $res = $mysqli->query($squery);
 
@@ -1770,9 +1774,9 @@ $loop_cnt++;
 
                     //$detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], false);
                     
-                    $listpaths = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
-                    if(is_array($listpaths) && count($listpaths)>0){
-                        $detailValue = array("file" => $listpaths[0]);
+                    $fileinfo = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
+                    if(is_array($fileinfo) && count($fileinfo)>0){
+                        $detailValue = array("file" => $fileinfo[0], "fileid"=>$fileinfo[0]["ulf_ObfuscatedFileID"]);
                     }
 
                     break;
