@@ -769,7 +769,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     rectype = this.options.params.rectypes.join();
                 }
                 
-                window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
+                //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
                 var allowed_fieldtypes = ['header', 'enum','freetext',"year","date","integer","float","resource","relmarker"];
                 

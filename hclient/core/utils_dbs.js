@@ -280,17 +280,17 @@ window.hWin.HEURIST4.dbs = {
                 ($fieldtypes.indexOf('header')>=0 || $fieldtypes.indexOf('header_ext')>=0) ) {
 
                 if($fieldtypes.indexOf('header_ext')>=0){
-                    $children.push({key:'recID', type:'integer',
+                    $children.push({key:'rec_ID', type:'integer',
                         title:"ID  <span style='font-size:0.7em'>(integer)</span>", 
                         code:($recTypeId+':id'), name:'Record ID'});
                 }
 
                 
-                $children.push({key:'recTitle', type:'freetext',
+                $children.push({key:'rec_Title', type:'freetext',
                     title:"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 
                     code:($recTypeId+':title'), name:'Record title'});
 
-                $children.push({key:'recModified', type:'date',
+                $children.push({key:'rec_Modified', type:'date',
                     title:"Modified  <span style='font-size:0.7em'>(Date)</span>", 
                     code:($recTypeId+':modified'), name:'Record modified'});
                     
@@ -298,13 +298,13 @@ window.hWin.HEURIST4.dbs = {
                 //array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
                 
                 if($fieldtypes.indexOf('header_ext')>=0){
-                    $children.push({key:'recURL', type:'freetext',
+                    $children.push({key:'rec_URL', type:'freetext',
                         title:"URL  <span style='font-size:0.7em'>(freetext)</span>", 
                         code:($recTypeId+':url'), name:'Record URL'});
                         
-                    $children.push({key:'recTags', type:'freetext',
+                    $children.push({key:'rec_Tags', type:'freetext',
                         title:"Tags  <span style='font-size:0.7em'>(freetext)</span>", 
-                        code:($recTypeId+':url'), name:'Record Tags'});
+                        code:($recTypeId+':tags'), name:'Record Tags'});
                 }
                 
             }
@@ -403,6 +403,9 @@ window.hWin.HEURIST4.dbs = {
                 $children.push({key:'recRelationNotes', title:'RelationNotes'});
                 $children.push({key:'recRelationStartDate', title:'RelationStartDate'});
                 $children.push({key:'recRelationEndDate', title:'RelationEndDate'});
+            }else if($mode==5){
+                $res['title'] = 'Any record type';
+                $res['type'] = 'rectype';
             }
 
             
@@ -608,7 +611,7 @@ window.hWin.HEURIST4.dbs = {
         if($res!=null){
 
             if(window.hWin.HEURIST4.util.isnull($res['code'])){
-              $res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)+":"+$pref.$dtID;  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)  
+              $res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)+":"+$pref+$dtID;  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)  
             } 
             $res['key'] = "f:"+$dtID;
             if($mode==4 || $mode==5){
@@ -666,7 +669,7 @@ window.hWin.HEURIST4.dbs = {
         }
         return $def;
     }
-    //=========================
+    //========================= end internal 
         
         if(fieldtypes==null){
             fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker'];
