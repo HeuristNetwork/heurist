@@ -796,8 +796,7 @@ END TREE REALTED ROUTINES ---------------------------------------
 		"no-resize": false,
         height: 750,     // height and width of term tree editing popup
         width: 1200,
-		callback: function(needTreeReload) {
-			if(true || needTreeReload) { //refresh in any case
+		afterclose: function() {
 
                 var  _type = 'enum';
                     
@@ -809,8 +808,6 @@ END TREE REALTED ROUTINES ---------------------------------------
                 treesByDomain = window.hWin.HEURIST4.terms.treesByDomain[_type];
                 termsByDomainLookup = window.hWin.HEURIST4.terms.termsByDomainLookup[_type];
 				_treesInit();
-
-			}
 		}
 		});
 	}

@@ -585,13 +585,14 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         //content.popupOpener = opener;
                         content.doDialogResize = $dosframe[0].doDialogResize;
 
+                        $dlg.removeClass('loading');
+                        $dosframe.show();    
+                        
                         var onloadCallback = options['onpopupload'];
                         if(onloadCallback){
                                 onloadCallback.call(opener, $dosframe[0]);
                         }
 
-                        $dlg.removeClass('loading');
-                        $dosframe.show();    
                 });
 
 //    options['callback']
@@ -634,6 +635,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                 }
                         };
                         $dlg.dialog(opts);
+                        
+                        if(options.noClose){
+                            $dlg.parent().find('.ui-dialog-titlebar').find('.ui-icon-closethick').parent().hide();
+                        }
+                        
                         
                         if(!window.hWin.HEURIST4.util.isempty(options['padding'])) //by default 2em
                             $dlg.css('padding', options.padding);

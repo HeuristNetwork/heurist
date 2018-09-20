@@ -131,7 +131,7 @@
                             <div>
                             <a href="#" onClick="window.detailTypeEditor.onAddVocabulary()">add a vocabulary</a>
                             <a href="#" onClick="window.detailTypeEditor.onAddTermsToVocab()">add terms to vocabulary</a>
-                            <a href="#" onClick="window.detailTypeEditor.showOtherTerms()">edit terms tree</a>
+                            <a href="#" onClick="window.detailTypeEditor.showOtherTerms(true)">edit terms tree</a>
                             </div>
                         </div>
                     </div>
@@ -142,7 +142,7 @@
                             <input type="submit" value="Select terms" id="btnAddSelTerm" 
                                     class="sel_width" onClick="window.detailTypeEditor.onSelectTerms()"/>                    
                             <span id="termsPreview2"></span>
-                            <a href="#" onClick="window.detailTypeEditor.showOtherTerms()">edit terms tree</a>
+                            <a href="#" onClick="window.detailTypeEditor.showOtherTerms(false)">edit terms tree</a>
                         </div>
                         <div style="font-style:italic;">Warning: Advanced users only - list must be updated manually if relevant new terms added</div>
                     </div>

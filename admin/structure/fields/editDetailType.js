@@ -423,11 +423,12 @@ function DetailTypeEditor() {
     /**
     * _onAddVocabOrTerms
     *
-    * Add new vocavulary or add child to currently selected
+    * Add new vocabulary or add child to currently selected
     */
     function _onAddVocabOrTerms(is_add_vocab){
 
         var type = document.getElementById("dty_Type").value;
+        var dt_name = document.getElementById("dty_Name").value;
         var allTerms = document.getElementById("dty_JsonTermIDTree").value;
         var disTerms = document.getElementById("dty_TermIDTreeNonSelectableIDs").value;
 
@@ -438,6 +439,7 @@ function DetailTypeEditor() {
         var el_sel = document.getElementById("selVocab");
         
         var vocab_id =  el_sel.value>0?el_sel.value:''; //keep value
+        var is_frist_time = true;
 
         var sURL = window.hWin.HAPI4.baseURL +
                 "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db;
@@ -445,18 +447,24 @@ function DetailTypeEditor() {
 
                     "close-on-blur": false,
                     "no-resize": true,
-                    "no-close": true, //hide close button
+                    noClose: true, //hide close button
                     title: 'Edit Vocabulary',
                     height: 340,
                     width: 700,
+                    onpopupload:function(dosframe){
+                        var ele = $(dosframe.contentDocument).find('#trmName');
+                        if(is_add_vocab && is_frist_time){
+                           is_frist_time = false;
+                           ele.val( dt_name+' vocabulary' ); 
+                        }
+                        ele.focus();
+                    },
                     callback: function(context) {
                         if(context!="") {
 
                             if(context=="ok"){    //after edit term tree
-                                //_recreateTermsPreviewSelector(type, allTerms, "");
                                 _recreateTermsVocabSelector(type, vocab_id);
                                 _recreateTermsPreviewSelector(type, vocab_id, "");
-                                
                             }else if(!Hul.isempty(context)) { //after add new vocab
                                 document.getElementById("dty_JsonTermIDTree").value =  context;
                                 document.getElementById("dty_TermIDTreeNonSelectableIDs").value = "";
@@ -492,6 +500,7 @@ function DetailTypeEditor() {
         window.hWin.HEURIST4.msg.showDialog(sURL, {
                     "close-on-blur": false,
                     "no-resize": true,
+                    noClose: true, //hide close button
                     title: 'Select terms',
                     height: 500,
                     width: 750,
@@ -506,6 +515,46 @@ function DetailTypeEditor() {
             });
 
     }
+    
+    function _showOtherTerms(isvocab){
+
+        var type = document.getElementById("dty_Type").value;
+        if(type!="enum"){
+            type="relation";
+        }
+        
+        var allTerms = document.getElementById("dty_JsonTermIDTree").value;
+        var disTerms = document.getElementById("dty_TermIDTreeNonSelectableIDs").value;
+
+        var sURL = window.hWin.HAPI4.baseURL + "admin/structure/terms/editTerms.php?"+
+            "popup=1&treetype="+type+"&db="+_db;
+        
+        var vocab_id = 0;
+        
+        if(isvocab){
+            var el_sel = document.getElementById("selVocab");
+            vocab_id =  el_sel.value>0?el_sel.value:'';
+            sURL = sURL + '&vocabid='+vocab_id;
+        }
+        
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+                "close-on-blur": false,
+                "no-resize": false,
+                title: 'Edit Terms',
+                height: 750,
+                width: 1200,
+                afterclose: function() {
+                    if(isvocab){
+                        _recreateTermsVocabSelector(type, vocab_id);
+                        _recreateTermsPreviewSelector(type, vocab_id, "");
+                    }else{
+                        _recreateTermsPreviewSelector(type, allTerms, disTerms);
+                    }
+                }
+        });
+
+    }
+    
 
     /**
     * onSelectRectype
@@ -1093,40 +1142,16 @@ function DetailTypeEditor() {
         onAddVocabulary : function() { _onAddVocabOrTerms(true); },
 
         onSelectTerms : function() { _onSelectTerms(); },
+
+        showOtherTerms: function(isvocab){ _showOtherTerms(isvocab); },
+
         
         /**
         *	handles change status event
         */
         onSelectRectype : _onSelectRectype,
 
-        showOtherTerms: function(){
-
-            var allTerms = document.getElementById("dty_JsonTermIDTree").value;
-            var type = document.getElementById("dty_Type").value;
-            if(type!="enum"){
-                type="relation";
-            }
-
-            var el_sel = document.getElementById("selVocab");
-            var vocab_id =  el_sel.value>0?el_sel.value:'';
-            var sURL = window.hWin.HAPI4.baseURL + "admin/structure/terms/editTerms.php?"+
-                "popup=1&vocabid="+vocab_id+"&treetype="+type+"&db="+_db;
-            
-            window.hWin.HEURIST4.msg.showDialog(sURL, {
-                    "close-on-blur": false,
-                    "no-resize": false,
-                    title: 'Edit Terms',
-                    height: 750,
-                    width: 1200,
-                    callback: function(needTreeReload) {
-                        _recreateTermsVocabSelector(type, vocab_id);
-                        _recreateTermsPreviewSelector(type, vocab_id, "");
-                    }
-            });
-
-        },
-
-
+        
         /**
         * Cancel form - checks if changes were made, shows warning and closes the window
         */
