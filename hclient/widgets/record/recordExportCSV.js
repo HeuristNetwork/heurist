@@ -25,7 +25,6 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         height: 520,
         width:  800,
         modal:  true,
-        init_scope: 'current',
         title:  'Export records to comma or tab separated text files',
         currentOwner: 0,
         currentAccess: null,
@@ -55,6 +54,57 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         return res;
     },    
         
+    //
+    // overwrite parent's method
+    //
+    _fillSelectRecordScope: function (){
+
+        this.selectRecordScope.empty();
+
+        var opt, selScope = this.selectRecordScope.get(0);
+
+        
+        var scope_types = [];   
+        
+        var rectype_Ids = this._currentRecordset.getRectypes();
+        
+        if(rectype_Ids.length>1){
+            window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
+        
+            for (var rty in rectype_Ids){
+                if(rty>=0 && window.hWin.HEURIST4.rectypes.pluralNames[rectype_Ids[rty]]){
+                    rty = rectype_Ids[rty];
+                    window.hWin.HEURIST4.ui.addoption(selScope,rty,
+                            'only: '+window.hWin.HEURIST4.rectypes.pluralNames[rty]);
+                }
+            }
+        }
+
+        
+        if (this._currentRecordset &&  this._currentRecordset.length() > 0) {
+            
+                var msg = (rectype_Ids.length>1)?'Basic record fields only':'Current result set';
+                    
+                window.hWin.HEURIST4.ui.addoption(selScope,
+                    (rectype_Ids.length>1)?'current':rectype_Ids[0],
+                    msg+' (count=' + this._currentRecordset.length()+')');
+        }
+        
+        if (this._currentRecordsetSelIds &&  this._currentRecordsetSelIds.length > 0) {
+                    
+                window.hWin.HEURIST4.ui.addoption(selScope,'selected',
+                    'Selected records only (count=' + this._currentRecordsetSelIds.length+')');
+        }
+        
+        
+        
+        this._on( this.selectRecordScope, {
+                change: this._onRecordScopeChange} );        
+        //this.selectRecordScope.val(this.options.init_scope);    
+        //if(selScope.selectedIndex<0) selScope.selectedIndex=0;
+        this._onRecordScopeChange();
+    },
+            
     //
     // 0 - download, 1 - open in new window
     //
@@ -207,11 +257,17 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     {
         var isdisabled = this._super();
         
-        window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );
+        //window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );
         
         var rtyID = this.selectRecordScope.val();
         //reload treeview
         this._loadRecordTypesTreeView( rtyID );
+        
+        if(rtyID==''){
+            $('.rtt-tree').parent().hide();
+        }else{
+            $('.rtt-tree').parent().show();
+        }
         
         return isdisabled;
     },
