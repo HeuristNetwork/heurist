@@ -58,7 +58,9 @@ $.widget( "heurist.importStructure", {
         source_database_id: 0,  //predefined database id ( skip database list selection )
         
         //LIST section 
-        pagesize: 2000      // page size in resultList 
+        pagesize: 2000,      // page size in resultList 
+        
+        onClose:null
     },
    
     //cached records hRecordSet for databases
@@ -100,13 +102,13 @@ $.widget( "heurist.importStructure", {
                                     +'<h4  style="padding:4 0 0 4" id="h_source_rty"></h4>'     
                                     +'<div id="btn_back_to_databases" style="position:absolute;right:4px;top:2px"/>'
                                +'</div>'
+                               
                                +'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
                                     +'<h4 style="padding:4 0 0 4">Entity to be imported</h4>'
-                               +'<div class="heurist-helper1" style="text-align:center;margin-top:200px">On the left panel: Expand record type groups in template database and Select record type to be imported</div>'
                                +'</div>'
                                +'<div style="border-left:1px solid lightgray;position:absolute;right:0px;width:223px;height:2.8em;">'
                                     +'<h4 style="padding:4 0 0 4">Current entities in database</h4>'
-                                    +'</div>'
+                               +'</div>'
                             +'</div>'
 
                             //left - source                                
@@ -115,15 +117,25 @@ $.widget( "heurist.importStructure", {
 
                             //structure of selected record type - popup
                             +'<div id="panel_rty_tree" '
-                                +'style="visibility:hidden;background:white;position:absolute; top:2.8em;bottom:0;right:225px; overflow:hidden;width:225px;">'
-                            +    '<div class="ent_header rtt-toolbar" style="text-align:right">'
+                                +'style="position:absolute; top:2.8em;bottom:0;right:225px; overflow:hidden;width:225px;">'
+                            +    '<div class="ent_header rtt-toolbar" style="text-align:right;height:3em;padding-top: 8px;">'
                                         +'<div id="btn_start_import"></div>'
                             +    '</div>'
-                            +    '<div class="ent_content rtt-tree" style="bottom:6em"/>'
-                            +    '<div class="ent_footer heurist-helper1" style="height:6em;font-size:0.8em">'
+                            
+                                +'<div id="panel_rty_tree_help" style="text-align:left;padding:200px 15px">'
+                                +'<div class="heurist-helper1">'
+                                    +'Expand groups on left side to see available entity types.<br><br>'
+                                    +'Select an entity type to see the list of fields it contains<br><br>'
+                                    +'Click button above to add the selected entity type to the current database'
+                                +'</div></div>'
+                            
+                            +    '<div class="ent_content rtt-tree" style="bottom:6em;display:none;top:4em"/>'
+                            +    '<div class="ent_footer" style="height:6em;font-size:0.8em;display:none">'
+                                    +'<div class="heurist-helper1">'
                                         +'Grayed out fields are already in current database.<br>'
                                         +'Arrows are record pointer fields<br>'
                                         +'Mouse over to view more information'
+                                    +'</div>'
                             +    '</div>'
                             +'</div>'
                             
@@ -150,6 +162,16 @@ $.widget( "heurist.importStructure", {
         this.panel_rty_list_target = this.element.find('#panel_rty_list_target');
         this.select_rty_list_target = this.element.find('#select_rty_list_target');
         this.panel_rty_structure = this.element.find('#panel_rty_tree');
+            
+        var btn_import = this.panel_rty_structure.find('#btn_start_import');
+        btn_import.button({icon: 'ui-icon-arrowthick-1-e', iconPosition:'begin', label:'add to database'})
+                    //.css({'line-height': '0.9em'})
+                    .click(function(){
+                        that.startImport();
+                    });
+        //this.panel_rty_structure
+        btn_import.find('.ui-icon').css({'color':'red'});
+        window.hWin.HEURIST4.util.setDisabled(btn_import, true);
             
         this.panel_report.find('#btn_close_panel_report')
         .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
@@ -512,7 +534,13 @@ $.widget( "heurist.importStructure", {
     _backToDatabases: function(){
         this.panel_rty.hide();
         this.element.find('#panel_dbs').show();
-        this.panel_rty_structure.css({visibility:'hidden'});
+        //this.panel_rty_structure.css({visibility:'hidden'});
+        this.panel_rty_structure.find('#panel_rty_tree_help').show();
+        this.panel_rty_structure.find('.ent_content').hide();
+        this.panel_rty_structure.find('.ent_footer').hide();
+        window.hWin.HEURIST4.util.setDisabled(this.panel_rty_structure.find('#btn_start_import'), true);
+
+        
         this._selectedRtyID = null;
     },
     
@@ -529,18 +557,6 @@ $.widget( "heurist.importStructure", {
         
         if(this._selectedRtyID!=rtyID ){
         
-            if(this._selectedRtyID==null){
-                // START IMPORT 
-                this.panel_rty_structure.find('#btn_start_import')
-                    .button({icon: 'ui-icon-arrowthick-1-e', iconPosition:'begin', label:'add to database'})
-                    //.css({'line-height': '0.9em'})
-                    .click(function(){
-                        that.startImport();
-                    });
-                this.panel_rty_structure.find('.ui-icon').css({'color':'red'});
-                    
-            }
-                
             this._selectedRtyID = rtyID;
             
             //generate treedata from rectype structure
@@ -650,7 +666,13 @@ $.widget( "heurist.importStructure", {
             this.dlgRtTree = window.hWin.HEURIST4.msg.showElementAsDialog({element:panel_rty_structure[0],height:400, width:300});
             this.dlgRtTree.addClass('ui-heurist-bg-light');
             */
-            this.panel_rty_structure.css({visibility:'visible'});
+            //this.panel_rty_structure.css({visibility:'visible'});
+            this.panel_rty_structure.find('#panel_rty_tree_help').hide();
+            this.panel_rty_structure.find('.ent_content').show();
+            this.panel_rty_structure.find('.ent_footer').show();
+            window.hWin.HEURIST4.util.setDisabled(this.panel_rty_structure.find('#btn_start_import'), false);
+                
+            
             this.panel_rty_structure.find('#btn_start_import').focus();
         }
     },
@@ -781,6 +803,12 @@ $.widget( "heurist.importStructure", {
                 position: position,
                 resizeStop: function(){ that._fixWidth(); },
                 close:function(){
+                    
+                    if($.isFunction(that.options.onClose)){
+                      //that.options.onClose(that._currentEditRecordset);  
+                      that.options.onClose.call();
+                    } 
+                    
                     $dlg.parent().remove(); 
                     that.element.remove();
                 }
@@ -858,6 +886,8 @@ $.widget( "heurist.importStructure", {
                 if(response.data.rectypes) window.hWin.HEURIST4.rectypes = response.data.rectypes;
                 if(response.data.detailtypes) window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                 if(response.data.terms) window.hWin.HEURIST4.terms = response.data.terms;
+                
+                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                 
                 var report = ''
                 var theader = '<table style="padding: 5px;font-size: 1em;">'

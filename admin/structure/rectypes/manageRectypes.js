@@ -763,19 +763,14 @@ function RectypeManager() {
 
             btnAddRecordType = Dom.get('btnImportFromDb'+grpID);
             btnAddRecordType.onclick = function(){
-                var sURL = window.hWin.HAPI4.baseURL + "admin/structure/import/selectDBForImport.php?popup=1&db="
-                    + window.hWin.HAPI4.database + "&grpId="+grpID;
-
-            window.hWin.HEURIST4.msg.showDialog(sURL, {
-                    "close-on-blur": false,
-                    "no-resize": false,
-                    title: 'Browse templates',
-                    height: dim.h*0.95,
-                    width: dim.w*0.95,
-                    //callback: _import_complete
-                });
-
-
+                
+                window.hWin.HEURIST4.ui.showImportStructureDialog({isdialog: true, 
+                onClose:function(){
+                    //refresh
+                    _cloneHEU = null;
+                    _clearGroupAndVisibilityChanges(true);
+                }});
+                
             };
             btnAddRecordType2 = Dom.get('btnImportFromDb'+grpID+'_2');
             if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick
@@ -989,7 +984,7 @@ function RectypeManager() {
         _updatesCnt = 0;
         _oRecordType.rectype.defs = {}; //clear keeptrack
 
-        _updateSaveNotice(_getGroupByIndex(tabView.get('activeIndex')));
+        //_updateSaveNotice(_getGroupByIndex(tabView.get('activeIndex')));
 
         if(_cloneHEU) { window.hWin.HEURIST4.rectypes = Hul.cloneJSON(_cloneHEU); }
         _cloneHEU = null;

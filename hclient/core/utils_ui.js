@@ -2133,6 +2133,19 @@ window.hWin.HEURIST4.ui = {
     //
     // show record action dialog
     //
+    showImportStructureDialog: function(options){
+    
+            var  doc_body = $(window.hWin.document).find('body');
+            var manage_dlg = $('<div id="heurist-dialog-importRectypes-'+window.hWin.HEURIST4.util.random()+'">')
+                .appendTo( doc_body )
+                .importStructure( options );
+                
+        
+    },
+    
+    //
+    // show record action dialog
+    //
     showRecordActionDialog: function(actionName, options){
 
         

@@ -59,6 +59,8 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
 <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
 
+<script type="text/javascript" src="../../../admin/structure/import/importStructure.js"></script>
+
 <style>
 .yui-skin-sam .yui-dt td {
     margin: 0;
