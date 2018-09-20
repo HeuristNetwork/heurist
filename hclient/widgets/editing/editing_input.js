@@ -39,6 +39,7 @@ $.widget( "heurist.editing_input", {
         readonly: false,
         title: '',  //label (overwrite Display label from record structure)
         showclear_button: true,
+        showedit_button: true,
         show_header: true, //show/hide label
         suppress_prompts:false, //supress help, error and required features
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
@@ -275,13 +276,16 @@ $.widget( "heurist.editing_input", {
             this.element.show();    
         }
         
+        if(this.options.showedit_button){
+            this.element.find('.btn_add_term').css({'visibility':'visible','max-width':16});
+        }else{
+            this.element.find('.btn_add_term').css({'visibility':'hidden','max-width':0});
+        }
         
         if(this.options.showclear_button){
             this.element.find('.btn_input_clear').css({'visibility':'visible','max-width':16});
-            this.element.find('.btn_add_term').css({'visibility':'visible','max-width':16});
         }else{
             this.element.find('.btn_input_clear').css({'visibility':'hidden','max-width':0});
-            this.element.find('.btn_add_term').css({'visibility':'hidden','max-width':0});
         }
         
         if(this.options.show_header){
@@ -623,16 +627,17 @@ $.widget( "heurist.editing_input", {
                     
                     window.hWin.HEURIST4.msg.showDialog(url, {height:320, width:700,
                         title: 'Add Term',
+                        noClose: true, //hide close button
                         //class:'ui-heurist-bg-light',
-                        //callback: function(context){
-                        //    if(context=="ok") {
-                        afterclose: function(){
-                            if(true){ //always reload term list after this popup
+                        onpopupload:function(dosframe){
+                            $(dosframe.contentDocument).find('#trmName').focus();
+                        },
+                        callback: function(context){
+
                                 $input = that._recreateSelector($input, true);
                                 $input.change( __onTermChange );
                                 
                                 __showHideSelByImage();
-                            }
                         }
                     } );
                     
@@ -646,6 +651,7 @@ $.widget( "heurist.editing_input", {
 
                     window.hWin.HEURIST4.msg.showDialog(url, {height:540, width:750,
                         title: 'Select Term',
+                        noClose: true, //hide close button
                         //class:'ui-heurist-bg-light',
                         callback: function(editedTermTree, editedDisabledTerms){
                             if(editedTermTree || editedDisabledTerms) {

@@ -459,10 +459,11 @@ function hRecordAddLink() {
     +(isAlready?'disabled checked="checked"'
         :' data-party="'+party+'" value="'+dty+'" data-type="'+field_type+'"')
     +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
-    +'<label style="font-style:italic" for="cb'+party+'_cb_'+dty+'">'+dtyName+'</label>&nbsp;'
-    +'<select id="rec'+party+'_sel_'+dty+'" class="text ui-widget-content ui-corner-all" style="margin-left:30px;">'  
-        +'<option>relation type</option>'
-    +'</select><div>').appendTo($('#'+party+'_field'));
+    + '<div id="rt_'+party+'_sel_'+dty+'" style="display:table-row"></div>'
+    //+'<label style="font-style:italic" for="cb'+party+'_cb_'+dty+'">'+dtyName+'</label>&nbsp;'
+    //+'<select id="rec'+party+'_sel_'+dty+'" class="text ui-widget-content ui-corner-all" style="margin-left:30px;">'  
+    //    +'<option>relation type</option></select>'
+    +'<div>').appendTo($('#'+party+'_field'));
     
     /*
                 if(party=='target'){
@@ -475,15 +476,16 @@ function hRecordAddLink() {
                         terms_dis = details[fi_term_dis],
                         currvalue = null;
                     
-                    //window.hWin.HEURIST4.ui.createTermSelectExt($('#rec'+party+'_sel_'+dty).get(0), 
-                    //        'relation', terms, terms_dis, currvalue, null, false, true);    
-                            
+                    _createInputElement_Relation( party, recRecTypeID, dty ); 
+                    
+      /*
                     window.hWin.HEURIST4.ui.createTermSelectExt2($('#rec'+party+'_sel_'+dty).get(0),
                         {datatype:'relation', termIDTree:terms, headerTermIDsList:terms_dis,
                             defaultTermID:currvalue, topOptions:null, needArray:false, useHtmlSelect:true});
-                    
+     */               
                 }else{
-                    $('#rec'+party+'_sel_'+dty).hide();   //hide relatiion type selector
+                    //$('#rec'+party+'_sel_'+dty).hide();   //hide relation type selector
+                    $('#rt_'+party+'_sel_'+dty).hide();   //hide relation type selector
                 }
             }
 
@@ -504,8 +506,8 @@ function hRecordAddLink() {
             //hide radio - since it is the only one field in list
             $('#source_field').find('.field_item').css('padding-left','0');
             $('#source_field').find('input[type=radio]').hide().click(); //prop('checked',true).
-            $('#source_field').find('label').text('Relationship type:')
-                .css({'font-style':'normal',display:'inline-block',width:'95px'});
+            /*$('#source_field').find('label').text('Relationship type:')
+                .css({'font-style':'normal',display:'inline-block',width:'95px'});*/
         }
                             
         
@@ -710,6 +712,53 @@ function hRecordAddLink() {
     }
 
     //
+    // create input element for relation selecor
+    //
+    function _createInputElement_Relation( party, rectypeID, dtID ){ 
+//AAA
+        if(window.hWin.HEURIST4.util.isempty(dtID)) return;
+    
+        var $field = $('#rt_'+party+'_sel_'+dtID).empty();
+
+        
+        var typedefs = window.hWin.HEURIST4.rectypes.typedefs;
+        var fi = typedefs.dtFieldNamesToIndex;
+        var dtFields =  window.hWin.HEURIST4.util.cloneJSON(typedefs[rectypeID].dtFields[dtID]);
+
+        dtFields[fi['rst_DisplayName']] = 'Relationship type:';//input_label;
+        dtFields[fi['rst_RequirementType']] = 'optional';
+        dtFields[fi['rst_RequirementType']] = 'optional';
+        dtFields[fi['rst_MaxValues']] = 1;
+        
+        var that = this;
+
+        var ed_options = {
+            recID: -1,
+            dtID: dtID,
+            //rectypeID: rectypeID,
+            rectypes: window.hWin.HEURIST4.rectypes,
+            values: '',// init_value
+            readonly: false,
+
+            showclear_button: false,
+            showedit_button: true,
+            suppress_prompts: true,
+            //show_header: false,
+            detailtype: 'relationtype',  //overwrite detail type from db (for example freetext instead of memo)
+            dtFields:dtFields,
+            
+            change: function(){
+                _enableActionButton();
+            }    
+        };
+
+        $("<div>").attr('id','target_record')
+                    //.css({'padding-left':'130px'})
+        $field.editing_input(ed_options);
+    }
+    
+    
+    //
     //
     //
     function getFieldValue(input_id) {
@@ -877,10 +926,12 @@ function hRecordAddLink() {
                 res = {rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:target_RecTypeID };
                 
         }else{ //relmarker
-
+                /*
                 var rl_ele = $('#rec'+(isReverce?'target':'source')+'_sel_'+dtyID);
                 var termID = rl_ele.val(),
                     sRelation = rl_ele.find('option:selected').text();
+                */
+                var termID = getFieldValue('rt_'+(isReverce?'target':'source')+'_sel_'+dtyID);
         
                 for(idx in currentScope){
                 
