@@ -170,7 +170,7 @@ function hRecordSet(initdata) {
         iconColor = iconColor || 'rgb(255, 0, 0)'; 
         fillColor = fillColor || 'rgb(255, 0, 0)';
         lineColor = lineColor || 'rgb(255, 0, 0)'; 
-        fillOpacity = fillOpacity || 0.3;
+        fillOpacity = fillOpacity || 0.25;
 /*      
                                 fillOpacity:0.3,// 0.3,
                                 lineColor:lineColor,
@@ -346,8 +346,8 @@ function hRecordSet(initdata) {
                             iconImg = iconMarker;    
                         }else{
                             //default icon of record type
-                            iconImgEvt = iconId + 'm.png';
-                            iconImg = window.hWin.HAPI4.iconBaseURL + iconId + 'm.png&color='+encodeURIComponent(iconColor);
+                            iconImgEvt = iconId + 's.png';
+                            iconImg = window.hWin.HAPI4.iconBaseURL + iconId + 's.png&color='+encodeURIComponent(iconColor);
                         }
                         
                         item = {

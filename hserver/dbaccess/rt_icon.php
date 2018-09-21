@@ -190,8 +190,10 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
     if(substr($rectype_id,-5,5) == "m.png") { //for mapping
         $rectype_id = substr($rectype_id, 0, -5);
         //$bg_color = array(0,0,0);   //black
+        //$bg_color = array(255,255,255);  //white
         $filename2 = $path . $rectype_id . "m.png";
         $alpha = 127; //0-127
+        //$alpha = 60; //semi-trnasparnet bg
     }else if(substr($rectype_id,-5,5) == "s.png") { //for selection
         $rectype_id = substr($rectype_id, 0, -5);
         $bg_color = array(190,228,248);  //#bee4f8
