@@ -32,6 +32,7 @@
     * dbs_GetRectypeStructure
     * dbs_GetRectypeGroups
     * dbs_GetRectypeByID
+    * dbs_GetRectypeNames
     * dbs_GetTerms
     * dbs_GetDetailTypes
     * dbs_GetDtLookups
@@ -315,6 +316,25 @@
         return $rectype;
     }
 
+    /**
+    * returns array of rectype names for given ids
+    * 
+    * @param mixed $mysqli
+    * @param mixed $rty_IDs
+    */
+    function dbs_GetRectypeNames($mysqli, $rty_IDs){
+        
+        $rty_IDs = prepareIds($rty_IDs);
+        
+        $labels = array();
+        if ($rty_IDs) {
+            $labels = mysql__select_assoc2($mysqli, 
+                'select rty_ID, rty_Name from defRecTypes where rty_ID in ('.implode(',', $rty_IDs).')');
+        }
+        return $labels;
+        
+    }
+    
     
 /**
 * get rectype constraint structure with lookups by target and term id index by srcID

@@ -1607,7 +1607,7 @@ copy_IconAndThumb_FromLibrary
             $recCount = $res->num_rows;
             if ($recCount>0) { //yes, $rty_ID is in use
             
-                $rt_Names = getRecTypeNames( explode(',',$rty_IDs) );
+                $rt_Names = dbs_GetRectypeNames($mysqli, $rty_IDs );
             
                 $ret_message = 'Sorry, you are trying to delete a target record type ('
                     .implode(', ',$rt_Names)
@@ -1727,7 +1727,7 @@ copy_IconAndThumb_FromLibrary
 
                                     $ret_message = $ret_message.'<br><div style="padding:10px 30px;text-align:left">'
                                     .'The following record types would be affected: <ul style="padding-top:5px">';
-                                     $labels = getRecTypeNames($rtyIDs);
+                                     $labels = dbs_GetRectypeNames( $mysqli, $rtyIDs );
                                     
                                      foreach  ($labels as $rty_ID=>$rty_Name)  {
                                          $ret_message = $ret_message.'<li>'.$rty_Name.'</li>';
