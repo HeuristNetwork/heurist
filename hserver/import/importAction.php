@@ -1703,13 +1703,19 @@ private static function findOriginalRecord($recordId){
         $details['recordURL'] = $row[0];
         $details['recordNotes'] = $row[1];
 
-        $query = "SELECT dtl_Id, dtl_DetailTypeID, dtl_Value FROM recDetails WHERE dtl_RecID=".$recordId." ORDER BY dtl_DetailTypeID";
+        $query = "SELECT dtl_Id, dtl_DetailTypeID, dtl_Value, AsWKT(dtl_Geo), dtl_UploadedFileID FROM recDetails WHERE dtl_RecID=".$recordId." ORDER BY dtl_DetailTypeID";
         $dets = mysql__select_all(self::$mysqli, $query);
         if($dets){
             foreach ($dets as $row){
                 $bd_id = $row[0];
                 $field_type = $row[1];
-                $value = $row[2];
+                if($row[4]){ //dtl_UploadedFileID
+                    $value = $row[4];
+                }else if($row[3]){
+                    $value = $row[2].' '.$row[3];
+                }else{
+                    $value = $row[2];
+                }
                 if(!@$details["t:".$field_type]) $details["t:".$field_type] = array();
                 $details["t:".$field_type]["bd:".$bd_id] = $value;
             }
@@ -1781,7 +1787,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                 print "</div>";
             }
         }else{
-            error_log( $out["message"] );
+            error_log( $out["message"].'  '.print_r($out["sysmsg"], true) );
         }
 
         self::$rep_skipped++;

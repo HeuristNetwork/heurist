@@ -274,7 +274,7 @@
 
         // recDetails data
         if ( @$record['details'] ) {
-            $detailValues = prepareDetails($system, $rectype, $record['details'], ($modeImport<2 && $is_strict_validation));
+            $detailValues = prepareDetails($system, $rectype, $record['details'], ($modeImport<2 && $is_strict_validation), $recID);
             if(!$detailValues){
                 return $system->getError();
             }
@@ -1137,7 +1137,7 @@
     * @param mixed $details
     * @param mixed $is_strict - check mandatory fields, resources and terms ID
     */
-    function prepareDetails($system, $rectype, $details, $is_strict)
+    function prepareDetails($system, $rectype, $details, $is_strict, $recID)
     {
         global $terms;
 
@@ -1374,7 +1374,7 @@ array_push($errorValues,
 .'If the problem cannot be fixed, or re-occurs frequently, please email the Heurist development team (support at HeuristNetwork dor org)');
             
             $system->addError(HEURIST_ERROR, 'Encountered invalid value'.$ss
-                                                        .' for field'.$ss, $errorValues);
+                                                        .' for field'.$ss.' Record#'.$recID, $errorValues);
 
         }else if (count($insertValues)<1) {
 
