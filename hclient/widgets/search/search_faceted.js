@@ -303,11 +303,13 @@ $.widget( "heurist.search_faceted", {
            if( !window.hWin.HEURIST4.util.isnull(field['var']) && field['code']){
                //create new query and add new parameter
                var code = field['code'];
+//console.log(code);               
+               
                code = code.split(':');
                
                field['id']   = code[code.length-1];
                field['rtid'] = code[code.length-2];
-               if(field['isfacet']!=that._FT_INPUT){  //not direct iinput
+               if(field['isfacet']!=that._FT_INPUT){  //not direct input
                
                        //create query to search facet values
                        function __crt( idx ){
@@ -349,6 +351,8 @@ $.widget( "heurist.search_faceted", {
                            field['facet'] = {ids:'$IDS'};
                        }else{}*/
                        field['facet'] = __crt( code.length-2 );
+                       
+//console.log('res = '+field['facet']);                       
                }
                
                
@@ -413,7 +417,8 @@ $.widget( "heurist.search_faceted", {
                             val = "$X"+field['var']; 
                         }
                         curr_level = __checkEntry(curr_level, key, val);
-                    
+           
+//console.log(curr_level);                     
                         j=j+2;
                     }               
                

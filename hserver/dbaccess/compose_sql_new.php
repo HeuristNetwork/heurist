@@ -1091,6 +1091,10 @@ class HPredicate {
 
     /**
     * find records that are source relation for specified records
+    * 
+    * "related_to:term_id": query for target record
+    * 
+    * $this->field_id - relation type (term id)
     */
     function predicateRelatedTo(){
 

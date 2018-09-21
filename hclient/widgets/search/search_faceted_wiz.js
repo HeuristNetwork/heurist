@@ -1040,7 +1040,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         }
                 }
             });//visit
-            if(!isfound){
+            if(!isfound){ //assume that they not loaded with lazt load
                 facets.push(old_facets[k]); 
             }
         }
@@ -1090,10 +1090,6 @@ $.widget( "heurist.search_faceted_wiz", {
                 return a.order<=b.order?-1:1;
             });
 
-
-            this.options.params.facets = facets;   //assign new selection
-            this.options.params.version = 2;
-
             if(len>0){
                 //facets[0].isfacet = true;
             }
@@ -1108,17 +1104,25 @@ $.widget( "heurist.search_faceted_wiz", {
             var dispname_idx = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'];
 
             len = facets.length;
-            for (k=0;k<len;k++){
+            k = 0;
+            while(k<facets.length){
                 //title
                 //help tip (take from rectype structure?)
                 //type of facet (radio group)
-                
+                var removeFacet = false;
                 var harchy = [];
                 var codes = facets[k]['code'].split(':');
                 var j = 0;
                 while(j<codes.length){
                     var rtid = codes[j];
                     var dtid = codes[j+1];
+                    
+                    if(!window.hWin.HEURIST4.rectypes.typedefs[ rtid ]){
+                        //record type was removed - remove facet
+                        removeFacet = true;
+                        break;
+                    }
+                    
                     harchy.push('<b>'+window.hWin.HEURIST4.rectypes.names[ rtid ]+'</b>');
                     
                     var linktype = dtid.substr(0,2);                                
@@ -1127,6 +1131,12 @@ $.widget( "heurist.search_faceted_wiz", {
                         
                         if(dtid>0){
                         
+                        if(!window.hWin.HEURIST4.rectypes.typedefs[ rtid ].dtFields[dtid]){
+                            //field was removed - remove facet
+                            removeFacet = true;
+                            break;
+                        }
+                            
                         if(linktype=='lt' || linktype=='rt'){
                             harchy.push(' . '+window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]+' &gt ');
                         }else{
@@ -1140,10 +1150,22 @@ $.widget( "heurist.search_faceted_wiz", {
                         }
                         
                     }else{
+                        
+                        if(!window.hWin.HEURIST4.rectypes.typedefs[ rtid ].dtFields[dtid]){
+                            //field was removed - remove facet
+                            removeFacet = true;
+                            break;
+                        }
+                        
                         //harchy.push(window.hWin.HEURIST4.detailtypes.names[ dtid ]);    
                         harchy.push(' . '+window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]);
                     }
                     j = j+2;
+                }//while codes
+                
+                if(removeFacet){
+                    facets.splice(k,1);
+                    continue;
                 }
                 
                 
@@ -1317,7 +1339,12 @@ $.widget( "heurist.search_faceted_wiz", {
                 }else{
                     listdiv.find('input:checkbox[name="facet_Group'+idd+'"][value="'+facets[k].groupby+'"]').attr('checked', true);
                 }
-            }//for
+                
+                k++;
+            }//while facets
+           
+            this.options.params.facets = facets;   //assign new selection
+            this.options.params.version = 2;
            
             listdiv.sortable();
             listdiv.disableSelection();
