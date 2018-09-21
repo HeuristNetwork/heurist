@@ -165,8 +165,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         return window.hWin.HEURIST4.msg.showMsgDlg( message,
         function(){
             if($.isFunction(callbackFunc)){
-                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                callbackFunc.call(this, $dlg.find('#dlg-prompt-value').val());
+                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();      
+                var ele = $dlg.find('#dlg-prompt-value');
+                var val = '';
+                if(ele.attr('type')!='checkbox' || ele.is(':checked')){
+                    val =  ele.val();
+                }
+                callbackFunc.call(this,val);
             }
         },
         window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle, ext_options);

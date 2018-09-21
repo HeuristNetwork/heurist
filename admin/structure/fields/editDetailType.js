@@ -751,10 +751,12 @@ function DetailTypeEditor() {
     * @return "mandatory" in case there are empty mandatory fields (it prevents further saving on server)
     *           or "ok" if all mandatory fields are filled
     */
-    function _fromUItoArray(isShowWarn){
+    function _fromUItoArray(isShowWarn, ignoreFields){
 
         _updatedFields = [];
         _updatedDetails = [];
+        
+        if(!ignoreFields) ignoreFields = [];
 
         var el = document.getElementById("dty_ShowInLists");
         el.value = el.checked?1:0;
@@ -831,7 +833,49 @@ function DetailTypeEditor() {
                 _updatedFields = [];
                 return "mandatory";
             }
+        }else if(document.getElementById("dty_Type").value==="relmarker"){
+            
+            var dd = document.getElementById("dty_JsonTermIDTree").value;
+            if( dd==="" || dd==="{}" ) {
+                if(isShowWarn) {
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                        'Please select or add relationship types',null, 'Warning');
+                }
+                _updatedFields = [];
+                return "mandatory";
+            }
+
+            var dd = document.getElementById("dty_PtrTargetRectypeIDs").value;
+            if( dd==="" ) {
+                if(isShowWarn) {
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                        'Please select target record type. Unconstrained relationship is not allowed',null, 'Warning');
+                }
+                _updatedFields = [];
+                return "mandatory";
+            }
+        }else if(document.getElementById("dty_Type").value==="resource" && ignoreFields.indexOf('dty_PtrTargetRectypeIDs')<0){
+            
+            var dd = document.getElementById("dty_PtrTargetRectypeIDs").value;
+            if( dd==="" ) {
+                if(isShowWarn) {
+                    window.hWin.HEURIST4.msg.showPrompt(
+'Please select target record type(s) for this entity pointer field before clicking the Create Field button.'
++'<br><br>We strongly recommend NOT creating an unconstrained entity pointer unless you have a very special reason for doing so, as all the clever stuff that Heurist does with wizards for building facet searches, rules, visualisation etc. depend on knowing what types of entities are linked. It is also good practice to plan your connections carefully. If you really wish to create an unconstrained entity pointer - not recommended - check this box <input id="dlg-prompt-value" class="text ui-corner-all" '
+                + ' type="checkbox" value="1"/>', 
+    function(value){
+        if(value==1){
+            ignoreFields.push('dty_PtrTargetRectypeIDs');
+            _updateDetailTypeOnServer( ignoreFields );
         }
+    }, {title:'Target record type(s) should be set',yes:'Continue',no:'Cancel'});
+                    _updatedFields = [];
+                    return "mandatory";
+                }
+            }
+        }
+        
+        
         var val = document.getElementById("dty_Type").value;
         if(Hul.isempty(val)){
             if(isShowWarn) {
@@ -901,13 +945,15 @@ function DetailTypeEditor() {
     * 2. creates object to be sent to server
     * 3. sends data to server
     */
-    function _updateDetailTypeOnServer()
+    function _updateDetailTypeOnServer(ignoreFields)
     {
         if($('#btnSave').is(":disabled")) return;
         $('#btnSave').attr('disabled','disabled');
+        
+        if(!ignoreFields) ignoreFields = [];
 
         //1. gather changed data
-        if(_fromUItoArray(true)==="mandatory"){ //save all changes
+        if(_fromUItoArray(true, ignoreFields)==="mandatory"){ //save all changes
             $('#btnSave').removeAttr('disabled');
             return;
         }
