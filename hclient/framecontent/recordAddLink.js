@@ -743,6 +743,7 @@ function hRecordAddLink() {
             showclear_button: false,
             showedit_button: true,
             suppress_prompts: true,
+            useHtmlSelect:true, 
             //show_header: false,
             detailtype: 'relationtype',  //overwrite detail type from db (for example freetext instead of memo)
             dtFields:dtFields,

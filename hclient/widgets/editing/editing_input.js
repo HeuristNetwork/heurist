@@ -42,6 +42,7 @@ $.widget( "heurist.editing_input", {
         showedit_button: true,
         show_header: true, //show/hide label
         suppress_prompts:false, //supress help, error and required features
+        useHtmlSelect: false,
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
         
         change: null  //onchange callback
@@ -2277,7 +2278,7 @@ $.widget( "heurist.editing_input", {
             //vocabulary
             $input = window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),
                 {datatype:this.detailType, termIDTree:allTerms, headerTermIDsList:headerTerms,
-                    defaultTermID:value, topOptions:true, supressTermCode:true, useHtmlSelect:false});
+                    defaultTermID:value, topOptions:true, supressTermCode:true, useHtmlSelect:this.options.useHtmlSelect});
         
             var opts = $input.find('option');      
             if(opts.length==0 || (opts.length==1 && $(opts[0]).text()=='')){
