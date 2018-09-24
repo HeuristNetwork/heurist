@@ -1368,7 +1368,7 @@ $loop_cnt=1;
                                 
                                 if($find_places_for_geo){
                                     $detail_query = $detail_query . 'UNION  '
-                                    .'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,AsWKT(dtl_Geo), 0, 0, 0 '
+                                    .'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,AsWKT(dtl_Geo), rl_TargetID, 0, 0 '
                                     .' FROM recDetails, recLinks, Records '
                                     .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
                                     .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID in ('. join(',', $rectypes_as_place)
@@ -1418,8 +1418,17 @@ $loop_cnt++;
 
                                     $val = null;
                                     
-                                    if($row[2]){
-                                        $val = $row[1].' '.$row[2];     //dtl_Geo @todo convert to JSON
+                                    if($row[2]){ //GEO
+                                        //dtl_Geo @todo convert to JSON
+                                        $val = $row[1]; //geotype 
+                                        
+                                        $linked_Place_ID = $row[3]; //linke place record id
+                                        if($linked_Place_ID>0){
+                                            $val = $val.':'.$linked_Place_ID;      //reference to real geo record
+                                        }
+                                        
+                                        $val = $val.' '.$row[2];  //WKT
+                                        
                                     }else if($row[3]){ //uploaded file
                                     
                                         if($needCompleteInformation){

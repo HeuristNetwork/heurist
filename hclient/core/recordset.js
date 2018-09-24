@@ -170,7 +170,7 @@ function hRecordSet(initdata) {
         iconColor = iconColor || 'rgb(255, 0, 0)'; 
         fillColor = fillColor || 'rgb(255, 0, 0)';
         lineColor = lineColor || 'rgb(255, 0, 0)'; 
-        fillOpacity = fillOpacity || 0.25;
+        fillOpacity = fillOpacity || 0.2;
 /*      
                                 fillOpacity:0.3,// 0.3,
                                 lineColor:lineColor,
@@ -197,11 +197,15 @@ function hRecordSet(initdata) {
             }
         }
         
+        var linkedPlaceRecId = [];
+        
         var tot = 0;
         
         for(idx in records){
             if(idx)
             {
+                var fillOpacity_thisRec = fillOpacity;
+                
                 var record = records[idx];
                 var recTypeID   = Number(_getFieldValue(record, 'rec_RecTypeID'));
                 
@@ -327,6 +331,13 @@ function hRecordSet(initdata) {
                                     }
                                         
                                 }
+                                if(geodata[m].recID>0){ //reference to linked place record
+                                    if(linkedPlaceRecId.indexOf(geodata[m].recID)<0){
+                                        linkedPlaceRecId.push(geodata[m].recID);
+                                    }else{
+                                        fillOpacity_thisRec = 0.001;
+                                    }
+                                }
                             }
                         }
                         
@@ -372,7 +383,7 @@ function hRecordSet(initdata) {
                                 //color on dataset level works once only - timemap bug
                                 color: iconColor,
                                 fillColor: fillColor,
-                                fillOpacity:fillOpacity,
+                                fillOpacity: fillOpacity_thisRec,
                                 lineColor:lineColor,
                                 /* neither work
                                 strokeOpacity:0.3,
@@ -569,8 +580,11 @@ function hRecordSet(initdata) {
     */
 
     //
-    //
-    //
+    // geo value is in format
+    // geotype:recID WKT
+    // geotype - p,pl,c,l
+    // recID optional reference to real geo record (linked place)
+    // WKT - coordinates
     function _getFieldGeoValue(record, fldname){
 
         var geodata = _getFieldValues(record, fldname);
@@ -578,10 +592,19 @@ function hRecordSet(initdata) {
              var m, res = [];
              for(m=0; m<geodata.length; m++){
                 var g = geodata[m].split(' ');
-                var gt = g[0];
-                g.shift();
+                var gt = g[0].split(':');
+                var geoRecID = (gt && gt.length==2)?gt[1]:0;
+                gt = gt[0];  //geotype
+                
+                g.shift(); //remove first
                 var wkt = g.join(' ');           
-                res.push({geotype:gt, wkt:wkt});
+                oRes = {geotype:gt, wkt:wkt};
+                
+                if(geoRecID>0){
+                    oRes['recID'] = geoRecID;
+                }
+                
+                res.push(oRes);
              }
              return res;
         }else{
@@ -663,7 +686,7 @@ function hRecordSet(initdata) {
                     var g = d[DT_GEO_OBJECT][0].split(' ');
 
                     if(fldname=="dtl_Geo"){
-                        g.shift()
+                        g.shift();
                         return g.join(' '); //return coordinates only
                     }else{
                         return g[0];  //return geotype - first part of dtl_Geo field - "p wkt"
