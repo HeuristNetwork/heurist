@@ -2196,11 +2196,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             //define header - rectype icon, retype name and record title
             var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-            var sheader = '<div class="ui-heurist-header2" style="text-align:left">'
+            var sheader = '<div class="ui-heurist-header2" style="text-align:left;min-height:25px">'
                     + '<img src="'+ph_gif
-                        + '" width=25 height=25 style="vertical-align:middle;margin-right: 10px;background-image:url(\''
+                        + '" width=21 height=21 style="padding:2px;'
+                        + 'background-position:center;background-repeat:no-repeat;background-size: 21px 21px;'
+                        + 'vertical-align:middle;margin-right: 10px;background-image:url(\''
                         + top.HAPI4.iconBaseURL+this._currentEditRecTypeID
-                        + 'm&color=rgb(255,255,255)\');"/><span style="display:inline-block;vertical-align:middle">'
+                        //+ 'm&color=rgb(255,255,255)\');"/>'
+                        + 's&color=rgb(0,0,0)&circle=rgb(255,255,255)\');"/>'  //draw black on white
+                    + '<span style="display:inline-block;vertical-align:middle">'
                         + window.hWin.HEURIST4.rectypes.names[this._currentEditRecTypeID]                         
                     + '</span>';
                     

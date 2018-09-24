@@ -100,30 +100,42 @@ id - record id
     if(substr($rectype_id,-4,4) != ".png") $rectype_id = $rectype_id . ".png";
     $filename = HEURIST_ICON_DIR . $rectype_id;
 
-    if(@$_REQUEST['color']){
-        
-        if(strpos($_REQUEST['color'],'rgb')===0){
-            $clr = substr($_REQUEST['color'],4,-1);
-            $color_new = explode(',',$clr);
-        }else{
-            //1st way list($r,$g,$b) = array_map('hexdec',str_split($colorName,2));
-            //2d way
-            $hexcolor = $_REQUEST['color'];
-            $shorthand = (strlen($hexcolor) == 4);
-            list($r, $g, $b) = $shorthand? sscanf($hexcolor, "#%1s%1s%1s") : sscanf($hexcolor, "#%2s%2s%2s");
-            $color_new = $shorthand?array(hexdec("$r$r"), hexdec("$g$g"), hexdec("$b$b")) 
-                                   :array(hexdec($r), hexdec($g), hexdec($b));
-        }
-        
-    }else{
-        $color_new = null; //array(255, 0, 0);    
-    }  
+    $color_new = _parseColor(@$_REQUEST['color']);
+    $bg_circle_color = _parseColor(@$_REQUEST['circle']);
+    
+    
 //print $filename;    
     if(file_exists($filename)){
         download_file($filename);
     }else{
-        create_rt_icon_with_bg( $rectype_id, $color_new );
+        create_rt_icon_with_bg( $rectype_id, $color_new, $bg_circle_color);
     }
+    
+    
+
+function _parseColor($param_color){
+
+    if($param_color!=null){
+
+        if(strpos($param_color,'rgb')===0){
+            $clr = substr($param_color,4,-1);
+            $color_new = explode(',',$clr);
+        }else{
+            //1st way list($r,$g,$b) = array_map('hexdec',str_split($colorName,2));
+            //2d way
+            $hexcolor = $param_color;
+            $shorthand = (strlen($hexcolor) == 4);
+            list($r, $g, $b) = $shorthand? sscanf($hexcolor, "#%1s%1s%1s") : sscanf($hexcolor, "#%2s%2s%2s");
+            $color_new = $shorthand?array(hexdec("$r$r"), hexdec("$g$g"), hexdec("$b$b")) 
+            :array(hexdec($r), hexdec($g), hexdec($b));
+        }
+
+    }else{
+        $color_new = null; //array(255, 0, 0);    
+    }  
+    return $color_new;
+}
+    
  
 function download_file($filename){
         ob_start();    
@@ -174,7 +186,7 @@ function imagepalettetotruecolor(&$img)
 //
 //
 //    
-function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
+function create_rt_icon_with_bg( $rectype_id,  $color_new, $bg_circle_color ){ //}, $bg_color ) {
 
     if(substr($rectype_id,0,4)=='term'){
         $rectype_id = substr($rectype_id, 4);
@@ -185,8 +197,6 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
     
     $alpha = 0;
 
-    $bg_color = array(200,200,200);   //gray
-    
     if(substr($rectype_id,-5,5) == "m.png") { //for mapping
         $rectype_id = substr($rectype_id, 0, -5);
         //$bg_color = array(0,0,0);   //black
@@ -196,13 +206,13 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
         //$alpha = 60; //semi-trnasparnet bg
     }else if(substr($rectype_id,-5,5) == "s.png") { //for selection
         $rectype_id = substr($rectype_id, 0, -5);
-        $bg_color = array(190,228,248);  //#bee4f8
+        if(!$bg_circle_color) $bg_circle_color = array(190,228,248);  //#bee4f8   364050  
         $filename2 = $path . $rectype_id . "s.png";
         $alpha = 10;
     }else{
         $rectype_id = substr($rectype_id, 0, -4);
         $filename2 = $path . $rectype_id . ".png";
-        $bg_color = array(200,200,200);   //gray
+        //$bg_color = array(200,200,200);   //gray
         $alpha = 127; //0-127
         
         /*if(file_exists($filename2)){
@@ -239,23 +249,25 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
         imagecolortransparent($img, $bg);
         
         //draw transparent rectangle
-        imagefilledrectangle($img, 0, 0, 25, 25, $bg);
+        imagefilledrectangle($img, 0, 0, 25, 25, $bg); //fill bg rectangle
         
         // draw circle
-        //$col_ellipse = imagecolorallocatealpha($img, $bg_color[0], $bg_color[1], $bg_color[2], $alpha);
-        $col_ellipse = imagecolorallocate($img, $bg_color[0], $bg_color[1], $bg_color[2]);
-        imagefilledellipse($img, 12, 12 , 24, 24, $col_ellipse);        
+        if($bg_circle_color!=null){
+            //$col_ellipse = imagecolorallocatealpha($img, $bg_color[0], $bg_color[1], $bg_color[2], $alpha);
+            $col_ellipse = imagecolorallocate($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2]);
+            imagefilledellipse($img, 12, 12 , 24, 24, $col_ellipse);        
+        }
         
         // load icon
         $img_icon = @imagecreatefrompng($filename);
 
         $color_old = array(0,0,0);//???? 54,100,139);      
-        $color_new = (!$color_new)?array(255, 0, 0):$color_new;      
+        $color_new = (!$color_new)?array(255, 0, 0):$color_new;  //array(54,64,80);     
         /* RGB of your inside color */
         $rgb = $color_new; //array(0,0,255);
-        /* Negative values, don't edit */
         
-        $rgb = array($color_old[0]-$rgb[0],$color_old[1]-$rgb[1],$color_old[2]-$rgb[2]);
+        // Negative values, don't edit
+        $rgb = array(($color_old[0]-$rgb[0]),($color_old[1]-$rgb[1]),($color_old[2]-$rgb[2]));
         imagefilter($img_icon, IMG_FILTER_NEGATE); 
         imagefilter($img_icon, IMG_FILTER_COLORIZE, $rgb[0], $rgb[1], $rgb[2]); 
         imagefilter($img_icon, IMG_FILTER_NEGATE); 
@@ -266,12 +278,13 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new ){ //}, $bg_color ) {
         /*if($alpha==127){
             imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16); //keep bg of icon - transparent hole
         }*/
-        // merge icon
+        // merge icon and background
         $imageInfo = getimagesize($filename); 
         if(is_array($imageInfo) && $imageInfo[0]==24  && $imageInfo[1]==24){
             imagecopymerge_alpha($img, $img_icon, 0, 0, 0, 0, 24, 24, 70);  //mix background to dark
         }else{
-            imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 70);  //mix background to dark
+            imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16,100);  //mix background to dark
+            //imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 70);  //mix background to dark
         }
         
         /*$bg = imagecolorallocate($img_icon, 255, 255, 255);
