@@ -1121,7 +1121,7 @@ $.widget( "heurist.search_faceted", {
     , _redrawFacets: function( response, keep_cache ) {
         
                 if(!(this.options.params.viewport>0)){
-                    this.options.params.viewport = 50; //default viewport
+                    this.options.params.viewport = 5; //default viewport
                 }
         
                 if(response.status == window.hWin.ResponseStatus.OK){

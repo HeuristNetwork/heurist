@@ -91,7 +91,7 @@ $.widget( "heurist.search_faceted_wiz", {
         svsID: null,
         domain: null, // bookmark|all or usergroup ID
         params: {
-            viewport:10
+            viewport:5
         },
         onsave: null
     },
@@ -1273,7 +1273,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 listdiv.find('#facet_Title'+idd).val(facets[k].title);
                 listdiv.find('#facet_Help'+idd).val(facets[k].help);
                 
-                listdiv.find('input:checkbox[name="facet_Order'+idd+'"]').attr('checked', (facets[k].orderby=='count'));
+                listdiv.find('#facet_Order'+idd).attr('checked', (facets[k].orderby=='count'));
 
                 //listdiv.find('input:radio[name="facet_Type'+idd+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
                 listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').removeClass('ui-heurist-btn-header1');
@@ -1404,7 +1404,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 this.options.params.facets[k].help = listdiv.find('#facet_Help'+idd).val();
                 this.options.params.facets[k].isfacet = listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value');
                                 //was  listdiv.find('input:radio[name="facet_Type'+idd+'"]:checked').val();
-                this.options.params.facets[k].orderby = listdiv.find('input:checkbox[name="facet_Order'+idd+'"]').is(':checked')?'count':null;
+                this.options.params.facets[k].orderby = listdiv.find('#facet_Order'+idd).is(':checked')?'count':null;
                 
                 if(this.options.params.facets[k].type=='date' 
                   || this.options.params.facets[k].type=='year'){
