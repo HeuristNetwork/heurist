@@ -449,6 +449,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         if (ismapdoc) {
             legendid = 'md-'+overlay_idx;
             overlay = overlays[overlay_idx];
+            
+            if(!overlay) return;
 
             if(rectypeID && rectypeID==RT_SHP_SOURCE && overlay.visible){
                 icon_bg = 'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif);'
@@ -464,6 +466,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         }else{
             legendid = overlay_idx;
             overlay = overlays_not_in_doc[overlay_idx];
+            if(!overlay) return;
         }
         
         if(icon_bg==null && Number.isInteger(rectypeID)){
@@ -651,7 +654,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             source.color = layer.color;
             source.title = layer.title;
             source.iconMarker = layer.iconMarker;
-
+            
             /** MAP IMAGE FILE (TILED) */
             if(source.rectypeID == RT_TILED_IMAGE_SOURCE) {
 //DEBUG console.log("MAP IMAGE FILE (tiled)");
@@ -877,8 +880,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             kmlLayer.setMap(null);
         };
         kmlLayer.zoomToOverlay = function(){
-            //map.fitBounds(bounds);
-            console.log('to implement');
+            map.fitBounds(kmlLayer.getDefaultViewport());
         };
 
 
@@ -1716,9 +1718,11 @@ map.data.addListener('mouseover', function(event) {
     HeuristOverlay.prototype.setVisibility = function(checked) {
         this.visible = checked;
         if(checked) {
-            this.setMap(map);
+            this.div_.style.visibility = 'visible';
+            //this.setMap(map);
         }else{
-            this.setMap(null);
+            //this.setMap(null);
+            this.div_.style.visibility = 'hidden';
         }
     }
 
@@ -1785,8 +1789,12 @@ map.data.addListener('mouseover', function(event) {
         this.div_.parentNode.removeChild(this.div_);
         this.div_ = null;
     };
+    
+    HeuristOverlay.prototype.zoomToOverlay = function() {
+        this.map_.fitBounds(this.bounds_);
+    };
     //end custom overlay
-
+    
     
     /**
     * Initialization
