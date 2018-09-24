@@ -85,19 +85,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
             
             if(!array_key_exists('mode', $_REQUEST)) {
 
-                $system_folders = array(HEURIST_THUMB_DIR,
-                        HEURIST_FILESTORE_DIR."generated-reports/",
-                        HEURIST_ICON_DIR,
-                        HEURIST_FILESTORE_DIR."settings/",
-                        HEURIST_FILESTORE_DIR.'documentation_and_templates/',
-                        HEURIST_FILESTORE_DIR.'backup/',
-                        HEURIST_FILESTORE_DIR.'entity/',
-                        HEURIST_SMARTY_TEMPLATES_DIR
-                        );
-                if(defined('HEURIST_XSL_TEMPLATES_DIR')) array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);
-                if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
-                if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
-
+                $system_folders = $system->getSystemFolders();
 
                 // Find out which folders are allowable - the default scratch space plus any
                 // specified for FieldHelper indexing in Advanced Properties

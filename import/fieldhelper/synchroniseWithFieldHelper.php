@@ -99,21 +99,8 @@ require_once(dirname(__FILE__)."/../../hserver/utilities/utils_file.php");
         $currfile = null;
         $mediaExts = null;
         $progress_divid = 0;
-        $system_folders = array(HEURIST_THUMB_DIR,
-            HEURIST_ICON_DIR,
-            HEURIST_FILES_DIR,
-            HEURIST_FILESTORE_DIR."backup/",
-            HEURIST_FILESTORE_DIR.'documentation_and_templates/',
-            HEURIST_FILESTORE_DIR."faims/",
-            HEURIST_FILESTORE_DIR."generated-reports/",
-            HEURIST_FILESTORE_DIR."scratch/",
-            HEURIST_FILESTORE_DIR."settings/",
-            HEURIST_FILESTORE_DIR.'term-images/',
-            HEURIST_SMARTY_TEMPLATES_DIR);
-        if(defined('HEURIST_XSL_TEMPLATES_DIR')) array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);    
-        if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
-        if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
-
+        $system_folders = $system->getSystemFolders();
+        
         ?>
         <h2>ADVANCED USERS</h2>
 

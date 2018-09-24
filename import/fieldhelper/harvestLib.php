@@ -1,20 +1,5 @@
 <?php
   
-    $system_folders = array(HEURIST_THUMB_DIR,
-        HEURIST_ICON_DIR,
-        HEURIST_FILES_DIR,
-        HEURIST_FILESTORE_DIR."backup/",
-        HEURIST_FILESTORE_DIR.'documentation_and_templates/',
-        HEURIST_FILESTORE_DIR."faims/",
-        HEURIST_FILESTORE_DIR."generated-reports/",
-        HEURIST_FILESTORE_DIR."scratch/",
-        HEURIST_FILESTORE_DIR."settings/",
-        HEURIST_FILESTORE_DIR.'term-icons/',
-        HEURIST_SMARTY_TEMPLATES_DIR); 
-    if(defined('HEURIST_XSL_TEMPLATES_DIR')) array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);
-    if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
-    if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
-
     $rep_counter = null;
     $rep_issues = null;
     $reg_info = array('reg'=>array(),'nonreg'=>array());
@@ -84,7 +69,9 @@ function sanitizeFolderName($folder) {
 //
 function doHarvest($dirs_and_exts, $is_report, $imode) {
 
-    global $rep_counter, $rep_issues, $system_folders;
+    global $system, $rep_counter, $rep_issues;
+    
+    $system_folders = $system->getSystemFolders();
     
     if(@$dirs_and_exts['error']){
         print "<div style=\"color:red\">".$dirs_and_exts['error']."</div>";
