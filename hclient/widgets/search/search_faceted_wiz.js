@@ -1000,7 +1000,9 @@ $.widget( "heurist.search_faceted_wiz", {
         return null;
     }
 
+    //
     // 3d step  - define individual setting for facets
+    //
     , _initStep3_FacetsSettings: function() {
 
         var facets = [];
@@ -1102,6 +1104,8 @@ $.widget( "heurist.search_faceted_wiz", {
             listdiv.empty();
 
             var dispname_idx = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'];
+            var allterms_idx = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_JsonTermIDTree'];
+            var disterms_idx = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_TermIDTreeNonSelectableIDs'];
 
             len = facets.length;
             k = 0;
@@ -1263,9 +1267,27 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(facets[k].isfacet==false){
                     facets[k].isfacet = 0;
                 }else if(facets[k].isfacet==true || !(Number(facets[k].isfacet)<4 && Number(facets[k].isfacet)>=0)){
-                    //by default column for text and selector/slider for enum/dates
+                    //by default column for text and selector/slider for dates
                     //for text field default is search for others slider/dropdown
-                    facets[k].isfacet = (facets[k].type=='freetext')?0:1;
+                    if(facets[k].type=='enum' || facets[k].type=='relationtype'){
+                        
+                        var allTerms = window.hWin.HEURIST4.detailtypes.typedefs[dtid].commonFields[allterms_idx];
+                        var disTerms = window.hWin.HEURIST4.detailtypes.typedefs[dtid].commonFields[disterms_idx];
+                        var list = window.hWin.HEURIST4.dbs.getPlainTermsList(facets[k].type, allTerms, disTerms);
+                        
+                        if(list.length<5){
+                            facets[k].isfacet = 2; //wrap 
+                        }else if (list.length<25) {
+                            facets[k].isfacet = 3; //list
+                        }else{
+                            facets[k].isfacet = 1;    
+                        }
+                    }else{
+                        facets[k].isfacet = (facets[k].type=='freetext')?0:1;
+                    }
+                    
+                    
+                    
                 }
 
 
