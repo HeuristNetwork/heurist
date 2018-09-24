@@ -655,8 +655,8 @@ function zoomBtn(zoom_in){
         factor = zoom_in ? 1.3 : 1/1.3,
         target_scale = scale * factor;
 
-    if(isNaN(x) || !isFinit(x)) x = 0;
-    if(isNaN(y) || !isFinit(y)) y = 0;
+    if(isNaN(x) || !isFinite(x)) x = 0;
+    if(isNaN(y) || !isFinite(y)) y = 0;
         
     // If we're already at an extent, done
     if (target_scale === extent[0] || target_scale === extent[1]) { return false; }
