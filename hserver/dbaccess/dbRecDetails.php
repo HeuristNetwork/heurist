@@ -183,6 +183,8 @@ class DbRecDetails
             .'WHERE d.dtl_RecID=parent.rec_ID and parent.rec_RecTypeID='
             .$this->data['rtyID'].' and d.dtl_DetailTypeID='.$this->data['dtyID'];
 
+error_log($query);
+            
         $res = $mysqli->query($query);
         if ($res){
           
@@ -203,7 +205,7 @@ class DbRecDetails
                     
                     $passedValues++;
                     
-                    if($row[2]>0){
+                    if(!($row[3]>0)){
                         array_push($childNotFound, $row[0]);
                     }else
                     if(in_array($row[2], $groups)){
@@ -235,7 +237,10 @@ class DbRecDetails
         if (count($toProcess)==0){
             return $this->result_data;
         }
-        
+/*debug
+error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $this->result_data,true) );
+    return $this->result_data;
+*/        
         //3. add reverse pointer field in child record to parent record 
         $processedParents = array();
         $childInserted = array();   

@@ -193,7 +193,7 @@ function EditRecStructure() {
             if(arr.length==0){
                 $("#recStructure_toolbar").show();
             }
-
+            
             // define datasource for datatable
             var myDataSource = new YAHOO.util.LocalDataSource(arr,{
                 responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
@@ -3016,8 +3016,11 @@ function __getlink(arr){
     return link+arr.join(',')+link2+arr.length; 
 }           
            
+                   
+var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+var sName = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[rst_ID][fi.rst_DisplayName];
                                 
-sMsg = '<h3>Conversion of records to child records</h3><br>'
+sMsg = '<h3>Conversion of records to child records</h3><br><b>Pointer field:'+ sName +'</b><br><br>'
 +'<div>'+response.data['passed']+' values were found (child record ids)</div>'
 +(response.data['disambiguation']>0?('<div>'+response.data['disambiguation']+' values ignored. The same records were pointed to as a child record by more than one parent</div>'):'')
 +(response.data['noaccess']>0?('<div>'+response.data['noaccess']+' records can not be converted to child records (no access rights)</div>'):'');

@@ -821,6 +821,8 @@
 
             $dtl_ID = -1;
 
+//error_log($parent_id.'  > '.$child_id);            
+            
             $query = 'SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID='
             .$child_id.' AND dtl_DetailTypeID='.DT_PARENT_ENTITY;
             $res = $mysqli->query($query);
@@ -828,6 +830,7 @@
                 $matches = array();
                 while ($row = $res->fetch_row()){
                     if($parent_id == $row[1]){
+//error_log('exists');                        
                         return 0; //exactly the same already exists                           
                     }
                     $dtl_ID = $row[0];
@@ -839,12 +842,14 @@
             if($dtl_ID>0 && !$allow_multi_parent){ //pointer already exists
                 $mysqli->query('UPDATE recDetails '.
                         "SET dtl_Value=$parent_id WHERE dtl_ID=$dtl_ID");                    
+//error_log('upd '.$dtl_ID);                        
                 if($mysqli->error) $res = -1; //($mysqli->affected_rows>0);
             }else{
                 $mysqli->query('INSERT INTO recDetails '.
                     "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ".
                     "VALUES ($child_id, ".DT_PARENT_ENTITY.", $parent_id, $addedByImport )");                    
                 if(!($mysqli->insert_id>0)) $res=-1;
+//error_log('inserted '.$mysqli->insert_id.'   '.$mysqli->error);                        
             }
         }
 
