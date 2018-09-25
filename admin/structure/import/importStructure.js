@@ -163,15 +163,15 @@ $.widget( "heurist.importStructure", {
         this.select_rty_list_target = this.element.find('#select_rty_list_target');
         this.panel_rty_structure = this.element.find('#panel_rty_tree');
             
-        var btn_import = this.panel_rty_structure.find('#btn_start_import');
-        btn_import.button({icon: 'ui-icon-arrowthick-1-e', iconPosition:'begin', label:'add to database'})
+        this.btn_import = this.panel_rty_structure.find('#btn_start_import');
+        this.btn_import.button({icon: 'ui-icon-arrowthick-1-e', iconPosition:'begin', label:'add to database'})
                     //.css({'line-height': '0.9em'})
                     .click(function(){
                         that.startImport();
                     });
         //this.panel_rty_structure
-        btn_import.find('.ui-icon').css({'color':'red'});
-        window.hWin.HEURIST4.util.setDisabled(btn_import, true);
+        this.btn_import.find('.ui-icon').css({'color':'red'});
+        window.hWin.HEURIST4.util.setDisabled(this.btn_import, true);
             
         this.panel_report.find('#btn_close_panel_report')
         .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
@@ -184,6 +184,12 @@ $.widget( "heurist.importStructure", {
             //refresh target
             //that.panel_rty_list_target.manageDefRecTypes('getRecordsetFromStructure');
             window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
+            
+            that.panel_rty_structure.css({visibility:'visible'});
+            that.panel_rty_structure.find('#panel_rty_tree_help').show();
+            that.panel_rty_structure.find('.ent_content').hide();
+            that.panel_rty_structure.find('.ent_footer').hide();
+            window.hWin.HEURIST4.util.setDisabled(that.btn_import, true);
         });
         
         
@@ -538,7 +544,7 @@ $.widget( "heurist.importStructure", {
         this.panel_rty_structure.find('#panel_rty_tree_help').show();
         this.panel_rty_structure.find('.ent_content').hide();
         this.panel_rty_structure.find('.ent_footer').hide();
-        window.hWin.HEURIST4.util.setDisabled(this.panel_rty_structure.find('#btn_start_import'), true);
+        window.hWin.HEURIST4.util.setDisabled(this.btn_import, true);
 
         
         this._selectedRtyID = null;
@@ -670,7 +676,7 @@ $.widget( "heurist.importStructure", {
             this.panel_rty_structure.find('#panel_rty_tree_help').hide();
             this.panel_rty_structure.find('.ent_content').show();
             this.panel_rty_structure.find('.ent_footer').show();
-            window.hWin.HEURIST4.util.setDisabled(this.panel_rty_structure.find('#btn_start_import'), false);
+            window.hWin.HEURIST4.util.setDisabled(this.btn_import, false);
                 
             
             this.panel_rty_structure.find('#btn_start_import').focus();
@@ -888,6 +894,8 @@ $.widget( "heurist.importStructure", {
                 if(response.data.terms) window.hWin.HEURIST4.terms = response.data.terms;
                 
                 window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+                that.panel_report.find('#btn_close_panel_report').click();
+                
                 
                 var report = ''
                 var theader = '<table style="padding: 5px;font-size: 1em;">'
@@ -913,6 +921,12 @@ $.widget( "heurist.importStructure", {
                 }
                
                 if(report!=''){ 
+                    
+                    report = 'Import completed successfully';
+                    
+                    window.hWin.HEURIST4.msg.showMsgFlash(report,4000);
+                    
+                    /*
                     report = '<div style="font-size:0.9em;"><h2>Record type and associated structures imported</h2>'
                                 +report
                                 +'</div>'
@@ -921,7 +935,7 @@ $.widget( "heurist.importStructure", {
                     that.panel_rty.hide();
                     that.panel_report.find('.ent_content_full').html(report);
                     that.panel_report.show();
-                    
+                    */
                 
                 }else{
                     report = 'Nothing imported. '+
