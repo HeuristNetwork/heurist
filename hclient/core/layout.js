@@ -117,7 +117,12 @@ function hLayout(args) {
         //by default find parent of element with ui-layout-container clas
         //find parent container
         if(element){
-            $container = $(element).parents().find('.ui-layout-container')
+            if($(element).hasClass('ui-layout-container')){
+                $container = $(element);
+            }else{
+                $container = $(element).parents().find('.ui-layout-container');
+                if($container.length>0) $container = $($container[0]);
+            }
         }
         //otherwise root container
         if(!$container || $container.length==0){
@@ -789,6 +794,11 @@ function hLayout(args) {
         if(tabcfg.sortable){
             $ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
         }
+        /*
+        if(tabcfg.css){
+            $ul.css(tabcfg.css);
+        }
+        */
 
         //every app is new tab
         $.each(apps, function(idx, _app){

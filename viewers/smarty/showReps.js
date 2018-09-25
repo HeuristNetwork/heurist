@@ -942,15 +942,21 @@ function ShowReps() {
             _reload_templates();
         }
 
+        var container_ele = $(window.hWin.document).find('div[layout_id="FAP2"]');
+        
         //resize global cardinal layout
         if(iseditor){
-            _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'] );
+            _kept_width = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['east','outerWidth'], container_ele );
             window.hWin.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
-            window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
+            
+            //maximize width
+            window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', 
+                    ['east', (top?top.innerWidth:window.innerWidth)-150 ], container_ele);  
             _doExecuteFromEditor();
         }else if(isviewer){
             if(_kept_width>0)
-                window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width]);  //restore width
+                window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', _kept_width], container_ele);  //restore width
+                
             window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', 'west');
             
             var sel = document.getElementById('selTemplates');
