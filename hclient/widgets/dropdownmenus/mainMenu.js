@@ -38,7 +38,7 @@ $.widget( "heurist.mainMenu", {
 
         this.div_logo = $( "<div>")
         .addClass('logo')   //width was 198
-        .css({'width':'150px', 'height':'56px', 'float':'left', 'margin-top':'6px'})
+        .css({'width':'150px', 'float':'left', 'margin-top':'6px'}) //'height':'56px', 
         .appendTo( this.element );
 
         if(window.hWin.HAPI4.get_prefs('layout_theme')!='heurist'){
@@ -135,9 +135,13 @@ $.widget( "heurist.mainMenu", {
 
 
         // MAIN MENU-----------------------------------------------------
+        var he = this.element.height();
+        this.divMainMenu = $("<div>")
+            .css({'border-bottom':'lightgray solid 1px','position':'absolute',left:0,right:0,top:he/2})
+            .appendTo(this.element);;
 
         this.divMainMenu = $( "<div>")
-        .css({'position':'absolute', 'left':24, bottom:2, 'text-align':'left'})  //one rows
+        .css({'position':'absolute', 'left':24, bottom:he/8, 'text-align':'left'})  //one rows
         //.addClass('logged-in-only')
         .appendTo(this.element);
         

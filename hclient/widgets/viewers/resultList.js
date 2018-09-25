@@ -579,7 +579,7 @@ $.widget( "heurist.resultList", {
             this.div_header.hide();
         }
 
-        this.div_toolbar.css({'top':top+'px', height:this.options.show_savefilter?'5em':'2.5em'});
+        this.div_toolbar.css({'top':(top-2)+'px', height:this.options.show_savefilter?'5em':'2.5em'});
         if(this.options.show_toolbar){
             this.div_toolbar.show();
             top = top + this.div_toolbar.height();
@@ -591,7 +591,7 @@ $.widget( "heurist.resultList", {
         //!window.hWin.HEURIST4.util.isempty(this.div_content_header.html());
         
         if(has_content_header){ //table_header
-            top = top + this.div_content_header.height();
+            top = top + this.div_content_header.height()-2;
         }
 
         this.div_content.css({'top': top+4+'px'});

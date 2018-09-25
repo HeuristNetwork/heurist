@@ -166,6 +166,20 @@ $.widget( "heurist.search", {
         
         window.hWin.HEURIST4.util.setDisabled(this.input_search, true);
 
+        var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language', text:'help'})
+        .css({'text-decoration':'none','color':'gray', 'outline':0})
+        //.addClass('ui-icon ui-icon-gear') 'padding-right':'1.5em',
+        .appendTo(this.div_search_input)
+        .position({
+            of: this.input_search,
+            my: 'left top',
+            at: 'left bottom'});
+        
+        this._on( link, {  click: function(){
+            window.open('context_help/advanced_search.html','_blank');
+        } });
+        
+        
         var menu_h = window.hWin.HEURIST4.util.em(1);
 
 
@@ -224,10 +238,11 @@ $.widget( "heurist.search", {
         this.btn_search_domain = $( "<button>", {
             label: window.hWin.HR("filter option")
         })
-        .css({'vertical-align':'top', 'font-size':'1.3em'})
+        .css({'vertical-align':'top', 'font-size':'1.45em'})
         .appendTo( this.div_search_as_user )
         .addClass('ui-heurist-btn-header1 heurist-bookmark-search')
-        .button({icon:'ui-icon-carat-1-s', showLabel:false});
+        .button({icon:'ui-icon-carat-1-s',  label: window.hWin.HR("filter domain"), showLabel:false});
+        //.height( this.btn_search_as_user.height() );
 
         //btn_search_domain is hidden this.div_search_as_user.controlgroup();
 
@@ -337,7 +352,7 @@ $.widget( "heurist.search", {
 
         var linkGear = $('<a>',{href:'#', 
         title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
-        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-45px','height':'18px','opacity':'0.5','margin-top': '0.2em'})
+        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-65px','height':'18px','opacity':'0.5','margin-top': '0.2em'})
         .addClass('ui-icon ui-icon-filter-form') //was ui-icon-gear
         .appendTo(this.div_buttons);
         this._on( linkGear, {  click: this.showSearchAssistant });
@@ -367,15 +382,6 @@ $.widget( "heurist.search", {
         .css({'text-align': 'center'}) // ,     ,'width': '20px'
         .appendTo( this.div_search ); //.insertBefore( this.div_search_as_guest );
 
-        var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language', text:'help'})
-        .css({'display':'inline-block','text-decoration':'none','color':'gray', 'outline':0})
-        //.addClass('ui-icon ui-icon-gear') 'padding-right':'1.5em',
-        .appendTo(this.div_buttons);
-        this._on( link, {  click: function(){
-            window.open('context_help/advanced_search.html','_blank');
-        } });
-        
-        
         // Add record button
         if(this.options.btn_visible_newrecord){
 
