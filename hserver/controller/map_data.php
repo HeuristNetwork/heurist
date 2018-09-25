@@ -264,9 +264,12 @@ function getRecordDetails($system, $record) {
                 // Opacity
                 $record->opacity = floatval($value);
 
-            }else if(defined('DT_COLOR') && $type == DT_COLOR) {
+            }else if(defined('DT_SYMBOLOGY_COLOR') && $type == DT_SYMBOLOGY_COLOR) {
                 // Color - take value from term code
                 $color = _getTermByID($system, $value);
+
+                $record->color_id = $value;
+                $record->color_code = $color->code;
                 if($color->code) {
                     $record->color = $color->code;   
                 }

@@ -650,9 +650,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         if(layer !== undefined && layer.dataSource !== undefined) {
             var source = layer.dataSource;
 //DEBUG console.log(source);
-
-            source.color = layer.color;
             source.title = layer.title;
+            
+            source.color = layer.color;
             source.iconMarker = layer.iconMarker;
             
             /** MAP IMAGE FILE (TILED) */
@@ -1259,6 +1259,15 @@ map.data.addListener('mouseover', function(event) {
                         symbology.stroke = 'rgb(128,0,128)';
                         symbology.fill   = 'rgb(128,0,128)';
                         symbology['fill-opacity'] = 0.1;
+                        
+                    }else{
+                        
+                        symbology.iconColor = source.color;
+                        symbology.fill = source.color;
+                        symbology.stroke = source.color;
+                        
+                        if(!window.hWin.HEURIST4.util.isnull(source.opacity))
+                            symbology['fill-opacity'] = source.opacity;
                     }
                     
                     
