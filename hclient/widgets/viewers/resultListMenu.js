@@ -126,7 +126,7 @@ $.widget( "heurist.resultListMenu", {
 
             this.menu_Selected.find('.logged-in-only').show();
             this.menu_Collected.find('.logged-in-only').show();
-            this.menu_Recode.show();
+            this.btn_Recode.show();
             this.btn_Shared.show();
 
             //$(this.element).find('.logged-in-only').show();//.css('visibility','visible');
@@ -134,7 +134,7 @@ $.widget( "heurist.resultListMenu", {
             //$(this.element).find('.logged-in-only').hide();//.css('visibility','hidden');
             this.menu_Selected.find('.logged-in-only').hide();
             this.menu_Collected.find('.logged-in-only').hide();
-            this.menu_Recode.hide();
+            this.btn_Recode.hide();
             this.btn_Shared.hide();
         }
     },
