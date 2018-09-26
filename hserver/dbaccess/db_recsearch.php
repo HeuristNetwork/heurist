@@ -712,7 +712,7 @@
     *       detail (former 'f') - ids       - only record ids
     *                             count     - only count of records  
     *                             header    - record header
-    *                             timemap   - record header + timemap details
+    *                             timemap   - record header + timemap details (time, location and symbology fields)
     *                             detail    - record header + all details
     *                             structure - record header + all details + record type structure (for editing) - NOT USED
     *       tags                  returns with tags for current user (@todo for given user, group)
@@ -760,6 +760,10 @@
             $system->defineConstant('DT_END_DATE');
             $system->defineConstant('DT_GEO_OBJECT');
             $system->defineConstant('DT_DATE');
+            $system->defineConstant('DT_SYMBOLOGY_POINTMARKER');
+            $system->defineConstant('DT_SYMBOLOGY_COLOR');
+            $system->defineConstant('DT_BG_COLOR');
+            $system->defineConstant('DT_OPACITY');
             
             $rectypes_as_place = $system->get_system('sys_TreatAsPlaceRefForMapping');
             if($rectypes_as_place){
@@ -780,6 +784,12 @@
                 //this case nearly impossible since system always has date and geo fields 
                 $fieldtypes_ids = array(DT_GEO_OBJECT, DT_DATE, DT_START_DATE, DT_END_DATE); //9,10,11,28';    
              }
+             //add symbology fields
+             if(defined('DT_SYMBOLOGY_POINTMARKER')) $fieldtypes_ids[] = DT_SYMBOLOGY_POINTMARKER;
+             if(defined('DT_SYMBOLOGY_COLOR')) $fieldtypes_ids[] = DT_SYMBOLOGY_COLOR;
+             if(defined('DT_BG_COLOR')) $fieldtypes_ids[] = DT_BG_COLOR;
+             if(defined('DT_OPACITY')) $fieldtypes_ids[] = DT_OPACITY;
+             
              $fieldtypes_ids = implode(',', $fieldtypes_ids);
              $needThumbField = true;
 //DEBUG error_log('timemap fields '.$fieldtypes_ids);
@@ -1354,15 +1364,19 @@ $loop_cnt=1;
                             $chunk_rec_ids = array_slice($all_rec_ids, $offset, 1000); 
                             $offset = $offset + 1000;
 
+                            $ulf_fields = 'f.ulf_ObfuscatedFileID, f.ulf_Parameters';  //4,5
+                            
                             //search for specific details
                             if($fieldtypes_ids!=null && $fieldtypes_ids!=''){
                                 
                                 $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
-                                .'AsWKT(dtl_Geo), 0, 0, 0 '
-                                .'FROM recDetails
-                                WHERE (dtl_RecID in (' . join(',', $chunk_rec_ids) . ') '
+                                .'AsWKT(dtl_Geo), dtl_UploadedFileID, '
+                                .$ulf_fields
+                                .' FROM recDetails '
+                                . ' left join recUploadedFiles as f on f.ulf_ID = dtl_UploadedFileID '
+                                . ' WHERE (dtl_RecID in (' . join(',', $chunk_rec_ids) . ') '
                                 .' AND dtl_DetailTypeID in ('.$fieldtypes_ids.'))';
                                 
                                 
@@ -1383,7 +1397,7 @@ $loop_cnt=1;
                                     $ulf_fields = 'f.ulf_OrigFileName,f.ulf_ExternalFileReference,f.ulf_ObfuscatedFileID,'
                                                     .'f.ulf_MimeExt, f.ulf_Parameters';  //4,5,6,7,8
                                 }else{
-                                    $ulf_fields = 'f.ulf_ObfuscatedFileID, f.ulf_Parameters';  //4,5
+                                    
                                 }
                                 
                                 $detail_query = 'select dtl_RecID,'

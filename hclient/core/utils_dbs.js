@@ -127,6 +127,33 @@ window.hWin.HEURIST4.dbs = {
 
         return termName+(withcode ?termCode :'');
     },
+
+    //
+    // Returns hex color by label or code for term by id
+    //
+    getColorFromTermValue: function(termID){
+
+        var term = window.hWin.HEURIST4.ui.getTermById(termID);    
+        
+        var termName, termCode='';
+
+        if(term){
+            var terms = window.hWin.HEURIST4.terms;
+            termName = term[terms.fieldNamesToIndex['trm_Label']];
+            termCode = term[terms.fieldNamesToIndex['trm_Code']];
+            if(window.hWin.HEURIST4.util.isempty(termCode)){
+                var cnames = window.hWin.HEURIST4.ui.getColorArr('names');
+                var idx = window.hWin.HEURIST4.util.findArrayIndex(termName.toLowerCase(),cnames);
+                if(idx>=0){
+                    cnames = window.hWin.HEURIST4.ui.getColorArr('hexs');
+                    termCode = '#'+cnames[idx]; 
+                }
+            }
+        }
+
+        return termCode;
+    },
+
     
     //
     // get description of label for term

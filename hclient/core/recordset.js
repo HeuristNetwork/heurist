@@ -154,6 +154,14 @@ function hRecordSet(initdata) {
             timeenabled = 0;
             
         var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
+        
+        var localIds = window.hWin.HAPI4.sysinfo['dbconst'];
+        var DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
+        var DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR']; //3-1037;
+        var DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-1037;
+        var DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
+        
+        
             
         dataset_name = dataset_name || "main";
         
@@ -204,8 +212,6 @@ function hRecordSet(initdata) {
         for(idx in records){
             if(idx)
             {
-                var fillOpacity_thisRec = fillOpacity;
-                
                 var record = records[idx];
                 var recTypeID   = Number(_getFieldValue(record, 'rec_RecTypeID'));
                 
@@ -224,6 +230,20 @@ function hRecordSet(initdata) {
                 
                 iconId      = _getFieldValue(record, 'rec_Icon');  //used if icon differ from rectype icon
                 if(!iconId) iconId = recTypeID; //by default 
+                
+                //symbology per record overwrite layer symbology
+                var pr_iconMarker = _getFieldValue(record, DT_SYMBOLOGY_POINTMARKER);
+                var pr_iconColor  = window.hWin.HEURIST4.dbs.getColorFromTermValue(_getFieldValue(record, DT_SYMBOLOGY_COLOR));
+                var pr_fillColor  = window.hWin.HEURIST4.dbs.getColorFromTermValue(_getFieldValue(record, DT_BG_COLOR));
+                var pr_Opacity    = _getFieldValue(record, DT_OPACITY);
+
+                if(pr_iconMarker){
+                    pr_iconMarker  = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        +'&file='+pr_iconMarker[0];
+                }
+                
+                var fillOpacity_thisRec = pr_Opacity?pr_Opacity:fillOpacity;
+                
                 
                 var html_thumb = '';
                 if(recThumb){                             //class="timeline-event-bubble-image" 
@@ -277,6 +297,9 @@ function hRecordSet(initdata) {
                             
                             if(typeof iconId=='string' && iconId.indexOf('http:')==0){
                                 iconImg = iconId;
+                            }else if(pr_iconMarker){
+                                //icon is set per record
+                                iconImg = pr_iconMarker;   
                             }else if(iconMarker){
                                 //icon is set per map layer
                                 iconImg = iconMarker;    
@@ -351,6 +374,10 @@ function hRecordSet(initdata) {
                             //icon is set in data (top prioriry)
                             iconImgEvt = iconId;    
                             iconImg = iconId;    
+                        }else if(pr_iconMarker){
+                            //icon is set per record
+                            iconImg = pr_iconMarker;   
+                            iconImgEvt = pr_iconMarker;    
                         }else if(iconMarker){
                             //icon is set per map layer
                             iconImgEvt = iconMarker;    
@@ -358,7 +385,12 @@ function hRecordSet(initdata) {
                         }else{
                             //default icon of record type
                             iconImgEvt = iconId + 's.png';
-                            iconImg = window.hWin.HAPI4.iconBaseURL + iconId + 's.png&color='+encodeURIComponent(iconColor);
+                            iconImg = window.hWin.HAPI4.iconBaseURL + iconId + 's.png&color='
+                                        +encodeURIComponent(pr_iconColor ?pr_iconColor:iconColor);
+                                        
+                            if(pr_fillColor){
+                                iconImg = iconImg + '&circle='+encodeURIComponent(pr_fillColor);
+                            }
                         }
                         
                         item = {
@@ -381,10 +413,10 @@ function hRecordSet(initdata) {
                                 title: recName,
                                 
                                 //color on dataset level works once only - timemap bug
-                                color: iconColor,
-                                fillColor: fillColor,
+                                color: pr_iconColor ?pr_iconColor:iconColor,
+                                fillColor: pr_fillColor ?pr_fillColor:fillColor,
                                 fillOpacity: fillOpacity_thisRec,
-                                lineColor:lineColor,
+                                lineColor: pr_iconColor ?pr_iconColor:lineColor,
                                 /* neither work
                                 strokeOpacity:0.3,
                                 strokeWeight:6,

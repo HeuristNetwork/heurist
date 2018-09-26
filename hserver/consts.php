@@ -314,6 +314,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MAXIMUM_MAP_ZOOM' => array(3, 1078), // prior Jan 2017 some databases used one, some used the other. Either now used for setting.
     'DT_SYMBOLOGY_POINTMARKER' => array(3, 1091), 
     'DT_SYMBOLOGY_COLOR' => array(3, 1037),
+    'DT_BG_COLOR' => array(2, 551),
     'DT_OPACITY' => array(3, 1090),
     
     'DT_DATA_SOURCE' => array(3, 1083),
