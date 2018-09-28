@@ -80,6 +80,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     }
     .detailRow{
         padding: 10px 0;
+        height: 2.5em;
     }
     </style>
     
@@ -87,9 +88,9 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     <!-- Database registration form -->
 
     <body class="popup">
-        <div class="banner"><h2>Register Database with Heurist Master Index</h2></div>
+        <!-- <div class="banner"><h2>Register Database with Heurist Master Index</h2></div> -->
         <div id="page-inner" style="overflow:auto;">
-            <h3>Registration</h3>
+            <!-- <h3>Registration</h3> -->
 <?php
 
             $sysinfo = $system->get_system(); //get info from sysIdentification
@@ -141,7 +142,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     <div>
         <div class="header" style="vertical-align:top"><label>Description:</label></div>
         <div class="text ui-widget-content ui-corner-all"
-            style="width:550px;margin:4px" readonly="readonly">
+            style="width:450px;margin:4px" readonly="readonly">
             <?php echo $dbDescription;?>
          </div>
     </div>
@@ -170,20 +171,21 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 <fieldset>
     
     <div>
-        <div class="header" style="vertical-align:top"><label>Database Description:</label></div>
+        <div class="header" style="vertical-align:top;min-width:100px"><label>Database Description:</label></div>
         <textarea  type="memo" maxlength="1000" cols="80" rows="3" name="dbDescription" class="text"
         style="border:1px solid;padding:2px"
                                 onkeyup="onKeyUpDbDescription( event )"></textarea>
+
+        <div class="heurist-helper1">
+            Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)
+        </div>
                                 
-        <div  style="display:inline-block;vertical-align:top;padding-left:4px">
+        <div style="padding-top:10px"  xstyle="display:inline-block;vertical-align:top;padding-left:4px">
                             <label id="cntChars" style="text-align:left"></label><br/>
                             <input id="btnSubmit" type="submit" name="submit" value="Register"
                                  style="padding:4px 6px;font-weight: bold;" onClick="hideRegistrationForm()" disabled="disabled" >
         </div>
         
-        <div class="heurist-helper1">
-            Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)
-        </div>
         
         
     <div  style="margin-top: 15px; margin-bottom: 20px;">
@@ -207,7 +209,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             } // new registration
 ?>
 
-            <!-- Explanation for the user -->
+<!-- Explanation for the user THAT'S WRONG PLACE FOR IT!
 
             <div class="separator_row" style="margin:20px 0;"></div>
             <h3>Suggested workflow for new databases:</h3>
@@ -243,7 +245,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
                     the software and database formats. <br/>It also allows other databases to import structural elements
                     (record types, field types and terms) but does NOT confer any form of access to data in this database</div>
             </div>
-
+ -->
 <?php
 
 function registerDatabase() {
@@ -277,6 +279,8 @@ function registerDatabase() {
                 "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail
                 ."&serverURL=" . rawurlencode($serverURL);
 
+                
+                
                 //$data = loadRemoteURLContent($reg_url);
                 $data = loadRemoteURLContentSpecial($reg_url); //without proxy
 
@@ -288,8 +292,9 @@ function registerDatabase() {
                     return;
                 }
                 
-                
                 $mysqli = $system->get_mysqli();
+                //restore connection
+                mysql__usedatabase($mysqli, HEURIST_DBNAME); 
 
                 $dbID = intval($data); // correct return of data is just the registration number. we probably need a
 
@@ -323,14 +328,17 @@ function registerDatabase() {
                         $edit_url = HEURIST_INDEX_BASE_URL."?fmt=edit&recID=".$dbID."&db=Heurist_Master_Index";
  ?>                  
  <fieldset>
-                        <div class='detailRow'><div class='header'>Database:</div>
+                        <div><div class='header'>Database:</div>
                         <div class='text'><?php echo HEURIST_DBNAME;?></div></div>
-                        <div class='detailRow'><div class='header'>
+                        
+                        <div><div class='header' style="vertical-align:top;">
                         Registration successful, database ID allocated is</div>
-                        <div class='text'><?php echo $dbID;?></div></div>
-                        <div class='detailRow'><div class='header'></div>
-                        <div class='text'>Basic description: <?php echo $dbDescription;?></div></div>
-                        <div class='detailRow'><div class='header'>Collection metadata:</div>
+                        <div class='text' style="font-size:large;height:2em"><?php echo $dbID;?></div></div>
+                        
+                        <div><div class='header'>Basic description: </div>
+                        <div class='text' style="width:450px;"><?php echo $dbDescription;?></div></div>
+                        
+                        <div><div class='header'>Collection metadata:</div>
                         <div class='text'><a href="<?php echo $edit_url;?>" target=_blank>Click here to edit</a>
                         (login - if asked - as yourself) </div></div>
  </fieldset>

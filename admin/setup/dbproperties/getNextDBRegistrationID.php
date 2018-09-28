@@ -43,18 +43,19 @@ if(@$_REQUEST["db"]!='Heurist_Master_Index'){
     return;
 }
 
-require_once (dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_mail.php');
+    require_once (dirname(__FILE__).'/../../../hserver/System.php');
+    require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_mail.php');
 
     // init main system class
     $system = new System();
-
-    if(!$system->init(@$_REQUEST['db'])){
-        $response = $system->getError();
-        echo '0,'.$response[0]['message'];
+    
+    if(!$system->init(@$_REQUEST['db'], false)){
+        //$response = $system->getError();
+        //echo '0,'.$response[0]['message'];
+        echo '0, Failed to connect to  Master Index database';
         return;
     }
-
+    
 
 $indexdb_user_id = 0; // Flags problem if not reset
 

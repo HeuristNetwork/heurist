@@ -518,7 +518,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                                 
                     }
                 });
-        
+
         }else 
         if(action == "menu-database-properties"){
             
