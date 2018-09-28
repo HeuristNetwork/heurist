@@ -153,24 +153,25 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
             <div id="formContainer"style="top:0;bottom:0;left:350;right:0;padding-left:10px;position:absolute;vertical-align:top;overflow-y:auto;border:1px gray solid;">
             
-               <div style="margin-left:2px; margin-top:15px;">
+               <div style="height:60px">
+               <div style="margin-left:2px; margin-top:15px;float:left">
                     <span class="ui-icon ui-icon-arrowthick-1-w" style="font-size:18px;color:gray"></span>
                     <input type="button" value="Add Vocabulary" id="btnAddRoot1" onClick="{editTerms.doAddChild(true)}"/>
-                    <span style="margin-left:10px;"> (adds a new root to the tree)</span>
+                    <br><span style="margin-left:20px;font-size:0.9em"> (adds a new root to the tree)</span>
                 </div>
                 <!-- Navigation: Search form to do partial match search on terms in the tree -->
-                <div id="formSearch" style="padding-top:15px">
+                <div id="formSearch" style="padding:15px;float:right">
                     <div class="dtyField"><label class="dtyLabel" style="width:30px;">Find:</label>
                         <input id="edSearch" style="width:70px"  onkeyup="{doSearch(event)}"/>
                         <br><label style="padding-left:37px">&gt;2 characters</label>
                     </div>
                     <div class="dtyField">
-                        <select id="resSearch" size="5" style="width:300px" onclick="{editTerms.doEdit()}"></select>
+                        <select id="resSearch" size="5" style="font-size: 0.9em;width: 200px;max-height: 50px;" onclick="{editTerms.doEdit()}"></select>
                     </div>
                 </div>
-
+                </div>
              
-                <h2 id="formMessage" style="margin-left:10px; border-style:none;display:block;text-align:left;width:400px;">
+                <h2 id="formMessage" style="position:absolute;top:80px;left:30px; border-style:none;display:block;text-align:left;width:400px;">
                     Rollover terms in the tree to show available actions<br>
                     Drag terms to reposition or merge <br/> Select term to edit label and description
                 </h2>
@@ -185,7 +186,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" class="form_editor" style="display:none;width:600px;padding-top:5px">
+                <div id="formEditor" class="form_editor" style="display:none;padding:5px">
                     <h2 style="margin-left:5px; margin-top:0px; margin-bottom:10px;border-style:none;display:inline-block">Edit selected term / vocabulary</h2>
                     <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
                         <b>term saved successfully!</b>
@@ -305,7 +306,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                          These buttons are hidden now. They are replaced by action icons in treeview (see __defineActionIcons)
                          Either this section of code will be removed or restored in next months
                         -->
-                        <div style="display:inline-block; margin-top:30px;width:90%;">
+                        <div style="display:inline-block; margin-top:15px;width:90%;">
                             <span style="visibility:hidden;">
                             <input type="button" value="Import" id="btnImport"
                                 title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"
