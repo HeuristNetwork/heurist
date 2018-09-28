@@ -568,7 +568,7 @@ $system->defineConstants();
             <!-- Map document selector -->
             
             <div id="mapSelector" class="map-inited" style="float:left;">
-                <label id="map-doc-select-lbl"><i>Map document:</i></label>
+                <label id="map-doc-select-lbl" style="padding: 4px;line-height: 2.2em;"><i>Map document:</i></label>
                 <button id="mapSelectorBtn" class="truncate" style="max-width: 200px;"></button> 
             </div>
             <div id="mapToolbar" class="map-inited" style="float:left;display:none">

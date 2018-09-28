@@ -57,7 +57,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             
         if(window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'])){
             //@todo change label - hide button
-            $('#map-doc-select-lbl').text('Map document not defined');
+            $('#map-doc-select-lbl').text('No map documents available');
             $('#mapSelectorBtn').hide();
             return;
         }
