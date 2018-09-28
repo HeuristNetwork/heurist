@@ -2557,8 +2557,8 @@ function EditRecStructure() {
                 //check for parent pointers
                 var parent_rtys = __findParentRecordTypes(rty_ID);
                 if(parent_rtys.length>0){
-                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlg('We recommend the addition of at least one field from this record structure in addition to the parent record fields - preferably a required field'
-+' - to ensure that the record title distinguishes the record from other records belonging to the parent entity.<br><br> '
+                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlg('We recommend that you have at least one REQUIRED field '
++'from this record structure (in addition to any parent record fields), to ensure that the record has a distinctive title.<br><br> '
 +'Click [OK] to revise the title (recommended), [Proceed without revision] if you want to proceed without additional fields.',
 [{text:'OK', click: function(){$dlg.dialog( "close" );}},
  {text:'Proceed without revision', click: function(){$dlg.dialog( "close" );  _checkForTitleMask(__reviseTitleMask); }} ]        
