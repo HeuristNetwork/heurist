@@ -1172,9 +1172,9 @@ error_log(print_r($_REQUEST, true));
     /**
     * Loads system settings (default values) from sysIdentification
     */
-    public function get_system( $fieldname=null ){
+    public function get_system( $fieldname=null, $need_reset = false ){
 
-        if(!$this->system_settings)
+        if(!$this->system_settings || $need_reset)
         {
             $mysqli = $this->mysqli;
             $this->system_settings = getSysValues($mysqli);

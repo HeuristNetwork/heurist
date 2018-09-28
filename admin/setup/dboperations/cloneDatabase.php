@@ -51,14 +51,19 @@ $isCloneTemplate = ($templateddb!=null);
 
 if($isCloneTemplate){ //template db must be registered with id less than 21
 
-    if(mysql__usedatabase($mysqli, $templateddb)!==true){
-        die("Sorry, could not connect to the database $templateddb");
-    }
-    
+    $ERROR_REDIR = PDIR.'hclient/framecontent/infoPage.php';
 
-    $dbRegID = $system->get_system('sys_dbRegisteredID');
+    if(mysql__usedatabase($mysqli, $templateddb)!==true){
+        $system->addError(HEURIST_ERROR, "Sorry, could not connect to the database $templateddb. Operation is possible when database to be cloned is on the same server");
+        include $ERROR_REDIR;
+        exit();
+    }
+
+    $dbRegID = $system->get_system('sys_dbRegisteredID', true);
     if(!($dbRegID>0 && $dbRegID<1000)){
-        die("Sorry, the database $templateddb must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.");
+        $system->addError(HEURIST_ERROR, "Sorry, the database $templateddb must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.");
+        include $ERROR_REDIR;
+        exit();
     }
 }else{
     $templateddb = null;

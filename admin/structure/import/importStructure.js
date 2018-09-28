@@ -226,7 +226,8 @@ $.widget( "heurist.importStructure", {
                            groupByField: 'rec_RecTypeID',
                            rendererGroupHeader: function(grp_val){
                                if(grp_val==0){
-                                   return '<div style="width:100%;padding:4px 0 4px 40px;border-bottom:1px solid lightgray">'
+                                   //width:100%;
+                                   return '<div style="padding:4px 0 4px 40px;border-bottom:1px solid lightgray">'
                                    +'<h2>Curated templates</h2>'
                                    +'<div style="padding-top:4px;"><i>Databases curated by the Heurist team as a source of useful entity types for new databases</i></div></div>';
                                }else{
@@ -240,8 +241,8 @@ $.widget( "heurist.importStructure", {
                            
                            rendererHeader:  function(){
             sHeader = '<div style="width:62px">Reg#</div><div style="width:23em">Database Name</div>'
-                    +'<div style="width:31em">Description</div>'
-                    +'<div style="width:5em">URL</div>';
+                    +'<div style="width:54em">Description</div>';
+                    //+'<div style="width:3em">URL</div>';
                                 return sHeader;
                            },
                            renderer:
@@ -261,7 +262,8 @@ $.widget( "heurist.importStructure", {
             
             //help text
             $('<div>')
-                .text('Please select a database in the list below to see entity (record) types wich you might wish to import')
+                .text('Please select a database in the list below to see entity (record) '
+                +'types which you might wish to import. Rollover description for full details.')
                 .addClass('heurist-helper1')
                 .css({padding:'7px 30px'})
                 .appendTo(this.recordList_dbs.find('.div-result-list-toolbar'));
@@ -287,7 +289,7 @@ $.widget( "heurist.importStructure", {
                 that._on( that.input_search, { keypress: that.startSearchOnEnterPress });
                 that._on( that.btn_search_start, { click: that.startSearch_dbs });            
                 
-                that.searchForm_dbs.find('#input_search_type_div2').show();
+                //that.searchForm_dbs.find('#input_search_type_div2').show();
                 that.input_search_type = that.searchForm_dbs.find('#input_search_type2');
                 that._on(that.input_search_type,  { change:that.startSearch_dbs });
                 
@@ -394,6 +396,10 @@ $.widget( "heurist.importStructure", {
                 }else if(this.input_search_type.val()=='user'){
                     request['rec_ID'] = '>999';
                 }
+            }
+            
+            if(window.hWin.HAPI4.sysinfo['db_registeredid']>0){
+                request['rec_ID'] = ('!='+window.hWin.HAPI4.sysinfo['db_registeredid']);    
             }
             
             if(this.input_sort_type.val()=='name'){
@@ -721,6 +727,24 @@ $.widget( "heurist.importStructure", {
                  recID =  action.recID;
                  action = action.action;
              }
+
+            var record = this._cachedRecordset_dbs.getById(recID);
+            var dbName = this._cachedRecordset_dbs.fld(record, 'rec_Title');
+            var recURL = this._cachedRecordset_dbs.fld(record, 'rec_URL');
+            
+            if(action=='open'){
+                    
+                 window.open(recURL+'?db='+dbName,'_blank');
+                    
+            }else if(action=='clone'){
+
+                var cloneURL = window.hWin.HAPI4.baseURL + 'admin/setup/dboperations/cloneDatabase.php'
+                    +'?db='+window.hWin.HAPI4.database
+                    +'&templatedb='+dbName;
+                    
+                window.hWin.HEURIST4.msg.showDialog(cloneURL, { width: 800, height: 400, title:'Clone curated template'});
+            }
+             
          }
         return false;
     },
@@ -757,10 +781,17 @@ $.widget( "heurist.importStructure", {
         var recTitle = '<div class="item" style="width:3em">'+recID+'</div>'
                       +'<div class="item" style="width:25em;'+(recID<1000?'font-weight:bold':'')
                                                         +'">'+dbName+'</div>'
-                      +'<div class="item" style="width:35em" title="'+recTitle+'">'+recTitle+'</div>'
-                      +'<div class="item" style="width:20em;padding-left:4px"><a href="'
-                                +recURL+'?db='+dbName+'" target="_blank">'
-                        + window.hWin.HEURIST4.util.htmlEscape(recURL)+'</a></div>';
+                      +'<div class="item" style="width:60em" title="'+recTitle+'">'+recTitle+'</div>';
+                      /*+'<div class="item" style="width:2em;padding-left:4px"><a href="'
+                                +recURL+'?db='+dbName+'" target="_blank" title="'
+                                +window.hWin.HEURIST4.util.htmlEscape(recURL)+'">'
+                                +'<span class="ui-icon yunui-icon-extlink" style="font-size:0.9em">'
+                                +'</span></a></div>';
+           recTitle = recTitle 
+                      +'<div class="item" style="width:2em;padding-left:4px">'
+                            +'<span class="ui-icon ui-icon-copy" style="font-size:0.9em">'
+                            +'</span></div>';*/
+                                
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb
@@ -771,9 +802,24 @@ $.widget( "heurist.importStructure", {
         + '</div>'
         + '<div class="recordTitle" style="left:40px !important">'
         +     recTitle 
-        + '</div></div>';
+        + '</div>'
         
-       
+        + '<div title="Click to open database in new window" '
+        + 'class="rec_edit_link_ext ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+        + 'role="button" aria-disabled="false" data-key="open">'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/><span class="ui-button-text"/>'
+        + '</div>';
+
+        if(recID<1000){
+            html = html
+                + '<div title="Click to clone curated template" '
+                + 'class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+                + 'role="button" aria-disabled="false" data-key="clone">'
+                + '<span class="ui-button-icon-primary ui-icon ui-icon-copy"/><span class="ui-button-text"/>'
+                + '</div>';
+        }                                                         
+        
+        html = html + '</div>';
 
         return html;
     

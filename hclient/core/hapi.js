@@ -271,7 +271,6 @@ function hAPI(_db, _oninit) { //, _currentUser
                 function(response){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                    
                         if(response.data.sysinfo){
                             window.hWin.HAPI4.sysinfo = response.data.sysinfo;
                             window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];

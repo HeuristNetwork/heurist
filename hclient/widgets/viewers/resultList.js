@@ -500,6 +500,8 @@ $.widget( "heurist.resultList", {
         arguments['pagesize'] = 9999999999999;
         }*/
         // _super and _superApply handle keeping the right this-context
+        this._grp_keep_status = {};
+        
         this._superApply( arguments );
         this._refresh();
     },

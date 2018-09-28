@@ -205,7 +205,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 //window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
                                 //window.hWin.HEURIST4.remote.terms = response.data.terms;
                                 
-                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes );
+                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, true );
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
@@ -236,7 +236,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     // get recordset from HEURIST4.rectypes
     //
-    getRecordsetFromStructure: function( rectypes){
+    getRecordsetFromStructure: function( rectypes, hideDisabled ){
         
         var rdata = { 
             entityName:'defRecTypes',
@@ -247,6 +247,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
       
 
         if(!rectypes){
+            //by default take from local definitions
             rectypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes);
         }else{
             //reload groups for remote rectypes            
@@ -268,27 +269,43 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             idx_ccode = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
         }
 
+        var idx_visibility = rectypes.typedefs.commonNamesToIndex.rty_ShowInLists;
+        var hasRtToImport = false;
 
         for (var r_id in rectypes.typedefs)
         {
             if(r_id>0){
                 var rectype = rectypes.typedefs[r_id].commonFields;
+
+                if(hideDisabled && rectype[idx_visibility]=='0' ){
+                    continue;
+                }
                 
                 if(this.options.import_structure){
                     var concept_code =  rectype[ idx_ccode ];
                     var local_rtyID = window.hWin.HEURIST4.dbs.findByConceptCode( concept_code, 
                                                             window.hWin.HEURIST4.rectypes.typedefs, idx_ccode );
                     rectype.push( local_rtyID );
+                    hasRtToImport = hasRtToImport || !(local_rtyID>0);
                 }
                 
                 rectype.unshift(r_id);
+                
                 rdata.records[r_id] = rectype;
                 rdata.order.push( r_id );
                 
             }
         }
         rdata.count = rdata.order.length;
-
+        
+        if(this.options.import_structure){
+            this.recordList.resultList('option', 'empty_remark',
+                                        '<div style="padding:1em 0 1em 0">'+
+                                        (hasRtToImport
+                                        ?this.options.entity.empty_remark
+                                        :'Your database already has all the entity types available in this source'
+                                        )+'</div>');
+        }
         
         this._cachedRecordset = new hRecordSet(rdata);
         this.recordList.resultList('updateResultSet', this._cachedRecordset);
@@ -370,7 +387,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
             
         recTitle = recTitle + fld2('rty_Name','15em')
-                    + fld2('rty_Description','45em');
+            + ' : <div class="item" style="font-style:italic;width:45em">'
+            + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rty_Description'))+'</div>'
         
         var rtIcon = window.hWin.HAPI4.iconBaseURL+recID;// window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
         //var rtThumb = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'thumb');
