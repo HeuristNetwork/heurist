@@ -1411,7 +1411,9 @@ array_push($errorValues,
 
         $new_owner = 0;
 
-        $owner = mysql__select_value($mysqli, "SELECT rec_OwnerUGrpID FROM Records WHERE rec_ID = ".$id);
+        $row = mysql__select_row($mysqli, "SELECT rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = ".$id);
+        $owner = $row[0];
+        $recTypeID = $row[1];
         if (!$system->is_member($owner)){   //current user is not member of current group
             $new_owner = $system->get_user_id();
             //return $system->addError(HEURIST_REQUEST_DENIED, 'User not authorised to duplicate record');
@@ -1450,6 +1452,15 @@ array_push($errorValues,
             $res = mysql__duplicate_table_record($mysqli, 'recDetails', 'dtl_RecID', $id, $new_id);
             if(!is_int($res)){ $error = $res; break; }
             
+            //remove pointer fields where Parent-Child flag is ON
+            $query = 'DELETE FROM recDetails where dtl_RecID='.$new_id.' and dtl_DetailTypeID in '
+            .'(SELECT rst_DetailTypeID FROM defRecStructure WHERE rst_RecTypeID='.$recTypeID.' AND rst_CreateChildIfRecPtr=1)';
+            $res = $mysqli->query($query);
+            if(!$res){
+                $error = 'database error - ' .$mysqli->error;
+                break;
+            }
+                        
             //@todo duplicate uploaded files
             //$fd_res = unregister_for_recid2($id, $needDeleteFile);
             //if ($fd_res) { $error = "database error - " . $fd_res; break; }
