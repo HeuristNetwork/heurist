@@ -30,6 +30,10 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+$is_included = (defined('PDIR'));
+
+if(!$is_included){
+
 define('MANAGER_REQUIRED',1);   
 define('PDIR','../../');  //need for proper path to js and css    
 
@@ -37,6 +41,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
 $mysqli = $system->get_mysqli();
 
+}
 
 $invalidChars = array(chr(0),chr(1),chr(2),chr(3),chr(4),chr(5),chr(6),chr(7),chr(8),chr(11),chr(12),chr(14),chr(15),chr(16),chr(17),chr(18),chr(19),chr(20),chr(21),chr(22),chr(23),chr(24),chr(25),chr(26),chr(27),chr(28),chr(29),chr(30),chr(31)); // invalid chars that need to be stripped from the data.
 $replacements = array("?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?","?"," ","?","?","?","?","?");
@@ -51,6 +56,15 @@ if($res){
     }
     $res->close();
 }
+if($is_included){
+?>    
+<hr/>
+<a name="clean_invalid_chars"></a>
+<div>
+<h3>Check and fix invalid characters in the data fields in the database records</h3>
+<?php    
+$is_not_found = true;
+}else{
 ?>
 <html>
     <head>
@@ -60,16 +74,17 @@ if($res){
     </head>
     <body class="popup">
         <div class="banner"><h2>Clean Invalid Characters</h2></div>
-
         <div id="page-inner" style="overflow:auto;padding-left: 6px;">
             <div>This function removes invalid characters in the data fields in the database records<br />&nbsp;<hr /></div>
-
+<?php
+}
+?>
             <table>
                 <?php
                 $now = date('Y-m-d H:i:s');
                 $prevInvalidRecId = 0;
                 foreach ($textDetails as $textDetail) {
-                    if (! check($textDetail['dtl_Value'])){
+                    if (! check_invalid_chars($textDetail['dtl_Value'])){
                         if ($prevInvalidRecId < $textDetail['dtl_RecID']) {
                             print "<tr><td><a target=_blank href='".HEURIST_BASE_URL."?fmt=edit&recID=".
                             $textDetail['dtl_RecID'] . "&db=".HEURIST_DBNAME. "'> " . $textDetail['dtl_RecID']. "</a></td></tr>\n";
@@ -93,10 +108,12 @@ if($res){
                         }else{
                             print "<tr><td><pre>" . "Error ". res."while updating to : ".htmlspecialchars($newText) . "</pre></td></tr>\n";
                         }
+                        
+                        $is_not_found = false;
                     }
                 }
 
-                function check($text) {
+                function check_invalid_chars($text) {
                     global $invalidChars;
                     foreach ($invalidChars as $charCode){
                         if (strpos($text,$charCode)) {
@@ -109,9 +126,18 @@ if($res){
                 ?>
             </table>
 
+<?php 
+if($is_included){ 
+    if($is_not_found){
+        print 'All records have valid characters in freetext and blocktext fields.<br><br>';        
+    }
+    print '</div>';
+}else{
+?>
             <p>
                 [end of check]
             </p>
         </div>
     </body>
 </html>
+<?php } ?>

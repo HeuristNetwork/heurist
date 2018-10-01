@@ -172,7 +172,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 <a href="#single_value" style="white-space: nowrap;padding-right:10px">Single value fields</a>
                 <a href="#required_fields" style="white-space: nowrap;padding-right:10px">Required fields</a>
                 <a href="#nonstandard_fields" style="white-space: nowrap;padding-right:10px">Non-standard fields</a>
-                <a href="#origin_differences" style="white-space: nowrap;padding-right:10px">Differences with Core Definitions</a>
+                <!-- <a href="#origin_differences" style="white-space: nowrap;padding-right:10px">Differences with Core Definitions</a> -->
             </div>
         </div>
         
@@ -1169,6 +1169,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 ?>
             </div>
 
+<!--            
             <hr/>
             
             <a name="origin_differences"></a>
@@ -1177,11 +1178,25 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 <?php
                     $_REQUEST['verbose'] = 1;
                     $_REQUEST['filter_exact']  = HEURIST_DBNAME_FULL;
-                    //include(dirname(__FILE__).'/verifyForOrigin.php');
+                    include(dirname(__FILE__).'/verifyForOrigin.php');
                 ?>
             </div>
+-->
+<?php
+include(dirname(__FILE__).'/cleanInvalidChars.php');
+
+include(dirname(__FILE__).'/checkRectypeTitleMask.php');
+?>
+
+            <hr/>            
             
-            <hr/>
+            <a name=""></a>
+            <div>
+                <br><br><br>
+                <a href="admin/verification/listDatabaseErrorsInit.php?type=files&db=<?php echo HEURIST_DBNAME;?>" 
+                        target="_blank">Find duplicate and unused uploaded files (slow)</a>
+            </div>
+
 
         </div>
     </body>
