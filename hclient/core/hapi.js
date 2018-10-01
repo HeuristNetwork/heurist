@@ -263,30 +263,18 @@ function hAPI(_db, _oninit) { //, _currentUser
             */
             , verify_credentials: function(callback, requiredLevel){
 
-                callback(); //verification temporarely disabled
-                return; 
+                requiredLevel = Number(requiredLevel);
+                if(requiredLevel<0){ //no verification required - everyone access
+                    callback(); 
+                    return; 
+                }
                 
-                //check if login
-                _callserver('usr_info', {a:'verify_credentials'},
-                function(response){
+                function __verify(){
                     
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        if(response.data.sysinfo){
-                            window.hWin.HAPI4.sysinfo = response.data.sysinfo;
-                            window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
-                        }
-                        if(response.data.currentUser) {
-                            window.hWin.HAPI4.setCurrentUser(response.data.currentUser);   
-                            //trigger global event ON_CREDENTIALS
-                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
-                        }
-
-                        //since currentUser is up-to-date - use client side method
-                        requiredLevel = Number(requiredLevel);
-                        
-                        if(!(requiredLevel<0  //not verify if reqlevel <0
-                            || window.hWin.HAPI4.has_access(requiredLevel))){ 
-
+                        if(window.hWin.HAPI4.has_access(requiredLevel)){ 
+                              callback();  
+                        }else{
+                            var response = {};
                             response.sysmsg = 0;
                             response.status = window.hWin.ResponseStatus.REQUEST_DENIED;
                             response.message = 'To perform this operation you have to be logged in';
@@ -302,17 +290,40 @@ function hAPI(_db, _oninit) { //, _currentUser
                                } 
                                response.message += ' as administrator of group #'+requiredLevel+sGrpName;
                             }
+                            
+                            window.hWin.HEURIST4.msg.showMsgErr(response, true);
                         }
-                    }
+                }
+                
+                function __response_handler(response){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        callback();
+                        if(response.data.sysinfo){
+                            window.hWin.HAPI4.sysinfo = response.data.sysinfo;
+                            window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+                        }
+                        if(response.data.currentUser) {
+                            window.hWin.HAPI4.setCurrentUser(response.data.currentUser);   
+                            //trigger global event ON_CREDENTIALS
+                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+                        }
+                    
+                        //since currentUser is up-to-date - use client side method
+                        __verify();
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response, true);
-                       // window.hWin.HEURIST4.msg.showMsgErr(response, true); Login Page is already rendered no need to  display Error Message
                     }
-                });
-
+                }
+                
+                //MODE1 verify locally only
+                if(true){
+                    __verify(); //verification temporarely disabled
+                
+                }else{
+                    //MODE2 verify via server each time
+                    //check if login
+                    _callserver('usr_info', {a:'verify_credentials'}, __response_handler);
+                }
             }
 
             /**

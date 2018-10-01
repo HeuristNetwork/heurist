@@ -164,13 +164,13 @@ $.widget( "heurist.mainMenu", {
         if(__include('profile')) this._initMenu('Profile', -1, this.divProfileItems);
 
         if(__include('Database')) this._initMenu('Database', -1);            
-        if(__include('Structure')) this._initMenu('Structure', 1);
+        if(__include('Structure')) this._initMenu('Structure', 0);
         if(__include('Verify')) this._initMenu('Verify', 0);
         if(__include('Import')) this._initMenu('Import', 0);
         if(__include('Management')) this._initMenu('Management', 0);
-        if(__include('Admin')) this._initMenu('Admin', 1);
+        if(__include('Admin')) this._initMenu('Admin', 2);
             
-        if(__include('FAIMS')) this._initMenu('FAIMS', 0);
+        if(__include('FAIMS')) this._initMenu('FAIMS', 2);
         if(__include('Help')) this._initMenu('Help', -1);
         
         this.divMainMenuItems.menu();
@@ -240,19 +240,34 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             $(this.element).find('.logged-out-only').show();
         }*/
         
-        function ___set_menu_item_visibility(idx, item){
+        function ___set_menu_item_visibility(idx, item, is_showhide){
 
                 var lvl = $(item).attr('data-level');
                 if(lvl>=0){
                     //@todo lvl=1 is_admin
                     var is_visible = window.hWin.HAPI4.has_access(lvl);
-                    var item = $(item).is('li')?item:$(item).parent();
+                    var item = $(item).is('li')?$(item):$(item).parent();
+                    var elink = $(item).find('a');
+                    if(is_showhide){
+                        if(is_visible){
+                            item.show();  
+                        }else{
+                            item.hide();  
+                        }
+                        
+                    }else
                     if(is_visible){
-                        $(item).show();
+                        window.hWin.HEURIST4.util.setDisabled(elink, false);
+                        item.attr('title', '');
                     }else{
-                        $(item).hide();
+                        window.hWin.HEURIST4.util.setDisabled(elink, true);
+                        
+                        item.attr('title', 'Only '
+                        + (item.attr('data-level')==2?'the database owner':'database managers')
+                        + ' can delete all records / the database');
                     }
                 }            
+                
         }
         
         //  0 - logged in                 
@@ -261,9 +276,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         for (var key in this.menues){
             var menu = this.menues[key];
             if(menu.is('li')){
-                ___set_menu_item_visibility(0, menu);                
+                ___set_menu_item_visibility(0, menu, true);  //top level menu - show/hide               
             }else{
-                $(menu).find('li,a').each(___set_menu_item_visibility);
+                $(menu).find('li,a').each(___set_menu_item_visibility); //enable/disbale dropdown items
             }
         }
             
@@ -418,7 +433,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
 
     //
-    //
+    // NOT USED
     //
     _onPopupLink: function(event){
 
@@ -493,7 +508,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         //  groupid  - admin of group  
         //  1 - db admin (admin of group #1)
         //  2 - db owner
-        var requiredLevel = (action_level=-1 || action_level>=0) ?action_level :0;
+        var requiredLevel = (action_level==-1 || action_level>=0) ?action_level :0;
         
         window.hWin.HAPI4.SystemMgr.verify_credentials(
             function(){

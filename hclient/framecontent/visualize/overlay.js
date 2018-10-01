@@ -570,6 +570,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                       event.preventDefault();
                       
                       if(settings.isDatabaseStructure){
+                          if(window.hWin.HAPI4.is_admin())
                             _editRecStructure(rty_ID);    
                       }else{
                             window.open(window.hWin.HAPI4.baseURL
@@ -579,10 +580,22 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                       
                   });  
                   
-        btnEdit.append("title")
+        if(settings.isDatabaseStructure){          
+            if (window.hWin.HAPI4.is_admin()) {
+                btnEdit.append("title")
                    .text(function(d) {
                         return 'Click to edit the entity / record type structure';
                    });
+            }else{
+                btnEdit.style('display', 'none');
+                btnAddLink.style('display', 'none');
+            }
+        }else{
+            btnEdit.append("title")
+                   .text(function(d) {
+                        return 'Click to edit the record';
+                   });
+        }
                   
 
         if(settings.isDatabaseStructure){

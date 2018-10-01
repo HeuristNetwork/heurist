@@ -78,6 +78,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }else if(response.status==window.hWin.ResponseStatus.REQUEST_DENIED){
                 
                 if(msg!='') msg = msg + '<br><br>';
+                
+                response.error_title = 'Access denied';
+                response.sysmsg = (window.hWin.HAPI4.currentUser['ugr_ID']==0)?0:1;
 
                 if(needlogin && response.sysmsg==0){
                     msg = msg + 'It appears you are not logged in or your session has been experied. You have to re-login';
