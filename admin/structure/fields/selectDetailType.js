@@ -152,7 +152,9 @@ function SelectDetailType() {
 		}//for
 
 		//sort by name
-		arr.sort(function(a,b){return a[2]>b[2]});
+		arr.sort(function(a,b){
+            return a[2].localeCompare(b[2])
+        });
 
 
 		if(isnull(_myDataTable)){
@@ -163,8 +165,8 @@ function SelectDetailType() {
 									responseType : YAHOO.util.DataSource.TYPE_JSARRAY,
 									responseSchema : {
 										fields: ["selection", "order", "name", "help",  "type", "status", "description", "group", "info", "usage", "fieldset_rectypeid", "ptrtarget_rectypeids"]
-									},
-									doBeforeCallback : function (req, raw, res, cb) {
+									}
+									, doBeforeCallback : function (req, raw, res, cb) {
 										// This is the filter function
 
 										var data  = res.results || [],
@@ -200,13 +202,13 @@ function SelectDetailType() {
 								var myColumnDefs = [
 								{ key: "selection", label: "", sortable:true,
 									formatter:YAHOO.widget.DataTable.formatCheckbox, className:'center' },
-								{ key: "name", label: "Field type name", sortable:true },
+								{ key: "name", label: "Field name", sortable:true },
 								{ key: "order", label: "Order", hidden:true },
 								{ key: "help", label: "Help", hidden:true, sortable:false},
 								{ key: "type", label: "Data type", sortable:true,
 									formatter: function(elLiner, oRecord, oColumn, oData) {
 										var type = oRecord.getData("type");
-										elLiner.innerHTML = "<div style='width:80px'>"+window.hWin.HEURIST4.detailtypes.lookups[type]+"</div>";
+										elLiner.innerHTML = "<div style='width:100px'>"+window.hWin.HEURIST4.detailtypes.lookups[type]+"</div>";
 									}
 								},
 								{ key: "status", label: "Status", hidden:true, sortable:false },
