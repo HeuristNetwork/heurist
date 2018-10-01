@@ -168,9 +168,9 @@ $.widget( "heurist.mainMenu", {
         if(__include('Verify')) this._initMenu('Verify', 0);
         if(__include('Import')) this._initMenu('Import', 0);
         if(__include('Management')) this._initMenu('Management', 0);
-        if(__include('Admin')) this._initMenu('Admin', 2);
+        if(__include('Admin')) this._initMenu('Admin', 2, null, 0);
             
-        if(__include('FAIMS')) this._initMenu('FAIMS', 2);
+        if(__include('FAIMS')) this._initMenu('FAIMS', 1, null, 1);
         if(__include('Help')) this._initMenu('Help', -1);
         
         this.divMainMenuItems.menu();
@@ -199,7 +199,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 }
         });
 
-        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(e, data) {
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS
+            +' '+window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, function(e, data) {
             that._refresh();
         });
 
@@ -242,11 +243,17 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         function ___set_menu_item_visibility(idx, item, is_showhide){
 
-                var lvl = $(item).attr('data-level');
+                var lvl = $(item).attr('data-level'); //level of access by workgroup membership
+                
+                var lvl_exp = $(item).attr('data-exp-level');  //level by ui experience
+                
+                var is_visible = true;
+                
+                var item = $(item).is('li')?$(item):$(item).parent();
+                
                 if(lvl>=0){
                     //@todo lvl=1 is_admin
-                    var is_visible = window.hWin.HAPI4.has_access(lvl);
-                    var item = $(item).is('li')?$(item):$(item).parent();
+                    is_visible = window.hWin.HAPI4.has_access(lvl);
                     var elink = $(item).find('a');
                     if(is_showhide){
                         if(is_visible){
@@ -266,7 +273,22 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         + (item.attr('data-level')==2?'the database owner':'database managers')
                         + ' can delete all records / the database');
                     }
-                }            
+                }   
+                
+                //0 advance, 1-experienced, 2-beginner
+                if(lvl_exp>=0 && is_visible){
+                    
+                        var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+                        if(isNaN(Number(usr_exp_level))) exp_level = 2; //beginner by default
+                        
+                        is_visible = (usr_exp_level<=lvl_exp);
+                    
+                        if(is_visible){
+                            item.show();  
+                        }else{
+                            item.hide();  
+                        }
+                }         
                 
         }
         
@@ -331,11 +353,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     //
     // menu element is <li> (button) for horizontal meny and drop-down that is loaded from html
     //
-    _initMenu: function(name, access_level, parentdiv){
+    _initMenu: function(name, access_level, parentdiv, exp_level){
 
         var that = this;
         var myTimeoutId = -1;
-
+        
         //show hide function
         var _hide = function(ele) {
             myTimeoutId = setTimeout(function() {
@@ -385,6 +407,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(access_level>=0){
             this.menues['btn_'+name].attr('data-level', access_level);
         }    
+        if(exp_level>=0){
+            this.menues['btn_'+name].attr('data-exp-level', exp_level);
+        }
+
+
         
         // Load content for all menus except Database when user is logged out
 
@@ -780,12 +807,17 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                     function(){
                                         window.location.reload();
                                     }, 'Confirmation');*/
-                            }else if(reload_map){
-                                //reload map frame forcefully
-                                var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
-                                if(app && app.widget){
-                                    $(app.widget).app_timemap('reloadMapFrame'); //call method
+                            }else {
+                            
+                                if(reload_map){
+                                    //reload map frame forcefully
+                                    var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
+                                    if(app && app.widget){
+                                        $(app.widget).app_timemap('reloadMapFrame'); //call method
+                                    }
                                 }
+                                
+                                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
                             }
 
                         }else{
