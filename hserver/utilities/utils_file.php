@@ -142,7 +142,7 @@
     
    
     /**
-    * clean folder and itseld
+    * clean folder and itself
     * 
     * @param mixed $dir
     */
@@ -163,6 +163,30 @@
                 rmdir($dir); //delete folder itself
         }
     }
+    
+    //
+    // remove folder and all its content
+    //
+    function folderDelete2($dir, $rmdir) {
+
+        $files = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($files as $fileinfo) {
+            $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+            $todo($fileinfo->getRealPath());
+        }
+
+        if($rmdir){
+            $res = rmdir($dir);
+            return $res;
+        }else{
+            return true;
+        }
+    }
+    
    
     
     //

@@ -70,4 +70,11 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
     //load one of standard themes from jquery web resource
     $cssLink = 'https://code.jquery.com/ui/1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
 }
+
+function echo_flush($msg){
+    ob_start();
+    print $msg;
+    @ob_flush();
+    @flush();
+}
 ?>

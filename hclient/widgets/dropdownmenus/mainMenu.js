@@ -603,7 +603,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
         }else 
         if(action == "menu-import-email" || 
-           action == "menu-manage-backup" || action == "menu-manage-interdbtransfer" ||
+           action == "menu-manage-interdbtransfer" ||
            action == "menu-faims-import" || action == "menu-faims-export"
            ){
 
@@ -666,9 +666,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 }else if(size_type=='portrait'){
                     options = {width:650, height:800};    
                 }else if(size_type=='medium'){
-                    options = {width:1050, height:640};
+                    options = {width:1200, height:640};
                 }else{
-                    options = {width:760, height:400};
+                    options = {width:760, height:450};
                 }
                 if(!window.hWin.HEURIST4.util.isempty(dlg_title)){
                     options['title'] = dlg_title;

@@ -375,29 +375,36 @@ error_log(print_r($_REQUEST, true));
         }
     }
     
-    public function getSystemFolders(){
+    public function getSystemFolders($is_for_backup=false){
         
         $system_folders = array(HEURIST_THUMB_DIR,
             HEURIST_ICON_DIR,
-            HEURIST_FILES_DIR,
-            HEURIST_FILESTORE_DIR."backup/",
             HEURIST_FILESTORE_DIR.'documentation_and_templates/',
-            HEURIST_FILESTORE_DIR.'entity/',
-            HEURIST_FILESTORE_DIR."faims/",
-            HEURIST_FILESTORE_DIR."generated-reports/",
-            HEURIST_FILESTORE_DIR."scratch/",
             HEURIST_FILESTORE_DIR."settings/",
             HEURIST_FILESTORE_DIR.'term-icons/',
             HEURIST_FILESTORE_DIR.'term-images/',
-            HEURIST_FILESTORE_DIR.'hml-output/',
-            HEURIST_FILESTORE_DIR.'html-output/',
-            HEURIST_FILESTORE_DIR.'xsl-templates/',
-            HEURIST_SMARTY_TEMPLATES_DIR); 
+            HEURIST_SMARTY_TEMPLATES_DIR,
+            HEURIST_FILESTORE_DIR.'xsl-templates/');
+            
+        if(!$is_for_backup){
+            
+            $system_folders = array_merge($system_folders,
+                array(                
+                HEURIST_FILES_DIR,
+                HEURIST_FILESTORE_DIR."backup/",
+                HEURIST_FILESTORE_DIR.'entity/',
+                HEURIST_FILESTORE_DIR."faims/",
+                HEURIST_FILESTORE_DIR."generated-reports/",
+                HEURIST_FILESTORE_DIR."scratch/",
+                HEURIST_FILESTORE_DIR.'hml-output/',
+                HEURIST_FILESTORE_DIR.'html-output/'
+                )); 
             if(defined('HEURIST_XSL_TEMPLATES_DIR')) array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);
             if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
             if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
-            
-            return $system_folders;
+        }
+        
+        return $system_folders;
     }
     
     //

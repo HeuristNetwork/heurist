@@ -17,9 +17,14 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-if(!defined('PDIR')) define('PDIR','../../');
+$is_inlcuded = false;
+    
 
-require_once(dirname(__FILE__)."/../../hserver/System.php");
+if(!defined('PDIR')) {
+    $is_inlcuded = true;
+    define('PDIR','../../');   
+    require_once(dirname(__FILE__)."/../../hserver/System.php");
+}
 
 //variable is_error can be defined as global
 if(!isset($is_error)){

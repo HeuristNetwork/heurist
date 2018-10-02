@@ -125,9 +125,11 @@ if(@$_REQUEST['filename']){ //write the output into single file
     $output_file = null;     
 }
 
-$system = new System();
-if( !$system->init(@$_REQUEST['db']) ){
-    die("Can not connect to database");
+if(!defined('PDIR')){
+    $system = new System();
+    if( !$system->init(@$_REQUEST['db']) ){
+        die("Can not connect to database");
+    }
 }
 
 if(!defined('HEURIST_HML_DIR')){

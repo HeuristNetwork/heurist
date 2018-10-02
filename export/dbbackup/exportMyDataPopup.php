@@ -21,24 +21,15 @@
 */
 
 
-require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
-require_once(dirname(__FILE__).'/../../common/php/dbMySqlWrappers.php');
-require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
-require_once(dirname(__FILE__).'/../../search/parseQueryToSQL.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_files.php');
+define('MANAGER_REQUIRED', 1);   
+define('PDIR','../../');  //need for proper path to js and css    
 
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../hserver/utilities/utils_file.php');
+require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_files.php');
 require_once(dirname(__FILE__).'/../../external/php/Mysqldump.php');
 
-if (! is_logged_in()) {
-    header('Location: ' . HEURIST_BASE_URL . 'common/connect/login.php?db=' . HEURIST_DBNAME);
-    return;
-}
 
-if (isForAdminOnly("to carry out a database content dump - please ask your database owner to do this")){
-    return;
-}
-
-$username = get_user_username();
 $folder = HEURIST_FILESTORE_DIR.'backup/'.HEURIST_DBNAME;
 $progress_flag = HEURIST_FILESTORE_DIR.'backup/inprogress.info';
 
@@ -50,25 +41,29 @@ if($mode=='2' && file_exists($folder.".zip") ){
     exit();
 }
 
-?>
 
+?>
 <html>
     <head>
-        <title>Export My Data</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel=stylesheet href="../../common/css/global.css">
-        <link rel=stylesheet href="../../common/css/edit.css">
-        <link rel=stylesheet href="../../common/css/admin.css">
-        <style>
-            .input-row, .input-row .input-header-cell, .input-row div.input-cell {vertical-align:middle}
-        </style>
+        <title>Create data archive package</title>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        
+        <script type=text/javascript>
+            $(document).ready(function() {
+                $('input[type="submit"]').button();
+                $('input[type="button"]').button();
+            });
+        </script>
     </head>
-
     <body class="popup" style="padding-top:30px">
-
-        <div class="banner"  style="padding-left:3px"><h2>Complete data archive package</h2></div>    
+        
         <?php
+        //<div class="banner"  style="padding-left:3px"><h2>Complete data archive package</h2></div>    
 
         $please_advise = "<br>Please consult with your system administrator for a resolution.";
 
@@ -106,35 +101,40 @@ if($mode=='2' && file_exists($folder.".zip") ){
 <?php if(@$_REQUEST['inframe']==1) { ?>                    
                 <input name='inframe' value='1' type='hidden'>
 <?php } ?>                
-                <div class="input-row">
-                    <div class="input-header-cell">Include attached (uploaded) files eg. images</div> <!--  (output everything as one ZIP file) -->
-                    <div class="input-cell"><input type="checkbox" name="includeresources" value="1" checked></div>
+                <div class="input-row" style="padding-top:10px">
+                    <label>
+                        <input type="checkbox" name="includeresources" value="1" checked>
+                        Include attached (uploaded) files eg. images
+                    </label> 
                 </div>
 
                 <div class="input-row">
-                    <div class="input-header-cell" 
-                        title="Adds fully self-documenting HML (Heurist XML) file">
-                        Include HML</div>
-                    <div class="input-cell"><input type="checkbox" name="include_hml" value="1" checked></div>
+                    <label title="Adds fully self-documenting HML (Heurist XML) file">
+                        <input type="checkbox" name="include_hml" value="1" checked>
+                        Include HML
+                    </label>
                 </div>
                 
                 <div class="input-row">
-                    <div class="input-header-cell" 
+                    <label 
                         title="Adds documents describing Heurist structure and data formats - check this box if the output is for long-term archiving">
-                        Include background documentation for archiving</div>
-                    <div class="input-cell"><input type="checkbox" name="include_docs" value="1"></div>
+                        <input type="checkbox" name="include_docs" value="1">
+                        Include background documentation for archiving
+                    </label>
                 </div>
                 
                 <div class="input-row" style="display: none;">
-                    <div class="input-header-cell">Include resources from other users (everything to which I have access)</div>
-                    <div class="input-cell"><input type="checkbox" name="allrecs" value="1" checked></div>
+                    <label>
+                        <input type="checkbox" name="allrecs" value="1" checked>
+                        Include resources from other users (everything to which I have access)
+                    </label>
                 </div>
 
-                <div id="buttons" class="actionButtons">
-                    <input type="submit" value="Export" style="margin-right: 20px; padding-left:5px; padding-right:5px;"
+                <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:center">
+                    <input type="submit" value="Export" style="margin-right: 20px;padding-left:5px; padding-right:5px;"
                         onClick="function(event){ event.target.style.visibility = 'hidden'; }">
 <?php if(@$_REQUEST['inframe']!=1) { ?>                    
-                    <input type="button" value="Cancel"  style="margin-right: 200px; padding-left:5px; padding-right:5px;" onClick="window.close();">
+                    <input type="button" value="Cancel"  style="padding-left:5px; padding-right:5px;" onClick="window.close();">
 <?php } ?>                    
                 </div>
             </form>
@@ -154,24 +154,24 @@ if($mode=='2' && file_exists($folder.".zip") ){
             fwrite($fp, '1');
             fclose($fp);            
             
-            
             set_time_limit(0); //no limit
-
-            
             
             if(file_exists($folder)){
                 echo_flush("<br>Clear folder ".$folder."<br>");
                 //clean folder
-                $res = delFolderTree($folder, true);
+                $res = folderDelete2($folder, true);
                 if(!$res){
                     print 'It appears that backup opearation has been started already. Please try this function later'; 
                     if(file_exists($progress_flag)) unlink($progress_flag);
                     exit();
                 }
             }
-            if (!mkdir($folder, 0777, true)) {
+            if (!folderCreate($folder, true)) {
                 if(file_exists($progress_flag)) unlink($progress_flag);
-                die('Failed to create folder '.$folder.'<br/> in which to create the backup. Please consult your sysadmin.');
+                
+                $message = 'Failed to create folder '.$folder.'<br/> in which to create the backup. Please consult your sysadmin.';                
+                report_message($message, true);
+                exit();
             }
 
             ?>
@@ -179,43 +179,36 @@ if($mode=='2' && file_exists($folder.".zip") ){
             <div style="position:absolute;top:30;left:10;right:20">
             <?php
             
+            $folders_to_copy = null;
             
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
-                $system_folders = array(
-                    HEURIST_ICON_DIR,
-                    HEURIST_FILESTORE_DIR.'documentation_and_templates/',
-                    //HEURIST_FILESTORE_DIR."generated-reports/",
-                    HEURIST_FILESTORE_DIR."settings/",
-                    HEURIST_FILESTORE_DIR.'term-images/',
-                    HEURIST_SMARTY_TEMPLATES_DIR,
-                    HEURIST_XSL_TEMPLATES_DIR);
-                // 2016-10-25  Don't copy generated-reports, html-output, hml-output, backup, filethumbs 
-                // - these are derivative products, which don't therefore need to be archived    
-                //if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
-                //if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
+                $folders_to_copy = $system->getSystemFolders(true);
 
                 echo_flush("<br><br>Exporting system folders<br>");
-                //echo_flush('<br>'.HEURIST_FILESTORE_DIR.' to '.$folder.'<br>');             
-                
-                //recurse_copy( HEURIST_FILESTORE_DIR, $folder, $system_folders);
-            }else{
-                $system_folders = array('no copy folders');
             }
             
             if(@$_REQUEST['includeresources']=='1'){
+                if($folders_to_copy==null) $folders_to_copy = array();    
+                $folders_to_copy[] = HEURIST_FILES_DIR;
+                $folders_to_copy[] = HEURIST_THUMB_DIR;
+                
                 $copy_files_in_root = true; //copy all files within database folder
             }else{
                 $copy_files_in_root = false;
             }
+            if($folders_to_copy==null){
+                $folders_to_copy = array('no copy folders');   
+            }
+            
                 
            if(@$_REQUEST['include_docs']=='1' || @$_REQUEST['includeresources']=='1'){     
-               recurse_copy( HEURIST_FILESTORE_DIR, $folder, $system_folders, null, $copy_files_in_root);
+               folderRecurseCopy( HEURIST_FILESTORE_DIR, $folder, $folders_to_copy, null, $copy_files_in_root);
            }
             
             if(@$_REQUEST['include_docs']=='1'){// 2016-10-25  
                 echo_flush('Copy context_help folder<br>');                
-                recurse_copy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
+                folderRecurseCopy( HEURIST_DIR.'context_help/', $folder.'/context_help/', null);
             }
             
 
@@ -277,12 +270,12 @@ if($mode=='2' && file_exists($folder.".zip") ){
             saveURLasFile($url, $folder."/Database_Structure.xml");
 
 
-            if(is_admin()){
+            if($system->is_admin()){
                 // Do an SQL dump of the whole database
                 echo_flush("Exporting SQL dump of the whole database<br>");
 
                 try{
-                    $dump = new Mysqldump( DATABASE, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
+                    $dump = new Mysqldump( HEURIST_DBNAME_FULL, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DBSERVER_NAME, 'mysql', array('skip-triggers' => true,  'add-drop-trigger' => false));
                     $dump->start($folder."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
                 } catch (Exception $e) {
                     if(file_exists($progress_flag)) unlink($progress_flag);
@@ -293,19 +286,25 @@ if($mode=='2' && file_exists($folder.".zip") ){
             }
 
             // Create a zipfile of the definitions and data which have been dumped to disk
-            if(file_exists($folder.".zip")) unlink($folder.".zip");
+            $destination = $folder.'.zip';
+            if(file_exists($destination)) unlink($destination);
             chdir($folder); 
+            
+            $res = zip($folder, null, $destination, true);
+            
+            /* command line version
             $cmdline = "zip -r ".$folder.".zip *"; //archive everything within folder, keep folder strcuture
-
             $res1 = 0;
             $output1 = exec($cmdline, $output, $res1);
             if ($res1 != 0 ) {
                 print  ("<p class='error'>Exec error code $res1: Unable to create zip file $folder.zip>&nbsp;$please_advise<br>");
-                print  print_r($output,true);
-                print  "</p> Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator.";
-                print "Your data have been backed up in ".$folder;
-                print "<br><br>If you are unable to download from the link below, ask your system administrator to send you the content of this folder";
+                print  print_r($output,true).'</p>';
+            */
+            if(!$res){
+                print "Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator";
             } else {
+                print "<p>Your data have been backed up in ".$folder
+                ."<br><br>If you are unable to download from the link below, ask your system administrator to send you the content of this folder</p>";
                 print "<br><br><div class='lbl_form'></div>".
                 "<a href='exportMyDataPopup.php/".HEURIST_DBNAME.".zip?db=".HEURIST_DBNAME."&mode=2".
                 "' target='_blank' style='color:blue; font-size:1.2em'>Click here to download your data as a zip archive</a>";
@@ -332,3 +331,22 @@ if($mode=='2' && file_exists($folder.".zip") ){
     </body>
 </html>
 
+<?php
+function report_message($message, $is_error){
+?>
+        <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">
+
+            <div class="logo" style="background-color:#2e3e50;width:100%"></div>
+
+            <div class="<?php echo ($is_error)?'ui-state-error':''; ?>" 
+                style="width:90%;margin:auto;margin-top:10px;padding:10px;">
+                <span class="ui-icon <?php echo ($is_error)?'ui-icon-alert':'ui-icon-info'; ?>" 
+                      style="float: left; margin-right:.3em;font-weight:bold"></span>
+                <?php echo $message;?>
+            </div>
+        </div>
+    </body>    
+</html>
+<?php
+}
+?>

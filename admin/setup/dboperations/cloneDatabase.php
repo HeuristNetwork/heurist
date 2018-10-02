@@ -448,11 +448,4 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     
     return true;
 } // straightCopyNewDatabase
-
-function echo_flush($msg){
-    ob_start();
-    print $msg;
-    @ob_flush();
-    @flush();
-}
 ?>

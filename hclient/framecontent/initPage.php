@@ -27,6 +27,7 @@
 
 require_once(dirname(__FILE__)."/../../hserver/System.php");
 
+
 if(defined('IS_INDEX_PAGE')){
     //if PDIR is defined this script is main (root)
     define('ERROR_REDIR','hserver/utilities/list_databases.php');
@@ -34,8 +35,6 @@ if(defined('IS_INDEX_PAGE')){
     if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css
     define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
 }
-
-
 
 $error_msg = '';
 $isSystemInited = false;

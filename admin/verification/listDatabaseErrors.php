@@ -430,6 +430,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                 if(! $res )
                 {
                     print "<div class='error'>Cannot delete invalid pointers from Records.</div>";
+                    $wasdeleted1 = 0;
                 }else{
                     $wasdeleted1 = $mysqli->affected_rows;
                 }
