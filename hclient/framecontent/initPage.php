@@ -63,7 +63,6 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     //$message = $login_warning
     //include ERROR_REDIR;
     exit();
-
 }else if(defined('MANAGER_REQUIRED') && !$system->is_admin() ){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
     include ERROR_REDIR;
@@ -72,6 +71,19 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     $message = $login_warning.' as Database Owner';
     include ERROR_REDIR;
     exit();
+}
+
+//verify database version against minimal required
+if(defined('IS_INDEX_PAGE')){
+    if(HEURIST_MIN_DBVERSION>
+        $system->get_system('sys_dbVersion').'.'
+            .$system->get_system('sys_dbSubVersion').'.'
+            .$system->get_system('sys_dbSubSubVersion')){
+                
+        //header('Location: '.dirname(__FILE__).'/../../admin/setup/dbupgrade/upgradeDatabase.php');
+        include 'admin/setup/dbupgrade/upgradeDatabase.php';
+        exit();
+    }
 }
 
 //$system->defineConstants(); //init constants for record and field types

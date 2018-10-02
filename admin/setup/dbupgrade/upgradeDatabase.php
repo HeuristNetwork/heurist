@@ -20,26 +20,25 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    define('SKIP_VERSIONCHECK2', 1);
-
-    require_once(dirname(__FILE__).'/../../../common/connect/applyCredentials.php');
-    require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
-    require_once(dirname(__FILE__).'/../../../hserver/dbaccess/utils_db_load_script.php');
+if(!defined('PDIR')){
+    define('PDIR','../../../');  //need for proper path to js and css    
+    require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
+}
+    require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_db_load_script.php');
+    
 
     /*if(isForAdminOnly("to upgrade database structure")){
     return;
     }*/
-
-    $src_ver = explode(".", HEURIST_DBVERSION);
-    $src_maj = intval($src_ver[0]);
-    $src_min = intval($src_ver[1]);
-
+    $src_maj = intval( $system->get_system('sys_dbVersion') );
+    $src_min = intval( $system->get_system('sys_dbSubVersion') );
+    
     $trg_ver = explode(".", HEURIST_MIN_DBVERSION);
     $trg_maj = intval($trg_ver[0]);
     $trg_min = intval($trg_ver[1]);
-
-    if($src_maj==$trg_maj && $src_min == $trg_min){
-        header('Location: ' . HEURIST_BASE_URL);
+                                   
+    if( $src_maj==$trg_maj && $src_min == $trg_min ){ //versions are ok redirect ot main page
+        header('Location: ' . HEURIST_BASE_URL . '?db=' . $_REQUEST['db']);
         exit();
     }
 ?>
@@ -48,24 +47,69 @@
     <head>
         <title>Heurist database version upgrade</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel=stylesheet type='text/css' href='../../../common/css/global.css'>
-        <link rel=stylesheet type='text/css' href='../../../common/css/admin.css'>
-        <link rel=stylesheet type='text/css' href='../../../common/css/login.css'>
+        
+        <link rel=icon href="<?php echo PDIR?>favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR?>ext/jquery-ui-themes-1.12.1/themes/heurist/jquery-ui.css"/>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR?>h4styles.css">
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/localization.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
+
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>
+        <script>
+            $(document).ready(function() {
+                
+                if(!window.hWin.HAPI4){
+                    window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+                }else{
+                    onHapiInit(true);
+                }
+                
+                function onHapiInit(success){
+                    
+                    var prefs = window.hWin.HAPI4.get_prefs();
+                    if(!window.hWin.HR){
+                        //loads localization
+                        window.hWin.HR = window.hWin.HAPI4.setLocale(prefs['layout_language']);
+                    }
+                    
+                    $('button').button();
+                    
+                    $(window.hWin.document).on(
+                        window.hWin.HAPI4.Event.ON_CREDENTIALS,
+                        function(){
+                            if(window.hWin.HAPI4.has_access()){
+                                window.location.reload()
+                            }
+                        });
+                    
+                }
+                
+            });
+        </script>
     </head>
 
-    <body>
-        <div id=page style="padding: 20px;">
+    <body class="ui-heurist-header1" style="font-size:0.7em">
+        <div class="ui-corner-all ui-widget-content"
+            style="text-align:left; min-width:220px; padding: 0.5em; position:absolute; top:30px; bottom:30px; left:60px;right:60px">
 
-            <div id="logo" title="Click the logo at top left of any Heurist page to return to your default search (normally Favourites)"></div>
+            <div class="logo" style="background-color:#2e3e50;width:100%"></div>
 
-            <div>
+            <div style="margin-top:24px;">
                 <h2>Heurist Database Version upgrade</h2>
             </div>
-            <div id="loginDiv" style="height:auto; margin-top:44px; overflow-y:auto;text-align:left;">
+            <div style="height:auto; margin-top:24px; overflow-y:auto;text-align:left;">
 
                 <?php
 
-                    if(is_admin() && @$_REQUEST['mode']=='action' && $src_maj==$trg_maj){
+                    if($system->is_admin() && @$_REQUEST['mode']=='action' && $src_maj==$trg_maj){ //upgrade minor versions
 
                         $upgrade_success = true;
                         $keep_minver = $src_min;
@@ -89,9 +133,12 @@
                             }
                         }
 
-                        if($src_min>$keep_minver){ //update database
-                            mysql_connection_overwrite(DATABASE);
-                            mysql__update("sysIdentification", "1", array("sys_dbSubVersion"=>$src_min, "sys_dbSubSubVersion"=>"0"));
+                        if($src_min>$keep_minver){ //update database - set version up to date
+                            $mysqli = $system->get_mysqli();
+                            mysql__usedatabase($mysqli, HEURIST_DBNAME);
+                            $query1 = "update sysIdentification set sys_dbSubVersion=$src_min, sys_dbSubSubVersion=0 where 1";
+                            $res1 = $mysqli->query($query1);
+                            
                             print "<br>";
                         }
 
@@ -99,10 +146,12 @@
                             print "<p>Upgrade was successeful.&nbsp;&nbsp;<a href='".HEURIST_BASE_URL."?db=".HEURIST_DBNAME."'>Return to main page</a></p>";
                         }
 
-                    }else{
+                    }
+                    else{
                     ?>
 
-                    <p>Your database <b> <?=HEURIST_DBNAME?> </b> currently uses database format version <b><?=HEURIST_DBVERSION?> </b>
+                    <p>Your database <b> <?=HEURIST_DBNAME?> </b> currently uses database format version 
+                        <b><?=$src_maj.'.'.$src_min.'.'.$system->get_system('sys_dbSubSubVersion')?> </b>
                         <br />(this is distinct from the program version # listed below)</p>
 
                     <p>This version of the software <b>(Vsn <?=HEURIST_VERSION?>)</b>
@@ -112,12 +161,13 @@
 
                     <?php
 
-                        if(is_admin()){
+                        if($system->is_admin()){
 
                             if($src_maj!=$trg_maj){
-                                print "<p style='font-weight:bold'>Automatic upgrade applies to minor version updates only (ie. within database version 1, 2 etc.). "+
-                                "Please contact Heurist support to upgrade major version (1 => 2, 2 => 3)</p>";
+                                print '<p style="font-weight:bold">Automatic upgrade applies to minor version updates only (ie. within database version 1, 2 etc.). Please contact Heurist support to upgrade major version (1 => 2, 2 => 3)</p>';
                             }else{
+                                
+                                //verification that all scripts exist and get safety rating from these scrips
 
                                 $scripts_info = "";
                                 $is_allfind = true;
@@ -157,7 +207,8 @@
                                         }
 
                                         $scripts_info  = $scripts_info."<tr><td width='100'>".
-                                        $src_maj.".".$src_min.".0 to ".$src_maj.".".($src_min+1).".0</td><td>".$safety." ".$description."</td></tr>";
+                                        $src_maj.".".$src_min.".0 to ".$src_maj.".".($src_min+1).".0</td><td>".$safety
+                                        ." <i>".$description."</i></td></tr>";
 
                                         $src_min++;
                                     }else{
@@ -170,27 +221,29 @@
                                 if($is_allfind)    {
                                 ?>
 
-                                <div>Upgrades marked SAFE are unlikely to harm your database but will make it incompatible with older versions of the code.<br />
+                                <p>Upgrades marked SAFE are unlikely to harm your database but will make it incompatible with older versions of the code.<br />
                                     Upgrades marked DANGEROUS involve major changes to your database structure and could cause data loss.<br />
                                     For these upgrades we strongly recommend cloning your database first with an older version of the software<br />
                                     or asking your system adminstrator to backup the MySQL database and database file directory.<br />
                                     <br />
                                     If you need a partial upgrade eg. to an intermediate version, you will need to run an older version of the software -
                                     please consult Heurist support.
-                                    <p>
+                                </p>    
+                                <p>
                                     Please determine whether you need backward compatibility and/or clone your database with an older version before proceeding.
                                     <br />
                                     Specific changes in each version upgrade are listed below:
-                                </div>
+                                </p>
 
                                 <table>
                                     <?=$scripts_info?>
                                 </table>
+                                <br>
                                 <p>
-                                    <form action="upgradeDatabase.php">
+                                    <form action="<?php echo HEURIST_BASE_URL?>admin/setup/dbupgrade/upgradeDatabase.php">
                                         <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
                                         <input type="hidden" name="mode" value="action">
-                                        <input type="submit" value="Upgrade database">
+                                        <button value="submit">Upgrade database</button>
                                     </form>
                                 </p>
                                 <?php
@@ -199,15 +252,17 @@
 
                         }else{ //not admin
                         ?>
-                        <p style='font-weight:bold'>You must be logged in as database owner to upgrade the database structure</p>
-                        <p>
-                            <a href="<?=HEURIST_BASE_URL?>common/connect/login.php?logout=1&amp;db=<?=HEURIST_DBNAME?>">Log in as database owner</a>
-                        </p>
+                <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
+                    <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
+                    You must be logged in as database owner to upgrade the database structure
+                    <button onclick="doLogin(true)">Login</button>
+                </div>
                         <?php
                         }
                     }
                 ?>
-                <a href="<?=HEURIST_BASE_URL?>common/connect/selectDatabase.php?$msg=Select database">Select different database</a>
+<br><br>                
+<a href="<?=HEURIST_BASE_URL?>hserver/utilities/list_databases.php">Select different database</a>
             </div>
         </div>
     </body>
@@ -216,11 +271,17 @@
 <?php
     function executeScript($filename){
 
-                    if(db_script(DATABASE, $filename)){
+                    if(db_script(HEURIST_DBNAME_FULL, $filename)){
                        return true;
-                    }else{
-                        echo ("<p class='error'>Error: Unable to execute $filename for database ".HEURIST_DBNAME."<br>");
-                        echo ("Please check whether this file is valid; consult Heurist helpdesk if needed <br />&nbsp;<br></p>");
+?>                    }else{
+                        
+                <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
+                    <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
+                    Error: Unable to execute $filename for database <?php echo HEURIST_DBNAME; ?><br>
+                    Please check whether this file is valid; consult Heurist helpdesk if needed<br>
+                    <button onclick="doLogin(true)">Login</button>
+                </div>
+<?php                        
                         return false;
                     }
 

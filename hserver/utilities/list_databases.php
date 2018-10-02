@@ -19,21 +19,19 @@
 */
 
 if(!defined('PDIR')){
-    define('PDIR','../');
+    define('PDIR','../../');
+    require_once(dirname(__FILE__).'/../System.php');
 }
 
-if(isset($system)){
-    //this is inclusion into index.php
-    if(!$isSystemInited){
-        $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
-    }
-}else{
-    require_once(dirname(__FILE__)."/../System.php");
+if(!isset($system)){
     $system = new System();
-    $isSystemInited = $system->init(@$_REQUEST['db'], false); //init wihout db
 }
 
-if( !$isSystemInited ){  //cannot init system (apparently connection to Database Server is wrong or server is down)
+if(!$system->is_inited()){
+    $system->init(@$_REQUEST['db'], false); //init wihout db
+}
+
+if( !$system->is_inited() ){  //cannot init system (apparently connection to Database Server is wrong or server is down)
     $err = $system->getError();
     $error_msg = @$err['message'];
 }
@@ -55,7 +53,6 @@ if($system->get_mysqli()!=null) { //server is connected
         <link rel=icon href="<?php echo PDIR?>favicon.ico" type="image/x-icon">
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR?>ext/jquery-ui-themes-1.12.1/themes/heurist/jquery-ui.css" />
-        
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR?>h4styles.css">
 
         <script type="text/javascript">

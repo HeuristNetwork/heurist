@@ -26,7 +26,7 @@
 //       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
-define('HEURIST_MIN_DBVERSION', "1.2.0");
+define('HEURIST_MIN_DBVERSION', "1.2.0"); //minimal version of db for current version of code
 define('HEURIST_HELP', "http://heurist.sydney.edu.au/help");
 define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h5-ao/");
 //define('HEURIST_INDEX_BASE_URL', "http://127.0.0.1/h4-ao");
