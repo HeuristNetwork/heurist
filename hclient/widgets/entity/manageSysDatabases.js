@@ -49,12 +49,13 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         
         this.recordList.resultList('option','rendererHeader',
                     function(){
-        sHeader = '<div style="width:60px"></div><div style="width:13em">Db Name</div>'
+        sHeader = '<div style="width:60px"></div><div style="border-right:none">Db Name</div>';
+        /*
                 //+'<div style="width:3em">Ver</div>'
                 +'<div style="width:3em">Reg#</div>'
                 +'<div style="width:20em">Title</div>'
                 +'<div style="width:5em">Role</div>'
-                +'<div style="width:5em">Users</div>';
+                +'<div style="width:5em">Users</div>'; */
                 
                 return sHeader;
                     }
@@ -66,7 +67,43 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         }
         
 
+        //load at once everything to _cachedRecordset
         var that = this;
+        function __onDataResponse(response){
+
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
+                that._cachedRecordset = response;
+                
+                //that.filterRecordList(null, {});
+                that.recordList.resultList('updateResultSet', response);
+            };
+            
+        var entityData = window.hWin.HAPI4.EntityMgr.getEntityData2( this.options.entity.entityName );
+
+        
+        if($.isEmptyObject(entityData)){
+        
+            window.hWin.HAPI4.EntityMgr.doRequest(
+                {a:'search', 'entity':this.options.entity.entityName, 'details':'ids'},
+                       function(response){
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                entityData = new hRecordSet(response.data);
+                                window.hWin.HAPI4.EntityMgr.setEntityData(
+                                            that.options.entity.entityName,
+                                            entityData);
+
+                                __onDataResponse(entityData);
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                       });
+        
+        }else{
+            __onDataResponse(entityData);
+        }
+        
+        /*
         window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
             function(response){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -76,7 +113,9 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
                 that.filterRecordList(null, {});
                 //that.recordList.resultList('updateResultSet', response);
             });
+        */    
             
+        //and then filter locally    
         this._on( this.searchForm, {
                 "searchsysdatabasesonfilter": this.filterRecordList
                 });
@@ -106,17 +145,20 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         var recID   = fld('sys_Database');
         
         var dbName = fld('sys_dbName');
+//console.log('>>>'+dbName);        
         if(dbName=='Please enter a DB name ...') dbName = '';
         var regID = fld('sys_dbRegisteredID');
         regID = (regID>0?regID:'');
         
+        var recTitle = frm(recID.substr(4));
+        /*
         var recTitle = frm(recID.substr(4),'14em')
                       //+frm(fld('sys_Version'),'4em')
                       +frm(regID, '4em')
                       +frm(dbName, '23em')
                       +frm(fld('sus_Role'), '6em')
                       +frm(fld('sus_Count'), '5em');
-                      
+        */              
         var recTitleHint = '';//fld('sys_dbDescription');
         
         var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');

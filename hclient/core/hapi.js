@@ -830,6 +830,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             getEntityData:function(entityName, force_reload, callback){
 
                 if($.isEmptyObject(entity_data[entityName]) || force_reload==true){
+                    
                     _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':'list'},
                        function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
@@ -849,6 +850,14 @@ function hAPI(_db, _oninit) { //, _currentUser
                         return entity_data[entityName];
                     }
                 }
+            },
+            
+            getEntityData2: function(entityName){
+                return entity_data[entityName];     
+            },
+
+            setEntityData: function(entityName, data){
+                entity_data[entityName] = data;
             },
             
             //

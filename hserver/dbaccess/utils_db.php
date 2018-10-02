@@ -167,7 +167,7 @@
     */
     function mysql__getdatabases4($mysqli, $with_prefix = false, $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
     {
-        $query = "show databases";
+        $query = "show databases where `database` like 'hdb_%'";
         $res = $mysqli->query($query);
         $result = array();
         $isFilter = ($email != null && $role != null);

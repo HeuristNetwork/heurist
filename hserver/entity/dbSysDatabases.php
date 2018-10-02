@@ -64,32 +64,66 @@ class DbSysDatabases extends DbEntityBase
             $order   = array();
             $records = array();
             
-            $query = "show databases";
-            $res = $this->system->get_mysqli()->query($query);
-            $result = array();
-            while ($row = $res->fetch_row()) {
-                $database  = $row[0];
-                $test = strpos($database, HEURIST_DB_PREFIX);
-                if ($test === 0){
-                    $records[$database] = array($database);
-                    //array_push($order, $database);
-                    $order[] = $database;
+            if(true){ //}$this->data['details']=='ids' || !@$this->data['sys_Database']){
+            
+                $query = "show databases where `database` like 'hdb_%'";
+                $res = $this->system->get_mysqli()->query($query);
+
+                $query = array();
+                while ($row = $res->fetch_row()) {
+                    $database  = $row[0];
+                    $test = strpos($database, HEURIST_DB_PREFIX);
+                    if ($test === 0){
+                        //$query[] = "SELECT '".$database."' as sys_Database, sys_dbRegisteredID, sys_dbName FROM `"
+                        //        .$database."`.sysIdentification";
+                        $records[$database] = array($database);
+                        $order[] = $database;
+                    }
                 }
-            }
-            $res->close();
-            //natcasesort($order);
+                
+                $res->close();
+            
+                return array('queryid'=>@$this->data['request_id'],  //query unqiue id set in doRequest
+                                'entityName'=>$this->config['entityName'],
+                                'pageno'=>@$this->data['pageno'],  //page number to sync
+                                'offset'=>@$this->data['offset'],
+                                'count'=>count($records),
+                                'reccount'=>count($records),
+                                'records'=>$records,
+                                
+                                'order'=>$order,
+                                'fields'=>array('sys_Database')//,'sys_dbRegisteredID','sys_dbName'),
+                            );
+                                
+            }else{
+            
+                $databases = $this->data['sys_Database'];
+                $query = array();
+                foreach ($databases as $database) {
+                        $query[] = "SELECT '".$database."' as sys_Database, sys_dbRegisteredID, sys_dbName FROM `"
+                                .$database."`.sysIdentification";
+                        $order[] = $database;
+                }
+                //natcasesort($order);
+                
+                $query = implode(' UNION ', $query);
+                $res = $this->system->get_mysqli()->query($query);
+                while ($row = $res->fetch_row()) {
+                    $records[$row[0]] = $row;
+                }
+                
         
-            return array(
+                return array(
                             'queryid'=>@$this->data['request_id'],  //query unqiue id set in doRequest
                             'pageno'=>@$this->data['pageno'],  //page number to sync
                             'offset'=>@$this->data['offset'],
                             'count'=>count($records),
                             'reccount'=>count($records),
-                            'fields'=>array('sys_Database'),
+                            'fields'=>array('sys_Database','sys_dbRegisteredID','sys_dbName'),
                             'records'=>$records,
                             'order'=>$order,
                             'entityName'=>$this->config['entityName']);
-        
+            }
             //sys_Database, sys_dbRegisteredID, sys_dbName, sys_AllowRegistration, sus_Role, sus_Count
         
         }else {//from index database

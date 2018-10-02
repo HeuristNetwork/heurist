@@ -983,14 +983,16 @@ $.widget( "heurist.resultList", {
         + '<div class="recordIcons">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif">'
         + '</div>'
-        + '<div class="recordTitle">id ' + recID
+        + '<div class="recordTitle">' + recID
         + '...</div>'
+/*        
         + '<div title="Click to edit record (opens new tab)" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
         + '</div>'
         + '<div title="Click to view record (opens as popup)" class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false">'
         +     '<span class="ui-button-icon-primary ui-icon ui-icon-comment"></span><span class="ui-button-text"></span>'
         + '</div>'
+*/        
         + '</div>';
 
         return html;
