@@ -608,6 +608,8 @@ error_log('http code = '.$code.'  curl error='.$error);
 //
 function getScriptOutput($path, $print = FALSE)
 {
+    global $system;
+    
     ob_start();
 
     if( is_readable($path) && $path )

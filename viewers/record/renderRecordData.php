@@ -874,7 +874,10 @@ function print_public_details($bib) {
     </div>
     <?php
 
-    $always_visible_dt = array(DT_SHORT_SUMMARY, DT_GEO_OBJECT);
+    $always_visible_dt = array(DT_SHORT_SUMMARY);
+    if(defined('DT_GEO_OBJECT')){
+        $always_visible_dt[] = DT_GEO_OBJECT;
+    }
 
 
     $prevLbl = null;

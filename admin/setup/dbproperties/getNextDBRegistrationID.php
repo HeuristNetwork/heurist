@@ -46,15 +46,29 @@ if(@$_REQUEST["db"]!='Heurist_Master_Index'){
     require_once (dirname(__FILE__).'/../../../hserver/System.php');
     require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_mail.php');
 
+    $connect_failure = false;
+    
+if(isset($system)){ //this is call from heurist server by include  loadRemoteURLContentSpecial->getScriptOutput
+    
+    $mysqli = $system->get_mysqli();
+    $connect_failure = (mysql__usedatabase($mysqli, @$_REQUEST['db'])!=true);
+
+}else{ //this is call from remote server as independent script
+    
     // init main system class
     $system = new System();
     
-    if(!$system->init(@$_REQUEST['db'], false)){
+    $connect_failure = (!$system->init(@$_REQUEST['db'], false));
+    
+}
+
+if($connect_failure){
         //$response = $system->getError();
         //echo '0,'.$response[0]['message'];
         echo '0, Failed to connect to  Master Index database';
         return;
-    }
+}
+    
     
 
 $indexdb_user_id = 0; // Flags problem if not reset
@@ -221,7 +235,7 @@ if($dbID>0) {
         "Go to the address below to review the database:\n".
         $serverURL;
 
-        $dbowner = user_getDbOwner($this->mysqli);
+        $dbowner = user_getDbOwner($mysqli);
         $dbowner_Email = $dbowner['ugr_eMail'];
         $email_title = 'Database registration ID: '.$dbID.'. User ['.$indexdb_user_id.']';
 
@@ -236,7 +250,5 @@ if($dbID>0) {
         .'Please contact <a href=mailto:info@heuristNetwork.org> Heurist developers</a> for advice';
         echo '0,'. $error;
     }
-
-
 }
 ?>
