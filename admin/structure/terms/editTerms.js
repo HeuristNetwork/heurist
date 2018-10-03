@@ -563,8 +563,8 @@ function EditTerms() {
                 "close-on-blur": false,
                 "no-resize": true,
                 title: 'Set As Inverse',
-                height: 310,
-                width: 560
+                height: 240,
+                width: 520
         });
 
         // _originalParentNode  = ele.parentNode;

@@ -388,20 +388,21 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                 <!-- search for and set inverse terms, only for relationship types -->
                 <div id="formInverse" style="display:none;width:500px;">
 
-                    <h3 style="border-style: none;margin-left:10px;">Select Inverse Term</h3>
-                    <div style="border: black; border-style: solid; border-width:thin; padding:10px;margin-left:10px;">
+                    <h3 style="margin-left:10px;">Select Inverse Term</h3>
+                    <div style="padding:10px">
 
                         <div style="display:inline-block;vertical-align: top; width:130px;">
                             <label class="dtyLabel" style="width:30px;">Find:</label>
-                            <input id="edSearchInverse" style="width:70px" /><br/> <!--onkeyup="{doSearch(event)}" Better to add in js file to allow events recognise other ja funnctions-->
-                            type 3 or more letters<br/><br/>select inverse from list
-                            <input type="button" value="and Set As Inversed" id="btnSelect2"/> <!-- "onClick="{editTerms.doSelectInverse()}" -->
+                            <input id="edSearchInverse" style="width:70px" /><br/> 
                         </div>
                         <div style="display:inline-block;">
                             <select id="resSearchInverse" size="5" style="width:320px" ></select><!--ondblclick="{editTerms.doSelectInverse()}"-->
                         </div>
                     </div>
-
+                    <div style="padding:5px 30px;text-align:right">
+                            <label>select inverse from list</label>
+                            <input type="button" value="and Set As Inversed" id="btnSelect2"/> 
+                    </div>        
                 </div>
 
                 <div id="divApply" style="margin-left:10px; margin-top:15px; text-align:left; display: block;">
