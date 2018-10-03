@@ -261,7 +261,7 @@ foreach ($imp_recordtypes as $rty_id){
 
             // 6. With list of all base field types: Return data for all terms used
 
-            if($field[$idx_type] == "enum" || $field[$idx_type] == "relationtype"){
+            if($field[$idx_type] == "enum" || $field[$idx_type] == "relmarker" || $def_field[$idx_type] == "relationtype"){
                 //get topmost vocabulary
                 getTopMostVocabulary($def_dts[$ftId]['commonFields'][$idx_terms], $field[$idx_type]);
             }
@@ -502,12 +502,12 @@ foreach ($imp_fieldtypes as $ftId){
     //disambiguate name
     $def_field[$idx_name] = doDisambiguate($def_field[$idx_name], $trg_fieldtypes['names']);
 
-    if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype"){
+    if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype" || $def_field[$idx_type] == "relmarker"){
         //change terms ids for enum and reltypes
         $def_field[$idx_terms_tree] = replaceTermIds(@$def_field[$idx_terms_tree], $def_field[$idx_type] );
         $def_field[$idx_terms_disabled] = replaceTermIds(@$def_field[$idx_terms_disabled], $def_field[$idx_type]);
-
-    }else if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
+    }
+    if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
         //change record ids for pointers
         $def_field[$idx_constraints] = replaceRecIds(@$def_field[$idx_constraints]);
     }
@@ -551,14 +551,15 @@ foreach ($imp_recordtypes as $rtyID){
         $fields = array();
         foreach ($def_rts[$rtyID]['dtFields'] as $ftId => $def_field){
 
-            if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype"){
+            if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype" || $def_field[$idx_type] == "relmarker"){
                 //change terms ids for enum and reltypes
                 $def_field[$idx_terms_tree] = ""; //replaceTermIds(@$def_field[$idx_terms_tree], $def_field[$idx_type] );
                 $def_field[$idx_terms_disabled] = ""; //replaceTermIds(@$def_field[$idx_terms_disabled], $def_field[$idx_type]);
 
-            }else if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
+            }
+            if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
                 //change record ids for pointers
-                $def_field[$idx_constraints] = replaceRecIds(@$def_field[$idx_constraints]);
+                $def_field[$idx_constraints] = ""; //replaceRecIds(@$def_field[$idx_constraints]);
             }
 
             $fields[ $fields_correspondence[$ftId] ] = $def_field;
@@ -937,7 +938,9 @@ function replaceTermIds( $sterms, $domain ) {
 function getTopMostVocabulary($terms_ids, $domain){
     global $imp_terms, $sourceTerms;
 
-    if($domain=="relationtype") $domain = "relation";
+    if($domain=='relationtype' || $domain=='relmarker'){
+        $domain = 'relation';    
+    } 
 
     //array of valid ids
     $terms_ids =  $sourceTerms->getTermsFromFormat($terms_ids, $domain);

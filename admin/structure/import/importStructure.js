@@ -968,9 +968,9 @@ $.widget( "heurist.importStructure", {
                
                 if(report!=''){ 
                     
-                    report = 'Import completed successfully';
+                    report = 'Added';
                     
-                    window.hWin.HEURIST4.msg.showMsgFlash(report,4000);
+                    window.hWin.HEURIST4.msg.showMsgFlash(report,1000);
                     
                     /*
                     report = '<div style="font-size:0.9em;"><h2>Record type and associated structures imported</h2>'
