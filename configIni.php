@@ -107,9 +107,10 @@ $httpProxyAuth = "";
 $indexServerAddress="";
 $indexServerPort="";
 
-$passwordForDatabaseCreation="";
-$passwordForDatabaseDeletion="";
-$passwordForReservedChanges="";
+$passwordForDatabaseCreation=""; // normally blank = any logged in user can create
+$passwordForDatabaseDeletion=""; // if blank, only database owner can delete, otherwise any admin user in DB owners group (with challenge)
+$passwordForReservedChanges=""; // if blank, no-one can modify reserved fields, otherwise challenge
+$passwordForServerFunctions=""; // if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
 
 $defaultRootFileUploadPath ="";
 $defaultRootFileUploadURL = "";
@@ -128,9 +129,6 @@ $websiteThumbnailPassword = "";
 $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 
 $defaultFaimsModulesPath = ""; // FAIMS only: the location where FAIMS module files will be written
-
-//action passwords
-$passwordForReservedChanges = "SpeakEasy1935";
 
 // parent directory configuration file is optional, hence include not require
 if (is_file($parentIni)){
