@@ -235,8 +235,8 @@ $(document).ready(function() {
 
                         if(!window.hWin.HEURIST4.util.isnull(context)){
                             //refresh the local heurist
-
-                            window.hWin.HEURIST4.detailtypes = context.detailTypes;
+                            if(context.detailtypes)
+                                window.hWin.HEURIST4.detailtypes = context.detailtypes;
 
                             //new field type to be added
                             var dty_ID = Math.abs(Number(context.result[0]));
@@ -300,8 +300,8 @@ $(document).ready(function() {
             if(response.status == window.hWin.ResponseStatus.OK){
 
                 //update local structure
-                window.hWin.HEURIST4.rectypes = response.rectypes;
-                window.hWin.HEURIST4.detailtypes = response.detailtypes;
+                window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                 _structureWasUpdated = true;
                                     
             }else{
