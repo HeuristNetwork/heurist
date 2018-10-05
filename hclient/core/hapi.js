@@ -1087,6 +1087,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                if(window.hWin.HEURIST4.util.isempty(res)){
                    res = defvalue;
                }
+               if(name=='userCompetencyLevel' && isNaN(Number(res))){
+                    res = defvalue;
+               }
                return res;
         },
 

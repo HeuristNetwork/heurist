@@ -1884,10 +1884,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //var no_access = that._getField('rec_OwnerUGrpID')!=0 &&  //0 is everyone
             var no_access = !(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(that._getField('rec_OwnerUGrpID')));
                             //!window.hWin.HAPI4.is_admin()
+            var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
             
             //2. Popup for resource field
             var dlged = that._getEditDialog();
-            if(dlged && (no_access || this.options.edit_obstacle)){ 
+            if(dlged && (no_access || (this.options.edit_obstacle && exp_level!=0 ) )){ 
                 
                 var ele = $('<div><div class="edit-button" style="background:#f48642 !important;margin: 40px auto;width:200px;padding:10px;border-radius:4px;">'
                             +'<h2 style="display:inline-block;color:white">View-only mode</h2>&nbsp;&nbsp;'

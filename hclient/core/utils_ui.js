@@ -1360,7 +1360,6 @@ window.hWin.HEURIST4.ui = {
 
             if(!(exp_level>=0)){
                 exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-                if(isNaN(Number(exp_level))) exp_level = 2; //beginner by default
             }
             
             var is_exit = false;
@@ -1426,7 +1425,6 @@ window.hWin.HEURIST4.ui = {
                     .on('click', function(event){
                            //show popup menu 
                            var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-                           if(exp_level=='beginner') exp_level = 2;
                            
                            $help_menu.find('span').removeClass('ui-icon-check');
                            $help_menu.find('li[data-level="'+exp_level+'"] > a > span').addClass('ui-icon-check');

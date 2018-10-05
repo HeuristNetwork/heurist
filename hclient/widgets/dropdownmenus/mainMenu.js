@@ -278,8 +278,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 //0 advance, 1-experienced, 2-beginner
                 if(lvl_exp>=0 && is_visible){
                     
-                        var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-                        if(isNaN(Number(usr_exp_level))) exp_level = 2; //beginner by default
+                        var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);//beginner by default
                         
                         is_visible = (usr_exp_level<=lvl_exp);
                     
