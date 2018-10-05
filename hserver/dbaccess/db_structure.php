@@ -477,8 +477,8 @@ function dbs_GetRectypeConstraint($system) {
             error_log('DATABASE: '.$system->dbname().'. Error retrieving terms '.$mysqli->error);
         }
         $terms['treesByDomain'] = array(
-                'relation' => __getTermTree($mysqli, "relation", "prefix"), 
-                'enum' => __getTermTree($mysqli, "enum", "prefix"));
+                'relation' => __getTermTree($system->dbname(), $mysqli, "relation", "prefix"), 
+                'enum' => __getTermTree($system->dbname(), $mysqli, "enum", "prefix"));
         //ARTEM setCachedData($cacheKey, $terms);
         return $terms;
     }
@@ -818,7 +818,7 @@ function dbs_GetRectypeConstraint($system) {
     * @param     array $parents of current branch to avoid recursion
     * @return    object $terms
     */
-    function __attachChild($parentIndex, $childIndex, $terms, $parents) {
+    function __attachChild($dbname, $parentIndex, $childIndex, $terms, $parents) {
         
         /*if (!@count($terms[$childIndex]) || $parentIndex == $childIndex) {//recursion termination
             return $terms;
@@ -836,9 +836,9 @@ function dbs_GetRectypeConstraint($system) {
                 foreach ($terms[$childIndex] as $gChildID => $n) { //loop for his children
                     if ($gChildID != null) {
                         if(array_search($gChildID, $parents)===false){
-                            $terms = __attachChild($childIndex, $gChildID, $terms, $parents);//depth first recursion
+                            $terms = __attachChild($dbname, $childIndex, $gChildID, $terms, $parents);//depth first recursion
                         }else{
-                            error_log('Recursion in '.$system->dbname().'.defTerms!!! Tree '.implode('>',$parents)
+                            error_log('Recursion in '.$dbname.'.defTerms!!! Tree '.implode('>',$parents)
                                     .'. Can\'t add term '.$gChildID);
                         }
                     }
@@ -859,7 +859,7 @@ function dbs_GetRectypeConstraint($system) {
     * @return    mixed
     * @uses      __attachChild()
     */
-    function __getTermTree($mysqli, $termDomain, $matching = 'exact') { // termDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in the trm_Domain enum
+    function __getTermTree($dbname, $mysqli, $termDomain, $matching = 'exact') { // termDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in the trm_Domain enum
         $whereClause = "a.trm_Domain " . ($matching == 'prefix' ? " like '" . $termDomain . "%' " : ($matching == 'postfix' ? " like '%" . $termDomain . "' " : "='" . $termDomain . "'"));
         $query = "select a.trm_ID as pID, b.trm_ID as cID
         from defTerms a
@@ -885,7 +885,7 @@ function dbs_GetRectypeConstraint($system) {
                 //check that we have a child branch
                 if ($childID != null && array_key_exists($childID, $terms)) {
                     if (count($terms[$childID])) {//yes then attach it and it's children's branches
-                        $terms = __attachChild($parentID, $childID, $terms, null);
+                        $terms = __attachChild($dbname, $parentID, $childID, $terms, null);
                     } else {//no then it's a leaf in a branch, remove this redundant node.
                         unset($terms[$childID]);
                     }
