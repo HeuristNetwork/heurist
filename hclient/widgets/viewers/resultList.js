@@ -494,14 +494,12 @@ $.widget( "heurist.resultList", {
         //-----------------------
 
     },
-
+    
     _setOptions: function() {
         /*if(!(arguments['pagesize']>0)){
         arguments['pagesize'] = 9999999999999;
         }*/
         // _super and _superApply handle keeping the right this-context
-        this._grp_keep_status = {};
-        
         this._superApply( arguments );
         this._refresh();
     },
@@ -1821,14 +1819,14 @@ $.widget( "heurist.resultList", {
                     isfirst = false;
                 }
             }
-            
+
             //
             for (var grp_val in html_groups){
                 var gheader = (hasRender)
                     ?this.options.rendererGroupHeader.call(this, grp_val, this._grp_keep_status)
                     :'<div style="width:100%"> Group '+grp_val+'</div>';
                 
-                var is_expanded = (this._grp_keep_status[grp_val]!=0);
+                var is_expanded = ($.isEmptyObject(this._grp_keep_status) || this._grp_keep_status[grp_val]==1);
                 html += (gheader+'<div data-grp-content="'+grp_val
                     +'" style="display:'+(is_expanded?'block':'none')
                     +'">'+html_groups[grp_val]+'</div>');
@@ -2105,5 +2103,8 @@ $.widget( "heurist.resultList", {
         this.recordList.find
         */
     },
-
+    
+    resetGroups: function(){
+        this._grp_keep_status = {};
+    },
 });

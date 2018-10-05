@@ -296,6 +296,7 @@ function registerDatabase() {
                 //restore connection
                 mysql__usedatabase($mysqli, HEURIST_DBNAME); 
 
+                
                 $dbID = intval($data); // correct return of data is just the registration number. we probably need a
 
                 if ($dbID == 0) { // Unable to allocate a new database identifier
@@ -320,6 +321,7 @@ function registerDatabase() {
                 } else
                 { // We have got a new dbID, set the assigned dbID in sysIdentification
                 
+
                     $res = $mysqli->query("update sysIdentification set `sys_dbRegisteredID`='$dbID', ".
                         "`sys_dbDescription`='".$mysqli->real_escape_string($dbDescription)."' where 1");
                         

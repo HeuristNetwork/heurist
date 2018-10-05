@@ -182,13 +182,9 @@ $.widget( "heurist.importStructure", {
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             //refresh target
-            //that.panel_rty_list_target.manageDefRecTypes('getRecordsetFromStructure');
             window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
             
-            that.panel_rty_structure.css({visibility:'visible'});
-            that.panel_rty_structure.find('#panel_rty_tree_help').show();
-            that.panel_rty_structure.find('.ent_content').hide();
-            that.panel_rty_structure.find('.ent_footer').hide();
+            that.showRecTypeTree();
             window.hWin.HEURIST4.util.setDisabled(that.btn_import, true);
         });
         
@@ -368,6 +364,13 @@ $.widget( "heurist.importStructure", {
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
         
     },
+    
+    showRecTypeTree: function(){
+            this.panel_rty_structure.css({visibility:'visible'});
+            this.panel_rty_structure.find('#panel_rty_tree_help').show();
+            this.panel_rty_structure.find('.ent_content').hide();
+            this.panel_rty_structure.find('.ent_footer').hide();
+    },
 
     //
     //
@@ -426,7 +429,6 @@ $.widget( "heurist.importStructure", {
         var sDB_ID = db_ids.fld(record, 'rec_ID');
         var sURL  = db_ids.fld(record, 'rec_URL');
         var sDB   = db_ids.fld(record, 'rec_Title');
-        
         
         if(this._selectedDB != sDB_ID){
             
@@ -567,6 +569,8 @@ $.widget( "heurist.importStructure", {
                 //.css({left: this.element.find('#panel_rty').width()-300 }).show();
         var that = this;
         
+        this.showRecTypeTree();
+        
         if(this._selectedRtyID!=rtyID ){
         
             this._selectedRtyID = rtyID;
@@ -611,7 +615,6 @@ $.widget( "heurist.importStructure", {
                 },
                 loadChildren: function(e, data){
                   
-//console.log(data);                     
 //                        var tree = treediv.fancytree("getTree");
                         data.node.visit(function(node){
                             var lcode = node.data.dtyID_local>0 ?node.data.dtyID_local:node.data.rtyID_local;

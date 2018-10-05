@@ -145,9 +145,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         //may overwrite resultList behaviour
         if(this.options.recordList){
-            
             this.recordList.resultList( this.options.recordList );
-            
         }
 
         // init search header
@@ -192,6 +190,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 if(this.options.import_structure){
                     //take recordset from REMOTE HEURIST.rectypes format     
                     window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+                    
+                    this.recordList.resultList('resetGroups');
                     
                     window.hWin.HAPI4.SystemMgr.get_defs(
                             {rectypes:'all', mode:2, remote:this.options.import_structure.database_url}, function(response){
