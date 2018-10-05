@@ -219,7 +219,13 @@ function EditTerms() {
         if(Hul.isnull(node)){
             return null;
         }else{
+            var parent_id = null;
+            if(node.parent){
+                parent_id = node.parent.data.id
+            }
+            /*
             var parent_id = Number(node.data.parent_id)
+            */
             if(Hul.isnull(parent_id) || isNaN(parent_id) || parent_id===0){
                 return node;
             }else{
@@ -514,26 +520,31 @@ function EditTerms() {
             var sel = $(top.document).find('#resSearchInverse').get(0);
             if(sel.selectedIndex>=0 && !Hul.isnull(_currentNode) ){
 
-                var nodeid = sel.options[sel.selectedIndex].value;
+                var nodeid = sel.options[sel.selectedIndex].value; //possible inverse term
                 var node = _findNodeById(nodeid, false);
                 if(false && _currentNode.data.id===nodeid){
                     alert("Not possible for a term to be inverse of itself");
                 }
                 else if(_currentNode === _findTopLevelForId(_currentNode.data.id))
                 {
-                    alert("you can't set inverse on top level vocabulary");
+                    alert("You can't set inverse on top level vocabulary");
 
                 }
                 else if( node === _findTopLevelForId(nodeid) ){
-                    alert("you can't make top level vocabulary an inverse");
+                    alert("You can't make top level vocabulary an inverse");
                 }else{
 
                     document.getElementById ('edInverseTerm').value = sel.options[sel.selectedIndex].text;
                     document.getElementById ('edInverseTermId').value = nodeid;
                     document.getElementById ('btnInverseSetClear').value = 'clear';
                     //document.getElementById ('formInverse').style.display = "none";
-                    _doSave(true, false);
-
+                    
+                    //don't save if already in edit mode
+                    if(!isExistingNode(_currentNode)){
+                        _doSave(true, false);    
+                    }else{
+                        _isNodeChanged();
+                    }
                 }
             }
 
@@ -595,7 +606,8 @@ function EditTerms() {
             document.getElementById ('formInverse').style.display = "none";
             document.getElementById ('edInverseTerm').value = "";
             document.getElementById ('edInverseTermId').value = "0";
-            _setOrclearInverseTermId2()
+            _isNodeChanged();
+            //_setOrclearInverseTermId2()
         }
     }
 
@@ -808,7 +820,7 @@ function EditTerms() {
                     nodeForAction.data.title = _currentNode.data.description;
 
                     nodeForAction.data.parent_id = iParentId;
-
+                    
                     _updateTermsOnServer(nodeForAction, needReload, callback);
 
                     //alert("TODO SAVE ON SERVER");
@@ -861,7 +873,9 @@ function EditTerms() {
     */
     function _updateTermsOnServer(node, _needReload, main_callback)
     {
-
+        
+        $("#btnSave" ).prop('disabled', 'disabled').addClass('save-disabled');
+        
         var term = node.data;
         var current_id = node.data.id;
         var wasExpanded = node.isExpanded();
@@ -967,8 +981,9 @@ function EditTerms() {
                         }
                     }//for
 
-                    if(!error) {
-                        
+                    if(error) {
+                        $("#btnSave" ).removeProp('disabled', 'disabled').removeClass('save-disabled');
+                    }else{ 
                         window.hWin.HEURIST4.terms = response.data.terms;
 
                         _isSomethingChanged = true;
@@ -990,8 +1005,6 @@ function EditTerms() {
                         //document.getElementById ('div_SaveMessage').style.display = "inline-block";
                         $("#Saved" ).css("display","inline-block");
                         setTimeout(function(){$("#Saved" ).css("display","none")}, 1000);
-                        $("#btnSave" ).prop('disabled', 'disabled');
-                        $('#btnSave').addClass('save-disabled');
 
                         /*FancyTree needs to be reinitialised manually when terms are modified*/
 
