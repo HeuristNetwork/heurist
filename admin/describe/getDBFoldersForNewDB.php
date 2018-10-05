@@ -27,7 +27,7 @@
 require_once(dirname(__FILE__).'/../../common/connect/applyCredentials.php');
 require_once(dirname(__FILE__).'/../../common/php/dbUtils.php');
 
-$uploadPath = HEURIST_FILESTORE_DIR; //HEURIST_UPLOAD_ROOT.HEURIST_DBNAME;
+$uploadPath = HEURIST_FILESTORE_DIR; //HEURIST_FILESTORE_ROOT.HEURIST_DBNAME;
 
 $folders = array( "rectype-icons", "settings", "smarty-templates", "xsl-templates");
 

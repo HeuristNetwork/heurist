@@ -652,7 +652,7 @@ function importRectype($importRty, $alreadyImported) {
 function copyRectypeIcon($sourceDBName, $importRtyID, $importedRecTypeID, $thumb=""){
 
 	// BUG TODO: this is not always true, and what about cross server
-    $filename = HEURIST_UPLOAD_ROOT.$sourceDBName."/rectype-icons/".$thumb.$importRtyID.".png";
+    $filename = HEURIST_FILESTORE_ROOT.$sourceDBName."/rectype-icons/".$thumb.$importRtyID.".png";
 
 	if(file_exists($filename)){
 

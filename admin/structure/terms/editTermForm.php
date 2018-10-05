@@ -89,9 +89,10 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
     }
 
 
-    if($parent_id!=0){
+    if($parent_id>0){
         $terms = dbs_GetTerms($system);
-        $parent_name = $terms['termsByDomainLookup'][$_REQUEST['treetype']][$parent_id][0];
+        if(@$terms['termsByDomainLookup'][$_REQUEST['treetype']][$parent_id])
+            $parent_name = $terms['termsByDomainLookup'][$_REQUEST['treetype']][$parent_id][0];
     }
 
 ?>

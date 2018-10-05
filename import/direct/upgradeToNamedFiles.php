@@ -90,7 +90,7 @@ $dbname = $_REQUEST['db'];
 if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 
 	/* This would have been best, but decided to leave in original location to simplify upgrade
-	$make_directory = "mkdir " . HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/attached-files"; // new fiolder for the copied files
+	$make_directory = "mkdir " . HEURIST_FILESTORE_ROOT.HEURIST_DBNAME."/attached-files"; // new fiolder for the copied files
 	print "<br>Creating new directory with: $make_directory<p>";
 	exec("$make_directory" . ' 2>&1', $output, $res1);
 	if ($res1 != 0 ) {
@@ -123,9 +123,9 @@ if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
 		$ulf_ID=$row1['ulf_ID']; // current name of file in the uploaded files directory for thsi database
 		$ulf_OrigFileName=$row1['ulf_OrigFileName']; // the original file name
 
-		$newPath = HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/"; // path to allow multiple directories
+		$newPath = HEURIST_FILESTORE_ROOT.HEURIST_DBNAME."/"; // path to allow multiple directories
 		$newName = "ulf_".$ulf_ID."_".$ulf_OrigFileName; // new name with path to allow multiple directories
-		$oldName=HEURIST_UPLOAD_ROOT.HEURIST_DBNAME."/".$ulf_ID;
+		$oldName=HEURIST_FILESTORE_ROOT.HEURIST_DBNAME."/".$ulf_ID;
 
 		// TODO: Needs to replace quotes in the file name to avoid future problems, quotes are nasty!
 

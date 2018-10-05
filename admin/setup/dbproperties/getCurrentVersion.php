@@ -132,7 +132,7 @@ function checkVersionOnMainServer($version_in_session)
     $version_last_check = getLastCheckedVersion($version_in_session);
 
     //check data of last check and last warning email
-    $fname = HEURIST_UPLOAD_ROOT."lastAdviceSent.ini";
+    $fname = HEURIST_FILESTORE_ROOT."lastAdviceSent.ini";
     if ($version_last_check==null && file_exists($fname)){      //version in session is outdated
         //last check and version
         $version_in_session = file_get_contents($fname);

@@ -375,10 +375,10 @@ $mysqli = $system->get_mysqli();
 
                     //realpath gives real path on remote file server
                     if(strpos($fpath, '/srv/HEURIST_FILESTORE/')===0){
-                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $fpath);
+                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $fpath);
                     }else
                     if(strpos($fpath, '/misc/heur-filestore/')===0){
-                        $fpath = str_replace('/misc/heur-filestore/', HEURIST_UPLOAD_ROOT, $fpath);
+                        $fpath = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $fpath);
                     }
                     
                     

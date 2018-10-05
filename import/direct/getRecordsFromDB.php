@@ -1273,8 +1273,8 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                 global $sourcedbname, $dbPrefix, $db_prefix;
                 $sourcedb = $db_prefix.$sourcedbname;
 
-                $_src_HEURIST_FILESTORE_DIR =  HEURIST_UPLOAD_ROOT.$sourcedbname.'/';
-                $_src_HEURIST_FILES_DIR =  HEURIST_UPLOAD_ROOT.$sourcedbname.'/file_uploads/';
+                $_src_HEURIST_FILESTORE_DIR =  HEURIST_FILESTORE_ROOT.$sourcedbname.'/';
+                $_src_HEURIST_FILES_DIR =  HEURIST_FILESTORE_ROOT.$sourcedbname.'/file_uploads/';
 
                 $res = mysql_query("select * from $sourcedb.`recUploadedFiles` where ulf_ID=".$src_fileid);
                 if (mysql_num_rows($res) != 1) {
@@ -1306,7 +1306,7 @@ require_once(dirname(__FILE__).'/../../search/actions/actionMethods.php');
                 }else{
                     //special case to support absolute path on file server
                     if(strpos($path, '/srv/HEURIST_FILESTORE/')===0){
-                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_UPLOAD_ROOT, $path);
+                        $fpath = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $path);
                         if(file_exists($fpath)){
                             $filename =$fpath;
                         }

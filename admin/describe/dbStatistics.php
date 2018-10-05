@@ -193,7 +193,7 @@ function dirsize($dir)
                     /*
                     mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1)"
                     ." FROM information_schema.tables where table_schema='".$db."'").",".
-                    round( (dirsize(HEURIST_UPLOAD_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
+                    round( (dirsize(HEURIST_FILESTORE_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
                     */
                     "'".mysql__select_val("select max(rec_Modified)  from ".$db.".Records")."','".
                     mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps")."','".
