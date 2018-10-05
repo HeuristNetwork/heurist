@@ -587,6 +587,66 @@
         }
     }
     
+    /**
+    * get incremeneted value for given field
+    * 
+    * @param mixed $system
+    * @param mixed $params
+    */
+    function recordGetIncrementedValue($system, $params){
+    
+        
+        $rt_ID = @$params["rtyID"];
+        $dt_ID = @$params["dtyID"];
+
+        if($rt_ID>0 && $dt_ID>0){
+
+            $mysqli = $system->get_mysqli(); 
+            
+            //1. get detail type
+            $res = mysql__select_list($mysqli, 'defDetailTypes','dty_Type','dty_ID='.$dt_ID);
+            if(is_array($res) && count($res)>0){
+                $isNumeric = ($res[0]!='freetext');
+
+            //2. get max value for numeric and last value for non numeric    
+                if($isNumeric){
+                    $res = mysql__select_list($mysqli, 'recDetails, Records','max(CAST(dtl_Value as SIGNED))',
+                            'dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID);    
+                }else{
+                    $res = mysql__select_list($mysqli, 'recDetails, Records','dtl_Value',
+                            'dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID.' ORDER BY dtl_ID desc LIMIT 1');    
+                }
+                
+                $value = 1;
+                
+                if(is_array($res) && count($res)>0){
+                    
+                    if($isNumeric){
+                        $value = 1 + intval($res[0]);    
+                    }else{
+                        //find digits at the end of string
+                        $value = $res[0];
+                        $matches = array();
+                        if (preg_match('/(\d+)$/', $value, $matches)){
+                            $digits = $matches[1];
+                            $value = substr($value,0,-strlen($digits)).(intval($digits)+1);    
+                        }else{
+                            $value = $value.'1';
+                        }
+                    }
+                }
+                
+                $res = array("status"=>HEURIST_OK, 'result'=>$value);    
+                
+            }else{
+                return $system->addError(HEURIST_INVALID_REQUEST, 'Get incremented value. Detail type '.$dt_ID.' not found');
+            }
+        }else{
+            return $system->addError(HEURIST_INVALID_REQUEST, 'Get incremented value. Parameters are wrong or undefined');
+        }
+        
+    }
+    
 
     /**
     * update ownership and access for set of records

@@ -231,25 +231,19 @@ $.widget( "heurist.editing_input", {
             
             if(values_to_set=='increment_new_values_by_1'){
                 
-                    //find incremented value on server side
-                    var url = window.hWin.HAPI4.baseURL + "records/edit/getIncrementedValue.php";
-                    var request = {db:window.hWin.HAPI4.database,
-                                   dtyID: this.options.dtID,
-                                   rtyID: this.options.rectypeID};
-                    var that = this;
-                    
-                    window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
+                   //find incremented value on server side
+                   window.hWin.HAPI4.RecordMgr.increment(this.options.rtyID, this.options.dtyID, 
+                     function(response){
                       if(!window.hWin.HEURIST4.util.isnull(response)){
-                          if(!window.hWin.HEURIST4.util.isnull(response.result)){
-                          
-                            //recreate input elements and assign given values
-                            that.setValue(response.result);
-                            that.options.values = that.getValues();
-                            that._refresh();
-                              
-                          }else if(!window.hWin.HEURIST4.util.isnull(response.error)){
-                              window.hWin.HEURIST4.msg.showMsgErr( response.error );
-                          }
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                
+                                that.setValue(response.result);
+                                that.options.values = that.getValues();
+                                that._refresh();
+                                
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
                       }
                   });
                   this.setValue(0);

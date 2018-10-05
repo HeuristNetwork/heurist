@@ -564,6 +564,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *   remove    - delete record
     *   duplicate
     *   access    - ownership and visibility
+    *   increment
     *
     *           for record_details controller
     *   details   - batch edition of record details for many records
@@ -622,7 +623,12 @@ function hAPI(_db, _oninit) { //, _currentUser
                 if(request) request.a = 'access';
                 _callserver('record_edit', request, callback);
             }
-
+            
+            ,increment: function(rtyID, dtyID, callback){
+                var request = {a:'increment', rtyID:rtyID, dtyID:dtyID};
+                _callserver('record_edit', request, callback);
+            }
+            
             /**
             * Remove Record
             *

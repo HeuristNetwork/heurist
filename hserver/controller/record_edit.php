@@ -74,6 +74,10 @@
 
                 $response = recordUpdateOwnerAccess($system, $_REQUEST);
 
+            } else if ($action=="increment"){
+
+                $response = recordGetIncrementedValue($system, $_REQUEST);
+                
             } else if ($action=="duplicate" && @$_REQUEST['id']) {
 
                 
