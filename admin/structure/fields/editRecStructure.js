@@ -230,29 +230,6 @@ function EditRecStructure() {
                     }
                 },
                 {
-                    key:"rst_ID", label: "Hdr", sortable:false, width:20,
-                    formatter: function(elLiner, oRecord, oColumn, oData){
-                        
-                        elLiner.innerHTML = "<img src='../../../common/images/insert_header.png' style='cursor:pointer;' "
-                        +" title='Click this button to insert a new section header at this point in the record structure / data entry form' "+
-                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, true);}' >";
-                        
-                        //elLiner.innerHTML = oData;
-                        //elLiner.title = oRecord.getData("conceptCode");
-                    }
-                },
-                {
-                    key:'addColumn',
-                    label: "Add",
-                    sortable:false, width:20,
-                    formatter: function(elLiner, oRecord, oColumn, oData) {
-                        elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' style='cursor:pointer;' "
-                        +" title='Click this button to insert a new field at this point in the record structure / data entry form' "+
-                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, false);}' >";
-                        //editStructure.onAddFieldMenu(event);
-                    }
-                },
-                {
                     key:"expandColumn",
                     label: "Edit",  width:20,
                     hidden: false, //width : "16px",
@@ -269,6 +246,50 @@ function EditRecStructure() {
                         
                     }
                     //expansionFormatter
+                },
+                {
+                    key:"rst_ID", label: "Header", sortable:false, width:45,
+                    formatter: function(elLiner, oRecord, oColumn, oData){
+
+                        /* icon                        
+                        elLiner.innerHTML = "<img src='../../../common/images/insert_header.png' style='cursor:pointer;' "
+                        +" title='Click this button to insert a new section header at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, true);}' >";
+                        */
+
+                        //label
+                        elLiner.innerHTML = 
+                        '<img src="../../../common/images/blue-up-triangle.png" style="float:right"/><br>'
+                        +'<div style="font-size:0.7em" '
+                        +" title='Click to insert a new section header at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, true);}' >"+
+                        'Add&nbsp;divider</div>';
+                        
+                        $(elLiner).css({cursor:'pointer'});
+                        //elLiner.innerHTML = oData;
+                        //elLiner.title = oRecord.getData("conceptCode");
+                    }
+                },
+                {
+                    key:'addColumn',
+                    label: "Add",
+                    sortable:false, width:40,
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        /*
+                        elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' style='cursor:pointer;' "
+                        +" title='Click this button to insert a new field at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, false);}' >";*/
+                        //label
+                        elLiner.innerHTML = 
+                        '<img src="../../../common/images/blue-up-triangle.png" style="float:right"/><br>'
+                        + '<div style="font-size:0.7em;width:40px" '
+                        +" title='Click to insert a new field at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, false);}' >"+
+                        'Add&nbsp;field</div>';
+                        
+                        $(elLiner).css({cursor:'pointer'}); //'margin-top':'10px', 
+
+                    }
                 },
                 {
                     key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
@@ -308,7 +329,8 @@ function EditRecStructure() {
                         
                         var type = oRecord.getData("dty_Type");
                         if(type=='separator'){
-                            $(elLiner).css({'font-size':'1.2em'});//,'font-weight':'bold','cursor':'normal'});
+                            $(elLiner).css({'text-decoration':'underline'});//'font-size':'1.2em',,'font-weight':'bold','cursor':'normal'});
+                            elLiner.innerHTML = elLiner.innerHTML.toUpperCase();
                         }
                         $(elLiner).css({'font-weight':'bold'})
                                 .addClass('yui-dt-liner-editable');   
@@ -369,7 +391,7 @@ function EditRecStructure() {
                 //{ key:"rst_DisplayHelpText", label: "Prompt", sortable:false },
                 {
                     key:"rst_RequirementType", label: "Requirement", sortable:false,
-                    minWidth:80, maxAutoWidth:80, width:80, className:'left',
+                    minWidth:70, maxAutoWidth:70, width:70, className:'left',
                     
                     editor: new YAHOO.widget.DropdownCellEditor({ 
                             dropdownOptions: ['required', 'recommended', 'optional', {value:'forbidden',label:'hidden'} ],  
@@ -400,7 +422,7 @@ function EditRecStructure() {
                 },
                 {
                     key:"rst_MaxValues", label: "Repeatability", sortable:false,
-                    minWidth:80, maxAutoWidth:80, width:80, className:'left',
+                    minWidth:70, maxAutoWidth:70, width:70, className:'left',
                     editor: new YAHOO.widget.DropdownCellEditor({ 
                             dropdownOptions: 
                             //['single', 'repeatable', 'limited'],
@@ -432,7 +454,7 @@ function EditRecStructure() {
 
                 },
                 {
-                    key:"rst_DefaultValue", label: "Default", sortable:false,className:"center",
+                    key:"rst_DefaultValue", label: "Default", sortable:false,className:"center",width:40,
                     formatter: function(elLiner, oRecord, oColumn, oData){
                         var reqtype = oRecord.getData('rst_DefaultValue');
                         if (reqtype && reqtype.length > 0){
@@ -2063,13 +2085,19 @@ function EditRecStructure() {
     }
 
     function _onAddFieldAtIndex(e, isSectionHeader){
-        e = window.hWin.HEURIST4.util.stopEvent(e);
-        var targ = e.target;
-        var rst_ID = targ.getAttribute("rst_ID")
+        
+        var recs = _myDataTable.getRecordSet();
+        var index_toinsert = recs.getLength();
+        
+        if(e!=null){
+            e = window.hWin.HEURIST4.util.stopEvent(e);
+            var targ = e.target;
+            var rst_ID = targ.getAttribute("rst_ID");
+            if(!rst_ID) return;
 
-        if(!rst_ID) return;
+            index_toinsert = _getRecordById(rst_ID).row_index;
+        }
 
-        var index_toinsert = _getRecordById(rst_ID).row_index;
         _myDataTable.unselectAllRows();
 
         

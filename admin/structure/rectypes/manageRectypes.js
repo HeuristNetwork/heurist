@@ -1143,7 +1143,7 @@ function RectypeManager() {
                 "no-resize": false,
                 title: 'RECORD STRUCTURE',
                 height: dim.h*0.9,
-                width: 860,
+                width: 960,
                 "no-close": true,
                 closeCallback: function(){ alert('kiki'); },
                 callback: function(context) {
