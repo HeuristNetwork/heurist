@@ -171,7 +171,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                 </div>
                 </div>
              
-                <h2 id="formMessage" style="position:absolute;top:80px;left:30px; border-style:none;display:block;text-align:left;width:400px;">
+                <h2 id="formMessage" style="position:absolute;top:100px;left:30px; border-style:none;display:block;text-align:left;width:400px;">
                     Rollover terms in the tree to show available actions<br>
                     Drag terms to reposition or merge <br/> Select term to edit label and description
                 </h2>
