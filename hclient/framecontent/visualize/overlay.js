@@ -71,7 +71,7 @@ function getRecordOverlayData(record) {
                 
                 if(!settings.isDatabaseStructure){
                     // Relation
-                    var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "9px", height: 11, indent: true, subheader:1};
+                    var relation = {text: "➜ " + truncateText(link.target.name, maxLength), size: "9px", height: 11, indent: true, subheader:1, xpos:10, multiline:true};
                     if(settings.showCounts) {
                         relation.text += ", n=" + link.targetcount;                      
                     }
@@ -92,7 +92,7 @@ function getRecordOverlayData(record) {
                 }
                
                 // Relation
-                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "9px", height: fontSize, indent: true};
+                var relation = {text: truncateText(link.source.name, maxLength) + " ↔ " + truncateText(link.target.name, maxLength), size: "9px", height: fontSize, indent: true, xpos:10, multiline:true};
                 if(settings.showCounts) {
                     relation.text += ", n=" + link.relation.count
                 }
@@ -103,15 +103,18 @@ function getRecordOverlayData(record) {
                 }
             }
         }
-        //console.log("Record overlay data", map);
+
+//console.log("Record overlay data", map);
 
         // Convert map to array
+        var xpos = 10; //!!!!
         for(key in map) {                                   
-            array.push({text: truncateText(key, maxLength), size: "8px", 
+            array.push({text: truncateText(key, maxLength), size: "8px", xpos:xpos, multiline:true,
                     style:"italic", height: fontSize, indent:true, enter: true, subheader:1}); // Heading
             for(text in map[key]) {
                 array.push(map[key][text]);    
             }
+            //xpos = xpos + 10;
         }
     }
 
@@ -313,7 +316,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         // Adding text 
         var offset = (type=='record')?26:6;  
         var indent = 5;
-        var position = 2;
+        var position = 16;
         
 
         var text;
@@ -341,9 +344,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           })        // Some left padding
                           .attr("y", function(d, i) {
                               // Multiline check
-                              if(!d.multiline) {
-                                  if(!(isNaN(d.height) || d.height==null)){
-                                    position += (d.height*1.2);
+                              if(d.multiline) {
+                                  if(d.xpos>0){
+                                    position = position + d.xpos;
                                   }
                               }
                               return position; // Position calculation
@@ -362,6 +365,8 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                           }, "important");
                           
         }else{
+            
+            position = 0;
             // links info needs icon
             var k, text = [[]];
             for(k=0;k<info.length;k++){
@@ -380,14 +385,14 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                   .attr("width", iconSize)
                   
                 text[0].push(linkicon[0][0]);
-                          
+//!!!!                         
                 var linkline = overlay.append("text")
                           .text(info[k].text)
                           .attr("class", 'info-mode')
                           .attr("x", iconSize+2)
                           .attr("y", function(d, i) {
                               //position += (info[k].height*1.2);
-                              position += (iconSize*1.2);
+                              position = position + (iconSize*1.2);
                               return position; // Position calculation
                           })
                           .attr("fill", fontColor)
