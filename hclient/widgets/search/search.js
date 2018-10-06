@@ -474,6 +474,7 @@ $.widget( "heurist.search", {
                            currentAccess: add_rec_prefs[2],
                            currentAccessGroups: add_rec_prefs[4],
                            scope_types: 'none',
+                           height:400, 
                            title: window.hWin.HR('Default ownership and access for new record'),
                            onClose:                         
                            function(context){

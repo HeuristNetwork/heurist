@@ -2170,6 +2170,9 @@ window.hWin.HEURIST4.ui = {
             
             var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/record/';
             var scripts = [ path+actionName+'.js'];
+            if(actionName=='recordAdd'){
+                scripts= [path+'recordAccess.js', path+'recordAdd.js'];
+            }
             
             //load missed javascripts
             $.getMultiScripts(scripts)
@@ -2178,6 +2181,7 @@ window.hWin.HEURIST4.ui = {
                 window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, options);
             }).fail(function(error) {
                 // one or more scripts failed to load
+                //console.log(error);                
                 window.hWin.HEURIST4.msg.showMsgWorkInProgress();
             }).always(function() {
                 // always called, both on success and error

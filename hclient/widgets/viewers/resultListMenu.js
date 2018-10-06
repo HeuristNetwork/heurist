@@ -379,7 +379,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             if(this.isResultSetEmpty()) return;
             
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {height:540, onClose:
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAccess', {height:450, onClose:
                function( context ){
                    if(context){
                        //@todo refresh page

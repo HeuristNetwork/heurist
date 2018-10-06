@@ -877,7 +877,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                currentOwner:  that._getField('rec_OwnerUGrpID'),
                currentAccess: that._getField('rec_NonOwnerVisibility'),
                currentAccessGroups: that._getField('rec_NonOwnerVisibilityGroups'),
-               scope_types: 'none', onClose: __assignOwnerAccess
+               scope_types: 'none', onClose: __assignOwnerAccess,
+               height:400
         });
               
                     }); //on edit ownership click

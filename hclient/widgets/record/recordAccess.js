@@ -37,12 +37,15 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
     _initControls:function(){
         
-        /*
+        if(this.options.scope_types=='none'){
+            this.element.find('#hr_sel_record_scope').hide();
+        }
+        
         var fieldSelect = this.element.find('#sel_Ownership');
         window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], null,  //take groups of current user
                 [{key:0, title:'Everyone (no restriction)'}, 
                  {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}]);
-        */         
+                 
 
         //define group selector for edit
         var ele = this.element.find('#sel_OwnerGroups');
@@ -63,6 +66,16 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         
         if(!window.hWin.HEURIST4.util.isempty(this.options.currentOwner)){
             
+            fieldSelect.val(this.options.currentOwner);
+            if( fieldSelect.val()==null && this.options.currentOwner){
+                var editors = this.options.currentOwner.split(',');
+                fieldSelect.val(editors[0]);
+            }
+            if( fieldSelect.val()==null ){
+                fieldSelect.val( window.hWin.HAPI4.currentUser['ugr_ID'] );
+            }
+            
+            /* multigroup edit option
             if(this.options.currentOwner==0){
                 this.element.find('#rb_Owner-everyone').prop('checked', true);    
             }else if(this.options.currentOwner == window.hWin.HAPI4.currentUser['ugr_ID']){
@@ -71,14 +84,16 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 this.element.find('#rb_Owner-group').prop('checked', true);    
                 this.element.find('#sel_OwnerGroups').show().editing_input('setValue', [this.options.currentOwner]);
             }
+            */
         }
         
         if(this.options.currentAccess){
             //fieldSelect.val(this.options.currentOwner);
             
-            if(this.options.currentAccess=='viewable' && this.options.currentAccessGroups){
-                this.element.find('#rb_Access-viewable-group').prop('checked', true);
-                this.element.find('#sel_AccessGroups').show();
+            if( this.options.currentAccess=='hidden' ||
+                (this.options.currentAccess=='viewable' && this.options.currentAccessGroups)){
+                this.element.find('#rb_Access-hidden').prop('checked', true); //was viewable-group
+                this.element.find('#sel_AccessGroups').css({display:'table-row'});
             }else{
                 this.element.find('#rb_Access-'+this.options.currentAccess).prop('checked', true);
                 
@@ -102,8 +117,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         
         $('input[name="rb_Access"]').change(function(){
             
-            if($('#rb_Access-viewable-group').prop('checked')){
-                $('#sel_AccessGroups').show();
+            if($('#rb_Access-hidden').prop('checked')){ //was viewable-group
+                $('#sel_AccessGroups').css({display:'table-row'});
             }else{
                 $('#sel_AccessGroups').hide();
             }
@@ -168,8 +183,9 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     //
     getSelectedParameters: function( showWarning ){
        
+        /* option for many groups edit 
         var ownership = this.element.find('input[type="radio"][name="rb_Owner"]:checked').val();
-                    //this.element.find('#sel_Ownership').val();
+                    
         if(ownership=='everyone') {
             ownership = 0;
         } else if(ownership=='user') {
@@ -185,6 +201,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 return false;
             }
         }
+        */        
+        var ownership = this.element.find('#sel_Ownership').val();
         
         
         var visibility = this.element.find('input[type="radio"][name="rb_Access"]:checked').val();
@@ -196,9 +214,11 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         
         var visibility_groups = '';
         
-        if(visibility=='viewable' && $('#sel_AccessGroups').editing_input('instance')){
+        if(visibility=='hidden' && $('#sel_AccessGroups').editing_input('instance')){
             var sel = $('#sel_AccessGroups').editing_input('getValues');
-            if(sel && sel.length>0){
+
+            if(sel && sel.length>0 && sel[0]!=''){
+                visibility='viewable';
                 visibility_groups = sel[0];
             }
         }
