@@ -765,6 +765,7 @@ $.widget( "heurist.editing_input", {
                                         var link_info = isInwardRelation?context.source:context.target;
                                         link_info.relation_recID = context.relation_recID;
                                         link_info.trm_ID = context.trm_ID;
+                                        link_info.is_inward = isInwardRelation;
                                         
                                         var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv,
                                             link_info, true);
@@ -826,7 +827,8 @@ $.widget( "heurist.editing_input", {
                                                  relation_recID: direct[k]['relationID'], 
                                                  trm_ID: direct[k]['trmID'],
                                                  dtl_StartDate: direct[k]['dtl_StartDate'], 
-                                                 dtl_EndDate: direct[k]['dtl_EndDate']
+                                                 dtl_EndDate: direct[k]['dtl_EndDate'],
+                                                 is_inward: false
                                                 }, true);
                                             ele.on('remove', __onRelRemove);
                                             
@@ -876,7 +878,8 @@ $.widget( "heurist.editing_input", {
                                                  relation_recID: reverse[k]['relationID'], 
                                                  trm_ID: invTermID,
                                                  dtl_StartDate: reverse[k]['dtl_StartDate'], 
-                                                 dtl_EndDate: reverse[k]['dtl_EndDate']
+                                                 dtl_EndDate: reverse[k]['dtl_EndDate'],
+                                                 is_inward: true
                                                 }, true);
                                             ele.addClass('reverse-relation', 1)
                                                 .on('remove', __onRelRemove);

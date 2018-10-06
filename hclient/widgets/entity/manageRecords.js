@@ -279,7 +279,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               css:{'margin-left':'0.5em'},
                               click: function() { 
                                   
-                                if(that._additionWasPerformed){
+                                if(true || that._additionWasPerformed){
                                     that.selectedRecords(that._currentEditRecordset);
                                     that._selectAndClose();
                                 }else{

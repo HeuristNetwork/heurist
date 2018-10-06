@@ -1819,7 +1819,8 @@ window.hWin.HEURIST4.ui = {
                         //2017-11-08 no more link here
                         //+ '<a target=_new href="#" data-recID="'+info['rec_ID'] +'">'
                         //+ window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a>'
-                        + '</span><span data-recID="'+info['rec_ID'] +'" style="display:table-cell;padding-top:4px;">'
+                        + '</span><span class="related_record_title" data-recID="'
+                                        +info['rec_ID'] +'" style="display:table-cell;padding-top:4px;">'
                         + rec_Title
                         + '</span>'
                         + '</div>'
@@ -1920,10 +1921,46 @@ window.hWin.HEURIST4.ui = {
                     function(event, res){
                         if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
                             var recordset = res.selection;
-                            var DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
                             var record = recordset.getFirstRecord();
-                            var term_ID = recordset.fld(record,DT_RELATION_TYPE);
-                            ele.find('.detailType').text(window.hWin.HEURIST4.ui.getTermValue(term_ID)); //update relation type
+                            var related_ID = recordset.fld(record, 'rec_ID');                              
+                            var DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
+                            var DT_RELATED_REC_ID = window.hWin.HAPI4.sysinfo['dbconst']
+                                [info['is_inward']?'DT_PRIMARY_RESOURCE':'DT_TARGET_RESOURCE'];
+
+                            // e - search for temp also
+                            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+related_ID, w: "e", 
+                                        f:[DT_RELATION_TYPE,DT_RELATED_REC_ID]},  
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    var recordset = new hRecordSet(response.data);
+                                    if(recordset.length()>0){
+                                        var record = recordset.getFirstRecord();
+                                        var term_ID = recordset.fld(record,DT_RELATION_TYPE);
+                                        ele.find('.detailType').text(window.hWin.HEURIST4.ui.getTermValue(term_ID)); //update relation type
+                                        var related_ID = recordset.fld(record, DT_RELATED_REC_ID);  
+
+                                        // e - search for temp also
+                                        window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+related_ID, w: "e", f:"header"},  
+                                        function(response){
+                                            if(response.status == window.hWin.ResponseStatus.OK){
+                                                var recordset = new hRecordSet(response.data);
+                                                if(recordset.length()>0){
+                                                    var record = recordset.getFirstRecord();
+                                                    var rec_Title = recordset.fld(record,'rec_Title');
+                                                    if(!rec_Title) {rec_Title = 'New record. Title is not defined yet.';}
+                                        
+                                                    ele.find('.related_record_title').text(rec_Title )
+                                                            .attr('data-recID', related_ID);
+                                                            
+                                                    var rec_RecType = recordset.fld(record,'rec_RecTypeID');                            
+                                                    //@todo - update record type icon
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                            
                         }
                 }});
             });
