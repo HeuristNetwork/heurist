@@ -1539,15 +1539,20 @@ class FieldPredicate extends Predicate {
         
         $match_pred = $this->get_field_value();
         
-        $cs_ids = getCommaSepIds($this->value);
-
-        if ($cs_ids) {  
-        //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { it does not work for more than 500 entries
-            $isnumericvalue = false;
-            $isin = true;
-        }else{
-            $isin = false;
-            $isnumericvalue = is_numeric($this->value);
+        $isnumericvalue = false;
+        $isin = false;
+        if($this->field_type_value!='date'){
+        
+            $cs_ids = getCommaSepIds($this->value);
+            
+            if ($cs_ids) {  
+            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { it does not work for more than 500 entries
+                $isnumericvalue = false;
+                $isin = true;
+            }else{
+                $isin = false;
+                $isnumericvalue = is_numeric($this->value);
+            }
         }
         
         /*
