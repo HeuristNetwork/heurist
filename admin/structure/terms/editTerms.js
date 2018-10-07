@@ -2342,7 +2342,12 @@ function EditTerms() {
                 }
                 else{ //has children - vocabulary to be merged
                     $_dialogbox.find("#moveBtn").click(function(){
+                        
+                        _findNodeById(data.otherNode.data.id, true);
 
+                        //node - destination
+                        //otherNode - node to be moved
+                        
 
                         if(node.data.id)
                         {
@@ -2354,11 +2359,10 @@ function EditTerms() {
                             }
                             // alert($('#edParentId').val());
 
-                            // _updateTermsOnServer(_currentNode,false);
-                            _doSave(false,true);
+                            _doSave(false, true);
                         }
 
-                        data.otherNode.moveTo(node,data.hitMode);
+                        data.otherNode.moveTo(node, data.hitMode);
                         $_dialogbox.dialog($_dialogbox).dialog("close");
                     });
                 }
