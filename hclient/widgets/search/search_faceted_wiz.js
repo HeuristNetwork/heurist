@@ -1210,7 +1210,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     sContent = sContent 
                         //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_1" name="facet_Type'
                         //+idd+'" value="1" data-type="slider"/><label for="facetType'+idd+'_1">slider</label>';
-                        +'<button label="slider" class="btnset_radio" data-idx="'+idd+'" data-value="1"/>';
+                        +'<button label="slider" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="slider"/>';
                     
                 }else if(facets[k].type=='date' || facets[k].type=='year'){
                     sContent = sContent 
