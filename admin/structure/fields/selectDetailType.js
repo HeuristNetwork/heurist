@@ -82,7 +82,7 @@ function SelectDetailType() {
 							filterTimeout = null;
 
 							var filter_name  = filterByName.value;
-							var filter_group = filterByGroup.value;
+							var filter_group = 'all'; //filterByGroup.value;
 							var filter_select = ((filterBySelection2.checked)?1:0);
 
 							// Get filtered data
@@ -177,7 +177,7 @@ function SelectDetailType() {
 											//parse request
 											var fvals = req.split("|");
 
-											var sByGroup  = fvals[0];
+											var sByGroup  = 'all';//fvals[0];
 											var sByName   = fvals[1].toLowerCase();
 											var isBySelect = (fvals[2]==="0");
 
