@@ -102,8 +102,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 msg = 'Error_Empty_Message';
         }
         if(window.hWin.HEURIST4.util.isempty(dlg_title)){
-                dlg_title = 'Error';
+                dlg_title = 'Error_Title';
         }
+        dlg_title = window.hWin.HR(dlg_title);
 
         var buttons = {};
         buttons[window.hWin.HR('OK')]  = function() {

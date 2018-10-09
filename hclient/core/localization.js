@@ -26,6 +26,7 @@ regional['en'] = {
     'My Searches':'My Filters',
     'My Bookmarks':'My Bookmarks',
 
+    'Error_Title': 'Heurist',
     'Error_Empty_Message':'No error message was supplied, please report to Heurist developers.',
 
     'Password_Reset':'Your password has been reset. You should receive an email shortly with your new password.',
