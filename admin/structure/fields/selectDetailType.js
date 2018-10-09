@@ -116,6 +116,11 @@ function SelectDetailType() {
 			document.title = "Insert fields to " + window.hWin.HEURIST4.rectypes.names[rty_ID];
 		}
 
+        var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);//beginner by default
+        if(usr_exp_level<2){
+            $('#divFilterBySelection').css({'display':'inline-block'});
+        }                
+        
 		//////////////////// create data table
 		var arr = [],
 			dty_ID,

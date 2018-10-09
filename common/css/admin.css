@@ -167,8 +167,9 @@ body.popup #page-inner {
 .yui-skin-sam .yui-dt tr.separator td.yui-dt-asc,
 .yui-skin-sam .yui-dt tr.separator td.yui-dt-desc{
     font-style:italic;
-    font-weight:bold;
+    /*font-weight:bold;*/
     font-size: 1.4em;
+    background-color:#AAAAAA;
 }
 .yui-skin-sam tr.yui-dt-highlighted{
     background-color:#BFDFFF;

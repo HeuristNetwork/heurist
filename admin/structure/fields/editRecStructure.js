@@ -220,6 +220,56 @@ function EditRecStructure() {
 
             var myColumnDefs = [
                 {
+                    key:"rst_ID", label: "Divider", sortable:false, width:45,
+                    formatter: function(elLiner, oRecord, oColumn, oData){
+
+                        /* icon                        
+                        elLiner.innerHTML = "<img src='../../../common/images/insert_header.png' style='cursor:pointer;' "
+                        +" title='Click this button to insert a new section header at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, true);}' >";
+                        */
+
+                        //label
+                        elLiner.innerHTML = 
+                        '<img src="../../../common/images/arrow_right2.png" style="float:right"/><br>'
+                        +'<div style="font-size:0.75em" '
+                        +" title='Click to insert a new section divider at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"'>"+
+                        'Add&nbsp;divider</div>';
+                        
+                        $(elLiner).css({cursor:'pointer'})
+                            .attr('rst_ID', oRecord.getData("rst_ID"))
+                            .click(function(){editStructure.onAddFieldAtIndex(event, true);});
+                        //elLiner.innerHTML = oData;
+                        //elLiner.title = oRecord.getData("conceptCode");
+                    }
+                },
+                {
+                    key:'addColumn',
+                    label: "Field",
+                    sortable:false, width:40,
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        /*
+                        elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' style='cursor:pointer;' "
+                        +" title='Click this button to insert a new field at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, false);}' >";*/
+                        //label
+                        elLiner.innerHTML = 
+                        '<img src="../../../common/images/arrow_right2.png" style="float:right"/><br>'
+                        + '<div style="font-size:0.75em;width:40px;font-weight:bold;" '
+                        +" title='Click to insert a new field at this point in the record structure / data entry form' "+
+                        " rst_ID='"+oRecord.getData("rst_ID")+"'>"+
+                        'Add&nbsp;field</div>';
+                        
+                        $(elLiner).css({cursor:'pointer'})
+                            .attr('rst_ID', oRecord.getData("rst_ID"))
+                            .click(function(){
+                                editStructure.onAddFieldAtIndex(event, false);
+                                });
+
+                    }
+                },
+                {
                     key:'rst_NonOwnerVisibility',
                     label: "<img src='../../../common/images/up-down-arrow.png'>",
                     sortable:false, width:20,
@@ -246,50 +296,6 @@ function EditRecStructure() {
                         
                     }
                     //expansionFormatter
-                },
-                {
-                    key:"rst_ID", label: "Header", sortable:false, width:45,
-                    formatter: function(elLiner, oRecord, oColumn, oData){
-
-                        /* icon                        
-                        elLiner.innerHTML = "<img src='../../../common/images/insert_header.png' style='cursor:pointer;' "
-                        +" title='Click this button to insert a new section header at this point in the record structure / data entry form' "+
-                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, true);}' >";
-                        */
-
-                        //label
-                        elLiner.innerHTML = 
-                        '<img src="../../../common/images/blue-up-triangle.png" style="float:right"/><br>'
-                        +'<div style="font-size:0.7em" '
-                        +" title='Click to insert a new section header at this point in the record structure / data entry form' "+
-                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, true);}' >"+
-                        'Add&nbsp;divider</div>';
-                        
-                        $(elLiner).css({cursor:'pointer'});
-                        //elLiner.innerHTML = oData;
-                        //elLiner.title = oRecord.getData("conceptCode");
-                    }
-                },
-                {
-                    key:'addColumn',
-                    label: "Add",
-                    sortable:false, width:40,
-                    formatter: function(elLiner, oRecord, oColumn, oData) {
-                        /*
-                        elLiner.innerHTML = "<img src='../../../common/images/insert_field.png' style='cursor:pointer;' "
-                        +" title='Click this button to insert a new field at this point in the record structure / data entry form' "+
-                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, false);}' >";*/
-                        //label
-                        elLiner.innerHTML = 
-                        '<img src="../../../common/images/blue-up-triangle.png" style="float:right"/><br>'
-                        + '<div style="font-size:0.7em;width:40px" '
-                        +" title='Click to insert a new field at this point in the record structure / data entry form' "+
-                        " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, false);}' >"+
-                        'Add&nbsp;field</div>';
-                        
-                        $(elLiner).css({cursor:'pointer'}); //'margin-top':'10px', 
-
-                    }
                 },
                 {
                     key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
@@ -1512,11 +1518,11 @@ function EditRecStructure() {
 
             var _detailType = [];//new Array();
 
-            _detailType[fnames[fi.dty_Name]] = 'HEADING '+k;
+            _detailType[fnames[fi.dty_Name]] = 'DIVIDER '+k;
             _detailType[fnames[fi.dty_ExtendedDescription]] = '';
             _detailType[fnames[fi.dty_Type]] = 'separator';
             _detailType[fnames[fi.dty_OrderInGroup]] = 0;
-            _detailType[fnames[fi.dty_HelpText]] = 'Headings serve to break the data entry form up into sections';
+            _detailType[fnames[fi.dty_HelpText]] = 'Dividers serve to break the data entry form up into sections';
             _detailType[fnames[fi.dty_ShowInLists]] = 1;
             _detailType[fnames[fi.dty_Status]] = 'open';
             _detailType[fnames[fi.dty_DetailTypeGroupID]] = ft_separator_group;
@@ -2136,7 +2142,7 @@ function EditRecStructure() {
             _fieldMenu.addItems([
                 { text: "Add field (use existing definition)" },
                 { text: "Define field (create new definition)" },
-                { text: "Add section header" }
+                { text: "Add section divider" }
             ]);
             _fieldMenu.render(document.getElementById('recStrcuture_bottom')); //document.body);
             $("#menu_addfield").bind("mouseleave",function(){

@@ -119,35 +119,35 @@
     <body class="popup yui-skin-sam" style="overflow: scroll;">
         <script type="text/javascript" src="selectDetailType.js"></script>
 
-        <div id="filtertoolbar">
-            <div class="input-row" style="border:none;">
+        <div id="filtertoolbar" style="min-height:8em">
+            <div style="border:none;padding-bottom: 10px;">
             
                 <div style="display:inline-block;min-width:120px">  <!-- class="input-cell"  class="input-cell" -->
-                    <b>Use an existing field</b>(select in list below)
+                    <b>Use an existing field</b>&nbsp;&nbsp;(select in list below)
                 </div>
                     
                 <div style="display:inline-block;color: #6A7C99;min-width:40px;text-align:right;padding-right:10px">
                     Find
                 </div>
-                <div class="input-cell" style="display:inline-block;">
-                
+                <div style="display:inline-block;">
                     <input type="text" id="inputFilterByName" name="inputFilterByName" style="min-width:4em;" value=""/>
-                
-                    <select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;display:none">
-                        <option value="all">all groups</option>
-                    </select>
-
-                    <div style="display:inline-block;padding-left:10px">
-                        Show
-                    </div>
-                    <div style="display:inline-block;">
-                        <input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/>
-                        <label for="inputFilterBySelection1" style="text-align:left; width:20px; min-width:20px;">All</label>
-                        <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/>
-                        <label for="inputFilterBySelection2" style="text-align:left">Selected</label>
-                    </div>
-
                 </div>
+                
+                <select id="inputFilterByGroup" name="inputFilterByGroup" size="1" style="width:138px;display:none">
+                        <option value="all">all groups</option>
+                </select>
+                    
+                
+                <div id="divFilterBySelection" style="display:none;padding-left:10px">
+                        <label>Show</label>
+                        <div style="display:inline-block;">
+                            <input type="radio" id="inputFilterBySelection1" name="inputFilterBySelection" value="all" checked="checked"/>
+                            <label for="inputFilterBySelection1" style="text-align:left; width:20px; min-width:20px;">All</label>
+                            <input type="radio" id="inputFilterBySelection2" name="inputFilterBySelection" value="selonly"/>
+                            <label for="inputFilterBySelection2" style="text-align:left">Selected</label>
+                        </div>
+                </div>
+
             </div>
 
 <!--            
@@ -178,7 +178,7 @@
                         onClick="{window.selectDetailType.onDefineNewType();}"
                         title="Create a completely new base field type. It is preferable to use an existing field (select one or several fields below and click Insert Selected) before creating a new field type." />
                 </div>
-                <div style="float:right;text-align:right;padding-right: 30px;padding-bottom:5px">
+                <div style="float:right;text-align:right;padding-right:5px 30px;padding-bottom:5px">
                         <label id="lblSelect1"></label>
                         <a href="#" id="btnClearSelection" style="min-width:7ex;" title="clear the current selection">&nbsp;clear&nbsp;</a>
                         <input type="button" tabindex="11" value="Insert selected" onClick="onApply()" />
