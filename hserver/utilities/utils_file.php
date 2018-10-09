@@ -234,7 +234,7 @@
     */
     function saveURLasFile($url, $filename)
     { //Download file from remote server
-        $rawdata = loadRemoteURLContent($url);
+        $rawdata = loadRemoteURLContent($url); //loadRemoteURLContentSpecial($url);
         return fileSave($rawdata, $filename);
     }
     

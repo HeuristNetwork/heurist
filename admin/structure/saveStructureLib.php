@@ -506,14 +506,12 @@ copy_IconAndThumb_FromLibrary
 	function updateTitleMask($rtyID, $mask) {
         global $mysqli;
 
-
 		$ret = 0;
 		if($mask){
                 $parameters = array("");
-				$val = TitleMask::execute($mask, $rtyID, 1, null, _ERR_REP_SILENT);//make coded
+				$val = TitleMask::execute($mask, $rtyID, 1, null, _ERR_REP_SILENT);//convert from human to coded
 
                 $parameters = addParam($parameters, "s", $val);
-
                 /* DEPRECATED
 				$colName = "rty_CanonicalTitleMask";
 				$parameters[0] = "ss";//$parameters[0].$rtyColumnNames[$colName];

@@ -261,7 +261,7 @@ foreach ($imp_recordtypes as $rty_id){
 
             // 6. With list of all base field types: Return data for all terms used
 
-            if($field[$idx_type] == "enum" || $field[$idx_type] == "relmarker" || $def_field[$idx_type] == "relationtype"){
+            if($field[$idx_type] == "enum" || $field[$idx_type] == "relmarker" || $field[$idx_type] == "relationtype"){
                 //get topmost vocabulary
                 getTopMostVocabulary($def_dts[$ftId]['commonFields'][$idx_terms], $field[$idx_type]);
             }
@@ -395,7 +395,7 @@ foreach ($imp_recordtypes as $rtyID){
     $def_rectype[$idx_name] = doDisambiguate($def_rectype[$idx_name], $trg_rectypes['names']);
 
     //assign canonical to title mask (since in DB we store only rty_TitleMask)
-    //$def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
+    $def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
 
     //fill original ids if missed
     if($def_rectype[$idx_ccode] && (!$def_rectype[$idx_origin_dbid] || !$def_rectype[$idx_origin_id])){
@@ -590,10 +590,12 @@ foreach ($imp_recordtypes as $rtyID){
 
 //$mysqli->commit();
 
+TitleMask::set_fields_correspondence($fields_correspondence);
+
 foreach ($imp_recordtypes as $rtyID){
     if(@$rectypes_correspondence[$rtyID]){
 
-        $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask];
+        $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask_canonical];
 //echo $mask;
         // note we use special global array $fields_correspondence - for proper conversion of remote id to concept code
         $res = updateTitleMask( $rectypes_correspondence[$rtyID], $mask);
@@ -602,6 +604,8 @@ foreach ($imp_recordtypes as $rtyID){
         }
     }
 }
+
+TitleMask::set_fields_correspondence(null);
 
 $mysqli->commit();
 //$mysqli->close();
@@ -1141,15 +1145,36 @@ function findByConceptCode($ccode, $entities, $idx_ccode, $sall=false){
 // Copy record type icon and thumbnail from source to destination database
 //
 function copyRectypeIcon($source_RtyID, $target_RtyID, $thumb=""){
-    global $sourceIconURL;
-
-    $sourceURL = $sourceIconURL.$thumb.$source_RtyID.".png";
+    global $sourceIconURL, $remote_dbname;
+    
     $targetPath = HEURIST_ICON_DIR.$thumb.$target_RtyID.".png";
+    
+    //check if the same server with target
+    if(strpos($sourceIconURL, HEURIST_SERVER_URL)===0){ 
+        
+        $filename = HEURIST_FILESTORE_ROOT.$remote_dbname."/rectype-icons/".$thumb.$source_RtyID.".png";
+        if(file_exists($filename)){
+            
+            if(file_exists($targetPath)){
+                unlink($targetPath);
+            }
 
-    //print "<br>sourcce=".$sourceURL;
-    //print "<br>path=".$targetPath;
+            if (!copy($filename, $targetPath)) {
+                //makeLogEntry("<b>Warning</b> Importing Record-type", $importRtyID, " Can't copy ".(($thumb=="")?"icon":"thumbnail")." ".$filename." to ".$target_filename);
+            }
+        }else{
+            //makeLogEntry("<b>Warning</b> Importing Record-type", $importRtyID, " ".(($thumb=="")?"icon":"thumbnail")." does not exist");
+        }
+    
 
-    saveURLasFile($sourceURL, $targetPath); //see utils_file
+    }else{
+        $sourceURL = $sourceIconURL.$thumb.$source_RtyID.".png";
+
+        //print "<br>sourcce=".$sourceURL;
+        //print "<br>path=".$targetPath;
+
+        saveURLasFile($sourceURL, $targetPath); //see utils_file
+    }
 
     if($thumb==""){
         copyRectypeIcon($source_RtyID, $target_RtyID, "thumb/th_");

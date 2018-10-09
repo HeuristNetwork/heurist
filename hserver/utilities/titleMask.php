@@ -71,9 +71,12 @@ class TitleMask {
     private static $rdr = null;  //record detail types
     //private static $rectypes = null;
     private static $records = null;
+    
+    //private static $DT_PARENT_ENTITY = 0;
 
-    public static function initialize($fields_correspondence=null)
+    public static function initialize()
     {
+        
         if (self::$initialized)
             return;
 
@@ -81,9 +84,12 @@ class TitleMask {
         self::$mysqli = $system->get_mysqli();
         self::$db_regid = $system->get_system('sys_dbRegisteredID');
         self::$initialized = true;
-        self::$fields_correspondence = $fields_correspondence;
         
         $system->defineConstant('DT_PARENT_ENTITY');
+    }
+    
+    public static function set_fields_correspondence($fields_correspondence){
+        self::$fields_correspondence = $fields_correspondence;
     }
     
 /**
@@ -150,7 +156,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
 
     self::initialize();
 
-    if(isset(self::$fields_correspondence)){
+    if(self::$fields_correspondence!=null){
         self::$rdr = null;
     }
 
@@ -651,7 +657,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
     // Return the rec-detail-type ID for the given field in the given record type
     if (strpos($field_name, ".") === FALSE) {    // direct field name lookup
 
-        if($mode==1 && isset(self::$fields_correspondence)){
+        if($mode==1 && self::$fields_correspondence!=null){
             $field_name = self::__replaceInCaseOfImport($field_name);
         }
 
@@ -671,7 +677,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         $parent_field_name = $matches[1];
 
 
-        if($mode==1 && isset(self::$fields_correspondence)){  //special case
+        if($mode==1 && self::$fields_correspondence!=null){  //special case
             $parent_field_name = self::__replaceInCaseOfImport($parent_field_name);
         }//special case
 
@@ -829,7 +835,7 @@ private static function __replaceInCaseOfImport($dty_ID){
     //special case - replace dty_ID in case of definition import
     if(strpos($dty_ID,"-")===false && is_numeric($dty_ID)){ //this is not concept code and numeric
 
-        if(isset(self::$fields_correspondence) && count(self::$fields_correspondence)>0 && @self::$fields_correspondence[$dty_ID]){
+        if(self::$fields_correspondence!=null && count(self::$fields_correspondence)>0 && @self::$fields_correspondence[$dty_ID]){
             //print "<br>>>>was ".$dty_ID;
             $dty_ID = @self::$fields_correspondence[$dty_ID];
             //print "<br>>>>replace to ".$dty_ID;
