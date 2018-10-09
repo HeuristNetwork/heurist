@@ -977,6 +977,14 @@ $.widget( "heurist.editing_input", {
                                      if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                         var recordset = data.selection;
                                         var record = recordset.getFirstRecord();
+                                        
+                                        var rec_Title = recordset.fld(record,'rec_Title');
+                                        if(window.hWin.HEURIST4.util.isempty(rec_Title)){
+                                            // no proper selection 
+                                            // consider that record was not saved - it returns FlagTemporary=1 
+                                            return;
+                                        }
+                                       
                                         var targetID = recordset.fld(record,'rec_ID');
                                         var rec_Title = recordset.fld(record,'rec_Title');
                                         var rec_RecType = recordset.fld(record,'rec_RecTypeID');
@@ -1145,7 +1153,7 @@ $.widget( "heurist.editing_input", {
                                   if(new_rec_param==null){
                                       new_rec_param = {RecTypeID:selector_rectype.val()};
                                   }
-                                  
+console.log('OPEN RECORD EDIT');                                  
                                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                                         {new_record_params:new_rec_param, 
                                             onselect:popup_options.onselect, 

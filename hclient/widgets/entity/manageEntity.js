@@ -105,7 +105,7 @@ $.widget( "heurist.manageEntity", {
         
         selection_on_init:null, //ids to be selected on init
         
-        selectOnSave:false, //edit/save of record triggers onselect and close dialog
+        selectOnSave:false, //edit/save of record triggers onselect and close dialog, trigger onselect works always on close dialog
         
         //it either loaded from server side if _entityName defined or defined explicitely on client side
         entity: {},       //configuration
@@ -735,6 +735,21 @@ $.widget( "heurist.manageEntity", {
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
                 close:function(){
+
+                    if(that.options.selectOnSave==true){
+                        
+                        var res = that._currentEditRecordset;
+                        if(window.hWin.HEURIST4.util.isRecordSet(res)){
+                            //window.hWin.HAPI4.save_pref('recent_Users', this._selection.getIds(25), 25);      
+                            that._trigger( "onselect", null, 
+                                {selection:  
+                                    (that.options.select_return_mode=='recordset') ?res :res.getIds()});
+                        }else{        
+                            that._trigger( "onselect", null, null );
+                        }
+                    }
+                
+                    
                     if($.isFunction(that.options.onClose)){
                       //that.options.onClose(that._currentEditRecordset);  
                       that.options.onClose.call();

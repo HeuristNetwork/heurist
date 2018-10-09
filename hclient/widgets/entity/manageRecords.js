@@ -24,7 +24,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     _currentEditRecTypeID:null,
     _isInsert: false,
-    _additionWasPerformed: false, //for selectAndSave mode
+    _additionWasPerformed: false, //NOT USED for selectAndSave mode
     _updated_tags_selection: null,
     _keepYPos: 0,
     
@@ -279,12 +279,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               css:{'margin-left':'0.5em'},
                               click: function() { 
                                   
+                                /*A123  remarked since onselect triggered in onClose event 
                                 if(true || that._additionWasPerformed){
                                     that.selectedRecords(that._currentEditRecordset);
                                     that._selectAndClose();
                                 }else{
                                     that.closeEditDialog();   
-                                }
+                                }*/
+                                that.closeEditDialog();
                                   
                               }},
                         {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
@@ -383,8 +385,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     var that = this;
                     popup_options['onselect'] = function(event, data){
                             if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                //that.selectedRecords(data.selection);
-                                //that._selectAndClose();
 
                                 //save last 25 selected records
                                 /*
@@ -2024,6 +2024,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             //var recID = ''+response.data[0];
                             var rec_Title = response.rec_Title;
                             
+                            var saved_record = that._currentEditRecordset.getFirstRecord();
+                            that._currentEditRecordset.setFld(saved_record, 'rec_Title', rec_Title);
+
                             //that._afterSaveEventHandler( recID, fields);
                             //
                             if(that.options.selectOnSave==true){
@@ -2036,17 +2039,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 
                             }else if(afterAction=='close'){
 
-                                that._currentEditRecordset.setFld(
-                                        that._currentEditRecordset.getFirstRecord(),'rec_Title',rec_Title);
-                                
                                 that._currentEditID = null;
+                                /*A123  remarked since onselect triggered in onClose event 
                                 if(that.options.selectOnSave==true){
                                     that.selectedRecords(that._currentEditRecordset);
                                     that._selectAndClose();
-                                }else{
-                                    that._currentEditID = null;
+                                }else*/
                                     that.closeEditDialog();            
-                                }
                                 
                             }else if(afterAction=='newrecord'){
                                 that._initEditForm_step3(-1);
