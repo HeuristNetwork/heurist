@@ -810,7 +810,7 @@ var TDate = function (strDate) {
                             return _month ? TDate.getMonthName(_month) : "";
                         case " MMM":
                         case "MMM":
-                            return _month ? TDate.getMonthName(_month,true) : "";
+                            return _month ? ((format.length === 4? format[0] : "") + TDate.getMonthName(_month,true)) : "";
                         case " MM":
                         case "-MM":
                         case "/MM":

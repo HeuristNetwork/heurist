@@ -1494,14 +1494,14 @@ $.widget( "heurist.search_faceted", {
                                 //mmax = moment(mmax).valueOf();
                                 //find date interval for proper formating
                                 var delta = mmax-mmin;
-                                var date_format = "dd mmm yyyy HH:MM"; //"YYYY-MM-DD hh:mm:ss";
+                                var date_format = "dd MMM yyyy HH:mm"; //"YYYY-MM-DD hh:mm:ss";
                                 
                                 if(delta>3*365*daymsec){ //3 years
                                     date_format = "yyyy";
                                 }else if(delta>365*daymsec){ //6 month
-                                    date_format = "mmm yyyy";
+                                    date_format = "MMM yyyy";
                                 }else if(delta>daymsec){ //1 day
-                                    date_format = "dd mmm yyyy";
+                                    date_format = "dd MMM yyyy";
                                 }
                                 
                             }else{
