@@ -192,7 +192,14 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 ?>
                 
                 <br/>
-                <p><a href='#' onclick="{window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification'); return false;}"
+                <p><a href='#' onclick="{window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', 
+                    {onClose:function(){
+                        
+                        //var mediaFolders = window.hWin.HAPI4.sysinfo['sys_MediaFolders'];
+                        //var mediaExts = window.hWin.HAPI4.sysinfo['sys_MediaExtensions'];
+                        location.reload();
+                        
+                    }}); return false;}"
                     title='Open form to edit properties which determine the handling of files and directories in the database upload folders'>
                     Click here to set media/upload folders</a>
                 </p>                

@@ -80,7 +80,16 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
     
     _afterSaveEventHandler: function( recID, fields ){
         this._super( recID, fields );
-        this.closeDialog(true); //force to avoid warning
+        
+        var that = this;
+        
+        //reload local sysinfo
+        window.hWin.HAPI4.SystemMgr.sys_info(function(){
+            that.closeDialog(true); //force to avoid warning    
+        });
+        
+        
+        
     },
     
 });
