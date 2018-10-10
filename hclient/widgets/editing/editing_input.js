@@ -924,7 +924,8 @@ $.widget( "heurist.editing_input", {
                     //show popup dialog at once
                     //IJ ASKS to disbale it __show_addlink_dialog();
                     if(this.element.find('.rel_link').is(':visible')){
-                        window.hWin.HEURIST4.msg.showMsgFlash('Please define the first relationship before adding another', 2000);                          }
+                        window.hWin.HEURIST4.msg.showMsgFlash('Please define the first relationship before adding another', 2000);                        
+                    }
                     
                     this.element.find('.rel_link').show();
                     
@@ -943,10 +944,12 @@ $.widget( "heurist.editing_input", {
         }
         else if(this.detailType=='resource' && this.configMode.entity=='records'){
 
+            /*
             if(value=='' && this.element.find('.sel_link2').is(':visible')){
                 window.hWin.HEURIST4.msg.showMsgFlash('Please select record before adding another pointer',2000);
                 return;
             }
+            */
             
             var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
             
