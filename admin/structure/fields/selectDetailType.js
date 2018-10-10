@@ -117,7 +117,7 @@ function SelectDetailType() {
 		}
 
         var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);//beginner by default
-        if(usr_exp_level<2){
+        if(usr_exp_level<1){
             $('#divFilterBySelection').css({'display':'inline-block'});
         }                
         
