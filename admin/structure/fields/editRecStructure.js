@@ -231,7 +231,8 @@ function EditRecStructure() {
 
                         //label
                         elLiner.innerHTML = 
-                        '<img src="../../../common/images/arrow_right2.png" style="float:right"/><br>'
+                        '<img src="../../../common/images/arrow_right2.png" style="float:right"'
+                        +' rst_ID="'+oRecord.getData("rst_ID")+'"/><br>'
                         +'<div style="font-size:0.75em" '
                         +" title='Click to insert a new section divider at this point in the record structure / data entry form' "+
                         " rst_ID='"+oRecord.getData("rst_ID")+"'>"+
@@ -255,7 +256,8 @@ function EditRecStructure() {
                         " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, false);}' >";*/
                         //label
                         elLiner.innerHTML = 
-                        '<img src="../../../common/images/arrow_right2.png" style="float:right"/><br>'
+                        '<img src="../../../common/images/arrow_right2.png" style="float:right"'
+                        +' rst_ID="'+oRecord.getData("rst_ID")+'"/><br>'
                         + '<div style="font-size:0.75em;width:40px;font-weight:bold;" '
                         +" title='Click to insert a new field at this point in the record structure / data entry form' "+
                         " rst_ID='"+oRecord.getData("rst_ID")+"'>"+
