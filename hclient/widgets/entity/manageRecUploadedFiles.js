@@ -389,7 +389,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         //find file element
         var that = this;
         
-            if(!this._editing_uploadfile){
+            if(!this._editing_uploadfile){ //form is not yet defined
 
                 var container = $('<div>').css({width:0,height:0}).appendTo(this.editForm.parent());
                 

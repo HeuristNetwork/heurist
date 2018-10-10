@@ -221,9 +221,16 @@ function registerUploadedFile($system, $file){
             $name = str_replace('\\', '/', $name);
             $name = preg_replace('!.*/!', '', $name);
             
+            $extension = null;
+            if($file->type=='application/octet-stream'){ 
+                //need to be more specific - try ro save extension
+                $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+            }
+            
+            
             $fields = array(    
             'ulf_OrigFileName' => $name,
-            'ulf_MimeExt' => $file->type, //extension or mimetype allowed
+            'ulf_MimeExt' => $extension?$extension:$file->type, //extension or mimetype allowed
             'ulf_FileSizeKB' => ($file->size<1024?1:intval($file->size/1024)),
             'ulf_FilePath' => 'file_uploads/'); //relative path to HEURIST_FILESTORE_DIR - db root
             //,'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt)); //backward capability            
