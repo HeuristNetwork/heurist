@@ -5270,7 +5270,7 @@ html, body {
   background-color: transparent; }
 
 html {
-  background: black url("bundles/usydbookofremembrancewebsite/images/common/background.jpg") no-repeat center center;
+  background: black;
   background-size: auto auto;
   background-size: cover;
   background-position: top center;
@@ -6127,7 +6127,7 @@ a.facet_link span:first-child:focus {
 .float-panel {
     position: absolute;
     width: 120px;
-    height: 65px;
+    /*height: 65px;*/
     padding:4px;
     top: 180px;
     right: 10px;

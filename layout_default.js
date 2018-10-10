@@ -246,7 +246,8 @@ var cfg_layouts = [
     */
 
     {id:'boro', name:'Beyond 1914 / Book of Remembrance, University of Sydney, built with Heurist', theme:'heurist', type:'free', 
-                cssfile:'hclient/widgets/boro/beyond1914.css', template: 'hclient/widgets/boro/boro_main.html'
+                cssfile:['hclient/widgets/boro/beyond1914.css','hclient/widgets/boro/boro_style.css'],
+                template: 'hclient/widgets/boro/boro_main.html'
        //widgets will be loaded into divs with id "result_pane" and "search_pane" in boro_main.html         
        ,boro_place:{dropable:false,css:{},
                 apps:[                           

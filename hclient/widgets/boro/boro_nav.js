@@ -44,6 +44,7 @@ $.widget( "heurist.boro_nav", {
     
     history:[], 
     historyNav:[],
+    currentNavIdx:0,
     
     recset: null, //current recordset
     
@@ -98,17 +99,31 @@ $.widget( "heurist.boro_nav", {
         // Sets up element to apply the ui-state-focus class on focus.
         //this._focusable($element);
         $('.float-panel').sideFollow();
-        var ele = $('.float-panel > select');
+        /*var ele = $('.float-panel > select');
         ele.change(function(e){
                 var idx = $(e.target).val();
                 that._setOptions( that.historyNav[idx] );
-        });
-        ele = $('.float-panel > a');
-        ele.click(function(e){
-            if(that.historyNav.length>1){
-                that._setOptions( that.historyNav[that.historyNav.length-2] );
-            }
-        });
+        });*/
+        $('.float-panel > div > span.ui-icon-triangle-1-n').click(
+            function(e){
+                var pnl = $('.float-panel > .historylist');
+                if(pnl.is(':visible')){
+                    $(e.target).addClass('ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-n');
+                    pnl.hide();
+                }else{
+                    $(e.target).removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-n');
+                    pnl.show();
+                }
+            }        
+        );
+        $('.float-panel > div > span.ui-icon-close').click(
+            function(e){
+                that.currentNavIdx = 0;
+                that.historyNav = [];
+                $('.float-panel > .historylist').empty();
+                $('.float-panel').hide();
+            }        
+        );
         
         $('body').css({'background':'none'});
 
@@ -1978,10 +1993,14 @@ $.widget( "heurist.boro_nav", {
     
     __formatDate: function(val){
                 if(!this.isempty(val)){
-                    var tDate = TDate.parse(val);
-                    var day = Number(tDate.getDay());
-            
-                    var res = (isNaN(day)||day<1||day>31?'':(day+' '))+tDate.toString('MMMM')+' '+Math.abs(tDate.getYear()); 
+                    var res;
+                    if( isTemporal(val) ){
+                        res = temporalToHumanReadableString(val);
+                    }else{
+                        var tDate = TDate.parse(val);
+                        var day = Number(tDate.getDay());
+                        res = (isNaN(day)||day<1||day>31?'':(day+' '))+tDate.toString('MMMM')+' '+Math.abs(tDate.getYear()); 
+                    }
                     return res.trim();
                 }else{
                     return '';
@@ -2271,6 +2290,16 @@ $.widget( "heurist.boro_nav", {
     // navigation to history
     //
     stepBack: function(){
+        
+        console.log('step back');      
+        if(this.historyNav.length>1){
+            var toidx = ((this.currentNavIdx==0)?this.historyNav.length:this.currentNavIdx)-1;
+            var nav = this.historyNav[toidx];
+            console.log( nav.page_name?nav.page_name:nav.title );    
+            this._setOptions( nav );
+        }
+        
+        
         return; //ignore
         
         if(this.history.length>1){
@@ -2280,24 +2309,45 @@ $.widget( "heurist.boro_nav", {
         }
     },
     
+    //
+    // update title in history and redraw history list
+    //
     resolveHistory: function(entityType, recID, title){
         
-            for (var idx in this.historyNav){
-                    var nav = this.historyNav[idx];
-                    if(nav.entityType == entityType && nav.entityID==recID){
-                        this.historyNav[idx].title = title;
+            if (!window.hWin.HEURIST4.util.isempty(title)){
+                    for (var idx in this.historyNav){
+                            var nav = this.historyNav[idx];
+                            if(nav.entityType == entityType && nav.entityID==recID){
+                                this.historyNav[idx].title = title;
+                            }
                     }
             }
             
             if(this.historyNav.length>1){
                 
-                var ele = $('.float-panel > select');
+                var ele = $('.float-panel > .historylist');
                 ele.empty();
                 
-                for (var idx=this.historyNav.length-2; idx>=0; idx--){
+                var that = this;
+                
+                //draw except current entry
+                for (var idx=this.historyNav.length-1; idx>=0; idx--){
                     var nav = this.historyNav[idx];
                     var text = nav.page_name?nav.page_name:nav.title;   //(nav.entityType+'  '+nav.entityID);
-                    window.hWin.HEURIST4.ui.addoption(ele[0], idx, text);
+                    
+                    if (true || !window.hWin.HEURIST4.util.isempty(text)){
+                        
+                        $('<a>').attr('history_idx',idx).attr('title',text).text(text)
+                            .css({'color':'white'})
+                            .click(function(event){
+                                if(that.historyNav.length>1){
+                                    var idx = $(event.target).attr('history_idx');
+                                    that._setOptions( that.historyNav[idx] );
+                                }
+                                window.hWin.HEURIST4.util.stopEvent(event);
+                            }).appendTo($('<div>').addClass('truncate').css({'max-width':'110px;'}).appendTo(ele));
+                        //window.hWin.HEURIST4.ui.addoption(ele[0], idx, text);
+                    }
                 }
                 
                 $('.float-panel').show();
@@ -2307,6 +2357,9 @@ $.widget( "heurist.boro_nav", {
             
     },
     
+    //
+    //
+    //
     addToHistory: function(opt){
         
             this.history.push(opt);        
@@ -2323,7 +2376,7 @@ $.widget( "heurist.boro_nav", {
                 //console.log(opt);
                 
                 //historyNav
-                //find entry in history and put in t the end of array
+                //find entry in history and put in the end of array
                 var is_not_found = true;
                 for (var idx in this.historyNav){
                     var nav = this.historyNav[idx];
@@ -2332,14 +2385,18 @@ $.widget( "heurist.boro_nav", {
                     {
                         is_not_found = false;
                         
+                        this.currentNavIdx = idx;
+                        /* put current to the top
                         this.historyNav.splice(idx, 1);
                         this.historyNav.push(nav); //add current as a last
+                        */
                         
                         break;
                     }
                 }
                 if(is_not_found){
                     this.historyNav.push(opt);
+                    this.currentNavIdx = this.historyNav.length-1;
                 }
                 
             }else if(this.historyNav.length < 2){
