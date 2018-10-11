@@ -328,7 +328,7 @@ class DbSysUsers extends DbEntityBase
                         $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $group_role);
                         
                         $fname = HEURIST_FILESTORE_DIR.$ugr_ID;
-                        fileSave('X',$fname);  //add to group
+                        fileSave('X',$fname);  //add to group ???
                     }
                     
                     //send approvement or registration email

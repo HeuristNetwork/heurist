@@ -660,7 +660,7 @@
             $res = $mysqli->query($query);
         }
         
-        //create new table
+        //create new tables
         $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
         if($value==null || $value==""){        
         
@@ -681,6 +681,30 @@
             $query = 'DROP INDEX rcp_composite_key ON usrRecPermissions';
             $res = $mysqli->query($query);
         }
+
+        //create new tables
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'sysDashboard'");
+        if($value==null || $value==""){        
+            
+$query = 'CREATE TABLE sysDashboard ('
+  .'dsh_ID tinyint(3) unsigned NOT NULL auto_increment,'
+  ."dsh_Order smallint COMMENT 'Used to define the order in which the dashboard entries are shown',"
+  ."dsh_Label varchar(64) COMMENT 'The short text which will describe this function on the dashboard',"
+  ."dsh_Description varchar(1024) COMMENT 'A longer text giving more information about this function to show as a description below the label or as a rollover',"
+  ."dsh_Enabled enum('y','n') NOT NULL default 'y' COMMENT 'Allows unused functions to be retained so they can be switched back on',"
+  ."dsh_ShowIfNoRecords enum('y','n') NOT NULL default 'y' COMMENT 'Deteremines whether the function will be shown on the dashboard if there are no records in the database (eg. no point in showing searches if nothing to search)',"
+  ."dsh_CommandToRun varchar(64) COMMENT 'Name of commonly used functions',"
+  ."dsh_Parameters varchar(250) COMMENT 'Parameters to pass to the command eg the record type to create',"
+  ."PRIMARY KEY  (dsh_ID)"
+.") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off'";
+            
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot create sysDashboard', $mysqli->error);
+                return false;
+            }
+        }
+
         
         $query = 'DROP TRIGGER IF EXISTS update_sys_index_trigger';
         $res = $mysqli->query($query);

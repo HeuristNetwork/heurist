@@ -610,6 +610,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     + '<br><br>'+window.hWin.HR('New_Function_Contact_Team'));
             
         }else 
+        if(action == "menu-manage-dashboards"){
+            
+           window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard');
+        
+        }else
         if(action == "menu-help-bugreport"){
             
            window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport');

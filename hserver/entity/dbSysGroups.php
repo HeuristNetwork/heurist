@@ -349,8 +349,10 @@ class DbSysGroups extends DbEntityBase
             if(count(@$affectedUserIds)>0)
             foreach($affectedUserIds as $usrID)  //affected users
             if($usrID!=$this->system->get_user_id()){
-                    $fname = HEURIST_FILESTORE_DIR.$usrID;
-                    fileSave('X',$fname);  //on delete
+                    $fname = $this->getEntityImagePath($usrID);
+                    if(file_exists($fname)){
+                        unlink($fname);
+                    }
             }
             
             //@todo   $groups = reloadUserGroups(get_user_id());
@@ -458,7 +460,8 @@ class DbSysGroups extends DbEntityBase
         }
         if($ret){
             $mysqli->commit();
-            
+        
+            //????    
             foreach ($assignIDs as $usrID)
             if($usrID!=$this->system->get_user_id()){
                 $fname = HEURIST_FILESTORE_DIR.$usrID;

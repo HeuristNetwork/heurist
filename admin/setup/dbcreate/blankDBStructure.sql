@@ -553,6 +553,25 @@ CREATE TABLE sysArchive (
   KEY arc_Table (arc_Table,arc_ChangedByUGrpID,arc_OwnerUGrpID,arc_RecID,arc_TimeOfChange)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='An archive of all (or most) changes in the database to allow';
 
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table 'sysDashboard'
+--
+
+CREATE TABLE sysDashboard (
+  dsh_ID tinyint(3) unsigned NOT NULL auto_increment,
+  dsh_Order smallint COMMENT 'Used to define the order in which the dashboard entries are shown',
+  dsh_Label varchar(64) COMMENT 'The short text which will describe this function on the dashboard',
+  dsh_Description varchar(1024) COMMENT 'A longer text giving more information about this function to show as a description below the label or as a rollover',
+  dsh_Enabled enum('y','n') NOT NULL default 'y' COMMENT 'Allows unused functions to be retained so they can be switched back on',
+  dsh_ShowIfNoRecords enum('y','n') NOT NULL default 'y' COMMENT 'Deteremines whether the function will be shown on the dashboard if there are no records in the databar (eg. no point in showing searches if nothing to search)',
+  dsh_CommandToRun varchar(64) COMMENT 'Name of commonly used functions',
+  dsh_Parameters varchar(250) COMMENT 'Parameters to pass to the command eg the record type to create',
+  PRIMARY KEY  (dsh_ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off';
+
 -- --------------------------------------------------------
 
 --

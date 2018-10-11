@@ -1,0 +1,127 @@
+{
+        "entityName": "sysDashboard",
+
+        "tableName": "sysDashboard",
+        "tablePrefix": "dsh",
+        
+        "helpContent": "sysDashboard.html",
+        
+        "searchFormContent": "searchSysDashboard.html",
+        
+        "entityTitle": "Dashboard entry",
+        "entityTitlePlural": "Dashboard entries",
+        "empty_remark": "Please use the search field above to locate relevant Dashboard entry",
+
+        "fields": [
+                {
+                    "dtID": "dsh_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "dtID": "dsh_Order",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Size":20,
+                        "rst_DisplayWidth":20,
+                        "rst_DisplayName": "Order:",
+                        "rst_DisplayHelpText": "Define the order in which the dashboard entries are shown"
+                    }
+                },
+                {
+                    "dtID": "dsh_Label",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":63,
+                        "rst_DisplayName": "Label:",
+                        "rst_DisplayHelpText": "The short text which will describe this function on the dashboard", 
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "dsh_Description",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":1024,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayHeight":3,
+                        "rst_DisplayName": "Description:",
+                        "rst_DisplayHelpText": "A longer text giving more information about this function to show as a description below the label or as a rollover"
+                    }
+                },
+                {
+                    "dtID": "dsh_Enabled",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName": "Enabled:",
+                        "rst_DisplayHelpText": "Allows unused functions to be retained so they can be switched back on",
+                        "rst_DefaultValue":"y",
+                        "rst_FieldConfig":[
+                            {"key":"y","title":"Show"},
+                            {"key":"n","title":"Hidden"}
+                        ]
+                    }
+                }, 
+                {
+                    "dtID": "dsh_ShowIfNoRecords",
+                    "titleField": true,
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName": "Show for empty DB:",
+                        "rst_DisplayHelpText": "Deteremines whether the function will be shown on the dashboard if there are no records in the database (eg. no point in showing searches if nothing to search)",
+                        "rst_DefaultValue":"y",
+                        "rst_FieldConfig":[
+                            {"key":"y","title":"Yes"},
+                            {"key":"n","title":"No"}
+                        ]
+                    }
+                }, 
+                {
+                    "dtID": "dsh_CommandToRun",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName": "Command:",
+                        "rst_DisplayHelpText": "Name of commonly used functions", 
+                        "rst_RequirementType":"required",
+                        "rst_FieldConfig":[
+                            {"key":"menu-database-browse","title":"Browse databases"},
+                            {"key":"menu-database-create","title":"Create new database"},
+                            {"key":"menu-database-clone","title":"Clone current database"},
+                            
+                            
+                            
+                            {"key":"manage","title":"Manage record types"}
+                        ]
+                    }
+                },
+                {
+                    "dtID": "dsh_Parameters",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":250,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName": "Parameters:",
+                        "rst_DisplayHelpText": "Parameters to pass to the command eg the record type to create"
+                    }
+                },
+                {
+                    "dtID": "dsh_Image",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Icon:",
+                        "rst_DisplayHelpText": "The icon which will represent this function on the dashboard", 
+                        "rst_FieldConfig":{"entity":"sysDashboard", "accept":".png,.jpg,.gif", "size":200},
+                        "dty_Role":"virtual"
+                    }
+                }
+            ]
+}
