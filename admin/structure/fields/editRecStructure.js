@@ -2326,8 +2326,10 @@ function EditRecStructure() {
 
             proxyEl = this.proxyEl = this.getDragEl();
             srcEl = this.srcEl = this.getEl();
+            
+            var dcol  = $(srcEl).find('td.yui-dt0-col-rst_NonOwnerVisibility');
 
-            if(x>50){
+            if(x<dcol.position().left+10 || x>dcol.position().left+dcol.width()){ //area on row where DnD can be inited
                 proxyEl.innerHTML = "";
                 Dom.setStyle(this.proxyEl, "visibility", "hidden");
                 Dom.setStyle(srcEl, "visibility", "");
