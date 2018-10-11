@@ -50,7 +50,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
             .dtyField {
                 padding-bottom: 3px;
                 padding-top: 3px;
-                display: inline-block;
+                /*display: inline-block;*/
                 vertical-align: top;
             }
             .dtyLabel {
@@ -141,7 +141,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
         <script type="text/javascript" src="editTerms.js"></script>
 
-        <div class="ent_wrapper"> <!-- style="top:0px"-->
+        <div class="ent_wrapper" style="min-width:1050px"> <!-- style="top:0px"-->
             <div class="ent_header" id="divBanner" style="height:3em;border:none;">
                 <h2 style="line-height:25px"></h2>
                 <label style="padding:14px 0px;font-size:14px;font-weight:bold">Vocabularies</label>
@@ -161,11 +161,12 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                 </div>
                 <!-- Navigation: Search form to do partial match search on terms in the tree -->
                 <div id="formSearch" style="padding:15px;float:right">
-                    <div class="dtyField"><label class="dtyLabel" style="width:30px;">Find:</label>
+                    <div class="dtyField" style="display: inline-block;">
+                        <label class="dtyLabel" style="width:30px;">Find:</label>
                         <input id="edSearch" style="width:70px"  onkeyup="{doSearch(event)}"/>
                         <br><label style="padding-left:37px">&gt;2 characters</label>
                     </div>
-                    <div class="dtyField">
+                    <div class="dtyField" style="display: inline-block;">
                         <select id="resSearch" size="5" style="font-size: 0.9em;width: 200px;max-height: 50px;" onclick="{editTerms.doEdit()}"></select>
                     </div>
                 </div>
@@ -194,7 +195,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
                     <div style="margin-left:5px; border: black; border-style: solid; border-width:thin; padding:10px;">
 
-                        <div class="dtyField">
+                        <div class="dtyField" style="display: inline-block;">
                             <label class="dtyLabel">ID:</label>
                             <input id="edId" readonly="readonly" style="width:50px"/>
                             <input id="edParentId" type="hidden"/>
@@ -214,7 +215,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
 
                         <div class="dtyField">
-                            <div style="float:left;">
+                            <div>
                                 <label class="dtyLabel" style="color: red; margin-top:10px;">
                                     Term (label)</label>
                                 <!-- onkeypress="top.HEURIST.util.onPreventChars(event)" -->
@@ -266,7 +267,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                             <label for="cbInverseTermItself">Term is inverse of another term</label>
                         </div>
                         <div id="divInverse" class="dtyField"><label class="dtyLabel">Inverse Term</label>
-                            <input id="edInverseTerm" readonly="readonly" style="width:250px;background-color:#DDD;"/>
+                            <input id="edInverseTerm" readonly="readonly" style="width:400px;background-color:#DDD;"/>
                             <input type="button" value="clear" id="btnInverseSetClear" style="width:60px"/>
                         </div>
                         <input id="edInverseTermId" type="hidden"/>

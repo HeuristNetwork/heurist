@@ -363,7 +363,8 @@ function EditTerms() {
                 }
                 if(!Hul.isnull(node_invers)){ //inversed term found
                     $('#edInverseTermId').val(node_invers.data.id);
-                    $('#edInverseTerm').val(getParentLabel(node_invers));
+                    var parent_label = getParentLabel(node_invers);
+                    $('#edInverseTerm').val(parent_label).attr('title',parent_label);
                     $('#btnInverseSetClear').val('clear');
 
                     $('#divInverse').css({display:(node_invers.data.id==node.data.id)?'none':'block'});
@@ -372,7 +373,7 @@ function EditTerms() {
                 }else{
                     node.data.inverseid = null;
                     $('#edInverseTermId').val('0');
-                    $('#edInverseTerm').val('click me to select inverse term...');
+                    $('#edInverseTerm').val('click me to select inverse term...').attr('title','');
                     $('#btnInverseSetClear').val('set');
                     $('#divInverse').hide();
                     $('#cbInverseTermItself').prop('checked',true);
@@ -476,7 +477,7 @@ function EditTerms() {
             document.getElementById ('edInverseTermId').value = "0";
             document.getElementById ('divInverse').style.display = 'block';
             document.getElementById ('btnInverseSetClear').value = 'set';
-            document.getElementById ('edInverseTerm').value = "";
+            $('#edInverseTerm').val('').attr('title','');
         }
         _isNodeChanged();
     }
