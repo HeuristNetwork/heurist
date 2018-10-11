@@ -44,7 +44,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(typeof response === "string"){
             msg = response;
         }else{
-            var request_code = '';
+            var request_code = null;
             if(window.hWin.HEURIST4.util.isnull(response) || window.hWin.HEURIST4.util.isempty(response.message)){
                 if(response.status!=window.hWin.ResponseStatus.REQUEST_DENIED){
                         msg = 'Error_Empty_Message';
