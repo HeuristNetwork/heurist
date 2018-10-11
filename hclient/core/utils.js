@@ -529,6 +529,12 @@ window.hWin.HEURIST4.util = {
             request.db = window.hWin.HAPI4.database;
         }
         
+        var action = url.substring(url.lastIndexOf('/')+1);
+        if(action.indexOf('.php')>0) {
+            action = action.substring(0,action.indexOf('.php'));   
+        }
+        var request_code = {script:action, action:''};
+        
         //note jQuery ajax does not properly in the loop - success callback does not work often
         var options = {
             url: url,
@@ -543,7 +549,9 @@ window.hWin.HEURIST4.util = {
                             
                     var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
                                             ?'Error_Connection_Reset':jqXHR.responseText;
-                    var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+                    var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
+                                        message: err_message,
+                                        request_code:request_code};
                     
                     if(caller){
                         callback(caller, response);
@@ -555,6 +563,10 @@ window.hWin.HEURIST4.util = {
             success: function( response, textStatus, jqXHR ){
                 if(callback){
                     if(caller){
+
+                        if($.isPlainObject(response)){
+                            response.request_code = request_code;
+                        }
                         callback(caller, response);
                     }else{
                         callback(response);    
@@ -563,7 +575,9 @@ window.hWin.HEURIST4.util = {
             },
             fail: function(  jqXHR, textStatus, errorThrown ){
                 var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
-                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
+                                message: err_message,
+                                request_code:request_code};
 
                 if(callback){
                     if(caller){

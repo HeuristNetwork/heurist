@@ -44,9 +44,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(typeof response === "string"){
             msg = response;
         }else{
+            var request_code = '';
             if(window.hWin.HEURIST4.util.isnull(response) || window.hWin.HEURIST4.util.isempty(response.message)){
                 if(response.status!=window.hWin.ResponseStatus.REQUEST_DENIED){
                         msg = 'Error_Empty_Message';
+                        if(response && !window.hWin.HEURIST4.util.isempty(response.request_code)){
+                            request_code = response.request_code;    
+                        }
                 }
             }else{
                 msg = response.message;
@@ -94,10 +98,21 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 msg = msg + '<br><br>If this error occurs repeatedly, please contact '
                 +'your system administrator or email us (support at HeuristNetwork dot org)'
                 +' and describe the circumstances under which it occurs so that we/they can find a solution';
+            }else  if(response.status==window.hWin.ResponseStatus.ACTION_BLOCKED){
+                // No enough rights or action is blocked by constraints
+                
+            }else  if(response.status==window.hWin.ResponseStatus.NOT_FOUND){
+                // The requested object not found.
+                
+            }
+            
+            if(request_code!=null){
+                msg = msg + '<br>Report this code to Heurist team: "'
+                    +(request_code.script+' '
+                    +(window.hWin.HEURIST4.util.isempty(request_code.action)?'':request_code.action)).trim()+'"';
             }
         }
-
-
+        
         if(window.hWin.HEURIST4.util.isempty(msg)){
                 msg = 'Error_Empty_Message';
         }

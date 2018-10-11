@@ -41,6 +41,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     *
     */
     function _init(_db, _oninit){ //, _currentUser) {
+    
         //@todo - take  database from URL
         if(_db){
             _database = _db;
@@ -66,6 +67,10 @@ function hAPI(_db, _oninit) { //, _currentUser
             });
             */
         }
+        if(!window.hWin.HR){
+            window.hWin.HR = that.setLocale('en');
+        }
+    
 
         if(typeof hLayout !== 'undefined' && $.isFunction(hLayout)){
             that.LayoutMgr = new hLayout();
@@ -114,7 +119,8 @@ function hAPI(_db, _oninit) { //, _currentUser
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());
-
+        
+        var request_code = {script:action, action:request.a};
         //note jQuery ajax does not properly in the loop - success callback does not work often
         $.ajax({
             url: url,
@@ -127,7 +133,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                 err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
                                             ?'Error_Connection_Reset':jqXHR.responseText;
                                             
-                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
+                                        message: err_message, 
+                                        request_code:request_code};
 
                 if(callback){
                     callback(response);
@@ -135,8 +143,11 @@ function hAPI(_db, _oninit) { //, _currentUser
                 //message:'Error connecting server '+textStatus});
             },
             success: function( response, textStatus, jqXHR ){
-
+                
                 if(callback){
+                    if($.isPlainObject(response)){
+                        response.request_code = request_code;
+                    }
                     callback(response);
                 }
                 
@@ -153,7 +164,9 @@ function hAPI(_db, _oninit) { //, _currentUser
             },
             fail: function(  jqXHR, textStatus, errorThrown ){
                 err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
-                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message}
+                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
+                            message: err_message,
+                            request_code: request_code}
 
                 if(callback){
                     callback(response);
