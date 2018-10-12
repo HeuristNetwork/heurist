@@ -10,7 +10,7 @@
         
         "entityTitle": "Dashboard entry",
         "entityTitlePlural": "Dashboard entries",
-        "empty_remark": "Please use the search field above to locate relevant Dashboard entry",
+        "empty_remark": "Nothing has been added to the dashboard, please add functions below. You can turn this function off with the Close button",
 
         "fields": [
                 {
@@ -30,6 +30,7 @@
                         "dty_Size":20,
                         "rst_DisplayWidth":20,
                         "rst_DisplayName": "Order:",
+                        "rst_DefaultValue":0,
                         "rst_DisplayHelpText": "Define the order in which the dashboard entries are shown"
                     }
                 },

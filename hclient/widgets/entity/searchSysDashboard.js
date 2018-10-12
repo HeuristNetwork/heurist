@@ -49,6 +49,8 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
         
         this.input_sort_type = this.element.find('#input_sort_type');
         this._on(this.input_sort_type,  { change:this.startSearch });
+                     
+        this._trigger( "oninit", null );
                       
         this.startSearch();            
     },  

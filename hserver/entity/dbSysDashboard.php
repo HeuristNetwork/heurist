@@ -147,6 +147,10 @@ class DbSysDashboard extends DbEntityBase
             if(!@$this->records[$idx]['dsh_Enabled']){
                     $this->records[$idx]['dsh_Enabled'] = 'y';
             }
+            if(@$this->records[$idx]['dsh_Order']==null 
+                || !($this->records[$idx]['dsh_Order']>0)){
+                    $this->records[$idx]['dsh_Order'] = 1;
+            }
             
             //validate duplication
             $mysqli = $this->system->get_mysqli();

@@ -21,7 +21,7 @@
 $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
 
     _entityName:'sysDashboard',
-    _isViewMode: true, 
+    defaultPrefs: {viewmode:'thumbs3', showonstartup:1},
     
     //
     //
@@ -36,12 +36,9 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.options.edit_height = 640;
         this.options.width = 950;
 
-        //for selection mode set some options
-        if(this.options.select_mode!='manager'){
-            this.options.width = (isNaN(this.options.width) || this.options.width<815)?900:this.options.width;                    
-            //this.options.edit_mode = 'none'
-        }
         this.options.height = (isNaN(this.options.height) || this.options.height<815)?900:this.options.height;                    
+        
+        this.options.isViewMode = true;
     
         this._super();
     },
@@ -62,14 +59,9 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         if(!this._super()){
             return false;
         }
-        
-        //take from preferences? or always inited as view?
-        this.options.isViewMode = this._isViewMode;
 
         // init search header
-        this.searchForm.searchSysDashboard(this.options);
-        
-        this._setMode(this._isViewMode)
+        this.searchForm.searchSysDashboard(this.options).addClass("ui-heurist-bg-light");
         
         /*
         var iheight = 7.4;
@@ -79,13 +71,40 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         //init viewer 
         var that = this;
         
+        var prefs = this.getUiPreferences();
+
         this._on( this.searchForm, {
                 "searchsysdashboardonresult": this.updateRecordList,
-                "searchsysdashboardonadd": function() { this.addEditRecord(-1); }
+                "searchsysdashboardonadd": function() { this.addEditRecord(-1); },
+                "searchsysdashboardoninit": function(){
+                    
+        this.show_longer_description = this.searchForm.find('#show_longer_description');
+
+        this.show_longer_description
+                .attr('checked',(prefs.viewmode=='thumbs3'))
+            .change(function(){
+                that.recordList.resultList('option','view_mode',
+                    that.show_longer_description.is(':checked')?'thumbs3':'thumbs');
+                that.saveUiPreferences();
+        });
+        
+        this._setMode(true)
+        
+        this.searchForm.find('#edit_dashboard').click(function(){
+            that._setMode(false);
+        });
+        this.searchForm.find('#show_on_startup')
+            .attr('checked', (prefs.showonstartup==1))
+            .change(function(){
+              that.saveUiPreferences();
+        });
+                    
+                    
+                }
                 });
                 
-        this.recordList.resultList('setHeaderText','<h3>Dashboard</h3><span class="heurist-helper1">A shortcuts to commonly used functions for this particuar database (al functions are available at any time via the menues and filter fields)</span>',
-            {height:'4em'});
+        //this.recordList.resultList('setHeaderText','<h3>Dashboard</h3><span class="heurist-helper1">A shortcuts to commonly used functions for this particuar database (al functions are available at any time via the menues and filter fields)</span>',
+        //    {height:'4em'});
         this.recordList.resultList('option','multiselect', false);
         this.recordList.resultList('option','select_mode', 'select_single');
         
@@ -124,10 +143,10 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             */
             //take status edit/view from preferences? or always in view mode by default
           
-            this.options.btn_array = [{text: window.hWin.HR(that._isViewMode?'Edit':'View'),
+            this.options.btn_array = [{id:'btn_set_mode',
+                        text: window.hWin.HR(that.options.isViewMode?'Edit':'View'),
                         click: function( event ) { 
-                            $(event.target).button('option','label', window.hWin.HR(!that._isViewMode?'Edit':'View'));
-                            that._setMode(!that._isViewMode);
+                            that._setMode(!that.options.isViewMode);
                         }}];
         
             this._super();
@@ -140,23 +159,46 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     _setMode: function(newmode){
         
         if(newmode){
-            this.searchForm.hide();
-            this.recordList.css({'top': 0});
+             // view mode
+             //this.searchForm.hide();
+             //this.recordList.css({'top': 0});
+            this.searchForm.css({'height': '5.4em'});
+            this.recordList.css({'top': '5.8em'});
+            
+            this.searchForm.find('#view_mode').show();
+            this.searchForm.find('#edit_mode').hide();
             this._as_dialog.parent().find('.ui-dialog-titlebar').hide();
+            
+            this.recordList.resultList('option','view_mode',
+                this.show_longer_description.is(':checked')?'thumbs3':'thumbs');
         }else{
-            this.searchForm.show();
+            // edit mode
+            
+            //this.searchForm.show();
+            this.searchForm.css({'height': '2.4em'});
             this.recordList.css({'top': '2.8em'});
+
+            this.searchForm.find('#view_mode').hide();
+            this.searchForm.find('#edit_mode').show();
             this._as_dialog.parent().find('.ui-dialog-titlebar').show();
+            
+            this.recordList.resultList('option','view_mode','list');
         }
+        /*
         this.recordList.resultList('option','show_counter', !newmode);
         this.recordList.resultList('option','show_inner_header', newmode);
+        */
+        this.recordList.resultList('option','show_toolbar', !newmode);
         
-        if(this._isViewMode !== newmode){
-            this._isViewMode = newmode;
+        if(this.options.isViewMode !== newmode){
             this.options.isViewMode = newmode;
             this.searchForm.searchSysDashboard('option','isViewMode',newmode);
             this.searchForm.searchSysDashboard('startSearch');
         }
+        
+        
+        this._as_dialog.parent().find('#btn_set_mode')
+            .button('option','label', window.hWin.HR(this.options.isViewMode?'Edit':'View'));
         
     },
 
@@ -253,7 +295,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             var record = this._selection.getFirstRecord();
             var command = this._selection.fld(record, 'dsh_CommandToRun');
             var params = this._selection.fld(record, 'dsh_Parameters');
-console.log(command+'  '+params);
+//console.log(command+'  '+params);
 
             if(command.indexOf('menu-')==0){ //main menu action
 
@@ -271,48 +313,17 @@ console.log(command+'  '+params);
     
     //
     getUiPreferences:function(){
-        return null;
+        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
+        return this.usrPreferences;
     },
     
     //    
     saveUiPreferences:function(){
-        
+        var params = 
+            {viewmode: this.show_longer_description.is(':checked')?'thumbs3':'thumbs',
+             showonstartup: this.searchForm.find('#show_on_startup').is(':checked')?1:0 };
+        window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);     
     },
     
 
 });
-/*
-                            {"key":"menu-database-browse","title":"Browse databases"},
-                            {"key":"menu-database-create","title":"Create new database"},
-                            {"key":"menu-database-clone","title":"Clone current database"},
-                            {"key":"menu-database-properties","title":"Database Properties"},
-                            {"key":"menu-database-register","title":"Database Register"},
-                            
-                            
-                            {"key":"menu-structure-rectypes","title":"Manage Record Types"},
-                            {"key":"menu-structure-import","title":"Browse templates"},
-                            {"key":"menu-structure-terms","title":"Manage terms"},
-                            {"key":"menu-structure-reltypes","title":"Manage relationship types"},
-                            {"key":"menu-structure-fields","title":"Manage base field types"},
-                            {"key":"menu-structure-summary","title":"Visualise DB Structure"},
-                            
-                            {"key":"menu-structure-verify","title":"Verify integrity"},
-                            {"key":"menu-structure-refresh","title":"Refresh memory"},
-                            
-                            
-                            {"key":"menu-profile-preferences","title":""},
-                            {"key":"menu-profile-tags","title":""},
-                            {"key":"menu-profile-reminders","title":""},
-                            {"key":"menu-profile-files","title":""},
-
-                            {"key":"","title":""},
-                            {"key":"","title":""},
-                            {"key":"","title":""},
-                            
-                            
-                            {"key":"menu-export-csv","title":"Export toCSV"},
-                            {"key":"","title":""},
-                            {"key":"","title":""},
-                            {"key":"","title":""},
-                            
-*/
