@@ -167,9 +167,14 @@ $.widget( "heurist.mainMenu", {
         if(__include('Structure')) this._initMenu('Structure', 0);
         if(__include('Verify')) this._initMenu('Verify', 0);
         if(__include('Import')) this._initMenu('Import', 0);
+        if(__include('Export')) {
+            this._initMenu('Export', 2, null, 3); //invisible in main menu   
+            //this.menues['btn_Export'].hide();
+        }
+            
         if(__include('Management')) this._initMenu('Management', 0);
         if(__include('Admin')) this._initMenu('Admin', 2, null, 0);
-            
+        
         if(__include('FAIMS')) this._initMenu('FAIMS', 1, null, 1);
         if(__include('Help')) this._initMenu('Help', -1);
         
@@ -253,7 +258,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 
                 if(lvl>=0){
                     //@todo lvl=1 is_admin
-                    is_visible = window.hWin.HAPI4.has_access(lvl);
+                    is_visible = (lvl_exp!=3) && window.hWin.HAPI4.has_access(lvl);
                     var elink = $(item).find('a');
                     if(is_showhide){
                         if(is_visible){
@@ -351,6 +356,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     
     //
     // menu element is <li> (button) for horizontal meny and drop-down that is loaded from html
+    // exp_level=3 hidden
     //
     _initMenu: function(name, access_level, parentdiv, exp_level){
 
@@ -426,7 +432,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             .appendTo( that.document.find('body') )
             //.addClass('ui-menu-divider-heurist')
             .menu({select: function(event, ui){ 
-                    that._menuActionHandler(event, ui.item.find('a'));
+                    that.menuActionHandler(event, ui.item.find('a'));
                     return false; 
             }});
             
@@ -515,11 +521,46 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         event.preventDefault();
         return false;
     },
+    
+    //
+    // returns all menu entries as array - used in dropdown command selector in dashboard editor
+    //
+    menuGetAllActions: function(){
+        
+        var res = [];    
+            
+        for (var key in this.menues){
+            var menu = this.menues[key];
+            var links = $(menu).find('a');
+            $.each(links, function(idx, link){
+                var link = $(link);
+                if(link.attr('id').indexOf('menu-')==0){
+                    res.push({key:link.attr('id'), title: ( key.substring(5)+' > '+link.text().trim() ) });
+                }
+            });
+        }
+        
+        return res;
+    },
 
     //
+    // finds and executes menu entry by link id
+    // 
+    menuActionById: function(menu_entry_id){
+        
+        for (var key in this.menues){
+            var menu = this.menues[key];
+            var ele = $(menu).find('#'+menu_entry_id);
+            if(ele.length>0 && ele.is('a')){
+                this.menuActionHandler(null, ele);            
+                break;
+            }
+        }
+    },
     //
     //
-    _menuActionHandler: function(event, item){
+    //
+    menuActionHandler: function(event, item){
         
         var that = this;
         
@@ -595,6 +636,49 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
                                                 
+        }else 
+        if(action == "menu-export-csv"){
+            
+            if(that.isResultSetEmpty()) return;
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV');
+            
+            
+        }else 
+        if(action == "menu-export-hml-resultset" || action == "menu-export-hml-multifile"){
+            
+            var q = '';
+            if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
+                q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
+                if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
+                    q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
+                }
+            }
+            
+            if(q!=''){
+            
+                var url = window.hWin.HAPI4.baseURL + "export/xml/flathml.php?"+
+                "w=all"+
+                "&a=1"+
+                "&depth=0"+
+                "&q=" + q +
+                "&db=" + window.hWin.HAPI4.database +
+                ( (action == "menu-export-hml-multifile")?'&file=1':'');
+
+                window.open(url, '_blank');
+            }
+            
+        }else 
+        if(action == "menu-export-kml"){
+            
+            var q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+            if(q=='?'){
+                window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
+                return;
+            }
+            var url = window.hWin.HAPI4.baseURL + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
+            window.open(url, '_blank');
+            
+            
         }else 
         if(action == "menu-import-add-record"){
             
@@ -697,8 +781,23 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             requiredLevel //needed level of credentials any, logged (by default), admin of group, db admin, db owner
         );
 
-        window.hWin.HEURIST4.util.stopEvent(event);
+        if(event) window.hWin.HEURIST4.util.stopEvent(event);
     },
+    
+    //
+    // similar in resultListMenu
+    //
+    isResultSetEmpty: function(){
+        var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
+        if (window.hWin.HEURIST4.util.isempty(recIDs_all)) {
+            window.hWin.HEURIST4.msg.showMsgDlg('No results found. '
+            +'Please run a query with at least one result record. You can use selection to direct your change.');
+            return true;
+        }else{
+            return false;
+        }
+    },
+    
 
 
     /**

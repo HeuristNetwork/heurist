@@ -187,6 +187,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     _initDialog: function(){
         
+            //restore from preferences    
             if(this.options.edit_mode == 'editonly'){
                 this.getUiPreferences();
                 this.options['width']  = this.usrPreferences['width'];

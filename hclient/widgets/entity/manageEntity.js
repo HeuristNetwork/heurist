@@ -672,9 +672,15 @@ $.widget( "heurist.manageEntity", {
     _initDialog: function(){
         
             var options = this.options,
-                btn_array = [], 
+                btn_array = [],
                 position = null,
                     that = this;
+                    
+            if(this.options.btn_array){ 
+                //some custom buttons besides select and close
+                btn_array = this.options.btn_array; 
+            }
+                
         
             //dialog buttons SELECT and CLOSE
             if(options['select_mode']=='select_multi' || options['select_mode']=='select_roles'){ 

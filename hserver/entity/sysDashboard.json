@@ -93,13 +93,6 @@
                         "rst_DisplayHelpText": "Name of commonly used functions", 
                         "rst_RequirementType":"required",
                         "rst_FieldConfig":[
-                            {"key":"menu-database-browse","title":"Browse databases"},
-                            {"key":"menu-database-create","title":"Create new database"},
-                            {"key":"menu-database-clone","title":"Clone current database"},
-                            
-                            
-                            
-                            {"key":"manage","title":"Manage record types"}
                         ]
                     }
                 },

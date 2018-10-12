@@ -279,9 +279,11 @@ $.widget( "heurist.resultList", {
         //if(this.options.innerHeader || this.options.select_mode=='select_multi'){  .addClass('ui-widget-content')
         this.div_header =  $( "<div>" ).css('height','3em').appendTo( this.element );
 
-        $('<h3>'+window.hWin.HR('Filtered Result')+'</h3>')
+        $('<div class="result-list-header">')
         .css('padding','0.7em 0 0 0.7em')
         .appendTo(this.div_header);
+        
+        this.setHeaderText('<h3>'+window.hWin.HR('Filtered Result')+'</h3>');
         
         //add label to display number of selected, button and selected onlu checkbox
         if(this.options.select_mode=='select_multi'){
@@ -571,15 +573,15 @@ $.widget( "heurist.resultList", {
     //adjust top,height according to visibility settings -----------
     _adjustHeadersPos: function(){
         
-        var top = 0;
+        var top = 4;
         if(this.options.show_inner_header){
             this.div_header.show();
-            top = top + this.div_header.height();
+            top = top + this.div_header.height()-5;
         }else{
             this.div_header.hide();
         }
 
-        this.div_toolbar.css({'top':(top-2)+'px', height:this.options.show_savefilter?'5em':'2.5em'});
+        this.div_toolbar.css({'top':top+'px', height:this.options.show_savefilter?'5em':'2.5em'});
         if(this.options.show_toolbar){
             this.div_toolbar.show();
             top = top + this.div_toolbar.height();
@@ -788,7 +790,7 @@ $.widget( "heurist.resultList", {
             }
 
             if(this.div_header!=null) {
-                this.div_header.find('h3').html(new_title);
+                this.setHeaderText('<h3>'+new_title+'</h3>');
             }
             if(new_title==''){
                 this.triggerSelection();
@@ -2106,5 +2108,13 @@ $.widget( "heurist.resultList", {
     
     resetGroups: function(){
         this._grp_keep_status = {};
+    },
+    
+    setHeaderText: function(newtext, headercss){
+        this.div_header.find('div.result-list-header').html(newtext);
+        if(headercss){
+            this.div_header.css(headercss);    
+            this._adjustHeadersPos();
+        }
     },
 });

@@ -66,6 +66,12 @@ class DbSysDashboard extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('dsh_Label');
         if($pred!=null) array_push($where, $pred);
         
+        $pred = $this->searchMgr->getPredicate('dsh_Enabled');
+        if($pred!=null) array_push($where, $pred);
+        
+        $pred = $this->searchMgr->getPredicate('dsh_ShowIfNoRecords');
+        if($pred!=null) array_push($where, $pred);
+        
         
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
@@ -138,8 +144,9 @@ class DbSysDashboard extends DbEntityBase
 
         //add specific field values
         foreach($this->records as $idx=>$record){
-            if(@$this->records[$idx]['dsh_Enabled'])
+            if(!@$this->records[$idx]['dsh_Enabled']){
                     $this->records[$idx]['dsh_Enabled'] = 'y';
+            }
             
             //validate duplication
             $mysqli = $this->system->get_mysqli();

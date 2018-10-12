@@ -36,6 +36,11 @@ body {
 a{
 outline: 0;
 }
+H2 {
+    color: #6A7C99;
+    font-size:1.2em;
+}
+
 .logo {
     background-image: url("hclient/assets/h4logo_small.png") !important;
     background-repeat: no-repeat !important;
@@ -409,6 +414,7 @@ optgroup {
     cursor: pointer;
 }
 
+/* main element for various lists it may be in 4 states list, icon, thumb, thumbs3 */
 .recordDiv {
     -moz-user-select: none;
     user-select: none;
@@ -418,6 +424,7 @@ optgroup {
     background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE));
 }
 
+/* highlight on hover */
 div.recordDiv:hover {
     -moz-box-shadow:0 1px 4px #000;
     -webkit-box-shadow:0 1px 4px #000;
@@ -427,16 +434,12 @@ div.recordDiv:hover {
     background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
 }
 
+/*  alternate color schme for entities other than usual Records */
 .list div.recordDiv_blue, .list div.recordDiv_blue:hover{
     background:-moz-linear-gradient(center top, #EDF5FF, #EDF5FF) repeat scroll 0 0 transparent;
     background:-webkit-gradient(linear, left top, left bottom, from(#EDF5FF), to(#EDF5FF));
 }
 
-
-H2 {
-    color: #6A7C99;
-    font-size:1.2em;
-}
 
 div.recordDiv:hover  .rec_edit_link, 
     div.recordDiv:hover  .rec_edit_link_ext, 
@@ -445,6 +448,7 @@ div.recordDiv:hover  .rec_edit_link,
 {
     display: inline-block;
 }
+
 h3:hover > #rec_add_link, 
     div.recordDiv:hover > .rec_edit_link, 
     div.recordDiv:hover > .rec_edit_link_ext, 
@@ -465,6 +469,7 @@ h3 > #rec_add_link,
     height: 16px;
     width: 16px;
 }
+
 div.recordDiv  .rec_actions {
     display: none;
     position: absolute;
@@ -551,7 +556,7 @@ div .selected_last{
     height: 78px;
     opacity: 0.5;
 }
-.recordDiv .recordTitle {
+.recordDiv .recordTitle, .recordDiv .recordDescription {
     color: #666666;
     position: absolute;
     text-align: left;
@@ -602,7 +607,6 @@ div .selected_last{
     left: 3px;
     right: 3px;
     height: 24px;
-    width: 125px;
 }
 
 .thumbs .recordDiv .recordSelector {
@@ -626,12 +630,38 @@ div .selected_last{
     bottom: 1px;
     right: 17px;
 }
-
 .thumbs .recordDiv .rec_owner{
     display: inline;
     padding-left:5px;
 }
 
+/* landscape option */
+.thumbs .landscape.recordDiv {
+    width: 274px;
+}
+.thumbs .landscape.recordDiv:hover {
+    width: 280px;
+}
+.thumbs .landscape.recordDiv .recordTitle {
+    left: 120px;
+    top: 4px;
+    right: 2px;
+    width: auto;
+    height:20px;
+    font-weight:bold;
+}
+.thumbs .landscape.recordDiv .recTypeThumb{
+    right:160px;
+    top:2px;
+    height:120px
+}
+.thumbs .landscape.recordDiv .recordDescription {
+    display:block !important;
+    left: 120px;
+    right: 3px;
+    top: 26px;
+    bottom: 4px;
+}
 
 
 /* ICONS VIEW */
@@ -667,9 +697,9 @@ div .selected_last{
 
 .icons .recordDiv .recordTitle {
     bottom: 0.1em;
-    top: 0.1em;
+    top: 0.3em;
     left: 42px;
-    width: 75px;
+    right: 1px;
 
     white-space: normal;
 }
@@ -764,8 +794,7 @@ div .selected_last{
     padding-top:5px;
 }
 
-
-/* THUMBS (another mode) VIEW */
+/* THUMBS (another mode) VIEW FOR DIGITAL HARLEM */
 .thumbs2 .recordDiv {
     -moz-user-select: none;
     border: 3px solid #2C547A;
@@ -859,6 +888,34 @@ div .selected_last{
 .thumbs3 .recordDiv .rec_owner{
     display: inline;
     padding-left:5px;
+}
+
+/* landscape option */
+.thumbs3 .landscape.recordDiv {
+    width: 440px;
+}
+.thumbs3 .landscape.recordDiv:hover {
+    width: 446px;
+}
+.thumbs3 .landscape.recordDiv .recordTitle {
+    left: 180px;
+    top: 4px;
+    right: 2px;
+    width: auto;
+    font-weight:bold;
+    font-size:1.2em;
+}
+.thumbs3 .landscape.recordDiv .recTypeThumb{
+    right:270px;
+    top:2px;
+    height:170px
+}
+.thumbs3 .landscape.recordDiv .recordDescription {
+    display:block !important;
+    left: 180px;
+    right: 3px;
+    top: 30px;
+    bottom: 2px;
 }
 
 
@@ -1551,6 +1608,8 @@ option {padding-left:15px;}
 .list div.recordDiv > .user-list, .list div.recordDiv > .user-list-member {
     display:block;
 }
+
+/*  rounded gray element to edit user role/membership see manageSysUsers, manageSysGroups */
 
 .user-list > div, .user-list-member > div{
     display:inline-block;

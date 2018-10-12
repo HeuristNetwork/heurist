@@ -62,20 +62,33 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
             this._super();
             
             var request = {}
-        
-            if(this.input_search.val()!=''){
-                request['dsh_Label'] = this.input_search.val();
-            }
             
-            if(this.input_search_inactive.is(':checked')){
-                request['dsh_Enabled'] = 'n';
-            }
-            
-            this.input_sort_type = this.element.find('#input_sort_type');
-            if(this.input_sort_type.val()=='order'){
+            if(this.options.isViewMode){
+                
+                request['dsh_Enabled'] = 'y';
                 request['sort:dsh_Order'] = '1' 
-            }else {
-                request['sort:dsh_Label'] = '1';   
+                
+                //if database empty - hide some entries
+                if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
+                    request['dsh_ShowIfNoRecords'] = 'y';
+                }
+                
+            }else{
+        
+                if(this.input_search.val()!=''){
+                    request['dsh_Label'] = this.input_search.val();
+                }
+                
+                if(this.input_search_inactive.is(':checked')){
+                    request['dsh_Enabled'] = 'n';
+                }
+                
+                this.input_sort_type = this.element.find('#input_sort_type');
+                if(this.input_sort_type.val()=='order'){
+                    request['sort:dsh_Order'] = '1' 
+                }else {
+                    request['sort:dsh_Label'] = '1';   
+                }
             }
             
            

@@ -23,14 +23,14 @@
 <li>
     <a href="#" id="menu-manage-dashboards"
         title="Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off">
-        Dashboard menu entry</a>
+        Dashboard menu entries</a>
 </li>
 
 
 
 <li>
     <!-- export/dbbackup/exportMyDataPopup.php?inframe=1 -->
-    <a href="export/dbbackup/exportMyDataPopup.php" data-level="1" 
+    <a href="export/dbbackup/exportMyDataPopup.php" data-level="1" id="menu-manage-archive"
         data-logaction="adminArchive"
         title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
         Create data archive package</a>
@@ -46,13 +46,13 @@
     </a>
 </li>
 <li>
-    <a href="admin/verification/recalcTitlesAllRecords.php"
+    <a href="admin/verification/recalcTitlesAllRecords.php" id="menu-manage-rectitles"
         data-level="1" data-logaction="stRebuildTitles" data-header="Management &gt; Rebuild record titles"
         title="Rebuilds the constructed record titles listed in search results, for all records">
         Rebuild record titles</a>
 </li>                    
 <li>
-    <a href="admin/verification/rebuildLuceneIndices.php"
+    <a href="admin/verification/rebuildLuceneIndices.php" id="menu-manage-lucene"
         data-level="1" data-header="Management &gt; Rebuild Lucene index" data-exp-level="1"
         title="Rebuilds the Lucene indices used by Elastic Search, for all record types - no result if Elastic server not specified in configuration">
         Rebuild Lucene index
@@ -95,7 +95,7 @@
             </li>
 
             <li>
-                <a  href="admin/describe/getDBStructureAsXML.php"
+                <a  href="admin/describe/getDBStructureAsXML.php" id="menu-manage-structure-asxml"
                     target="_blank" data-exp-level="1"
                     title="Lists the record type and field definitions in XML format (HML - Heurist Markup Language)">
                    Structure (XML)
@@ -103,7 +103,7 @@
             </li>
 
             <li>
-                <a href="admin/describe/getDBStructureAsSQL.php?pretty=1"
+                <a href="admin/describe/getDBStructureAsSQL.php?pretty=1" id="menu-manage-structure-assql"
                     target="_blank" data-exp-level="1"
                     title="Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)">
                     Structure (SQL)</a>
