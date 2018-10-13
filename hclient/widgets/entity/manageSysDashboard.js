@@ -76,6 +76,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this._on( this.searchForm, {
                 "searchsysdashboardonresult": this.updateRecordList,
                 "searchsysdashboardonadd": function() { this.addEditRecord(-1); },
+                "searchsysdashboardonorder": function() { this.saveNewOrder() },
                 "searchsysdashboardoninit": function(){
                     
         this.show_longer_description = this.searchForm.find('#show_longer_description');
@@ -93,8 +94,8 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.searchForm.find('#edit_dashboard').click(function(){
             that._setMode(false);
         });
-        this.searchForm.find('#show_on_startup')
-            .attr('checked', (prefs.showonstartup==1))
+        
+        this.show_on_startup.attr('checked', (prefs.showonstartup==1))
             .change(function(){
               that.saveUiPreferences();
         });
@@ -148,13 +149,18 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                         click: function( event ) { 
                             that._setMode(!that.options.isViewMode);
                         }}];
-        
+                        
             this._super();
+            
+            this.show_on_startup = $('<input id="show_on_startup" type="checkbox">')
+                .appendTo( $('<label style="float:right;padding:12px">Show dashboard on startup&nbsp;</label>')
+                    .appendTo(this._as_dialog.parent().find('.ui-dialog-buttonpane')) );            
             
     },
     
     //
     //  set view or edit mode
+    // newmode = true - view mode
     //
     _setMode: function(newmode){
         
@@ -162,13 +168,14 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
              // view mode
              //this.searchForm.hide();
              //this.recordList.css({'top': 0});
-            this.searchForm.css({'height': '5.4em'});
-            this.recordList.css({'top': '5.8em'});
+            this.searchForm.css({'height': '6.4em'});
+            this.recordList.css({'top': '6.8em'});
             
             this.searchForm.find('#view_mode').show();
             this.searchForm.find('#edit_mode').hide();
             this._as_dialog.parent().find('.ui-dialog-titlebar').hide();
             
+            this.recordList.resultList('option', 'sortable', false);
             this.recordList.resultList('option','view_mode',
                 this.show_longer_description.is(':checked')?'thumbs3':'thumbs');
         }else{
@@ -183,6 +190,13 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             this._as_dialog.parent().find('.ui-dialog-titlebar').show();
             
             this.recordList.resultList('option','view_mode','list');
+            
+            var that = this;
+            this.recordList.resultList('option', 'sortable', true);
+            this.recordList.resultList('option', 'onSortStop', function(){
+                that.searchForm.find('#btn_apply_order').css({'display':'inline-block'});
+            });
+            
         }
         /*
         this.recordList.resultList('option','show_counter', !newmode);
@@ -257,7 +271,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         + '<div class="recordTitle recordTitle2">'  // style="right:180px"
         +     recTitle
         + '</div>'
-        + '<div class="recordDescription" style="display:none">'
+        + '<div class="recordDescription">'
         +     recTitleHint
         + '</div>';
 
@@ -293,21 +307,69 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         if(!window.hWin.HEURIST4.util.isnull(value)){
             var record = this._selection.getFirstRecord();
-            var command = this._selection.fld(record, 'dsh_CommandToRun');
-            var params = this._selection.fld(record, 'dsh_Parameters');
-//console.log(command+'  '+params);
+            if(this.options.isViewMode){
+                var command = this._selection.fld(record, 'dsh_CommandToRun');
+                var params = this._selection.fld(record, 'dsh_Parameters');
+    //console.log(command+'  '+params);
 
-            if(command.indexOf('menu-')==0){ //main menu action
+                if(command.indexOf('menu-')==0){ //main menu action
 
-                var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('mainMenu');
-                if(app && app.widget){
-                    $(app.widget).mainMenu('menuActionById', command);
+                    var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('mainMenu');
+                    if(app && app.widget){
+                        $(app.widget).mainMenu('menuActionById', command);
+                    }
+
                 }
 
+            }else{
+                var recID = this._selection.fld(record, 'dsh_ID');
+                this.addEditRecord(recID);
             }
-
-            
         }
+    },
+    
+    //
+    // apply new order
+    //
+    saveNewOrder: function(){
+        
+            this.searchForm.find('#btn_apply_order').hide();    
+        
+            var recordset = this.recordList.resultList('getRecordSet');
+            //assign new value for dtg_Order and save on server side
+            var rec_order = recordset.getOrder();
+            var idx = 0, len = rec_order.length;
+            var fields = [];
+            for(; (idx<len); idx++) {
+                var record = recordset.getById(rec_order[idx]);
+                var oldval = recordset.fld(record, 'dsh_Order');
+                var newval = String(idx+1).lpad(0,3);
+                if(oldval!=newval){
+                    recordset.setFld(record, 'dsh_Order', newval);        
+                    fields.push({"dsh_ID":rec_order[idx], "dsh_Order":newval});
+                }
+            }
+            if(fields.length>0){
+
+                var request = {
+                    'a'          : 'save',
+                    'entity'     : this._entityName,
+                    'request_id' : window.hWin.HEURIST4.util.random(),
+                    'fields'     : fields                     
+                };
+
+                var that = this;                                                
+                //that.loadanimation(true);
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            window.hWin.HEURIST4.msg.showMsgFlash('Order saved',300);
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                });
+
+            }
     },
     
     
@@ -321,7 +383,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     saveUiPreferences:function(){
         var params = 
             {viewmode: this.show_longer_description.is(':checked')?'thumbs3':'thumbs',
-             showonstartup: this.searchForm.find('#show_on_startup').is(':checked')?1:0 };
+             showonstartup: this.show_on_startup.is(':checked')?1:0 };
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);     
     },
     

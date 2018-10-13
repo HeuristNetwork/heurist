@@ -32,17 +32,22 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
         this.element.find('.heurist-helper1').find('span').hide();
         this.element.find('.heurist-helper1').find('span.'+smode+',span.common_help').show();
         */
-        this.btn_add_record = this.element.find('#btn_add_record');
-
-        if(this.options.edit_mode=='none'){
-            this.btn_add_record.hide();
-        }else{
-            this.btn_add_record.css({'min-width':'9m','z-index':2})
+        this.btn_add_record = this.element.find('#btn_add_record')
+                .css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Add New Entry"), icon: "ui-icon-plus"})
                 .click(function(e) {
                     that._trigger( "onadd" );
                 }); 
-        }
+
+        this.btn_apply_order = this.element.find('#btn_apply_order')
+                .hide()
+                .css({'min-width':'9m','z-index':2})
+                    .button({label: window.hWin.HR("Save New Order"), icon: "ui-icon-move-v"})
+                .click(function(e) {
+                    that._trigger( "onorder" );
+                }); 
+
+
         
         this.input_search_inactive = this.element.find('#input_search_inactive');
         this._on(this.input_search_inactive,  { change:this.startSearch });
@@ -76,13 +81,9 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                 }
                 
             }else{
-        
+                /*
                 if(this.input_search.val()!=''){
                     request['dsh_Label'] = this.input_search.val();
-                }
-                
-                if(this.input_search_inactive.is(':checked')){
-                    request['dsh_Enabled'] = 'n';
                 }
                 
                 this.input_sort_type = this.element.find('#input_sort_type');
@@ -91,6 +92,11 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                 }else {
                     request['sort:dsh_Label'] = '1';   
                 }
+                */
+                if(this.input_search_inactive.is(':checked')){
+                    request['dsh_Enabled'] = 'n';
+                }
+                request['sort:dsh_Order'] = '1' 
             }
             
            

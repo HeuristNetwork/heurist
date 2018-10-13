@@ -76,7 +76,7 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "rst_DisplayName": "Show for empty DB:",
-                        "rst_DisplayHelpText": "Deteremines whether the function will be shown on the dashboard if there are no records in the database (eg. no point in showing searches if nothing to search)",
+                        "rst_DisplayHelpText": "Determines whether the function will be shown on the dashboard if there are no records in the database",
                         "rst_DefaultValue":"y",
                         "rst_FieldConfig":[
                             {"key":"y","title":"Yes"},

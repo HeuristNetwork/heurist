@@ -656,12 +656,15 @@ div .selected_last{
     height:120px
 }
 .thumbs .landscape.recordDiv .recordDescription {
-    display:block !important;
     left: 120px;
     right: 3px;
     top: 26px;
     bottom: 4px;
 }
+.thumbs .landscape.recordDiv .recordIcons {
+    display:none;
+}
+
 
 
 /* ICONS VIEW */
@@ -763,9 +766,29 @@ div .selected_last{
 .list .recordDiv .recordTitle2 {
     left: 54px;
 }
+.list .landscape.recordDiv .recordTitle {
+    max-width: 200px;
+}
+.list .landscape.recordDiv .recordDescription {
+    left: 280px;
+    right: 3px;
+    top: 8px;
+
+    vertical-align: middle;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+
+
 .icons .recordDiv .recordTitle .inlist, .thumbs .recordDiv .recordTitle .inlist{
     display:none;
 }
+.icons .landscape.recordDiv .recordDescription {
+    display:none;
+}
+
 .list .recordDiv .recordTitle .item {
     width:150px;
     display:inline-block;
@@ -911,11 +934,13 @@ div .selected_last{
     height:170px
 }
 .thumbs3 .landscape.recordDiv .recordDescription {
-    display:block !important;
     left: 180px;
     right: 3px;
     top: 30px;
     bottom: 2px;
+}
+.thumbs3 .landscape.recordDiv .recordIcons {
+    display:none;
 }
 
 
