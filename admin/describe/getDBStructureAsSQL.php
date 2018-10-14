@@ -7,6 +7,8 @@
 * @param includeUgrps=1 will output user and group information in addition to definitions
 * @param approvedDefsOnly=1 will only output Reserved and Approved definitions
 *
+* @todo need to reqrite using mysql scheme methods, get rid crosswalk inc 
+* 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2018 University of Sydney
@@ -715,6 +717,15 @@ function print_row($row,$fmt) {
             print "('$row[urp_ID]','$urp_Prefix'),";
             break;
 
+        case 'sysDashboard':
+            $dsh_Label = $mysqli->real_escape_string($row['dsh_Label']);
+            $dsh_Description = $mysqli->real_escape_string($row['dsh_Description']);
+            $dsh_Parameters = $mysqli->real_escape_string($row['dsh_Parameters']);
+            
+            print "('$row[dsh_ID]','$row[dsh_Order]','$dsh_Label','$dsh_Description','$row[dsh_Enabled]','$row[dsh_ShowIfNoRecords]',
+            '$row[dsh_CommandToRun]','$dsh_Parameters'),";
+            break;
+            
             // Note: these have not yet (Sep 2011) been implemented in buildCrosswalks.php as they are not really needed
 
         case 'sysUGrps': // User details - data from sysUGrps table

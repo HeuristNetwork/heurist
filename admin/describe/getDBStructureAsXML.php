@@ -4,6 +4,8 @@
 * getDBStructureAsXML.php: returns database definitions (rectypes, details etc.) as XML (HML)
 *
 * @param includeUgrps=1 will output user and group information in addition to definitions
+* 
+* @todo need to reqrite using mysql scheme methods, get rid crosswalk inc
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -671,6 +673,24 @@ function print_row($row,$fmt,$flds) {
             print "</urp>";
             break;
 
+        case 'sysDashboard':
+            
+            $dsh_Label = html_escape($row['dsh_Label']);
+            $dsh_Description = html_escape($row['dsh_Description']);
+            $dsh_Parameters = html_escape($row['dsh_Parameters']);
+
+            print "<dsh>";
+            print "<dsh_ID>$row[dsh_ID]</dsh_ID>".
+                  "<dsh_Order>$row[dsh_Order]</dsh_Order>".
+                  "<dsh_Label>$dsh_Label</dsh_Label>".
+                  "<dsh_Description>$dsh_Description</dsh_Description>".
+                  "<dsh_Enabled>$row[dsh_Enabled]</dsh_Enabled>".
+                  "<dsh_ShowIfNoRecords>$row[dsh_ShowIfNoRecords]</dsh_ShowIfNoRecords>".
+                  "<dsh_CommandToRun>$row[dsh_CommandToRun]</dsh_CommandToRun>".
+                  "<dsh_Parameters>$dsh_Parameters</dsh_Parameters>";
+            print "</dsh>";
+            break;
+            
             // Note: these have not yet (Sep 2011) been implemented in buildCrosswalks.php as they are not really needed
 
         case 'sysUGrps': // User details - data from sysUGrps table
