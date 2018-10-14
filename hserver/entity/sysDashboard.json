@@ -10,7 +10,7 @@
         
         "entityTitle": "Dashboard entry",
         "entityTitlePlural": "Dashboard entries",
-        "empty_remark": "Nothing has been added to the dashboard, please add functions below. You can turn this function off with the Close button",
+        "empty_remark": "Nothing has been added to the dashboard",
 
         "fields": [
                 {
