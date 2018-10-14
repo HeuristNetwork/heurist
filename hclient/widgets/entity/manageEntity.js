@@ -673,7 +673,7 @@ $.widget( "heurist.manageEntity", {
         
             var options = this.options,
                 btn_array = [],
-                position = null,
+                position = options.position,
                     that = this;
                     
             if(this.options.btn_array){ 
@@ -709,7 +709,10 @@ $.widget( "heurist.manageEntity", {
                     };
                 }
                 
-                position = this._getDialogPosition();                
+                if ( window.hWin.HEURIST4.util.isnull(position) || $.isEmptyObject(position)){
+                    position = this._getDialogPosition();                    
+                }
+                
                 
             }else {
                 //if(options.in_popup_dialog===false){ 
@@ -727,7 +730,6 @@ $.widget( "heurist.manageEntity", {
             if(options['height']>maxh) options['height'] = maxh*0.95;
             
             //this.options.window = window.hWin;
-            
             var $dlg = this.element.dialog({
                 autoOpen: false ,
                 //element: this.element[0],

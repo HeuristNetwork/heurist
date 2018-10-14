@@ -177,7 +177,7 @@ var cfg_layouts = [
                             show_inner_header: true} }]}  //search result
      },
 
-    // 3 main tabs on top with accodion menu on each one - most of admin/import/export in iframes
+    // 3 main tabs on top with accordion menu on each one - most of admin/import/export in iframes
     {id:'SearchAnalyze', name:'Search Analyze Publish', theme:'heurist', type:'cardinal',
     
         west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false, 

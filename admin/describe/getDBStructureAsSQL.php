@@ -377,6 +377,28 @@ $res->close();
 print "\n$endToken\n";
 if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
+
+// ------------------------------------------------------------------------------------------
+// sysDashboard
+
+print "\n\n\n-- Dashboard entries";print "\n";
+if($isHTML) print "<p>";
+include HEURIST_DIR.'admin/structure/crosswalk/sysDashboard.inc'; // sets value of $flds
+print "-- $flds \n";
+$query = "select $flds from sysDashboard";
+$res = $mysqli->query($query);
+$fmt = 'sysDashboard'; // update format if fields added
+
+if($isHTML) print "<p>";
+print "\n$startToken\n";
+while ($row = $res->fetch_assoc()) { print_row($row, $fmt); }
+$res->close();
+
+print "\n$endToken\n";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
+
+
+
 // ------------------------------------------------------------------------------------------
 // Output the following only if parameter switch set and user is an admin
 

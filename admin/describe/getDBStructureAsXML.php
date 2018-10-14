@@ -271,6 +271,20 @@ $res->close();
 print "</URLPrefixes>";
 
 // ------------------------------------------------------------------------------------------
+// sysDashboard
+
+print "\n\n<Dashboard>";
+include HEURIST_DIR.'admin/structure/crosswalk/sysDashboard.inc'; // sets value of $flds
+$query = "select $flds from sysDashboard";
+$res = $mysqli->query($query);
+$fmt = 'sysDashboard';  // update format if fields added
+print "\n\n<!-- $flds -->";
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
+print "</Dashboard>";
+
+// ------------------------------------------------------------------------------------------
 // Output the following only if parameter switch set and user is an admin
 
 if (!$includeUgrps) {
