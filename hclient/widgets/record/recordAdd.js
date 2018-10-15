@@ -26,11 +26,21 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         title:  'Add new Record',
         currentRecType: 0,
         currentRecTags: null,
-        scope_types: 'none'
+        scope_types: 'none',
+        get_params_only: false
     },
 
     _initControls:function(){
         
+        if(this.options.RecTypeID>0){
+            
+            this.options.currentRecType =  this.options.RecTypeID;           
+            this.options.currentOwner = this.options.OwnerUGrpID;           
+            this.options.currentAccess = this.options.NonOwnerVisibility;           
+            this.options.currentRecTags = this.options.RecTags;           
+            this.options.currentAccessGroups = this.options.NonOwnerVisibilityGroups;           
+        
+        }else
         if(this.options.currentRecType==0){
             //take from current user preferences
             var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
@@ -60,11 +70,14 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
       
         this._fillSelectRecordTypes( this.options.currentRecType );
       
-        this._on(this.element.find('#btnAddRecord').button({label: window.hWin.HR('Add Record').toUpperCase() })
-            .show(), {click:this.doAction});
-        this._on(this.element.find('#btnAddRecordInNewWin').button({icon:'ui-icon-extlink', 
-                label:window.hWin.HR('Add Record in New Window'), showLabel:false })
-            .show(), {click:this.doAction});
+        if(this.options.get_params_only==false){
+            
+            this._on(this.element.find('#btnAddRecord').button({label: window.hWin.HR('Add Record').toUpperCase() })
+                .show(), {click:this.doAction});
+            this._on(this.element.find('#btnAddRecordInNewWin').button({icon:'ui-icon-extlink', 
+                    label:window.hWin.HR('Add Record in New Window'), showLabel:false })
+                .show(), {click:this.doAction});
+        }
             //function(event){that.doAction(event)} );
         
         $('#div_more_options').show();
@@ -99,7 +112,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     //
     _getActionButtons: function(){
         var res = this._super();
-        res[1].text = window.hWin.HR('Add Record');
+        res[1].text = window.hWin.HR(this.options.get_params_only?'Get Parameters':'Add Record');
         return res;
     },    
 
@@ -134,19 +147,25 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 'NonOwnerVisibilityGroups':this.options.currentAccessGroups,
         };
                 
-                
-        var add_rec_prefs = [this.options.currentRecType, this.options.currentOwner, this.options.currentAccess, 
-                    this.options.currentRecTags, this.options.currentAccessGroups];    
-
-        window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);        
-            
-        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'recordAdd'});
-        
-        if(event && $(event.target).parent('div').attr('id')=='btnAddRecordInNewWin'){
-            var url = $('#txt_add_link').val();
-            window.open(url, '_blank');
+        if(this.options.get_params_only==true){
+            //return values as context
+            new_record_params.RecTags = this.options.currentRecTags;
+            this._context_on_close =  new_record_params;
         }else{
-            window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});    
+            
+            var add_rec_prefs = [this.options.currentRecType, this.options.currentOwner, this.options.currentAccess, 
+                        this.options.currentRecTags, this.options.currentAccessGroups];    
+
+            window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);        
+                
+            window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'recordAdd'});
+            
+            if(event && $(event.target).parent('div').attr('id')=='btnAddRecordInNewWin'){
+                var url = $('#txt_add_link').val();
+                window.open(url, '_blank');
+            }else{
+                window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});    
+            }
         }
                
         this.closeDialog(); 

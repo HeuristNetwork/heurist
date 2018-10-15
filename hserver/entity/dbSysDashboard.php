@@ -151,6 +151,15 @@ class DbSysDashboard extends DbEntityBase
                 || !($this->records[$idx]['dsh_Order']>0)){
                     $this->records[$idx]['dsh_Order'] = 1;
             }
+            if(@$this->records[$idx]['dsh_CommandToRun']=='action-AddRecord' 
+                            && @$this->records[$idx]['dsh_ParameterAddRecord']){
+                $this->records[$idx]['dsh_Parameters'] = $this->records[$idx]['dsh_ParameterAddRecord'];
+            }else if(@$this->records[$idx]['dsh_CommandToRun']=='action-SearchById' 
+                            && @$this->records[$idx]['dsh_ParameterSavedSearch']){
+                $this->records[$idx]['dsh_Parameters'] = $this->records[$idx]['dsh_ParameterSavedSearch'];
+            }
+            
+            
             
             //validate duplication
             $mysqli = $this->system->get_mysqli();

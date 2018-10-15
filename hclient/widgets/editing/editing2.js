@@ -480,7 +480,7 @@ function hEditing(_options) {
     function _getInputs(fieldName){
         var ele = _getFieldByName(fieldName);
         if(ele && ele.length>0){
-            return ele.editing_inputs('getInputs');
+            return ele.editing_input('getInputs');
         }
     }
 

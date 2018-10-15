@@ -656,6 +656,8 @@ function hRecordSet(initdata) {
             var idx = $.inArray(fldname, fields);
             if(idx>-1){
                 return record[idx];
+            }else if(record[fldname]){
+                return record[fldname];
             }else if(record['d'] && record['d'][fldname]){   
                 return record['d'][fldname]
             }else{
@@ -1323,6 +1325,10 @@ function hRecordSet(initdata) {
         
         getFields: function(){
             return fields;
+        },
+
+        setFields: function(_fields){
+            fields = _fields;
         },
         
         //  

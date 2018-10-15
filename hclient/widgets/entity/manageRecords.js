@@ -1419,9 +1419,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 //short version of new record params
                 if(that.options.new_record_params['rt']>0) that.options.new_record_params['RecTypeID'] = that.options.new_record_params['rt'];
                 if(that.options.new_record_params['ro']>=0) that.options.new_record_params['OwnerUGrpID'] = that.options.new_record_params['ro'];
-                if(that.options.new_record_params['rv']!='') that.options.new_record_params['NonOwnerVisibility'] = that.options.new_record_params['rv'];
-                if(that.options.new_record_params['url']!='') that.options.new_record_params['URL'] = that.options.new_record_params['url'];
-                if(that.options.new_record_params['desc']!='') that.options.new_record_params['ScratchPad'] = that.options.new_record_params['desc'];
+                if(!window.hWin.HEURIST4.util.isempty(that.options.new_record_params['rv'])) 
+                        that.options.new_record_params['NonOwnerVisibility'] = that.options.new_record_params['rv'];
+                if(!window.hWin.HEURIST4.util.isempty(that.options.new_record_params['url']))  
+                        that.options.new_record_params['URL'] = that.options.new_record_params['url'];
+                if(!window.hWin.HEURIST4.util.isempty(that.options.new_record_params['desc'])) 
+                        that.options.new_record_params['ScratchPad'] = that.options.new_record_params['desc'];
             }
         
             if(that._currentEditRecTypeID>0){

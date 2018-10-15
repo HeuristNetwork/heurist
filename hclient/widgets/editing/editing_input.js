@@ -686,7 +686,7 @@ $.widget( "heurist.editing_input", {
                 $input.prop('checked','checked');
             }
 
-        }else if(this.detailType=='rectype'){
+        }else if(this.detailType=='rectype'){  //@todo it seems not used need refer via resource type and entity mgr
 
             $input = $( "<select>" )
             .uniqueId()
@@ -1357,7 +1357,7 @@ console.log('OPEN RECORD EDIT');
             .appendTo( $inputdiv );
             
             if(!(this.options.dtID=='file' || this.detailType=='resource' || 
-                 this.detailType=='date' || this.detailType=='geo')){
+                 this.detailType=='date' || this.detailType=='geo' || this.detailType=='action')){
                      
                 $input.keydown(function(e){  //Ctrl+A - select all
                     if (e.keyCode == 65 && e.ctrlKey) {
@@ -1859,6 +1859,49 @@ console.log('OPEN RECORD EDIT');
                         }); 
             }
             else //------------------------------------------------------------------------------------
+            if(this.detailType=='action'){
+                
+                $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
+                   
+                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                    .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
+                    .insertBefore($input);
+            
+                //parse and return json object
+                that.newvalues[$input.attr('id')] = window.hWin.HEURIST4.util.isJSON(value);
+                if(that.newvalues[$input.attr('id')]==false){
+                    that.newvalues[$input.attr('id')] = {};
+                }
+                $input.val(JSON.stringify(that.newvalues[$input.attr('id')])).css('cursor','hand');
+                
+                      
+                __show_action_dialog = function (event){
+                        event.preventDefault();
+                        
+                        if(that.is_disabled) return;
+                        
+                        var dlg_options = that.newvalues[$input.attr('id')];
+                        if(  window.hWin.HEURIST4.util.isempty(dlg_options) ){
+                            dlg_options = {};
+                        }
+                        dlg_options.title = that.configMode.title;
+                        dlg_options.get_params_only = true;
+                        dlg_options.onClose = function(value){
+                            if(value){
+                                that.newvalues[$input.attr('id')] = window.hWin.HEURIST4.util.isJSON(value);
+                                if(that.newvalues[$input.attr('id')]==false){
+                                    that.newvalues[$input.attr('id')] = {};
+                                }
+                                $input.val(JSON.stringify(that.newvalues[$input.attr('id')])).change();
+                            }
+                        };
+                        
+                        window.hWin.HEURIST4.ui.showRecordActionDialog( this.configMode.actionName, dlg_options );
+                };
+
+                this._on( $input, { keypress: __show_action_dialog, click: __show_action_dialog } );
+                this._on( $gicon, { click: __show_action_dialog } );
+            }else //-----------------------------------------------
             if(this.detailType=='geo'){
                 
                 $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
@@ -1882,7 +1925,7 @@ console.log('OPEN RECORD EDIT');
                 that.newvalues[$input.attr('id')] = value;
                 $input.val(geovalue.type+'  '+geovalue.summary).css('cursor','hand');
                       
-                __show_mapdigit_dialog = function __show_select_dialog(event){
+                __show_mapdigit_dialog = function (event){
                         event.preventDefault();
                         
                         if(that.is_disabled) return;

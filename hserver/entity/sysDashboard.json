@@ -104,9 +104,34 @@
                         "dty_Size":250,
                         "rst_DisplayWidth":60,
                         "rst_DisplayName": "Parameters:",
-                        "rst_DisplayHelpText": "Parameters to pass to the command eg the record type to create"
+                        "rst_DisplayHelpText": "Parameters to pass to the command"
                     }
                 },
+                
+                {
+                    "dtID": "dsh_ParameterAddRecord",
+                    "dtFields":{
+                        "dty_Type":"action",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName":"Define Parameters:",
+                        "rst_DisplayHelpText": "Record type, owner and access parameters for new record", 
+                        "rst_FieldConfig": {"actionName":"recordAdd", "title":"Define parameters"}
+                    }
+                },
+                {
+                    "dtID": "dsh_ParameterSavedSearch",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":60,
+                        "dty_Role":"virtual",
+                        "rst_DisplayName":"Saved Filter:",
+                        "rst_DisplayHelpText": "Saved filter that will be executed", 
+                        "rst_FieldConfig": []
+                    }
+                },
+                
+                
                 {
                     "dtID": "dsh_Image",
                     "dtFields":{

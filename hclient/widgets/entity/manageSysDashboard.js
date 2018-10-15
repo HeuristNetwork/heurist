@@ -44,7 +44,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             this.options.position = {my: "left top", at:'left top', of:fit_to_layout};
             //var pos = fit_to_layout.offset();
             //{ my: "left top", at:'left+'+pos.left+' top+'+pos.top};;
-            this.options.width = fit_to_layout.width();
+            this.options.width = fit_to_layout.width()-20;
             this.options.height = fit_to_layout.height();
         }
         
@@ -120,22 +120,52 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.recordList.resultList('option','select_mode', 'select_single');
         
         //load all menu commands
-        //note!!! it won't works if structure for this entiy will be more complex than plain fields list
-        var menu_entries;
         var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('mainMenu');
         if(app && app.widget){
             menu_entries = $(app.widget).mainMenu('menuGetAllActions');
         }
+        menu_entries.unshift( {key:'action-CreateFilter', title: 'Trigger quick query dropdown'} );
+        menu_entries.unshift( {key:'action-SearchById', title: 'Run a  saved filter' } );
+        menu_entries.unshift( {key:'action-Search', title: 'Execute a filter string'} );
+        menu_entries.unshift( {key:'action-AddRecord',title:'Add specific entity/record type'});
         
 //console.log( menu_entries );        
+
+        //get all saved searches
+        var saved_searches = [];
+        var ssearches = window.hWin.HAPI4.currentUser.usr_SavedSearch;
+        var grp_IDs = [];
+        for (var svsID in ssearches)
+        {
+            grp_IDs.push(ssearches[svsID][2]);
+            saved_searches.push({key:svsID, title:ssearches[svsID][0], grpID:ssearches[svsID][2] });
+        }
         
+        window.hWin.HAPI4.SystemMgr.usr_names({UGrpID: grp_IDs}, function(res){
+            if(res && res.status==window.hWin.ResponseStatus.OK){
+                for (var idx in saved_searches)
+                {
+                    if(res.data[saved_searches[idx].grpID]){
+                        saved_searches[idx].title = res.data[saved_searches[idx].grpID] +  ' > ' +   saved_searches[idx].title;
+                    }
+                }
+            }
+        });
+        
+        
+        var k = 0;
         var fields = that.options.entity.fields;
         for (idx=0; idx<fields.length; idx++){
             if(fields[idx]['dtID']=='dsh_CommandToRun'){
                 that.options.entity.fields[idx]['dtFields']['rst_FieldConfig'] = menu_entries;
-                break;
+                k++;
+            }else if(fields[idx]['dtID']=='dsh_ParameterSavedSearch'){
+                that.options.entity.fields[idx]['dtFields']['rst_FieldConfig'] = saved_searches;
+                k++;
             }
+            if(k==2) break;
         }
+        
         
         return true;
     },
@@ -226,6 +256,70 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
     },
 
+    _initEditForm_step4: function(recordset){
+
+        if(recordset!=null){
+            
+                //var fields = recordset.getFields();
+                
+                var record = recordset.getFirstRecord();
+                var command = recordset.fld(record, 'dsh_CommandToRun');
+                var params = recordset.fld(record, 'dsh_Parameters');
+                if(command=='action-AddRecord'){
+                    recordset.setFld(record, 'dsh_ParameterAddRecord', params);
+                }else if(command=='action-SearchById'){
+                    recordset.setFld(record, 'dsh_ParameterSavedSearch', params);
+                }
+        }
+        
+        
+        this._super(recordset);        
+    },
+    
+    
+    //-----
+    // change parameter entry according to specified command
+    //
+    _afterInitEditForm: function(){
+
+        this._super();
+        
+        
+        //fill init values of virtual fields
+        //add lister for dty_Type field to show hide these fields
+        var elements = this._editing.getInputs('dsh_CommandToRun');
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(elements)){
+            this._on( $(elements[0]), {    
+                'change': function(event){
+                       var dsh_command = $(event.target).val();
+                       
+                       var ele_param = this._editing.getFieldByName('dsh_Parameters');
+                       var ele_param_ar = this._editing.getFieldByName('dsh_ParameterAddRecord');
+                       var ele_param_sf = this._editing.getFieldByName('dsh_ParameterSavedSearch');
+                       
+                       $(ele_param).hide();
+                       $(ele_param_ar).hide();
+                       $(ele_param_sf).hide();
+                                              
+                       if(dsh_command=='action-AddRecord'){
+                           $(ele_param_ar).show();
+                           
+                       }else if(dsh_command=='action-Search'){
+                            $(ele_param).show();
+                           
+                       }else if(dsh_command=='action-SearchById'){
+                            $(ele_param_sf).show();
+                           
+                       }
+                    
+                }
+                
+            });
+            
+            $(elements[0]).change(); //trigger
+        }
+
+    },
     //
     // force refresh after save (note: in case cached entity it auto happens in parent - manageEntity)
     //
@@ -329,6 +423,44 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                         $(app.widget).mainMenu('menuActionById', command);
                     }
 
+                }else if(command=='action-AddRecord'){ //add new record
+                    var params = window.hWin.HEURIST4.util.isJSON( this._selection.fld(record, 'dsh_Parameters') );
+                    if(params!==false){
+                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:params});
+                    }
+                
+                }else if(command=='action-SearchById'){ //add new record
+                    
+                    this.closeDialog();
+                
+                    var svsID = this._selection.fld(record, 'dsh_Parameters');
+                    var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
+                    if(app1 && app1.widget){
+                        $(app1.widget).svs_list('doSearchByID', svsID);        
+                    }
+                    
+
+                }else if(command=='action-Search'){ //add new record
+                
+                    this.closeDialog();
+                
+                    var qsearch = this._selection.fld(record, 'dsh_Parameters');
+                    
+                    var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
+                    if(app1 && app1.widget){
+                        $(app1.widget).svs_list('doSearch', '', qsearch, false);        
+                    }
+
+
+                }else if(command=='action-CreateFilter'){ //add new record
+                
+                    this.closeDialog();
+                
+                    var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('search');
+                    if(app1 && app1.widget){
+                        $(app1.widget).search('showSearchAssistant');        
+                    }
+               
                 }
 
             }else{

@@ -650,7 +650,7 @@ $.widget( "heurist.svs_list", {
                     var qsearch = that.allowed_svsIDs[svs_ID][_QUERY];
                     var qname   = that.allowed_svsIDs[svs_ID][_NAME];
                     var isfaceted = that.allowed_svsIDs[svs_ID][_FACET];
-                    that._doSearch2( qname, qsearch, isfaceted, event.target );
+                    that.doSearch( qname, qsearch, isfaceted, event.target );
                     that.accordeon.find('#search_query').val('');
                 }
             })
@@ -679,7 +679,7 @@ $.widget( "heurist.svs_list", {
                     if (code == 13) {
                         window.hWin.HEURIST4.util.stopEvent(e);
                         e.preventDefault();
-                        that._doSearch2('', ele_search.val(), false, ele_search);
+                        that.doSearch('', ele_search.val(), false, ele_search);
                     }
                 }
             });
@@ -689,7 +689,7 @@ $.widget( "heurist.svs_list", {
             .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
             this._on( btn_search, {
                 click:  function(){
-                    that._doSearch2('', ele_search.val(), false, ele_search);
+                    that.doSearch('', ele_search.val(), false, ele_search);
                 }
             });
         }
@@ -952,7 +952,7 @@ $.widget( "heurist.svs_list", {
                     //data.node.setSelected(true);
                     //remove highlight from others
                     that.search_tree.find('li.ui-state-active').removeClass('ui-state-active');
-                    that._doSearch2( qname, qsearch, isfaceted, event.target );
+                    that.doSearch( qname, qsearch, isfaceted, event.target );
                     setTimeout(function(){
                         that.search_tree.find('div.svs-contextmenu2').parent().addClass('leaves');
                         $(data.node.li).css('border','none').addClass('ui-state-active leaves');
@@ -1584,10 +1584,33 @@ $.widget( "heurist.svs_list", {
     qsearch = $(event.target).find('div').html();
     qsearch = qsearch.replace("&amp;","&");
     }
-    this._doSearch2(qsearch);
+    this.doSearch(qsearch);
     },*/
 
-    _doSearch2: function(qname, qsearch, isfaceted, ele){
+    doSearchByID: function(svsID){
+    
+        if(window.hWin.HAPI4.currentUser.usr_SavedSearch && 
+            window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID]){
+                                
+            var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_QUERY];
+            var qname   = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_NAME];
+            
+            var isfaceted = false;
+            
+            try {
+                var facet_params = $.parseJSON(qsearch);
+                isfaceted = (facet_params && Hul.isArray(facet_params.rectypes));
+            }
+            catch (err) {
+            }
+            
+            
+            this.doSearch( qname, qsearch, isfaceted, null );
+        }
+        
+    },
+    
+    doSearch: function(qname, qsearch, isfaceted, ele){
 
         if ( qsearch ) {
 
