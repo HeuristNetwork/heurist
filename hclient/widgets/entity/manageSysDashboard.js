@@ -41,11 +41,11 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         //window.hWin.
         var fit_to_layout = $('div[layout_id="FAP2"]');
         if(fit_to_layout.length>0){
-            this.options.position = {my: "left top", at:'left top', of:fit_to_layout};
+            this.options.position = {my: "left top", at:'left top+20', of:fit_to_layout};
             //var pos = fit_to_layout.offset();
             //{ my: "left top", at:'left+'+pos.left+' top+'+pos.top};;
-            this.options.width = fit_to_layout.width()-20;
-            this.options.height = fit_to_layout.height();
+            //this.options.width = fit_to_layout.width()-40;
+            this.options.height = fit_to_layout.height()-40;
         }
         
         this.options.isViewMode = true;
