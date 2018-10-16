@@ -930,8 +930,10 @@ div .selected_last{
 }
 .thumbs3 .landscape.recordDiv .recTypeThumb{
     right:270px;
-    top:2px;
-    height:170px
+    top:5px;
+    left:5px;
+    height:160px;
+    width:160px;
 }
 .thumbs3 .landscape.recordDiv .recordDescription {
     left: 180px;
@@ -1746,4 +1748,13 @@ body.popup h3 {
     height: 20px !important;
     line-height: 19px !important;
     font: 10px arial,helvetica,clean,sans-serif;
+}
+
+input[type="file"] {
+    background: transparent !important;
+    border-color:RGBA(255,255,255,0);
+    color:#6A7C99;
+    border:1px solid rgba(0, 0, 0, 0.2) !important;
+    font-size: 0.9em;
+    padding: 4px !important;
 }

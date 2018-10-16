@@ -278,10 +278,6 @@ function hEditing(_options) {
                             }else{
                                 fields[idx].values = null; //[''];
                             }  
-                            //reset default value - default value for new record only
-                            if(_is_insert!==true && fields[idx]['dtFields']['rst_DefaultValue']){
-                                fields[idx]['dtFields']['rst_DefaultValue']='';   
-                            }
                             
                         }else{
                         //new record - reset all values    
@@ -291,6 +287,7 @@ function hEditing(_options) {
                         fields[idx].recID = recID;
                         fields[idx].recordset = recdata;
                         fields[idx].change = _onChange;
+                        fields[idx].is_insert_mode = _is_insert;
                         
                         var inpt = $('<div>').css('display','block !important')
                                 .appendTo(fieldContainer).editing_input(fields[idx]);     

@@ -32,7 +32,7 @@
     */
 
 define('MANAGER_REQUIRED',1);   
-define('PDIR','../../');  //need for proper path to js and css    
+define('PDIR','../../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../../common/php/imageLibrary.php');
@@ -107,9 +107,11 @@ $mysqli = $system->get_mysqli();
 
         <title>Choose record type icon<?=(($mode==3)?"":" for ".$rt_id." : ".htmlspecialchars($rt_name))?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/edit.css">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/admin.css">
+
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        <link rel="stylesheet" type="text/css" href="<?echo $cssLink;?>">
 
         <style type="text/css">
             .success { font-weight: bold; color: green; margin-left: 3px; }
@@ -134,19 +136,27 @@ $mysqli = $system->get_mysqli();
                     document.forms[0].submit();
                 <?php } ?>
             }
+            
+            $(document).ready(function() {
+               $('button').button();
+            });                
+            
         </script>
+        
 
 <?php if($mode!=3){ ?>
-        <div class="input-row">
-            <div class="input-header-cell">Current thumbnail:</div>
-            <div class="input-cell"><img src="<?=$image_thumbnail?>?<?= time() ?>" style="vertical-align: middle; height:64px;"></div>
-            <div class="input-header-cell">Current icon:</div>
-            <div class="input-cell"><img src="<?=$image_icon?>?<?= time() ?>" style="vertical-align: middle; height:16px;"></div>
-        </div>
+        <fieldset>
+            <div class="input-cell">
+                <div class="header"><label>Current thumbnail:</label></div>
+                <img src="<?=$image_thumbnail?>?<?= time() ?>" style="vertical-align: middle; height:64px;">
+                <div class="header"><label>Current icon:</label></div>
+                <img src="<?=$image_icon?>?<?= time() ?>" style="vertical-align: middle; height:16px;">
+            </div>
+        </fieldset>
 <?php } ?>
-        <div class="actionButtons" style="position:absolute; right:10px; top:4px">
+        <div class="actionButtons" style="position:absolute; right:10px; top:10px">
                 <!-- input type="button" onClick="window.document.forms[0].submit();" value="Upload" style="margin-right:10px" -->
-                <input type="button" value="Close window" onClick="closewin()">
+                <button onClick="closewin()">Close window</button>
         </div>
 
         <form action="uploadRectypeIcon.php?db=<?= HEURIST_DBNAME?>" method="post" enctype="multipart/form-data" border="0">
@@ -172,13 +182,15 @@ $mysqli = $system->get_mysqli();
                 </div>
             </div>
 -->
-            <div class="input-row">
-                <div class="input-header-cell">Select new thumbnail</div>
-                <div class="input-cell"><input type="file" name="new_thumb" style="display:inline-block;" onchange="javascript:this.form.submit();"></div>
+            <fieldset>
+                <div class="input-cell">
+                    <div class="header"><label>Select new thumbnail</label></div>
+                    <input type="file" name="new_thumb" style="display:inline-block;" onchange="javascript:this.form.submit();">
 
-                <div class="input-header-cell">Select new icon</div>
-                <div class="input-cell"><input type="file" name="new_icon" style="display:inline-block;" onchange="javascript:this.form.submit();"></div>
-            </div>
+                    <div class="header"><label>Select new icon</label></div>
+                    <input type="file" name="new_icon" style="display:inline-block;" onchange="javascript:this.form.submit();">
+                </div>
+            </fieldset>
 <?php
             $select_tip = "or select a pre-defined icon below<br> (this will automatically select 16x16 and 64x64 icons)";
       }else{

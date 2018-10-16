@@ -719,8 +719,9 @@ $.widget( "heurist.manageEntity", {
                 var cancelbutton_label = (options['select_mode']=='select_multi' || options['select_mode']=='select_roles')
                     ?'Cancel':'Close';
                 
-                btn_array.push({text:window.hWin.HR(cancelbutton_label), 
-                        click: function() { that.closeDialog(); }}); //use usual close dialog 
+                btn_array.push({id:'btn_close_cancel', text:window.hWin.HR(cancelbutton_label), 
+                        click: function() { 
+                            that.closeDialog(); }}); //use usual close dialog 
             }
             
             if(position==null) position = { my: "center", at: "center", of: window };
@@ -1386,8 +1387,9 @@ $.widget( "heurist.manageEntity", {
     _initEditForm_step4: function(recordset){
         this._currentEditRecordset = recordset; 
         
+        var is_insert_mode = (recordset==null);
         //pass structure and record details
-        this._editing.initEditForm(this.options.entity.fields, recordset);
+        this._editing.initEditForm(this.options.entity.fields, recordset, is_insert_mode );
         this._afterInitEditForm();
     },
     

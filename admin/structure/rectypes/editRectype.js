@@ -173,8 +173,8 @@ function _upload_icon(mode) {
     window.hWin.HEURIST4.msg.showDialog(sURL, {
             "close-on-blur": false,
             "no-resize": false,
-            height: 500, //(mode==0?200:250),
-            width: 700,
+            height: 600, //(mode==0?200:250),
+            width: 850,
             title:' Select thumbnail and icon',
             callback:function(context){
                 icon_refresh(context);

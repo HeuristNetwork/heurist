@@ -185,14 +185,21 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             //take status edit/view from preferences? or always in view mode by default
           
             this.options.btn_array = [{id:'btn_set_mode',
-                        text: window.hWin.HR(that.options.isViewMode?'Edit':'View'),
+                        text: window.hWin.HR('Close'),
                         click: function( event ) { 
-                            that._setMode(!that.options.isViewMode);
+                            if(that.options.isViewMode){
+                                that.closeDialog();
+                            }else{
+                                that._setMode( true ); //back to view mode
+                            }
                         }}];
-                        
             this._super();
             
-            this.show_on_startup = $('<input id="show_on_startup" type="checkbox">')
+        //hide standard Close button - replace it with out setmode button
+        this._as_dialog.parent().find('#btn_close_cancel').hide();
+        this.btn_set_mode =  this._as_dialog.parent().find('#btn_set_mode');
+            
+        this.show_on_startup = $('<input id="show_on_startup" type="checkbox">')
                 .appendTo( $('<label style="float:right;padding:12px">Show dashboard on startup&nbsp;</label>')
                     .appendTo(this._as_dialog.parent().find('.ui-dialog-buttonpane')) );            
             
@@ -251,8 +258,11 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         }
         
         
-        this._as_dialog.parent().find('#btn_set_mode')
-            .button('option','label', window.hWin.HR(this.options.isViewMode?'Edit':'View'));
+        this.btn_set_mode
+            .button('option','label',window.hWin.HR(this.options.isViewMode?'Close':'View'))
+            .attr('title',this.options.isViewMode
+                        ?'The dashboard function can be turned back on by selecting Management > Dashboard'
+                        :'Turn back to presentation mode');
         
     },
 

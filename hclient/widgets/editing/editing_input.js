@@ -45,7 +45,8 @@ $.widget( "heurist.editing_input", {
         useHtmlSelect: false,
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
         
-        change: null  //onchange callback
+        change: null,  //onchange callback
+        is_insert_mode:false,
     },
 
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
@@ -220,7 +221,10 @@ $.widget( "heurist.editing_input", {
         
         if( !window.hWin.HEURIST4.util.isArray(this.options.values) ){
             var def_value = this.f('rst_DefaultValue');
-            if(window.hWin.HEURIST4.util.isempty(def_value)){
+
+            if( !this.options.is_insert_mode || window.hWin.HEURIST4.util.isempty(def_value)){
+                // reset default value - default value for new record only
+                // do not assign default values in edit mode                
                 values_to_set = [''];        
             }else if(window.hWin.HEURIST4.util.isArray(def_value)){
                 //exclude duplication
