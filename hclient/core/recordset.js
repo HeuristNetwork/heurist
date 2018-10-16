@@ -656,7 +656,7 @@ function hRecordSet(initdata) {
             var idx = $.inArray(fldname, fields);
             if(idx>-1){
                 return record[idx];
-            }else if(record[fldname]){
+            }else if(  (isNaN(Number(fldname)) && fldname.indexOf("dtl_")!=0) && record[fldname] ){
                 return record[fldname];
             }else if(record['d'] && record['d'][fldname]){   
                 return record['d'][fldname]
