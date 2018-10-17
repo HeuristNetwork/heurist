@@ -378,7 +378,8 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:'+recOpacity+'">'
         +'</div>';
 
-        var html = '<div class="recordDiv landscape" id="rd'+recID+'" recid="'+recID+'">'
+        var html = '<div class="recordDiv landscape'+(this.options.isViewMode?' dashboard outline_suppress':'')
+        +'" id="rd'+recID+'" recid="'+recID+'">'
         + html_thumb;
         
         

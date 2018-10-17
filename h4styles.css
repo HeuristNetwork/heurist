@@ -916,10 +916,9 @@ div .selected_last{
 /* landscape option */
 .thumbs3 .landscape.recordDiv {
     width: 440px;
+    border: none;
 }
-.thumbs3 .landscape.recordDiv:hover {
-    width: 446px;
-}
+
 .thumbs3 .landscape.recordDiv .recordTitle {
     left: 180px;
     top: 4px;
@@ -944,7 +943,31 @@ div .selected_last{
 .thumbs3 .landscape.recordDiv .recordIcons {
     display:none;
 }
-
+/* dashboard */
+.thumbs .dashboard.recordDiv:hover {
+    height: 128px;
+    width: 274px;
+}
+.thumbs3 .dashboard.recordDiv:hover {
+    height:180px;
+    width: 440px;
+}
+.thumbs .dashboard.recordDiv, .thumbs .dashboard.recordDiv:hover,
+.thumbs3 .dashboard.recordDiv, .thumbs3 .dashboard.recordDiv:hover,
+.thumbs .dashboard.recordDiv.selected, .thumbs .dashboard.recordDiv.selected:hover,
+.thumbs3 .dashboard.recordDiv.selected, .thumbs3 .dashboard.recordDiv.selected:hover{
+    -moz-box-shadow:none;
+    -webkit-box-shadow:none;
+    box-shadow: none !important;
+    border: none;
+    background: none !important;
+    margin:0 !important;
+    outline: none;
+    outline-style:none;
+}
+div .dashboard.selected_last{
+    border: none !important;
+}
 
 
 /* SAVED SEARCHES */
