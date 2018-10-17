@@ -276,7 +276,7 @@ var cfg_layouts = [
        ,result_pane:{dropable:false,apps:[{appid:'boro_reslist', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]} */
     },
 
-    {id:'adel', name:'Beyond 1918, University of Adelaide, built with Heurist', theme:'heurist', type:'free', 
+    {id:'adel', name:'November 1918, University of Adelaide, built with Heurist', theme:'heurist', type:'free', 
                 cssfile:['hclient/widgets/boro/beyond1914.css',
                 'https://global.adelaide.edu.au/style-guide-v2/latest/css/global-assets.css',
                 'https://global.adelaide.edu.au/style-guide-v2/0.24.0/css/header-footer.css',

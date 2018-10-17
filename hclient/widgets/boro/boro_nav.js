@@ -258,11 +258,12 @@ $.widget( "heurist.boro_nav", {
                             section.html(recordset.fld(content_rec, this.DT_EXTENDED_DESCRIPTION));
                         }
                     }
-                    if(name.toLowerCase()!=='contribute'){
+                    var lt = window.hWin.HAPI4.sysinfo['layout'];
+                    if(name.toLowerCase()!=='contribute' && lt=='boro'){ //substrcibe for Syndey only
                         //add registration form
                         ele = $('<div>').attr('data-recID', recID).appendTo(ele); 
                         
-                        var lt = window.hWin.HAPI4.sysinfo['layout'];  
+                          
                         ele.load(window.hWin.HAPI4.baseURL + 'hclient/widgets/boro/'+lt+'_subscribe.html',
                         function(){
                             var recID = $(this).attr('data-recID');
@@ -286,11 +287,33 @@ $.widget( "heurist.boro_nav", {
             +'<li><a href="#" class="nav-link" data-id="people">People</a></li>'
             +'<li><a href="#" class="nav-link" data-id="search">Search'
                 +'<spane style="position:relative;" class="ui-icon ui-icon-carat-1-s"></span></a></li>'
-            +'<li><a href="#" class="nav-link" data-id="resources">Resources'
-                +'<spane style="position:relative;" class="ui-icon ui-icon-carat-1-s"></span></a></li>'
-            +'</ul>';
+                
+        if(window.hWin.HAPI4.sysinfo['layout']=='boro'){ //resources menu for Syndey only
+            html  = html +'<li><a href="#" class="nav-link" data-id="resources">Resources'
+                +'<spane style="position:relative;" class="ui-icon ui-icon-carat-1-s"></span></a></li>';
+        }
+        html  = html +'</ul>';
         
         menu_ele.html(html);
+        
+        //init fancybox rollover for home page
+        if(window.hWin.HAPI4.sysinfo['layout']=='adel'){        
+        
+            //$("#home_page_gallery").show().appendTo();
+            
+            $("#home_page_gallery_container").load(window.hWin.HAPI4.baseURL+'hclient/widgets/boro/adel_roll_images.html',function(){
+                if($.fancybox && $.isFunction($.fancybox)){
+                        $.fancybox({selector : '#home_page_gallery > a[data-fancybox="home-roll-images"]',
+                         loop:true, buttons: [
+                                            "zoom",
+                                            "slideShow",
+                                            "thumbs",
+                                            "close"
+                                            ]});
+                }
+            });
+            
+        }
         
         /*
         $('.bor-dismiss-veil').click(function(event){
@@ -362,56 +385,59 @@ $.widget( "heurist.boro_nav", {
             return false;
         };        
         
-        var resource_menu = $('<ul>'
-        +'<li data-resource-id="general"><a href="#" class="nav-link">General resources</a></li>'
-        +'<li data-resource-id="education"><a href="#" class="nav-link">Education resources</a></li>'
-        +'</ul>')
-                .addClass('top-menu-dropdown').hide()
-                .css({'position':'absolute', 'padding':'5px', 'font-size': '15px'})
-                .appendTo( that.document.find('body') )
-                .menu({select: function(event, ui){ 
-                    
-                                    window.hWin.HEURIST4.util.stopEvent(event);
-                                    //that.history.push({page_name:'search'});
-                                    
-                                    var hdoc = $(window.hWin.document);
-                                    //hide all 
-                                    hdoc.find('#main_pane > .clearfix').hide(); //hide all
-                                    var ele = hdoc.find('#bor-page-resource');
-                                    
-                                    var rep_id = ui.item.attr('data-resource-id');
-                                    $('.bor-page-loading').show();
-                                    
-                                    
-                                    var repurl = window.hWin.HAPI4.baseURL
-                                            + 'viewers/smarty/updateReportOutput.php?publish=3&mode=html&id='
-                                            + (rep_id=='general'?3:2)
-                                            + '&db='+window.hWin.HAPI4.database;
-                                            
-                                    /*var repurl = window.hWin.HAPI4.baseURL
-                                        +'viewers/smarty/showReps.php?db='+window.hWin.HAPI4.database
-                                        +'&w=a&q=t%3A71%20f%3A29609%3A'
-                                        +(rep_id=='general'?6684:6685)
-                                        +'&h4=1&publish=1&debug=0&template=Beyond%201914%20Resources%20List.tpl'*/                                                          
-                                    ele.load(repurl,
-                                    function(){
-                                        $('.bor-page-loading').hide();
-                                        ele.show();
-                                    });
-                                    hdoc.scrollTop(0);
-                    
-                }});
-            
-        var resource_btn = menu_ele.find('.nav-link[data-id="resources"]');
-        resource_btn.on( {
-            mouseenter : function(){_show(resource_menu, resource_btn)},
-            mouseleave : function(){_hide(resource_menu)}
-        });   
-        resource_menu.on( {
-            mouseenter : function(){_show(resource_menu, resource_btn)},
-            mouseleave : function(){_hide(resource_menu)}
-        });
-             
+        if(window.hWin.HAPI4.sysinfo['layout']=='boro'){ //resources menu for Syndey only
+
+            var resource_menu = $('<ul>'
+            +'<li data-resource-id="general"><a href="#" class="nav-link">General resources</a></li>'
+            +'<li data-resource-id="education"><a href="#" class="nav-link">Education resources</a></li>'
+            +'</ul>')
+                    .addClass('top-menu-dropdown').hide()
+                    .css({'position':'absolute', 'padding':'5px', 'font-size': '15px'})
+                    .appendTo( that.document.find('body') )
+                    .menu({select: function(event, ui){ 
+                        
+                                        window.hWin.HEURIST4.util.stopEvent(event);
+                                        //that.history.push({page_name:'search'});
+                                        
+                                        var hdoc = $(window.hWin.document);
+                                        //hide all 
+                                        hdoc.find('#main_pane > .clearfix').hide(); //hide all
+                                        var ele = hdoc.find('#bor-page-resource');
+                                        
+                                        var rep_id = ui.item.attr('data-resource-id');
+                                        $('.bor-page-loading').show();
+                                        
+                                        
+                                        var repurl = window.hWin.HAPI4.baseURL
+                                                + 'viewers/smarty/updateReportOutput.php?publish=3&mode=html&id='
+                                                + (rep_id=='general'?3:2)
+                                                + '&db='+window.hWin.HAPI4.database;
+                                                
+                                        /*var repurl = window.hWin.HAPI4.baseURL
+                                            +'viewers/smarty/showReps.php?db='+window.hWin.HAPI4.database
+                                            +'&w=a&q=t%3A71%20f%3A29609%3A'
+                                            +(rep_id=='general'?6684:6685)
+                                            +'&h4=1&publish=1&debug=0&template=Beyond%201914%20Resources%20List.tpl'*/                                                          
+                                        ele.load(repurl,
+                                        function(){
+                                            $('.bor-page-loading').hide();
+                                            ele.show();
+                                        });
+                                        hdoc.scrollTop(0);
+                        
+                    }});
+                
+            var resource_btn = menu_ele.find('.nav-link[data-id="resources"]');
+            resource_btn.on( {
+                mouseenter : function(){_show(resource_menu, resource_btn)},
+                mouseleave : function(){_hide(resource_menu)}
+            });   
+            resource_menu.on( {
+                mouseenter : function(){_show(resource_menu, resource_btn)},
+                mouseleave : function(){_hide(resource_menu)}
+            });
+                 
+        }
                 
         //find faceted searches for search menu
         window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.search_UGrpID},
