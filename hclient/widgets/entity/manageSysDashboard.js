@@ -49,6 +49,8 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         }
         
         this.options.isViewMode = true;
+        
+        this.options.no_bottom_button_bar = true;
     
         this._super();
     },
@@ -85,11 +87,13 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
 
         this._on( this.searchForm, {
                 "searchsysdashboardonresult": this.updateRecordList,
+                "searchsysdashboardviewmode": function() { this._setMode( true );  }, //back to view mode
                 "searchsysdashboardonadd": function() { this.addEditRecord(-1); },
                 "searchsysdashboardonorder": function() { this.saveNewOrder() },
                 "searchsysdashboardoninit": function(){
                     
         this.show_longer_description = this.searchForm.find('#show_longer_description');
+        this.show_on_startup = this.searchForm.find('#show_on_startup');
 
         this.show_longer_description
                 .attr('checked',(prefs.viewmode=='thumbs3'))
@@ -99,15 +103,16 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 that.saveUiPreferences();
         });
         
+        this.show_on_startup
+                .attr('checked',(prefs.showonstartup==1))
+            .change(function(){
+                that.saveUiPreferences();
+        });
+        
         this._setMode(true)
         
         this.searchForm.find('#edit_dashboard').click(function(){
             that._setMode(false);
-        });
-        
-        this.show_on_startup.attr('checked', (prefs.showonstartup==1))
-            .change(function(){
-              that.saveUiPreferences();
         });
                     
                     
@@ -172,18 +177,12 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
 
     //
     // add specific buttons to bottom dialog bar
-    //        
+    //
+    /*        
     _initDialog: function(){
         
         var that = this;
-            //restore from preferences    
-            /* @todo
-            this.getUiPreferences();
-            this.options['width']  = this.usrPreferences['width'];
-            this.options['height'] = this.usrPreferences['height'];
-            */
             //take status edit/view from preferences? or always in view mode by default
-          
             this.options.btn_array = [{id:'btn_set_mode',
                         text: window.hWin.HR('Close'),
                         click: function( event ) { 
@@ -204,6 +203,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     .appendTo(this._as_dialog.parent().find('.ui-dialog-buttonpane')) );            
             
     },
+    */
     
     //
     //  set view or edit mode
@@ -241,7 +241,8 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             var that = this;
             this.recordList.resultList('option', 'sortable', true);
             this.recordList.resultList('option', 'onSortStop', function(){
-                that.searchForm.find('#btn_apply_order').css({'display':'inline-block'});
+                that.saveNewOrder(); //auto save order
+                //that.searchForm.find('#btn_apply_order').css({'display':'inline-block'});
             });
             
         }
@@ -258,11 +259,13 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         }
         
         
+        /*
         this.btn_set_mode
             .button('option','label',window.hWin.HR(this.options.isViewMode?'Close':'View'))
             .attr('title',this.options.isViewMode
                         ?'The dashboard function can be turned back on by selecting Management > Dashboard'
                         :'Turn back to presentation mode');
+        */
         
     },
 
@@ -376,12 +379,22 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         +'</div>';
 
         var html = '<div class="recordDiv landscape" id="rd'+recID+'" recid="'+recID+'">'
-        + html_thumb
-        + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordIcons" style="min-width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        + html_thumb;
+        
+        
+        if(!this.options.isViewMode && this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
+        
+            html = html + '<div style="display: inline-block;padding-top:5px;">'
+                + '<div title="Click to delete entry" style="width:16px;height:16px" class="logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                + '</div></div>';
+        }
+        //+ '<div class="recordSelector"><input type="checkbox" /></div>'
+        html = html 
+        /*+ '<div class="recordIcons" style="min-width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);opacity:'+recOpacity+'">'
-        + '</div>'
+        + '</div>' */
         + '<div class="recordTitle recordTitle2">'  // style="right:180px"
         +     recTitle
         + '</div>'
@@ -392,13 +405,14 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         // add edit/remove action buttons
         if(!this.options.isViewMode && this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
-            html = html 
+                /* these are standard buttons _ IJ wants special place
                 + '<div title="Click to edit entry" class="rec_edit_link_ext logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>&nbsp;&nbsp;'
                 + '<div title="Click to delete entry" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
                 + '</div>';
+                */
         }
         
         /*+ '<div title="Click to view record (opens in popup)" '

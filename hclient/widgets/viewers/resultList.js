@@ -320,7 +320,7 @@ $.widget( "heurist.resultList", {
 
         this.div_content = $( "<div>" )
         .addClass('div-result-list-content ent_content_full ui-heurist-bg-light')
-        .css({'border-top':'1px solid #cccccc'})  //,'padding-top':'1em'
+        //.css({'border-top':'1px solid #cccccc'})  //,'padding-top':'1em'
         .css({'overflow-y':'scroll'})
         .appendTo( this.element );
 

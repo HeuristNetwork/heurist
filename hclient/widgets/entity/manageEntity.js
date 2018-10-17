@@ -113,7 +113,10 @@ $.widget( "heurist.manageEntity", {
         //listeners
         onInitFinished:null,  //event listener when dialog is fully inited - use to perform initial search with specific parameters
         beforeClose:null,
-        onClose:null
+        onClose:null,
+        
+        no_bottom_button_bar: false,
+        btn_array: null,   //bottom bar buttons
     },
     
     //system name of entity  - define it to load entity config from server
@@ -657,13 +660,14 @@ $.widget( "heurist.manageEntity", {
                  {text:window.hWin.HR('Save'),
                     id:'btnRecSave',
                     css:{'visibility':'hidden', 'float':'right'},  
-                    click: function() { that._saveEditAndClose(); }},
-                    
+                    click: function() { that._saveEditAndClose(); }}
+                 /* IJ 2018-10-17 request   
                  {text:window.hWin.HR('Remove'), 
                     id:'btnRecRemove',
                     css:{'float':'left'},
                     click: function() { that._deleteAndClose(); },
-                 }];
+                 } */
+                 ];
     },
 
     //
@@ -741,7 +745,18 @@ $.widget( "heurist.manageEntity", {
                 position: position,
                 beforeClose: options.beforeClose,
                 resizeStop: function( event, ui ) {//fix bug
-                    that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
+                    //that.element.parent()
+                    var pele = that.element.parents('div[role="dialog"]');
+                    /*
+                    var ptop = pele.find('.ui-dialog-titlebar');
+                    var hr = ptop.is(':visible')?ptop.height():0;
+                    var pbtm = pele.find('.ui-dialog-buttonpane');
+                    hr = hr + ((pbtm.length>0 && pbtm.is(':visible'))?pbtm.height():0);
+                    */
+                    that.element.css({overflow: 'none !important',
+                    border: '1px red solid !important',
+                    'width':pele.width()-24 });
+                    //,'height':pele.height() - hr });
                 },
                 close:function(){
 
@@ -766,7 +781,7 @@ $.widget( "heurist.manageEntity", {
                     $dlg.parent().remove();    
                         
                 },
-                buttons: btn_array
+                buttons: this.options.no_bottom_button_bar?null:btn_array
             }); 
             this._as_dialog = $dlg; 
             
@@ -1180,11 +1195,12 @@ $.widget( "heurist.manageEntity", {
             }
             ele.find('#btnRecSave').css('visibility', mode);
             
+            /* IJ 2018-10-17 request   
             if(this._currentEditRecordset==null){            
                 ele.find('#btnRecRemove').css('visibility', 'hidden');
             }else{
                 ele.find('#btnRecRemove').css('visibility', 'visible');    
-            }
+            }*/
         }
     },
     

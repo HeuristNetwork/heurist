@@ -42,7 +42,7 @@ $.widget( "heurist.editing_input", {
         showedit_button: true,
         show_header: true, //show/hide label
         suppress_prompts:false, //supress help, error and required features
-        useHtmlSelect: false,
+        useHtmlSelect: false, //NOTE !!!! native select produce double space for option  Chrome touch screen
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
         
         change: null,  //onchange callback
@@ -2270,7 +2270,7 @@ console.log('OPEN RECORD EDIT');
                     //if($input==null || $input.length==0) $input = $('<select>').uniqueId();
 
                     //add add/browse buttons
-                    window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, true, null);
+                    window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, false, null);
 
                     if(this.configMode.button_browse){
 
@@ -2305,7 +2305,8 @@ console.log('OPEN RECORD EDIT');
                     
                     //array of key:title objects
                     //if($input==null) $input = $('<select>').uniqueId();
-                    window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
+                    var selObj = window.hWin.HEURIST4.ui.createSelector($input.get(0), allTerms);
+                    window.hWin.HEURIST4.ui.initHSelect(selObj, this.options.useHtmlSelect);
                 }
             }
             if(!window.hWin.HEURIST4.util.isnull(value)){
@@ -2329,6 +2330,8 @@ console.log('OPEN RECORD EDIT');
             }
 
             //if($input==null) $input = $('<select>').uniqueId();
+            
+            //this.options.useHtmlSelect native select produce double space for option  Chrome touch screen
             
             //vocabulary
             $input = window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),
