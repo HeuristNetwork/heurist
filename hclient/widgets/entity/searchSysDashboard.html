@@ -1,9 +1,10 @@
 <div>
 <div id="edit_mode" style="display:none;padding-top: 10px;">
+
     <div style="position: absolute;z-index: 1999;left: 10px;top: 20px;">
         <div id="btn_add_record" style="display:inline-block"></div>
         <div id="btn_apply_order"></div>
-        <div id="btn_set_mode" style="margin-left:20px" "title ="Turn back to presentation mode"></div>
+        <div id="btn_set_mode" style="margin-left:20px" title ="Turn back to presentation mode"></div>
         <label style="vertical-align:middle;padding-left:20px"><input id="show_on_startup" type="checkbox">&nbsp;Show dashboard on startup</label>
         <span class="heurist-helper1" style="vertical-align:middle;padding-left:40px">Drag and drop to re-order</span>
     </div>
@@ -53,13 +54,17 @@
     </div>
     -->    
 </div>
-<div id="view_mode" style="padding:0.5em">
-   <h3 style="padding-bottom: 0.5em;">Dashboard</h3>
+
+<div id="view_mode" style="padding:1.5em">
+   <h3 style="padding-bottom:0.5em;">Dashboard</h3>
    <span class="heurist-helper1">Shortcuts to commonly used functions for this particular database (all functions are available via the menus and filter field)</span>
    <div style="padding-top:1.5em">
-        <label style="padding:0 40px 0 20px;"><input id="show_longer_description" type="checkbox">&nbsp;Show longer description</label>
+        <!-- <label style="padding:0 40px 0 20px;"><input id="show_longer_description" type="checkbox">&nbsp;Show longer description</label> -->
         <a href="#" id="edit_dashboard"><span class="ui-icon ui-icon-pencil"/>&nbsp;Edit dashboard</a>
    </div>
+   <div id="btn_close_dashboard" style="position:absolute;right:1.5em;top:1.5em"/>
+
 </div>
+
 </div>
 

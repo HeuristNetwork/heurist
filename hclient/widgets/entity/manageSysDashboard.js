@@ -33,8 +33,8 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.options.use_cache = false;
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
-        this.options.edit_height = 640;
-        this.options.width = 950;
+        this.options.edit_height = 700;
+        this.options.width = 1000;
 
         this.options.height = (isNaN(this.options.height) || this.options.height<815)?900:this.options.height;                    
         
@@ -90,18 +90,19 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 "searchsysdashboardviewmode": function() { this._setMode( true );  }, //back to view mode
                 "searchsysdashboardonadd": function() { this.addEditRecord(-1); },
                 "searchsysdashboardonorder": function() { this.saveNewOrder() },
+                "searchsysdashboardonclose": function() { this.closeDialog() },
                 "searchsysdashboardoninit": function(){
                     
-        this.show_longer_description = this.searchForm.find('#show_longer_description');
+        //this.show_longer_description = this.searchForm.find('#show_longer_description');
         this.show_on_startup = this.searchForm.find('#show_on_startup');
 
-        this.show_longer_description
+        /*this.show_longer_description
                 .attr('checked',(prefs.viewmode=='thumbs3'))
             .change(function(){
-                that.recordList.resultList('option','view_mode',
-                    that.show_longer_description.is(':checked')?'thumbs3':'thumbs');
+                that.recordList.resultList('option','view_mode', 'thumbs');
+                    //that.show_longer_description.is(':checked')?'thumbs3':'thumbs');
                 that.saveUiPreferences();
-        });
+        });*/
         
         this.show_on_startup
                 .attr('checked',(prefs.showonstartup==1))
@@ -215,16 +216,19 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
              // view mode
              //this.searchForm.hide();
              //this.recordList.css({'top': 0});
-            this.searchForm.css({'height': '6.4em'});
-            this.recordList.css({'top': '6.8em'});
+            this.searchForm.css({'height': '7.4em'});
+            this.recordList.css({'top': '7.8em'});
             
             this.searchForm.find('#view_mode').show();
             this.searchForm.find('#edit_mode').hide();
             this._as_dialog.parent().find('.ui-dialog-titlebar').hide();
             
             this.recordList.resultList('option', 'sortable', false);
-            this.recordList.resultList('option','view_mode',
-                this.show_longer_description.is(':checked')?'thumbs3':'thumbs');
+            this.recordList.resultList('option','view_mode','thumbs');
+            
+            this.recordList.find('.div-result-list-content').css({'overflow-y':'auto'});
+            
+                //this.show_longer_description.is(':checked')?'thumbs3':'thumbs');
         }else{
             // edit mode
             
@@ -549,7 +553,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     //    
     saveUiPreferences:function(){
         var params = 
-            {viewmode: this.show_longer_description.is(':checked')?'thumbs3':'thumbs',
+            {viewmode: 'thumbs',  //this.show_longer_description.is(':checked')?'thumbs3':'thumbs',
              showonstartup: this.show_on_startup.is(':checked')?1:0 };
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);     
     },

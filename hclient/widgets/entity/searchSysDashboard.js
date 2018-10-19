@@ -54,6 +54,14 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                     that._trigger( "viewmode" );
                 }); 
 
+        this.btn_close_mode = this.element.find('#btn_close_dashboard')
+                .css({'min-width':'9m'})
+                    .button({label: window.hWin.HR("Close dashboard")})
+                .click(function(e) {
+                    that._trigger( "onclose" );
+                }); 
+                
+                
         this.input_search_inactive = this.element.find('#input_search_inactive');
         this._on(this.input_search_inactive,  { change:this.startSearch });
         

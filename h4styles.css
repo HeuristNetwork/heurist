@@ -643,7 +643,7 @@ div .selected_last{
     width: 280px;
 }
 .thumbs .landscape.recordDiv .recordTitle {
-    left: 120px;
+    left: 114px;
     top: 4px;
     right: 2px;
     width: auto;
@@ -651,15 +651,15 @@ div .selected_last{
     font-weight:bold;
 }
 .thumbs .landscape.recordDiv .recTypeThumb{
-    right:160px;
+    width:100px;
     top:2px;
-    height:120px
+    height:100px
 }
 .thumbs .landscape.recordDiv .recordDescription {
-    left: 120px;
+    left: 114px;
     right: 3px;
     top: 26px;
-    bottom: 4px;
+    bottom: 24px;
 }
 .thumbs .landscape.recordDiv .recordIcons {
     display:none;
@@ -943,10 +943,14 @@ div .selected_last{
 .thumbs3 .landscape.recordDiv .recordIcons {
     display:none;
 }
+
 /* dashboard */
-.thumbs .dashboard.recordDiv:hover {
-    height: 128px;
-    width: 274px;
+.thumbs .dashboard.recordDiv .recordDescription {
+    text-overflow: ellipsis;
+}
+.thumbs .dashboard.recordDiv, .thumbs .dashboard.recordDiv:hover {
+    height: 114px;
+    width: 440px;
 }
 .thumbs3 .dashboard.recordDiv:hover {
     height:180px;
@@ -961,7 +965,7 @@ div .selected_last{
     box-shadow: none !important;
     border: none;
     background: none !important;
-    margin:0 !important;
+    margin:20px !important;
     outline: none;
     outline-style:none;
 }
