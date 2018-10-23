@@ -54,8 +54,10 @@ $.widget( "heurist.editing_input", {
     configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
     
     isFileForRecord:false,
-    is_disabled: false,
+    entity_image_already_uploaded: false,
 
+    is_disabled: false,
+    
     // the constructor
     _create: function() {
 
@@ -405,6 +407,8 @@ $.widget( "heurist.editing_input", {
                         var $parent = $input.parents('.input-div');
                         $input.remove();
                         $parent.remove();
+                        
+                        that.entity_image_already_uploaded = false;
                     }else{
                         if($input.hSelect('instance')!==undefined) $input.hSelect('destroy');
                         
@@ -788,6 +792,7 @@ $.widget( "heurist.editing_input", {
                     if(that.options.recordset){
                     
                     var relations = that.options.recordset.getRelations();
+                  
                     if(relations && (relations.direct || relations.reverse)){
                         
                         var ptrset = that.f('rst_PtrFilteredIDs');
@@ -819,7 +824,7 @@ $.widget( "heurist.editing_input", {
                                         //verify that target rectype is satisfy to constraints and trmID allowed
                                         var targetID = direct[k].targetID;
                                         var targetRectypeID = headers[targetID][1];
-                                        if( headers[targetID]['used']!=1 &&
+                                        if( headers[targetID]['used_in_reverse']!=1 &&
                                            (ptrset.length==0 || 
                                             window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
                                         {
@@ -836,7 +841,7 @@ $.widget( "heurist.editing_input", {
                                                 }, true);
                                             ele.on('remove', __onRelRemove);
                                             
-                                            headers[targetID]['used'] = 1;
+                                            headers[targetID]['used_in_direct'] = 1;
                                         }
                                 }
                             }
@@ -862,7 +867,7 @@ $.widget( "heurist.editing_input", {
                                         var targetID = reverse[k].sourceID;
                                         var targetRectypeID = headers[targetID][1];
                                         
-                                        if (headers[targetID]['used']!=1 && (ptrset.length==0) ||
+                                        if (headers[targetID]['used_in_direct']!=1 && (ptrset.length==0) ||
                                                 (window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
                                         {
                                             if(!isSubHeaderAdded){
@@ -888,7 +893,7 @@ $.widget( "heurist.editing_input", {
                                             ele.addClass('reverse-relation', 1)
                                                 .on('remove', __onRelRemove);
                                             
-                                            headers[targetID]['used'] = 1;
+                                            headers[targetID]['used_in_reverse'] = 1;
                                         }
                                 }
                             }
@@ -1160,7 +1165,7 @@ $.widget( "heurist.editing_input", {
                                   if(new_rec_param==null){
                                       new_rec_param = {RecTypeID:selector_rectype.val()};
                                   }
-console.log('OPEN RECORD EDIT');                                  
+
                                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                                         {new_record_params:new_rec_param, 
                                             onselect:popup_options.onselect, 
@@ -1232,7 +1237,7 @@ console.log('OPEN RECORD EDIT');
             if(this.inputs.length>0 && !(value>0))  __show_select_dialog();
             */
             
-            this.newvalues[$input.attr('id')] = value;    
+            this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
 
 
             
@@ -1346,7 +1351,7 @@ console.log('OPEN RECORD EDIT');
             this._on( $gicon, { click: __show_select_dialog } );
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
             
-            this.newvalues[$input.attr('id')] = value;    
+            this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
 
         }
         else{
@@ -1600,7 +1605,7 @@ console.log('OPEN RECORD EDIT');
                    
                 }//temporal allowed
                 else{
-                    that.newvalues[$input.attr('id')] = value;            
+                    this.newvalues[$input.attr('id')] = value;  //for this type assign value at init          
                 }
                 
                 $input.val(value);    
@@ -1731,7 +1736,7 @@ console.log('OPEN RECORD EDIT');
                         }
                         
                         if(this.isFileForRecord && value){
-                            this.newvalues[$input.attr('id')] = value.ulf_ID;
+                            this.newvalues[$input.attr('id')] = value.ulf_ID;   //assign value at once
                         }
                 
             }
@@ -1751,6 +1756,13 @@ console.log('OPEN RECORD EDIT');
                         var $input_img = $('<div class="image_input fileupload ui-widget-content ui-corner-all">'
                             + '<img src="'+urlThumb+'" class="image_input"></div>').appendTo( $inputdiv );                
                             
+                         
+                        window.hWin.HAPI4.checkImageUrl(this.configMode.entity, this.options.recID, 'thumb',
+                            function(response){
+                                  if(response.data=='ok'){
+                                      that.entity_image_already_uploaded = true;
+                                  }
+                        });
                             
                 /* 2017-11-08 no more buttons 
                         //browse button    
@@ -1763,7 +1775,7 @@ console.log('OPEN RECORD EDIT');
                         //set input as file and hide
                         $input.prop('type','file').hide();
                         
-                        //temp file name 
+                        //temp file name  it will be renamed on server to recID.png on save
                         var newfilename = '~'+window.hWin.HEURIST4.util.random();
 
                         //crate progress dialog
@@ -1833,7 +1845,7 @@ console.log('OPEN RECORD EDIT');
                             // file.thumbnailUrl - is correct but inaccessible for heurist server
                             // we get image via fileGet.php
                             $input_img.find('img').prop('src', urlThumb);
-                            that.newvalues[$input.attr('id')] = newfilename;
+                            that.newvalues[$input.attr('id')] = newfilename;  
                         }
                         $input.attr('title', file.name);
                         that._onChange();//need call it manually since onchange event is redifined by fileupload widget
@@ -1861,6 +1873,7 @@ console.log('OPEN RECORD EDIT');
                         $input_img.on({click: function(){ //find('a')
                                 $input.click();}
                         }); 
+                        
             }
             else //------------------------------------------------------------------------------------
             if(this.detailType=='action'){
@@ -2313,10 +2326,13 @@ console.log('OPEN RECORD EDIT');
                 
                 if($($input).attr('radiogroup')){
                     $($input).find('input[value="'+value+'"]').attr('checked', true);
-                }else{
+                }else {
                     $($input).val(value); 
                 }
             }  
+            if($($input).hSelect("instance")!=undefined){
+                           $($input).hSelect("refresh"); 
+            }
 
         }else{ //this is usual enumeration from defTerms
 
@@ -2587,10 +2603,18 @@ console.log('OPEN RECORD EDIT');
                 var ress = this.getValues();
 
                 if(ress.length==0 || window.hWin.HEURIST4.util.isempty(ress[0]) || ress[0].trim()=='' ){
-                    //error highlight
-                    $(this.inputs[0]).addClass( "ui-state-error" );
-                    //add error message
-                    errorMessage = 'Field is required';
+                    
+                    
+                    if( data_type=='file' && !this.isFileForRecord && this.entity_image_already_uploaded){
+                        //special case for entity image
+                        
+                    }else{
+                    
+                        //error highlight
+                        $(this.inputs[0]).addClass( "ui-state-error" );
+                        //add error message
+                        errorMessage = 'Field is required';
+                    }
 
                 }else if((data_type=='freetext' || data_type=='url' || data_type=='blocktext') && ress[0].length<4){
                     //errorMessage = 'Field is required';

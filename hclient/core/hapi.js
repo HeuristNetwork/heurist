@@ -1266,6 +1266,19 @@ function hAPI(_db, _oninit) { //, _currentUser
                     +'&def='+def;
         }
 
+        , checkImageUrl: function(entityName, recID, version, callback){
+
+            var request = {
+                    db:window.hWin.HAPI4.database,
+                    entity: entityName,
+                    id:recID,
+                    version:version,
+                    def: 'check'};
+            
+            window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hserver/utilities/fileGet.php', 
+                        request, null, callback);
+        }
+
         //
         //
         //

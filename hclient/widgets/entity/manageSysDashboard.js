@@ -33,7 +33,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.options.use_cache = false;
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
-        this.options.edit_height = 700;
+        this.options.edit_height = 600;
         this.options.width = 1000;
 
         this.options.height = (isNaN(this.options.height) || this.options.height<815)?900:this.options.height;                    
@@ -134,6 +134,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         menu_entries.unshift( {key:'action-SearchById', title: 'Run a  saved filter' } );
         menu_entries.unshift( {key:'action-Search', title: 'Execute a filter string'} );
         menu_entries.unshift( {key:'action-AddRecord',title:'Add specific entity/record type'});
+        menu_entries.unshift( {key:'',title:'select command ...'});
         
 //console.log( menu_entries );        
 

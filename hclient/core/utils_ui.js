@@ -1340,7 +1340,7 @@ window.hWin.HEURIST4.ui = {
                 },*/
                   change: function( event, data ) {
     
-                        $(selObj).val(data.item.value);//.change();
+                        $(selObj).val(data.item.value);//change value for underlaying html select
                         $(selObj).trigger('change');
                 }});
             

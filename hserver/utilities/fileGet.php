@@ -128,7 +128,7 @@ if($filename){ //download from scratch
         }
         download_file($file_read, null);
         
-    }else{
+}else{
         
         $content_type = 'image/png';
 
@@ -177,38 +177,54 @@ if($filename){ //download from scratch
             }
             
         }   
-                   
-        if(file_exists($filename)){
-            download_file($filename, $content_type);
-            exit();
-        }
-            
-        
+
         //entity id either not defined or requested file doesn't exist
-        //editmode: empty gif (0) or add image gif (1) or default icon/thumb for entity (2)
+        //editmode: empty gif (0) or add image gif (1) or default icon/thumb for entity (2), or (check)  'ok' if it exists or '' missed
         $default_mode = @$_REQUEST['def'] ?$_REQUEST['def']:2;
-        
-        if($default_mode==2) //get entity default icon or thumb
-        {
-            //at the moment we don't have full images that describe entity - only icons and thumbs
-            $filename = dirname(__FILE__).'/../../hclient/assets/'
-                            .$_REQUEST['entity'].(($viewmode=='icon')?'':'_thumb').'.png';    
-                            
-            if(file_exists($filename)){
-                download_file($filename, $content_type);
-                exit();
-            }
-        }
-                
-        if ($default_mode==1){ //show invitation to add image
-            download_file(dirname(__FILE__).'/../../hclient/assets/100x100click.png', $content_type);
-        }else {
-            $content_type = 'image/gif';
-            if($viewmode = 'icon'){
-                download_file(dirname(__FILE__).'/../../hclient/assets/16x16.gif', $content_type);
+
+                   
+        if(file_exists($filename) && !is_dir($filename)){
+            if($default_mode=='check' || $default_mode==3){
+
+                $response = array('status'=>HEURIST_OK, 'data'=>'ok');
+                header('Content-type: application/json;charset=UTF-8');
+                print json_encode($response);
+
             }else{
-                download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif', $content_type);
+                download_file($filename, $content_type);
             }
+
+        }else if($default_mode=='check' || $default_mode==3){
+            
+                $response = array('status'=>HEURIST_OK, 'data'=>'not found');
+                header('Content-type: application/json;charset=UTF-8');
+                print json_encode($response);
+        
+        }else{
+        
+            if($default_mode=='view' && $default_mode==2) //get entity default icon or thumb
+            {
+                //at the moment we don't have full images that describe entity - only icons and thumbs
+                $filename = dirname(__FILE__).'/../../hclient/assets/'
+                                .$_REQUEST['entity'].(($viewmode=='icon')?'':'_thumb').'.png';    
+                                
+                if(file_exists($filename) && !is_dir($filename)){
+                    download_file($filename, $content_type);
+                    exit();
+                }
+            }
+                    
+            if ($default_mode=='edit' || $default_mode==1){ //show invitation to add image
+                download_file(dirname(__FILE__).'/../../hclient/assets/100x100click.png', $content_type);
+            }else {
+                $content_type = 'image/gif';
+                if($viewmode = 'icon'){
+                    download_file(dirname(__FILE__).'/../../hclient/assets/16x16.gif', $content_type);
+                }else{
+                    download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif', $content_type);
+                }
+            }
+        
         }
         exit();
 }
@@ -222,6 +238,7 @@ if($error){
 }
 
 function download_file($filename, $content_type){
+    
         ob_start();    
         if($content_type) header('Content-type: '.$content_type);
         header('Pragma: public');
