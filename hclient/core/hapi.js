@@ -554,8 +554,12 @@ function hAPI(_db, _oninit) { //, _currentUser
             get_url_content_type: function(url, callback){
                 var request = {a:'get_url_content_type', url: url};
                 _callserver('usr_info', request, callback);
-            }
+            },
 
+            get_sysimages: function(folders, callback){
+                var request = {a:'sysimages', folders: folders};
+                _callserver('usr_info', request, callback);
+            }
 
             /*
             ,databases: function(request, callback){

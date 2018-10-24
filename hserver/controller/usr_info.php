@@ -96,6 +96,13 @@
 
             $res = $system->getCurrentUserAndSysInfo();
 
+        }else if ($action=="sysimages") { //get list of system images
+        
+              $lib_path = 'admin/setup/iconLibrary/64px/';
+        
+              $res = folderContent(array($lib_path),array('png'));
+              
+ 
         }else        
         if ( $system->get_user_id()<1 &&  !in_array($action,$quest_allowed)) {
 

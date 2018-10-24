@@ -187,6 +187,50 @@
         }
     }
     
+    //
+    // get list of files in folder as search result (record list)
+    //
+    function folderContent($dirs, $exts) {
+        
+        $records = array();
+        $order = array();
+        $fields = array('file_id', 'file_name', 'file_dir');
+        $idx = 1;
+
+        foreach ($dirs as $dir) {
+            $files = scandir(HEURIST_DIR.$dir);
+            foreach ($files as $filename) {
+                //if (!(( $filename == '.' ) || ( $filename == '..' ) || is_dir(HEURIST_DIR.$dir . $filename))) 
+                
+                    $path_parts = pathinfo($filename);
+                    if(array_key_exists('extension', $path_parts))
+                    {
+                        $ext = strtolower($path_parts['extension']);
+                        if(file_exists(HEURIST_DIR.$dir.$filename) && in_array($ext, $exts))
+                        {
+                            $records[$idx] = array($idx, $filename, $dir);
+                            $order[] = $idx;
+                            $idx++;
+                        }
+                    }
+                
+            }//for
+        }
+
+        
+        $response = array(
+                            'pageno'=>0,  //page number to sync
+                            'offset'=>0,
+                            'count'=>count($records),
+                            'reccount'=>count($records),
+                            'fields'=>$fields,
+                            'records'=>$records,
+                            'order'=>$order,
+                            'entityName'=>'files');
+
+        return $response;
+        
+    }
    
     
     //

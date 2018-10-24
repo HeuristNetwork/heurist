@@ -100,7 +100,7 @@
                         "dty_Type":"file",
                         "rst_DisplayName":"Icon:",
                         "rst_DisplayHelpText": "The icon which will represent this function on the dashboard", 
-                        "rst_FieldConfig":{"entity":"sysDashboard", "accept":".png,.jpg,.gif", "size":200},
+                        "rst_FieldConfig":{"entity":"sysDashboard", "accept":".png,.jpg,.gif", "size":200, "use_assets":true},
                         "dty_Role":"virtual",
                         "rst_RequirementType":"required"
                     }

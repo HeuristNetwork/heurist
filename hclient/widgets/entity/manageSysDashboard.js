@@ -218,7 +218,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
              //this.searchForm.hide();
              //this.recordList.css({'top': 0});
             this.searchForm.css({'height': '7.4em'});
-            this.recordList.css({'top': '7.8em'});
+            this.recordList.css({'top': '7.4em'});
             
             this.searchForm.find('#view_mode').show();
             this.searchForm.find('#edit_mode').hide();

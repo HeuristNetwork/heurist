@@ -308,11 +308,8 @@ $.widget( "heurist.editing_input", {
             this.btn_add.remove();
         }
         // remove generated elements
-        if(this.rec_search_dialog){
-            this.rec_search_dialog.remove();
-        }
-        if(this.rec_relation_dialog){
-            this.rec_relation_dialog.remove();
+        if(this.imagelib_select_dialog){
+            this.imagelib_select_dialog.remove();
         }
         if(this.header){
             this.header.remove();
@@ -1783,6 +1780,8 @@ $.widget( "heurist.editing_input", {
                         +'<div class="progressbar" style="margin-top: 20px;"></div></div>').hide().appendTo( $inputdiv );
                         var $progress_bar = $progress_dlg.find('.progressbar');
                         var $progressLabel = $progress_dlg.find('.progress-label');
+                        
+                        var $select_imagelib_dlg = $('<div/>').appendTo( $inputdiv );
          
                         $progress_bar.progressbar({
                               value: false,
@@ -1871,6 +1870,11 @@ $.widget( "heurist.editing_input", {
                         //init click handlers
                         //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
                         $input_img.on({click: function(){ //find('a')
+                            if(false && that.configMode.use_assets){
+                                
+                                $select_imagelib_dlg.select_imagelib({onselect:null});
+                                
+                            }else
                                 $input.click();}
                         }); 
                         
