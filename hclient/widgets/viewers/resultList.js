@@ -581,7 +581,7 @@ $.widget( "heurist.resultList", {
             this.div_header.hide();
         }
 
-        this.div_toolbar.css({'top':top+'px', height:this.options.show_savefilter?'5em':'2.5em'});
+        this.div_toolbar.css({'top':top+'px', height:this.options.show_savefilter?'4.9em':'2.5em'});
         if(this.options.show_toolbar){
             this.div_toolbar.show();
             top = top + this.div_toolbar.height();

@@ -754,7 +754,7 @@ $.widget( "heurist.manageEntity", {
                     hr = hr + ((pbtm.length>0 && pbtm.is(':visible'))?pbtm.height():0);
                     */
                     that.element.css({overflow: 'none !important',
-                    border: '1px red solid !important',
+                    //border: '1px red solid !important',
                     'width':pele.width()-24 });
                     //,'height':pele.height() - hr });
                 },

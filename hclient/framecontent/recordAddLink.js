@@ -460,7 +460,7 @@ function hRecordAddLink() {
         :' data-party="'+party+'" value="'+dty+'" data-type="'+field_type+'"')
     +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
     + '<div id="rt_'+party+'_sel_'+dty+'" style="display:table-row"></div>'
-    //+'<label style="font-style:italic" for="cb'+party+'_cb_'+dty+'">'+dtyName+'</label>&nbsp;'
+    +'<label style="font-style:italic" for="cb'+party+'_cb_'+dty+'">'+dtyName+'</label>&nbsp;'
     //+'<select id="rec'+party+'_sel_'+dty+'" class="text ui-widget-content ui-corner-all" style="margin-left:30px;">'  
     //    +'<option>relation type</option></select>'
     +'<div>').appendTo($('#'+party+'_field'));

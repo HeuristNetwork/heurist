@@ -398,7 +398,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 */
                                 var now_selected = data.selection.getIds(25);
                                 window.hWin.HAPI4.save_pref('recent_Records', now_selected, 25);      
-                                
+                               
                                 that._trigger( "onselect", null, {selection:data.selection});  
                                 that.closeDialog();
                             }

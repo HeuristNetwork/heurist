@@ -240,7 +240,7 @@ function EditRecStructure() {
                         
                         $(elLiner).css({cursor:'pointer'})
                             .attr('rst_ID', oRecord.getData("rst_ID"))
-                            .click(function(){editStructure.onAddFieldAtIndex(event, true);});
+                            .click(function(event){editStructure.onAddFieldAtIndex(event, true);});
                         //elLiner.innerHTML = oData;
                         //elLiner.title = oRecord.getData("conceptCode");
                     }
@@ -265,7 +265,7 @@ function EditRecStructure() {
                         
                         $(elLiner).css({cursor:'pointer'})
                             .attr('rst_ID', oRecord.getData("rst_ID"))
-                            .click(function(){
+                            .click(function(event){
                                 editStructure.onAddFieldAtIndex(event, false);
                                 });
 

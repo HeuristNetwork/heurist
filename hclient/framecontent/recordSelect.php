@@ -51,6 +51,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                         rectype_set: rectype_set,
                         parententity: parententity,
                         onselect:function(event, data){
+                            
                             if(data && data.selection && window.hWin.HEURIST4.util.isRecordSet(data.selection)){
                                 window.close(data.selection);
                             }

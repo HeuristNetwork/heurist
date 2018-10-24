@@ -24,7 +24,9 @@ $.widget( "heurist.select_imagelib", {
     options: {
         isdialog: true, //show in dialog or embedded
 
-        onselect: null
+        onselect: null,
+        
+        assets:null //array of directories with images
     },
 
     // the constructor
@@ -98,9 +100,10 @@ $.widget( "heurist.select_imagelib", {
                         });        
          
 
+            //search for images in given array of folder
             var that = this;                                                
        
-            window.hWin.HAPI4.SystemMgr.get_sysimages(null, 
+            window.hWin.HAPI4.SystemMgr.get_sysimages(this.options.assets, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
