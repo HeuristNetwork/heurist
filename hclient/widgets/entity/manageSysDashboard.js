@@ -22,6 +22,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
 
     _entityName:'sysDashboard',
     defaultPrefs: {viewmode:'thumbs3', showonstartup:1},
+    i_show_on_startup:1,
     
     //
     //
@@ -95,6 +96,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     
         //this.show_longer_description = this.searchForm.find('#show_longer_description');
         this.show_on_startup = this.searchForm.find('#show_on_startup');
+        this.show_on_startup2 = this.searchForm.find('#show_on_startup2');
 
         /*this.show_longer_description
                 .attr('checked',(prefs.viewmode=='thumbs3'))
@@ -104,11 +106,10 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 that.saveUiPreferences();
         });*/
         
-        this.show_on_startup
-                .attr('checked',(prefs.showonstartup==1))
-            .change(function(){
-                that.saveUiPreferences();
-        });
+        this.i_show_on_startup = prefs.showonstartup;
+        
+        this._on(this.show_on_startup,{change:this.saveUiPreferences});
+        this._on(this.show_on_startup2,{change:this.saveUiPreferences});
         
         this._setMode(true)
         
@@ -136,8 +137,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         menu_entries.unshift( {key:'action-AddRecord',title:'Add specific entity/record type'});
         menu_entries.unshift( {key:'',title:'select command ...'});
         
-//console.log( menu_entries );        
-
         //get all saved searches
         var saved_searches = [];
         var ssearches = window.hWin.HAPI4.currentUser.usr_SavedSearch;
@@ -229,6 +228,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             
             this.recordList.find('.div-result-list-content').css({'overflow-y':'auto'});
             
+            this.show_on_startup2.prop('checked',this.i_show_on_startup==1);
                 //this.show_longer_description.is(':checked')?'thumbs3':'thumbs');
         }else{
             // edit mode
@@ -250,6 +250,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 //that.searchForm.find('#btn_apply_order').css({'display':'inline-block'});
             });
             
+            this.show_on_startup.prop('checked',this.i_show_on_startup==1);
         }
         /*
         this.recordList.resultList('option','show_counter', !newmode);
@@ -444,8 +445,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             if(this.options.isViewMode){
                 var command = this._selection.fld(record, 'dsh_CommandToRun');
                 var params = this._selection.fld(record, 'dsh_Parameters');
-    //console.log(command+'  '+params);
-
+    
                 if(command.indexOf('menu-')==0){ //main menu action
 
                     var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('mainMenu');
@@ -553,9 +553,12 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     
     //    
     saveUiPreferences:function(){
-        var params = 
+        
+       this.i_show_on_startup = (this.options.isViewMode? this.show_on_startup2.is(':checked') : this.show_on_startup.is(':checked'))?1:0;
+        
+       var params = 
             {viewmode: 'thumbs',  //this.show_longer_description.is(':checked')?'thumbs3':'thumbs',
-             showonstartup: this.show_on_startup.is(':checked')?1:0 };
+             showonstartup: this.i_show_on_startup };
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);     
     },
     
