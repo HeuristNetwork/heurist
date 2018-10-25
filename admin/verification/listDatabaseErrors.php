@@ -416,7 +416,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
 
 
                 
-            $wasdelete1 = 0;
+            $wasdeleted1 = 0;
             if(@$_REQUEST['fixparents']=="1"){
 
                 $query = 'DELETE parent FROM Records parentrec, defRecStructure, recDetails parent '
@@ -471,7 +471,7 @@ $res = $mysqli->query( $query2 );
 
 $bibs2 = array();
 $prec_ids2 = array();
-$det_ids = [];
+$det_ids = array();
 while ($row = $res->fetch_assoc()){
     $bibs2[] = $row;
     $prec_ids2[] = $row['dtl_Value'];
@@ -479,9 +479,9 @@ while ($row = $res->fetch_assoc()){
     if($row['parent_d_id']>0){
         $det_ids[] = $row['parent_d_id'];
     }
-    
-}
-            $wasdelete2 = 0;
+}//while
+
+            $wasdeleted2 = 0;
             if(@$_REQUEST['fixparents']=="2"){
 
                 $query = 'DELETE FROM recDetails WHERE dtl_ID in ('.implode(',',$det_ids).')';
@@ -1170,7 +1170,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 ?>
             </div>
 
-<!--            
+<!--
             <hr/>
             
             <a name="origin_differences"></a>
@@ -1179,7 +1179,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 <?php
                     $_REQUEST['verbose'] = 1;
                     $_REQUEST['filter_exact']  = HEURIST_DBNAME_FULL;
-                    include(dirname(__FILE__).'/verifyForOrigin.php');
+                    //remove this remark along with html remarks include(dirname(__FILE__).'/verifyForOrigin.php');
                 ?>
             </div>
 -->

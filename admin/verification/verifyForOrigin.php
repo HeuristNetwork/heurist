@@ -93,7 +93,7 @@
     }
     
     $rty_CodesToCheck = array(); //rty ids in origin db to be checked
-    $rty_Names = array();   //code -> name
+    $rty_Names = array();   //concept code -> name in origin database
     
     $fields = array();      //per record type
     $fields_req = array();  //requirement per record type
@@ -213,7 +213,8 @@
         $smsg = ""; 
         
         VerifyValue::reset();
-        $all_terms = getTerms(false);
+        $all_terms = dbs_GetTerms($system);
+        
         $constraints2 = array(); //per detail
         $terms_codes2 = array(); //per detail
         
@@ -237,15 +238,19 @@
             list($db_id, $orig_id) = explode('-',$rty_Code);
             
             //check for unexpected concept code by name
-            $rty_Name = $rty_Names[$rty_Code];
-            $query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB '
-            .' FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
-            $res = $mysqli->query($query);
-            if (!$res) {  print $db_name.'  '.$query.'  '.$mysqli->error;  return; }
-            $row = $res->fetch_assoc();
-            if($row){
-                if($row[0]!=$db_id || $row[1]!=$orig_id){
-                   $msg_error = $msg_error."<p style='padding-left:20px'>name = $rty_Name : Unexpected concept ID ".$row[0].'-'.$row[1].'</p>';
+            $rty_Name = @$rty_Names[$rty_Code];
+            if($rty_Name==null){
+                $msg_error = $msg_error. "<p style='padding-left:20px'> Record type for code $rty_Code not found in original database</p>";
+            }else{
+                $query = 'select rty_OriginatingDBID, rty_IDInOriginatingDB '
+                .' FROM defRecTypes WHERE rty_Name="'.$mysqli->real_escape_string($rty_Name).'"';
+                $res = $mysqli->query($query);
+                if (!$res) {  print $db_name.'  '.$query.'  '.$mysqli->error;  return; }
+                $row = $res->fetch_assoc();
+                if($row){
+                    if($row[0]!=$db_id || $row[1]!=$orig_id){
+                       $msg_error = $msg_error."<p style='padding-left:20px'>name = $rty_Name : Unexpected concept ID ".$row[0].'-'.$row[1].'</p>';
+                    }
                 }
             }
             
@@ -275,7 +280,13 @@
                      $codes = array();
                      //$codes[] = $row['dty_PtrTargetRectypeIDs'];
                      foreach($rids as $r_id){
-                         $codes[] = $rty_Codes2[$r_id];  
+                         $code = @$rty_Codes2[$r_id];
+                         if($code){
+                            $codes[] = $code; 
+                         }else{
+                            $msg_error = $msg_error.'<p>Field '.$row['dty_Name'].' (code '.$row['dty_ID']
+                                .') has invalid record type constraint (code: '.$r_id.')</p>';  
+                         }
                      }
                      //keep constraints
                      $constraints2[$dty_Code] = $codes;
@@ -399,8 +410,8 @@
             
             if($msg_error){
                 $smsg = $smsg
-                    ."<p style='padding-left:20px'>id = ".$rty_Code.'  <b>'.$rty_Names[$rty_Code] 
-                    .(($rty_Names[$rty_Code]!=$rty_Name)?'</b> <i>(in this database: '.$rty_Name.')</i>':'</b>').'</p>'
+                    ."<p style='padding-left:20px'>id = ".$rty_Code.'  <b>'.@$rty_Names[$rty_Code] 
+                    .((@$rty_Names[$rty_Code]!=$rty_Name)?'</b> <i>(in this database: '.$rty_Name.')</i>':'</b>').'</p>'
                     .$msg_error;
             }
                  
