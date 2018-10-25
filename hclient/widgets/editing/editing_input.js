@@ -1760,6 +1760,27 @@ $.widget( "heurist.editing_input", {
                                       that.entity_image_already_uploaded = true;
                                   }
                         });
+                        
+                        //library browser and explicit file upload buttons
+                        if(that.configMode.use_assets){
+                            var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px"/>')
+                            .appendTo( $inputdiv );                            
+                            
+                            $('<a href="#"><span class="ui-icon ui-icon-folder-open"/>Upload file</a>')
+                                .click(function(){ $input.click() }).appendTo( ele );                            
+                            $('<br/>').appendTo( ele );                            
+                            
+                            $('<a href="#"><span class="ui-icon ui-icon-grid"/>Or select from library</a>')
+                                .click(function(){                                 
+                                    $select_imagelib_dlg.select_imagelib({onselect:function(res){
+                                        if(res){
+                                            $input_img.find('img').prop('src', res.url);
+                                            that.newvalues[$input.attr('id')] = res.path; 
+                                            that._onChange(); 
+                                        }
+                                    }, assets:that.configMode.use_assets});
+                                }).appendTo( ele );                            
+                        }
                             
                 /* 2017-11-08 no more buttons 
                         //browse button    
@@ -1870,11 +1891,6 @@ $.widget( "heurist.editing_input", {
                         //init click handlers
                         //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
                         $input_img.on({click: function(){ //find('a')
-                            if(false && that.configMode.use_assets){
-                                
-                                $select_imagelib_dlg.select_imagelib({onselect:null});
-                                
-                            }else
                                 $input.click();}
                         }); 
                         

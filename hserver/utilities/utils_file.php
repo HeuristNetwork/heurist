@@ -194,11 +194,22 @@
         
         $records = array();
         $order = array();
-        $fields = array('file_id', 'file_name', 'file_dir');
+        $fields = array('file_id', 'file_name', 'file_dir', 'file_url');
         $idx = 1;
 
         foreach ($dirs as $dir) {
-            $files = scandir(HEURIST_DIR.$dir);
+            
+            if(strpos($dir, 'HEURIST_ICON_DIR')!==false){
+                //$folder = constant($dir);     @todo need better algorithm
+                $folder = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_DIR, $dir);
+                $url = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_URL, $dir);
+            }else{
+                $folder =  HEURIST_DIR.$dir;
+                $url = HEURIST_BASE_URL.$dir;
+            }
+                    
+            
+            $files = scandir($folder);
             foreach ($files as $filename) {
                 //if (!(( $filename == '.' ) || ( $filename == '..' ) || is_dir(HEURIST_DIR.$dir . $filename))) 
                 
@@ -206,9 +217,9 @@
                     if(array_key_exists('extension', $path_parts))
                     {
                         $ext = strtolower($path_parts['extension']);
-                        if(file_exists(HEURIST_DIR.$dir.$filename) && in_array($ext, $exts))
+                        if(file_exists($folder.$filename) && in_array($ext, $exts))
                         {
-                            $records[$idx] = array($idx, $filename, $dir);
+                            $records[$idx] = array($idx, $filename, $folder, $url);
                             $order[] = $idx;
                             $idx++;
                         }

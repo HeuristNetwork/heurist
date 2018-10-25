@@ -373,30 +373,48 @@ class DbEntityBase
         
     }
     
-    // need to rename temporary enity files to permanent
-    // $tempfile - file to rename to recID
-    //
+    // need to rename temporary enity files to permanent  "entity/[entity name]/recID.png"
+    // $tempfile - file to be either 
+    // 1) renamed to recID (if it is temp file started with ~)
+    // 2) copied 
     protected function renameEntityImage($tempfile, $recID){
 
+        $isSuccess = false;
+        
         $entity_name = $this->config['entityName'];
         
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
-
-        $directory = new \RecursiveDirectoryIterator($path);
-        $iterator = new \RecursiveIteratorIterator($directory);        
+        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'; //destination
         
-        foreach ($iterator as $filepath => $info) {
-              if(!$info->isFile()) continue;
-              
-              $filename = $info->getFilename();
-              $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
-              //$extension = $info->getExtension(); since 5.3.6 
+        if(strpos($tempfile,'~')===0){  
+            //temp file is in the same folder as destination
+            
+            $directory = new \RecursiveDirectoryIterator($path);
+            $iterator = new \RecursiveIteratorIterator($directory);        
+            
+            foreach ($iterator as $filepath => $info) {  //rec. iteration need to copy all versions (thumb and full img)
+                  if(!$info->isFile()) continue;
+                  
+                  $filename = $info->getFilename();
+                  $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
+                  //$extension = $info->getExtension(); since 5.3.6 
 
-              if ($filename==$tempfile.'.'.$extension) {
-                  $pathname = $info->getPath();
-                  $new_name = $pathname.'/'.$recID.'.'.$extension;
-                  rename ($info->getPathname(), $new_name);
-              }
+                  if ($filename==$tempfile.'.'.$extension) {
+                      $pathname = $info->getPath();
+                      $new_name = $pathname.'/'.$recID.'.'.$extension;
+                      $isSuccess = rename ($info->getPathname(), $new_name);
+                  }
+            }
+            
+        }else if(file_exists($tempfile)){
+            $path_parts = pathinfo($tempfile);
+            $ext = strtolower($path_parts['extension']);
+            $new_name = $path.$recID.'.'.$ext;
+            $new_name_thumb = $path.'thumbnail/'.$recID.'.'.$ext;
+            $isSuccess = fileCopy($tempfile, $new_name) &&  fileCopy($tempfile, $new_name_thumb);
+        }
+        
+        if(!$isSuccess){
+            error_log('Can\'t copy file '.$tempfile.' as '.$entity_name.' image');
         }
     }
     

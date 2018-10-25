@@ -98,9 +98,12 @@
 
         }else if ($action=="sysimages") { //get list of system images
         
-              $lib_path = 'admin/setup/iconLibrary/64px/';
+              $lib_path = @$_REQUEST['folders'];
+              if(!is_array($lib_path) || count($lib_path)<1){
+                  $lib_path = array('admin/setup/iconLibrary/64px/');
+              }
         
-              $res = folderContent(array($lib_path),array('png'));
+              $res = folderContent($lib_path, array('png'));
               
  
         }else        

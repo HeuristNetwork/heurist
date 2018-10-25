@@ -28,6 +28,8 @@ $.widget( "heurist.select_imagelib", {
         
         assets:null //array of directories with images
     },
+    
+    _as_dialog:null, //reference to itself as dialog (see options.isdialog)
 
     // the constructor
     _init: function() {
@@ -50,10 +52,14 @@ $.widget( "heurist.select_imagelib", {
                 resizeStop: function( event, ui ) {
                     var pele = that.element.parents('div[role="dialog"]');
                     that.element.css({overflow: 'none !important', width:pele.width()-24 });
+                },
+                close:function(){
+                    that._as_dialog.remove();    
                 }
             });
+            
+            this._as_dialog = $dlg; 
         }
-        
         
         //resultList with images
 //init record list
@@ -71,14 +77,19 @@ $.widget( "heurist.select_imagelib", {
                        entityName: this._entityName,
                        view_mode: 'thumbs',
                        
-                       pagesize: 9999999999999,
+                       pagesize: 500,
                        empty_remark: '',
                        renderer: function(recordset, record){ 
                            
                            var recID   = recordset.fld(record, 'file_id');
-                           var recThumb = window.hWin.HAPI4.baseURL 
+                           var recThumb;
+                           if(recordset.fld(record, 'file_url')){
+                                recThumb = recordset.fld(record, 'file_url')+recordset.fld(record, 'file_name');    
+                           }else{
+                                recThumb = window.hWin.HAPI4.baseURL 
                                             + recordset.fld(record, 'file_dir')
                                             + recordset.fld(record, 'file_name');
+                           }
         
                            var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
                             +'</div>';
@@ -93,9 +104,19 @@ $.widget( "heurist.select_imagelib", {
 
                 this._on( this.recordList, {        
                         "resultlistonselect": function(event, selected_recs){
-                                    //this.selectedRecords(selected_recs);
-                                    
-                                    //value = this._cachedRecordset.getSubSetByIds(selected_recs);
+                            
+                                    //var recordset = that.recordList.resultList('getRecordSet');
+                                    //recordset = recordset.getSubSetByIds(selected_recs);
+                                    var recordset = selected_recs;
+                                    var record = recordset.getFirstRecord();
+                                    var filename = recordset.fld(record, 'file_name')
+                                    var res = {url:recordset.fld(record, 'file_url')+filename,
+                                               path:recordset.fld(record, 'file_dir')+filename};
+
+                                    that.options.onselect.call(that, res);           
+                                    if(that._as_dialog){
+                                        that._as_dialog.dialog('close');
+                                    }
                                 }
                         });        
          
