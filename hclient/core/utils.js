@@ -618,7 +618,7 @@ window.hWin.HEURIST4.util = {
             return null;
         }
         
-        var gjson =  parseWKT(wkt);
+        var gjson =  parseWKT(wkt);    //wkt to json
         
         var bounds = null, southWest, northEast,
         shape  = null,
@@ -762,6 +762,9 @@ window.hWin.HEURIST4.util = {
     
     },
     
+    //
+    // OLD WAY to parse coordinates from WKT to timemap or google
+    //
     parseCoordinates: function(type, wkt, format, google) {
 
         if(type==1 && typeof google.maps.LatLng != "function") {
@@ -1163,6 +1166,9 @@ window.hWin.HEURIST4.util = {
         return (res && res.length>1)?res[1]:'';
     },
     
+    //
+    //
+    //
     wktValueToDescription:function(wkt){
         
         // parse a well-known-text value and return the standard description (type + summary)

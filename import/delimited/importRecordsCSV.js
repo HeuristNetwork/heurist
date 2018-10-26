@@ -175,7 +175,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         progressall: function (e, data) { // to implement
                     var progress = parseInt(data.loaded / data.total * 100, 10);
                     progressLabel = pbar.find('.progress-label').text(
-                                    Math.ceil(data.loaded/1024)+' / '+Math.ceil(data.total/1024));
+                                    Math.ceil(data.loaded/1024)+'Kb / '+Math.ceil(data.total/1024)) + 'Kb ';
                     pbar.progressbar({value: progress});
                     if (data.total>_max_upload_size && uploadData) {
                             uploadData.abort();
