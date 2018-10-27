@@ -128,6 +128,15 @@ function doLogin(isforsed){
                                                 window.hWin.HAPI4.SearchMgr.doSearch(document, request);
                                             }, 3000);
                                         }
+                                        
+                                        
+                                        if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
+                                           //show dashboard
+                                           var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
+                                           if(prefs.showonstartup==1)
+                                                    window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard');
+                                        }
+                                        
                                     }
                                     
                                     //that._refresh();
