@@ -222,7 +222,8 @@ function hRecordAddLink() {
     
     onlyReverse,
 
-    source_RecTypeID, target_RecTypeID,
+    source_RecTypeID, 
+    target_RecTypeID,
     selectRecordScope, allSelectedRectypes;
     
     
@@ -338,7 +339,7 @@ function hRecordAddLink() {
             }
         }
             
-        if(hasSelection){
+        if(hasSelection){ //make the same section in recordAction.js?
             
             rectype_Ids = [];
             var sels = window.hWin.HAPI4.currentRecordsetSelection;
@@ -455,12 +456,14 @@ function hRecordAddLink() {
                 
                 //add UI elements
     $('<div class="field_item" style="line-height:2.5em;padding-left:20px">'
+    +'<label style="font-style:italic">' //for="cb'+party+'_cb_'+dty+'"
     +'<input name="link_field" type="radio" id="cb'+party+'_cb_'+dty+'" '
     +(isAlready?'disabled checked="checked"'
         :' data-party="'+party+'" value="'+dty+'" data-type="'+field_type+'"')
     +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
-    + '<div id="rt_'+party+'_sel_'+dty+'" style="display:table-row"></div>'
-    +'<label style="font-style:italic" for="cb'+party+'_cb_'+dty+'">'+dtyName+'</label>&nbsp;'
+    + dtyName+'</label>&nbsp;'
+    + '<div style="display:inline-block;vertical-align:top;padding-left:20px">'
+    + '<div id="rt_'+party+'_sel_'+dty+'" style="display:table-row"></div></div>'
     //+'<select id="rec'+party+'_sel_'+dty+'" class="text ui-widget-content ui-corner-all" style="margin-left:30px;">'  
     //    +'<option>relation type</option></select>'
     +'<div>').appendTo($('#'+party+'_field'));
@@ -554,7 +557,7 @@ function hRecordAddLink() {
     } 
     
     //
-    //
+    // record selector (for target mainly)
     //
     function _createInputElement_RecordSelector(party, rt_constraints){
         

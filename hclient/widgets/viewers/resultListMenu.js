@@ -410,6 +410,13 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
             this.detailBatchEditPopup('add_link');
             
+        }else if(action == "menu-selected-add-link2"){
+
+            if(this.isResultSetEmpty()) return;
+            
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink');
+        
+            
         }else if(action == "menu-selected-rectype-change"){
 
             this.detailBatchEditPopup('rectype_change');
