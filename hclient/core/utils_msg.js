@@ -24,7 +24,7 @@ showElementAsDialog
 
 createAlertDiv - return error-state html with alert icon 
 
-bringCoverallToFront
+bringCoverallToFront - show loading icon and lock all screen
 sendCoverallToBack
 
 */

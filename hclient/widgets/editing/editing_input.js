@@ -485,9 +485,11 @@ $.widget( "heurist.editing_input", {
 
         }else if(this.detailType=='enum' || this.detailType=='relationtype'){
 
+            var dwidth = this.f('rst_DisplayWidth');
+            
             $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
-                .css('width','auto')
+                .css('width',dwidth?dwidth:'auto')
                 .val(value)
                 .appendTo( $inputdiv );
             
@@ -746,25 +748,10 @@ $.widget( "heurist.editing_input", {
                 
                     var __show_addlink_dialog = function(){
                             if(that.is_disabled) return;
-                        
-                            var url = window.hWin.HAPI4.baseURL 
-                                +'hclient/framecontent/recordAddLink.php?db='+window.hWin.HAPI4.database
-                                +'&dty_ID=' + that.options.dtID;
-                           
-                           if(isInwardRelation){
-                              url +=  '&source_RecTypes='+that.f('rst_PtrFilteredIDs')+'&target_ID=' + that.options.recID;
-                           }else{
-                              url +=  '&source_ID=' + that.options.recID;
-                           }     
                             
-                            window.hWin.HEURIST4.msg.showDialog(url, {height:280, width:750,
-                                title: window.hWin.HR('Add relationship'),
-                                class:'ui-heurist-bg-light',
-                                callback: function(context){
+                            
+                            function __onCloseAddLink(context){
                                     
-                                    //add new element
-                //context = {rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:target_RecTypeID,                     relation_recID:0, trm_ID:termID };
-//console.log(context);                
                                     if(context && context.count>0){
                                         
                                         var link_info = isInwardRelation?context.source:context.target;
@@ -778,9 +765,40 @@ $.widget( "heurist.editing_input", {
                                         that.element.find('.rel_link').hide();//hide this button if there are links
                                         ele.on('remove', __onRelRemove);
                                     }
-                                    
-                                }
-                            } );
+                            }                            
+                            
+                            var opts = {
+                                height:280, width:750, 
+                                title: 'Create a relationship between records',
+                                relmarker_dty_ID: that.options.dtID,
+                                onClose: __onCloseAddLink 
+                            };
+                           
+                           if(isInwardRelation){
+                              opts['source_AllowedTypes'] = that.f('rst_PtrFilteredIDs');
+                              opts['target_ID'] = that.options.recID;
+                           }else{
+                              opts['source_ID'] = that.options.recID;
+                           }     
+                        
+                            window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);
+                            
+                           /*
+                            var url = window.hWin.HAPI4.baseURL 
+                                +'hclient/framecontent/recordAddLink.php?db='+window.hWin.HAPI4.database
+                                +'&dty_ID=' + that.options.dtID;
+                           
+                           if(isInwardRelation){
+                              url +=  '&source_RecTypes='+that.f('rst_PtrFilteredIDs')+'&target_ID=' + that.options.recID;
+                           }else{
+                              url +=  '&source_ID=' + that.options.recID;
+                           }     
+                            
+                            window.hWin.HEURIST4.msg.showDialog(url, {height:280, width:750,
+                                title: window.hWin.HR('Add relationship'),
+                                class:'ui-heurist-bg-light',
+                                callback: __onCloseAddLink );
+                            */    
                     };
                     
                     

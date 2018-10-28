@@ -36,12 +36,14 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         target_ID:null,
         relmarker_dty_ID:null,//relmarker field type id 
         source_AllowedTypes:null,
-        onlyReverse:false,
+        onlyReverse:false
         
     },
 
     source_RecTypeID:null, 
     target_RecTypeID:null,
+    sSourceName:'',
+    sTargetName:'',
     
     //  
     // invoked from _init after loading of html content
@@ -164,7 +166,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 if(rty>=0){
                     rty = rectype_Ids[rty];
                     //need unique value - otherwise jquery selectmenu fails to recognize
-                    opt = new Option(window.hWin.HEURIST4.rectypes.pluralNames[rty]+' sel', 's'+rty); 
+                    opt = new Option(window.hWin.HEURIST4.rectypes.pluralNames[rty], 's'+rty); 
                     $(opt).attr('data-select', 1);
                     if(hasSelection){
                         $(opt).attr('depth', 1);
@@ -268,8 +270,8 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         :' data-party="'+party+'" value="'+dty+'" data-type="'+field_type+'"')
     +' class="cb_addlink text ui-widget-content ui-corner-all"/>'                                     
     + dtyName+'</label>&nbsp;'
-    + '<div style="display:inline-block;vertical-align:top;padding-left:20px">'
-    + '<div id="rt_'+party+'_sel_'+dty+'" style="display:table-row"></div></div>'
+    + '<div style="display:inline-block;vertical-align:-webkit-baseline-middle;padding-left:20px">'
+    + '<div id="rt_'+party+'_sel_'+dty+'" style="display:table-row;line-height:21px"></div></div>'
     +'<div>').appendTo(this.element.find('#'+party+'_field'));
     
                 if(field_type=='relmarker'){
@@ -510,6 +512,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         dtFields[fi['rst_RequirementType']] = 'optional';
         dtFields[fi['rst_RequirementType']] = 'optional';
         dtFields[fi['rst_MaxValues']] = 1;
+        dtFields[fi['rst_DisplayWidth']] = '25ex';
         
         var that = this;
 
@@ -575,10 +578,10 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 var recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
                 
                 if(party=='source'){
-                    sSourceName = rec_title;    
+                    that.sSourceName = rec_title;    
                     that.source_RecTypeID = recRecTypeID;
                 }else{
-                    sTargetName = rec_title;    
+                    that.sTargetName = rec_title;    
                     that.target_RecTypeID = recRecTypeID;
                 }
                 
@@ -672,9 +675,9 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         if(isReverce){
                         
-            var kp = sSourceName;
-            sSourceName = sTargetName;
-            sTargetName = kp;
+            var kp = this.sSourceName;
+            this.sSourceName = this.sTargetName;
+            this.sTargetName = kp;
             
             targetIDs = currentScope;
             sourceIDs = [(this.options.target_ID>0) ?this.options.target_ID :this.getFieldValue('target_record')];
@@ -696,7 +699,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                    }
                 }
                 
-                res = {rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:this.target_RecTypeID };
+                res = {rec_ID: targetIDs[0], rec_Title:this.sTargetName, rec_RecTypeID:this.target_RecTypeID };
                 
         }else{ //relmarker
                 /*
@@ -714,14 +717,14 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     details['t:'+DT_TARGET_RESOURCE] = [ isReverce?targetIDs[idx]:targetIDs[0] ];
                     
                     
-                    if(window.hWin.HEURIST4.util.isempty(sSourceName)){
+                    if(window.hWin.HEURIST4.util.isempty(this.sSourceName)){
                        var record = this._currentRecordset.getById( isReverce?sourceIDs[0]:sourceIDs[idx] );
-                       sSourceName =  this._currentRecordset.fld(record, 'rec_Title');
+                       this.sSourceName =  this._currentRecordset.fld(record, 'rec_Title');
                        this.source_RecTypeID = this._currentRecordset.fld(record, 'rec_RecTypeID');
                     }
-                    if(window.hWin.HEURIST4.util.isempty(sTargetName)){
+                    if(window.hWin.HEURIST4.util.isempty(this.sTargetName)){
                        var record = this._currentRecordset.getById( isReverce?targetIDs[idx]:targetIDs[0] );
-                       sTargetName =  this._currentRecordset.fld(record, 'rec_Title');
+                       this.sTargetName =  this._currentRecordset.fld(record, 'rec_Title');
                     }
                     
                     
@@ -733,11 +736,13 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                      
                 }//for
                 res = {
-                    source:{rec_ID: sourceIDs[0], rec_Title:sSourceName, rec_RecTypeID:this.source_RecTypeID},
-                    target:{rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:this.target_RecTypeID},
+                    source:{rec_ID: sourceIDs[0], rec_Title:this.sSourceName, rec_RecTypeID:this.source_RecTypeID},
+                    target:{rec_ID: targetIDs[0], rec_Title:this.sTargetName, rec_RecTypeID:this.target_RecTypeID},
                     //rec_ID: targetIDs[0], rec_Title:sTargetName, rec_RecTypeID:target_RecTypeID,
                     relation_recID:0, trm_ID:termID };
         }
+        
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
         
         this.addLinkOrRelation(0, requests, res);                     
         
@@ -774,10 +779,15 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             }else{ //add relationship - add new record
                 window.hWin.HAPI4.RecordMgr.save(request, __callBack);
             }
-        }else if(requests.length>0){
-            res.count = requests.length;
-            this._as_dialog.dialog('close');
-            //)window.close(res);//'Link'+(requests.length>1?'s':'')+' created...');
+        }else{
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            if(requests.length>0){
+                res.count = requests.length;
+                window.hWin.HEURIST4.msg.showMsgFlash('Link created...', 500);
+                this._context_on_close = res;
+                this._as_dialog.dialog('close');
+                //)window.close(res);//'Link'+(requests.length>1?'s':'')+' created...');
+            }
         }
     }
     
