@@ -44,6 +44,8 @@ createUserGroupsSelect - get SELECT for list of given groups, othewise loads lis
 
 setValueAndWidth assign value to input and adjust its width
 
+initHSelect - converts HTML select to jquery selectmenu
+
 ENTITY
 
 openRecordEdit  - open add/edit record form/dialog
@@ -1343,10 +1345,14 @@ window.hWin.HEURIST4.ui = {
                         $(selObj).val(data.item.value);//change value for underlaying html select
                         $(selObj).trigger('change');
                 }});
+                
+            var dwidth = $(selObj).css('width');    
+            if(dwidth=='0px') dwidth = 'auto';
             
+
             menu.hSelect( "menuWidget" ).css({'padding':0,'background':'#F4F2F4','zIndex':9999999});
             menu.hSelect( "menuWidget" ).addClass('heurist-selectmenu overflow').css({'max-height':'300px'});
-            menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF',width:'auto'}); //,'min-width':'16em''#F4F2F4'
+            menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF',width:(dwidth?dwidth:'auto') }); //,'min-width':'16em''#F4F2F4'
         }
         return $(selObj);
     },           

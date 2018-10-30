@@ -80,6 +80,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/record/recordAction.js"></script>
         <script type="text/javascript" src="hclient/widgets/record/recordAccess.js"></script>
         <script type="text/javascript" src="hclient/widgets/record/recordAdd.js"></script>
+        <script type="text/javascript" src="hclient/widgets/record/recordAddLink.js"></script>
         <script type="text/javascript" src="hclient/widgets/record/recordExportCSV.js"></script>
         
         
@@ -131,10 +132,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         
         <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
 
-        <!--  media viewer - however it is not used at the moment 
-        <script type="text/javascript" src="ext/yoxview/yoxview-init.js"></script>
-        -->
-        
         <link rel="stylesheet" type="text/css" href="ext/fancybox/jquery.fancybox.css" />
         <script type="text/javascript" src="ext/fancybox/jquery.fancybox.js"></script>
         
@@ -201,22 +198,18 @@ _time_debug = new Date().getTime() / 1000;
            function onInitCompleted_PerformSearch(){
                
 <?php
-     $db_total_records = mysql__select_value($system->get_mysqli(), 'select count(*) from Records');
-     echo 'var db_total_records='.($db_total_records>0?$db_total_records:0).';';  
-     
-     $query = 'select count(*) from sysDashboard where dsh_Enabled="y"';
-     if($db_total_records<1){
-          $query = $query.'AND dsh_ShowIfNoRecords="y"';
-     }
-     $db_has_active_dashboard = mysql__select_value($system->get_mysqli(), $query);
-     echo 'var db_has_active_dashboard='.($db_has_active_dashboard>0?$db_has_active_dashboard:0).';';  
+
+     //returns total records in db and counts of active entries in dashboard  
+     list($db_total_records, $db_has_active_dashboard) = $system->getTotalRecordsAndDashboard(); 
+     echo 'window.hWin.HAPI4.sysinfo.db_total_records = '.$db_total_records.';';
+     echo 'window.hWin.HAPI4.sysinfo.db_has_active_dashboard = '.$db_has_active_dashboard.';';
+
 ?>
                
-               window.hWin.HAPI4.sysinfo.db_total_records = db_total_records;
                
                 if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'){
                     //switch to FAP tab if q parameter is defined
-                    if(db_total_records<1){
+                    if(window.hWin.HAPI4.sysinfo.db_total_records<1){
                         showTipOfTheDay(false);   
                     }else{
                         
@@ -228,7 +221,7 @@ _time_debug = new Date().getTime() / 1000;
                         }
                     }
                     
-                }else if(db_total_records<1){
+                }else if(window.hWin.HAPI4.sysinfo.db_total_records<1){
                     showTipOfTheDay(false);
                 }
                 
@@ -309,8 +302,8 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                        //add new record
                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
                        
-                   }else if(db_has_active_dashboard>0) {
-                       //show dashboard
+                   }else if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
+                       //show dashboard (another place - after login in profle_login.js)
                        var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
                        if(prefs.showonstartup==1)
                                 window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard');
@@ -320,7 +313,7 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                 
                 //perform search in the case that parameter "q" is defined
                 var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
-                if(db_total_records>0 && !window.hWin.HEURIST4.util.isempty(qsearch)){
+                if(window.hWin.HAPI4.sysinfo.db_total_records>0 && !window.hWin.HEURIST4.util.isempty(qsearch)){
                     var qdomain = '<?=@$_REQUEST['w']?>';
                     var rules = '<?=@$_REQUEST['rules']?>';
                     if(window.hWin.HEURIST4.util.isempty(qdomain)) qdomain = 'a';

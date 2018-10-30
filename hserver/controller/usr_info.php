@@ -123,7 +123,8 @@
                 $session_type = @$_REQUEST['session_type'];
 
                 if($system->login($username, $password, $session_type)){
-                    $res = $system->getCurrentUserAndSysInfo();
+                    $res = $system->getCurrentUserAndSysInfo( true ); //including reccount and dashboard entries
+                    
                     checkDatabaseFunctions($mysqli);
                 }
 

@@ -15,6 +15,7 @@
 */
 
 /**
+* @todo - REMOVE, It is replaced with widget/record/recordAddLink.js
 * recordAddLink.php
 * Adds link field or create relationship between 2 records
 *

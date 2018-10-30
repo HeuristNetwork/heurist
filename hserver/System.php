@@ -653,6 +653,30 @@ error_log(print_r($_REQUEST, true));
     }
 
 
+    //
+    // returns total records in db and counts of active entries in dashboard  
+    //  invoked on page init and after login
+    //
+    public function getTotalRecordsAndDashboard(){
+        
+        $db_total_records = 0;
+        $db_has_active_dashboard = 0;
+        
+        if( $this->mysqli ){
+             $db_total_records = mysql__select_value($this->mysqli, 'select count(*) from Records');
+             $db_total_records = ($db_total_records>0)?$db_total_records:0;
+
+             if($this->has_access()){
+                 $query = 'select count(*) from sysDashboard where dsh_Enabled="y"';
+                 if($db_total_records<1){
+                      $query = $query.'AND dsh_ShowIfNoRecords="y"';
+                 }
+                 $db_has_active_dashboard = mysql__select_value($this->mysqli, $query);
+                 $db_has_active_dashboard = ($db_has_active_dashboard>0)?$db_has_active_dashboard:0;
+             }
+        }
+        return array($db_total_records, $db_has_active_dashboard);
+    }
 
     /**
     * Returns all info for current user and some sys config parameters
@@ -660,7 +684,7 @@ error_log(print_r($_REQUEST, true));
     * 
     * it always reload user info from database
     */
-    public function getCurrentUserAndSysInfo(){
+    public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false ){
         
         //current user reset - reload actual info from database
         $this->login_verify( true );
@@ -716,6 +740,12 @@ error_log(print_r($_REQUEST, true));
                     'max_file_size'=>$this->get_php_bytes('upload_max_filesize')
                     )
             );
+            
+            if($include_reccount_and_dashboard_count){
+                $res2 = $this->getTotalRecordsAndDashboard();                    
+                $res['sysinfo']['db_total_records'] = $res2[0];
+                $res['sysinfo']['db_has_active_dashboard'] = $res2[1];
+            }
 
         }else{
 

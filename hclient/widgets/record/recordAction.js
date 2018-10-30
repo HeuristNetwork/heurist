@@ -327,8 +327,6 @@ $.widget( "heurist.recordAction", {
             this.selectRecordScope.parent().hide();
             return;    
         }
-        
-        this.selectRecordScope.empty();
 
         var opt, selScope = this.selectRecordScope.get(0);
 

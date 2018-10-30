@@ -778,7 +778,10 @@ function _addNewLinkField(source_ID, target_ID){
                
                dlg_title = 'Select or Create new link field type';   
             }else{
-
+                
+                _linkTwoRecords(source_ID, target_ID);
+                return;
+                /*
                 url = url + "hclient/framecontent/recordAddLink.php?&db="
                     + window.hWin.HAPI4.database
                     + '&source_ID='+source_ID;
@@ -786,6 +789,7 @@ function _addNewLinkField(source_ID, target_ID){
                dlg_title = 'Add new link or create a relationship between records'; 
                dim.w = 750;
                dim.h = 380;
+               */
             }
                    
             if(target_ID>0){
@@ -822,4 +826,26 @@ function _addNewLinkField(source_ID, target_ID){
                     }
               });
                 
+}
+
+function _linkTwoRecords(source_ID, target_ID){
+    
+        function __onCloseAddLink(context){
+                if(context && context.count>0 && settings.onRefreshData){
+                            // Trigger refresh
+                            settings.onRefreshData.call(this);
+                }
+        }                            
+        
+        var opts = {
+            source_ID: source_ID,
+            onClose: __onCloseAddLink 
+        };
+        if(target_ID){
+            opts['target_ID'] = target_ID;
+        }
+    
+        window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);
+    
+    
 }
