@@ -633,7 +633,7 @@ function hSearchMinimalDigitalHarlem() {
                         var pathAddr = res_records[ path_recID ];
                         var type     = recordset.fld(pathAddr, 'dtl_GeoType');  //take first part of dtl_Geo field - "p wkt"
                         var wkt      = recordset.fld(pathAddr, 'dtl_Geo');
-                        var pnt      = window.hWin.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                        var pnt      = window.hWin.HEURIST4.geo.parseCoordinates(type, wkt, 0);
                         if(pnt!=null){
                             vertices.push(pnt.point);
                         }
@@ -681,7 +681,7 @@ function hSearchMinimalDigitalHarlem() {
                     var d_end1   = recordset.fld(mainAddr, DT_ENDDATE);
                     var type     = recordset.fld(mainAddr, 'dtl_GeoType');  //take first part of dtl_Geo field - "p wkt"
                     var wkt      = recordset.fld(mainAddr, 'dtl_Geo');
-                    var pnt1     = window.hWin.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                    var pnt1     = window.hWin.HEURIST4.geo.parseCoordinates(type, wkt, 0);
 
                     if(pnt1==null) continue;  //no geo data - skip
 
@@ -701,7 +701,7 @@ function hSearchMinimalDigitalHarlem() {
                         if(link_all_orphans || __isIntersects(d_start1, d_end1, d_start2, d_end2)){
                             type     = recordset.fld(residenceAddr, 'dtl_GeoType');  //take first part of dtl_Geo field - "p wkt"
                             wkt      = recordset.fld(residenceAddr, 'dtl_Geo');
-                            var pnt2     = window.hWin.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                            var pnt2     = window.hWin.HEURIST4.geo.parseCoordinates(type, wkt, 0);
                             if(pnt2!=null){
                                 var shapes = recordset.fld(residenceAddr, 'rec_Shape');
                                 if(!shapes) shapes=[];
@@ -733,7 +733,7 @@ function hSearchMinimalDigitalHarlem() {
                         if(link_all_orphans || is_event || __isIntersects(d_start1, d_end1, d_start2, d_end2)){
                             type     = recordset.fld(secAddr, 'dtl_GeoType');  //take first part of dtl_Geo field - "p wkt"
                             wkt      = recordset.fld(secAddr, 'dtl_Geo');
-                            var pnt2     = window.hWin.HEURIST4.util.parseCoordinates(type, wkt, 0);
+                            var pnt2     = window.hWin.HEURIST4.geo.parseCoordinates(type, wkt, 0);
                             if(pnt2!=null){
                                 if((pnt1.point.lat == pnt2.point.lat && pnt1.point.lon == pnt2.point.lon)){
                                     // do not draw secondary if it has the same coordinates as primary - to avoid clutering on map

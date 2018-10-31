@@ -788,7 +788,8 @@ function print_public_details($bib) {
                         case "c": $type = "Circle"; break;
                         case "r": $type = "Rectangle"; break;
                         case "l": $type = "Path"; break;
-                        default: $type = "Unknown";
+                        case "m": $type = "Collection"; break;
+                        default: $type = "Collection";
                     }
 
                     if ($type == "Point")
