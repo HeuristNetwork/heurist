@@ -2059,7 +2059,7 @@ ed_html +
     }
     
     /**
-    *  Keeps timeline zoom
+    *  Keeps timeline zoom, adjust timeline and MAP legend position
     */
     function _onWinResize(){
 
@@ -2188,11 +2188,13 @@ ed_html +
         },
 
         onWinResize: function(){
-            _onWinResize();
+//console.log('onWinResize');            
             if(tmap && tmap.map){ //fix google map bug to force redraw on previously hidden area
                     var ele = $("#mapping");
                     tmap.map.resizeTo(ele.width(),ele.height());
+//console.log('DONE!');            
             }
+            _onWinResize(); //adjust timeline and legend position
         },
 
         printMap: function(){
