@@ -135,7 +135,21 @@ function hRecordSet(initdata) {
         return dty_ids;
         
     }
+/**
+Life cycle for geodata in record
 
+DB - mysql.asWKT ->
+recordset.toTimemap - util.parseWKTCoordinates (wellknown.js parseWKT -> GeoJSON) -> timemap.js (DISPLAY on MAP) 
+@todo use google.maps.Data and get rid timemap.js
+
+EDIT   
+editing_input.js
+mapDraw.js initial_wkt -> _loadWKT (parsing) -> _applyCoordsForSelectedShape  
+                          _getWKT  (only one selected shape) returns to edit
+@todo 
+mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separate overlays)
+                         _getGeoJSON -> (wellknown.js) stringifyWKT ->  back to input
+*/    
     /**
     * Converts recordSet to OS Timemap dataset
     * 
@@ -331,16 +345,22 @@ function hRecordSet(initdata) {
                 }
                 
                 var shapes = (recShape && geoType!=1)?recShape:[];
+                if(!$.isArray(shapes)){
+                    console.log(record);
+                    console.log(shapes);
+                    shapes = [];
+                }
                 
                 if(geoType!=2){
                     
-                    var k, m;
+                    var k, m, i, j;
                     for(k=0; k<geofields.length; k++){
                         
                         var geodata = _getFieldGeoValue(record, geofields[k]);
                         if(geodata){
                             for(m=0; m<geodata.length; m++){
-                                var shape = window.hWin.HEURIST4.util.parseWKTCoordinates(geodata[m].geotype, geodata[m].wkt, 0);
+                                var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[m].wkt, geodata[m].geotype, 'timemap' );
+
                                 if(shape){ //main shape
                                     if($.isArray(shapes)){
                                         if($.isArray(shape)){
@@ -354,6 +374,7 @@ function hRecordSet(initdata) {
                                     }
                                         
                                 }
+                                
                                 if(geodata[m].recID>0){ //reference to linked place record
                                     if(linkedPlaceRecId.indexOf(geodata[m].recID)<0){
                                         linkedPlaceRecId.push(geodata[m].recID);

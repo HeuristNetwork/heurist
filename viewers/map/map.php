@@ -137,7 +137,9 @@ $system->defineConstants();
             togglerContent_open:    '<div class="ui-icon"></div>',
             togglerContent_closed:  '<div class="ui-icon"></div>',
             onresize_end: function(){
-                //global console.log('resize end');
+                //global 
+                //console.log('LAYOUT resize end');
+                if(mapping) mapping.onWinResize();
             }
             
         };

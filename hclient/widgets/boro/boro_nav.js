@@ -301,9 +301,49 @@ $.widget( "heurist.boro_nav", {
         
             //$("#home_page_gallery").show().appendTo();
             
-            $("#home_page_gallery_container").load(window.hWin.HAPI4.baseURL+'hclient/widgets/boro/adel_roll_images.html',function(){
+            $("#home_page_gallery_container")
+                .empty()
+                .css({"min-height": '430px', 'max-height': '430px'})
+                .load(window.hWin.HAPI4.baseURL+'hclient/widgets/boro/adel_roll_images.html',
+            function(){
+                //image rollover with effects
+                $('#home_page_gallery').hide();
+                
+                var selector = '#home_page_gallery > a[data-fancybox="home-roll-images';
+                var thumbs = $(selector); //all thumbnails
+                var imgs = [];
+                var cont = $("#home_page_gallery_container");
+                
+                //init slide show
+                var idx = 0;
+                function __onImageLoad(){
+                  
+                      setInterval(function(){
+                          
+                            $(imgs[idx]).hide('fade', null, 200, function(){
+                                idx = (idx == imgs.length-1) ?0 :(idx+1);
+                                $(imgs[idx]).show('fade', null, 300);        
+                            });
+                            
+                      },7000);
+                }
+                
+                //load full images
+                $(thumbs).each(function(idx, alink){
+                    //add images
+                    var img = $('<img>').appendTo( cont );
+                    imgs.push(img);
+                    
+                    if(idx>0){
+                        img.hide().attr('src',$(alink).attr('href'));
+                    }else{
+                        img.load(__onImageLoad).attr('src',$(alink).attr('href')); 
+                    } 
+                });
+                
+                /* fancybox gallery
                 if($.fancybox && $.isFunction($.fancybox)){
-                        $.fancybox({selector : '#home_page_gallery > a[data-fancybox="home-roll-images"]',
+                        $.fancybox({selector : selector,
                          loop:true, buttons: [
                                             "zoom",
                                             "slideShow",
@@ -311,6 +351,7 @@ $.widget( "heurist.boro_nav", {
                                             "close"
                                             ]});
                 }
+                */
             });
             
         }
@@ -1210,9 +1251,9 @@ $.widget( "heurist.boro_nav", {
             //Gender -------------------------------
             //@todo facet link
             termID = that.recset.fld(person, 20);
-            leftside['p_gender'] = '<a href="gender/'+termID
-                    +'/a" onclick="{window.hWin.boroResolver(event);}">'+that.__getTerm( termID )+'</a>';
-
+            leftside['p_gender'] = '<li><a href="gender/'+termID
+                    +'/a" onclick="{window.hWin.boroResolver(event);}">'+that.__getTerm( termID )+'</a></li>';
+                    
             //Early education -------------------------------
             var early = that.recset.values(person, that.DT_SCHOOLING);
             idx = 0
@@ -1837,10 +1878,17 @@ $.widget( "heurist.boro_nav", {
             if(that.isempty(html)){
                 $('#p_gallery').parent().hide();            
             }else{
-                html = html + '<p class="help-block">'
-                + 'Unless otherwise noted, these photographs, War Service Records, letters, diaries and cards were sent to the'      
-                + ' University by family and friends during and after World War One. If you have any material to add, please see our '
-                + '<a href="/contribute" onclick="{window.hWin.boroResolver(event);}">contribute page</a>.</p>';
+                if(window.hWin.HAPI4.sysinfo['layout']=='boro'){
+                    html = html + '<p class="help-block">'
+                    + 'Unless otherwise noted, these photographs, War Service Records, letters, diaries and cards were sent to the'      
+                    + ' University by family and friends during and after World War One. If you have any material to add, please see our '
+                    + '<a href="/contribute" onclick="{window.hWin.boroResolver(event);}">contribute page</a>.</p>';
+                }else{
+                    html = html + '<p class="help-block">'
+                    + 'Unless otherwise noted, these records are from the University of Adelaide Archives. '
+                    + 'If you have any material to add, please see our '
+                    + '<a href="/contribute" onclick="{window.hWin.boroResolver(event);}">contribute page</a>.</p>';
+                }
                
                 
                 $('#p_gallery').parent().show();            

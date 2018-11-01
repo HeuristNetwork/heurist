@@ -486,6 +486,9 @@ $.widget( "heurist.editing_input", {
         }else if(this.detailType=='enum' || this.detailType=='relationtype'){
 
             var dwidth = this.f('rst_DisplayWidth');
+            if(parseFloat(dwidth)>0){
+                dwidth = dwidth+'ex';
+            }
             
             $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
@@ -1975,7 +1978,7 @@ $.widget( "heurist.editing_input", {
                         .css('cursor','pointer')
                         .appendTo( $inputdiv );
                 */
-                var geovalue = window.hWin.HEURIST4.util.wktValueToDescription(value);
+                var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(value);
             
                 that.newvalues[$input.attr('id')] = value;
                 $input.val(geovalue.type+'  '+geovalue.summary).css('cursor','hand');
@@ -2001,7 +2004,7 @@ $.widget( "heurist.editing_input", {
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
                                     //that.newvalues[$input.attr('id')] = location
                                     that.newvalues[$input.attr('id')] = location.type+' '+location.wkt;
-                                    var geovalue = window.hWin.HEURIST4.util.wktValueToDescription(location.type+' '+location.wkt);
+                                    var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt);
                                     $input.val(geovalue.type+'  '+geovalue.summary).change();
                                     //$input.val(location.type+' '+location.wkt)
                                 }

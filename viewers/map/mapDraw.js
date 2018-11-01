@@ -217,7 +217,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     aCoords.push(formatPntWKT(latLng));
                     }, shape);
 
-                aCoords.push(aCoords[0]);
+                aCoords.push(aCoords[0]); //add lst point otherwise WKT fails
 
                 res.type = 'pl';
                 res.wkt = "POLYGON ((" + aCoords.join(",") + "))";
@@ -810,7 +810,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     }
 
     //
-    // show GeoJSON as a set of separate overlays
+    // show GeoJSON as a set of separate overlays  - replace with window.hWin.HEURIST4.geo.prepareGeoJSON
     //
     function _loadGeoJSON(mdata){
 
@@ -832,13 +832,16 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         //feature.geometry.type  , coordinates
         //GeometryCollection.geometries[{type: ,coordinates: },...]
 
+        
+        var ftypes = ['Point','MultiPoint','LineString','MultiLineString','Polygon','MultiPolygon'];
+        
         if(mdata.type == 'FeatureCollection'){
             var k = 0;
             for (k=0; k<mdata.features.length; k++){
                 _loadGeoJSON(mdata.features[k]); //another collection or feature
             }
-        }else if(mdata.type == 'Feature' && !$.isEmptyObject(mdata.geometry)){
-
+        }else{
+            
             function __loadGeoJSON_primitive(geometry){
 
                 if($.isEmptyObject(geometry)){
@@ -908,14 +911,18 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 }
 
             }
-
-            __loadGeoJSON_primitive(mdata.geometry)
+        
+            if(mdata.type == 'Feature' && !$.isEmptyObject(mdata.geometry)){
+                __loadGeoJSON_primitive(mdata.geometry)
+            }else if (mdata.type && ftypes.indexOf(mdata.type)>=0){                      
+                __loadGeoJSON_primitive(mdata)
+            }
         }
 
     }
 
     //
-    //
+    // construct geojson object from all overlays
     //
     function _getGeoJSON(){
 
@@ -931,6 +938,10 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     processPoints(shape.getPath(), function(latLng){
                         coords.push([latLng.lng(), latLng.lat()]);
                         }, shape);
+                    
+                    if(coords[coords.length-1][0]!=coords[0][0] && coords[coords.length-1][1]!=coords[0][1])    {
+                        coords.push(coords[0]); //add lst point otherwise WKT fails                        
+                    }
                     polygones.push(coords);
 
                 }else if (shape.type==google.maps.drawing.OverlayType.POLYLINE) {
@@ -947,7 +958,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     pnt2 = bnd.getNorthEast();  
 
                     coords = [[pnt1.lng(), pnt1.lat()],[pnt1.lng(), pnt2.lat()],
-                        [pnt2.lng(), pnt2.lat()],[pnt2.lng(), pnt1.lat()]];
+                        [pnt2.lng(), pnt2.lat()],[pnt2.lng(), pnt1.lat()], [pnt1.lng(), pnt1.lat()]];
 
                     polygones.push(coords);
 
@@ -961,7 +972,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                     for(var i = 0; i < 40; i++){
                         var gpos = google.maps.geometry.spherical.computeOffset(latLng, radius, degreeStep * i);
                         coords.push([gpos.lng(), gpos.lat()]);
-                    };                        
+                    };    
+                    coords.push(coords[0])                    
                     /*
                     for (var i=0; i <= 40; ++i) {
                     var x = latLng.lng() + radius * Math.cos(i * 2*Math.PI / 40);
@@ -998,18 +1010,30 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         }else if(polygones.length>1){
             geometries.push({type: "MultiPolygon", coordinates: polygones});   
         }
+        
+        var res = {};
+        if(geometries.length>0){
 
-        var res = { type: "FeatureCollection", features: [{ type: "Feature", geometry: {},
-            "properties": {}
-        }]};
+            //avoid FeatureCollection - stringifyWKT does not support it
+            /*
+            res = { type: "FeatureCollection", features: [{ type: "Feature", geometry: {},
+                "properties": {}
+            }]};
+            */
 
-        if(geometries.length==1){
-            res.features[0].geometry = geometries[0];
-        }else{
-            res.features[0].geometry = { type: "GeometryCollection", geometries:geometries };
+            res = { type: "Feature", geometry: {},
+                "properties": {}
+            };
+            
+            if(geometries.length==1){
+                //res.features[0].geometry = geometries[0];
+                res = geometries[0];
+            }else{
+                //features[0].
+                res.geometry = { type: "GeometryCollection", geometries:geometries };
+            }
+
         }
-
-
         return res;
     }    
 
@@ -1190,6 +1214,30 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         */ 
 
         $('#save-button').button().click(function(){
+            
+            var gjson = _getGeoJSON();
+            if($.isEmptyObject(gjson)){
+                window.hWin.HEURIST4.msg.showMsgDlg('You have to draw a shape');    
+            }else{
+                var res = stringifyWKT(gjson);
+                _saveExtentOnExit();
+                
+                //type code is not required for new code. this is for backward capability
+                var typeCode = 'm';
+                if(res.indexOf('GEOMETRYCOLLECTION')<0 && res.indexOf('MULTI')<0){
+                    if(res.indexOf('LINESTRING')>=0){
+                        typeCode = 'l';
+                    }else if(res.indexOf('POLYGON')>=0){
+                        typeCode = 'pl';
+                    }else {
+                        typeCode = 'p';
+                    }
+                    
+                }
+                window.close({type:typeCode, wkt:res});    
+            }
+            
+            /*OLD WAY
             if(selectedShape==null){
                 window.hWin.HEURIST4.msg.showMsgDlg('You have to select a shape');
             }else{
@@ -1197,6 +1245,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
                 _saveExtentOnExit();
                 window.close(res);    
             }
+            */
         });
         $('#cancel-button').button().click(function(){
             _saveExtentOnExit();
@@ -1289,7 +1338,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         if(!window.hWin.HEURIST4.util.isempty(initial_wkt)){
             setTimeout(function(){
-                _loadWKT(initial_wkt);
+                    _loadWKT(initial_wkt);
                 }, 1000);
         }else{
             _loadSavedExtentOnInit();  //load last extent of previous session
@@ -1384,7 +1433,64 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     // extract coordinates from WKT
     //
-    function _loadWKT(val) {
+    function _loadWKT(wkt) {
+
+        if (! wkt) {
+            wkt = decodeURIComponent(document.location.search);
+        }
+        
+        /*var matches = wkt.match(/\??(\S+)\s+(.*)/);
+        if (! matches) {
+            return;
+        }
+        var type = matches[1];
+        var value = matches[2];*/
+        
+        var resdata = window.hWin.HEURIST4.geo.wktValueToShapes( wkt, null, 'google' );
+                  
+        type = google.maps.drawing.OverlayType.MARKER;
+        var i;
+        for (i=0; i<resdata.Point.length; i++){
+            shape = resdata.Point[i];
+            selectedShape = null;//to avoid clear
+            _loadShape(shape, type);   
+        }
+        type = google.maps.drawing.OverlayType.POLYLINE;
+        for (i=0; i<resdata.Polyline.length; i++){
+            shape = resdata.Polyline[i];
+            selectedShape = null; //to avoid clear
+            _loadShape(shape, type);   
+        }
+        type = google.maps.drawing.OverlayType.POLYGON;
+        for (i=0; i<resdata.Polygon.length; i++){
+            shape = resdata.Polygon[i];
+            selectedShape = null; //to avoid clear
+            _loadShape(shape, type);   
+        }
+        
+        //zoom to full extent
+        var sw = new google.maps.LatLng(resdata._extent.ymin, resdata._extent.xmin);
+        var ne = new google.maps.LatLng(resdata._extent.ymax, resdata._extent.xmax);
+        var bounds = new google.maps.LatLngBounds(sw, ne);
+        if( Math.abs(ne.lat()-sw.lat())<0.06 && Math.abs(ne.lng()-sw.lng())<0.06 ){
+            gmap.setCenter(bounds.getCenter()); 
+            gmap.setZoom(14);      
+        }else{
+            gmap.fitBounds(bounds);
+        }
+        /*
+        var gjson =  parseWKT(value);    //wkt to json
+        
+        _loadGeoJSON( gjson );  ///!!!!!
+        
+        //zoom to last loaded shape        
+        if(selectedShape!=null){
+            _zoomToSelection();
+        }
+        */
+    }
+    
+    function _loadWKT_old(val) {
 
         if (! val) {
             val = decodeURIComponent(document.location.search);

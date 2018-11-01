@@ -509,7 +509,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             
             if(this._toolbar.find('#divNav3').length===0){
-                    $('<div id="divNav3" style="font-weight:bold;padding-left:10em;display:inline-block;text-align:right">Save then</div>')
+                    //padding-left:10em;
+                    $('<div id="divNav3" style="font-weight:bold;display:inline-block;text-align:right">Save then</div>')
                         .insertBefore(this._toolbar.find('#btnRecDuplicate'));
             }
             

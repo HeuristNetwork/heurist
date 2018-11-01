@@ -41,6 +41,8 @@
 
 	$mapobjects = array();
     
+    define('USE_GOOGLE', false);
+    
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
@@ -86,7 +88,7 @@
                     
                     switch ($geo_type) {
                     
-                        case "r":
+                        case "r":   //special case for rectangle
                             if (preg_match("/POLYGON\s?\(\\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*(\\S+)\\s+(\\S+),\\s*\\S+\\s+\\S+\\)\\)/i", $as_wkt, $matches)) {
                                 
                                 array_push($mapobjects, array("type" => "rect",
@@ -96,7 +98,7 @@
                             }
                             break;
 
-                        case "c":
+                        case "c": //special case for circle
                             if (preg_match("/LINESTRING\s?\((\\S+)\\s+(\\S+),\\s*(\\S+)\\s+\\S+,\\s*\\S+\\s+\\S+,\\s*\\S+\\s+\\S+\\)/i", $as_wkt, $matches)) {
                                 
                                 array_push($mapobjects, array("type" => "circle",
@@ -150,67 +152,130 @@
 
 	if(count($mapobjects)>0){
         
-		if(@$_REQUEST['width'] && @$_REQUEST['height']){
-			$size = $_REQUEST['width']."x".$_REQUEST['height'];
-		}else{
-			$size = "300x300";
-		}
+        if(USE_GOOGLE){
+            
+            if(@$_REQUEST['width'] && @$_REQUEST['height']){
+                $size = $_REQUEST['width']."x".$_REQUEST['height'];
+            }else{
+                $size = "300x300";
+            }
+            
+		    $url = "http://maps.google.com/maps/api/staticmap";
+		    $url = $url."?size=".$size."&sensor=false";
 
-		$url = "http://maps.google.com/maps/api/staticmap";
-		$url = $url."?size=".$size."&sensor=false";
+		    if(@$_REQUEST['zoom'] && is_numeric($_REQUEST['zoom'])){
+			    $url = $url."&zoom=".$_REQUEST['zoom'];
+		    }
+		    if(@$_REQUEST['maptype']){
+			    $url = $url."&maptype=".$_REQUEST['maptype'];
+		    }else{
+			    $url = $url."&maptype=terrain";
+		    }
+		    if(@$_REQUEST['m_style']){
+			    $style_marker = $_REQUEST['m_style'];
+		    }else{
+			    $style_marker = "color:red";
+		    }
+		    if(@$_REQUEST['pl_style']){
+			    $style_path = $_REQUEST['pl_style'];
+		    }else{
+			    $style_path = "weight:3|color:red";
+		    }
+		    if(@$_REQUEST['pg_style']){
+			    $style_poly = $_REQUEST['pg_style'];
+		    }else{
+			    $style_poly = "weight:3|color:red|fillcolor:0x0000ff40";
+		    }
 
-		if(@$_REQUEST['zoom'] && is_numeric($_REQUEST['zoom'])){
-			$url = $url."&zoom=".$_REQUEST['zoom'];
-		}
-		if(@$_REQUEST['maptype']){
-			$url = $url."&maptype=".$_REQUEST['maptype'];
-		}else{
-			$url = $url."&maptype=terrain";
-		}
-		if(@$_REQUEST['m_style']){
-			$style_marker = $_REQUEST['m_style'];
-		}else{
-			$style_marker = "color:red";
-		}
-		if(@$_REQUEST['pl_style']){
-			$style_path = $_REQUEST['pl_style'];
-		}else{
-			$style_path = "weight:3|color:red";
-		}
-		if(@$_REQUEST['pg_style']){
-			$style_poly = $_REQUEST['pg_style'];
-		}else{
-			$style_poly = "weight:3|color:red|fillcolor:0x0000ff40";
-		}
+        }else{
 
+           if(@$_REQUEST['width'] && @$_REQUEST['height']){
+                $size = $_REQUEST['width'].",".$_REQUEST['height'];
+            }else{
+                $size = "300,300";
+            }
+            
+            $url = 'https://static-maps.yandex.ru/1.x/?size='.$size.'&l=map&lang=en_RU';
+
+            if(@$_REQUEST['zoom'] && is_numeric($_REQUEST['zoom'])){
+                $url = $url."&z=".$_REQUEST['zoom'];
+            }
+
+            /*
+            if(@$_REQUEST['m_style']){
+                $style_marker = $_REQUEST['m_style'];
+            }else{
+                $style_marker = "color:red";
+            }
+            if(@$_REQUEST['pl_style']){
+                $style_path = $_REQUEST['pl_style'];
+            }else{
+                $style_path = "weight:3|color:red";
+            }
+            if(@$_REQUEST['pg_style']){
+                $style_poly = $_REQUEST['pg_style'];
+            }else{
+                $style_poly = "weight:3|color:red|fillcolor:0x0000ff40";
+            }
+            */
+        }
+
+        
+        
+        
 		//$url = $url."&key=ABQIAAAAGZugEZOePOFa_Kc5QZ0UQRQUeYPJPN0iHdI_mpOIQDTyJGt-ARSOyMjfz0UjulQTRjpuNpjk72vQ3w";
 
 		$markers = "";
 		$path_all = "";
 		$poly_all = "";
+        
+        $verties_cnt = 0;
+        $shapes_cnt = 0;
 
 		foreach ($mapobjects as $geoObject) {
 
 			if($geoObject['type']=="point" || $geoObject['type']=="p"){
-				$markers = $markers.$geoObject['geo'][1].",".$geoObject['geo'][0]."|";
+                if(USE_GOOGLE){
+				    $markers = $markers.$geoObject['geo'][1].','.$geoObject['geo'][0].'|';
+                }else{
+                    $markers = $markers.$geoObject['geo'][0].','.$geoObject['geo'][1].',pm2rdm';
+                }
+                $verties_cnt++;
             }
             else if($geoObject['type']=="rect"){
 
                 $crd = $geoObject['geo'];
-                $poly_all = $poly_all."&path=".$style_poly."|";
-                $poly_all = $poly_all.$crd['y0'].",".$crd['x0']."|";
-                $poly_all = $poly_all.$crd['y0'].",".$crd['x1']."|";
-                $poly_all = $poly_all.$crd['y1'].",".$crd['x1']."|";
-                $poly_all = $poly_all.$crd['y1'].",".$crd['x0']."|";
-                $poly_all = $poly_all.$crd['y0'].",".$crd['x0'];
+                if(USE_GOOGLE){
+                    $poly_all = $poly_all.'&path='.$style_poly.'|';
+                    $poly_all = $poly_all.$crd['y0'].','.$crd['x0'].'|';
+                    $poly_all = $poly_all.$crd['y0'].','.$crd['x1'].'|';
+                    $poly_all = $poly_all.$crd['y1'].','.$crd['x1'].'|';
+                    $poly_all = $poly_all.$crd['y1'].','.$crd['x0'].'|';
+                    $poly_all = $poly_all.$crd['y0'].','.$crd['x0'];
+                }else{
+                    if($poly_all!=''){
+                        $poly_all = $poly_all.'~';
+                    }
+                    $poly_all = $poly_all.'c:FF0000FF,f:0000FF40,w:3,'
+                                .$crd['x0'].','.$crd['y0'].','
+                                .$crd['x0'].','.$crd['y1'].','
+                                .$crd['x1'].','.$crd['y1'].','
+                                .$crd['x1'].','.$crd['y0'].','
+                                .$crd['x0'].','.$crd['y0'];
+                }
 
             }else 
             if($geoObject['type']=="circle"){
-                $markers = $markers.$geoObject['geo']['y'].",".$geoObject['geo']['x']."|";
+                if(USE_GOOGLE){
+                    $markers = $markers.$geoObject['geo']['y'].",".$geoObject['geo']['x']."|";
+                }else{
+                    $markers = $markers.$geoObject['geo']['x'].','.$geoObject['geo']['y'].',pm2rdm';
+                }
+                $verties_cnt++;
             }else
 			//if($geoObject['type']=="polyline" || $geoObject['type']=="l")
             //if($geoObject['type']=="polygon" || $geoObject['type']=="pl")
-            {
+            if(USE_GOOGLE){
 
                     $points = array();
                     $points2 = $geoObject['geo'];
@@ -266,19 +331,89 @@
                         
                     }
 
-			}
-		}
+			}else if ($shapes_cnt<5 && $verties_cnt<97) { //limit 5 shapes and 100 vertcies
 
-		if($markers!=""){
-			$markers = "&markers=".$style_marker."|".$markers;
-			$url = $url.$markers;
+                    $points = array();
+                    $points2 = $geoObject['geo'];
+                    $points_to_encode = array();
+
+                    if(count($points2)>100){
+                    
+                        $points = array();    
+                        foreach ($geoObject['geo'] as $point) {
+                            array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
+                        }
+                        
+                        $tolerance = 0.02;// 0.002;
+                        $crn = 0;
+                        $points2 = $points;
+                        while($verties_cnt+count($points2)>100 && $crn<4){
+                            $points2 = Simplify::run($points, $tolerance);
+                            $tolerance = $tolerance + 0.005;
+                            $crn++;
+                        }//while simplify
+
+                        if($verties_cnt+count($points2)<=100)
+                        foreach ($points2 as $point) {
+                            $points_to_encode[] = $point['x'];
+                            $points_to_encode[] = $point['y'];
+                            $shapes_cnt++;
+                            $verties_cnt = $verties_cnt + count($points2);
+                        }
+                        
+                    }else{
+                        $shapes_cnt++;
+                        $verties_cnt = $verties_cnt + count($points2);
+                        foreach ($points2 as $point) {
+                            $points_to_encode[] = $point[0];
+                            $points_to_encode[] = $point[1];
+                        }
+                    }
+                    if(count($points_to_encode)>2 && $geoObject['type']=="polygon" || $geoObject['type']=="pl"){
+                         //add first as last
+                        $points_to_encode[] = $points_to_encode[0];
+                        $points_to_encode[] = $points_to_encode[1];
+                        array_unshift($points_to_encode,'c:FF0000FF,f:0000FF40,w:3');
+                    }
+                    $points_to_encode = implode(',',$points_to_encode);
+                    
+                    
+                    if($points_to_encode!=''){
+                        
+                        if($poly_all!=''){
+                            $poly_all = $poly_all.'~';
+                        }
+                        $poly_all = $poly_all.$points_to_encode;
+                        
+                    }
+                
+            }
 		}
-		if($path_all!=""){         //0xff00007f
-			$url = $url.$path_all;
-		}
-		if($poly_all!=""){
-			$url = $url.$poly_all;
-		}
+        
+        if(USE_GOOGLE){
+
+		    if($markers!=''){
+			    $markers = "&markers=".$style_marker."|".$markers;
+			    $url = $url.$markers;
+		    }
+		    if($path_all!=''){         //0xff00007f
+			    $url = $url.$path_all;
+		    }
+		    if($poly_all!=''){
+			    $url = $url.$poly_all;
+		    }
+        
+        }else{
+            if($markers!=''){
+                $markers = '&pt='.$markers;
+                $url = $url.$markers;
+            }
+            if($poly_all!=''){
+                $url = $url.'&pl='.$poly_all;
+            }
+//error_log($url);        
+            
+        }
 
         if(@$_REQUEST['debug']){
             print '<div>'.strlen($url)."</div>";

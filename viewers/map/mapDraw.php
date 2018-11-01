@@ -33,6 +33,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
         <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/latlon-ellipsoidal.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/utm.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/dms.js"></script>        
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>ext/js/wellknown.js"></script>
 
         <!-- Initializing -->
 
