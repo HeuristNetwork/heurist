@@ -116,7 +116,7 @@ $.widget( "heurist.expertnation_nav", {
                 }
             }        
         );
-        $('.float-panel > div > span.ui-icon-close').click(
+        $('.float-panel > div > span.ui-icon-close').hide().click(
             function(e){
                 that.currentNavIdx = 0;
                 that.historyNav = [];
@@ -2412,15 +2412,19 @@ $.widget( "heurist.expertnation_nav", {
                     
                     if (true || !window.hWin.HEURIST4.util.isempty(text)){
                         
+                        
+                        
                         $('<a>').attr('history_idx',idx).attr('title',text).text(text)
-                            .css({'color':'white'})
+                            .css({color:'white',cursor:'pointer'})
                             .click(function(event){
                                 if(that.historyNav.length>1){
                                     var idx = $(event.target).attr('history_idx');
                                     that._setOptions( that.historyNav[idx] );
                                 }
                                 window.hWin.HEURIST4.util.stopEvent(event);
-                            }).appendTo($('<div>').addClass('truncate').css({'max-width':'110px;'}).appendTo(ele));
+                            }).appendTo(
+                             $('<div class="truncate" style="max-width:150px;">')
+                                .appendTo($('<li>').appendTo(ele)));
                         //window.hWin.HEURIST4.ui.addoption(ele[0], idx, text);
                     }
                 }
