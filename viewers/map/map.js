@@ -1108,7 +1108,7 @@ console.log('tileloaded 2');
 //console.log('after map init DELAYED');
                     var lt = window.hWin.HAPI4.sysinfo['layout'];  
                     var scrollwheel = true;
-                    if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0 || lt.indexOf('adel')==0) ){
+                    if(lt && (lt.indexOf('DigitalHarlem')==0 || lt=='Beyond1914' || lt=='UAdelaide') ){
                          scrollwheel = false;
                     }   
                     
@@ -1231,7 +1231,7 @@ console.log('tileloaded 2');
             }
             
             var lt = window.hWin.HAPI4.sysinfo['layout'];  
-            if(lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0 || lt.indexOf('adel')==0) ){
+            if(lt && (lt.indexOf('DigitalHarlem')==0 || lt=='Beyond1914' || lt=='UAdelaide') ){
                 useMarkerClusterer = false;
             }
 

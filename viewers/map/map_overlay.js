@@ -1106,8 +1106,8 @@ map.data.addListener('mouseover', function(event) {
     //
     //    
     function _isPublicSite(){
-        var lt = window.hWin.HAPI4.sysinfo['layout'];   
-        return lt && (lt.indexOf('DigitalHarlem')==0 || lt.indexOf('boro')==0 || lt.indexOf('adel')==0);
+        var lt = window.hWin.HAPI4.sysinfo['layout'];                                      
+        return lt && (lt.indexOf('DigitalHarlem')==0 || lt=='Beyond1914' || lt=='UAdelaide');
     }
 
     /**
@@ -1235,7 +1235,8 @@ map.data.addListener('mouseover', function(event) {
 
                     var symbology = {iconColor:source.color, iconMarker:source.iconMarker};
                     
-                    if(lt=='boro' || lt=='adel'){ //customized symbology and popup for boro
+                    if(lt=='Beyond1914' || lt=='UAdelaide'){//customized symbology and popup for expertnation
+                    
                         recset.calcfields['rec_Info'] = function(record, fldname){
                             
                             var info_content = this.fld(record, 'rec_Description');
@@ -1252,7 +1253,7 @@ map.data.addListener('mouseover', function(event) {
                                         + info_content
                                         + '<a href="'
                                         + window.hWin.HAPI4.baseURL+'place/'+this.fld(record,'rec_ID')+'/a" '
-                                        + 'onclick="{window.hWin.boroResolver(event);}" class="bor-button bor-map-button">See connections</a>'
+                                        + 'onclick="{window.hWin.enResolver(event);}" class="bor-button bor-map-button">See connections</a>'
                                     +'</div></div>';                            
                         }
                         

@@ -100,8 +100,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         
         <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_search.js"></script>
         <script type="text/javascript" src="hclient/widgets/digital_harlem/dh_maps.js"></script>
-        <script type="text/javascript" src="hclient/widgets/boro/boro_place.js"></script>
-        <script type="text/javascript" src="hclient/widgets/boro/boro_nav.js"></script>
+        <script type="text/javascript" src="hclient/widgets/expertnation/expertnation_place.js"></script>
+        <script type="text/javascript" src="hclient/widgets/expertnation/expertnation_nav.js"></script>
         <script type="text/javascript" src="hclient/widgets/viewers/connections.js"></script>
 
         <!-- DEBUG -->
@@ -227,10 +227,9 @@ _time_debug = new Date().getTime() / 1000;
                 
                
                //@todo define parameter in layout "production=true"
-               if(!(window.hWin.HAPI4.sysinfo['layout']=='boro' ||
-                   window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' || 
-                   window.hWin.HAPI4.sysinfo['layout']=='WebSearch' ||
-                   window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
+               var lt = window.hWin.HAPI4.sysinfo['layout'];
+               if(! (lt=='Beyond1914' ||  lt=='UAdelaide' ||
+                     lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
 
                    var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
 

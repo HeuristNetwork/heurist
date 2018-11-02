@@ -78,10 +78,10 @@ var cfg_widgets = [
     {id:'dh_results', name:'Layers', widgetname:'dh_results', script:'hclient/widgets/digital_harlem/dh_results.js'},
     {id:'dh_legend', name:'Legend', widgetname:'dh_legend', script:'hclient/widgets/digital_harlem/dh_legend.js'},
 
-    // BORO APPS
-    {id:'boro_results', name:'Search Result', widgetname:'boro_results', script:'hclient/widgets/boro/boro_results.js'},
-    {id:'boro_nav', name:'Navigation', widgetname:'boro_nav', script:'hclient/widgets/boro/boro_nav.js'},
-    {id:'boro_place', name:'Place', widgetname:'boro_place', script:'hclient/widgets/boro/boro_place.js'},
+    //ExpertNation APPS
+    {id:'expertnation_results', name:'Search Result', widgetname:'expertnation_results', script:'hclient/widgets/expertnation/expertnation_results.js'},
+    {id:'expertnation_nav', name:'Navigation', widgetname:'expertnation_nav', script:'hclient/widgets/expertnation/expertnation_nav.js'},
+    {id:'expertnation_place', name:'Place', widgetname:'expertnation_place', script:'hclient/widgets/expertnation/expertnation_place.js'},
      
     
     //fake app - reference to another layout to include
@@ -245,18 +245,18 @@ var cfg_layouts = [
     },
     */
 
-    {id:'boro', name:'Beyond 1914 / Book of Remembrance, University of Sydney, built with Heurist', theme:'heurist', type:'free', 
-                cssfile:['hclient/widgets/boro/beyond1914.css','hclient/widgets/boro/boro_style.css'],
-                template: 'hclient/widgets/boro/boro_main.html'
-       //widgets will be loaded into divs with id "result_pane" and "search_pane" in boro_main.html         
-       ,boro_place:{dropable:false,css:{},
+    {id:'Beyond1914', name:'Beyond 1914 / Book of Remembrance, University of Sydney, built with Heurist', theme:'heurist', type:'free', 
+                cssfile:['hclient/widgets/expertnation/expertnation.css','hclient/widgets/expertnation/beyond1914.css'],
+                template: 'hclient/widgets/expertnation/beyond1914_main.html'
+       //widgets will be loaded into divs with id "result_pane" and "search_pane" in beyond1914_main.html         
+       ,expertnation_place:{dropable:false,css:{},
                 apps:[                           
-                {appid:'boro_place', 
+                {appid:'expertnation_place', 
                     options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
                                 multiselect:false, show_menu: false},
                 hasheader:false, css:{border:'none', 'background':'none'} }]}
        ,result_pane:{dropable:false,css:{},
-                apps:[{appid:'boro_results', 
+                apps:[{appid:'expertnation_results', 
                     options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
                     multiselect:false, show_menu: false},
                 hasheader:true, css:{border:'none', 'background':'none'} }]}
@@ -267,30 +267,28 @@ var cfg_layouts = [
                 //faceted/forms searches
                 //dev
                 //{appid:'dh_search', options:{UGrpID:18, Xsearch_at_init:110}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
-       ,boro_nav:{dropable:false,css:{},
+       ,expertnation_nav:{dropable:false,css:{},
                 apps:[                           
                 //creates navigation menu and loads info pages
-                {appid:'boro_nav', options:{menu_div:'bor-navbar-collapse', search_UGrpID:48, uni_ID:4705}, hasheader:false, 
+                {appid:'expertnation_nav', options:{menu_div:'bor-navbar-collapse', search_UGrpID:48, uni_ID:4705}, hasheader:false, 
                             css:{border:'none', 'background':'none'} }]}
-/*       ,search_pane:{dropable:false,apps:[{appid:'boro_search', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]}
-       ,result_pane:{dropable:false,apps:[{appid:'boro_reslist', options:{}, hasheader:false, css:{border:'none', 'background':'none'} }]} */
     },
 
-    {id:'adel', name:'November 1918, University of Adelaide, built with Heurist', theme:'heurist', type:'free', 
-                cssfile:['hclient/widgets/boro/beyond1914.css',
+    {id:'UAdelaide', name:'November 1918, University of Adelaide, built with Heurist', theme:'heurist', type:'free', 
+                cssfile:['hclient/widgets/expertnation/expertnation.css',
                 'https://global.adelaide.edu.au/style-guide-v2/latest/css/global-assets.css',
                 'https://global.adelaide.edu.au/style-guide-v2/0.24.0/css/header-footer.css',
-                'hclient/widgets/boro/adel.css'], 
-                template: 'hclient/widgets/boro/adel_main.html'
-       //widgets will be loaded into divs with id "result_pane" and "search_pane" in boro_main.html         
-       ,boro_place:{dropable:false,css:{},
+                'hclient/widgets/expertnation/uadelaide.css'], 
+                template: 'hclient/widgets/expertnation/uadelaide_main.html'
+       //widgets will be loaded into divs with id "result_pane" and "search_pane" in uadelaide_main.html         
+       ,expertnation_place:{dropable:false,css:{},
                 apps:[                           
-                {appid:'boro_place', 
+                {appid:'expertnation_place', 
                     options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
                                 multiselect:false, show_menu: false},
                 hasheader:false, css:{border:'none', 'background':'none'} }]}
        ,result_pane:{dropable:false,css:{},
-                apps:[{appid:'boro_results', 
+                apps:[{appid:'expertnation_results', 
                     options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
                     multiselect:false, show_menu: false},
                 hasheader:true, css:{border:'none', 'background':'none'} }]}
@@ -300,10 +298,10 @@ var cfg_layouts = [
                 {appid:'dh_search', options:{UGrpID:55, search_at_init:196}, hasheader:false, 
                 css:{border:'none', 'background':'none'} }]         
        }
-       ,boro_nav:{dropable:false,css:{},
+       ,expertnation_nav:{dropable:false,css:{},
                 apps:[                           
                 //creates navigation menu and loads info pages
-                {appid:'boro_nav', options:{menu_div:'bor-navbar-collapse', search_UGrpID:55, uni_ID:4710}, hasheader:false, 
+                {appid:'expertnation_nav', options:{menu_div:'bor-navbar-collapse', search_UGrpID:55, uni_ID:4710}, hasheader:false, 
                             css:{border:'none', 'background':'none'} }]}
     },
 

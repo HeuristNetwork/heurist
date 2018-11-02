@@ -433,7 +433,12 @@ error_log(print_r($_REQUEST, true));
                 return false;
             }
 
-            define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
+            if(defined('HEURIST_FILESTORE_URL')){
+error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTORE_URL. ' script '.$_SERVER["SCRIPT_FILENAME"]);                
+                return true;
+            }else{
+                define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
+            }
 
         }
         else{

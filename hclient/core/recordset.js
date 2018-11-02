@@ -459,8 +459,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             }
                         }; 
                         
-                        /*suppress default icons for boro
-                        if(window.hWin.HAPI4.sysinfo['layout']!='boro'){ 
+                        /*suppress default icons for expertnation
+                        if(window.hWin.HAPI4.sysinfo['layout']!='Beyond1914'){ 
                             item.options.icon = iconImg; 
                         }*/
                                           

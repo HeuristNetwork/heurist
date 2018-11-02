@@ -126,9 +126,9 @@ $system->defineConstants();
         if(!success) return;
         
         var lt = window.hWin.HAPI4.sysinfo['layout'];
-        if(lt=='boro' || lt=='adel'){
+        if(lt=='Beyond1914' || lt=='UAdelaide'){
                 $("head").append($('<link rel="stylesheet" type="text/css" href="'
-                    +window.hWin.HAPI4.baseURL+'hclient/widgets/boro/beyond1914.css?t='+(new Date().getTime())+'">'));
+                    +window.hWin.HAPI4.baseURL+'hclient/widgets/expertnation/expertnation.css?t='+(new Date().getTime())+'">'));
         }        
 
         // Layout options

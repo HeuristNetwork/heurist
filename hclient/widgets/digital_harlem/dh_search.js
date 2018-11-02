@@ -227,7 +227,8 @@ $.widget( "heurist.dh_search", {
                 
         });
 
-        if(window.hWin.HAPI4.sysinfo['layout']=='boro' || window.hWin.HAPI4.sysinfo['layout']=='adel'){
+        var lt = window.hWin.HAPI4.sysinfo['layout'];
+        if(lt=='Beyond1914' || lt=='UAdelaide'){
             //find on page external search_value and search_button elements  - for BORO external search form
             var ele_search = $('#search_query'); //$(window.hWin.document).find('#search_query');
             if(ele_search.length>0){
@@ -251,7 +252,7 @@ $.widget( "heurist.dh_search", {
                 });
             }
             
-            // for boro/adel layout the container page is hidden initially
+            // for expertnation layouts the container page is hidden initially
             // need to refresh-init when it becomes visible
             $('.bor-page-search').on("myOnShowEvent", function(event){
                 if( event.target.id == 'bor-page-search'){
