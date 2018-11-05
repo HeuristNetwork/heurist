@@ -90,6 +90,7 @@
         <!-- END YUI -->
 
         <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
@@ -274,10 +275,18 @@
                  <a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>
             </div>
             <textarea readonly cols="400" id="rty_TitleMask" rows="2" 
-                style="width:600px;max-width:600px;height:40px;display:inline-block; background-color: lightgray;"></textarea>
+                style="width:600px;max-width:600px;height:30px;display:inline-block; background-color:#EFF;"></textarea>
         </div>
+
+        <div  id="divStreamLinedAddition" style="margin:10px 20px">
+            <label style="padding-left: 80px;"><input type="checkbox" checked="checked" id="cbStreamLinedAddition"
+            onchange="window.hWin.HAPI4.save_pref('editRecStructure_StreamLinedAddition', $(event.target).is(':checked')?1:0 )"/>&nbsp;
+                    <b>Streamlined field addition (commonest options, quicker addition)</b></label>
+            <label style="padding-left:100px">Drag rows up and down to change field order</label>
+        </div>
+
         
-        <div id="page-inner" style="top:125px; bottom:80px;">
+        <div id="page-inner" style="top:145px; bottom:80px;">
             <!--  class="yui-navset yui-navset-top"  -->
             <div id="modelTabs" style="margin:auto;text-align:left;"></div>
         </div>
@@ -327,5 +336,9 @@ a record can only be the child of ONE record.</p>
         
         </div>
 
+        
+        <div class="list_div ui-heurist-header2" 
+                style="z-index:999999999;height:auto;max-height:200px;padding:4px;cursor:pointer;">
+        </div>
     </body>
 </html>

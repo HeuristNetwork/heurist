@@ -442,7 +442,8 @@ function DetailTypeEditor() {
         var is_frist_time = true;
 
         var sURL = window.hWin.HAPI4.baseURL +
-                "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+(is_add_vocab?0:el_sel.value)+"&db="+_db;
+                "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+(is_add_vocab?0:el_sel.value)
+                +"&db="+window.hWin.HAPI4.database;
         window.hWin.HEURIST4.msg.showDialog(sURL, {
 
                     "close-on-blur": false,
@@ -924,14 +925,10 @@ function DetailTypeEditor() {
                 }
 
                 if(!error){
-                    var ss = (_dtyID < 0)?"added":"updated";
-
-                    if(report.indexOf(",")>0){
-                        // this alert is a pain: alert("Field types with IDs :"+report+ " were succesfully "+ss);
-                    }else{
-                        // this alert is a pain: alert("Field type with ID " + report + " was succesfully "+ss);
-                    }
-                    window.close(context); //send back new HEURIST strcuture
+                    
+                    var dty_ID = Math.abs(Number(context.result[0]));
+                    window.hWin.HEURIST4.detailtypes = context.detailtypes;
+                    
                 }
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);

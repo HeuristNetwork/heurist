@@ -57,7 +57,10 @@ function EditRecStructure() {
     _fieldMenu = null,
     db,
     warningPopupID = null,
-    _structureWasUpdated = false;
+    _structureWasUpdated = false,
+    
+    _isStreamLinedAddition = true, 
+    _isStreamLinedAdditionAction = false;
 
     // buttons on top and bottom of design tab
     var hToolBar = '<div style=\"display:none;\">'+
@@ -111,6 +114,11 @@ function EditRecStructure() {
         
         Dom.get("modelTabs").innerHTML = '<div id="tabDesign"><div id="tableContainer"></div></div>';
         _initTabDesign(null);
+        
+        
+        var df = window.hWin.HAPI4.get_prefs_def('editRecStructure_StreamLinedAddition', 1);
+        $('#cbStreamLinedAddition').prop('checked', df==1);
+        
     }
 
     /**
@@ -263,13 +271,27 @@ function EditRecStructure() {
                         " rst_ID='"+oRecord.getData("rst_ID")+"'>"+
                         'Add&nbsp;field</div>';
                         
+                        /*var cell_element = elLiner.parentNode;
+                        //Set trigger
+                        if( oData ){ //Row is closed
+                            Dom.addClass( cell_element, "yui-dt-expandablerow-trigger-conditional" );
+                        }*/
+                        
                         $(elLiner).css({cursor:'pointer'})
                             .attr('rst_ID', oRecord.getData("rst_ID"))
                             .click(function(event){
-                                editStructure.onAddFieldAtIndex(event, false);
+                                
+                                    _isStreamLinedAddition = $('#cbStreamLinedAddition').is(':checked');
+                                
+                                    if(!_isStreamLinedAddition){
+                                        editStructure.onAddFieldAtIndex(event, false);    
+                                    }else{
+                                        var oArgs = {event:'MouseEvent', target: elLiner};
+                                        onCellClickEventHandler( oArgs ); 
+                                    }
                                 });
 
-                    }
+                    }                                    
                 },
                 {
                     key:'rst_NonOwnerVisibility',
@@ -557,6 +579,113 @@ function EditRecStructure() {
                         /*
                         THIS IS FORM to edit detail structure. It is located on expandable row of table
                         */
+                        
+                        if(_isStreamLinedAdditionAction){ //global
+                            
+                            var _rst_ID = rst_ID;
+                            rst_ID = 0;
+                        
+                        obj.liner_element.innerHTML =   // padding-right:5; padding-left:30; 
+                        '<div style="margin: 4px 60px; padding-bottom:5;background-color:#EEE; border:#AFA 1px solid">'+
+                        
+                        '<div class="input-row"><div class="input-header-cell">Field name:</div>'+
+                            '<div class="input-cell">'+
+                                '<input id="ed_dty_Name" style="width:200px;" onchange="_onDispNameChange(event)" '+
+                                    'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" '+
+                                    'onkeyup="onFieldAddSuggestion(event,'+_rst_ID+')" '+  //need id to detect index_toinsert 
+                                    'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
+                            '</div></div>'+
+
+                        '<div class="input-row">'+
+                            '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
+                            '<div class="input-cell">'+
+                                '<textarea style="width:450px" cols="450" rows="3" id="ed_dty_HelpText" '+
+                                'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
+                                //'<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
+                                //            'This text is optional.</div>'+
+                            '</div></div>'+
+                            
+                        '<div class="input-row"><div class="input-header-cell" style="vertical-align:top;">Requirement:</div>'+
+                            '<div class="input-cell" title="Determines whether the field must be filled in, should generally be filled in, or is optional">'+
+                                '<select id="ed0_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:0px;vertical-align: top;">'+
+                                    '<option value="required">required</option>'+
+                                    '<option value="recommended" selected>recommended</option>'+
+                                    '<option value="optional">optional</option>'+
+                                    '<option value="forbidden">hidden</option></select>'+ //was forbidden
+                            '</div></div>'+
+                            
+                        // Repeatability
+                        '<div class="input-row">'+
+                            '<div class="input-header-cell">Repeatability :</div>'+
+                            '<div class="input-cell" title="Determines whether multiple values can be entered for this field" >'+
+                                '<select id="ed0_Repeatability" onchange="onRepeatChange(event)">'+
+                                    '<option value="single">single</option>'+
+                                    '<option value="repeatable" selected>repeatable</option>'+
+                                    '<option value="limited">limited</option>'+ //IJ request HIDE IT 2012-10-12
+                                '</select>'+
+
+                        // Minimum values
+                            '<span id="ed0_spanMinValue" style="display:none;visibility:hidden;"><label class="input-header-cell">Minimum&nbsp;values:</label>'+
+                            '<input id="ed0_rst_MinValues" title="Minimum number of values which are required in data entry" style="width:20px" size="2" '+
+                            'onblur="onRepeatValueChange(event)" onkeypress="window.hWin.HEURIST4.ui.preventNonNumeric(event)"/></span>'+
+                        // Maximum values
+                            '<span id="ed0_spanMaxValue" style="visibility:hidden;"><label class="input-header-cell">Maximum&nbsp;values:</label>'+
+
+                                '<input id="ed0_rst_MaxValues" title="Maximum number of values which are permitted in data entry" '+
+                                'style="width:20px; text-align:center;" size="2" '+
+                                    'onblur="onRepeatValueChange(event)" onkeypress="window.hWin.HEURIST4.ui.preventNonNumeric(event)"/></span>'+
+                            '</div></div>'+                            
+                       
+                        '<div class="input-row"><div class="input-header-cell" style="vertical-align:top;">Detail type :</div>'+
+                            '<div class="input-cell">'+
+                                '<select id="ed_dty_Type" onchange="onDetTypeChange(event)" style="display:inline; margin-right:0px;vertical-align: top;">'+
+                                    '<option value="enum">Dropdown (Terms)</option>'+
+                                    '<option value="float">Numeric (integer or decimal)</option>'+
+                                    '<option value="freetext" selected>Text (single line)</option>'+
+                                    '<option value="blocktext">Text (single line)</option>'+
+                                    '<option value="date">Date / time</option>'+
+                                    '<option value="geo">Geospatial (point, line, polygon ...)</option>'+
+                                    '<option value="file">File or remote URL</option>'+
+                                    '<option value="resource">Record pointer</option>'+
+                                    '<option value="relmarker">Relationship marker</option></select>'+
+                            '</div></div>'+
+                                                        
+                        // Terms - enums and relmarkers
+                        '<div class="input-row" style="display:none"><div class="input-header-cell">Vocabulary (terms):</div>'+
+                            '<div class="input-cell" title="The lsit of terms available for selection as values for this field">'+
+                                '<select id="selVocab"/>'+
+                                '<input id="ed_dty_JsonTermIDTree" type="hidden"/>'+
+                                '<input id="ed_dty_TermIDTreeNonSelectableIDs" type="hidden"/>'+
+                                '<span>'+
+                                    '<a href="#" onClick="onAddVocabulary()">add a vocabulary</a>'+
+                                '</span>'+
+                            '</div></div>'+
+
+                        // Pointer target types - pointers and relmarkers   ed_dty_PtrTargetRectypeIDs
+                        '<div class="input-row" style="display:none"><div class="input-header-cell">Target entity type:</div>'+
+                            '<div class="input-cell" title="Determines which record types this pointer field can point to. It is preferable to select target record types than to leave the pointer unconstrained">'+
+                                '<span class="dtyValue" id="pointerPreview" style="width:270px;border: 1px solid #DCDCDC;line-height: 19px;padding-left:2px"></span>&nbsp;'+
+                                '<input type="submit" value="Select Record Types" id="btnSelRecType2" onClick="onSelectRectype()"/>'+
+                                '<input id="ed_dty_PtrTargetRectypeIDs" type="hidden"/>'+
+                            '</div></div>'+
+                            
+                        '<div style="border-top:1px solid #AFA;padding:10px;">'+
+                            '<span style="font-style:italic;display:inline-block;">All fields in this form are required. For additional options, cancel,<br>'+
+                            'uncheck streamlined field addition checkbox, and click on add field again</span>'+
+                            '<span style="float:right;padding:4px;">'+
+                                '<input style="margin-right:10px;" type="button" value="Create Field" '+
+                                    'title="Create new base field type and adds to this record type"'+
+                                    ' onclick="onCreateFieldTypeAndAdd('+_rst_ID+');">'+                            
+                                '<input style="margin-right:10px;" type="button" value="Cancel" '+
+                                    'title="Create new base field type and adds to this record type"'+
+                                    ' onclick="editStructure.doExpliciteCollapse('+_rst_ID+', false);">'+                            
+                            '</span>'+
+                        '</div>'+
+                        
+                        '</div>';
+                        
+                        }else{
+                        
                         obj.liner_element.innerHTML =
                         '<div style="padding-left:30; padding-bottom:5; padding-right:5; background-color:#EEE">'+
 
@@ -727,7 +856,11 @@ function EditRecStructure() {
 
                         (ccode?'<div class="input-row"><div class="input-header-cell">Concept code:</div><div style="display:table-cell">'+ccode+'</div></div>':'')+
                         
-                        '</div></div>'
+                        '</div></div>';
+                        
+                        }
+                        
+                        
 
                     }
                 }
@@ -923,11 +1056,14 @@ function EditRecStructure() {
 
 
         var column = _myDataTable.getColumn(oArgs.target);
+        
+        _isStreamLinedAddition = $('#cbStreamLinedAddition').is(':checked');
 
         //prevent any operation in case of opened popup
         if(!Hul.isnull(popupSelect) || _isServerOperationInProgress ||
             (!Hul.isnull(column) && 
-                (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || column.key === 'addColumn') ))
+                (column.key === 'rst_values' || column.key === 'rst_NonOwnerVisibility' || 
+                    (column.key === 'addColumn' && !_isStreamLinedAddition) ) ))
             { 
                 return; 
             }
@@ -984,14 +1120,16 @@ function EditRecStructure() {
                     // after expansion - fill input values from HEURIST db
                     // after collapse - save data on server
                     function __toggle(){
-
+                        
                         if(!isExpanded){ //now it is expanded
-                            _expandedRecord = rst_ID;
+                            
+                            _expandedRecord = _isStreamLinedAdditionAction?null:rst_ID;
 
                             _myDataTable.onEventToggleRowExpansion(record_id);
 
-                            _fromArrayToUI(rst_ID, false); //after expand restore values from HEURIST
-
+                            if(!_isStreamLinedAdditionAction){
+                                _fromArrayToUI(rst_ID, false); //after expand restore values from HEURIST
+                            }
 
                             var rowrec = _myDataTable.getTrEl(oRecord);
                             var maindiv = Dom.get("page-inner");
@@ -1001,7 +1139,7 @@ function EditRecStructure() {
                             var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
                             elLiner.innerHTML = "";
 
-                        }else{
+                        }else {
                             _saveUpdates(false); //save on server
                             _expandedRecord = null;
                         }
@@ -1015,15 +1153,20 @@ function EditRecStructure() {
 
                         _actionInProgress = false;
                     }
-
-                    if(!Hul.isnull(record_id) && column.key === 'expandColumn'){
+                    
+                    if(!Hul.isnull(record_id) && 
+                            (column.key === 'expandColumn' ||
+                             column.key === 'addColumn' && _isStreamLinedAddition ))
+                    {
+                       
                         _actionInProgress = true;
-
+                        
                         oRecord = _myDataTable.getRecord(record_id);
                         var rst_ID = oRecord.getData("rst_ID");
 
                         var state = _myDataTable._getRecordState( record_id );
                         var isExpanded = ( state && state.expanded );
+                        
                         if(isExpanded){
                             _doExpliciteCollapse(rst_ID, true); //save this record on collapse
                             _setDragEnabled(true);
@@ -1033,7 +1176,9 @@ function EditRecStructure() {
                                 _doExpliciteCollapse(_expandedRecord, true);
                             }
                             _setDragEnabled(false);
+                            
                         }
+                        _isStreamLinedAdditionAction = (column.key === 'addColumn' && _isStreamLinedAddition);                            
 
                         // after expand/collapse need delay before filling values
                         setTimeout(__toggle, 300);
@@ -1079,7 +1224,7 @@ function EditRecStructure() {
             var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('rst_NonOwnerVisibility')});
             elLiner.innerHTML = "<img src='../../../common/images/up-down-arrow.png'>";
 
-            if(needSave){
+            if(needSave && !_isStreamLinedAdditionAction){
                 _fromUItoArray(rst_ID); //before collapse save from UI to HEURIST
             }
             _setDragEnabled(true);
@@ -1091,6 +1236,8 @@ function EditRecStructure() {
                 _saveUpdates(needClose); //global function
             }
         }
+        
+        _isStreamLinedAdditionAction = false;
     }
     
     /**
@@ -1263,6 +1410,8 @@ function EditRecStructure() {
     */
     function _fromArrayToUI(rst_ID, isAll)
     {
+        if(!rst_ID>0) return;
+        
         var findex = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
 
         var fieldnames = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames,
@@ -1594,6 +1743,37 @@ function EditRecStructure() {
 
         }
     }
+    
+    function _getIndex_toinsert(event){
+        
+        var recs = _myDataTable.getRecordSet();
+        var row_index, k, len = recs.getLength();
+        
+        var index_toinsert = recs.getLength();
+        var rst_ID;
+        
+        if(event!=null){
+            event = window.hWin.HEURIST4.util.stopEvent(event);
+            var targ = event.target;
+            rst_ID = targ.getAttribute("rst_ID");
+            if(!rst_ID) return null;
+
+            index_toinsert = _getRecordById(rst_ID).row_index;
+        }else{
+            var sels = _myDataTable.getSelectedRows();
+            
+            for (row_index = 0; row_index < len; row_index++ )
+            {
+                var rec = _myDataTable.getRecord(row_index);
+                if(sels[0]==rec.getId()){
+                    index_toinsert = row_index+1;
+                    break;
+                }
+            }
+        }
+            
+       return index_toinsert;  
+    }
 
     /**
     * Adds the list of new detail types to this record structure
@@ -1602,8 +1782,9 @@ function EditRecStructure() {
     * This is function for global method addDetail. It is invoked after selection of detail types or creation of new one
     * @param dty_ID_list - comma separated list of detail type IDs
     */
-    function _addDetails(dty_ID_list, index_toinsert){
+    function _addDetails(dty_ID_list, index_toinsert, defValues){
 
+        
         if(dty_ID_list=='section_header'){
             _onAddSeparator(index_toinsert);
             return;
@@ -1620,6 +1801,9 @@ function EditRecStructure() {
         if(Hul.isnull(recDetTypes)){
             recDetTypes = {}; //new Object();
         }
+        if(Hul.isnull(defValues)) defValues = {rst_RequirementType:'optional',rst_MinValues:0,rst_MaxValues:1};
+        
+
 
         var data_toadd = [];
         var detTypes = window.hWin.HEURIST4.detailtypes.typedefs,
@@ -1631,19 +1815,9 @@ function EditRecStructure() {
         var row_index, k, len = recs.getLength();
 
         if(Hul.isnull(index_toinsert)){
-            var sels = _myDataTable.getSelectedRows();
-
-            for (row_index = 0; row_index < len; row_index++ )
-            {
-                var rec = _myDataTable.getRecord(row_index);
-                if(sels[0]==rec.getId()){
-                    index_toinsert = row_index+1;
-                    break;
-                }
-            }
-            if(index_toinsert==null){
-                index_toinsert = recs.getLength()-1;
-            }
+            
+            index_toinsert = _getIndex_toinsert()
+            
         }
 
         var order = 0;
@@ -1653,7 +1827,7 @@ function EditRecStructure() {
             var rec = _myDataTable.getRecord(index_toinsert>=recs.getLength()?recs.getLength()-1:index_toinsert);
             order = Number(rec.getData('rst_DisplayOrder'));
         }
-
+        
         //moves detail types to
 
         for(k=0; k<arrDty_ID.length; k++){
@@ -1683,9 +1857,9 @@ function EditRecStructure() {
                 arr_target[rst.rst_DisplayHelpText] = arrs[fi.dty_HelpText];
                 arr_target[rst.rst_DisplayExtendedDescription] = arrs[fi.dty_ExtendedDescription];
                 arr_target[rst.rst_DefaultValue ] = "";
-                arr_target[rst.rst_RequirementType] = "optional";
-                arr_target[rst.rst_MaxValues] = "1";
-                arr_target[rst.rst_MinValues] = "0";
+                arr_target[rst.rst_RequirementType] = defValues.rst_RequirementType;
+                arr_target[rst.rst_MaxValues] = defValues.rst_MaxValues;
+                arr_target[rst.rst_MinValues] = defValues.rst_MinValues;
                 arr_target[rst.rst_DisplayWidth] = def_width;
                 arr_target[rst.rst_DisplayHeight] = def_height; //rows
                 arr_target[rst.rst_RecordMatchOrder] = "0";
@@ -1712,11 +1886,11 @@ function EditRecStructure() {
                     dty_Name: arrs[fi.dty_Name],
                     rst_DisplayName: arrs[fi.dty_Name],
                     dty_Type: arrs[fi.dty_Type],
-                    rst_RequirementType: "optional",
+                    rst_RequirementType: defValues.rst_RequirementType,
                     rst_DisplayWidth: def_width,
                     rst_DisplayHeight: def_height,
-                    rst_MinValues: 1,
-                    rst_MaxValues: 1,
+                    rst_MinValues: defValues.rst_MinValues,
+                    rst_MaxValues: defValues.rst_MaxValues,
                     rst_DefaultValue: "",
                     rst_Status: "open",
                     rst_NonOwnerVisibility: "viewable",
@@ -1949,6 +2123,7 @@ function EditRecStructure() {
     */
     function _saveUpdates(needClose, callback_after_save)
     {
+        if(_isStreamLinedAdditionAction) return; //do nothing
         
         var orec = _getUpdates();
         //if(str!=null)	alert(str);  //you can check the strcuture here
@@ -2094,27 +2269,34 @@ function EditRecStructure() {
 
     function _onAddFieldAtIndex(e, isSectionHeader){
         
-        var recs = _myDataTable.getRecordSet();
-        var index_toinsert = recs.getLength();
+        var index_toinsert = _getIndex_toinsert(e);
         
-        if(e!=null){
-            e = window.hWin.HEURIST4.util.stopEvent(e);
-            var targ = e.target;
-            var rst_ID = targ.getAttribute("rst_ID");
-            if(!rst_ID) return;
+        if(index_toinsert>=0){
+            
+            /*
+            var recs = _myDataTable.getRecordSet();
+            var index_toinsert = recs.getLength();
+            
+            if(e!=null){
+                e = window.hWin.HEURIST4.util.stopEvent(e);
+                var targ = e.target;
+                var rst_ID = targ.getAttribute("rst_ID");
+                if(!rst_ID) return;
 
-            index_toinsert = _getRecordById(rst_ID).row_index;
+                index_toinsert = _getRecordById(rst_ID).row_index;
+            }
+            */
+
+            _myDataTable.unselectAllRows();
+
+            
+            if(isSectionHeader===true){
+                _onAddSeparator(index_toinsert);
+            }else{
+                onAddNewDetail(index_toinsert);
+            }
+        
         }
-
-        _myDataTable.unselectAllRows();
-
-        
-        if(isSectionHeader===true){
-            _onAddSeparator(index_toinsert);
-        }else{
-            onAddNewDetail(index_toinsert);
-        }
-        
     }
 
     //Ian decided to remove this feature -however it may be helpful in another place
@@ -2518,8 +2700,11 @@ function EditRecStructure() {
         * Adds new detail types from selection popup or new detail type after its definition
         * @param dty_ID_list - comma separated list of detail type IDs
         */
-        addDetails:function(dty_ID_list, index_toinsert){
-            _addDetails(dty_ID_list, index_toinsert);
+        addDetails:function(dty_ID_list, index_toinsert, insertAfterRstID, defValues){
+            if(insertAfterRstID>0){
+                index_toinsert = _getRecordById(insertAfterRstID).row_index;
+            }
+            _addDetails(dty_ID_list, index_toinsert, defValues);
         },
 
         /**
@@ -2920,8 +3105,8 @@ function onRepeatChange(evt){
     
     
     //in case of reserved field show warning
-    var status = Dom.get(name+"_rst_Status").value;
-    if (status === "reserved"){
+    var status = Dom.get(name+"_rst_Status");
+    if (status && status.value=== "reserved"){
         
         var curr_value = $(el).attr('data-original');
         var new_value = el.value;
@@ -3152,8 +3337,10 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
     //allTerms = Hul.expandJsonStructure(allTerms);
     //disabledTerms = Hul.expandJsonStructure(disabledTerms);
 
-    if (typeof disabledTerms.join === "function") {
+    if (disabledTerms && typeof disabledTerms.join === "function") {
         disabledTerms = disabledTerms.join(",");
+    }else{
+        disabledTerms = '';
     }
 
     if(!Hul.isnull(allTerms)) {
@@ -3233,12 +3420,425 @@ function recreateRecTypesPreview(type, value) {
     divRecType.innerHTML = txt;
 }
 
+//
+// show dropdown for field suggestions to be added
+//
+function onFieldAddSuggestion(event, insertAfterRstID){
+    
+    var input_name = $(event.target);
+    
+    var fields_list_div = $('.list_div');
+  
+    if(input_name.val().length>2){
+       
+        var rty_ID = editStructure.getRty_ID(); 
+        var dty_ID, field_name,
+            fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
+            
+        fields_list_div.empty();  
+        var is_added = false;
+
+        //find among fields that are not in current record type
+        for (dty_ID in window.hWin.HEURIST4.detailtypes.names){
+           if(dty_ID>0){ 
+               var td = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID];
+               var deftype = td.commonFields;
+
+               var aUsage = window.hWin.HEURIST4.detailtypes.rectypeUsage[dty_ID];
+               
+               field_name = window.hWin.HEURIST4.detailtypes.names[dty_ID];
+
+               if( deftype[fi.dty_ShowInLists]!="0" && deftype[fi.dty_Type]!='separator'
+                    && ( window.hWin.HEURIST4.util.isnull(aUsage) || aUsage.indexOf(rty_ID)<0 ) 
+                    && (field_name.toLowerCase().indexOf( input_name.val().toLowerCase() )>=0) )
+               {
+
+                   is_added = true;
+                    $('<div recid="'+dty_ID+'" class="truncate">'+field_name
+                        +' ['+deftype[fi.dty_Type]+']</div>').appendTo(fields_list_div)
+                    .click( function(event){
+                        $(event.target).hide();
+                        var _dty_ID = $(event.target).attr('recid');
+                        
+                        fields_list_div.hide();
+                        input_name.val('').focus();
+                        
+                        editStructure.doExpliciteCollapse(insertAfterRstID, false);
+                        editStructure.addDetails(_dty_ID, null, insertAfterRstID);
+                               
+                    } );
+                    
+               }
+            }
+        }
+
+            fields_list_div.position({my:'left top', at:'left bottom', of:input_name})
+                //.css({'max-width':(maxw+'px')});
+                .css({'max-width':input_name.width()+60});
+                if(is_added){
+                    fields_list_div.show();    
+                }else{
+                    fields_list_div.hide();
+                }
+
+  }else{
+        fields_list_div.hide();  
+  }
+
+}
+
+//
+//
+//
+function onDetTypeChange()
+{
+    var dty_Type = document.getElementById("ed_dty_Type").value;
+    var ele1 = $("#ed_dty_JsonTermIDTree").parents('.input-row');
+    var ele2 = $("#ed_dty_PtrTargetRectypeIDs").parents('.input-row');
+    
+    if(dty_Type=='enum' || dty_Type=='relmarker'){
+        ele1.show();
+        $("#ed_dty_JsonTermIDTree").val('');
+        _recreateTermsVocabSelector(dty_Type);
+    }else{
+        ele1.hide();
+        $("#ed_dty_JsonTermIDTree").val('');
+    }
+    if(dty_Type=='resource' || dty_Type=='relmarker'){
+        ele2.show();
+        recreateRecTypesPreview(dty_Type, $("#ed_dty_PtrTargetRectypeIDs").val())
+    }else{
+        ele2.hide();
+        $("#ed_dty_PtrTargetRectypeIDs").val('');
+    }
+    
+}
+
+//
+//
+//
+function _recreateTermsVocabSelector(datatype, toselect)  {
+
+//        var prev = document.getElementById("termsVocab");
+//        prev.innerHTML = "";
+
+        if(Hul.isempty(datatype)) return;
+
+        var vocabId = toselect ?toselect: Number(document.getElementById("ed_dty_JsonTermIDTree").value),
+        sel_index = -1;
+        if(isNaN(vocabId)){
+            vocabId = 0;
+        }
+
+        var dom = (datatype === "relation" || datatype === "relmarker" || datatype === "relationtype")?"relation":"enum",
+        fi_label = window.hWin.HEURIST4.terms.fieldNamesToIndex['trm_Label'];
+        var termID,
+        termName,
+        termTree = window.hWin.HEURIST4.terms.treesByDomain[dom],
+        terms = window.hWin.HEURIST4.terms.termsByDomainLookup[dom];
+                            
+        var el_sel = $('#selVocab').get(0);
+        $(el_sel).empty();
+
+        window.hWin.HEURIST4.ui.addoption(el_sel, -1, 'select...');
+        
+        //add to temp array
+        var vocabs = [];
+        for(termID in termTree) { // For every term in first levet of tree
+            if(!Hul.isnull(termID)){
+                termName = terms[termID][fi_label];
+                vocabs.push({key:termID, title:termName });
+            }
+        }
+        //sort array 
+        vocabs.sort(function(a,b){ return a.title<b.title?-1:1; });
+
+        for(var idx in vocabs) { // For every term in first levet of tree
+            if(vocabs[idx]){
+                window.hWin.HEURIST4.ui.addoption(el_sel, vocabs[idx].key, vocabs[idx].title);
+                if(Number(vocabs[idx].key)==vocabId){
+                    sel_index = el_sel.length-1;
+                }
+            }
+        }
+
+        if(sel_index<0) {
+            sel_index = (document.getElementById("ed_dty_JsonTermIDTree").value!='' && vocabId==0)?el_sel.length-1:0;
+        }
+        el_sel.selectedIndex = sel_index;
+
+        el_sel.onchange =  function(){
+            document.getElementById("ed_dty_JsonTermIDTree").value =  el_sel.value;
+        };
+        el_sel.style.maxWidth = '120px';
+
+}
+
+//
+//
+//
+/**
+* onSelectRectype
+*
+* listener of "Select Record Type" buttons
+* Shows a popup window where you can select record types
+*/
+function onSelectRectype()
+{
+
+        var type = document.getElementById("ed_dty_Type").value;
+        if(type === "relmarker" || type === "resource")
+        {
+
+            var args, sURL;
+
+            if(document.getElementById("ed_dty_PtrTargetRectypeIDs")) {
+                    args = document.getElementById("ed_dty_PtrTargetRectypeIDs").value;
+            }
+
+            if(args) {
+                sURL =  window.hWin.HAPI4.baseURL + "admin/structure/rectypes/selectRectype.html?type=" 
+                    + type + "&dtID="+_dtyID+"&ids=" + args+"&db="+window.hWin.HAPI4.database;
+            } else {
+                sURL =  window.hWin.HAPI4.baseURL + "admin/structure/rectypes/selectRectype.html?type=" + type+"&db="+window.hWin.HAPI4.database;
+            }
+
+            window.hWin.HEURIST4.msg.showDialog(sURL, {
+                "close-on-blur": false,
+                "no-resize": true,
+                title: 'Select Record Type',
+                height: 600,
+                width: 640,
+                callback: function(recordTypesSelected) {
+                    if(!Hul.isnull(recordTypesSelected)) {
+                        document.getElementById("ed_dty_PtrTargetRectypeIDs").value = recordTypesSelected;
+                        recreateRecTypesPreview(type, recordTypesSelected);
+                    }
+                }
+            });
+        }
+}
+
+
+//
+//  create new field type and to this record type
+//
+function onCreateFieldTypeAndAdd( insertAfterRstID ){
+
+        _updatedFields = [];
+        _updatedDetails = [];
+
+        var i;
+        var fnames = window.hWin.HEURIST4.detailtypes.typedefs.commonFieldNames;
+
+        //take only changed values
+        for (i = 0, l = fnames.length; i < l; i++){
+            var fname = fnames[i];
+            el = $('#ed_'+fname);
+      
+            if( el.length>0 ){
+        
+                if(el.val()!=='')
+                {
+                    _updatedFields.push(fname);
+                    _updatedDetails.push(el.val());
+                }
+            }
+        }
+        
+        // check mandatory fields
+        if(Hul.isempty(document.getElementById("ed_dty_HelpText").value)) {
+            window.hWin.HEURIST4.msg.showMsgErr('Help text is mandatory field');
+            document.getElementById("ed_dty_HelpText").focus();
+            return;
+        }
+
+        var dty_Type = document.getElementById("ed_dty_Type").value;
+        if(Hul.isempty(dty_Type)){
+            window.hWin.HEURIST4.msg.showMsgErr("Data Type is mandatory field", 'Warning');
+            document.getElementById("ed_dty_Type").focus();
+            return;
+        }
+        
+        var swarn = "";
+        var dt_name = document.getElementById("ed_dty_Name").value;
+        if(dt_name==="") {
+            swarn = "Field name is mandatory field"
+        }else{
+            swarn = window.hWin.HEURIST4.ui.validateName(dt_name, "Field 'Name'");
+        }
+        if(swarn!=""){
+            window.hWin.HEURIST4.msg.showMsgErr( swarn );
+            document.getElementById("ed_dty_Name").focus();
+            return;
+        }
+        
+        if(dty_Type==="enum"){
+            var dd = document.getElementById("ed_dty_JsonTermIDTree").value;
+            if( dd==="" || dd==="{}" ) {
+                swarn = 'Please select or add a vocabulary. Vocabularies must contain at least one term.';
+            }
+        }else if(dty_Type==="relmarker"){
+            
+            var dd = document.getElementById("ed_dty_JsonTermIDTree").value;
+            if( dd==="" || dd==="{}" ) {
+                swarn = 'Please select or add relationship types';
+            }else{
+                var dd = document.getElementById("ed_dty_PtrTargetRectypeIDs").value;
+                if( dd==="" ) {
+                    swarn = 'Please select target record type. Unconstrained relationship is not allowed';
+                }
+            }
+        }else if(dty_Type==="resource"){
+            
+            var dd = document.getElementById("ed_dty_PtrTargetRectypeIDs").value;
+            if( dd==="" ) {
+                swarn = 'Please select target record type(s) for this entity pointer field'
+                    +'<br><br>We strongly recommend NOT creating an unconstrained entity pointer';
+            }
+        }        
+        
+        if(swarn!=""){
+            window.hWin.HEURIST4.msg.showMsgErr( swarn );
+            return;
+        }
+        
+        //keep reqtype and min max values (repeat)        
+        var defValues = {rst_RequirementType:Dom.get("ed0_rst_RequirementType").value,
+                          rst_MinValues:Dom.get("ed0_rst_MaxValues").value,
+                          rst_MaxValues:Dom.get("ed0_rst_MaxValues").value};
+
+        //collapse
+        editStructure.doExpliciteCollapse(insertAfterRstID, false);
+
+        _updatedFields.push('dty_ID');
+        _updatedFields.push('dty_Status');
+        _updatedFields.push('dty_NonOwnerVisibility');
+        _updatedFields.push('dty_ShowInLists');
+        _updatedFields.push('dty_DetailTypeGroupID');
+        _updatedDetails.push(-1);
+        _updatedDetails.push('open');
+        _updatedDetails.push('viewable');
+        _updatedDetails.push(1);
+        _updatedDetails.push( Number(window.hWin.HEURIST4.detailtypes.groups[0].id) );//add to first group
+        
+//console.log(_updatedFields);  
+//console.log(_updatedDetails);
+        //save new field type
+            var k,
+            val;
+            var oDetailType = {detailtype:{
+                colNames:{common:[]},
+                defs: {}
+            }};
+            var values = [];
+            for(k = 0; k < _updatedFields.length; k++) {
+                oDetailType.detailtype.colNames.common.push(_updatedFields[k]);
+                values.push(_updatedDetails[k]);
+            }
+
+            oDetailType.detailtype.defs[-1] = {};
+            oDetailType.detailtype.defs[-1].common = [];
+            for(val in values) {
+                oDetailType.detailtype.defs[-1].common.push(values[val]);
+            }
+
+            // 3. sends data to server
+            var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+            
+            var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                
+                    var context = response.data;
+                    var error = false;
+                    var _dtyID = -1;
+
+                    for(ind in context.result){
+                        if( !Hul.isnull(ind) ){
+                            var item = context.result[ind];
+                            if(isNaN(item)){
+                                window.hWin.HEURIST4.msg.showMsgErr(item);
+                                error = true;
+                            }else{
+                                _dtyID = Math.abs(Number(item));
+                            }
+                        }
+                    }
+console.log(context);                    
+console.log(_dtyID);             
+                    if(!error && _dtyID>0){
+                        window.hWin.HEURIST4.detailtypes = context.detailtypes;
+                        
+                        editStructure.addDetails(''+_dtyID, null, insertAfterRstID, defValues);
+                    }
+                }
+            });
+}
+
+//
+//
+//
 function _onDispNameChange(event){
     var name = event.target.value;
     var swarn = window.hWin.HEURIST4.ui.validateName(name, "Prompt (display name)");
     if(swarn){
         alert(swarn);
     }
+}
+
+function onAddVocabulary(){
+    var is_add_vocab = true;
+    
+        var type = document.getElementById("ed_dty_Type").value;
+        var dt_name = document.getElementById("ed_dty_Name").value;
+        var allTerms = document.getElementById("ed_dty_JsonTermIDTree").value;
+        var disTerms = '';
+
+        if(type!="enum"){
+            type="relation";
+        }
+
+        var el_sel = document.getElementById("selVocab");
+        
+        var vocab_id =  el_sel.value>0?el_sel.value:''; //keep value
+        var is_frist_time = true;
+
+        var sURL = window.hWin.HAPI4.baseURL +
+                "admin/structure/terms/editTermForm.php?treetype="+type+"&parent="+(is_add_vocab?0:el_sel.value)
+                +"&db="+window.hWin.HAPI4.database;
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+
+                    "close-on-blur": false,
+                    "no-resize": true,
+                    noClose: true, //hide close button
+                    title: 'Edit Vocabulary',
+                    height: 340,
+                    width: 700,
+                    onpopupload:function(dosframe){
+                        var ele = $(dosframe.contentDocument).find('#trmName');
+                        if(is_add_vocab && is_frist_time){
+                           is_frist_time = false;
+                           ele.val( dt_name+' vocabulary' ); 
+                        }
+                        ele.focus();
+                    },
+                    callback: function(context) {
+                        if(context!="") {
+
+                            if(context=="ok"){    //after edit term tree
+                                _recreateTermsVocabSelector(type, vocab_id);
+                                
+                            }else if(!Hul.isempty(context)) { //after add new vocab
+                                document.getElementById("ed_dty_JsonTermIDTree").value =  context;
+                                document.getElementById("ed_dty_TermIDTreeNonSelectableIDs").value = "";
+                                
+                                _recreateTermsVocabSelector(type, context);
+                            }
+                        }
+                    }
+            });
+    
 }
 
 //
