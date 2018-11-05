@@ -62,7 +62,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
        var ele = this.element.find('fieldset');  
        $('<div id="div_sel_rectype" style="padding: 0.2em; min-width: 600px;" class="input">'
             +'<div class="header" style="padding: 0 16px 0 16px;"><label for="sel_recordtype">Type of record to add:</label></div>'
-            +'<select id="sel_recordtype" style="max-width:30em"></select>'
+            +'<select id="sel_recordtype" style="width:40ex;max-width:30em"></select>'
             
             +'<div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>'
             +'<div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>'
