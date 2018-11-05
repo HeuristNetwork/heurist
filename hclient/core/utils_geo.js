@@ -676,11 +676,12 @@ window.hWin.HEURIST4.geo = {
         }else if(resdata.Point.length==0 && resdata.Polyline.length==1 && resdata.Polygon.length==0){
             
                 var path = resdata.Polyline[0];
-            
+                var point1 = path.shift();
+                var point2 = path.pop();
                 return { type: "Path", summary: "X,Y ("+ 
-                            path.shift().lng.toFixed(5)+","+path.shift().lat.toFixed(5)
+                            point1.lng.toFixed(5)+","+point1.lat.toFixed(5)
                             +") - ("+
-                            path.pop().lng.toFixed(5)+","+path.pop().lat.toFixed(5)+")" };
+                            point2.lng.toFixed(5)+","+point2.lat.toFixed(5)+")" };
             
         }else if (resdata.Point.length>0 || resdata.Polyline.length>0 || resdata.Polygon.length>0){
             

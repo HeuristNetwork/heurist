@@ -732,10 +732,10 @@ function hLayout(args) {
                    widget = $content.dh_search( options );
             }else if(app.widgetname=='dh_maps'){
                    widget = $content.dh_maps( options );
-            }else if(app.widgetname=='boro_place'){
-                   widget = $content.boro_place( options );
-            }else if(app.widgetname=='boro_nav'){
-                   widget = $content.boro_nav( options );
+            }else if(app.widgetname=='expertnation_place'){
+                   widget = $content.expertnation_place( options );
+            }else if(app.widgetname=='expertnation_nav'){
+                   widget = $content.expertnation_nav( options );
             }else
                     {
                         //this is normal way of widget initialization
@@ -1017,7 +1017,7 @@ function hLayout(args) {
             }
         }
         
-        if(layoutid.indexOf('DigitalHarlem')==0 || layoutid.indexOf('boro')==0 || layoutid.indexOf('adel')==0){
+        if(layoutid.indexOf('DigitalHarlem')==0 || layoutid=='Beyond1914' || layoutid=='UAdelaide'){
             //name of application to window title
             window.hWin.document.title = layout.name;
         }

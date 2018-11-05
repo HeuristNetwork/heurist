@@ -1200,7 +1200,15 @@ $.widget( "heurist.search_faceted", {
                     
                     if(field['type']=='enum' && field['groupby']!='firstlevel'){
                         
-                        var dtID = field['id'];                        
+                        var dtID = field['id'];  
+                                              
+if(!detailtypes[dtID]){
+    console.log('Field '+dtID+' not found!!!!');
+    console.log(field);
+    //search next facet
+    this._recalculateFacets( facet_index );
+    return;
+}
                         //enumeration
                         var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
