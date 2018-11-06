@@ -409,7 +409,7 @@ function DetailTypeEditor() {
             }
         }
         if(txt==""){
-            txt = "unconstrained";
+            txt = "select...";
         }
         if (!Hul.isnull(txt) && txt.length > 40){
             divRecType.title = txt;
@@ -456,7 +456,9 @@ function DetailTypeEditor() {
                         var ele = $(dosframe.contentDocument).find('#trmName');
                         if(is_add_vocab && is_frist_time){
                            is_frist_time = false;
-                           ele.val( dt_name+' vocabulary' ); 
+                           if( !window.hWin.HEURIST4.util.isempty(dt_name)){
+                                ele.val( dt_name+' vocab' );    
+                           }
                         }
                         ele.focus();
                     },
@@ -928,7 +930,7 @@ function DetailTypeEditor() {
                     
                     var dty_ID = Math.abs(Number(context.result[0]));
                     window.hWin.HEURIST4.detailtypes = context.detailtypes;
-                    
+                    window.close(context);
                 }
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr(response);

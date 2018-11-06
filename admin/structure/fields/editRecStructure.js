@@ -119,6 +119,11 @@ function EditRecStructure() {
         var df = window.hWin.HAPI4.get_prefs_def('editRecStructure_StreamLinedAddition', 1);
         $('#cbStreamLinedAddition').prop('checked', df==1);
         
+        //click outside of list
+        $(document).click(function(event){
+           if($(event.target).parents('.list_div').length==0) { $('.list_div').hide(); };
+        });
+        
     }
 
     /**
@@ -586,12 +591,13 @@ function EditRecStructure() {
                             rst_ID = 0;
                         
                         obj.liner_element.innerHTML =   // padding-right:5; padding-left:30; 
-                        '<div style="margin: 4px 60px; padding-bottom:5;background-color:#EEE; border:#AFA 1px solid">'+
+                        '<div style="margin: 4px 60px; padding-bottom:5;border:black 1px solid">'+
                         
                         '<div class="input-row"><div class="input-header-cell">Field name:</div>'+
                             '<div class="input-cell">'+
                                 '<input id="ed_dty_Name" style="width:200px;" onchange="_onDispNameChange(event)" '+
                                     'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" '+
+                                    'onblur="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
                                     'onkeyup="onFieldAddSuggestion(event,'+_rst_ID+')" '+  //need id to detect index_toinsert 
                                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
                             '</div></div>'+
@@ -599,7 +605,7 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                             '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                             '<div class="input-cell">'+
-                                '<textarea style="width:450px" cols="450" rows="3" id="ed_dty_HelpText" '+
+                                '<textarea style="width:450px" cols="450" rows="2" id="ed_dty_HelpText" '+
                                 'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
                                 //'<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
                                 //            'This text is optional.</div>'+
@@ -636,13 +642,13 @@ function EditRecStructure() {
                                     'onblur="onRepeatValueChange(event)" onkeypress="window.hWin.HEURIST4.ui.preventNonNumeric(event)"/></span>'+
                             '</div></div>'+                            
                        
-                        '<div class="input-row"><div class="input-header-cell" style="vertical-align:top;">Detail type :</div>'+
+                        '<div class="input-row"><div class="input-header-cell" style="vertical-align:top;">Data type :</div>'+
                             '<div class="input-cell">'+
                                 '<select id="ed_dty_Type" onchange="onDetTypeChange(event)" style="display:inline; margin-right:0px;vertical-align: top;">'+
                                     '<option value="enum">Dropdown (Terms)</option>'+
                                     '<option value="float">Numeric (integer or decimal)</option>'+
                                     '<option value="freetext" selected>Text (single line)</option>'+
-                                    '<option value="blocktext">Text (single line)</option>'+
+                                    '<option value="blocktext">Text (memo)</option>'+
                                     '<option value="date">Date / time</option>'+
                                     '<option value="geo">Geospatial (point, line, polygon ...)</option>'+
                                     '<option value="file">File or remote URL</option>'+
@@ -664,12 +670,12 @@ function EditRecStructure() {
                         // Pointer target types - pointers and relmarkers   ed_dty_PtrTargetRectypeIDs
                         '<div class="input-row" style="display:none"><div class="input-header-cell">Target entity type:</div>'+
                             '<div class="input-cell" title="Determines which record types this pointer field can point to. It is preferable to select target record types than to leave the pointer unconstrained">'+
-                                '<span class="dtyValue" id="pointerPreview" style="width:270px;border: 1px solid #DCDCDC;line-height: 19px;padding-left:2px"></span>&nbsp;'+
-                                '<input type="submit" value="Select Record Types" id="btnSelRecType2" onClick="onSelectRectype()"/>'+
+                                '<span class="dtyValue" id="pointerPreview" style="cursor:pointer;width:270px;border: 1px solid #DCDCDC;line-height: 19px;padding-left:2px" onClick="onSelectRectype()"></span>'+
+                                //'&nbsp;<input type="submit" value="Select Record Types" id="btnSelRecType2" onClick="onSelectRectype()"/>'+
                                 '<input id="ed_dty_PtrTargetRectypeIDs" type="hidden"/>'+
                             '</div></div>'+
                             
-                        '<div style="border-top:1px solid #AFA;padding:10px;">'+
+                        '<div style="border-top:1px solid black;padding:10px;">'+
                             '<span style="font-style:italic;display:inline-block;">All fields in this form are required. For additional options, cancel,<br>'+
                             'uncheck streamlined field addition checkbox, and click on add field again</span>'+
                             '<span style="float:right;padding:4px;">'+
@@ -685,9 +691,11 @@ function EditRecStructure() {
                         '</div>';
                         
                         }else{
+
+                        var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
                         
                         obj.liner_element.innerHTML =
-                        '<div style="padding-left:30; padding-bottom:5; padding-right:5; background-color:#EEE">'+
+                        '<div class="edit-form" style="display:none;margin: 4px 60px; padding-bottom:5;border:black 1px solid">'+
 
                         // Name / prompt
                         '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div>'+
@@ -713,10 +721,10 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                         '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                         '<div class="input-cell">'+
-                        '<textarea style="width:450px" cols="450" rows="3" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
+                        '<textarea style="width:450px" cols="450" rows="2" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
                         'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
-                        '<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
-                                            'This text is optional.</div>'+
+                        //'<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
+                        //                    'This text is optional.</div>'+
                         '</div></div>'+
 
                         '<div class="input-row">'+
@@ -811,6 +819,7 @@ function EditRecStructure() {
                         '</div></div>'+
                         
                         
+                        /* OLD PLACE 
                         // Base field definitions  (button)
                         '<div>'+
                         '<div style="width:90%;text-align:right;padding:5px 20px 15px 0">'+ //margin-left:190px; 
@@ -820,43 +829,79 @@ function EditRecStructure() {
                         'title="Allows modification of the underlying field definition (shared by all record types that use this base field)"'+
                         ' onclick="_onAddEditFieldType('+rst_ID+','+rty_ID+');">':'<span style="margin-right:220px;">&nbsp;</span>')+
 
-                        // Save and cancel (buttons)
+                        //Save and cancel (buttons)
                         '<input style="margin-right:20px;" id="btnSave_'+rst_ID+'" type="button" value="Save"'+
                         'title="Save any changes to the field settings. You may also simply click on another field to save this one and open the other" onclick="doExpliciteCollapse(event);"  style="margin:0 2px;"/>'+
                         '<input id="btnCancel_'+rst_ID+'" type="button" value="Cancel" '+
                         'title="Cancel any changes made to the field settings for this field (will not cancel previously saved settings)" onclick="doExpliciteCollapse(event);" style="margin:0 2px;"/>'+
                         '</div>'+
-
-                        '<div id="divMoreDefs'+rst_ID+'" class="togglepnl"><a style="margin-left: 40px;" onMouseDown="'+
+                        */
+                        
+                        '<div id="divMoreDefs'+rst_ID+'" class="togglepnl" '+
+                        'style="background-color:white;'+((exp_level!=0)?'display:none;':'')+'">'+
+                        '<a style="margin-left: 40px; line-height:25px" onMouseDown="'+
                         "$('#options').slideToggle('fast'); $('#divMoreDefs"+rst_ID+"').toggleClass('show'); $('#options').toggleClass('hidden');"+
-                        '">more ...</a>'+
+                        '">more ...</a></div>'+
 
-                        '<div id="options" class="hidden" style="background-color:#EEE;">'+
+                        '<div id="options" class="hidden" style="background-color:white">'+
 
                         // Status
-                        '<div class="input-row"><div class="input-header-cell">Status:</div>'+
-                        '<div class="input-cell" title="Determines the degree of authority assigned to this field - reserved is used for internal Heurist definitions, open is the lowest level"><select id="ed'+rst_ID+
-                        '_rst_Status" style="display:inline-block" onchange="onStatusChange(event)">'+
-                        '<option value="open">open</option>'+
-                        '<option value="pending">pending</option>'+
-                        '<option value="approved">approved</option>'+
-                        '</select>'+  //<option value="reserved">reserved</option>
+                        '<div class="input-row">'+
+                            '<div class="input-header-cell">Status:</div>'+
+                            '<div class="input-cell" title="Determines the degree of authority assigned to this field - reserved is used for internal Heurist definitions, open is the lowest level">'+
+                                '<select id="ed'+rst_ID+
+                                '_rst_Status" style="display:inline-block" onchange="onStatusChange(event)">'+
+                                        '<option value="open">open</option>'+
+                                        '<option value="pending">pending</option>'+
+                                        '<option value="approved">approved</option>'+
+                                '</select>'+  //<option value="reserved">reserved</option>
 
-                        // Non-owner visibility
-                        '<span><label class="input-header-cell" '+
-                        'title="Determines whether the field can be viewed by users other than the record owner/owner group">Non-owner visibility:</label>'+
-                        '<select id="ed'+rst_ID+
-                        '_rst_NonOwnerVisibility">'+  // style="display:inline-block"
-                        '<option value="hidden">hidden</option>'+
-                        '<option value="viewable">viewable</option>'+
-                        '<option value="public">public</option>'+
-                        '<option value="pending">pending</option></select></span>'+
+                                // Non-owner visibility
+                                '<span><label class="input-header-cell" '+
+                                    'title="Determines whether the field can be viewed by users other than the record owner/owner group">Non-owner visibility:</label>'+
+                                    '<select id="ed'+rst_ID+
+                                            '_rst_NonOwnerVisibility">'+  // style="display:inline-block"
+                                            '<option value="hidden">hidden</option>'+
+                                            '<option value="viewable">viewable</option>'+
+                                            '<option value="public">public</option>'+
+                                            '<option value="pending">pending</option></select>'+
+                                '</span>'+
                         
                         '</div></div>'+
 
-                        (ccode?'<div class="input-row"><div class="input-header-cell">Concept code:</div><div style="display:table-cell">'+ccode+'</div></div>':'')+
+                        (ccode?('<div class="input-row">'+
+                            '<div class="input-header-cell">Concept code:</div>'+
+                            '<div style="display:table-cell">'+ccode+'</div></div>'):'')+
                         
-                        '</div></div>';
+                        '</div>'+
+                        
+                        '<div style="border-top:1px solid black;padding:10px;">'+
+                            '<span style="font-style:italic;display:inline-block;">'+
+                            (allowEditBaseFieldType?
+                                'To change terms list or target entity types: '+
+                                '<a href="#" onclick="_onAddEditFieldType('+rst_ID+','+rty_ID+');">Edit base field definitions</a>'
+                            :'&nbsp;')+
+                            
+                            '</span><span style="float:right;">'+
+
+                                (false && allowEditBaseFieldType?
+                                '<input style="margin-right:20px;" id="btnEdit_'+rst_ID+'" type="button" value="Edit Base Field Definition" '+
+                                'title="Allows modification of the underlying field definition (shared by all record types that use this base field)"'+
+                                ' onclick="_onAddEditFieldType('+rst_ID+','+rty_ID+');">':'')+  
+
+                                //Save and cancel (buttons)
+                                '<input style="margin-right:10px;padding-left:20px;padding-right:20px;" id="btnSave_'+rst_ID+'" type="button" value="Save"'+
+                                'title="Save any changes to the field settings. You may also simply click on another field to save this one and open the other" onclick="doExpliciteCollapse(event);"  style="margin:0 2px;"/>'+
+                                '<input id="btnCancel_'+rst_ID+'" type="button" value="Cancel" '+
+                                'title="Cancel any changes made to the field settings for this field (will not cancel previously saved settings)" onclick="doExpliciteCollapse(event);" style="margin:0 2px;"/>'+
+                                    
+                            '</span>'+
+                        '</div>'+
+                        
+                        
+                        
+                        
+                        '</div>';
                         
                         }
                         
@@ -869,6 +914,7 @@ function EditRecStructure() {
             // highlight listeners
             _myDataTable.subscribe("rowMouseoverEvent", _myDataTable.onEventHighlightRow);
             _myDataTable.subscribe("rowMouseoutEvent", _myDataTable.onEventUnhighlightRow);
+            
             //ART16 _myDataTable.subscribe("rowClickEvent", _myDataTable.onEventSelectRow);
             
             //
@@ -1128,6 +1174,7 @@ function EditRecStructure() {
                             _myDataTable.onEventToggleRowExpansion(record_id);
 
                             if(!_isStreamLinedAdditionAction){
+                                $('.edit-form').show('fade', null, 1000);
                                 _fromArrayToUI(rst_ID, false); //after expand restore values from HEURIST
                             }
 
@@ -1181,7 +1228,7 @@ function EditRecStructure() {
                         _isStreamLinedAdditionAction = (column.key === 'addColumn' && _isStreamLinedAddition);                            
 
                         // after expand/collapse need delay before filling values
-                        setTimeout(__toggle, 300);
+                        setTimeout(__toggle, 100);
 
                     }
 
@@ -1992,7 +2039,7 @@ function EditRecStructure() {
                 //$.find("tr.yui-dt-last > td.yui-dt-col-rst_DisplayName")[0]
                 var oArgs = {event:'MouseEvent', target: elLiner};
                 onCellClickEventHandler(oArgs);
-            },500);
+            },50);
         }
     }
 
@@ -3408,7 +3455,7 @@ function recreateRecTypesPreview(type, value) {
             }
         } //for
     }else{
-        txt = "unconstrained";
+        txt = "select...";
     }
 
     if (txt && txt.length > 40){
@@ -3457,11 +3504,15 @@ function onFieldAddSuggestion(event, insertAfterRstID){
                     $('<div recid="'+dty_ID+'" class="truncate">'+field_name
                         +' ['+deftype[fi.dty_Type]+']</div>').appendTo(fields_list_div)
                     .click( function(event){
-                        $(event.target).hide();
-                        var _dty_ID = $(event.target).attr('recid');
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                        var ele = $(event.target).hide();
+
+                        var _dty_ID = ele.attr('recid');
                         
                         fields_list_div.hide();
                         input_name.val('').focus();
+                        
+                        window.hWin.HEURIST4.msg.showMsgFlash('Field is added to record structure');
                         
                         editStructure.doExpliciteCollapse(insertAfterRstID, false);
                         editStructure.addDetails(_dty_ID, null, insertAfterRstID);
@@ -3472,11 +3523,11 @@ function onFieldAddSuggestion(event, insertAfterRstID){
             }
         }
 
-            fields_list_div.position({my:'left top', at:'left bottom', of:input_name})
-                //.css({'max-width':(maxw+'px')});
-                .css({'max-width':input_name.width()+60});
                 if(is_added){
                     fields_list_div.show();    
+                    fields_list_div.position({my:'left top', at:'left bottom', of:input_name})
+                        //.css({'max-width':(maxw+'px')});
+                        .css({'max-width':input_name.width()+60});
                 }else{
                     fields_list_div.hide();
                 }
@@ -3598,9 +3649,10 @@ function onSelectRectype()
 
             if(args) {
                 sURL =  window.hWin.HAPI4.baseURL + "admin/structure/rectypes/selectRectype.html?type=" 
-                    + type + "&dtID="+_dtyID+"&ids=" + args+"&db="+window.hWin.HAPI4.database;
+                    + type + "&ids=" + args+"&db="+window.hWin.HAPI4.database;
             } else {
-                sURL =  window.hWin.HAPI4.baseURL + "admin/structure/rectypes/selectRectype.html?type=" + type+"&db="+window.hWin.HAPI4.database;
+                sURL =  window.hWin.HAPI4.baseURL + "admin/structure/rectypes/selectRectype.html?type=" 
+                + type+"&db="+window.hWin.HAPI4.database;
             }
 
             window.hWin.HEURIST4.msg.showDialog(sURL, {
@@ -3716,7 +3768,7 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
         _updatedFields.push('dty_NonOwnerVisibility');
         _updatedFields.push('dty_ShowInLists');
         _updatedFields.push('dty_DetailTypeGroupID');
-        _updatedDetails.push(-1);
+        _updatedDetails.push('');
         _updatedDetails.push('open');
         _updatedDetails.push('viewable');
         _updatedDetails.push(1);
@@ -3765,11 +3817,9 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
                             }
                         }
                     }
-console.log(context);                    
-console.log(_dtyID);             
                     if(!error && _dtyID>0){
+                        window.hWin.HEURIST4.msg.showMsgFlash('New field type created');
                         window.hWin.HEURIST4.detailtypes = context.detailtypes;
-                        
                         editStructure.addDetails(''+_dtyID, null, insertAfterRstID, defValues);
                     }
                 }
@@ -3819,7 +3869,9 @@ function onAddVocabulary(){
                         var ele = $(dosframe.contentDocument).find('#trmName');
                         if(is_add_vocab && is_frist_time){
                            is_frist_time = false;
-                           ele.val( dt_name+' vocabulary' ); 
+                           if( !window.hWin.HEURIST4.util.isempty(dt_name)){
+                                ele.val( dt_name+' vocab' );    
+                           }
                         }
                         ele.focus();
                     },
