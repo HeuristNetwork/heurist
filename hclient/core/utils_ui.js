@@ -1800,15 +1800,28 @@ window.hWin.HEURIST4.ui = {
         
         var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
         var sRelBtn = '';
+       
+        var isHiddenRecord = false;
+        
+        if(selector_function !== false){
+                
+            
+                var not_owner = !(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member( info['rec_OwnerUGrpID'] ));
+                if(not_owner){
+                     selector_function = false;
+                     //this record hidden for current user
+                     isHiddenRecord = (info['rec_NonOwnerVisibility']=='hidden');
+                }
+        }
         
         var isEdit = (selector_function!==false);
         
-        
         if(info['trm_ID']>0){
             sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:46px"><div class="btn-rel"/><div class="btn-del"/></div>';
-        }else{
+        }else if (!isHiddenRecord) {
             sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:23px"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
+        
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
                         +' style="margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;

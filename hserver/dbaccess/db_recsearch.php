@@ -515,7 +515,7 @@
         }
         $ids = array_merge($ids, $rel_ids);  
               
-        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID from Records '
+        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID, rec_OwnerUGrpID, rec_NonOwnerVisibility from Records '
         .' WHERE rec_ID IN ('.implode(',',$ids).')';
         $res = $mysqli->query($query);
         if (!$res){
@@ -523,7 +523,7 @@
         }else{
             
                 while ($row = $res->fetch_row()) {
-                    $headers[$row[0]] = array($row[1], $row[2]);   
+                    $headers[$row[0]] = array($row[1], $row[2], $row[3], $row[4]);   
                 }
                 $res->close();
         }

@@ -55,10 +55,10 @@ $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['relo
 $rectypesStructure = dbs_GetRectypeStructures($system); //getAllRectypeStructures(); //get all rectype names
 $terms = dbs_GetTerms($system);//getTerms();
 
-$ACCESSABLE_OWNER_IDS = $system->get_user_group_ids();  ///do we need it??
-if (!in_array(0, $ACCESSABLE_OWNER_IDS)) {
-    array_push($ACCESSABLE_OWNER_IDS, 0);
-}
+$ACCESSABLE_OWNER_IDS = $system->get_user_group_ids();  //all groups current user is a member
+if(!is_array($ACCESSABLE_OWNER_IDS)) $ACCESSABLE_OWNER_IDS = array();
+array_push($ACCESSABLE_OWNER_IDS, 0);
+
 
 $relRT = ($system->defineConstant('RT_RELATION')?RT_RELATION:0);
 $relSrcDT = ($system->defineConstant('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
@@ -225,7 +225,21 @@ if(!$is_map_popup){
                     return false;
                 }
             }
-
+            
+            //
+            //
+            //
+            function no_access_message(ele){                        
+                var sMsg = 'Sorry, your user profile does not allow you to view the content of this record'
+                if(window.hWin && window.hWin.HEURIST4){
+                    //,null,ele position not work properly 1) long message 2) within iframe
+                    window.hWin.HEURIST4.msg.showMsgFlash(sMsg,1000);                        
+                }else{
+                    alert(sMsg);
+                }
+                return false;
+            }
+            
             //
             // catch click on a href and opens it in popup dialog
             //
@@ -236,11 +250,15 @@ if(!$is_map_popup){
                 <?php 
                 }else{
                 ?>    
-                try{
-                   window.hWin.HEURIST4.msg.showDialog(link.href, { title:'.', width: 600, height: 500, modal:false });
-                   return false;
-                }catch(e){
-                   return true; 
+                if(window.hWin && window.hWin.HEURIST4){
+                    try{
+                       window.hWin.HEURIST4.msg.showDialog(link.href, { title:'.', width: 600, height: 500, modal:false });
+                       return false;
+                    }catch(e){
+                       return true; 
+                    }
+                }else{
+                    return true; 
                 }
                 <?php
                 } 
@@ -344,20 +362,33 @@ else{
 
 // this functions outputs common info.
 function print_details($bib) {
-    global $is_map_popup;
+    global $is_map_popup, $ACCESSABLE_OWNER_IDS, $system;
         
     print_header_line($bib);
     
-    print_public_details($bib);
     
-    if(!$is_map_popup){
-        print_private_details($bib);
-        print_other_tags($bib);
-    //print_text_details($bib);
+    $rec_visibility = $bib['rec_NonOwnerVisibility'];
+    $rec_owner  = $bib['rec_OwnerUGrpID']; 
+    $hasAccess = ($rec_visibility=='public') || 
+                                    ($system->has_access() && $rec_visibility!='hidden') || 
+                                    in_array($rec_owner, $ACCESSABLE_OWNER_IDS);
+    if($hasAccess){
+    
+        print_public_details($bib);
+        
+        if(!$is_map_popup){
+            print_private_details($bib);
+            print_other_tags($bib);
+        //print_text_details($bib);
+        }
+        
+        print_relation_details($bib);
+        print_linked_details($bib);
+    
+    }else{
+        
+        print 'Sorry, your user profile does not allow you to view the content of this record';
     }
-    
-    print_relation_details($bib);
-    print_linked_details($bib);
     
 }
 
@@ -574,7 +605,7 @@ function print_personal_details($bkmk) {
 
 
 function print_public_details($bib) {
-    global $system, $terms, $is_map_popup;
+    global $system, $terms, $is_map_popup, $ACCESSABLE_OWNER_IDS;
     
     $mysqli = $system->get_mysqli();
 
@@ -642,25 +673,44 @@ function print_public_details($bib) {
 
             }else if ($bd['dty_Type'] == 'resource') {
 
-                $rec_id = intval($bd['val']);
-                $rec_title = mysql__select_value($mysqli, 'select rec_Title from Records where rec_ID='.$rec_id);
                 
-                $bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
-                    .HEURIST_DBNAME.'&recID='.$rec_id.(defined('use_alt_db')? '&alt' : '')
-                    .'" onclick="return link_open(this);">'
-                    .htmlspecialchars($rec_title).'</a>';
-
-                //find dates
-                $row = mysql__select_row($mysqli, 
-                    'select cast(getTemporalDateString(dtl_Value) as DATETIME), dtl_Value '
-                    .'from recDetails where dtl_DetailTypeID in ('
-                    .DT_DATE.','.DT_START_DATE.') and dtl_RecID='.$rec_id );
-                    
+                $rec_id = intval($bd['val']);                              
+                $row = mysql__select_row($mysqli, 'select rec_Title, rec_NonOwnerVisibility, rec_OwnerUGrpID  from Records where rec_ID='.$rec_id);
                 if($row){
-                    if($row[0]==null){//year
-                        $bd['order_by_date'] = $row[1];
+                    $rec_title = $row[0];
+                    $rec_visibility = $row[1];
+                    $rec_owner = $row[2];
+                    
+                    $hasAccess = ($rec_visibility=='public') || 
+                                    ($system->has_access() && $rec_visibility!='hidden') || 
+                                    in_array($rec_owner, $ACCESSABLE_OWNER_IDS);
+                    
+                    if($hasAccess){
+                                                       
+                        $bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
+                            .HEURIST_DBNAME.'&recID='.$rec_id.(defined('use_alt_db')? '&alt' : '')
+                            .'" onclick="return link_open(this);">'
+                            .htmlspecialchars($rec_title).'</a>';
+                        
                     }else{
-                        $bd['order_by_date'] = $row[0];    
+                        
+                        $bd['val'] = '<a href="#" onclick="return no_access_message(this);">'
+                            .htmlspecialchars($rec_title).'</a>';
+                        
+                    }
+
+                    //find dates
+                    $row = mysql__select_row($mysqli, 
+                        'select cast(getTemporalDateString(dtl_Value) as DATETIME), dtl_Value '
+                        .'from recDetails where dtl_DetailTypeID in ('
+                        .DT_DATE.','.DT_START_DATE.') and dtl_RecID='.$rec_id );
+                        
+                    if($row){
+                        if($row[0]==null){//year
+                            $bd['order_by_date'] = $row[1];
+                        }else{
+                            $bd['order_by_date'] = $row[0];    
+                        }
                     }
                 }
 
@@ -1129,8 +1179,8 @@ function print_relation_details($bib) {
        print '<div class=detailRowHeader>Related'; 
     }
 
-    $accessCondition = (count($ACCESSABLE_OWNER_IDS)>0?'(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
-    ($system->has_access()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")');
+    $accessCondition = '(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
+    ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")');
     
     if($from_res){
     while ($reln = $from_res->fetch_assoc()) {
@@ -1223,9 +1273,9 @@ function print_linked_details($bib) {
     'and dtl_DetailTypeID = dty_ID '.
     'and dtl_Value = ' . $bib['rec_ID'].' '.
     'and rec_RecTypeID != '.$relRT.' '.
-    'and '.(count($ACCESSABLE_OWNER_IDS)>0?'(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') ':'(0 ').
-    (($system->has_access()?'OR NOT rec_NonOwnerVisibility = "hidden")':'OR rec_NonOwnerVisibility = "public")').
-    ' ORDER BY rec_RecTypeID, rec_Title');
+    'and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
+    ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")').
+    ' ORDER BY rec_RecTypeID, rec_Title';
     
     $mysqli = $system->get_mysqli();
     
