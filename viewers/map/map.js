@@ -1233,6 +1233,11 @@ console.log('tileloaded 2');
             var lt = window.hWin.HAPI4.sysinfo['layout'];  
             if(lt && (lt.indexOf('DigitalHarlem')==0 || lt=='Beyond1914' || lt=='UAdelaide') ){
                 useMarkerClusterer = false;
+
+                if(lt=='Beyond1914' || lt=='UAdelaide'){
+                    customTheme['iconSize']  = [24,24];
+                    customTheme['iconAnchor']  = [12,12];
+                }
             }
 
             // Initialize TimeMap

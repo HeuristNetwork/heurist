@@ -156,7 +156,7 @@ $.widget( "heurist.expertnation_nav", {
                 
             }else{
                 
-                if(page_name>0 || page_name=='home' || page_name=='people'){
+                if(page_name>0 || page_name=='people'){
                     page_id = page_name;
                 }else{
                     page_id = this._getStaticPageIdByName(page_name);
@@ -365,6 +365,9 @@ $.widget( "heurist.expertnation_nav", {
         */
         
         var homepage_id = this._getStaticPageIdByName('home');
+        
+        //add home page as first entry into histort
+        this.addToHistory({page_name:'home'});
          
         menu_ele.find('.nav-link').click(function(event){
             
@@ -384,7 +387,8 @@ $.widget( "heurist.expertnation_nav", {
             
                 that.fillPeopleByFirstChar();
                 
-            }else if(recID==homepage_id && hdoc.find('.bor-page-'+homepage_id).is(':visible')){ //home page
+            }else if(recID==homepage_id && hdoc.find('.bor-page-'+homepage_id).is(':visible')){ 
+                //home page is visible - click on home force reload
                 location.reload();
             }else{
                 
@@ -393,7 +397,7 @@ $.widget( "heurist.expertnation_nav", {
                 //show selected 
                 hdoc.find('.bor-page-'+recID).show();
                 //scroll to top
-                hdoc.scrollTop(0);
+                //hdoc.scrollTop(0);
                 
                 if(recID>0){
                     var edit_form = hdoc.find('.bor-page-'+recID).find('.newsletter-form');
@@ -711,9 +715,10 @@ $.widget( "heurist.expertnation_nav", {
         if(entType=='place'){
             
             request['q'] = 'ids:'+recID;
-            request['rules'] = [{"query":"t:24,26,29,33,37 linked_to:25 ", //eventlet,edu inst,mil service,death,occupation
+            request['rules'] = [{"query":"t:24,26,29,33,37 linked_to:25 ", //eventlet,edu inst,mil service,death,occupation  liked to person
                         "levels":[{"query":"t:10 linkedfrom:24,29,33,37 f:196:"+this.options.uni_ID}, //persons only form UnySyd
-                                    //persons vis tertiary and schooling
+                                  {"query":"t:4 linkedfrom:37-21"}, //organization linked to occupat.event
+                                    //persons with tertiary and schooling
                                   {"query":"t:27,31 linked_to:26-97",
                                         "levels":[{"query":"t:10 linked_to:27,31 f:196:"+this.options.uni_ID}]} ] }];
             //or linkedfrom via field 16
@@ -985,7 +990,7 @@ $.widget( "heurist.expertnation_nav", {
                         });
                         res = [];
                         for(var k=0; k<timeline.length; k++){
-                            if(timeline[k].story){  //timeline[k].placeID==recID && 
+                            if(timeline[k].story && res.indexOf(timeline[k].story)<0){  //timeline[k].placeID==recID && 
                                  res.push(timeline[k].story);
                             }
                         }
@@ -1365,6 +1370,9 @@ $.widget( "heurist.expertnation_nav", {
             }
             leftside['p_tertiary'] = html;
 
+            
+//inital map [{"t":"25"},{"linkedfrom":[{"t":"37,24,29,33"},{"linkedfrom":[{"t":"10"},{"f:196":"4710"}]}] }]
+            
             //Events (79->t:24) -------------------------------
             
             // 4 - before service, 10 after service
@@ -1405,6 +1413,9 @@ $.widget( "heurist.expertnation_nav", {
                             }
                         }
                         
+                        var sEventNotes = that.recset.fld(record, 2898); //organization or person linked to this event
+                        if(sEventNotes==null) sEventNotes = '';
+                        
                         if(placeID==0 || window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0){
                             
                             if(termID==3302){
@@ -1419,9 +1430,9 @@ $.widget( "heurist.expertnation_nav", {
                                 date: that.__getYear(eventDate.date), 
                                 date2: eventDate.date,
                                 eventTypeID: termID,
-                                story: sEventType.toLowerCase(),
+                                story: sEventType.toLowerCase()+' '+sEventNotes,
                                                     //that.__getYear(eventDate.date, ord)+'  '+
-                                description: sEventType+' '+(place.link?place.link:'')+' '+eventDate.desc });//', '
+                                description: sEventType+' '+sEventNotes+' '+(place.link?place.link:'')+' '+eventDate.desc });//', '
                         }
                     }
                 }
@@ -1443,14 +1454,13 @@ $.widget( "heurist.expertnation_nav", {
                         }
                        
                         var sOccupationOrg = '';
-                        /* we does not retrieve orgs
+                        //we did not retrieve orgs from now we do
                         var org_rec_id = that.recset.fld(record, 21);
                         if(org_rec_id>0){
                             var org_record = that.recset.getById( org_rec_id ); 
                             sOccupationOrg = that.recset.fld(org_record, this.DT_NAME);
-                            sOccupationOrg = (sOccupationOrg)?(' ar '+sOccupationOrg):'';
                         }
-                        */
+                        
                         
                         var termID = that.recset.fld(record, 150);
                         var sOccupationTitle = that.__getTerm(termID);
@@ -1459,11 +1469,24 @@ $.widget( "heurist.expertnation_nav", {
 
                             var year_main = that.__getYear(eventDate.date, 1920);
                             var year_end = that.__getYear(eventDate.date_end, year_main);
+  
+                            //don't include sOccupationOrg if it is the same as one of place.names 
+                            //need to exclude repeatative of University name as part of locality
+                            if(sOccupationOrg!=''){
+                                for(var n=0; n<place.names.length; n++){
+                                    if(place.names[n].indexOf(sOccupationOrg)==0){
+                                        sOccupationOrg = '';   
+                                        break;
+                                    }
+                                }                 
+                                if(sOccupationOrg!='')
+                                    sOccupationOrg = ' at '+sOccupationOrg;
+                            }
                             
                             timeline.push({year:year_main, year_end:year_end,  
                                     date: that.__getYear(eventDate.date),
                                     date2: eventDate.date, 
-                                    story: 'was '+sOccupationTitle.toLowerCase(),
+                                    story: 'was '+sOccupationTitle.toLowerCase()+' '+sOccupationOrg,
                                     description: sOccupationTitle+' '+sOccupationOrg+' '
                                         +(place.link?place.link:'')+' '+eventDate.desc });//', '
                         }
@@ -1645,7 +1668,8 @@ $.widget( "heurist.expertnation_nav", {
                         "levels":[{"query":"t:25 linkedfrom:26"}]}]},  //place (location of institution)
                     
                 {"query":"t:24,28,29,33,37 linkedfrom:10",  //eventlet,mil award,mil service,death,occupation
-                        "levels":[{"query":"t:25 linkedfrom:-78"}]},  //location of event
+                        "levels":[{"query":"t:25 linkedfrom:-78"},    //location of event 
+                                  {"query":"t:4 linkedfrom:37-21"}]},  //organization linked to occupation event
                 {"query":"t:5 linkedfrom:10-61,135,144"}]  //documents pdf,additional photos,documents
         };
             
@@ -1886,7 +1910,7 @@ $.widget( "heurist.expertnation_nav", {
                     + '<a href="/contribute" onclick="{window.hWin.enResolver(event);}">contribute page</a>.</p>';
                 }else{
                     html = html + '<p class="help-block">'
-                    + 'Unless otherwise noted, these records are from the University of Adelaide Archives. '
+                    //+ 'Unless otherwise noted, these records are from the University of Adelaide Archives. '
                     + 'If you have any material to add, please see our '
                     + '<a href="/contribute" onclick="{window.hWin.enResolver(event);}">contribute page</a>.</p>';
                 }
@@ -2072,9 +2096,13 @@ $.widget( "heurist.expertnation_nav", {
                     if( isTemporal(val) ){
                         res = temporalToHumanReadableString(val);
                     }else{
-                        var tDate = TDate.parse(val);
-                        var day = Number(tDate.getDay());
-                        res = (isNaN(day)||day<1||day>31?'':(day+' '))+tDate.toString('MMMM')+' '+Math.abs(tDate.getYear()); 
+                        try{
+                            var tDate = TDate.parse(val);
+                            var day = Number(tDate.getDay());
+                            res = (isNaN(day)||day<1||day>31?'':(day+' '))+tDate.toString('MMMM')+' '+Math.abs(tDate.getYear()); 
+                        }catch(e) {
+                            res = val; //parsing fails                            
+                        }
                     }
                     return res.trim();
                 }else{
@@ -2449,7 +2477,7 @@ $.widget( "heurist.expertnation_nav", {
             {page_name:'search','svsID':svsID}
             */
             
-            if(opt.page_name=='search' || opt.page_name=='people' || opt.entityType)
+            if(opt.page_name=='home' || opt.page_name=='search' || opt.page_name=='people' || opt.entityType)
             {
             
                 //console.log(opt);
