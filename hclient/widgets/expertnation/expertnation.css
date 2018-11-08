@@ -6064,7 +6064,7 @@ h2 .bor-tooltip, .h2 .bor-tooltip {
 .bor-filter-expand {
   text-align: center;
   display: block;
-  max-height: 25px;
+  /*max-height: 25px;*/
   border-top: 1px solid #bbb;
   overflow: hidden;
   position: relative;

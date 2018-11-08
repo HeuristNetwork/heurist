@@ -1613,7 +1613,7 @@ div.coverall-div {
     text-align:left;
     cursor:pointer;
     color: #999999;
-    padding-top:16px;
+    padding-top:0px;
 }
 .bor-toggler > span >span{
     display:inline-block;
