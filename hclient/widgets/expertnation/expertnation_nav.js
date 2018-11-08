@@ -202,6 +202,10 @@ $.widget( "heurist.expertnation_nav", {
                         that._constructNavigationMenu( recordset );
                     }
             });
+            
+            //assign map for iframes
+            $('.mapframe').prop('src', window.hWin.HAPI4.baseURL+
+                    'viewers/map/map.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&header=off&legend=off');
 
         }
         
@@ -246,6 +250,9 @@ $.widget( "heurist.expertnation_nav", {
                     //add section on page for database content
                     var ele = that._addClearPageDiv(recID);                
 
+                    //for map.php witnin iframe
+                    content = content.replace('http://heurist.sydney.edu.au/h5-ao/',window.hWin.HAPI4.baseURL);
+                    
                     //add page content from database  
                     ele.html( content );    
 

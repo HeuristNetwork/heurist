@@ -240,7 +240,7 @@ function getRecordDetails($system, $record) {
                 
             }else if(defined('DT_SYMBOLOGY_POINTMARKER') && $type == DT_SYMBOLOGY_POINTMARKER) {
                 //marker icon url 
-                $record->iconMarker = getFileURL($system, $fileID);;
+                $record->iconMarker = $fileID; //getFileURL($system, $fileID);
 
             }else if(defined('DT_MAXIMUM_MAP_ZOOM') && $type == DT_MAXIMUM_MAP_ZOOM) {
                 // Maximum zoom

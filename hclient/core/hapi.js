@@ -128,6 +128,9 @@ function hAPI(_db, _oninit) { //, _currentUser
             data: request,
             dataType: "json",
             cache: false,
+            xhrFields: {
+                  withCredentials: true
+            },            
             error: function( jqXHR, textStatus, errorThrown ) {
 
                 err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
@@ -313,7 +316,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                     if(response.status == window.hWin.ResponseStatus.OK){
                         if(response.data.sysinfo){
                             window.hWin.HAPI4.sysinfo = response.data.sysinfo;
-                            window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+//!!!!  assign baseURL window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
                         }
                         if(response.data.currentUser) {
                             window.hWin.HAPI4.setCurrentUser(response.data.currentUser);   
@@ -355,7 +358,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                             }
                             if(response.data.sysinfo){
                                 window.hWin.HAPI4.sysinfo = response.data.sysinfo;
-                                window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
+//!!!! assign baseURL window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
                             }
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response.message);
