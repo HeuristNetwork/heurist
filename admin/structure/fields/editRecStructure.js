@@ -50,6 +50,7 @@ function EditRecStructure() {
     _updatedDetails = [], //list of dty_ID that were affected with edition
     _updatedFields = [],  //list of indexes in fieldname array that were affected
     _expandedRecord = null, //rstID of record (row) in design datatable that is (was) expanded (edited)
+    _highightedRow = null,
     _isServerOperationInProgress = false, //prevents send request if there is not respoce from previous one
     _isReserved = false,
     _rty_Status,
@@ -564,7 +565,7 @@ function EditRecStructure() {
                 "tableContainer",
                 myColumnDefs,
                 myDataSource,
-                //this is box of expandable record
+                //this is box of expandable record   - to show onEventToggleRowExpansion
                 {	sortedBy:{key:'rst_DisplayOrder', dir:YAHOO.widget.DataTable.CLASS_ASC},
                     formatRow: myRowFormatter,
                     rowExpansionTemplate :
@@ -605,7 +606,7 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                             '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                             '<div class="input-cell">'+
-                                '<textarea style="width:450px" cols="450" rows="2" id="ed_dty_HelpText" '+
+                                '<textarea class="initially-dis" style="width:450px" cols="450" rows="2" id="ed_dty_HelpText" '+
                                 'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
                                 //'<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
                                 //            'This text is optional.</div>'+
@@ -613,7 +614,7 @@ function EditRecStructure() {
                             
                         '<div class="input-row"><div class="input-header-cell" style="vertical-align:top;">Requirement:</div>'+
                             '<div class="input-cell" title="Determines whether the field must be filled in, should generally be filled in, or is optional">'+
-                                '<select id="ed0_rst_RequirementType" onchange="onReqtypeChange(event)" style="display:inline; margin-right:0px;vertical-align: top;">'+
+                                '<select id="ed0_rst_RequirementType" onchange="onReqtypeChange(event)" class="initially-dis" style="display:inline; margin-right:0px;vertical-align: top;">'+
                                     '<option value="required">required</option>'+
                                     '<option value="recommended" selected>recommended</option>'+
                                     '<option value="optional">optional</option>'+
@@ -624,7 +625,7 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                             '<div class="input-header-cell">Repeatability :</div>'+
                             '<div class="input-cell" title="Determines whether multiple values can be entered for this field" >'+
-                                '<select id="ed0_Repeatability" onchange="onRepeatChange(event)">'+
+                                '<select id="ed0_Repeatability" class="initially-dis" onchange="onRepeatChange(event)">'+
                                     '<option value="single">single</option>'+
                                     '<option value="repeatable" selected>repeatable</option>'+
                                     '<option value="limited">limited</option>'+ //IJ request HIDE IT 2012-10-12
@@ -644,10 +645,10 @@ function EditRecStructure() {
                        
                         '<div class="input-row"><div class="input-header-cell" style="vertical-align:top;">Data type :</div>'+
                             '<div class="input-cell">'+
-                                '<select id="ed_dty_Type" onchange="onDetTypeChange(event)" style="display:inline; margin-right:0px;vertical-align: top;">'+
-                                    '<option value="enum">Dropdown (Terms)</option>'+
+                                '<select id="ed_dty_Type" class="initially-dis" onchange="onDetTypeChange(event)" style="display:inline; margin-right:0px;vertical-align: top;">'+
+                                    '<option value="enum" selected>Dropdown (Terms)</option>'+
                                     '<option value="float">Numeric (integer or decimal)</option>'+
-                                    '<option value="freetext" selected>Text (single line)</option>'+
+                                    '<option value="freetext">Text (single line)</option>'+
                                     '<option value="blocktext">Text (memo)</option>'+
                                     '<option value="date">Date / time</option>'+
                                     '<option value="geo">Geospatial (point, line, polygon ...)</option>'+
@@ -659,7 +660,7 @@ function EditRecStructure() {
                         // Terms - enums and relmarkers
                         '<div class="input-row" style="display:none"><div class="input-header-cell">Vocabulary (terms):</div>'+
                             '<div class="input-cell" title="The lsit of terms available for selection as values for this field">'+
-                                '<select id="selVocab"/>'+
+                                '<select id="selVocab" class="initially-dis"/>'+
                                 '<input id="ed_dty_JsonTermIDTree" type="hidden"/>'+
                                 '<input id="ed_dty_TermIDTreeNonSelectableIDs" type="hidden"/>'+
                                 '<span>'+
@@ -715,7 +716,6 @@ function EditRecStructure() {
                                 '</span>'+
                                 '</span>'+
                             '</div></div>'+
-
 
                         // Help text
                         '<div class="input-row">'+
@@ -796,7 +796,7 @@ function EditRecStructure() {
                         '<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
                         '<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
                         '<span class="input-cell" id="termsPreview" class="dtyValue"></span>'+
-                        '<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition"</span>'+
+                        //'<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition"</span>'+
                         '</div></div>'+
 
                         // Pointer target types - pointers and relmarkers
@@ -804,7 +804,7 @@ function EditRecStructure() {
                         '<div id="pointerPreview" class="input-cell" title="Determines which record types this pointer field can point to. It is preferable to select target record types than to leave the pointer unconstrained">'+
                         '<input id="ed'+rst_ID+'_rst_PtrFilteredIDs" type="hidden"/>'+
                         // TODO: the following message is not showing, whereas the one above does
-                        '<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition"</span>'+ // and then "Select Record Types"
+                        //'<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition"</span>'+ // and then "Select Record Types"
                         '</div></div>'+
 
                         '<div class="input-row"><div class="input-header-cell">Create new records as children:</div>'+
@@ -912,8 +912,8 @@ function EditRecStructure() {
             );
 
             // highlight listeners
-            _myDataTable.subscribe("rowMouseoverEvent", _myDataTable.onEventHighlightRow);
-            _myDataTable.subscribe("rowMouseoutEvent", _myDataTable.onEventUnhighlightRow);
+            //_myDataTable.subscribe("rowMouseoverEvent", _myDataTable.onEventHighlightRow);
+            //_myDataTable.subscribe("rowMouseoutEvent", _myDataTable.onEventUnhighlightRow);
             
             //ART16 _myDataTable.subscribe("rowClickEvent", _myDataTable.onEventSelectRow);
             
@@ -1172,6 +1172,16 @@ function EditRecStructure() {
                             _expandedRecord = _isStreamLinedAdditionAction?null:rst_ID;
 
                             _myDataTable.onEventToggleRowExpansion(record_id);
+                            
+                            if(_highightedRow!=null) _myDataTable.unhighlightRow(_highightedRow);
+                            var tr = _myDataTable.getTrEl(oRecord);
+                            _myDataTable.highlightRow( tr );
+                            _highightedRow = tr;
+//                            
+//console.log(tr);                            
+//{'border-top':'2px solid blue', 'border-bottom': '2px solid blue'}
+                            
+                            window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), true);
 
                             if(!_isStreamLinedAdditionAction){
                                 $('.edit-form').show('fade', null, 1000);
@@ -3475,6 +3485,8 @@ function onFieldAddSuggestion(event, insertAfterRstID){
     var input_name = $(event.target);
     
     var fields_list_div = $('.list_div');
+    
+    window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), input_name.val().length<3 );
   
     if(input_name.val().length>2){
        
@@ -3818,7 +3830,7 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
                         }
                     }
                     if(!error && _dtyID>0){
-                        window.hWin.HEURIST4.msg.showMsgFlash('New field type created');
+                        window.hWin.HEURIST4.msg.showMsgFlash('New field created');
                         window.hWin.HEURIST4.detailtypes = context.detailtypes;
                         editStructure.addDetails(''+_dtyID, null, insertAfterRstID, defValues);
                     }
