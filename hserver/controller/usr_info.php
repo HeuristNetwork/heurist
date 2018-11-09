@@ -44,7 +44,7 @@
             $const_toinit = true;
             if(!$reload_user_from_db){
                 $const_toinit = false;
-                $system->initPathConstants(@$_REQUEST['db']);
+                $system->initPathConstants(@$_REQUEST['db']);  
                 $fname = HEURIST_FILESTORE_DIR.$res;
                 $reload_user_from_db = file_exists($fname);
             }
