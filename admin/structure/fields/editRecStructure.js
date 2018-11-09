@@ -122,7 +122,9 @@ function EditRecStructure() {
         
         //click outside of list
         $(document).click(function(event){
-           if($(event.target).parents('.list_div').length==0) { $('.list_div').hide(); };
+           if($(event.target).parents('.list_div').length==0) { 
+                $('.list_div').hide(); 
+           };
         });
         
     }
@@ -245,12 +247,12 @@ function EditRecStructure() {
 
                         //label
                         elLiner.innerHTML = 
-                        '<img src="../../../common/images/arrow_right2.png" style="float:right"'
-                        +' rst_ID="'+oRecord.getData("rst_ID")+'"/><br>'
-                        +'<div style="font-size:0.75em" '
+                        '<div style="font-size:0.75em" '
                         +" title='Click to insert a new section divider at this point in the record structure / data entry form' "+
                         " rst_ID='"+oRecord.getData("rst_ID")+"'>"+
-                        'Add&nbsp;divider</div>';
+                        'Add&nbsp;divider</div>'+
+                        '<img src="../../../common/images/arrow_right2.png" style="float:right"'
+                        +' rst_ID="'+oRecord.getData("rst_ID")+'"/>';
                         
                         $(elLiner).css({cursor:'pointer'})
                             .attr('rst_ID', oRecord.getData("rst_ID"))
@@ -270,12 +272,13 @@ function EditRecStructure() {
                         " rst_ID='"+oRecord.getData("rst_ID")+"' onclick='{editStructure.onAddFieldAtIndex(event, false);}' >";*/
                         //label
                         elLiner.innerHTML = 
-                        '<img src="../../../common/images/arrow_right2.png" style="float:right"'
-                        +' rst_ID="'+oRecord.getData("rst_ID")+'"/><br>'
-                        + '<div style="font-size:0.75em;width:40px;font-weight:bold;" '
+                        '<div style="font-size:0.75em;width:40px;font-weight:bold;" '
                         +" title='Click to insert a new field at this point in the record structure / data entry form' "+
                         " rst_ID='"+oRecord.getData("rst_ID")+"'>"+
-                        'Add&nbsp;field</div>';
+                        'Add&nbsp;field</div>'+
+                        '<img src="../../../common/images/arrow_right2.png" style="float:right"'
+                        +' rst_ID="'+oRecord.getData("rst_ID")+'"/>';
+                        
                         
                         /*var cell_element = elLiner.parentNode;
                         //Set trigger
@@ -598,7 +601,7 @@ function EditRecStructure() {
                             '<div class="input-cell">'+
                                 '<input id="ed_dty_Name" style="width:200px;" onchange="_onDispNameChange(event)" '+
                                     'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" '+
-                                    'onblur="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
+                                    //'onblur="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
                                     'onkeyup="onFieldAddSuggestion(event,'+_rst_ID+')" '+  //need id to detect index_toinsert 
                                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
                             '</div></div>'+
@@ -607,6 +610,7 @@ function EditRecStructure() {
                             '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                             '<div class="input-cell">'+
                                 '<textarea class="initially-dis" style="width:450px" cols="450" rows="2" id="ed_dty_HelpText" '+
+                                'onfocus="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
                                 'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
                                 //'<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
                                 //            'This text is optional.</div>'+
@@ -658,7 +662,7 @@ function EditRecStructure() {
                             '</div></div>'+
                                                         
                         // Terms - enums and relmarkers
-                        '<div class="input-row" style="display:none"><div class="input-header-cell">Vocabulary (terms):</div>'+
+                        '<div class="input-row" Xstyle="display:none"><div class="input-header-cell">Vocabulary (terms):</div>'+
                             '<div class="input-cell" title="The lsit of terms available for selection as values for this field">'+
                                 '<select id="selVocab" class="initially-dis"/>'+
                                 '<input id="ed_dty_JsonTermIDTree" type="hidden"/>'+
@@ -1174,9 +1178,6 @@ function EditRecStructure() {
                             _myDataTable.onEventToggleRowExpansion(record_id);
                             
                             if(_highightedRow!=null) _myDataTable.unhighlightRow(_highightedRow);
-                            var tr = _myDataTable.getTrEl(oRecord);
-                            _myDataTable.highlightRow( tr );
-                            _highightedRow = tr;
 //                            
 //console.log(tr);                            
 //{'border-top':'2px solid blue', 'border-bottom': '2px solid blue'}
@@ -1184,8 +1185,16 @@ function EditRecStructure() {
                             window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), true);
 
                             if(!_isStreamLinedAdditionAction){
+                                
+                                var tr = _myDataTable.getTrEl(oRecord);
+                                _myDataTable.highlightRow( tr );
+                                _highightedRow = tr;
+                                
                                 $('.edit-form').show('fade', null, 1000);
                                 _fromArrayToUI(rst_ID, false); //after expand restore values from HEURIST
+                            }else{
+                                onDetTypeChange(); //to fill term selector
+                                $('#ed_dty_Name').focus();
                             }
 
                             var rowrec = _myDataTable.getTrEl(oRecord);
@@ -1768,6 +1777,10 @@ function EditRecStructure() {
                     report = "",
                     ind;
 
+            
+//console.log('added on server '+(new Date().getTime() / 1000 - _time_debug));            
+//_time_debug = new Date().getTime() / 1000;                       
+                    
                     for(ind in response.data.result){
                         if( !Hul.isnull(ind) ){
                             var item = response.data.result[ind];
@@ -1789,7 +1802,9 @@ function EditRecStructure() {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
             }
-
+                                   
+//            _time_debug = new Date().getTime() / 1000;                       
+//console.log('send save separator')            
             //
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = _addNewSeparator;
@@ -1800,6 +1815,8 @@ function EditRecStructure() {
 
         }
     }
+    
+    var _time_debug;
     
     function _getIndex_toinsert(event){
         
@@ -1815,7 +1832,7 @@ function EditRecStructure() {
             rst_ID = targ.getAttribute("rst_ID");
             if(!rst_ID) return null;
 
-            index_toinsert = _getRecordById(rst_ID).row_index;
+            index_toinsert = _getRecordById(rst_ID).row_index+1; 
         }else{
             var sels = _myDataTable.getSelectedRows();
             
@@ -1965,6 +1982,9 @@ function EditRecStructure() {
 
             _myDataTable.addRows(data_toadd, index_toinsert);
 
+//console.log('added on datatable '+(new Date().getTime() / 1000 - _time_debug));            
+//_time_debug = new Date().getTime() / 1000;                       
+            
             _myDataTable.unselectAllRows();
             //ART16 _myDataTable.selectRow(index_toinsert);
 
@@ -1975,6 +1995,9 @@ function EditRecStructure() {
             dragDropEnable();
 
             _saveUpdates(false, function(){
+
+//console.log('saved into structure '+(new Date().getTime() / 1000 - _time_debug));            
+//_time_debug = new Date().getTime() / 1000;                       
                 
                 //ART 2018-07-30 
                 _updateOrderAfterInsert( data_toadd[data_toadd.length-1]['rst_ID'] );
@@ -2043,6 +2066,9 @@ function EditRecStructure() {
             
             //emulate click on just added row
             setTimeout(function(){
+               
+//console.log('expand '+(new Date().getTime() / 1000 - _time_debug));            
+//_time_debug = new Date().getTime() / 1000;                       
                 
                 var oRecord = _getRecordById(lastID).record;
                 var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('expandColumn')});
@@ -2192,8 +2218,12 @@ function EditRecStructure() {
         btnSaveOrder.style.visibility = "hidden";
 
         if(!$.isEmptyObject(orec)){
+            
+            window.hWin.HEURIST4.msg.bringCoverallToFront( $(this.document).find('body') );            
 
             var updateResult = function(response){
+                
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
                 
                 _isServerOperationInProgress = false;
                 
@@ -2759,7 +2789,7 @@ function EditRecStructure() {
         */
         addDetails:function(dty_ID_list, index_toinsert, insertAfterRstID, defValues){
             if(insertAfterRstID>0){
-                index_toinsert = _getRecordById(insertAfterRstID).row_index;
+                index_toinsert = _getRecordById(insertAfterRstID).row_index+1;
             }
             _addDetails(dty_ID_list, index_toinsert, defValues);
         },
@@ -3495,7 +3525,16 @@ function onFieldAddSuggestion(event, insertAfterRstID){
             fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
             
         fields_list_div.empty();  
-        var is_added = false;
+        var is_added = true;
+        
+        //add current value as first
+        var first_ele = $('<div class="truncate"><b>'+input_name.val()+' [NEW]</b></div>').appendTo(fields_list_div)
+                        .click( function(event){
+                            window.hWin.HEURIST4.util.stopEvent(event);
+                            fields_list_div.hide(); 
+                            $('#ed_dty_HelpText').focus();
+                        });
+
 
         //find among fields that are not in current record type
         for (dty_ID in window.hWin.HEURIST4.detailtypes.names){
@@ -3511,25 +3550,34 @@ function onFieldAddSuggestion(event, insertAfterRstID){
                     && ( window.hWin.HEURIST4.util.isnull(aUsage) || aUsage.indexOf(rty_ID)<0 ) 
                     && (field_name.toLowerCase().indexOf( input_name.val().toLowerCase() )>=0) )
                {
+                   
+                   var ele;
+                   if(field_name.toLowerCase()==input_name.val().toLowerCase()){
+                       ele = first_ele;
+                   }else{
+                       ele = $('<div class="truncate">').appendTo(fields_list_div);
+                   }
 
                    is_added = true;
-                    $('<div recid="'+dty_ID+'" class="truncate">'+field_name
-                        +' ['+deftype[fi.dty_Type]+']</div>').appendTo(fields_list_div)
-                    .click( function(event){
-                        window.hWin.HEURIST4.util.stopEvent(event);
-                        var ele = $(event.target).hide();
+                    ele.attr('recid',dty_ID)
+                       .text(field_name+' ['+deftype[fi.dty_Type]+']')
+                       .click( function(event){
+                            window.hWin.HEURIST4.util.stopEvent(event);
 
-                        var _dty_ID = ele.attr('recid');
-                        
-                        fields_list_div.hide();
-                        input_name.val('').focus();
-                        
-                        window.hWin.HEURIST4.msg.showMsgFlash('Field is added to record structure');
-                        
-                        editStructure.doExpliciteCollapse(insertAfterRstID, false);
-                        editStructure.addDetails(_dty_ID, null, insertAfterRstID);
-                               
-                    } );
+                            var ele = $(event.target).hide();
+                            var _dty_ID = ele.attr('recid');
+                     
+console.log('addd '+_dty_ID);                     
+                            if(_dty_ID>0){
+                                fields_list_div.hide();
+                                input_name.val('').focus();
+                                
+                                window.hWin.HEURIST4.msg.showMsgFlash('Field is added to record structure');
+                                
+                                editStructure.doExpliciteCollapse(insertAfterRstID, false);
+                                editStructure.addDetails(_dty_ID, null, insertAfterRstID);
+                            }
+                     });
                     
                }
             }
