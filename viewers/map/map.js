@@ -1539,7 +1539,9 @@ console.log('tileloaded 2');
         //this - item (map item)
         //placemark_selected that was cliked - item may have several placemarks
         
-        if(!this.placemark.points && this.dataset.id=='main'){
+        var res = _getPlaceMarkFromItem( this, selected_placemark );
+        if(res.placemark_type=='marker' &&
+            !this.placemark.points && this.dataset.id=='main'){
         
             _selectItemsWithSameCoords( this, selected_placemark );
         }else{

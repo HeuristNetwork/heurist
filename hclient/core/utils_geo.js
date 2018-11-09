@@ -685,6 +685,7 @@ window.hWin.HEURIST4.geo = {
             
         }else if (resdata.Point.length>0 || resdata.Polyline.length>0 || resdata.Polygon.length>0){
             
+            var type = '';
             if(resdata.Point.length==0 && resdata.Polyline.length==0 && resdata.Polygon.length==1){
                      if (typeCode == "r") type = "Rectangle";
                         else if (typeCode == "c") type = "Circle";
