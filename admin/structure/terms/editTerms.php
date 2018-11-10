@@ -351,7 +351,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                     </div>
 
                     <div style="padding-top:20px; margin-left:10px">
-                        Term(s) have been added to the term tree but this does not add them to the  individual trees for different fields, since these are individually selected from the complete term tree. Please update the lists for each field to which these terms should be added. <br/><br/> The felds most likely to be affected are
+                        Term(s) have been added to the term tree but this does not add them to the  individual trees for different fields, since these are individually selected from the complete term tree. Please update the lists for each field to which these terms should be added. <br/><br/> The fields most likely to be affected are
 
                     </div>
 
