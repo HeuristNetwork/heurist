@@ -176,7 +176,7 @@ body.popup #page-inner {
     color:black;
 }
 .yui-skin-sam .yui-dt tr.separator > td{
-    border-top: black 2px solid;
+    border-top: black 1px solid;
 }
 
 .yui-navset {

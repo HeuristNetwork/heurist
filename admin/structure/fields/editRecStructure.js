@@ -610,6 +610,7 @@ function EditRecStructure() {
                             '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                             '<div class="input-cell">'+
                                 '<textarea class="initially-dis" style="width:450px" cols="450" rows="2" id="ed_dty_HelpText" '+
+                                'onkeypress="removeErrorClass(this)"'+
                                 'onfocus="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
                                 'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
                                 //'<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
@@ -3524,6 +3525,8 @@ function onFieldAddSuggestion(event, insertAfterRstID){
     
     var input_name = $(event.target);
     
+    removeErrorClass(input_name);
+    
     var fields_list_div = $('.list_div');
     
     window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), input_name.val().length<3 );
@@ -3535,10 +3538,10 @@ function onFieldAddSuggestion(event, insertAfterRstID){
             fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
             
         fields_list_div.empty();  
-        var is_added = true;
+        var is_added = false;
         
         //add current value as first
-        var first_ele = $('<div class="truncate"><b>'+input_name.val()+' [NEW]</b></div>').appendTo(fields_list_div)
+        var first_ele = $('<div class="truncate"><b>'+input_name.val()+' [new]</b></div>').appendTo(fields_list_div)
                         .click( function(event){
                             window.hWin.HEURIST4.util.stopEvent(event);
                             fields_list_div.hide(); 
@@ -3742,6 +3745,9 @@ function onSelectRectype()
 }
 
 
+function removeErrorClass( ele ){
+    $(ele).removeClass('ui-state-error');
+}
 //
 //  create new field type and to this record type
 //
@@ -3768,33 +3774,31 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
             }
         }
         
+        
         // check mandatory fields
-        if(Hul.isempty(document.getElementById("ed_dty_HelpText").value)) {
-            window.hWin.HEURIST4.msg.showMsgErr('Help text is mandatory field');
-            document.getElementById("ed_dty_HelpText").focus();
-            return;
-        }
-
-        var dty_Type = document.getElementById("ed_dty_Type").value;
-        if(Hul.isempty(dty_Type)){
-            window.hWin.HEURIST4.msg.showMsgErr("Data Type is mandatory field", 'Warning');
-            document.getElementById("ed_dty_Type").focus();
-            return;
-        }
+        if (!(window.hWin.HEURIST4.msg.checkLength($('#ed_dty_HelpText'), 'Help text', null, 1, 0) && 
+            window.hWin.HEURIST4.msg.checkLength($('#ed_dty_Type'), 'Data Type', null, 1, 0) &&
+            window.hWin.HEURIST4.msg.checkLength($('#ed_dty_Name'), 'Field name', null, 1, 0))) return;
         
         var swarn = "";
-        var dt_name = document.getElementById("ed_dty_Name").value;
-        if(dt_name==="") {
-            swarn = "Field name is mandatory field"
-        }else{
-            swarn = window.hWin.HEURIST4.ui.validateName(dt_name, "Field 'Name'");
+        var dt_name = document.getElementById("ed_dty_Name").value.toLowerCase();
+        swarn = window.hWin.HEURIST4.ui.validateName(dt_name, "Field 'Name'");
+        //check that already exists
+        if(swarn==""){
+            for (var dty_ID in window.hWin.HEURIST4.detailtypes.names){
+                if(dty_ID>0 && window.hWin.HEURIST4.detailtypes.names[dty_ID].toLowerCase()==dt_name){
+                       swarn = "Field name '"+window.hWin.HEURIST4.detailtypes.names[dty_ID]
+                            +"' aready exists in this database";
+                }
+            }
         }
         if(swarn!=""){
-            window.hWin.HEURIST4.msg.showMsgErr( swarn );
-            document.getElementById("ed_dty_Name").focus();
+            window.hWin.HEURIST4.msg.showMsgFlash( swarn );
+            $("#ed_dty_Name").addClass( "ui-state-error" ).focus();
             return;
         }
         
+        var dty_Type = document.getElementById("ed_dty_Type").value;
         if(dty_Type==="enum"){
             var dd = document.getElementById("ed_dty_JsonTermIDTree").value;
             if( dd==="" || dd==="{}" ) {
@@ -3821,7 +3825,7 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
         }        
         
         if(swarn!=""){
-            window.hWin.HEURIST4.msg.showMsgErr( swarn );
+            window.hWin.HEURIST4.msg.showMsgFlash( swarn );
             return;
         }
         
