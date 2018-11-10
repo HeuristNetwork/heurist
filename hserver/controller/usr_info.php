@@ -33,7 +33,6 @@
      
     $system = new System();
         
-    
     if($action=='verify_credentials'){ //just check only if logged in (db connection not required)
         
         $res = $system->verify_credentials(@$_REQUEST['db']);
@@ -44,7 +43,7 @@
             $const_toinit = true;
             if(!$reload_user_from_db){
                 $const_toinit = false;
-                $system->initPathConstants(@$_REQUEST['db']);
+                $system->initPathConstants(@$_REQUEST['db']);  
                 $fname = HEURIST_FILESTORE_DIR.$res;
                 $reload_user_from_db = file_exists($fname);
             }
@@ -84,6 +83,7 @@
         
     }else if( !$system->init( @$_REQUEST['db'] ) ){ 
         
+//        error_log('FAILD INIT SYSTEM');        
         
     }else{
         

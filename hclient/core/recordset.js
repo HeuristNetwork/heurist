@@ -309,7 +309,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                      
                             dres = dates[k];
                             
-                            if(typeof iconId=='string' && iconId.indexOf('http:')==0){
+                            if(typeof iconId=='string' && (iconId.indexOf('http:')==0 || iconId.indexOf('https:')==0)){
                                 iconImg = iconId;
                             }else if(pr_iconMarker){
                                 //icon is set per record
@@ -391,7 +391,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 }
                 
                         var iconImgEvt, iconImg;
-                        if(typeof iconId=='string' && iconId.indexOf('http:')==0){
+                        if(typeof iconId=='string' && (iconId.indexOf('http:')==0 || iconId.indexOf('https:')==0) ){
                             //icon is set in data (top prioriry)
                             iconImgEvt = iconId;    
                             iconImg = iconId;    

@@ -90,6 +90,7 @@
         <!-- END YUI -->
 
         <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/edit.css">
@@ -114,6 +115,17 @@
             }
             .dtyValue {
                     display: inline-block;
+            }
+            .list_div {
+                cursor: pointer;
+                border: 1px solid rgba(0, 0, 0, 0.2);
+                margin: 2px 0;
+                padding: 4px;
+                background:#F4F2F4 !important;
+                overflow-y:auto;
+            }            
+            .list_div > div{
+                padding: 2px;
             }
             /*.yui-dt table
             {
@@ -210,9 +222,14 @@
             .yui-skin-sam .yui-dt tr.gray td.yui-dt-desc {
                 color: #aaaaaa;
             }
-
+                                      
             .yui-skin-sam .yui-dt-selected, .yui-skin-sam tr.yui-dt-selected td{
                 background-color: #aaaaaa;
+            }
+            .yui-skin-sam tr.yui-dt-highlighted td{
+                background-color: #9cf;
+                /*border-top:2px blue solid;
+                border-bottom:2px blue solid;*/
             }
             
             .dragrow{
@@ -240,6 +257,26 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+            }
+            
+            div.coverall-div
+            {
+                position: absolute;
+                left:0;
+                top: 0;
+                height:100%;
+                width:100%;
+                border: 0;
+                padding: 0;
+                margin: 0;
+
+                background-color: rgba(0, 0, 0, 0.025);
+                /*opacity: 0.025;
+                filter: progid:DXImageTransform.Microsoft.Alpha(opacity=5);*/
+                background-image: url(../../../hclient/assets/loading-animation-white.gif);
+                background-repeat: no-repeat;
+                background-position: center;     
+                cursor:wait;
             }
         </style>
         
@@ -274,10 +311,18 @@
                  <a href="#" onclick="{editStructure.doEditTitleMask(false);}">edit title mask<img src="../../../common/images/edit-pencil.png" width="16" height="16" border="0" title="Edit" /></a>
             </div>
             <textarea readonly cols="400" id="rty_TitleMask" rows="2" 
-                style="width:600px;max-width:600px;height:40px;display:inline-block; background-color: lightgray;"></textarea>
+                style="width:600px;max-width:600px;height:30px;display:inline-block; background-color:#EFF;"></textarea>
         </div>
+
+        <div  id="divStreamLinedAddition" style="margin:10px 20px">
+            <label style="padding-left: 80px;"><input type="checkbox" checked="checked" id="cbStreamLinedAddition"
+            onchange="window.hWin.HAPI4.save_pref('editRecStructure_StreamLinedAddition', $(event.target).is(':checked')?1:0 )"/>&nbsp;
+                    <b>Streamlined field addition (commonest options, quicker addition)</b></label>
+            <label style="padding-left:100px">Drag rows up and down to change field order</label>
+        </div>
+
         
-        <div id="page-inner" style="top:125px; bottom:80px;">
+        <div id="page-inner" style="top:145px; bottom:80px;">
             <!--  class="yui-navset yui-navset-top"  -->
             <div id="modelTabs" style="margin:auto;text-align:left;"></div>
         </div>
@@ -327,5 +372,9 @@ a record can only be the child of ONE record.</p>
         
         </div>
 
+        
+        <div class="list_div" 
+                style="z-index:999999999;height:auto;max-height:200px;padding:4px;cursor:pointer;">
+        </div>
     </body>
 </html>

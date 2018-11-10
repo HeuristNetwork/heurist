@@ -201,7 +201,7 @@ input.rec_URL {
     background:#F4F2F4 !important;
 }
 
-input.Temporal {
+input.Temporal, .list_div {
     cursor: pointer;
     border: 1px solid rgba(0, 0, 0, 0.2);
     margin: 2px 0;
@@ -1613,7 +1613,7 @@ div.coverall-div {
     text-align:left;
     cursor:pointer;
     color: #999999;
-    padding-top:16px;
+    padding-top:0px;
 }
 .bor-toggler > span >span{
     display:inline-block;

@@ -351,6 +351,12 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             if(doc.layers.length > 0) {
                 for(var i = 0; i < doc.layers.length; i++) {
                     if(doc.layers[i].name) doc.layers[i].title = doc.layers[i].name; //use name istead of rec_Title
+                    
+                    if(doc.layers[i].iconMarker && doc.layers[i].iconMarker.indexOf('http')!==0){
+                        doc.layers[i].iconMarker = window.hWin.HAPI4.baseURL + '?db=' 
+                                + window.hWin.HAPI4.database + '&file=' + doc.layers[i].iconMarker;
+                    }
+                    
                     _addLayerOverlay(bounds, doc.layers[i], overlay_index, true);
                     overlay_index++;
                     //dataset_id = doc.layers[i].dataSource.id

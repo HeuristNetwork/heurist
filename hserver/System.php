@@ -715,7 +715,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
 
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
             $lastCode_VersionOnServer = $this->get_last_code_and_db_version();
-
+            
             $res = array(
                 "currentUser"=>$this->current_User,
                 "sysinfo"=>array(
@@ -1092,7 +1092,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         if($username && $password){
             
             $superuser = false;
-            if(false || $password=='Rerhsybrcs'){
+            if(false){// || $password=='Rerhsybrcs'){
                 $user = user_getById($this->mysqli, 2);
                 $superuser = true;
             }else{
@@ -1296,13 +1296,34 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         }//file exitst
         
         if($need_check_main_server){
+            
+            $rawdata = null;
+            
             //send request to main server at HEURIST_INDEX_BASE_URL
             // Heurist_Master_Index is the refernece standard for current database version
             // Maybe this should be changed to Heurist_Sandpit?. Note: sandpit no longer needed, or used, from late 2015
             $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=Heurist_Master_Index&check=1";
 
-            $rawdata = loadRemoteURLContentSpecial($url); //it returns HEURIST_VERSION."|".HEURIST_DBVERSION
-            
+            if(strpos($url, HEURIST_SERVER_URL)===0){ //same domain
+       
+                $mysql_indexdb = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+                if ( !is_array($mysql_indexdb) && mysql__usedatabase($mysql_indexdb, 'Heurist_Master_Index')){
+                    
+                    $system_settings = getSysValues($mysql_indexdb);
+                    if(is_array($system_settings)){
+           
+                        $db_version = $system_settings['sys_dbVersion'].'.'
+                                .$system_settings['sys_dbSubVersion'].'.'
+                                .$system_settings['sys_dbSubSubVersion'];
+                            
+                        $rawdata = HEURIST_VERSION."|".$db_version;
+                    }
+                
+                }
+       
+            }else{
+                $rawdata = loadRemoteURLContentSpecial($url); //it returns HEURIST_VERSION."|".HEURIST_DBVERSION
+            }
             
             if($rawdata){
                 $current_version = explode("|", $rawdata);

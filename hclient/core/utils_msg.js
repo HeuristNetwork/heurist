@@ -46,11 +46,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }else{
             var request_code = null;
             if(window.hWin.HEURIST4.util.isnull(response) || window.hWin.HEURIST4.util.isempty(response.message)){
-                if(response.status!=window.hWin.ResponseStatus.REQUEST_DENIED){
-                        msg = 'Error_Empty_Message';
-                        if(response && !window.hWin.HEURIST4.util.isempty(response.request_code)){
-                            request_code = response.request_code;    
-                        }
+                msg = 'Error_Empty_Message';
+                if(response && response.status!=window.hWin.ResponseStatus.REQUEST_DENIED 
+                    && !window.hWin.HEURIST4.util.isempty(response.request_code)){
+                            
+                        request_code = response.request_code;    
                 }
             }else{
                 msg = response.message;

@@ -2141,16 +2141,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(this.element.find('.chb_opt_fields').length==0){  //not inited yet
             
             $('<div style="display:table;min-width:575px;width:100%">'
-             +'<div style="display:table-cell;text-align:left;padding:10px 0px 5px 35px;">'
+             +'<div style="display:table-cell;text-align:left;padding:20px 0px 5px 35px;">'
                     +'<label><input type="checkbox" class="chb_show_help" '
                         +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
                     +'<label><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
-                    +'<hr style="margin-top: 10px;width:250px">'
+                +'<span class="btn-config4-container" style="border: 1px #7D9AAA solid;padding: 4px;margin-left: 50px;">'
+                +'<span class="btn-config4" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">Modify structure</span>'
+                +'<span class="btn-config5 ui-icon ui-icon-gear smallicon"></span></span>'
+                    +'<hr style="margin-top: 10px;width:230px">'
              +'</div>'
              +'<div style="display:table-cell;text-align:right;padding: 10px 40px 0px 0px;font-weight: bold;">'
-                +'<span class="btn-config4" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Modify structure</span>'
-                +'<span class="btn-config5 ui-icon ui-icon-gear smallicon"></span>'
 
                 +'<span class="btn-config6" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Bug report</span>'
                 +'<span class="btn-config7 ui-icon ui-icon-bug smallicon"></span>'
@@ -2167,8 +2168,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         .click(function(){that.editRecordType();});
                 this.element.find('.btn-config4').click(function(){that.editRecordType();});
             }else{
-                this.element.find('.btn-config5').hide();
-                this.element.find('.btn-config4').hide();
+                this.element.find('.btn-config4-container').hide();
+                //this.element.find('.btn-config5').hide();
+                //this.element.find('.btn-config4').hide();
             }
             //bug report
             this.element.find('.btn-config7')

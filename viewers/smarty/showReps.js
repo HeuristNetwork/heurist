@@ -79,7 +79,7 @@ function ShowReps() {
         keepSelIndex = sel.selectedIndex,
         _currentTemplate = window.hWin.HAPI4.get_prefs('viewerCurrentTemplate');
 
-        //celear selection list
+        /*celear selection list
         while (sel.length>0){
             sel.remove(0);
         }
@@ -90,6 +90,7 @@ function ShowReps() {
                 if(i!==undefined){
 
                     window.hWin.HEURIST4.ui.addoption(sel, context[i].filename, context[i].name);
+                    
                     if(keepSelIndex<0 && _currentTemplate==context[i].filename){
                         keepSelIndex = sel.length-1;
                     }
@@ -102,6 +103,31 @@ function ShowReps() {
                 _reload(context[sel.selectedIndex].filename);
             }
         }
+        */
+
+
+        var all_templates = []        
+        if(context && context.length>0){
+
+            for (var i=0; i<context.length; i++){
+                    all_templates.push({key:context[i].filename, title:context[i].name});
+                    
+                    if(keepSelIndex<0 && _currentTemplate==context[i].filename){
+                        keepSelIndex = sel.length-1;
+                    }
+            } // for
+
+
+            var sel2 = window.hWin.HEURIST4.ui.createSelector(sel, all_templates);
+            sel2.selectedIndex = (keepSelIndex<0)?0:keepSelIndex;
+            
+            window.hWin.HEURIST4.ui.initHSelect(sel2, false);
+            
+            if(sel.selectedIndex>=0){
+                _reload(context[sel2.selectedIndex].filename);
+            }
+        }
+        
         _setLayout(true, false);
     }
 
@@ -196,8 +222,13 @@ function ShowReps() {
         if(window.hWin.HEURIST4.util.isnull(sel) || window.hWin.HEURIST4.util.isnull(sel.options) 
             || sel.options.length===0) { return null; }
             
-        if(sel.selectedIndex<0 || !sel.options[sel.selectedIndex]) sel.selectedIndex = 0;
-        return sel.options[sel.selectedIndex].value; // by default first entry
+        if(sel.selectedIndex<0 || !sel.options[sel.selectedIndex]){
+            
+            sel.selectedIndex = 0;
+            $(sel).hSelect("refresh"); 
+        }
+
+        return sel.options[sel.selectedIndex].value; // by default first entry        
     }
 
     /**

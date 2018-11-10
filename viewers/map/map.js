@@ -1233,6 +1233,11 @@ console.log('tileloaded 2');
             var lt = window.hWin.HAPI4.sysinfo['layout'];  
             if(lt && (lt.indexOf('DigitalHarlem')==0 || lt=='Beyond1914' || lt=='UAdelaide') ){
                 useMarkerClusterer = false;
+
+                if(lt=='Beyond1914' || lt=='UAdelaide'){
+                    customTheme['iconSize']  = [24,24];
+                    customTheme['iconAnchor']  = [12,12];
+                }
             }
 
             // Initialize TimeMap
@@ -1534,7 +1539,9 @@ console.log('tileloaded 2');
         //this - item (map item)
         //placemark_selected that was cliked - item may have several placemarks
         
-        if(!this.placemark.points && this.dataset.id=='main'){
+        var res = _getPlaceMarkFromItem( this, selected_placemark );
+        if(res.placemark_type=='marker' &&
+            !this.placemark.points && this.dataset.id=='main'){
         
             _selectItemsWithSameCoords( this, selected_placemark );
         }else{

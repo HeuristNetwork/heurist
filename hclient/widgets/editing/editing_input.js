@@ -2196,13 +2196,16 @@ $.widget( "heurist.editing_input", {
                         var relations = that.options.recordset.getRelations();
                         if(relations && relations.headers && relations.headers[value]){
                             
+                            sTitle = relations.headers[value][0];
                             
                             ele.empty();
                             window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
                                             {rec_ID: value, 
                                              rec_Title: relations.headers[value][0], 
                                              rec_RecTypeID: relations.headers[value][1],
-                                             rec_IsChildRecord: isChildRecord
+                                             rec_IsChildRecord: isChildRecord,
+                                             rec_OwnerUGrpID: relations.headers[value][2],
+                                             rec_NonOwnerVisibility: relations.headers[value][3]
                                              },
                                              selector_function);
                                              

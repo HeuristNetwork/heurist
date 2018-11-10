@@ -563,6 +563,9 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         this._cachedRecordset.removeRecord(recID);
     },
     
+    //
+    //
+    //
     selectedRecords: function(value){
         
         if(window.hWin.HEURIST4.util.isnull(value)){

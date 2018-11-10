@@ -269,7 +269,13 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                         window.hWin.HEURIST4.terms = response.data.terms;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain database definitions (get_defs function). This is probably due to a network timeout. However, if the problem persists please report to Heurist developers as it could indicate corruption of the database.');
+                        var sMsg = 'Cannot obtain database definitions (get_defs function). This is probably due to a network timeout. However, if the problem persists please report to Heurist developers as it could indicate corruption of the database.';                            
+                        
+                        if(response.message){
+                             sMsg =  sMsg + '<br><br>' + response.message;
+                        }
+                        window.hWin.HEURIST4.msg.showMsgErr(sMsg);
+                        
                         success = false;
                     }
 
