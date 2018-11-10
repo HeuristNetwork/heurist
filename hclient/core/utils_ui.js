@@ -1318,6 +1318,9 @@ window.hWin.HEURIST4.ui = {
             
             var parent_ele = $(selObj).parents('.ui-dialog');
             if(!parent_ele || parent_ele.length==0) {
+                
+                parent_ele = $(selObj).parents('.selectmenu-parent'); //add special class to some top most div 
+                
                 /*
                 var sel = $(selObj)[0];
                 if(sel.ownerDocument != document){ //inside iframe
@@ -1329,8 +1332,9 @@ window.hWin.HEURIST4.ui = {
                 //parent dialog not found
                 if(parent_ele.length==0)
                 */
-                    parent_ele = $(selObj).parent();   
-                
+                    if(!parent_ele || parent_ele.length==0) {
+                        parent_ele = $(selObj).parent();   
+                    }
             }
             
             var menu = $(selObj).hSelect(       
@@ -2047,9 +2051,9 @@ window.hWin.HEURIST4.ui = {
     // configMode.entity
     // configMode.filter_group
     createEntitySelector: function(selObj, configMode, topOptions, callback){
-       
-        $(selObj).empty();
         
+        selObj = window.hWin.HEURIST4.ui.createSelector(selObj, null);
+       
         var request = {a:'search','details':'name'};
         var fieldTitle;
         
@@ -2094,10 +2098,8 @@ window.hWin.HEURIST4.ui = {
             request['entity'] = 'sysImportFiles';
             request['ugr_ID'] = configMode.filter_group;
         }else{
-            return;
+            return selObj;
         }
-        
-        
         
         window.hWin.HAPI4.EntityMgr.doRequest(request,
                     function(response){
@@ -2119,20 +2121,20 @@ window.hWin.HEURIST4.ui = {
                                 groups = topOptions;
                             }
 
-                            window.hWin.HEURIST4.ui.createSelector(selObj, groups);
+                            selObj = window.hWin.HEURIST4.ui.createSelector(selObj, groups);
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                         
                         if($.isFunction(callback)){
-                            callback();
+                            callback(selObj);
                         }
                         
                     });
                               
         
-        
+          return selObj;
     },
 
     //

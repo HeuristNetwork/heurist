@@ -36,7 +36,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     currentStep, 
     currentId,  //currect record id in import tabel to PREVIEW data
     upload_file_name,  //file on server with original uploaded data
-    encoded_file_name; //file on server with UTF8 encoded data
+    encoded_file_name, //file on server with UTF8 encoded data
+    
+    session_selector;
     
     function _init(_imp_ID, _max_upload_size, format){
     
@@ -203,7 +205,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     .click(function(e) {
                             //@todo - remove temp file
                             _showStep(1);
-                            $('#selImportId').val('');
+                            session_selector.val('').hSelect("refresh"); 
                         });
                         
         $('#btnParseStep1')
@@ -223,18 +225,22 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $('#divFieldRolesHeader').hide();
         
         //get list of sessions and fill selector                        
-        var selImportID = $('#selImportId').change(function(e){
-           if(e.target.value>0){
-                imp_ID = e.target.value;      
-                _loadSession();    
-           }
-        });
-        window.hWin.HEURIST4.ui.createEntitySelector( selImportID.get(0), 
+        window.hWin.HEURIST4.ui.createEntitySelector( $('#selImportId').get(0), 
                     {entity:'SysImportFiles', filter_group:'0,'+window.hWin.HAPI4.currentUser['ugr_ID']}, 
                     window.hWin.HR('select uploaded file...'),
-                    function(){
-                        window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), selImportID.find('option').length<2 );
+                    function(sel){
+
+                        window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), $(sel).find('option').length<2 );
+                        
+                        session_selector = window.hWin.HEURIST4.ui.initHSelect(sel, false);
+                        session_selector.change(function(event){
+                           if($(event.target).val()>0){
+                                imp_ID = $(event.target).val();
+                                _loadSession();    
+                           }
+                        });
                     });
+                        
         
                         
         //init STEP 3 - matching and import
@@ -431,12 +437,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 if($('#selImportId > option').length>1){
                                     window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), false);
                                 }
+                                 
                                 _showStep(1);
                                 window.hWin.HEURIST4.msg.showMsgDlg('Import session was cleared');
                             }else{
                                 $('#selImportId').empty();
                                 //IJ asked 2016-11-15 window.hWin.HEURIST4.msg.showMsgDlg('Import sessions were cleared');
                             }
+                            session_selector.hSelect("refresh");
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                             window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), false);
@@ -505,7 +513,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             var $dlg, buttons = {};
         
             if($('#sa_primary_rectype > option').length==0){
-                window.hWin.HEURIST4.ui.createRectypeSelect( $('#sa_primary_rectype').get(0), null, window.hWin.HR('select...'), true);
+                window.hWin.HEURIST4.ui.createRectypeSelect( $('#sa_primary_rectype').get(0), null, window.hWin.HR('select...'), false);
             }else{
                 $('#sa_primary_rectype').val(imp_session['primary_rectype']);
             }
@@ -1769,7 +1777,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $.each(sels, function (idx, item){
             var $item = $(item);
             if($item.attr('id')==keyfield_sel){
-                window.hWin.HEURIST4.ui.createSelector(item, [{key:'id',title:'Record ID'}] );  //the only option for current id field
+                var selObj = window.hWin.HEURIST4.ui.createSelector(item, [{key:'id',title:'Record ID'}] );  //the only option for current id field
+                selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, false);
             }else{
                 
                 var field_idx = $(item).attr('data-field');
@@ -1781,7 +1790,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 var sel = window.hWin.HEURIST4.ui.createRectypeDetailSelect(item, rtyID, 
                     $item.hasClass('indexes')?allowed2:allowed, 
                     $item.hasClass('indexes')?topitems2:topitems,
-                    {useHtmlSelect:true, 
+                    {useHtmlSelect:false, 
                      show_dt_name:true, 
                      show_latlong:(currentStep==4), 
                      show_required:(currentStep==4)});    
@@ -2307,7 +2316,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), __isAllRectypesSelectedForIdFields() );
                             });
                             $.each(select_rectype, function(idx, item){
-                                window.hWin.HEURIST4.ui.createRectypeSelect( item, null, 'select...', true);    
+                                window.hWin.HEURIST4.ui.createRectypeSelect( item, null, 'select...', false);    
                             });
 
                             $("input[id^='d_field']").change(function(evt){
@@ -2342,9 +2351,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             
                             imp_ID = response.data.import_id;      
                             if($('#selImportId > option').length<1){
-                            window.hWin.HEURIST4.ui.addoption($('#selImportId').get(0), null, window.hWin.HR('select uploaded file...'));    
+                                window.hWin.HEURIST4.ui.addoption($('#selImportId').get(0), null, window.hWin.HR('select uploaded file...'));    
                             }
                             window.hWin.HEURIST4.ui.addoption($('#selImportId').get(0), imp_ID, response.data.import_name);
+                            session_selector.hSelect("refresh");
                             _loadSession();    
                         }
                         
@@ -3898,7 +3908,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         
         if(page==1){
-            $('#selImportId').val('');  //clear selection
+            $("#selImportId").val('');  //clear selection
+            if(session_selector && session_selector.hSelect('instance')) session_selector.hSelect("refresh");
             imp_ID = 0;
         }else if(page==1){
             $('#divStep2').find('fieldset').show();

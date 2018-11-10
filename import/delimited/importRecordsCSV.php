@@ -178,7 +178,7 @@ If you have missing data for Required fields, you may find it convenient to set 
     </div>
 </div>
 <!-- STEP 2 parse uploaded data -->
-<div style="width:100%; height:100%;display:none;" id="divStep2">
+<div style="width:100%; height:100%;display:none;" id="divStep2" class="selectmenu-parent">
     <div class="ent_header" style="height:27em;padding-top:1em;">
     
         <div id="btnBackToStart2"
@@ -389,7 +389,7 @@ If you have missing data for Required fields, you may find it convenient to set 
     </div>
 </div>
 <!-- STEP 3 matching and import -->
-<div style="width:100%; height:100%;display:none;overflow:auto" id="divStep3">
+<div style="width:100%; height:100%;display:none;overflow:auto" id="divStep3" class="selectmenu-parent">
 
     <div class="ent_header" style="height:auto;border:none;padding-top:1em;padding-bottom:2.5em;min-width:970px">
     
