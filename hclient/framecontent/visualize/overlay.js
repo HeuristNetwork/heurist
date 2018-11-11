@@ -835,6 +835,10 @@ function _linkTwoRecords(source_ID, target_ID){
                             // Trigger refresh
                             settings.onRefreshData.call(this);
                 }
+                
+                drag_link_source_id = null;
+                if(drag_link_line) drag_link_line.remove();
+                drag_link_line = null;
         }                            
         
         var opts = {

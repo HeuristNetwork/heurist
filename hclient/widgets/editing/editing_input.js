@@ -772,7 +772,7 @@ $.widget( "heurist.editing_input", {
                             
                             var opts = {
                                 height:280, width:750, 
-                                title: 'Create a relationship between records',
+                                title: 'Create relationship between records ( Field: "'+window.hWin.HEURIST4.detailtypes.names[that.options.dtID]+'" )',
                                 relmarker_dty_ID: that.options.dtID,
                                 onClose: __onCloseAddLink 
                             };

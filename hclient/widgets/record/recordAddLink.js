@@ -34,7 +34,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         source_ID:null,
         target_ID:null,
-        relmarker_dty_ID:null,//relmarker field type id 
+        relmarker_dty_ID:null,//relmarker field type id  - this is creation of relationship only
         source_AllowedTypes:null,
         onlyReverse:false
         
@@ -55,6 +55,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             this.element.find('#div_source1').hide();
             this.element.find('#div_source2').css('display','inline-block');
         }else{
+            this.element.find('#div_source_header').css('vertical-align','top');
             this.getRecordValue(this.options.source_ID, 'source');            
         }
        
@@ -63,6 +64,8 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             this.element.find('#div_target1').hide();
             this.element.find('#div_target2').css('display','inline-block');
         }else{
+            this.element.find('#div_target_header').css('vertical-align','top');
+            
             this.getRecordValue(this.options.target_ID, 'target');
 
             if(this.options.source_AllowedTypes && this.options.relmarker_dty_ID>0){
@@ -83,7 +86,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     //
     _getActionButtons: function(){
         var res = this._super();
-        res[1].text = window.hWin.HR('Create links');
+        res[1].text = window.hWin.HR((this.options.relmarker_dty_ID>0)?'Create link':'Create links');
         return res;
     },
     
@@ -274,6 +277,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     + '<div id="rt_'+party+'_sel_'+dty+'" style="display:table-row;line-height:21px"></div></div>'
     +'<div>').appendTo(this.element.find('#'+party+'_field'));
     
+    
                 if(field_type=='relmarker'){
                     
                     var terms = details[fi_term],
@@ -301,8 +305,10 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         }//for fields
         
         if(this.options.relmarker_dty_ID>0){
-            //hide radio - since it is the only one field in list
-            this.element.find('#source_field').find('.field_item').css('padding-left','0');
+            //hide radio and field name - since it is the only one field in list
+            var ele = this.element.find('#source_field').find('.field_item').css('padding-left',0);
+            this.element.find('#source_field').find('.field_item > div').css('padding-left',0);
+            this.element.find('#source_field').find('.field_item > label').hide();
             this.element.find('#source_field').find('input[type=radio]').hide().click(); //prop('checked',true).
         }
                             
@@ -333,8 +339,19 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     //
     _enableActionButton: function (){
         
+        var sel_field  = this.element.find('input[type="radio"][name="link_field"]:checked');
+        
         var isEnabled = ((this.options.target_ID>0 || this.getFieldValue('target_record')>0) && 
-                        this.element.find('input[type="radio"][name="link_field"]:checked').val()>0);
+                            sel_field.val()>0);
+                            
+        if(isEnabled && sel_field.attr('data-type')=='relmarker'){
+            //in case relmarker check if reltype selected
+            var isReverce = (sel_field.attr('data-party')=='target');
+            var dtyID = sel_field.val()
+            var termID = this.getFieldValue('rt_'+(isReverce?'target':'source')+'_sel_'+dtyID);        
+            isEnabled = (termID>0);
+        }                
+                        
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), !isEnabled );
         
     }, 
@@ -605,9 +622,11 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     }else{
                         $('#target_title').hide();    
                         $('#target_rectype_img').hide(); 
-                        $('#target_rectype').css({'margin-top':0,'margin-left':'5px'}); 
+                        //DO NOT SHOW 
+                        $('#target_rectype').hide(); //css({'margin-top':0,'margin-left':'5px'}); 
+                        
                         $('#div_target1').css({'display':'block','padding-left':'120px'}); 
-                        $('#div_target2').find('.link-div').css({'background':'none','border':'none'});
+                        $('#div_target2 ').find('.link-div').css({'background':'none'}); //,'border':'none'
                         $('#div_target2').find('a').css({'font-weight':'bold','font-size':'1.05em'});
                     }
                 }else{
@@ -645,7 +664,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         var dtyID = ele.val()
         var data_type = ele.attr('data-type');
         var isReverce = (ele.attr('data-party')=='target');
-        
+
         if(!(this.options.source_ID>0)){
             
             var rty_ID = Number(this.source_RecTypeID);

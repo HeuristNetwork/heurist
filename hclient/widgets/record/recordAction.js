@@ -169,7 +169,7 @@ $.widget( "heurist.recordAction", {
         return [
                  {text:window.hWin.HR('Cancel'), 
                     id:'btnCancel',
-                    css:{'float':'right'}, 
+                    css:{'float':'right','margin-left':'30px'}, 
                     click: function() { 
                         that.closeDialog();
                     }},
