@@ -98,6 +98,12 @@ H2 {
     width: 100%;
 }
 
+/* fix overflow issue in menu   */
+.ui-selectmenu-menu > .ui-menu .ui-menu-item, .ui-selectmenu-menu > .ui-menu .ui-state-active{
+    margin: 1px;
+}
+
+
 /* TODO: opacity=20 appears to be wrong, ? should be opacity 20 */
 .ui-layout-mask {
     background: #C00 !important;

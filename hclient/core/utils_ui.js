@@ -1347,11 +1347,18 @@ window.hWin.HEURIST4.ui = {
                     at: "left bottom",
                     offset: null
                 },*/
-                  change: function( event, data ) {
+                change: function( event, data ) {
     
                         $(selObj).val(data.item.value);//change value for underlaying html select
                         $(selObj).trigger('change');
-                }});
+                },
+                open: function(event, ui){
+                    //console.log(menu.hSelect( "menuWidget" ).width());
+                    //increase width of dropdown to avoid word wrap
+                    menu.hSelect( "menuWidget" ).width( menu.hSelect( "menuWidget" ).width()+20 );                    
+                }
+              });
+                
                 
             var dwidth = $(selObj).css('width');    
             if(dwidth=='0px') dwidth = 'auto';
@@ -1359,7 +1366,8 @@ window.hWin.HEURIST4.ui = {
             var dminwidth = $(selObj).css('min-width');    
             if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '4em';
 
-            menu.hSelect( "menuWidget" ).css({'padding':0,'background':'#F4F2F4','zIndex':9999999});
+            menu.hSelect( "menuWidget" ).css( {'padding':0,'background':'#F4F2F4','zIndex':9999999 });
+                        
             menu.hSelect( "menuWidget" ).addClass('heurist-selectmenu overflow').css({'max-height':'300px'});
             menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF',
                 width:(dwidth?dwidth:'auto'),'min-width':dminwidth }); //,'min-width':'16em''#F4F2F4'
