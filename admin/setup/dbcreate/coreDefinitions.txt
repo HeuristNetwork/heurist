@@ -1,7 +1,7 @@
--- Heurist Definitions Exchange File generated: 19 Oct 2018 @ 17:45
+-- Heurist Definitions Exchange File generated: 12 Nov 2018 @ 00:33
 -- Installation = http://heurist.sydney.edu.au/h5-ao/
 -- Database = Heurist_Core_Definitions
--- Program Version: 5.0.1
+-- Program Version: 5.0.2
 -- Database Version: 1.2.0
 
 -- RECORD TYPE GROUPS
@@ -861,7 +861,7 @@
 ('166','Symbology colour','','enum','Symbology colour for rendering this map layer or for individual map object', '','','open','3', 'default symbology colour','1037','101', '0','3324','', '',0,'1','viewable', '1',''),
 ('167','Image format','Please document the nature of this detail type (field)) ...','enum','The specific image format type eg. jpg, tif, geotif used by this file', '','','open','3', 'Image format','1094','101', '0','3328','', '',0,'1','viewable', '1',''),
 ('168','Worldfile','Please document the nature of this detail type (field)) ...','blocktext','Standard worldfile content using ESRI definition', '','','open','3', 'Worldfile','1095','101', '0','','', '',0,'1','viewable', '1',''),
-('169','Map data source','Please document the nature of this detail type (field)) ...','resource','The file or service which delivers the map data', '','','open','3', 'Map Data source','1083','101', '0','','', '26,27,28,29,44',0,'1','viewable', '1','26,27,28,29,44'),
+('169','Map data source','Please document the nature of this detail type (field)) ...','resource','The file or service which delivers the map data', '','','open','3', 'Map Data source','1083','101', '0','','', '27,28,29,44,11',0,'1','viewable', '1','27,28,29,44,11'),
 ('170','Minimum zoom degrees','Please document the nature of this detail type (field)) ...','float','The minimum zoom below which the map layer is turned off or the map cannot be zoomed in (if the larger map dimension falls below this)', '','','open','3', 'Minimum zoom for layer display (degrees)','1085','101', '0','','', '',0,'1','viewable', '1',''),
 ('171','Maximum zoom degrees','Please document the nature of this detail type (field)) ...','float','The maximum zoom above which the map layer is turned off or the map cannot be zoomed out (if the larger map dimension falls below this)', '','','open','3', 'Maximum zoom for layer display (degrees)','1086','101', '0','','', '',0,'1','viewable', '1',''),
 ('172','Hide layer outside zoom range','Please document the nature of this detail type (field)) ...','enum','Hide the map layer altogther in the legend if map is outside the zoom range specified in previous fields, otherwise simply disable in legend', '','','open','3', 'Hide layer outside zoom range','1087','101', '0','{\"5204\":{},\"5205\":{}}','[]', '',0,'1','viewable', '1',''),
@@ -1504,7 +1504,19 @@
 
 -- `dsh_ID`,`dsh_Order`,`dsh_Label`,`dsh_Description`,`dsh_Enabled`,`dsh_ShowIfNoRecords`,`dsh_CommandToRun`,`dsh_Parameters`
 
->>StartData>> >>EndData>>
+>>StartData>> ('1','4','Add a Person','Adds a Person record, editable and viewable by any logged in user','y','y', 'action-AddRecord','{\"RecTypeID\":\"10\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"viewable\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
+('2','5','Add a Place','Adds a Place record, editable by any logged in user, publicly viewable','y','y', 'action-AddRecord','{\"RecTypeID\":\"12\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"public\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
+('3','9','Quick filter builder','Simple form to build a single criterion search/filter','y','y', 'action-CreateFilter',''),
+('4','11','Persons search','Run a saved filter to retrieve all Persons in the database','y','y', 'action-SearchById','29'),
+('5','1','Set your preferences','Set your preferences for page length, startup filter, map clustering and other behaviours','y','y', 'menu-profile-preferences',''),
+('6','8','Structure editing','Define or modify entity types, fields and vocabularies','y','y', 'menu-structure-rectypes',''),
+('7','7','Browse templates','Borrow structure (entity types, fields, vocabularies) from templates and other users\' databases','y','y', 'menu-structure-import',''),
+('8','2','Import a user','Imports the profile of an existing user from another database','y','y', 'menu-profile-import',''),
+('9','10','Export CSV file','Exports a selection of fields for the current database susbset to a CSV file','y','y', 'menu-export-csv',''),
+('10','3','Import CSV file','Imports a spreadsheet CSV file, normalising multiple entity types','y','y', 'menu-export-csv',''),
+('11','6','Add a new record','Add a new record selecting record (entity) type and access rights','y','y', 'menu-import-add-record',''),
+('12','12','Archive database','Create a single self-documenting file containing all data (XML, SQL, original uploads)','y','y', 'menu-help-tipofday',''),
+>>EndData>>
 
  
 
