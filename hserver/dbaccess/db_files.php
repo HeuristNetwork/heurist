@@ -492,7 +492,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         
         //force download  - important for embed element DO NOT include this atttibute!
         if($originalFileName!=null){
-           header('Content-Disposition: attachment; filename='.$originalFileName); //basename($filename));
+          header('Content-Disposition: attachment; filename="'.$originalFileName.'"'); //basename($filename));
         }
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
