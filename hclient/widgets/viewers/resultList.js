@@ -1205,7 +1205,7 @@ $.widget( "heurist.resultList", {
 
         var selected_rec_ID = $rdiv.attr('recid');
 
-        var action = $target.parents().attr('data-key');//parents('div[data-key!=""]');
+        var action =  $target.attr('data-key') || $target.parents().attr('data-key');//parents('div[data-key!=""]');
         if(!window.hWin.HEURIST4.util.isempty(action)){ //action_btn && action_btn.length()>0){
             //var action = action_btn.attr('data-key');
             if(this.options.renderer){

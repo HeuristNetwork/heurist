@@ -182,7 +182,7 @@ $.widget( "heurist.importStructure", {
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             //refresh target
-            window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
+            window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,false);
             
             that.showRecTypeTree();
             window.hWin.HEURIST4.util.setDisabled(that.btn_import, true);
@@ -237,7 +237,8 @@ $.widget( "heurist.importStructure", {
                            
                            rendererHeader:  function(){
             sHeader = '<div style="width:62px">Reg#</div><div style="width:23em">Database Name</div>'
-                    +'<div style="width:54em">Description</div>';
+                    +'<div style="width:2em">&nbsp;</div>'
+                    +'<div style="width:52em">Description</div>';
                     //+'<div style="width:3em">URL</div>';
                                 return sHeader;
                            },
@@ -268,7 +269,7 @@ $.widget( "heurist.importStructure", {
                   
             //init search panel
             this.searchForm_dbs.load(window.hWin.HAPI4.baseURL
-                        +'hclient/widgets/entity/searchSysDatabases.html?t'
+                        +'hclient/widgets/entity/searchSysDatabases.html?t='
                         +window.hWin.HEURIST4.util.random(), 
             function(response, status, xhr){
                 
@@ -310,6 +311,7 @@ $.widget( "heurist.importStructure", {
                 if(that.options.source_database_id>0){
                     query_request['q'] = 'ids:'+that.options.source_database_id;
                 }
+                query_request['detail'] = '398'; //Allow Clone?
                 
                 window.hWin.HAPI4.RecordMgr.search(query_request, 
                     function( response ){
@@ -318,6 +320,7 @@ $.widget( "heurist.importStructure", {
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
                             response.data.fields.push('rec_ScratchPad');
+                            response.data.fields.push('rec_AllowClone');
                             
                             that._cachedRecordset_dbs = new hRecordSet(response.data);
                             
@@ -326,6 +329,7 @@ $.widget( "heurist.importStructure", {
                                 
                                     var recURL  = this.fld(record, 'rec_URL');
                                     var recDesc = this.fld(record, 'rec_Title');
+                                    var isAllowClone = (this.fld(record, 398)!=6023)?1:0;
                             
                                     var splittedURL = recURL.split('?');
                                     var dbURL = splittedURL[0];
@@ -336,6 +340,8 @@ $.widget( "heurist.importStructure", {
                                     this.setFld(record, 'rec_Title', dbName);
                                     this.setFld(record, 'rec_ScratchPad', recDesc);
                                     this.setFld(record, 'rec_RecTypeID', recID<1000?0:1);
+                                    this.setFld(record, 'rec_AllowClone', isAllowClone);                                    
+
                             });
                             
                             if(that.options.source_database_id>0){
@@ -484,7 +490,7 @@ $.widget( "heurist.importStructure", {
                             +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
                             +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
-                            +'<h2>'+grp_val+' '+rectypes.groups[idx].name+'</h2>'
+                            +'<h2>'+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
                             +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
                     }
                 }
@@ -765,6 +771,7 @@ $.widget( "heurist.importStructure", {
         var recID = fld('rec_ID');
         var recURL = fld('rec_URL');
         var dbName = fld('rec_Title');
+        var recAllowClone = fld('rec_AllowClone');
         var recTitle = window.hWin.HEURIST4.util.htmlEscape(fld('rec_ScratchPad'));
         
         /*var splittedURL = recURL.split('?');
@@ -784,7 +791,10 @@ $.widget( "heurist.importStructure", {
         var recTitle = '<div class="item" style="width:3em">'+recID+'</div>'
                       +'<div class="item" style="width:25em;'+(recID<1000?'font-weight:bold':'')
                                                         +'">'+dbName+'</div>'
-                      +'<div class="item" style="width:60em" title="'+recTitle+'">'+recTitle+'</div>';
+                      +'<div class="item" style="width:4em">'
+                        +((recID<1000 && recAllowClone==1)?'<span data-key="clone" style="cursor:pointer;text-decoration:underline">clone</span>'
+                                     :'')+'</div>'
+                      +'<div class="item" style="width:56em" title="'+recTitle+'">'+recTitle+'</div>';
                       /*+'<div class="item" style="width:2em;padding-left:4px"><a href="'
                                 +recURL+'?db='+dbName+'" target="_blank" title="'
                                 +window.hWin.HEURIST4.util.htmlEscape(recURL)+'">'

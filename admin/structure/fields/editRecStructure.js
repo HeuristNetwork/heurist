@@ -624,6 +624,8 @@ function EditRecStructure() {
                                     '<option value="recommended" selected>recommended</option>'+
                                     '<option value="optional">optional</option>'+
                                     '<option value="forbidden">hidden</option></select>'+ //was forbidden
+                                    
+                                '<input type="hidden" id="ed0_rst_Status" value="open">'+
                             '</div></div>'+
                             
                         // Repeatability
