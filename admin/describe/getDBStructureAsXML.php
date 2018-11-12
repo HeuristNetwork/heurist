@@ -217,6 +217,34 @@ $res->close();
 print "</Translations>";
 
 // ------------------------------------------------------------------------------------------
+// sysDashboard
+
+print "\n\n<Dashboard>";
+include HEURIST_DIR.'admin/structure/crosswalk/sysDashboard.inc'; // sets value of $flds
+$query = "select $flds from sysDashboard";
+$res = $mysqli->query($query);
+$fmt = 'sysDashboard';  // update format if fields added
+print "\n\n<!-- $flds -->";
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
+print "</Dashboard>";
+
+// ------------------------------------------------------------------------------------------
+// defLanguages
+
+print "\n\n<Languages>";
+include HEURIST_DIR.'admin/structure/crosswalk/defLanguagesFields.inc'; // sets value of $flds
+$query = "select $flds from defLanguages";
+$res = $mysqli->query($query);
+$fmt = 'defLanguages';  // update format if fields added
+print "\n\n<!-- $flds -->";
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
+print "</Languages>";
+
+// ------------------------------------------------------------------------------------------
 // defCalcFunctions
 
 print "\n\n<CalcFunctions>";
@@ -245,20 +273,6 @@ $res->close();
 print "</Crosswalks>";
 
 // ------------------------------------------------------------------------------------------
-// defLanguages
-
-print "\n\n<Languages>";
-include HEURIST_DIR.'admin/structure/crosswalk/defLanguagesFields.inc'; // sets value of $flds
-$query = "select $flds from defLanguages";
-$res = $mysqli->query($query);
-$fmt = 'defLanguages';  // update format if fields added
-print "\n\n<!-- $flds -->";
-while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
-$res->close();
-
-print "</Languages>";
-
-// ------------------------------------------------------------------------------------------
 // defURLPrefixes
 
 print "\n\n<URLPrefixes>";
@@ -272,19 +286,6 @@ $res->close();
 
 print "</URLPrefixes>";
 
-// ------------------------------------------------------------------------------------------
-// sysDashboard
-
-print "\n\n<Dashboard>";
-include HEURIST_DIR.'admin/structure/crosswalk/sysDashboard.inc'; // sets value of $flds
-$query = "select $flds from sysDashboard";
-$res = $mysqli->query($query);
-$fmt = 'sysDashboard';  // update format if fields added
-print "\n\n<!-- $flds -->";
-while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
-$res->close();
-
-print "</Dashboard>";
 
 // ------------------------------------------------------------------------------------------
 // Output the following only if parameter switch set and user is an admin

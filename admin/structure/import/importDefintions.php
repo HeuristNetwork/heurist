@@ -136,7 +136,7 @@ class ImportDefinitions {
         $this->mysqli->query('SET FOREIGN_KEY_CHECKS = 0');
 
 
-        //order of tables 
+        //order of tables - this must correspond with order in getDBStructureAsSQL.php
         $tables = array('',
         'defRecTypeGroups', 
         'defDetailTypeGroups', 
@@ -148,7 +148,11 @@ class ImportDefinitions {
         'defRelationshipConstraints',
         'defFileExtToMimetype',
         'defTranslations',
-        'usrSavedSearches');
+        'usrSavedSearches',
+        'sysDashboard', // added 12/11/18
+        'defLanguages' // added 12/11/18
+        // there are several more tables which are not used as at 12/11/18
+        );
         
         $splittedData = explode(START_TOKEN, $data);
         

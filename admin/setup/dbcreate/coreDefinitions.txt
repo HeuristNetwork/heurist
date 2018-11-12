@@ -1,5 +1,5 @@
--- Heurist Definitions Exchange File generated: 12 Nov 2018 @ 00:33
--- Installation = http://heurist.sydney.edu.au/h5-ao/
+-- Heurist Definitions Exchange File generated: 12 Nov 2018 @ 12:38
+-- Installation = http://heurist.sydney.edu.au/HEURIST/h5-ij/
 -- Database = Heurist_Core_Definitions
 -- Program Version: 5.0.2
 -- Database Version: 1.2.0

@@ -694,6 +694,24 @@ function print_row($row,$fmt) {
                     '$svs_Query','$row[svs_UGrpID]','$row[svs_ExclusiveXSL]'),";
             break;
 
+        case 'sysDashboard':
+            $dsh_Label = $mysqli->real_escape_string($row['dsh_Label']);
+            $dsh_Description = $mysqli->real_escape_string($row['dsh_Description']);
+            $dsh_Parameters = $mysqli->real_escape_string($row['dsh_Parameters']);
+            
+            print "('$row[dsh_ID]','$row[dsh_Order]','$dsh_Label','$dsh_Description','$row[dsh_Enabled]','$row[dsh_ShowIfNoRecords]',
+            '$row[dsh_CommandToRun]','$dsh_Parameters'),";
+            break;
+            
+        case 'defLanguages':
+            $lng_Name = $mysqli->real_escape_string($row['lng_Name']);
+            $lng_Notes = $mysqli->real_escape_string($row['lng_Notes']);
+            print "('$row[NISOZ3953]','$row[lng_ISO639]','$lng_Name','$lng_Notes'),";
+            break;
+
+        // As at 12/11/18 only the tables above are imported by admin/structure/import/importDefinitions 
+        // when creating a new database
+        
         case 'defCalcFunctions':
             $cfn_FunctionSpecification = $mysqli->real_escape_string($row['cfn_FunctionSpecification']);
             print "('$row[cfn_ID]','$row[cfn_Domain]','$cfn_FunctionSpecification'),";
@@ -706,26 +724,11 @@ function print_row($row,$fmt) {
             '$row[crw_Modified]'),";
             break;
 
-        case 'defLanguages':
-            $lng_Name = $mysqli->real_escape_string($row['lng_Name']);
-            $lng_Notes = $mysqli->real_escape_string($row['lng_Notes']);
-            print "('$row[NISOZ3953]','$row[lng_ISO639]','$lng_Name','$lng_Notes'),";
-            break;
-
         case 'defURLPrefixes':
             $urp_Prefix = $mysqli->real_escape_string($row['urp_Prefix']);
             print "('$row[urp_ID]','$urp_Prefix'),";
             break;
 
-        case 'sysDashboard':
-            $dsh_Label = $mysqli->real_escape_string($row['dsh_Label']);
-            $dsh_Description = $mysqli->real_escape_string($row['dsh_Description']);
-            $dsh_Parameters = $mysqli->real_escape_string($row['dsh_Parameters']);
-            
-            print "('$row[dsh_ID]','$row[dsh_Order]','$dsh_Label','$dsh_Description','$row[dsh_Enabled]','$row[dsh_ShowIfNoRecords]',
-            '$row[dsh_CommandToRun]','$dsh_Parameters'),";
-            break;
-            
             // Note: these have not yet (Sep 2011) been implemented in buildCrosswalks.php as they are not really needed
 
         case 'sysUGrps': // User details - data from sysUGrps table
