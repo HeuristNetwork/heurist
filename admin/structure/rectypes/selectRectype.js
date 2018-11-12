@@ -579,13 +579,12 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
 			var db = window.hWin.HAPI4.database;
 			var url = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/editRectype.html?supress=1&db="+db;
-
-            var dim = Hul.innerDimensions(top);                    
+            var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
             
 			popupSelect = Hul.popupURL(top, url,
 			{	"close-on-blur": false,
 				"no-resize": false,
-                height: dim.h*0.9,
+                height: maxh*0.9,
                 width: 800,
 				callback: function(context) {
 

@@ -1364,7 +1364,7 @@ window.hWin.HEURIST4.ui = {
             if(dwidth=='0px') dwidth = 'auto';
             
             var dminwidth = $(selObj).css('min-width');    
-            if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '4em';
+            if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '10em';
 
             menu.hSelect( "menuWidget" ).css( {'padding':0,'background':'#F4F2F4','zIndex':9999999 });
                         
@@ -1815,7 +1815,7 @@ window.hWin.HEURIST4.ui = {
        
         var isHiddenRecord = false;
         
-        if(selector_function !== false){
+        if(selector_function !== false ){
                 
             
                 var not_owner = !(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member( info['rec_OwnerUGrpID'] ));

@@ -3575,7 +3575,7 @@ function onFieldAddSuggestion(event, insertAfterRstID){
 
                    is_added = true;
                     ele.attr('recid',dty_ID)
-                       .text(field_name+' ['+deftype[fi.dty_Type]+']')
+                       .text(field_name+' ['+ window.hWin.HEURIST4.detailtypes.lookups[deftype[fi.dty_Type]] +']')
                        .click( function(event){
                             window.hWin.HEURIST4.util.stopEvent(event);
 

@@ -86,7 +86,7 @@
 
 </script>
 
-<fieldset>
+<fieldset style="padding:0">
 
     <h3>Bookmarklet</h3>
     <div>
@@ -101,100 +101,9 @@
 
     <!-- ================================================= -->
     <hr/>
-    <h3>Filter</h3>
-    <div>
-        <div class="header"><label for="defaultSearch">Filter string to apply when loading main page</label></div>
-        <input name="defaultSearch" id="defaultSearch" class="text ui-widget-content ui-corner-all" style="min-width:300px"/>
-    </div>
-
-    <div>
-        <div class="header"><label for="searchQueryInBrowser">Include current filter in URL for page</label></div>
-        <input type="checkbox" name="searchQueryInBrowser" id="searchQueryInBrowser" class="text ui-widget-content ui-corner-all"/>
-    </div>
-
-    <div>
-        <div class="header"><label for="bookmarks_on">Show My Bookmarks in navigation panel<br/><i>Turn on only if using bookmarks in shared db</i></label></div>
-        <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
-    </div>
-
-    <div>
-        <div class="header">
-            <label for="search_result_pagesize">
-                Page size for display of search results list
-            </label>
-        </div>
-        <select name="search_result_pagesize" id="search_result_pagesize" class="text ui-widget-content ui-corner-all" style="min-width:50px"
-            title="This limit does not apply to filter. This is just for pagination of result list">
-            <option value="50">50</option>
-            <option value="100">100</option>
-            <option value="500">500</option>
-            <option value="1000">1,000</option>
-            <option value="5000">5,000 (not recommended)</option>
-        </select>
-    </div>
-
-
-    <div>
-        <div class="header">
-            <label for="smarty-output-limit">
-                Limit lines in interactive custom report output<br/><i>Heurist interface only, not external calls</i>
-            </label>
-        </div>
-        <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
-            title="This limit does not apply to external calls or periodic report generation to file">
-            <option value="50">50</option>
-            <option value="200">200</option>
-            <option value="500">500 (not recommended)</option>
-            <option value="1000">1,000 (not recommended)</option>
-            <option value="2000">2,000 (not recommended)</option>
-        </select>
-    </div>
-
-    <div>
-        <div class="header"><label for="search_detail_limit">
-                Limit objects on interactive map/timeline<br/><i>Heurist interface, not external calls. Beware overloading websites with too many objects.</i>
-            </label></div>
-        <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
-            title="This limit does not apply to external calls - make sure you do not overload websites with maps or timelines with too many objects">
-            <option value="500">500</option>
-            <option value="1000">1,000</option>
-            <option value="2000">2,000</option>
-            <option value="5000">5,000 (not recommended)</option>
-            <!--
-            <option value="10000">10,000 (not recommended)</option>
-            <option value="20000">20,000 (not recommended)</option>
-            -->
-        </select>
-    </div>
-
     <!-- ================================================= -->
-    <br/><hr />
-    <h3>Edit</h3>
- 
- <!-- Appears not to have been implemented in new editing functions 2017, possibly reinstate?
-
-    <div>
-        <div class="header"><label for="tagging-popup">Prompt for tags when saving records<br /><i>if no tags have been set</i></label></div>
-        <input type="checkbox" name="tagging-popup" id="tagging-popup" class="text ui-widget-content ui-corner-all"/>
-    </div>
--->
-
-    <div>
-        <div class="header"><label for="defaultRecentPointerSearch">Default to recent records search when editing<br />pointer fields <i>(otherwise All Records)</i></label></div>
-        <input type="checkbox" name="defaultRecentPointerSearch" id="defaultRecentPointerSearch" class="text ui-widget-content ui-corner-all"/>
-    </div>
-
-<!-- 14/4/18: This does not appear to do anything, besides it should really be replaced by proper indexing using Elastic and specification of composite key for each record type 
-    <div>
-        <div class="header"><label for="findFuzzyMatches">Check for similar records on creation<br /><i>can slow new-record save</i></label></div>
-        <input type="checkbox" name="findFuzzyMatches" id="findFuzzyMatches" class="text ui-widget-content ui-corner-all"/>
-    </div>
--->
-
-    <!-- ================================================= -->
-    <br/><hr />
     <h3>Appearance</h3>
-
+                                   
     <div>
         <div class="header"><label for="userCompetencyLevel">
                 User interface style / level of user
@@ -213,8 +122,8 @@
         <select name="layout_id" id="layout_id" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
     </div>
 
-    <div>
-        <div class="header"><label for="layout_language">Interface language <i>(partially implemented)</i></label></div>
+    <div style="display: none;">
+        <div class="header"><label for="layout_language">Interface language <i>(under implemented)</i></label></div>
         <select name="layout_language" id="layout_language" class="text ui-widget-content ui-corner-all" style="min-width:300px"></select>
     </div>
 
@@ -258,6 +167,100 @@
         <div class="header"><label for="mapSelectTools">Map select tools (by click, in rect, in shape)</label></div>
         <input type="checkbox" name="mapSelectTools " id="mapSelectTools" checked class="text ui-widget-content ui-corner-all"/>
     </div>
+    <br/><hr />
+
+
+    <h3>Filter</h3>
+    <div>
+        <div class="header"><label for="defaultSearch">Filter string to apply when loading main page</label></div>
+        <input name="defaultSearch" id="defaultSearch" class="text ui-widget-content ui-corner-all" style="min-width:300px"/>
+    </div>
+
+    <div>
+        <div class="header"><label for="searchQueryInBrowser">Include current filter in URL for page</label></div>
+        <input type="checkbox" name="searchQueryInBrowser" id="searchQueryInBrowser" class="text ui-widget-content ui-corner-all"/>
+    </div>
+
+    <div>
+        <div class="header">
+            <label for="search_result_pagesize">
+                Page size for display of search results list
+            </label>
+        </div>
+        <select name="search_result_pagesize" id="search_result_pagesize" class="text ui-widget-content ui-corner-all" style="min-width:50px"
+            title="This limit does not apply to filter. This is just for pagination of result list">
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="500">500</option>
+            <option value="1000">1,000</option>
+            <option value="5000">5,000 (not recommended)</option>
+        </select>
+    </div>
+
+
+    <div>
+        <div class="header">
+            <label for="smarty-output-limit">
+                Limit lines in interactive custom report output<br/><i style="font-size:smaller">Heurist interface only, not external calls</i>
+            </label>
+        </div>
+        <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
+            title="This limit does not apply to external calls or periodic report generation to file">
+            <option value="50">50</option>
+            <option value="200">200</option>
+            <option value="500">500 (not recommended)</option>
+            <option value="1000">1,000 (not recommended)</option>
+            <option value="2000">2,000 (not recommended)</option>
+        </select>
+    </div>
+
+    <div>
+        <div class="header"><label for="search_detail_limit">
+                Limit objects on interactive map/timeline<br/><i style="font-size:smaller">Heurist interface, not external calls. Beware overloading websites with too many objects.</i>
+            </label></div>
+        <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
+            title="This limit does not apply to external calls - make sure you do not overload websites with maps or timelines with too many objects">
+            <option value="500">500</option>
+            <option value="1000">1,000</option>
+            <option value="2000">2,000</option>
+            <option value="5000">5,000 (not recommended)</option>
+            <!--
+            <option value="10000">10,000 (not recommended)</option>
+            <option value="20000">20,000 (not recommended)</option>
+            -->
+        </select>
+    </div>
+
+    <div>
+        <div class="header"><label for="bookmarks_on">Show My Bookmarks in navigation panel<br/><i style="font-size:smaller">Turn on only if using bookmarks in shared db</i></label></div>
+        <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
+    </div>
+
+    
+    <!-- ================================================= -->
+    <br/><hr />
+    <h3>Edit</h3>
+ 
+ <!-- Appears not to have been implemented in new editing functions 2017, possibly reinstate?
+
+    <div>
+        <div class="header"><label for="tagging-popup">Prompt for tags when saving records<br /><i>if no tags have been set</i></label></div>
+        <input type="checkbox" name="tagging-popup" id="tagging-popup" class="text ui-widget-content ui-corner-all"/>
+    </div>
+-->
+
+    <div>
+        <div class="header"><label for="defaultRecentPointerSearch">Default to recent records search when editing<br />pointer fields <i>(otherwise All Records)</i></label></div>
+        <input type="checkbox" name="defaultRecentPointerSearch" id="defaultRecentPointerSearch" class="text ui-widget-content ui-corner-all"/>
+    </div>
+
+<!-- 14/4/18: This does not appear to do anything, besides it should really be replaced by proper indexing using Elastic and specification of composite key for each record type 
+    <div>
+        <div class="header"><label for="findFuzzyMatches">Check for similar records on creation<br /><i>can slow new-record save</i></label></div>
+        <input type="checkbox" name="findFuzzyMatches" id="findFuzzyMatches" class="text ui-widget-content ui-corner-all"/>
+    </div>
+-->
+
     
     
     <!--

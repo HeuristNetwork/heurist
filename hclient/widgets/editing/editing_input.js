@@ -492,7 +492,7 @@ $.widget( "heurist.editing_input", {
             
             $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
-                .css('width',dwidth?dwidth:'auto')
+                .css('width',dwidth?dwidth:'0px')
                 .val(value)
                 .appendTo( $inputdiv );
             
@@ -2744,12 +2744,14 @@ $.widget( "heurist.editing_input", {
             $inputdiv.addClass('truncate').css({'max-width':'400px'});
             
             this._findAndAssignTitle($inputdiv, value);
+            return;
 
         } else if(this.detailType=="resource"){
 
-            disp_value = "....resource "+value;
+            $inputdiv.html("....resource "+value);
 
             this._findAndAssignTitle($inputdiv, value);
+            return;
 
         } else if(this.detailType=="relmarker"){  //combination of enum and resource
 

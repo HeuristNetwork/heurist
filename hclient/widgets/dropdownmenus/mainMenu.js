@@ -824,6 +824,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             //assign values to form fields from window.hWin.HAPI4.currentUser['ugr_Preferences']
             var prefs = window.hWin.HAPI4.currentUser['ugr_Preferences'];
+            
             var allFields = $dlg.find('input,select');
 
             var currentTheme = prefs['layout_theme'];
@@ -833,6 +834,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 onSelect: function(){
                     currentTheme = this.currentTheme;
             }});
+
+            //default            
+            prefs['userCompetencyLevel'] = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+            prefs['searchQueryInBrowser'] = window.hWin.HAPI4.get_prefs_def('searchQueryInBrowser', 1);
+            prefs['mapcluster_on'] = window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1);
+            
 
             //from prefs to ui
             allFields.each(function(){
@@ -872,6 +879,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         if(response.status == window.hWin.ResponseStatus.OK){
 
                             var prefs = window.hWin.HAPI4.currentUser['ugr_Preferences'];
+                            
                             var ask_reload = (prefs['layout_language'] != request['layout_language'] ||
                                 prefs['layout_theme'] != request['layout_theme'] ||
                                 prefs['layout_id'] != request['layout_id']);
@@ -891,9 +899,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                 $('.heurist-bookmark-search').css('display',
                                     (request['bookmarks_on']=='1')?'inline-block':'none');
                             }
+                            
+                            $(request).each(function(key,value){
+                                window.hWin.HAPI4.currentUser['ugr_Preferences'][key] = value;    
+                            });
 
-
-                            window.hWin.HAPI4.currentUser['ugr_Preferences'] = request; //wrong since request can have only part of peferences!!!!!
+                            //window.hWin.HAPI4.currentUser['ugr_Preferences'] = request; //wrong since request can have only part of peferences!!!!!
                             /*allFields.each(function(){
                             window.hWin.HAPI4.currentUser['ugr_Preferences'][this.id] = $(this).val();
                             });*/
@@ -934,8 +945,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             $dlg.dialog({
                 autoOpen: true,
-                height: 580,
-                width: 800,
+                height: 'auto', //600,
+                width: 'auto', //800,
                 modal: true,
                 resizable: false,
                 draggable: true,

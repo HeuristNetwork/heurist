@@ -34,8 +34,8 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.options.use_cache = false;
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
-        this.options.edit_height = 600;
-        this.options.width = 1000;
+        this.options.edit_height = 700;
+        this.options.width = 1200;
 
         this.options.height = (isNaN(this.options.height) || this.options.height<815)?900:this.options.height;                    
         
@@ -217,7 +217,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
              //this.searchForm.hide();
              //this.recordList.css({'top': 0});
             this.searchForm.css({'height': '7.4em'});
-            this.recordList.css({'top': '7.4em'});
+            this.recordList.css({'top': '4.4em'});
             
             this.searchForm.find('#view_mode').show();
             this.searchForm.find('#edit_mode').hide();
