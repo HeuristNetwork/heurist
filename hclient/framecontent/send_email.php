@@ -84,7 +84,7 @@ if(isset($_POST['data'])) {
 
 <body class="ui-heurist-bg-light" onload="setup()">
 
-    <fieldset>
+    <fieldset style="font-size:0.8em">
 
         <span id="selected-records"></span>
 
@@ -134,7 +134,7 @@ if(isset($_POST['data'])) {
         </div>
         <div>
             <div class="header_narrow" style="vertical-align:top"><label for="message">Message :</label></div>
-            <textarea name="message2" id="message" rows="10" class="text ui-widget-content ui-corner-all mandatory"  style="margin-top:0.4em;width:25em"></textarea>
+            <textarea name="message2" id="message" rows="8" class="text ui-widget-content ui-corner-all mandatory"  style="margin-top:0.4em;width:25em"></textarea>
             <textarea name="message" id="message-prepared" rows="10"
                                                             class="text ui-widget-content ui-corner-all mandatory"  style="margin-top:0.4em;width:25em;display: none"></textarea>
             <button id="btn_redo" style="display: none" onclick="redo()">&#10226;</button>
@@ -148,7 +148,7 @@ if(isset($_POST['data'])) {
                     role="button" aria-disabled="false" onClick="prepare()">
                     <span class="ui-button-text">Prepare emails</span>
             </button>
-       </div>
+       </div>                                                
 
 
     </fieldset>
@@ -159,14 +159,14 @@ if(isset($_POST['data'])) {
         var storage_key = "email"; // Key used to store data
         var dropdowns = ["#email", "#firstname", "#familyname", "#field1", "#field2", "#field3"]; // ID's of the dropdowns
         var text_types = ["freetext", "blocktext"]; // Text only types for the dropdowns
-        var all_types = ["freetext", "blocktext", "memo", "seperator", "numeric", "date", "enum", "termlist"]; // All types that can be selected from the dropdown
+        var all_types = ["freetext", "blocktext", "memo", "seperator", "numeric", "date", "enum"]; // All types that can be selected from the dropdown
         var definitions; // Record type field definitions
-        var rectype_index = 4; // Record type index in object
-        var type_index = 23; // Field type index in object
+       // var rectype_index = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_Type; // Record type index in object
+        var type_index = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.dty_Type; // Field type index in object
         var ids =  window.hWin.HAPI4.selectedRecordIds; // Selected record ID's
         var recordset = window.hWin.HAPI4.currentRecordset.getSubSetByIds(ids);
         var records = recordset.getRecords(); // Array of record objects
-        var record = recordset.getFirstRecord(); // First record in the list, used to determine the Record Types
+        var first_record = recordset.getFirstRecord(); // First record in the list, used to determine the Record Types
 
         // Retrieves an item from localStorage
         function getItem(name) {
@@ -234,8 +234,8 @@ if(isset($_POST['data'])) {
 
             // Determine record type of first record
             //this.record = records.getFirstRecord(); // Reference to first record; 
-            var rectype = this.record[rectype_index]; // Record type of first record
-            this.definitions = window.hWin.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
+            var rectype = recordset.fld(first_record, 'rec_RecTypeID'); // Record type of first record
+            definitions = window.hWin.HEURIST4.rectypes.typedefs[rectype].dtFields; // Definitions for this record type
 //console.log("Rectype: " + rectype + ", definitions", this.definitions);
 
             // TEXT ONLY DROPDOWNS
@@ -298,7 +298,7 @@ if(isset($_POST['data'])) {
                     return window.hWin.HEURIST4.terms.termsByDomainLookup.enum[enumID][0];
                 }
 
-            }else if(type == "termlist") {
+            }else if(type == "termlist") { //???
                          alert("terms");
 
             }

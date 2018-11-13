@@ -890,6 +890,8 @@ function print_public_details($bib) {
 
             print '<div class=thumb_image>';
 
+            $url = @$thumb['external_url']?$thumb['external_url']:(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
+
             if($thumb['player'] && !$is_map_popup){
 
                 if(strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0){
@@ -904,15 +906,13 @@ function print_public_details($bib) {
                     print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
                 }
             }else{  //for usual image
-                print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($thumb['url']) .'\')">';
+                print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')">';
             }
             print '<br/><div class="download_link">';
             if($thumb['player'] && !$is_map_popup){
                 print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">CLOSE</a>&nbsp;';
             }
             
-            $url = $thumb['external_url']?$thumb['external_url']:(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
-
             print '<a href="' . htmlspecialchars($url) 
                                 . '" class="external-link" target=_surf class="image_tool">DOWNLOAD</a></div>';
             print '</div>';

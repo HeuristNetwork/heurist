@@ -477,8 +477,8 @@ function dbs_GetRectypeConstraint($system) {
             error_log('DATABASE: '.$system->dbname().'. Error retrieving terms '.$mysqli->error);
         }
         $terms['treesByDomain'] = array(
-                'relation' => __getTermTree($system->dbname(), $mysqli, "relation", "prefix"), 
-                'enum' => __getTermTree($system->dbname(), $mysqli, "enum", "prefix"));
+                'relation' => __getTermTree($system->dbname(), $mysqli, "relation", "exact"), 
+                'enum' => __getTermTree($system->dbname(), $mysqli, "enum", "exact"));
         //ARTEM setCachedData($cacheKey, $terms);
         return $terms;
     }
@@ -892,6 +892,7 @@ function dbs_GetRectypeConstraint($system) {
                 }
             }
         }
+        
         return $terms;
     }
 

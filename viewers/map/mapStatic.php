@@ -363,10 +363,12 @@
                         
                     }else{
                         $shapes_cnt++;
-                        $verties_cnt = $verties_cnt + count($points2);
-                        foreach ($points2 as $point) {
-                            $points_to_encode[] = $point[0];
-                            $points_to_encode[] = $point[1];
+                        if(count($points2)>0){
+                            $verties_cnt = $verties_cnt + count($points2);
+                            foreach ($points2 as $point) {
+                                $points_to_encode[] = $point[0];
+                                $points_to_encode[] = $point[1];
+                            }
                         }
                     }
                     if(count($points_to_encode)>2 && $geoObject['type']=="polygon" || $geoObject['type']=="pl"){

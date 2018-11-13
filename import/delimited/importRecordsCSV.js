@@ -2290,9 +2290,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     +(is_id_field?'<input type="checkbox" id="id_field_'+i+'" value="'+i
                                             +'" checked disabled/>':'-')+'</td>'
                                 +'<td style="min-width:50px;text-align:center">'
-                                    +(is_id_field?'':'<input type="checkbox" id="d_field_'+i+'" value="'+i+'"/>')+'</td>'
-                                +'<td style="width:200px"><select id="id_rectype_'
-                                +i+'" class="text ui-widget-content ui-corner-all" style="visibility:hidden"></select></td></tr>').appendTo(tbl);
+                                    //date field
+                                    +(is_id_field?'':'<input type="checkbox" id="d_field_'+i+'" value="'+i+'"/>')+'</td>' 
+                                +'<td style="width:200px">'
+                                +(is_id_field?('<select id="id_rectype_'+i
+                                    +'" class="text ui-widget-content ui-corner-all"></select>'):'')
+                                +'</td></tr>').appendTo(tbl);
                             }         
                             
                             
@@ -2301,6 +2304,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     var res = false;
                                     var ele = $.find("input[id^='id_field_']");
                                     $.each(ele, function(idx, item){
+                                        
                                             if($(item).is(':checked')){
                                                 var rectypeid = $('#id_rectype_'+item.value).val();
                                                 if(!rectypeid){
@@ -2312,13 +2316,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     return res;                                    
                             }
                             
-                            var select_rectype = $("select[id^='id_rectype']").change(function(evt){
-                                window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), __isAllRectypesSelectedForIdFields() );
-                            });
+                            var select_rectype = $("select[id^='id_rectype']");
                             $.each(select_rectype, function(idx, item){
-                                window.hWin.HEURIST4.ui.createRectypeSelect( item, null, 'select...', false);    
+                                var sel = window.hWin.HEURIST4.ui.createRectypeSelect( item, null, 'select...', false);    
+                                sel.change(function(evt){
+                                    window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), __isAllRectypesSelectedForIdFields() );
+                                });                                
                             });
 
+                            
                             $("input[id^='d_field']").change(function(evt){
                                 var cb = $(evt.target); 
                                 window.hWin.HEURIST4.util.setDisabled( $('#id_field_'+cb.val()), cb.is(':checked') );
@@ -2331,8 +2337,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 $('#divFieldRolesHeader').show();
 
                                 window.hWin.HEURIST4.util.setDisabled( $('#d_field_'+cb.val()), cb.is(':checked') );
-                                $("select[id='id_rectype_"+ cb.val()+"']")  
-                                        .css('visibility',  cb.is(':checked')?'visible':'hidden');            
+                                
+                                //$("select[id='id_rectype_"+ cb.val()+"']").hSelect(cb.is(':checked')?'show':'hide');
+                                //.css('visibility',  cb.is(':checked')?'visible':'hidden');            
                             
                                 var is_visible = $("input[id^='id_field']:checked").length>0;
                             

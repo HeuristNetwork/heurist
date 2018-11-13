@@ -132,10 +132,10 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
                             //realpath gives real path on remote file server
                             if(strpos($dir, '/srv/HEURIST_FILESTORE/')===0){
-                                $dir = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_DIR, $dir);
+                                $dir = str_replace('/srv/HEURIST_FILESTORE/', HEURIST_FILESTORE_ROOT, $dir);
                             }else
                             if(strpos($dir, '/misc/heur-filestore/')===0){
-                                $dir = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_DIR, $dir);
+                                $dir = str_replace('/misc/heur-filestore/', HEURIST_FILESTORE_ROOT, $dir);
                             }
                             $dir = str_replace('\\','/',$dir);     
                             if(!( substr($dir, 0, strlen(HEURIST_FILESTORE_DIR)) === HEURIST_FILESTORE_DIR )){

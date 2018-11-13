@@ -1194,7 +1194,7 @@ include(dirname(__FILE__).'/checkRectypeTitleMask.php');
             <a name=""></a>
             <div>
                 <br><br><br>
-                <a href="admin/verification/listDatabaseErrorsInit.php?type=files&db=<?php echo HEURIST_DBNAME;?>" 
+                <a href="listDatabaseErrorsInit.php?type=files&db=<?php echo HEURIST_DBNAME;?>" 
                         target="_blank">Find duplicate and unused uploaded files (slow)</a>
             </div>
 
