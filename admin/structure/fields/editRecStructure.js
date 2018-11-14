@@ -2624,7 +2624,7 @@ function EditRecStructure() {
             //proxyEl.innerHTML = "<table><tbody>"+srcEl.innerHTML+"</tbody></table>";
             proxyEl.innerHTML = ''; //'<div class="dragrow">'+this.srcData.rst_DisplayName+"</div>";
             proxyEl.style.cursor = "row-resize";
-            $(proxyEl).css({'background':'rgb(200,200,200,0.5)', 'border':'2px dotted red'});
+            //$(proxyEl).css({'background':'green', 'border':'2px solid red'}); //rgb(200,200,200,0.5)
 
             //var rst_ID = this.srcData.rst_ID
             //_fromUItoArray(rst_ID); //before collapse save to UI
@@ -2638,7 +2638,7 @@ function EditRecStructure() {
             var position,
             srcEl = this.srcEl;
 
-            proxyEl.innerHTML = "";
+            //proxyEl.innerHTML = "";
             Dom.setStyle(this.proxyEl, "visibility", "hidden"); //hide drag div
             Dom.setStyle(srcEl, "visibility", "");
             
@@ -2651,7 +2651,8 @@ function EditRecStructure() {
                 
                 _highightedRow = rowrec;
                 _myDataTable.highlightRow(_highightedRow);
-                $(_highightedRow).effect( 'bounce', {}, 500, function(){_updateOrderAfterDrag()} );
+                //$(_highightedRow).effect( 'bounce', {}, 500, function(){_updateOrderAfterDrag()} );
+                _updateOrderAfterDrag();
                
             }else{
                 _updateOrderAfterDrag();    
