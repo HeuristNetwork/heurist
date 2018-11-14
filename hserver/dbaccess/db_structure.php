@@ -1,5 +1,6 @@
 <?php
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
+    require_once (dirname(__FILE__).'/../utilities/utils_mail.php');
 //@TODO convert to class
 
     /**
@@ -496,6 +497,8 @@ function dbs_GetRectypeConstraint($system) {
         if($parentlist==null) $parentlist = array($termID);
         $offspring = array();
         if ($termID) {
+            $emailsent = false;
+            
             $res = $mysqli->query("select * from defTerms where trm_ParentTermID=$termID");
             if ($res && $res->num_rows>0 ) { //child nodes exist
                 while ($row = $res->fetch_assoc()) { // for each child node
@@ -506,7 +509,18 @@ function dbs_GetRectypeConstraint($system) {
                         array_push($parentlist, $subTermID);
                         $offspring = array_merge($offspring, getTermOffspringList($mysqli, $subTermID, $parentlist));
                     }else{
-                        error_log('Database '.DATABASE.'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID);
+                        $sMsg = 'DATABASE '.$system->dbname().'. Recursion in parent-term hierarchy '.$termID.'  '.$subTermID;
+                        error_log($sMsg);
+                        if(!$emailsent){
+                            
+                            $emailsent = true;
+                            $dbowner = user_getDbOwner($mysqli); //info about user #2
+                            
+                            sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$system->dbname()
+                            .', owner '.@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'].' '.@$dbowner['ugr_eMail'],
+                            'User was unable to load the database due to a corrupted terms tree. '
+                            .'Recursion in parent-term hierarchy '.$termID.'  '.$subTermID, null);
+                        }
                     }
                 }
             }
@@ -832,14 +846,27 @@ function dbs_GetRectypeConstraint($system) {
                 }else{
                     array_push($parents, $childIndex);
                 }
+                
+                $emailsent = false;
             
                 foreach ($terms[$childIndex] as $gChildID => $n) { //loop for his children
                     if ($gChildID != null) {
                         if(array_search($gChildID, $parents)===false){
                             $terms = __attachChild($dbname, $childIndex, $gChildID, $terms, $parents);//depth first recursion
                         }else{
-                            error_log('Recursion in '.$dbname.'.defTerms!!! Tree '.implode('>',$parents)
-                                    .'. Can\'t add term '.$gChildID);
+                            $sMsg = 'Recursion in '.$dbname.'.defTerms! Tree '.implode('>',$parents)
+                                    .'. Can\'t add term '.$gChildID;
+                            error_log($sMsg);        
+                            if(!$emailsent){
+                                $emailsent = true;
+                                sendEmail(HEURIST_MAIL_TO_ADMIN, 'Recursion in '.$dbname.'.defTerms', 
+                                        $sMsg , null);
+                                        
+                                sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname,
+                                    'User was unable to load the database due to a corrupted terms tree. '
+                                    .'Recursion in parent-term hierarchy. Parent:'.implode('>',$parents)
+                                    .'  Child:'.$gChildID, null);
+                            }
                         }
                     }
                 }
