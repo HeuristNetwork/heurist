@@ -417,7 +417,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
 
                 
             $wasdeleted1 = 0;
-            if(@$_REQUEST['fixparents']=="1"){
+            if(@$_REQUEST['fixparents']=="1"){ //remove pointer field in parent records that does not have reverse in children
 
                 $query = 'DELETE parent FROM Records parentrec, defRecStructure, recDetails parent '
                  .'LEFT JOIN recDetails child ON child.dtl_DetailTypeID='.DT_PARENT_ENTITY.' AND child.dtl_Value=parent.dtl_RecID '
@@ -435,17 +435,20 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                     $wasdeleted1 = $mysqli->affected_rows;
                 }
             }
-                
-//find parents without reverse pointer in child record               
-$query1 = 'SELECT parentrec.rec_ID, parentrec.rec_Title as p_title, parent.dtl_Value, childrec.rec_Title as c_title, child.dtl_RecID '
+
+//---------------------------------------                
+//find parents with pointer field rst_CreateChildIfRecPtr=1) without reverse pointer in child record               
+$query1 = 'SELECT parentrec.rec_ID, parentrec.rec_Title as p_title, '  //'parent.dtl_DetailTypeID, rst_DisplayName, '
+.'parent.dtl_Value, childrec.rec_Title as c_title, child.dtl_RecID as f247 '
 .'FROM Records parentrec, defRecStructure, recDetails parent '
  .'LEFT JOIN recDetails child ON child.dtl_DetailTypeID='.DT_PARENT_ENTITY.' AND child.dtl_Value=parent.dtl_RecID '
  .'LEFT JOIN Records childrec ON parent.dtl_Value=childrec.rec_ID '
  .'WHERE '
  .'parentrec.rec_ID=parent.dtl_RecID AND rst_CreateChildIfRecPtr=1 '
  .'AND rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=parent.dtl_DetailTypeID '
- .'AND child.dtl_RecID is NULL'; 
-
+ .'AND child.dtl_RecID is NULL ORDER BY parentrec.rec_ID'; 
+ 
+ 
 $res = $mysqli->query( $query1 );
 
 $bibs1 = array();
@@ -455,17 +458,20 @@ while ($row = $res->fetch_assoc()){
     $prec_ids1[] = $row['rec_ID'];
 }
 
+//print $query1; 
+//print '<br>'.count($bibs1);
+
 //find children without reverse pointer in parent record               
 $query2 = 'SELECT child.dtl_ID as child_d_id, child.dtl_RecID as child_id, childrec.rec_Title as c_title, child.dtl_Value, '
 .'parentrec.rec_Title as p_title, parent.dtl_ID as parent_d_id, parent.dtl_Value rev, dty_ID, rst_CreateChildIfRecPtr '
-
-.'FROM recDetails child '
+.' FROM recDetails child '
  .'LEFT JOIN Records parentrec ON child.dtl_Value=parentrec.rec_ID '
  .'LEFT JOIN Records childrec ON childrec.rec_ID=child.dtl_RecID  '
  .'LEFT JOIN recDetails parent ON parent.dtl_RecID=parentrec.rec_ID AND parent.dtl_Value=childrec.rec_ID '
  .'LEFT JOIN defDetailTypes ON parent.dtl_DetailTypeID=dty_ID AND dty_Type="resource" ' //'AND dty_PtrTargetRectypeIDs=childrec.rec_RecTypeID '
  .'LEFT JOIN defRecStructure ON rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=dty_ID AND rst_CreateChildIfRecPtr=1 '
-.'WHERE child.dtl_DetailTypeID='.DT_PARENT_ENTITY.' AND (rst_CreateChildIfRecPtr IS NULL OR rst_CreateChildIfRecPtr!=1)';
+.'WHERE child.dtl_DetailTypeID='.DT_PARENT_ENTITY .' AND parent.dtl_DetailTypeID!='.DT_PARENT_ENTITY
+.' AND (rst_CreateChildIfRecPtr IS NULL OR rst_CreateChildIfRecPtr!=1) ORDER BY child.dtl_RecID';
 
 $res = $mysqli->query( $query2 );
 
@@ -473,13 +479,22 @@ $bibs2 = array();
 $prec_ids2 = array();
 $det_ids = array();
 while ($row = $res->fetch_assoc()){
+    if(in_array( $row['child_d_id'], $det_ids)) continue;
     $bibs2[] = $row;
-    $prec_ids2[] = $row['dtl_Value'];
-    $det_ids[] = $row['child_d_id'];
+    $prec_ids2[] = $row['dtl_Value'];  //remove DT_PARENT_ENTITY from orphaned children
+    array_push($det_ids, $row['child_d_id']); 
+    /*
     if($row['parent_d_id']>0){
-        $det_ids[] = $row['parent_d_id'];
+        // keep dtl_ID of pointer field in parent record 
+        // to remove this 'fake' pointer in parent - that's wrong - need to remove DT_PARENT_ENTITY in child
+        $det_ids[] = $row['parent_d_id']; 
     }
+    */
 }//while
+
+//print $query2; 
+//print '<br>'.count($bibs2);
+
 
             $wasdeleted2 = 0;
             if(@$_REQUEST['fixparents']=="2"){
@@ -497,7 +512,7 @@ while ($row = $res->fetch_assoc()){
 
                 
                 if (count($bibs1) == 0) {
-                    print "<h3>All child records have correct parent record pointer fields</h3>";
+                    print "<h3>All parent records have correct reverse pointer in children records</h3><br>";
                     if($wasdeleted1>1){
                         print "<div>$wasdeleted1 invalid pointer(s) were removed from database</div>";
                     }
@@ -505,7 +520,7 @@ while ($row = $res->fetch_assoc()){
                 else
                 {
                     ?>
-                    <h3>Invalid child record pointers ('parent' records which are not indicated as parent by the child record they point to). Missed reverse pointer to parent field in child record</h3>
+                    <br><h3>List of 'parent' records which are not indicated as parent by the child record they point to. Missed reverse pointer to parent field in child record</h3>
                     <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $prec_ids1) ?>'>
                         (show results as search)</a></span>
                         
@@ -540,7 +555,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                 
                 
                 if (count($bibs2) == 0) {
-                    print "<br><h3>All parent records have correct parent record pointer fields</h3>";
+                    print "<br><h3>All parent records have correct parent record pointer fields</h3><br>";
                     if($wasdeleted2>1){
                         print "<div>$wasdeleted2 invalid pointer(s) were removed from database</div>";
                     }
@@ -548,13 +563,15 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                 else
                 {
                     ?>
-                    <h3>Invalid parent record pointers. Missed pointer to child field in parent record. Or parent/child flag is OFF</h3>
+                    <br><h3>Invalid parent records.<br>
+                        Records indicated as parent by a child have no pointer to the child record<br>
+                        Or parent/child flag is OFF in record structure defintions</h3>
                     <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $prec_ids2) ?>'>
                         (show results as search)</a></span>
                         
                     <div>To fix the inconsistencies, please click here:
                         <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixparents=2','_self')">
-                            Delete broken parent-child pointer fields (if they exist) in both 'fake' child and parent records</button>
+                             Delete broken parent-child fields in alleged children records</button>
                     </div>
                     <table>
                         <?php
@@ -566,7 +583,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                                         <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                     </a></td>
                                 <td><?= $row['p_title'] ?></td>
-                                <td>points to</td>
+                                <td>has reverse 'pointer to parent' in </td>
                                 <td style="white-space: nowrap;"><a target=_new2
 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['child_id'] ?>'><?= $row['child_id'] ?>
                                         <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
@@ -1104,8 +1121,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 left join recDetails on rec_ID = dtl_RecID
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join defRecStructure on rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
-                where rec_FlagTemporary!=1 and rst_ID is null
-            ");
+                where rec_FlagTemporary!=1 and dty_ID != ".DT_PARENT_ENTITY." rst_ID is null");
 
             $bibs = array();
             $ids = array();
