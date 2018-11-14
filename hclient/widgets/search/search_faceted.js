@@ -1171,8 +1171,8 @@ $.widget( "heurist.search_faceted", {
                     function __drawToggler($facet_values, display_mode){
                         
                         $('<div class="bor-filter-expand bor-toggler">'
-                            +'<span class="bor-toggle-show-on" style="display:none"><span class="ui-icon ui-icon-circle-arrow-n"></span><span>&nbsp;Show less&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-n"></span></span>'
-                            +'<span class="bor-toggle-show-off"><span class="ui-icon ui-icon-circle-arrow-s"></span><span>&nbsp;Show more&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-s"></span></span>'
+                            +'<span class="bor-toggle-show-on" style="display:none"><span class="ui-icon ui-icon-circle-arrow-n"></span><span>&nbsp;Show less&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-n bor-toggler-second-arrow"></span></span>'
+                            +'<span class="bor-toggle-show-off"><span class="ui-icon ui-icon-circle-arrow-s"></span><span>&nbsp;Show more&nbsp;</span><span class="ui-icon ui-icon-circle-arrow-s bor-toggler-second-arrow"></span></span>'
                          +'</div>').click(function(event){ 
                                             var ele = $(event.target).parents('div.bor-toggler');
                                             var mode = ele.attr('data-mode');

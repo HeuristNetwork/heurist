@@ -12,3 +12,9 @@
 html{
   background: black url("assets/beyond1914/images/common/background.jpg") no-repeat center center;
 }
+.bor-toggler{
+    padding-top:0px;
+}
+.bor-toggler-second-arrow{
+    display:inline-block !important;
+}
