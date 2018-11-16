@@ -34,12 +34,12 @@
 if(@$_REQUEST['u']){ 
     
     $url = $_REQUEST['u'];
-    
+
 // 1. check that this url already exists and bookmarked by current user  ------------------------
 //      (that's double precaution - it is already checked in bookmarkletPopup)    
 
     //  fix url to be complete with protocol and remove any trailing slash
-    if (! preg_match('!^[a-z]+:!i', $url)) $url = 'http://' . $url;
+    if (! preg_match('!^[a-z]+:!i', $url)) $url = 'http://' . $url;       
     if (substr($url, -1) == '/') $url = substr($url, 0, strlen($url)-1);
 
     // look up the user's bookmark (usrBookmarks) table, see if they've already got this URL bookmarked -- if so, just edit it 
@@ -57,7 +57,30 @@ if(@$_REQUEST['u']){
         exit();  
     }else{
 // 3. otherwise prepare description and write parameters as json array in header of this page        
+
+//u - url        
+//t - record title
+//d - selected text
+//f - favicon
+//rec_rectype   
         
+        
+        $params = array();
+        
+        $rec_rectype = @$_REQUEST['rec_rectype'];    
+        if($rec_rectype>0){
+            $params['rec_rectype'] = $rec_rectype;
+        }
+        if(@$_REQUEST['t']){
+            $params['t'] = $_REQUEST['t'];
+        }
+        if(@$_REQUEST['u']){
+            $params['u'] = $url;
+        }
+        if(@$_REQUEST['f']){ //favicon
+            //$params['rec_title'] = $_REQUEST['f'];
+        }
+ 
         // preprocess any description 
         if (@$_REQUEST['d']) {
             $description = $_REQUEST['d'];
@@ -80,7 +103,7 @@ if(@$_REQUEST['u']){
                 $description .= ' [source: web page ' . date('Y-m-d') . ']';
             }
             
-            $params = array('d'=>$description);
+            $params['d'] = $description;
             
             // extract all id from descriptions for bibliographic references 
             $dois = array();
@@ -91,7 +114,7 @@ if(@$_REQUEST['u']){
             $isbns = array();
             if (preg_match_all('!ISBN(?:-?1[03])?[^a-z]*?(97[89][-0-9]{9,13}[0-9]|[0-9][-0-9]{7,10}[0-9X])\\b!i', $description, $matches, PREG_PATTERN_ORDER)) {
                 $isbns = array_unique($matches[1]);
-                if (! @$_REQUEST['rec_rectype'] && defined('RT_BOOK')) {
+                if (!($rec_rectype>0) && defined('RT_BOOK')) {
                     $params['rec_rectype'] = RT_BOOK;
                 }
             }
@@ -99,19 +122,31 @@ if(@$_REQUEST['u']){
             $issns = array();
             if (preg_match_all('!ISSN(?:-?1[03])?[^a-z]*?([0-9]{4}-?[0-9]{3}[0-9X])!i', $description, $matches, PREG_PATTERN_ORDER)) {
                 $issns = array_unique($matches[1]);
-                if (! @$_REQUEST['rec_rectype'] && defined('RT_JOURNAL_ARTICLE')){
+                if (!($rec_rectype>0) && defined('RT_JOURNAL_ARTICLE')){
                     $params['rec_rectype'] = RT_JOURNAL_ARTICLE;
                 }
             }
             
-            print '<script>var prepared_params = '.json_encode($params).';</script>';
         }
+        
+        if(!($params['rec_rectype']>0)){
+           if(defined('RT_INTERNET_BOOKMARK')) {
+                $params['rec_rectype']  = RT_INTERNET_BOOKMARK;
+           }else if(defined('RT_NOTE')) {
+               $params['rec_rectype']  = RT_NOTE;
+           }
+        }
+        
+        
+        print '<script>var prepared_params = '.json_encode($params).';</script>';
+        
     }
     
 }   
 else{
     print '<script>var prepared_params = {};</script>';
-}    
+}   
+console.log(prepared_params);                         
 ?>
 <!-- <?php echo PDIR;?> -->
 
@@ -164,6 +199,7 @@ else{
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
                     
                     function __param(pname){
+                        //in case of bookmarklet addition url parameters may be parsed and prepared 
                         if($.isEmptyObject(prepared_params) || 
                            window.hWin.HEURIST4.util.isempty(prepared_params[pname]))
                         {
@@ -185,6 +221,7 @@ else{
                         
                         new_record_params['Title'] = __param('t');
                         new_record_params['URL']   = __param('u');
+                        new_record_params['ScratchPad']   = __param('d');
                         
                         /*
                         $details = array();

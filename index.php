@@ -286,17 +286,31 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                         (window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search) && 
                          window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search)))
                    {
+                       //add new record from bookmarklet  - see recordEdit.php as alternative add record in separate window
+                       var url = window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search);
                        
                        var new_record_params = {
-                            rt: window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search)
-                                                    || window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search),
-                            ro: window.hWin.HEURIST4.util.getUrlParameter('rec_owner', window.location.search),
-                            rv: window.hWin.HEURIST4.util.getUrlParameter('rec_visibility', window.location.search),
+                            RecTypeID: window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search)
+                                                    || window.hWin.HEURIST4.util.getUrlParameter('rt', window.location.search),
+                            OwnerUGrpID: window.hWin.HEURIST4.util.getUrlParameter('rec_owner', window.location.search),
+                            NonOwnerVisibility: window.hWin.HEURIST4.util.getUrlParameter('rec_visibility', window.location.search),
                             tag: window.hWin.HEURIST4.util.getUrlParameter('tag', window.location.search)
                                 ||window.hWin.HEURIST4.util.getUrlParameter('k', window.location.search),
-                            url:  window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search),
-                            desc:  window.hWin.HEURIST4.util.getUrlParameter('d', window.location.search)
+                            Title:  window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search),
+                            URL:  url,
+                            ScratchPad:  window.hWin.HEURIST4.util.getUrlParameter('d', window.location.search)
                        };
+                       
+                       //defaul rectype for bookmarklet addition
+                       if(url && !(new_record_params['RecTypeID']>0)){
+                           
+                           if(window.hWin.HAPI4.sysinfo['dbconst']['RT_INTERNET_BOOKMARK']>0) {
+                               new_record_params['RecTypeID']  = window.hWin.HAPI4.sysinfo['dbconst']['RT_INTERNET_BOOKMARK'];
+                           }else if(window.hWin.HAPI4.sysinfo['dbconst']['RT_NOTE']>0) {
+                               new_record_params['RecTypeID']  = window.hWin.HAPI4.sysinfo['dbconst']['RT_NOTE'];
+                           }
+                       }
+                       
                        
                        //add new record
                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});

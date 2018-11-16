@@ -26,6 +26,10 @@ $system = new System();
 if(!$system->init(@$_REQUEST['db'])){
     return;
 }    
+
+//@todo move code from js to php 
+//@todo get rectype names and groups here 
+//@todo find possible bookmark id 
 ?>
 var Heurist = {
 
@@ -375,6 +379,7 @@ doBookmark: function(rectype) {
 	}
 	var favicon = Heurist.findFavicon();
 
+    //see redirects/resolver.php - invokes recordEdit 
 	var w = open(Heurist.uriBase +'?fmt=edit&db='+Heurist.database
                 + '&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) 
 				+ '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) 
@@ -382,6 +387,7 @@ doBookmark: function(rectype) {
 				+ (favicon? ('&f=' + encodeURIComponent(favicon)) : '') 
                 + (rectype ? '&rec_rectype=' + rectype : '') 
 				+ '&version=' + version);
+                
 	void(window.setTimeout('window.focus()',200));
 },
 

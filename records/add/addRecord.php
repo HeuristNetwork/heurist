@@ -30,6 +30,8 @@
 * @subpackage  Records/Add
 */
 
+error_log(print_r($_REQUEST, true));
+
 if (@$_REQUEST['h4']==2){
     header( 'Location: ../../hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'] );
     return;

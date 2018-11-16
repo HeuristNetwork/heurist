@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+*  Load rectype names and groups into object - need for selectors on bookmarklet popup
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson
@@ -61,11 +61,11 @@ ob_start();
 
 print "HEURIST_rectypes = {};\n\n";
 
-$names = mysql__select_assoc2("select rty_ID, rty_Name from defRecTypes order by rty_Name");
+$names = mysql__select_assoc2($mysqli, 'select rty_ID, rty_Name from defRecTypes order by rty_Name');
 
 print "top.HEURIST_rectypes.names = " . json_encode($names) . ";\n\n";
 
-$names = mysql__select_assoc2("select rty_ID, rty_Plural from defRecTypes");
+$names = mysql__select_assoc2($mysqli, 'select rty_ID, rty_Plural from defRecTypes');
 
 print "top.HEURIST_rectypes.pluralNames = " . json_encode($names) . ";\n\n";
 

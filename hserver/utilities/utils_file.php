@@ -24,21 +24,39 @@
     /*
     folderExists
     folderCreate
-    folderDelete
+    folderDelete  
+    folderDelete2   using RecursiveIteratorIterator
     
-    folderCreate2
+    folderCreate2  - create folder, check write permissions, add index.html, write htaccess 
     folderAddIndexHTML
-    folderRecurseCopy
+    allowWebAccessForForlder
+    
+    folderContent  - get list of files in folder as search result (record list)
     
     fileCopy
     fileSave
     
+    saveURLasFile       loadRemoteURLContent + fileSave
+    
     getRelativePath
+    folderRecurseCopy
     
-    allowWebAccessForForlder
-    
+    ===
     zip
     unzip
+    
+    ===
+    loadRemoteURLContentSpecial tries to avoid curl if url on the same domain
+    
+    loadRemoteURLContent
+    loadRemoteURLContentWithRange  load data with curl
+    loadRemoteURLContentType
+    
+    getScriptOutput
+    
+    =====
+    
+    autoDetectSeparators
     */
 
     // 1 - OK
@@ -140,6 +158,17 @@
         }
     }
     
+   
+    //
+    //
+    //
+    function allowWebAccessForForlder($folder){
+    $res = true;
+    if(file_exists($folder) && is_dir($folder) && !file_exists($folder.'/.htaccess')){
+        $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'/.htaccess');
+    }
+    return $res;
+    }
    
     /**
     * clean folder and itself
@@ -807,16 +836,5 @@ function flush_buffers($start=true){
     @ob_flush();
     @flush();
     if($start) @ob_start();
-}
-
-//
-//
-//
-function allowWebAccessForForlder($folder){
-    $res = true;
-    if(file_exists($folder) && is_dir($folder) && !file_exists($folder.'/.htaccess')){
-        $res = copy(HEURIST_DIR.'admin/setup/.htaccess_via_url', $folder.'/.htaccess');
-    }
-    return $res;
 }
 ?>
