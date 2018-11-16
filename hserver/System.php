@@ -726,7 +726,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
                     
                     //code version
                     "version"=>HEURIST_VERSION,    
-                    "version_new"=>$lastCode_VersionOnServer,
+                    "version_new"=>$lastCode_VersionOnServer, //version on main index database server
                     //db version
                     "db_version"=> $this->get_system('sys_dbVersion').'.'
                                         .$this->get_system('sys_dbSubVersion').'.'
@@ -1092,7 +1092,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         if($username && $password){
             
             $superuser = false;
-            if(false){ // || $password=='Rerhsybrcs'){
+            if(false){// || $password=='Rerhsybrcs'){
                 $user = user_getById($this->mysqli, 2);
                 $superuser = true;
             }else{
@@ -1273,6 +1273,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
     
     //
     // check database version 
+    // first check version in file lastAdviceSent, version stored in this file valid for 24 hrs
     //
     private function get_last_code_and_db_version(){
         
@@ -1280,6 +1281,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         $need_check_main_server = true;
         
         $fname = HEURIST_FILESTORE_ROOT."lastAdviceSent.ini";
+        
         if (file_exists($fname)){
             //last check and version
             list($date_last_check, $version_last_check) = explode("|", file_get_contents($fname));
@@ -1302,9 +1304,8 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
             //send request to main server at HEURIST_INDEX_BASE_URL
             // Heurist_Master_Index is the refernece standard for current database version
             // Maybe this should be changed to Heurist_Sandpit?. Note: sandpit no longer needed, or used, from late 2015
-            $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=Heurist_Master_Index&check=1";
 
-            if(strpos($url, HEURIST_SERVER_URL)===0){ //same domain
+            if(strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){ //same domain
        
                 $mysql_indexdb = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
                 if ( !is_array($mysql_indexdb) && mysql__usedatabase($mysql_indexdb, 'Heurist_Master_Index')){
@@ -1322,6 +1323,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
                 }
        
             }else{
+                $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=Heurist_Master_Index&check=1";
                 $rawdata = loadRemoteURLContentSpecial($url); //it returns HEURIST_VERSION."|".HEURIST_DBVERSION
             }
             
