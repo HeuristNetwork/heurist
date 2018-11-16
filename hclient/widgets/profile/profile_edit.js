@@ -1,5 +1,6 @@
 /**
-* Dialog to edit user's profile (logged in) or register new user (not logged in)
+* Dialog to register new user (not logged in)
+* @todo replace with entity.manageSysUsers
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

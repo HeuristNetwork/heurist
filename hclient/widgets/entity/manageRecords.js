@@ -832,7 +832,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'right','margin': '0 0 0.8em 7px', 'font-size': '0.8em', height: '14px', width: '14px'})
                     .click(function(){
-           
+
            //
            //
            //             
@@ -1392,7 +1392,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     //
-    _initEditForm_step3: function(recID){
+    _initEditForm_step3: function(recID, is_insert){
         
         //fill with values
         this._currentEditID = recID;
@@ -1410,14 +1410,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }else if(recID>0){ //edit existing record  - load complete information - full file info, relations, permissions
         
             window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"complete", l:1}, 
-                        function(response){ response.is_insert=false; that._initEditForm_step4(response); });
+                        function(response){ response.is_insert = (is_insert==true); 
+                                            that._initEditForm_step4(response); });
 
         }else if(recID<0){ //add new record
         
             if(!that.options.new_record_params){
                 that.options.new_record_params = {};  
             }else{ 
-                //short version of new record params
+                //short version of new record params (backward capability)
                 if(that.options.new_record_params['rt']>0) that.options.new_record_params['RecTypeID'] = that.options.new_record_params['rt'];
                 if(that.options.new_record_params['ro']>=0) that.options.new_record_params['OwnerUGrpID'] = that.options.new_record_params['ro'];
                 if(!window.hWin.HEURIST4.util.isempty(that.options.new_record_params['rv'])) 
@@ -1436,6 +1437,34 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             that.options.new_record_params['FlagTemporary'] = 1;
             that.options.new_record_params['no_validation'] = 1;
             
+            if(that.options.new_record_params['Title'] && window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']>0){
+               that.options.new_record_params['details'] = {};
+               that.options.new_record_params['details'][window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']] = that.options.new_record_params['Title']; 
+            }    
+            
+            function __onAddNewRecord(){
+
+                if(that.options.new_record_params['details']){                     
+                    //need to use save because method "add" inserts only header
+                    window.hWin.HAPI4.RecordMgr.save( that.options.new_record_params,
+                        function(response){ 
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    response.is_insert=true; 
+                                    that._initEditForm_step3(response.data, true); //new record id
+                                } else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                }
+                                // for  window.hWin.HAPI4.RecordMgr.add that._initEditForm_step4(response); 
+                        });
+                }else{
+                    window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                        function(response){ 
+                            response.is_insert=true; 
+                            that._initEditForm_step4(response); 
+                        });
+                }
+            }
+                    
             
             if(!(that.options.new_record_params['RecTypeID']>0)){
                 
@@ -1446,13 +1475,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             
                             that._currentEditRecTypeID = context.RecTypeID;
                             that.options.new_record_params =  context;
-                                
-                            window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
-                                    function(response){  
-                                            response.is_insert=true; 
-                                            //add details from new_record_params
-                                            //@todo
-                                            that._initEditForm_step4(response); });
+                            __onAddNewRecord();    
                         }else{
                              that.closeDialog();
                         }
@@ -1483,13 +1506,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     that.options.new_record_params.NonOwnerVisibilityGroups = add_rec_prefs[4];
                 }
                 
-                //this._currentEditRecTypeID is set in add button
-                window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
-                        function(response){ 
-                            response.is_insert=true; 
-                            //add details from new_record_params
-                            //@todo
-                            that._initEditForm_step4(response); });
+                __onAddNewRecord();
             }
         }
 
@@ -1863,12 +1880,22 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             //show rec_URL 
             var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
+            var ele = that._editing.getFieldByName('rec_URL');
             if(rectypes.typedefs[rectypeID].commonFields[fi_url]=='1'){
-                var ele = that._editing.getFieldByName('rec_URL');
                 ele.show();
             }
+            //special case for bookmarklet addition - some values are already assigned 
+            if(that._isInsert){
+                var vals = ele.editing_input('getValues');
+                if(vals[0]!=''){
+                      //get snapshot of url  
+                    
+                      that._editing.setModified(true); //forcefully set to modified
+                      that.onEditFormChange();
+                }
+            }
             
-            if(that.editFormSummary && that.editFormSummary.length>0){
+            if(that.editFormSummary && that.editFormSummary.length>0) {
                 /*@todo that.editFormSummary.accordion({
                     active:0    
                 });*/
@@ -1950,7 +1977,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
     },        
     
-
     
     
     //  -----------------------------------------------------

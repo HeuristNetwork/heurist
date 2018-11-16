@@ -489,7 +489,7 @@ $.widget( "heurist.editing_input", {
             if(parseFloat(dwidth)>0){
                 dwidth = dwidth+'ex';
             }
-            
+
             $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
                 .css('width',dwidth?dwidth:'0px')
@@ -638,7 +638,7 @@ $.widget( "heurist.editing_input", {
                             $(dosframe.contentDocument).find('#trmName').focus();
                         },
                         callback: function(context){
-
+                                $input.css('width','auto');
                                 $input = that._recreateSelector($input, true);
                                 $input.change( __onTermChange );
                                 
@@ -1649,10 +1649,12 @@ $.widget( "heurist.editing_input", {
                         .appendTo( $inputdiv ); 
                         
                         $input.change(function(){
-                            
-                            if(!(that.newvalues[$input.attr('id')]>0)){
+                            var val = that.newvalues[$input.attr('id')];
+
+                            if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
                                 $input.val('');
                             }
+                            //clear thumb rollover
                             if(window.hWin.HEURIST4.util.isempty($input.val())){
                                  $input_img.find('img').attr('src','');    
                             }
@@ -1699,18 +1701,29 @@ $.widget( "heurist.editing_input", {
                                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                         var recordset = data.selection;
                                         var record = recordset.getFirstRecord();
+                                        
+                                        var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
+                                                        ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
+                                                        ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                                                        ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID')};
+                                        
+                                        that.newvalues[$input.attr('id')] = newvalue;
+                                        that._findAndAssignTitle($input, newvalue);
+                                        
+                                        /*
+                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
+                                        
                                         var rec_Title = recordset.fld(record,'ulf_ExternalFileReference');
                                         if(window.hWin.HEURIST4.util.isempty(rec_Title)){
                                             rec_Title = recordset.fld(record,'ulf_OrigFileName');
                                         }
-                                        that.newvalues[$input.attr('id')] = recordset.fld(record,'ulf_ID');
                                         window.hWin.HEURIST4.ui.setValueAndWidth($input, rec_Title, 10);
 
                                         //url for thumb
                                         $inputdiv.find('.image_input > img').attr('src',
                                             window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
                                             recordset.fld(record,'ulf_ObfuscatedFileID'));
-
+                                        */
                                         $input.change();
                                     }
                                 
@@ -1736,9 +1749,12 @@ $.widget( "heurist.editing_input", {
                                 popup_options.height = usrPreferences.height;
                                 var sels = this.newvalues[$(event.target).attr('id')];
                                 if(!sels && this.options.values && this.options.values[0]){
-                                     sels = this.options.values[0];
+                                     sels = this.options.values[0];    //take selected value from options
                                 } 
-                                if(!window.hWin.HEURIST4.util.isempty(sels)){
+
+                                if($.isPlainObject(sels)){
+                                    popup_options.selection_on_init = [sels.ulf_ID];
+                                }else if(!window.hWin.HEURIST4.util.isempty(sels)){
                                     popup_options.selection_on_init = sels.split(',');
                                 } else {
                                     popup_options.selection_on_init = null;    
@@ -1754,7 +1770,14 @@ $.widget( "heurist.editing_input", {
                         }
                         
                         if(this.isFileForRecord && value){
-                            this.newvalues[$input.attr('id')] = value.ulf_ID;   //assign value at once
+                            //assign value at once
+                            this.newvalues[$input.attr('id')] = value;
+                            /*
+                            if($.isPlainObject(value) && value.ulf_ID>0){
+                                this.newvalues[$input.attr('id')] = value.ulf_ID;   
+                            }else if (parseInt(value)>0){
+                                this.newvalues[$input.attr('id')] = value;
+                            }*/
                         }
                 
             }
@@ -2165,21 +2188,28 @@ $.widget( "heurist.editing_input", {
         
         if(this.isFileForRecord){   //FILE FOR RECORD
             
-            if(!value){
+            if(!value){   //empty value
                 window.hWin.HEURIST4.ui.setValueAndWidth(ele, '');
                 return;
             }
         
-            var rec_Title = value.ulf_ExternalFileReference;
-            if(window.hWin.HEURIST4.util.isempty(rec_Title)){
-                rec_Title = value.ulf_OrigFileName;
+            if($.isPlainObject(value)){
+        
+                var rec_Title = value.ulf_ExternalFileReference;
+                if(window.hWin.HEURIST4.util.isempty(rec_Title)){
+                    rec_Title = value.ulf_OrigFileName;
+                }
+                window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
+                
+                //url for thumb
+                ele.parent().find('.image_input > img').attr('src',
+                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                        value.ulf_ObfuscatedFileID);
+                        
+            }else{
+                 //call server for file details
+                
             }
-            window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title, 10);
-            
-            //url for thumb
-            ele.parent().find('.image_input > img').attr('src',
-                window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                    value.ulf_ObfuscatedFileID);
                     
         }else if(this.detailType=='file'){  // FILE FOR OTHER ENTITIES - @todo test
             
@@ -2646,7 +2676,9 @@ $.widget( "heurist.editing_input", {
             }else{
                 var ress = this.getValues();
 
-                if(ress.length==0 || window.hWin.HEURIST4.util.isempty(ress[0]) || ress[0].trim()=='' ){
+                if(ress.length==0 || window.hWin.HEURIST4.util.isempty(ress[0]) || 
+                    ($.isPlainObject(ress[0]) &&  $.isEmptyObject(ress[0])) || 
+                    ($.type(ress[0])=='string' && ress[0].trim()=='')) {
                     
                     
                     if( data_type=='file' && !this.isFileForRecord && this.entity_image_already_uploaded){

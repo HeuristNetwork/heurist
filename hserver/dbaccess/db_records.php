@@ -1262,7 +1262,7 @@
         foreach ($details2 as $dtyID => $values) {
             foreach ($values as $eltID => $dtl_Value) {
 
-                if(strlen(trim($dtl_Value))==0){
+                if(!is_array($dtl_Value) && strlen(trim($dtl_Value))==0){
                     continue;
                 }
 
@@ -1352,13 +1352,11 @@
                         }else{  // new way - URL or JSON string with file data array (structure similar get_uploaded_file_info)
                             //TODO!!!!!
                             // $dtl_UploadedFileID = register_external($dtl_Value);
+                            $dtl_UploadedFileID = intval(@$dtl_Value['ulf_ID']);
                         }
 
-                        if ($dtl_UploadedFileID!=null)
-                        {
-                            $dtl_Value = null;
-                            $isValid = true;
-                        }
+                        $dtl_Value = null;
+                        $isValid = ($dtl_UploadedFileID>0);
 
                         break;
 

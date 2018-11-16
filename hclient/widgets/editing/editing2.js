@@ -383,7 +383,14 @@ function hEditing(_options) {
             //var vals = ele.list("getValues"); 
             //var vals = ele.data("editing_input").getValues();
             if(vals && vals.length>0){
-                details[ ele.editing_input('option', 'dtID') ] = (needArrays || vals.length>1) ?vals :vals[0];
+                
+                var a_val;
+                if(needArrays || vals.length>1 || $.isPlainObject(vals[0])){
+                    a_val = vals;
+                }else{
+                    a_val = vals[0];   
+                }
+                details[ ele.editing_input('option', 'dtID') ] = a_val;
             }
         }
         return details;

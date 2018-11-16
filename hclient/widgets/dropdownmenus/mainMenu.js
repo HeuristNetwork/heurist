@@ -45,6 +45,7 @@ $.widget( "heurist.mainMenu", {
             this.div_logo.button();
         }
 
+        //validate server side version  - compare version of code in server where main index database and this server version
         var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.version_new, window.hWin.HAPI4.sysinfo['version']);   
         var sUpdate = '';
         if(res==-2){ // -2=newer code on server
