@@ -1629,6 +1629,37 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             that._currentEditID = that._getField('rec_ID');;
             that._currentEditRecTypeID = rectypeID;
             
+            
+            if(that._isInsert && !(that.options.parententity>0)){
+                //special verification - prevent unparented records
+                //IMHO it should be optional
+                // 1. if rectype is set as target for one of Parent/child pointer fields 
+                // 2 and options.parententity show warning and prevent addition
+                var fi_is_parent_child = rectypes.typedefs.dtFieldNamesToIndex.rst_CreateChildIfRecPtr;
+                var fi_type = rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
+                var fi_ptr = rectypes.typedefs.dtFieldNamesToIndex.rst_PtrFilteredIDs;
+                
+                for (var rtyID in rectypes.typedefs)
+                if(rtyID>0){
+                    for (var dtyID in rectypes.typedefs[rtyID].dtFields){
+                        if(rectypes.typedefs[rtyID].dtFields[dtyID][fi_type]=='resource' && 
+                           rectypes.typedefs[rtyID].dtFields[dtyID][fi_is_parent_child]=='1' && 
+                           rectypes.typedefs[rtyID].dtFields[dtyID][fi_ptr]){
+                              
+                               if(window.hWin.HEURIST4.util.findArrayIndex(rectypeID, rectypes.typedefs[rtyID].dtFields[dtyID][fi_ptr].split(','))>=0){
+                                    window.hWin.HEURIST4.msg.showMsgDlg(
+rectypes.names[rectypeID] + ' is a child record type of '+rectypes.names[rtyID]+
+'. <br><br>To avoid creation of orphan records, you can only create '+rectypes.names[rectypeID]+' records from within a '+rectypes.names[rtyID]+' record.',
+                                null,{title:'Child record type'});                                   
+                                   
+                                   that.closeEditDialog();
+                                   return;
+                               }
+                        }
+                    }
+                }
+            }
+            
             var dialog_title = this.options['edit_title'];
             if(!dialog_title){
                  
