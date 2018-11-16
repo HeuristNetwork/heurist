@@ -334,7 +334,7 @@ function EditRecStructure() {
                     key:"rst_DisplayOrder", label: "Order", sortable:true, hidden:true
                 },
                 {
-                    key:"rst_DisplayName", label: "Field prompt in form", width:120, sortable:false,
+                    key:"rst_DisplayName", label: "Field prompt in form", width:150, minWidth:150, sortable:false,
                     
                     editor: new YAHOO.widget.TextboxCellEditor({ 
                             disableBtns:true,
@@ -372,12 +372,12 @@ function EditRecStructure() {
                             elLiner.innerHTML = elLiner.innerHTML.toUpperCase();
                         }
                         $(elLiner).css({'font-weight':'bold'})
-                                .addClass('yui-dt-liner-editable');   
+                               .addClass('yui-dt-liner-editable');   
                         
 
                     }
                 },
-                { key: "dty_Type", label: "Data Type", sortable:false, width:90,
+                { key: "dty_Type", label: "Data Type", sortable:false, width:90, 
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var type = oRecord.getData("dty_Type");
                         if(type!=='separator'){
@@ -398,7 +398,7 @@ function EditRecStructure() {
                     }
                 },
                 {
-                    key:"rst_DisplayWidth", label: "Width", sortable:false, width:25, className:"center" ,
+                    key:"rst_DisplayWidth", label: "Width", sortable:false, width:25, minWidth:25, maxWidth:25, className:"center" ,
                     
                     editor: new YAHOO.widget.TextboxCellEditor({
                             validator: YAHOO.widget.DataTable.validateNumber,
@@ -430,7 +430,7 @@ function EditRecStructure() {
                 //{ key:"rst_DisplayHelpText", label: "Prompt", sortable:false },
                 {
                     key:"rst_RequirementType", label: "Requirement", sortable:false,
-                    minWidth:70, maxAutoWidth:70, width:70, className:'left',
+                    minWidth:70, maxAutoWidth:70, maxWidth:70, width:70, className:'left',
                     
                     editor: new YAHOO.widget.DropdownCellEditor({ 
                             dropdownOptions: ['required', 'recommended', 'optional', {value:'forbidden',label:'hidden'} ],  
@@ -461,7 +461,7 @@ function EditRecStructure() {
                 },
                 {
                     key:"rst_MaxValues", label: "Repeatability", sortable:false,
-                    minWidth:70, maxAutoWidth:70, width:70, className:'left',
+                    minWidth:70, maxAutoWidth:70, maxWidth:70, width:70, className:'left',
                     editor: new YAHOO.widget.DropdownCellEditor({ 
                             dropdownOptions: 
                             //['single', 'repeatable', 'limited'],
@@ -3784,7 +3784,7 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
             window.hWin.HEURIST4.msg.checkLength($('#ed_dty_Name'), 'Field name', null, 1, 0))) return;
         
         var swarn = "";
-        var dt_name = document.getElementById("ed_dty_Name").value.toLowerCase();
+        var dt_name = document.getElementById("ed_dty_Name").value.toLowerCase().trim();
         swarn = window.hWin.HEURIST4.ui.validateName(dt_name, "Field 'Name'");
         //check that already exists
         if(swarn==""){
@@ -3837,9 +3837,6 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
                           rst_MinValues:Dom.get("ed0_rst_MaxValues").value,
                           rst_MaxValues:Dom.get("ed0_rst_MaxValues").value};
 
-        //collapse
-        editStructure.doExpliciteCollapse(insertAfterRstID, false);
-
         _updatedFields.push('dty_ID');
         _updatedFields.push('dty_Status');
         _updatedFields.push('dty_NonOwnerVisibility');
@@ -3872,13 +3869,18 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
                 oDetailType.detailtype.defs[-1].common.push(values[val]);
             }
 
+            window.hWin.HEURIST4.msg.bringCoverallToFront( $(this.document).find('body') );            
+            
             // 3. sends data to server
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             
             var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
                 
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
                     var context = response.data;
                     var error = false;
                     var _dtyID = -1;
@@ -3895,6 +3897,9 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
                         }
                     }
                     if(!error && _dtyID>0){
+                        //collapse
+                        editStructure.doExpliciteCollapse(insertAfterRstID, false);
+                    
                         window.hWin.HEURIST4.msg.showMsgFlash('New field created');
                         window.hWin.HEURIST4.detailtypes = context.detailtypes;
                         editStructure.addDetails(''+_dtyID, null, insertAfterRstID, defValues);
