@@ -60,6 +60,8 @@ function EditRecStructure() {
     warningPopupID = null,
     _structureWasUpdated = false,
     
+    _newOptionalFields = {},
+    
     _isStreamLinedAddition = true, 
     _isStreamLinedAdditionAction = false;
 
@@ -168,7 +170,8 @@ function EditRecStructure() {
                 }
 
             };
-
+            
+            
             //fill the values of record detail strcutures
             var arr = [];
             var _dts = typedef.dtFields;
@@ -983,6 +986,8 @@ function EditRecStructure() {
 
                         _myDataTable.deleteRow(oRecord.getId(), -1);
 
+                        _isNewOptionalFieldAppeared( response.data.rectypes );
+                        
                         window.hWin.HEURIST4.rectypes = response.data.rectypes;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
 
@@ -1345,6 +1350,9 @@ function EditRecStructure() {
     * (if order was changes it affects all types)
     */
     function _fromUItoArray(_rst_ID){
+
+        var old_typedefs = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields);
+        
         var arrStrucuture = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;
         var fieldnames = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames;
 
@@ -1458,6 +1466,7 @@ function EditRecStructure() {
         }
 
         //saves back to HEURIST
+        _isNewOptionalFieldAppeared( arrStrucuture, old_typedefs)
         window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields = arrStrucuture;
     }//end of _doExpliciteCollapse
 
@@ -1815,7 +1824,7 @@ function EditRecStructure() {
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
             var callback = _addNewSeparator;
             
-            var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};
+            var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};    //add separator
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
             
 
@@ -1980,10 +1989,15 @@ function EditRecStructure() {
                 _updatedDetails.push(dty_ID); //track change
 
                 order++;
+                
+                if(defValues.rst_RequirementType=='optional'){
+                     _newOptionalFields[dty_ID] = true; 
+                }
             }
         }//end for
 
         if(data_toadd.length>0){
+            
             window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields = recDetTypes;
 
             _myDataTable.addRows(data_toadd, index_toinsert);
@@ -2084,10 +2098,36 @@ function EditRecStructure() {
             },50);
         }
     }
+    
+    function _isNewOptionalFieldAppeared(typedef_new, typedef){
+        
+        if(typedef_new.typedefs) typedef_new = typedef_new.typedefs[rty_ID].dtFields;
+        if(!typedef) typedef = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;
+        
+        var fi_req = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_RequirementType;
+                       
+        for (var dty_ID  in typedef_new) {
+            if(typedef_new[dty_ID][fi_req]=='optional'){
+                
+                if(!typedef[dty_ID] || typedef[dty_ID][fi_req]!='optional'){
+                    _newOptionalFields[dty_ID] = true;                
+                }
+                
+            }else if( _newOptionalFields[dty_ID] ){ //removed or was optional
+                delete _newOptionalFields[dty_ID];
+            }
+        }        
+        for (var dty_ID  in typedef) {
+            if( _newOptionalFields[dty_ID] && !typedef_new[dty_ID] ){ //deleted
+                delete _newOptionalFields[dty_ID];
+            }
+        }
+        
+    }
+    
 
     /**
     * asyncSubmitter for inline editor
-    * 
     */
     function _updateSingleField(dty_ID, fieldName, oOldValue, oNewValue, fnCallback){
          
@@ -2111,6 +2151,8 @@ function EditRecStructure() {
             var updateResult = function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
 
+                    _isNewOptionalFieldAppeared( response.data.rectypes );
+                
                     window.hWin.HEURIST4.rectypes = response.data.rectypes;
                     window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                     window.hWin.HEURIST4.terms = response.data.terms;
@@ -2235,6 +2277,8 @@ function EditRecStructure() {
                 
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
+                    _isNewOptionalFieldAppeared( response.data.rectypes );
+                                               
                     window.hWin.HEURIST4.rectypes = response.data.rectypes;
                     window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                     window.hWin.HEURIST4.terms = response.data.terms;
@@ -2889,6 +2933,31 @@ function EditRecStructure() {
 );
                 }else{
                     alert("You should have at least one required field and at least one of them should appear in the title mask to ensure that the constructed title is not blank. \n\nPlease set one or more fields to Required.");
+                }
+            }
+        },
+        
+        newOptionalFeldsWereAdded: function(){
+
+            var usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_records', {optfields:true});
+            var isfields_on = usrPreferences['optfields']==true || usrPreferences['optfields']=='true';
+            
+            if(!isfields_on){                
+            
+                var snames = [];
+                var fi_name = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
+                
+                for (var dty_ID in _newOptionalFields){
+                    snames.push(window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[dty_ID][fi_name]);
+                }
+                if(snames.length>0){
+                    var sMsg = 'You\'ve added (or set) optional field'+(snames.length==1
+                                    ?' '+snames[0]
+                                    :'s '+snames.join(', '))
+                                +' but optional fields are not displayed. '
+                                +'Turn on optional fields to see the field'
+                                +(snames.length==1?'':'s')+' you have added.';
+                    window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 'Optional fields added');
                 }
             }
         },
@@ -3583,7 +3652,7 @@ function onFieldAddSuggestion(event, insertAfterRstID){
                             var ele = $(event.target).hide();
                             var _dty_ID = ele.attr('recid');
                      
-console.log('addd '+_dty_ID);                     
+                   
                             if(_dty_ID>0){
                                 fields_list_div.hide();
                                 input_name.val('').focus();
@@ -4100,4 +4169,10 @@ function onEditRecordType(){
         });
         
         return false;
+}
+
+function showWarningAboutOptionalFields(){
+    if(editStructure && editStructure.newOptionalFeldsWereAdded() ){
+        
+    }
 }
