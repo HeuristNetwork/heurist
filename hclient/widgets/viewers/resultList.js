@@ -1187,6 +1187,57 @@ $.widget( "heurist.resultList", {
     //
     //
     //
+    _recordDivNavigateUpDown:function(event){
+          var key = event.which || event.keyCode;
+          if(key==38 || key==40){
+              
+              var curr_sel = null;
+              
+              if(this.options.select_mode=='select_multi'){
+                   curr_sel = this.div_content.find('.selected');
+              }else{
+                   curr_sel = this.div_content.find('.selected_last');
+              }
+              
+              if(curr_sel.length > 0)
+              { 
+                  //find next of previous div
+                  if(key==38){
+                     curr_sel = $( curr_sel ).prev( '.recordDiv' );
+                  }else{
+                     curr_sel = $( curr_sel ).next( '.recordDiv' );    
+                  }
+              }
+              
+              if(curr_sel.length==0)  //not found - take first
+              {
+                  curr_sel = this.div_content.find('.recordDiv');
+              }
+              
+              if(curr_sel.length > 0)
+              { 
+                event.target = curr_sel[0];
+                this._recordDivOnClick(event);
+                
+                var spos = this.div_content.scrollTop();
+                var spos2 = curr_sel.position().top;
+                var offh = spos2 + curr_sel.height() - this.div_content.height() + 10;
+               
+                if(spos2 < 0){
+                    this.div_content.scrollTop(spos+spos2);
+                }else if ( offh > 0 ) {
+                    this.div_content.scrollTop( spos + offh );
+                }
+                window.hWin.HEURIST4.util.stopEvent(event);
+                
+                return false;
+              }
+          }
+    },
+    
+    //
+    //
+    //
     _recordDivOnClick: function(event){
 
         //var $allrecs = this.div_content.find('.recordDiv');
@@ -1262,6 +1313,7 @@ $.widget( "heurist.resultList", {
 
         //select/deselect on click
         if(this.options.select_mode=='select_multi'){
+            
             if($rdiv.hasClass('selected')){
                 $rdiv.removeClass('selected');
                 $rdiv.find('.recordSelector>input').prop('checked', '');
@@ -1907,9 +1959,17 @@ $.widget( "heurist.resultList", {
             });
         }
         
+        //tabindex is required to keydown be active
+        $allrecs.each(function(idx, item){
+            $(item).prop('tabindex',idx);
+        });
+        
         
         this._on( $allrecs, {
             click: this._recordDivOnClick,
+            //keypress: this._recordDivNavigateUpDown,
+            keydown: this._recordDivNavigateUpDown,
+            //keyup: this._recordDivNavigateUpDown,
             mouseover: this._recordDivOnHover,
             /* enable but specify entityName to edit in options */
             dblclick: function(event){ //start edit on dblclick
@@ -2039,7 +2099,10 @@ $.widget( "heurist.resultList", {
         }
         
     },
-
+    
+    //
+    //
+    //
     _onGetFullRecordData: function( response, rec_toload ){
 
         this.loadanimation(false);
