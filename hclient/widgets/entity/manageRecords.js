@@ -1630,7 +1630,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             that._currentEditRecTypeID = rectypeID;
             
             
-            if(that._isInsert && !(that.options.parententity>0)){
+            if(that._isInsert && response.allowCreateIndependentChildRecord!==true &&!(that.options.parententity>0)){
                 //special verification - prevent unparented records
                 //IMHO it should be optional
                 // 1. if rectype is set as target for one of Parent/child pointer fields 
@@ -1646,17 +1646,33 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                            rectypes.typedefs[rtyID].dtFields[dtyID][fi_is_parent_child]=='1' && 
                            rectypes.typedefs[rtyID].dtFields[dtyID][fi_ptr]){
                               
-                               if(window.hWin.HEURIST4.util.findArrayIndex(rectypeID, rectypes.typedefs[rtyID].dtFields[dtyID][fi_ptr].split(','))>=0){
-                                    window.hWin.HEURIST4.msg.showMsgDlg(
-rectypes.names[rectypeID] + ' is a child record type of '+rectypes.names[rtyID]+
-'. <br><br>To avoid creation of orphan records, you can only create '+rectypes.names[rectypeID]+' records from within a '+rectypes.names[rtyID]+' record.',
-                                null,{title:'Child record type'});                                   
+                    if(window.hWin.HEURIST4.util.findArrayIndex(rectypeID, rectypes.typedefs[rtyID].dtFields[dtyID][fi_ptr].split(','))>=0)
+                    {
                                    
-                                   that.closeEditDialog();
-                                   return;
-                               }
-                        }
+                                   
+                                   var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.names[rtyID]
++'.<br><br>To avoid creation of orphan records, you should only create '+rectypes.names[rectypeID]+' records from within a '+rectypes.names[rtyID]+' record'
++'<br><br>If you understand the implications and still wish to create an independent, non-child record,<br> check this box <input type="checkbox"> '
++' then click [Create independent record]',
+[{text:'Cancel', click: function(){ $dlg.dialog( "close" ); that.closeEditDialog(); }},
+ {text:'Create independent record', click: function(){
+                            $dlg.dialog( "close" ); 
+                            response.allowCreateIndependentChildRecord = true;
+                            that._initEditForm_step4(response)   }} ],{title:'Child record type'}        
+                     );
+                     
+                          var btn = $dlg.parent().find('button:contains("Create independent record")');
+                          var chb = $dlg.find('input[type="checkbox"]').change(function(){
+                              window.hWin.HEURIST4.util.setDisabled(btn, !chb.is(':checked') );
+                          })
+                          window.hWin.HEURIST4.util.setDisabled(btn, true);
+                          
+                          return;
                     }
+
+                        }//if
+                    }//for
                 }
             }
             
