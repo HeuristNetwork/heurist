@@ -1,5 +1,6 @@
 <?php
 /**
+* Service
 * For Entities (for recUploadFiles see file_download.php)
 * 
 * fileGet.php - 1) get image for given entity, record ID, version and color 

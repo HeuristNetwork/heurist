@@ -104,6 +104,7 @@ class DbEntityBase
     
     //
     // save one or several records 
+    // return false or record IDs
     //
     public function save(){
 

@@ -379,7 +379,7 @@ doBookmark: function(rectype) {
 	}
 	var favicon = Heurist.findFavicon();
 
-    //see redirects/resolver.php - invokes recordEdit 
+    //see index.php  window.hWin.HEURIST4.ui.openRecordEdit
 	var w = open(Heurist.uriBase +'?fmt=edit&db='+Heurist.database
                 + '&t=' + Heurist.urlcleaner(encodeURIComponent(titl)) 
 				+ '&u=' + Heurist.urlcleaner(encodeURIComponent(url)) 

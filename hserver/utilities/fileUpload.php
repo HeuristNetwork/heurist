@@ -1,5 +1,6 @@
 <?php
 /**
+* Service
 * fileUpload.php - file uploader handler
 *
 * @package     Heurist academic knowledge management system
@@ -175,11 +176,13 @@ if($response!=null){
             break;            
         }else if($entity_name=="recUploadedFiles"){
             
-            $ret = registerUploadedFile($system, $file); //it returns ulf_ID
+            $entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
+            $ret = $entity->registerFile($file, null); //it returns ulf_ID
+            
             if( is_bool($ret) && !$ret ){
                 $response = $system->getError();
             }else{
-                $file->ulf_ID = $ret[0];
+                $file->ulf_ID = $ret;
             }
         }else if($entity_name=="temp" && $is_autodect_csv) {
             
@@ -203,97 +206,8 @@ if($response!=null){
     }
     header('Content-type: application/json;charset=UTF-8');
     print json_encode($response);
-    
 
-//
-// copy temp file into file upload folder and register file in table
-//    
-function registerUploadedFile($system, $file){
-    
-    $errorMsg = null;        
-    $tmp_name = HEURIST_SCRATCH_DIR.$file->name;
-    if(file_exists($tmp_name)){
-        
-            $fields = array();
-            /* clean up the provided file name -- these characters shouldn't make it through anyway */
-            $name = $file->original_name;
-            $name = str_replace("\0", '', $name);
-            $name = str_replace('\\', '/', $name);
-            $name = preg_replace('!.*/!', '', $name);
-            
-            $extension = null;
-            if($file->type=='application/octet-stream'){ 
-                //need to be more specific - try ro save extension
-                $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-            }
-            
-            
-            $fields = array(    
-            'ulf_OrigFileName' => $name,
-            'ulf_MimeExt' => $extension?$extension:$file->type, //extension or mimetype allowed
-            'ulf_FileSizeKB' => ($file->size<1024?1:intval($file->size/1024)),
-            'ulf_FilePath' => 'file_uploads/'); //relative path to HEURIST_FILESTORE_DIR - db root
-            //,'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt)); //backward capability            
-                
-            $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
-            
-            $entity = new DbRecUploadedFiles($system, $fileinfo);
-            $ret = $entity->save();
-            
-            if($ret!==false){
-                
-                $records = $entity->records();
-                
-                $ulf_ID = $records[0]['ulf_ID'];
-                $ulf_ObfuscatedFileID = $records[0]['ulf_ObfuscatedFileID'];
-                
-                //copy temp file from scratch to fileupload folder
-                $tmp_name = HEURIST_SCRATCH_DIR.$file->name;
-                $new_name = 'ulf_'.$ret[0].'_'.$name;
-                
-                if(file_exists($tmp_name)){
-                
-                    if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) ) 
-                    {
-                        //remove temp file
-                        unlink($tmp_name);
-                        
-                        //copy thumbnail
-                        if(isset($file->thumbnailName)){
-                            $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$file->thumbnailName;
-                            if(file_exists($thumb_name)){
-                                $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
-                                copy($thumb_name, $new_name);
-                                //remove temp file
-                                unlink($thumb_name);
-                            }
-                        }
-                        
-                    }else{
-                        $errorMsg = "Upload file: $name couldn't be saved to upload path definied for db = "
-                            . HEURIST_DBNAME.' ('.HEURIST_FILES_DIR
-                            .'). Please ask your system administrator to correct the path and/or permissions for this directory';
-                    }
-                }
-            
-            }else{ 
-                //remove temp file from scratch
-                unlink($tmp_name);
-            }
-    }else{ //nearly impossible case
-                        $errorMsg = 'Cant find temporary uploaded file: '.$file->name
-                        .' for db = ' . HEURIST_DBNAME.' ('.HEURIST_SCRATCH_DIR
-                        .'). Please ask your system administrator to correct the path and/or permissions for this directory';
-    }
-   
-    if($errorMsg!=null){
-        $system->addError(HEURIST_INVALID_REQUEST, $errorMsg);
-        $ret = false;
-    }
-    
-    return $ret;
-}    
-    
+//------------
 //
 //  verification of uploaded file - @todo integrate with UploadHandler
 //    

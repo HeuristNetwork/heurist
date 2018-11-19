@@ -38,6 +38,7 @@
     require_once (dirname(__FILE__).'/db_users.php');
     require_once (dirname(__FILE__).'/db_structure.php');
     require_once (dirname(__FILE__).'/db_recsearch.php');
+    require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
     require_once (dirname(__FILE__).'/../../records/index/elasticSearch.php');
 
@@ -274,7 +275,7 @@
 
         // recDetails data
         if ( @$record['details'] ) {
-            $detailValues = prepareDetails($system, $rectype, $record['details'], ($modeImport<2 && $is_strict_validation), $recID);
+            $detailValues = prepareDetails($system, $rectype, $record, ($modeImport<2 && $is_strict_validation), $recID);
             if(!$detailValues){
                 return $system->getError();
             }
@@ -1202,10 +1203,12 @@
     * @param mixed $details
     * @param mixed $is_strict - check mandatory fields, resources and terms ID
     */
-    function prepareDetails($system, $rectype, $details, $is_strict, $recID)
+    function prepareDetails($system, $rectype, $record, $is_strict, $recID)
     {
         global $terms;
 
+        $details = $record['details'];
+        
         /*
         * $details is the form
         *    $details = array("t:1" => array("bd:234463" => "7th Ave"),
@@ -1343,8 +1346,26 @@
 
 
                     case "file": //@TODO
+                    
+                        if($dtl_Value=='generate_thumbnail_from_url' && @$record['URL']){
+                            
+                            $tmp_file = generate_thumbnail($record['URL']);
+                            if(!is_a($tmp_file,'stdClass')){
+                                $err_msg = is_array($tmp_file)?$tmp_file['error']:'Unknown error '.$tmp_file;
+                            }else{
+                                $entity = new DbRecUploadedFiles($system, null);
+                                
+                                $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
+                                
+                                if(!$dtl_UploadedFileID){
+                                    $err_msg = $system->getError();
+                                    $err_msg = $err_msg['message'];
+                                    $system->clearError();                           
+                                }
+                            }
 
-                        if(is_numeric($dtl_Value)){  //this is ulf_ID
+                            
+                        }else if(is_numeric($dtl_Value)){  //this is ulf_ID
                             $dtl_UploadedFileID = intval($dtl_Value);
 
                             //TODO !!! mysql_num_rows(mysql_query("select ulf_ID from recUploadedFiles where ulf_ID=".dtl_UploadedFileID)) <=0 )

@@ -29,6 +29,18 @@ require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 class DbRecUploadedFiles extends DbEntityBase
 {
 
+    //
+    // constructor - load configuration from json file
+    //    
+    function __construct( $system, $data ) {
+        
+       if($data==null){
+           $data = array('entity'=>'recUploadedFiles');
+       } 
+        
+       parent::__construct( $system, $data );
+    }
+    
     /**
     *  search uploaded fils
     * 
@@ -463,6 +475,141 @@ class DbRecUploadedFiles extends DbEntityBase
         }
         
         return true;
+    }
+    
+    
+    /**
+    * @todo
+    * 
+    * @param mixed $url
+    * @param mixed $generate_thumbmail
+    */
+    public function registerURL($url, $generate_thumbmail = false){
+
+ 
+    }   
+
+    /**
+    * register file in database
+    * 
+    * @param mixed $file - flle object see UploadHabdler->get_file_object) 
+    *     
+            $file = new \stdClass();
+            original_name, type, name, size, url (get_download_url), 
+    * 
+    * 
+    * @param mixed $needclean - remove file from temp lcoation after reg
+    * @returns record or false
+    */
+    public function registerFile($file, $newname, $needclean = true){
+        
+        if(!is_a($file,'stdClass')){
+            
+            $tmp_name  = $file;
+            if(file_exists($tmp_name)){
+                $fileinfo = pathinfo($tmp_name);
+                
+                $file = new \stdClass();
+                $file->original_name = $newname?$newname:$fileinfo['filename'];
+                $file->name = $file->original_name;
+                $file->size = filesize($file_path); //fix_integer_overflow
+                $file->type = $fileinfo['extension'];
+            }
+            
+        }else{
+            //uploaded via UploadHandler is in scratch
+            $tmp_name = HEURIST_SCRATCH_DIR.$file->name;
+        }
+        
+        
+        $errorMsg = null;        
+        if(file_exists($tmp_name)){
+            
+                $fields = array();
+                /* clean up the provided file name -- these characters shouldn't make it through anyway */
+                $name = $file->original_name;
+                $name = str_replace("\0", '', $name);
+                $name = str_replace('\\', '/', $name);
+                $name = preg_replace('!.*/!', '', $name);
+                
+                $extension = null;
+                if($file->type=='application/octet-stream'){ 
+                    //need to be more specific - try ro save extension
+                    $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                }
+                
+                
+                $fields = array(    
+                'ulf_OrigFileName' => $name,
+                'ulf_MimeExt' => $extension?$extension:$file->type, //extension or mimetype allowed
+                'ulf_FileSizeKB' => ($file->size<1024?1:intval($file->size/1024)),
+                'ulf_FilePath' => 'file_uploads/'); //relative path to HEURIST_FILESTORE_DIR - db root
+                //,'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt)); //backward capability            
+                    
+                $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
+                
+                $this->setData($fileinfo);
+                $ret = $this->save();   //it returns ulf_ID
+                
+                if($ret!==false){
+                    
+                    $records = $this->records();
+                    
+                    $ulf_ID = $records[0]['ulf_ID'];
+                    $ulf_ObfuscatedFileID = $records[0]['ulf_ObfuscatedFileID'];
+                    
+                    //copy temp file from scratch to fileupload folder
+                    $new_name = 'ulf_'.$ret[0].'_'.$name;
+                    
+                    if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) ) 
+                    {
+                        //remove temp file
+                        if($needclean) unlink($tmp_name);
+                        
+                        //copy thumbnail
+                        if(isset($file->thumbnailName)){
+                            $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$file->thumbnailName;
+                            if(file_exists($thumb_name)){
+                                $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                                copy($thumb_name, $new_name);
+                                //remove temp file
+                                if($needclean) unlink($thumb_name);
+                            }
+                        }
+                        
+                        $ret = $ulf_ID;
+                        
+                    }else{
+                        $errorMsg = "Upload file: $name couldn't be saved to upload path definied for db = "
+                            . $this->system->dbname().' ('.HEURIST_FILES_DIR
+                            .'). Please ask your system administrator to correct the path and/or permissions for this directory';
+                    }
+                
+                }else{ 
+                    //remove temp file from scratch
+                    if($needclean) unlink($tmp_name);
+                }
+                
+        }else{
+        
+            if(is_a($file,'stdClass')){
+                $errorMsg = 'Cant find temporary uploaded file: '.$file->name
+                            .' for db = ' . $this->system->dbname().' ('.HEURIST_SCRATCH_DIR
+                            .')';
+            }else{ 
+               $errorMsg = 'Cant find file to be registred : '.$tmp_name
+                           .' for db = ' . $this->system->dbname();
+            }
+            $errorMsg = $errorMsg
+                    .'. Please ask your system administrator to correct the path and/or permissions for this directory';
+        }
+       
+        if($errorMsg!=null){
+            $this->system->addError(HEURIST_INVALID_REQUEST, $errorMsg);
+            $ret = false;
+        }
+            
+        return $ret;    
     }
 }
 ?>

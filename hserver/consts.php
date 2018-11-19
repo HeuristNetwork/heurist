@@ -155,6 +155,10 @@ define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org');
 define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org');
 define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO);
 
+
+//
+define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
+
 //---------------------------------
 
 /** RECORD TYPE DEFINITIONS */

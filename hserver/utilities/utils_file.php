@@ -1,6 +1,7 @@
 <?php
 
     /**
+    * File library - convert to static class
     *  File/folder utilities
     *
     * folderCreate
@@ -36,6 +37,7 @@
     fileCopy
     fileSave
     
+    generate_thumbnail 
     saveURLasFile       loadRemoteURLContent + fileSave
     
     getRelativePath
@@ -309,6 +311,52 @@
         }
     }
 
+
+    //
+    // returns temp file path or array with error messahe 
+    //    
+    function generate_thumbnail($sURL){
+
+        if(!defined('WEBSITE_THUMBNAIL_SERVICE') || WEBSITE_THUMBNAIL_SERVICE==''){
+            return array('error'=>'Thumbnail generator service not defined');
+        }
+        
+        $res = array();
+        //get picture from service
+        //"http://www.sitepoint.com/forums/image.php?u=106816&dateline=1312480118";
+        //https://api.thumbnail.ws/api/ab73cfc7f4cdf591e05c916e74448eb37567feb81d44/thumbnail/get?url=[URL]&width=320
+        $remote_path =  str_replace("[URL]", $sURL, WEBSITE_THUMBNAIL_SERVICE);
+        $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_"); // . $file_id;
+
+        $filesize = saveURLasFile($remote_path, $heurist_path);
+
+        if($filesize>0){
+
+            //check the dimension of returned thumbanil in case it less than 50 - consider it as error
+            if(strpos($remote_path, substr(WEBSITE_THUMBNAIL_SERVICE,0,24))==0){
+
+                $image_info = getimagesize($heurist_path);
+                if($image_info[1]<50){
+                    //remove temp file
+                    unlink($heurist_path);
+                    return array('error'=>'Thumbnail generator service can\'t create the image for specified URL');
+                }
+            }
+
+            $file = new \stdClass();
+            $file->original_name = 'snapshot.jpg';
+            $file->name = pathinfo($heurist_path, PATHINFO_BASENAME); //name with ext
+            $file->size = $filesize; //fix_integer_overflow
+            $file->type = 'jpg';
+                                
+            return $file;    
+            
+        }else{
+            return array('error'=>'Cannot download image from thumbnail generator service');
+        }
+
+        
+    }    
     
     /**
     * save remote url as file and returns the size of saved file

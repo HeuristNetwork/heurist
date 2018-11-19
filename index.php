@@ -286,7 +286,7 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                         (window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search) && 
                          window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search)))
                    {
-                       //add new record from bookmarklet  - see recordEdit.php as alternative add record in separate window
+                       //add new record from bookmarklet  - see recordEdit.php as alternative, it opens record editor in separate window
                        var url = window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search);
                        
                        var new_record_params = {
@@ -301,7 +301,7 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                             ScratchPad:  window.hWin.HEURIST4.util.getUrlParameter('d', window.location.search)
                        };
                        
-                       //defaul rectype for bookmarklet addition
+                       //default rectype for bookmarklet addition
                        if(url && !(new_record_params['RecTypeID']>0)){
                            
                            if(window.hWin.HAPI4.sysinfo['dbconst']['RT_INTERNET_BOOKMARK']>0) {

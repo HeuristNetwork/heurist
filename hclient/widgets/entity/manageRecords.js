@@ -1441,6 +1441,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                that.options.new_record_params['details'] = {};
                that.options.new_record_params['details'][window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']] = that.options.new_record_params['Title']; 
             }    
+            if(that.options.new_record_params['URL'] && window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL']>0){
+               if(!that.options.new_record_params['details']) that.options.new_record_params['details'] = {};
+               that.options.new_record_params['details'][window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL']] = 'generate_thumbnail_from_url';
+            }
             
             function __onAddNewRecord(){
 
@@ -1450,7 +1454,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         function(response){ 
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     response.is_insert=true; 
-                                    that._initEditForm_step3(response.data, true); //new record id
+                                    that._initEditForm_step3(response.data, true); //it returns new record id only
                                 } else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
                                 }
@@ -1460,7 +1464,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
                         function(response){ 
                             response.is_insert=true; 
-                            that._initEditForm_step4(response); 
+                            that._initEditForm_step4(response); //it returns full record data
                         });
                 }
             }
