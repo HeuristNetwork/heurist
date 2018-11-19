@@ -352,9 +352,8 @@
             return $file;    
             
         }else{
-            return array('error'=>'Cannot download image from thumbnail generator service');
+            return array('error'=>'Cannot download image from thumbnail generator service. '.$remote_path);
         }
-
         
     }    
     
@@ -366,8 +365,12 @@
     */
     function saveURLasFile($url, $filename)
     { //Download file from remote server
-        $rawdata = loadRemoteURLContent($url); //loadRemoteURLContentSpecial($url);
-        return fileSave($rawdata, $filename);
+        $rawdata = loadRemoteURLContent($url, false); //use proxy 
+        if($rawdata!==false){
+            return fileSave($rawdata, $filename); //returns file size
+        }else{
+            return 0;
+        }
     }
     
  

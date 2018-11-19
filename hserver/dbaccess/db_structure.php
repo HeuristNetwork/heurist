@@ -859,9 +859,6 @@ function dbs_GetRectypeConstraint($system) {
                             error_log($sMsg);        
                             if(!$emailsent){
                                 $emailsent = true;
-                                sendEmail(HEURIST_MAIL_TO_ADMIN, 'Recursion in '.$dbname.'.defTerms', 
-                                        $sMsg , null);
-                                        
                                 sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname,
                                     'User was unable to load the database due to a corrupted terms tree. '
                                     .'Recursion in parent-term hierarchy. Parent:'.implode('>',$parents)

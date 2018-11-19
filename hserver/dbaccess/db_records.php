@@ -1258,7 +1258,6 @@
                 "rst_DetailTypeID",
                 "rst_RecTypeID=$rectype and rst_CreateChildIfRecPtr=1");
         
-        
         //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
         $insertValues = array();
         $errorValues = array();
@@ -1275,7 +1274,7 @@
                 $dtl_Geo = null;
                 $isValid = false;
                 $err_msg = '';
-
+                
                 switch ($det_types[$dtyID]) {
 
                     case "freetext":
@@ -1350,8 +1349,9 @@
                         if($dtl_Value=='generate_thumbnail_from_url' && @$record['URL']){
                             
                             $tmp_file = generate_thumbnail($record['URL']);
+                            
                             if(!is_a($tmp_file,'stdClass')){
-                                $err_msg = is_array($tmp_file)?$tmp_file['error']:'Unknown error '.$tmp_file;
+                                $err_msg = is_array($tmp_file) ?$tmp_file['error'] :'Unknown error '.$tmp_file;
                             }else{
                                 $entity = new DbRecUploadedFiles($system, null);
                                 
@@ -1360,10 +1360,19 @@
                                 if(!$dtl_UploadedFileID){
                                     $err_msg = $system->getError();
                                     $err_msg = $err_msg['message'];
-                                    $system->clearError();                           
+                                    $system->clearError();  
                                 }
                             }
-
+                            
+                            if($err_msg!=''){
+                                //send email to heurist team about fail generation from url
+                                sendEmail(HEURIST_MAIL_TO_ADMIN, 'The thumbnailer fails to return an image '.$system->dbname(),
+                                      'The thumbnailer fails to return an image '.$system->dbname().'. '.$err_msg, null);      
+                                $err_msg = '';
+                                $dtl_Value = '';
+                                $isValid = 'ignore';
+                                break; //just ignore this value                        
+                            }
                             
                         }else if(is_numeric($dtl_Value)){  //this is ulf_ID
                             $dtl_UploadedFileID = intval($dtl_Value);
@@ -1376,6 +1385,7 @@
                             $dtl_UploadedFileID = intval(@$dtl_Value['ulf_ID']);
                         }
 
+                        
                         $dtl_Value = null;
                         $isValid = ($dtl_UploadedFileID>0);
 
@@ -1424,7 +1434,10 @@
                         continue;    //noop since separators and relmarker have no detail values
                 } //switch
 
-                if($isValid){
+        
+                if($isValid==='ignore') continue;
+
+                if($isValid == true){
 
                     if(@$det_required[$dtyID]!=null){
                         unset($det_required[$dtyID]);
@@ -1434,7 +1447,6 @@
                     $dval['dtl_UploadedFileID'] = $dtl_UploadedFileID;
                     $dval['dtl_Geo'] = $dtl_Geo;
                     array_push($insertValues, $dval);
-
                 }else{
                     $dt_names = dbs_GetDtLookups();
                     array_push($errorValues, $dtl_Value." is not valid. Field type ".@$dt_names[$det_types[$dtyID]]." (field id: $dtyID). ".$err_msg);

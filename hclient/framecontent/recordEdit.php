@@ -146,7 +146,6 @@ if(@$_REQUEST['u']){
 else{
     print '<script>var prepared_params = {};</script>';
 }   
-console.log(prepared_params);                         
 ?>
 <!-- <?php echo PDIR;?> -->
 
