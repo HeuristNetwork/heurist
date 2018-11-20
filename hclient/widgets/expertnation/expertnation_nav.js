@@ -1885,7 +1885,7 @@ $.widget( "heurist.expertnation_nav", {
                         html = html + '<div style="display:none;width:80%;height:90%" id="pdf-viewer'+uniqid+'">'
                                 + '<object width="100%" height="100%" name="plugin" data="'
                                 + fileURL_forembed
-                                + '" type="application/pdf"></object></div>';
+                                + '#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf"></object></div>';
                                 
                         uniqid++;
                         
