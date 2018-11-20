@@ -3916,7 +3916,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         if(page==1){
             $("#selImportId").val('');  //clear selection
-            if(session_selector && session_selector.hSelect('instance')) session_selector.hSelect("refresh");
+            //if(session_selector && session_selector.hSelect('instance')) session_selector.hSelect("refresh");
+            if(session_selector && session_selector.hSelect('instance')) {
+                var sw = $("#selImportId").width();        
+                if(sw>500) sw = 500;
+                session_selector.hSelect("refresh");
+                $("#selImportId-button").css('width', sw);   
+            }
             imp_ID = 0;
         }else if(page==1){
             $('#divStep2').find('fieldset').show();

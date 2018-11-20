@@ -69,7 +69,8 @@ $.widget( "heurist.ruleBuilder", {
         .addClass('text ui-corner-all ui-widget-content')
         .appendTo( cont );
 
-        window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, (this.options.level==1?'select....':false), true );
+        window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), this.options.recordtypes, 
+                                                            (this.options.level==1?'select....':false), true );
 
         //create list/combobox of pointer/relmarker fields
         this.select_fields = $( "<select>" )

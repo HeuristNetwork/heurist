@@ -44,8 +44,10 @@ if(!$system->is_admin()){
 
 $excludeDuplication = (@$_REQUEST["dup"]!="1"); //by default exclude duplication of existing record types (identified by concept IDs)
 
-//combination of db and record type id eg. 1126-13
-$code = @$_REQUEST['code']; //concept code of record type is source database
+//combination of db and record type id eg. 1126-13            
+$code = @$_REQUEST['code']; //this is not concept code - these are source database and rectype id in it
+//concept code is unique for record type unfortunately it does not specify exactly what database is preferable as a source of donwloading
+
 $req_import_types  = @$_REQUEST["import"];
 $req_correspondence = @$_REQUEST["correspondence"];
 

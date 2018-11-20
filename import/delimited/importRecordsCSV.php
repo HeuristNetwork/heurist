@@ -163,7 +163,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         <h2 style="padding:10 0 10 120">OR</h2>
         
         <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Select previously uploaded file</h2>
-            <select id="selImportId" class="text ui-widget-content ui-corner-all"></select>
+            <select id="selImportId" class="text ui-widget-content ui-corner-all" style="width:auto"></select>
             <a href="#" id="btnClearAllSessions"
                 title="All uploaded files will be removed from the sytem. Start this action if you sure that you do not need any import data anymore"
                             style="margin-left: 10px;">Clear all files</a>        

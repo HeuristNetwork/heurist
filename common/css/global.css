@@ -683,15 +683,16 @@ input[type="radio"] {vertical-align: text-top;}
 .detailRowHeader span.link{text-transform: none; font-size: 9px;}
 
 .personPhoto {max-width: 150px;padding:0 16px 0 0;}
-.thumb_image {clear:both; margin:5px; cursor: url(../images/zoom-in.png),pointer;} /*float:right;margin-right: 10px; */
+.thumb_image {clear:both; margin:5px; cursor: url(../images/zoom-in.png),pointer;margin-left:90px} /*float:right;margin-right: 10px; */
 /*.thumb_image .download_link{text-align:right; padding-right:3px}*/
-.fullSize {width:100%; padding:5px;text-align:center}
+.fullSize {padding:20px;text-align:center}
 
 div.thumbnail {
-    /*text-align: center;*/
+    /*text-align: center;
     margin-left:90px;
+    */
 }
-div.thumbnail .fullSize img {margin:0; width:auto; max-width:100%; cursor: url(../images/zoom-out.png),pointer;}
+div.thumbnail .fullSize img {margin:0px; width:auto; max-width:100%; cursor: url(../images/zoom-out.png),pointer;}
 div.thumbnail img{width:80px;border: 2px solid #FFF;-moz-box-shadow:0 2px 4px #BBB;-webkit-box-shadow:0 2px 4px #BBB;box-shadow:0 2px 4px #BBB;}
 img {border:0 none;vertical-align:middle;}
 #recID {float:right}

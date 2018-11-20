@@ -939,7 +939,10 @@ class SortPhrase {
                         return array("$bd_name.dtl_Value".$scending, "$bd_name.dtl_Value".$scending,
                             "left join recDetails $bd_name on $bd_name.dtl_RecID=rec_ID and dtl_DetailTypeID=$field_id ");
                     } else if ($baseType == "integer"){//sort field is an integer so need to cast in order to get numeric sorting
-                        return array(" cast(dtl_Value as unsigned)","dtl_Value is integer",
+                        return array(" cast(dtl_Value as unsigned)".$scending,"dtl_Value is integer",
+                            "left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=$field_id ");
+                    } else if ($baseType == "float"){//sort field is an numeric so need to cast in order to get numeric sorting
+                        return array(" cast(dtl_Value as decimal)".$scending,"dtl_Value is decimal",
                             "left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=$field_id ");
                     } else {
                         // have to introduce a defDetailTypes join to ensure that we only use the linked resource's title if this is in fact a resource type (previously any integer, e.g. a date, could potentially index another records record)
@@ -962,7 +965,11 @@ class SortPhrase {
                             "left join defDetailTypes bdt$bd_name on bdt$bd_name.dty_Name='".$mysqli->real_escape_string($field_name)."' "
                             ."left join recDetails $bd_name on $bd_name.dtl_RecID=rec_ID and $bd_name.dtl_DetailTypeID=bdt$bd_name.dty_ID ");
                     } else if ($baseType == "integer"){//sort field is an integer so need to cast in order to get numeric sorting
-                        return array(" cast(dtl_Value as unsigned)","dtl_Value is integer",
+                        return array(" cast(dtl_Value as decimal)".$scending,"dtl_Value is decimal",
+                            "left join defDetailTypes bdtInt on bdtInt.dty_Name='".$mysqli->real_escape_string($field_name)."' "
+                            ."left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=bdtInt.dty_ID ");
+                    } else if ($baseType == "float"){//sort field is an numeric so need to cast in order to get numeric sorting
+                        return array(" cast(dtl_Value as unsigned)".$scending,"dtl_Value is integer",
                             "left join defDetailTypes bdtInt on bdtInt.dty_Name='".$mysqli->real_escape_string($field_name)."' "
                             ."left join recDetails dtlInt on dtlInt.dtl_RecID=rec_ID and dtlInt.dtl_DetailTypeID=bdtInt.dty_ID ");
                     } else {

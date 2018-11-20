@@ -72,7 +72,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
                     window.hWin.HAPI4 = new hAPI('<?=$_REQUEST['db']?>');
                 }
 
-                window.hWin.HEURIST4.util.createRectypeSelect($('#cbRectypes').get(0), null, ' ');
+                window.hWin.HEURIST4.ui.createRectypeSelect($('#cbRectypes').get(0), null, ' ');
 
                 $('.showintervals')
                 .button({icons: {primary: "ui-icon-triangle-1-s"}, text: false })
@@ -90,9 +90,9 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
                 var allowedlist = ["enum", "integer", "float", "date", "freetext"]; //"resource",
 
-                window.hWin.HEURIST4.util.createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ');
-                window.hWin.HEURIST4.util.createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ');
-                window.hWin.HEURIST4.util.createRectypeDetailSelect($('#cbPages').get(0), recordtype, allowedlist, ' ');
+                window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ');
+                window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ');
+                window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbPages').get(0), recordtype, allowedlist, ' ');
 
                 clearIntervals('column');
                 clearIntervals('row');

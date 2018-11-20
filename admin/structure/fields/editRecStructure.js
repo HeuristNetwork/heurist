@@ -1699,8 +1699,12 @@ function EditRecStructure() {
             //update min/max visibility
             onReqtypeChange(Number(rst_ID));
         }
-        Dom.get('ed'+rst_ID+'_rst_DisplayName').focus();
-
+        var ele = Dom.get('ed'+rst_ID+'_rst_DisplayName');
+        ele.focus();
+        if(rst_type === "separator"){
+            //ele.select();
+            ele.setSelectionRange(0, ele.value.length);
+        }
 
         //If reserved, requirements can only be increased, nor can you change min or max values
         onStatusChange(Number(rst_ID));
