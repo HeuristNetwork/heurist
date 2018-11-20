@@ -5267,14 +5267,14 @@ html, body {
   background-color: transparent; }
 
 html {
-  background: black url("assets/beyond1914/images/common/background.jpg") no-repeat center center;
+  Xbackground: black url("assets/beyond1914/images/common/background.jpg") no-repeat center center;
   background-size: auto auto;
   background-size: cover;
   background-position: top center;
   background-attachment: fixed; }
   @media only screen and (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     html {
-      background-image: url("assets/beyond1914/images/common/background@2x.jpg"); } }
+      Xbackground-image: url("assets/beyond1914/images/common/background@2x.jpg"); } }
 
 .container {
   margin-top: 122px;

@@ -581,6 +581,16 @@ $.widget( "heurist.expertnation_nav", {
                     },2000);
                     
         
+       
+        $('#help_link').click(function(event){
+           
+           var sURL = $(event.target).attr('href');
+           window.hWin.HEURIST4.util.stopEvent(event);
+           window.hWin.HEURIST4.msg.showDialog(sURL,{title:'How to use this?',width:1200,height:900});
+           
+           return false; 
+        });
+       
         
     },
     
