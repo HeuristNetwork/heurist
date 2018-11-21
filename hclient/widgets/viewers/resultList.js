@@ -517,9 +517,10 @@ $.widget( "heurist.resultList", {
                                pagesize: 9999999999999,
                                renderer: function(recordset, record){ 
                                    var recID = recordset.fld(record, 'rec_ID');
-                                    return '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'"><span style="min-width:150px">'
-                                            + recID
-                                            + '</span>'+window.hWin.HEURIST4.util.htmlEscape( recordset.fld(record, 'rec_Title') ) 
+                                    return '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+                                            //+'<span style="min-width:150px">'
+                                            //+ recID + '</span>'
+                                            + window.hWin.HEURIST4.util.htmlEscape( recordset.fld(record, 'rec_Title') ) 
                                             + '</div>';
                                }
                                });     
@@ -540,7 +541,7 @@ $.widget( "heurist.resultList", {
                         
                     var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({element: $(this.sortResultListDlg)[0],
                         title:'Drag records up and down to position, hit Save order to save the order as link',
-                        height:700,
+                        height:500,
                         buttons:[
                             {text:'Cancel', click: function(){$dlg.dialog( "close" );}},
                             {text:'Save Order', click: function(){
@@ -555,7 +556,7 @@ $.widget( "heurist.resultList", {
                                     var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
                                     if(app && app.widget){
                                         var squery = 'ids:'+new_rec_order.join(',')+' sortby:f';
-                                        $(app.widget).svs_list('editSavedSearch', 'saved', null, null, squery); //call public method
+                                        $(app.widget).svs_list('editSavedSearch', 'saved', undefined, null, squery); //call public method
                                     }
                                 }
                             }} 
