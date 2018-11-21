@@ -388,6 +388,9 @@ class HQuery {
             }
             
             switch (strtolower($subtext)) {
+                case 'f': case 'fixed': //no sort - returns as is
+                
+                        break;
                 case 'r': case 'rating':
                     if ($this->search_domain == BOOKMARK) {
                         if(!in_array('bkm_Rating', $sort_fields)) {

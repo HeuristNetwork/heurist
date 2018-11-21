@@ -25,6 +25,7 @@ define('BIBLIO', 'biblio'); //outdated @toremove
 define('EVERYTHING', 'everything');
 
 
+define('SORT_FIXED', 'f');
 define('SORT_POPULARITY', 'p');
 define('SORT_RATING', 'r');
 define('SORT_URL', 'u');
@@ -314,6 +315,13 @@ function parse_query($search_domain, $text, $sort_order='', $parentquery, $currU
     } else {
         if ($search_domain == BOOKMARK) {
             switch ($sort_order) {
+                case SORT_FIXED:
+                    if($query->fixed_sortorder){
+                        $q = 'FIND_IN_SET(TOPBIBLIO.rec_ID, \''.$query->fixed_sortorder.'\')';
+                    }else{
+                        $q = null;
+                    }
+                    break;
                 case SORT_POPULARITY:
                     $q = 'rec_Popularity desc, rec_Added desc'; break;
                 case SORT_RATING:
@@ -331,6 +339,13 @@ function parse_query($search_domain, $text, $sort_order='', $parentquery, $currU
             }
         } else {
             switch ($sort_order) {
+                case SORT_FIXED:
+                    if($query->fixed_sortorder){
+                        $q = 'FIND_IN_SET(TOPBIBLIO.rec_ID, \''.$query->fixed_sortorder.'\')';
+                    }else{
+                        $q = null;
+                    }
+                    break;
                 case SORT_POPULARITY:
                     $q = 'rec_Popularity desc, rec_Added desc'; break;
                 case SORT_URL:
@@ -365,6 +380,8 @@ class Query {
     var $top_limbs;
     var $sort_phrases;
     var $sort_tables;
+    
+    var $fixed_sortorder = null;
 
 
     function Query($search_domain, $text, $currUserID, $parentquery, $absoluteStrQuery = false) {
@@ -511,14 +528,18 @@ class Query {
         $sort_clauses = array();
         for ($i=0; $i < count($this->sort_phrases); ++$i) {
             @list($new_sql, $new_sig, $new_tables) = $this->sort_phrases[$i]->makeSQL();
+            
+            if($new_sql!=null){
 
-            if (! @$sort_clauses[$new_sig]) {    // don't repeat identical sort clauses
-                if ($sort_clause) $sort_clause .= ', ';
+                if (! @$sort_clauses[$new_sig]) {    // don't repeat identical sort clauses
+                    if ($sort_clause) $sort_clause .= ', ';
 
-                $sort_clause .= $new_sql;
-                if ($new_tables) array_push($this->sort_tables, $new_tables);
+                    $sort_clause .= $new_sql;
+                    if ($new_tables) array_push($this->sort_tables, $new_tables);
 
-                $sort_clauses[$new_sig] = 1;
+                    $sort_clauses[$new_sig] = 1;
+                }
+                
             }
         }
         if ($sort_clause) $sort_clause = ' ORDER BY ' . $sort_clause;
@@ -893,6 +914,13 @@ class SortPhrase {
         }
 
         switch (strtolower($subtext)) {
+            case 'f': case 'fixed': //sort as is
+                if($this->parent->fixed_sortorder){
+                    return array('FIND_IN_SET(TOPBIBLIO.rec_ID, \''.$this->parent->fixed_sortorder.'\')', 'rec_ID', NULL);
+                }else{
+                    return array(NULL, NULL, NULL);
+                }
+            
             case 'p': case 'popularity':
                 return array('-rec_Popularity'.$scending.', -rec_ID'.$scending, 'rec_Popularity', NULL);
 
@@ -2023,6 +2051,8 @@ class BibIDPredicate extends Predicate {
                 // comma-separated list of ids
                 $not = ($this->parent->negate)? ' not' : '';
                 $match_pred = $not.' in ('.$cs_ids.')';
+                
+                $pquery->fixed_sortorder = $cs_ids; //need in case sortby:f
             }else{
                 
                 $this->value = recordSearchReplacement($mysqli, $this->value);
