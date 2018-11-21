@@ -6132,3 +6132,11 @@ a.facet_link span:first-child:focus {
     color: #fff;
     text-align: center;
 }
+
+/* trick to hide PDF toolbar in FF */
+#outerContainer #mainContainer div.toolbar {
+  display: none !important; /* hide PDF viewer toolbar */
+}
+#outerContainer #mainContainer #viewerContainer {
+  top: 0 !important; /* move doc up into empty bar space */
+}

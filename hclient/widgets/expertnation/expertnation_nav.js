@@ -219,6 +219,14 @@ $.widget( "heurist.expertnation_nav", {
     
     _constructNavigationMenu: function( recordset ){
     
+
+        $("body").on("contextmenu",function(e){
+            return false;
+        });        
+        $('body').bind('cut copy paste', function (e) {
+            e.preventDefault();
+        });
+            
         var that = this;
         var menu_ele = $('#'+this.options.menu_div);
         
@@ -1873,7 +1881,16 @@ $.widget( "heurist.expertnation_nav", {
                     var record = that.recset.getById(fval[idx]);
                     var filename = that.recset.fld(record, 62);
                     var obf = that.recset.fld(record, 38);
-                    var img_title = that.recset.fld(record, 'rec_Title')
+                    var img_title = that.recset.fld(record, 'rec_Title');
+                    if( window.hWin.HEURIST4.util.isempty(img_title) ) img_title = '';
+                    
+                    var img_description = that.recset.fld(record, 3);
+                    if( !window.hWin.HEURIST4.util.isempty(img_description) ){
+                        img_description = img_title +  ' <i style=\'float:right\'>'+img_description+'</i>';
+                    }else{
+                        img_description = img_title;
+                    }
+                    
                     var isScan = (that.recset.fld(record, 'rec_RecTypeID')==144);
 //console.log(record);
                     var stitle = isScan?'Document scan':('Photograph of '+fullName);
@@ -1881,7 +1898,7 @@ $.widget( "heurist.expertnation_nav", {
                     if(ext==null) ext = '';
                     //var slightbox = (ext.toLowerCase()=='pdf')?' target="_blank"':'data-fancybox="profile-images" data-lightbox="profile-images"';
                     var slightbox = 'data-fancybox="profile-images" data-lightbox="profile-images" '
-                                    +' data-caption="' + (img_title==null?'':img_title) + '"';
+                                    +' data-caption="' + img_description + '"';
                     
                     if(ext.toLowerCase()=='pdf'){
                         slightbox = slightbox+' data-src="#pdf-viewer'+uniqid+'"';
@@ -1891,11 +1908,17 @@ $.widget( "heurist.expertnation_nav", {
                                 + 'hserver/dbaccess/file_download.php?db=' 
                                 + window.hWin.HAPI4.database + '&embed=1&file='+obf[0];
                                 
+  /*div.pdf {
+   position: absolute;
+  top: -42px;
+  left: 0;width:100%;
+  }*/                                
                         /* inline html  */
-                        html = html + '<div style="display:none;width:80%;height:90%" id="pdf-viewer'+uniqid+'">'
-                                + '<object width="100%" height="100%" name="plugin" data="'
+                        html = html 
+                        + '<div oncontextmenu="return false;" style="display:none;width:80%;height:90%" id="pdf-viewer'+uniqid+'">'
+                                + '<object oncontextmenu="return false;" width="100%" height="100%" name="plugin" data="'
                                 + fileURL_forembed
-                                + '#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf"></object></div>';
+                                + '#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&scrollbar=0" type="application/pdf"></object></div>';
                                 
                         uniqid++;
                         
@@ -1906,7 +1929,7 @@ $.widget( "heurist.expertnation_nav", {
                     
                     html = html +           
                         '<a class="bor-gallery-link" ' + slightbox
-                            + ' data-footer="" title="'+ (img_title==null?'':img_title) +'" href="'
+                            + ' data-footer="" title="'+ img_title +'" href="'
                             + href +'">'
                             + '<img class="bor-thumbnail" src="' 
                             + window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database 
