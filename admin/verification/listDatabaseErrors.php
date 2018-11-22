@@ -416,9 +416,12 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
 
 
                 
+            $wasadded1 = 0;
+                
             $wasdeleted1 = 0;
-            if(@$_REQUEST['fixparents']=="1"){ //remove pointer field in parent records that does not have reverse in children
-
+            if(false && @$_REQUEST['fixparents']=="1"){ 
+                
+                //remove pointer field in parent records that does not have reverse in children
                 $query = 'DELETE parent FROM Records parentrec, defRecStructure, recDetails parent '
                  .'LEFT JOIN recDetails child ON child.dtl_DetailTypeID='.DT_PARENT_ENTITY.' AND child.dtl_Value=parent.dtl_RecID '
                  .'LEFT JOIN Records childrec ON parent.dtl_Value=childrec.rec_ID '
@@ -426,6 +429,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                  .'parentrec.rec_ID=parent.dtl_RecID AND rst_CreateChildIfRecPtr=1 '
                  .'AND rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=parent.dtl_DetailTypeID '
                  .'AND child.dtl_RecID is NULL'; 
+                 
                 $res = $mysqli->query( $query );
                 if(! $res )
                 {
@@ -454,8 +458,19 @@ $res = $mysqli->query( $query1 );
 $bibs1 = array();
 $prec_ids1 = array();
 while ($row = $res->fetch_assoc()){
-    $bibs1[] = $row;
-    $prec_ids1[] = $row['rec_ID'];
+    
+    if(@$_REQUEST['fixparents']=="1"){ 
+        //new way: add missed reverse link to alleged children
+        $mysqli->query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
+                                    .$child_ID . ','. DT_PARENT_ENTITY  .', '.$row['rec_ID'] . ')');
+        $wasadded1++;
+    }else{
+        
+        $bibs1[] = $row;
+        $prec_ids1[] = $row['rec_ID'];
+        $child_ID = $row['dtl_Value'];
+    }
+    
 }
 
 //print $query1; 
@@ -512,21 +527,24 @@ while ($row = $res->fetch_assoc()){
 
                 
                 if (count($bibs1) == 0) {
-                    print "<h3>All parent records have correct reverse pointer in children records</h3><br>";
+                    print "<h3>All parent records are correctly referenced by their child records</h3><br>";
                     if($wasdeleted1>1){
                         print "<div>$wasdeleted1 invalid pointer(s) were removed from database</div>";
+                    }
+                    if($wasadded1>0){
+                        print "<div>$wasadded1 reverse pointers were added t0 child records</div>";
                     }
                 }
                 else
                 {
                     ?>
-                    <br><h3>List of 'parent' records which are not indicated as parent by the child record they point to. Missed reverse pointer to parent field in child record</h3>
+                    <br><h3>Parent  records which are not correctly referenced by their child records (missing pointer to parent)</h3>
                     <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $prec_ids1) ?>'>
                         (show results as search)</a></span>
                         
                     <div>To fix the inconsistencies, please click here:
                         <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixparents=1','_self')">
-                            Delete ALL 'child' pointers in 'fake' parent records</button>
+                            Add missing parent record pointers to child records</button>
                     </div>
                         
                     <table>
@@ -555,7 +573,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                 
                 
                 if (count($bibs2) == 0) {
-                    print "<br><h3>All parent records have correct parent record pointer fields</h3><br>";
+                    print "<br><h3>All parent records correctly reference records which believe they are their children</h3><br>";
                     if($wasdeleted2>1){
                         print "<div>$wasdeleted2 invalid pointer(s) were removed from database</div>";
                     }
@@ -563,16 +581,17 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                 else
                 {
                     ?>
-                    <br><h3>Invalid parent records.<br>
-                        Records indicated as parent by a child have no pointer to the child record<br>
-                        Or parent/child flag is OFF in record structure defintions</h3>
+                    <br><h3>Child records indicate a parent which does not identify them as their child. </h3>
                     <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $prec_ids2) ?>'>
                         (show results as search)</a></span>
-                        
+                    
+<!--  IJ: For the moment I suggest you omit a FIX button for this case
+                      
                     <div>To fix the inconsistencies, please click here:
                         <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixparents=2','_self')">
                              Delete broken parent-child fields in alleged children records</button>
                     </div>
+-->                    
                     <table>
                         <?php
                         foreach ($bibs2 as $row) {
