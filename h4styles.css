@@ -84,7 +84,7 @@ H2 {
     padding: 0.1em 2.1em 0.2em 0.2em;
 }
 .ui-front{
-    z-index: 999999;
+    z-index: 59999; /*999999;*/
 }
 /*  LAYOUT */
 .ui-layout-pane {

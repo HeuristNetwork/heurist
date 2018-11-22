@@ -318,7 +318,12 @@ $.widget( "heurist.editing_input", {
         if(this.inputs){
             $.each(this.inputs, function(index, input){ 
 
-                    if(that.detailType=='file'){
+                    if(that.detailType=='blocktext'){
+                        var eid = '#'+input.attr('id')+'_editor';
+                        tinymce.remove(eid);
+                        $(eid).remove(); //remove editor element
+                        
+                    }else if(that.detailType=='file'){
                         $(input).fileupload('destroy');
                     }else{
                         if($(input).hSelect('instance')!==undefined) $(input).hSelect('destroy');
@@ -482,6 +487,71 @@ $.widget( "heurist.editing_input", {
             .keyup(function(){that._onChange();})
             .change(function(){that._onChange();})
             .appendTo( $inputdiv );
+            
+            var eid = $input.attr('id')+'_editor';
+            
+            $editor = $( "<div>")
+            .attr("id", eid)
+            .addClass('text ui-widget-content ui-corner-all')
+            .css({'overflow-x':'hidden','display':'inline-block'})
+            .appendTo( $inputdiv ).hide();
+            
+            
+            function __showEditor(){
+                var eid = '#'+$input.attr('id')+'_editor';                    
+                
+                $input.hide();
+                        $(eid).html($.parseHTML($input.val())).width($input.width()).show();
+                        tinymce.init({
+                                //target: $editor, 
+                                selector: (eid),
+                                inline: false,
+                                menubar: false,
+                                 setup:function(ed) {
+                                   ed.on('change', function(e) {
+                                       $input.val( ed.getContent() );
+                                       that._onChange();
+                                   });
+                                 },
+                                plugins: [
+                                    'advlist autolink lists link image preview textcolor', //anchor charmap print 
+                                    'searchreplace visualblocks code fullscreen',
+                                    'media table contextmenu paste help'  //insertdatetime  wordcount
+                                  ],      
+                                  //code insert  |  fontselect fontsizeselect |  forecolor backcolor | alignleft aligncenter alignright alignjustify            
+                                toolbar: ['undo redo | formatselect | bold italic forecolor | align | bullist numlist outdent indent | media image link | removeformat | fullscreen help'],
+                                content_css: [
+                                    '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+                                    //,'//www.tinymce.com/css/codepen.min.css'
+                                    ]                    
+                          });
+  
+            }
+            
+              
+            var $btn_edit_switcher = $( '<span>', {title: 'Show/hide Rich text editor'})
+                .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                .css({'margin-top':'2px','vertical-align':'top',cursor:'pointer'})
+                .appendTo( $inputdiv );
+                
+            this._on( $btn_edit_switcher, { click: function(){
+                    
+                    var eid = '#'+$input.attr('id')+'_editor';                    
+                    if($input.is(':visible')){
+                        __showEditor();
+                    }else{
+                        $input.show();
+                        tinymce.remove(eid);
+                        $(eid).hide();
+                    }
+                }});
+                
+                //what is visible initially
+                var nodes = $.parseHTML(value);
+                if(nodes && (nodes.length>1 || nodes[0].nodeName!='#text')){ //if it has html show editor at once
+                     setTimeout(__showEditor,500); 
+                }
+              
 
         }else if(this.detailType=='enum' || this.detailType=='relationtype'){
 
@@ -614,7 +684,7 @@ $.widget( "heurist.editing_input", {
                     
                 var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
                 .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                .css({'margin-top':'2px'})
+                .css({'margin-top':'2px',cursor:'pointer'})
                 .appendTo( $inputdiv );
                 //.button({icons:{primary: 'ui-icon-gear'},text:false});
                 

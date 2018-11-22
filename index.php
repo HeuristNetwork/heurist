@@ -135,6 +135,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <link rel="stylesheet" type="text/css" href="ext/fancybox/jquery.fancybox.css" />
         <script type="text/javascript" src="ext/fancybox/jquery.fancybox.js"></script>
         
+        <script src="ext/tinymce/tinymce.min.js"></script>
+        <script src="ext/tinymce/jquery.tinymce.min.js"></script>
         
         <!-- os, browser detector -->
         <script type="text/javascript" src="ext/js/platform.js"></script>
@@ -146,6 +148,14 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                
                 if(!success) return;
 
+                
+$(document).on('focusin', function(e) {
+    if ($(e.target).closest(".mce-window, .moxman-window").length) {
+        e.stopImmediatePropagation();
+    }
+});   
+                
+                
                 //
                 // cfg_widgets and cfg_layouts are defined in layout_default.js
                 //
