@@ -260,7 +260,7 @@ $.widget( "heurist.editing_input", {
         }else if(this.detailType=='file' || this.detailType=='geo'){
             values_to_set = this.options.values;
         }else {
-            values_to_set = window.hWin.HEURIST4.util.uniqueArray(this.options.values); //.slice();//.unique();
+            values_to_set = this.options.values; //window.hWin.HEURIST4.util.uniqueArray(this.options.values); //.slice();//.unique();
         }
         
         //recreate input elements and assign given values
