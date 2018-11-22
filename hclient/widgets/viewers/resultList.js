@@ -1197,10 +1197,11 @@ $.widget( "heurist.resultList", {
         // construct the line or block
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
         + html_thumb
-        + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        
+        + '<div class="recordIcons logged-in-only">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/>'
-        +     '<span class="ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline;left:4px">&nbsp;&nbsp;</span>'
+        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/> '
+        +     '<span class="ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline;left:0px">&nbsp;&nbsp;</span>'
         +     html_owner
         +     html_pwdrem
         + '</div>'
