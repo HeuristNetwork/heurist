@@ -543,7 +543,6 @@ $.widget( "heurist.resultList", {
                         title:'Drag records up and down to position, hit Save order to save the order as link',
                         height:500,
                         buttons:[
-                            {text:'Cancel', click: function(){$dlg.dialog( "close" );}},
                             {text:'Save Order', click: function(){
                                 //get new order of records ids
                                 var recordset = that.sortResultList.resultList('getRecordSet');
@@ -559,7 +558,8 @@ $.widget( "heurist.resultList", {
                                         $(app.widget).svs_list('editSavedSearch', 'saved', undefined, null, squery); //call public method
                                     }
                                 }
-                            }} 
+                            }},
+                            {text:'Cancel', click: function(){$dlg.dialog( "close" );}}
                         ]
                         });
                         

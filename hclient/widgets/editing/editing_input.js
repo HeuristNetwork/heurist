@@ -506,6 +506,9 @@ $.widget( "heurist.editing_input", {
                                 //target: $editor, 
                                 selector: (eid),
                                 inline: false,
+                                branding: false,
+                                elementpath: false,
+                                statusbar: false,
                                 menubar: false,
                                  setup:function(ed) {
                                    ed.on('change', function(e) {
@@ -518,8 +521,8 @@ $.widget( "heurist.editing_input", {
                                     'searchreplace visualblocks code fullscreen',
                                     'media table contextmenu paste help'  //insertdatetime  wordcount
                                   ],      
-                                  //code insert  |  fontselect fontsizeselect |  forecolor backcolor | alignleft aligncenter alignright alignjustify            
-                                toolbar: ['undo redo | formatselect | bold italic forecolor | align | bullist numlist outdent indent | media image link | removeformat | fullscreen help'],
+                                  //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
+                                toolbar: ['formatselect | bold italic forecolor | align | bullist numlist outdent indent | removeformat | help'],
                                 content_css: [
                                     '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
                                     //,'//www.tinymce.com/css/codepen.min.css'
