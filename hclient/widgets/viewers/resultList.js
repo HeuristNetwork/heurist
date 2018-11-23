@@ -2283,9 +2283,9 @@ $.widget( "heurist.resultList", {
                         if(that._currentSavedFilterID>0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
                             window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID]){
                            
-                           //if current saved search has sortby:f - just edit with new query
+                           //if current saved search has sortby:set - just edit with new query
                            var squery = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_QUERY];
-                           if(squery.indexOf('sortby:f')>=0){
+                           if(squery.indexOf('sortby:set')>=0){
                                 svsID = that._currentSavedFilterID;
                            }else{
                                 var groupID =  window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_GRPID];
@@ -2296,7 +2296,7 @@ $.widget( "heurist.resultList", {
                         //call for saved searches dialog
                         var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
                         if(app && app.widget){
-                            var squery = 'ids:'+new_rec_order.join(',')+' sortby:f';
+                            var squery = 'ids:'+new_rec_order.join(',')+' sortby:set';
                             $(app.widget).svs_list('editSavedSearch', 'saved', null, svsID, squery, null, true); //call public method
                         }
                     }

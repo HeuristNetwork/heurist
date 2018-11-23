@@ -25,7 +25,7 @@ define('BIBLIO', 'biblio'); //outdated @toremove
 define('EVERYTHING', 'everything');
 
 
-define('SORT_FIXED', 'f');
+define('SORT_FIXED', 'set');
 define('SORT_POPULARITY', 'p');
 define('SORT_RATING', 'r');
 define('SORT_URL', 'u');
@@ -914,7 +914,7 @@ class SortPhrase {
         }
 
         switch (strtolower($subtext)) {
-            case 'f': case 'fixed': //sort as is
+            case 'set': case 'fixed': //sort as defined in ids predicate
                 if($this->parent->fixed_sortorder){
                     return array('FIND_IN_SET(TOPBIBLIO.rec_ID, \''.$this->parent->fixed_sortorder.'\')', 'rec_ID', NULL);
                 }else{
@@ -2052,7 +2052,7 @@ class BibIDPredicate extends Predicate {
                 $not = ($this->parent->negate)? ' not' : '';
                 $match_pred = $not.' in ('.$cs_ids.')';
                 
-                $pquery->fixed_sortorder = $cs_ids; //need in case sortby:f
+                $pquery->fixed_sortorder = $cs_ids; //need in case sortby:set
             }else{
                 
                 $this->value = recordSearchReplacement($mysqli, $this->value);

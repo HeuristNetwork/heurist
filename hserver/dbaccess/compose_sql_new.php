@@ -229,6 +229,8 @@ class HQuery {
 
     var $level = "0";
     var $cnt_child_query = 0;
+    
+    var $fixed_sortorder = null;
 
 
     function HQuery($level, $query_json, $search_domain=null, $currUserID=null) {
@@ -388,8 +390,12 @@ class HQuery {
             }
             
             switch (strtolower($subtext)) {
-                case 'f': case 'fixed': //no sort - returns as is
+                case 'set': case 'fixed': //no sort - returns as is
                 
+                        if($this->fixed_sortorder){
+                            $sort_fields[] = 'r0.rec_ID';
+                            $sort_expr[] = 'FIND_IN_SET(r0.rec_ID, \''.$this->fixed_sortorder.'\')';
+                        }
                         break;
                 case 'r': case 'rating':
                     if ($this->search_domain == BOOKMARK) {
@@ -957,6 +963,11 @@ class HPredicate {
 
             if(!$this->field_list){
                 $val = "=0";
+            }else if ($p==0){
+                $cs_ids = getCommaSepIds($this->value);
+                if ($cs_ids && strpos($cs_ids, ',')>0) {  
+                    $top_query->fixed_sortorder = $cs_ids;
+                }
             }
         }
 
