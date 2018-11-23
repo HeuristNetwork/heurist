@@ -86,6 +86,7 @@ $.widget( "heurist.expertnation_nav", {
     RT_MILSERVICE: 29,
     RT_SCHOOLING: 31,
     RT_OCCUPATION: 37,
+    RT_ASSOCIATION: 69,
     
     // the widget's constructor
     _create: function() {
@@ -219,13 +220,14 @@ $.widget( "heurist.expertnation_nav", {
     
     _constructNavigationMenu: function( recordset ){
     
-
+        
         $("body").on("contextmenu",function(e){
             return false;
         });        
         $('body').bind('cut copy paste', function (e) {
             e.preventDefault();
         });
+        
             
         var that = this;
         var menu_ele = $('#'+this.options.menu_div);
@@ -450,7 +452,7 @@ $.widget( "heurist.expertnation_nav", {
 
             var resource_menu = $('<ul>'
             +'<li data-resource-id="general"><a href="#" class="nav-link">General resources</a></li>'
-            +'<li data-resource-id="education"><a href="#" class="nav-link">Education resources</a></li>'
+            //+'<li data-resource-id="education"><a href="#" class="nav-link">Education resources</a></li>'
             +'</ul>')
                     .addClass('top-menu-dropdown').hide()
                     .css({'position':'absolute', 'padding':'5px', 'font-size': '15px'})
@@ -458,6 +460,12 @@ $.widget( "heurist.expertnation_nav", {
                     .menu({select: function(event, ui){ 
                         
                                         window.hWin.HEURIST4.util.stopEvent(event);
+                                        
+                                        window.open('http://sydney.edu.au/arms/archives/beyond1914_resources.shtml','_blank');
+                                        
+                                        return false;
+                                        
+                                        
                                         //that.history.push({page_name:'search'});
                                         
                                         var hdoc = $(window.hWin.document);
@@ -471,7 +479,7 @@ $.widget( "heurist.expertnation_nav", {
                                         
                                         var repurl = window.hWin.HAPI4.baseURL
                                                 + 'viewers/smarty/updateReportOutput.php?publish=3&mode=html&id='
-                                                + (rep_id=='general'?3:2)
+                                                + (rep_id=='general'?5:4)
                                                 + '&db='+window.hWin.HAPI4.database;
                                                 
                                         /*var repurl = window.hWin.HAPI4.baseURL
@@ -955,12 +963,20 @@ $.widget( "heurist.expertnation_nav", {
                                 
                                     var eventDate = that.__getEventDates(record);
                                     
+                                    if(!(rankID>0)) {
+                                        var _rankID = that.recset.fld(record, 99);
+                                        var sRank = that.__getTerm(_rankID);
+                                        story = ' was '+sRank+' ';
+                                    }else{
+                                        story = ' held this rank ';
+                                    }
+                                    
                                     var sUnit = that.__getTerm(that.recset.fld(record, 138));
                                     
                                     //places of service
                                     //var place = that.__getPlace(record, 0);
                                                 
-                                    story = ' held this rank '
+                                    story = story
                                             + (sUnit?' with '+sUnit:'')
                                             //+ (place.link?', '+place.link:'')
                                             + ' ' + eventDate.desc;
@@ -1466,6 +1482,7 @@ $.widget( "heurist.expertnation_nav", {
             //Occupation Event (151->t:37) -------------------------------
             events = that.recset.values(person, 151);
             idx = 0;
+            html = '';
             if($.isArray(events)){
                 for (idx in events){
                     var rec_id = events[idx];
@@ -1489,6 +1506,8 @@ $.widget( "heurist.expertnation_nav", {
                         
                         var termID = that.recset.fld(record, 150);
                         var sOccupationTitle = that.__getTerm(termID);
+
+                        html = html + '<li>'+sOccupationTitle + ((sOccupationOrg!='')?(' at '+sOccupationOrg):'') + '</li>';
                         
                         if(placeID==0 || (place!=null && window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0)){     
 
@@ -1519,11 +1538,28 @@ $.widget( "heurist.expertnation_nav", {
                                 that.__setPlaceDesc(place, 'place', //@todo replace to name of occupation icon
                                     sOccupationTitle+' '+sOccupationOrg+' '+eventDate.desc);                    
                         }
-                        
                     }
                 }
             }
+            leftside['p_occupation'] = html;
             
+            //Professinal Assosiation (259->t:69) -------------------------------
+            var assocs = that.recset.values(person, 259);
+            idx = 0;
+            html = '';
+            if($.isArray(assocs)){
+                for (idx in events){
+                    var rec_id = assocs[idx];
+                    var record = that.recset.getById(rec_id);
+                    if(record){
+                        var termID = that.recset.fld(record, 258);
+                        var sOrg = that.__getTerm(termID);
+                        html = html + '<li>'+sOrg+'</li>'; 
+                    }
+                }//for
+            }
+            leftside['p_association'] = html;
+                
             //Military Awards -------------------------------
             var awards = that.recset.values(person, that.DT_MILAWARD);
             idx = 0;
@@ -1600,7 +1636,8 @@ $.widget( "heurist.expertnation_nav", {
                             + window.hWin.HAPI4.baseURL+'military-service/'
                             + rankID + ',' +  (sUnit?unitID:0) + '/a" onclick="{window.hWin.enResolver(event);}">'
                             + sRank+'</a>';
-                    }else if(sUnit){
+                    }
+                    if(sUnit){
                         sUnit = '<a href="'
                             + window.hWin.HAPI4.baseURL+'military-service/0,'
                             + unitID +'/a" onclick="{window.hWin.enResolver(event);}">'
@@ -1692,7 +1729,7 @@ $.widget( "heurist.expertnation_nav", {
                     "levels":[{"query":"t:26 linkedfrom:31,27",   //edu institution
                         "levels":[{"query":"t:25 linkedfrom:26"}]}]},  //place (location of institution)
                     
-                {"query":"t:24,28,29,33,37 linkedfrom:10",  //eventlet,mil award,mil service,death,occupation
+                {"query":"t:24,28,29,33,37,69 linkedfrom:10",  //eventlet,mil award,mil service,death,occupation
                         "levels":[{"query":"t:25 linkedfrom:-78"},    //location of event 
                                   {"query":"t:4 linkedfrom:37-21"}]},  //organization linked to occupation event
                 {"query":"t:5 linkedfrom:10-61,135,144"}]  //documents pdf,additional photos,documents
@@ -1796,7 +1833,20 @@ $.widget( "heurist.expertnation_nav", {
                 idx = 0;
                 for (idx in fval)
                 if(!that.isempty(fval)){
-                    html = html + '<li><a target="_blank" href="' + fval[idx]+'">Additional resource</a></li>'
+                    var surl = fval[idx];
+                    var k = surl.indexOf('://')
+                    if(k>0) surl = surl.substring(k+3);
+                    k = surl.indexOf('/');
+                    if(k>0){
+                        k = surl.indexOf('/',k+1);
+                        if(k>0) surl = surl.substring(0,k);
+                    }
+                    
+                    //Additional resource
+                    html = html 
+                        + '<li><div style="max-width:200px" class="truncate"><a target="_blank" href="' 
+                        + fval[idx]
+                        +'">'+surl+'</a></div></li>'
                 }
             }
             
