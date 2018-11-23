@@ -532,17 +532,20 @@ $.widget( "heurist.editing_input", {
             }
             
               
-            var $btn_edit_switcher = $( '<span>', {title: 'Show/hide Rich text editor'})
-                .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                .css({'margin-top':'2px','vertical-align':'top',cursor:'pointer'})
+            var $btn_edit_switcher = $( '<span>html</span>', {title: 'Show/hide Rich text editor'})
+                //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                .addClass('smallbutton btn_add_term')
+                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
                 .appendTo( $inputdiv );
                 
             this._on( $btn_edit_switcher, { click: function(){
                     
                     var eid = '#'+$input.attr('id')+'_editor';                    
                     if($input.is(':visible')){
+                        $btn_edit_switcher.text('text');
                         __showEditor();
                     }else{
+                        $btn_edit_switcher.text('html');
                         $input.show();
                         tinymce.remove(eid);
                         $(eid).hide();
