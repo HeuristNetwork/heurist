@@ -650,7 +650,7 @@ $.widget( "heurist.svs_list", {
                     var qsearch = that.allowed_svsIDs[svs_ID][_QUERY];
                     var qname   = that.allowed_svsIDs[svs_ID][_NAME];
                     var isfaceted = that.allowed_svsIDs[svs_ID][_FACET];
-                    that.doSearch( qname, qsearch, isfaceted, event.target );
+                    that.doSearch( svs_ID, qsearch, isfaceted, event.target ); //qname replaced with svs_ID
                     that.accordeon.find('#search_query').val('');
                 }
             })
@@ -937,14 +937,14 @@ $.widget( "heurist.svs_list", {
                     if(data.node.data && data.node.data.url){
                         isfaceted= data.node.data.isfaceted;
                         qsearch = data.node.data.url;
-                        qname   = data.node.title;
+                        qname   = (data.node.key>0)?data.node.key:data.node.title; //qname replaced with svs_ID
                     }else{
                         if (data.node.key && 
                             window.hWin.HAPI4.currentUser.usr_SavedSearch && 
                             window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key]){
                                 
                             qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_QUERY];
-                            qname   = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_NAME];
+                            qname   = data.node.key; //window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_NAME];
                             isfaceted = data.node.data.isfaceted;
                         }
                     }
@@ -1593,7 +1593,7 @@ $.widget( "heurist.svs_list", {
             window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID]){
                                 
             var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_QUERY];
-            var qname   = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_NAME];
+            var qname   = svsID; //window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_NAME];
             
             var isfaceted = false;
             
@@ -1735,25 +1735,25 @@ $.widget( "heurist.svs_list", {
     // groupID - current user or workgroup
     // svsID - saved search id
     // squery
-    , editSavedSearch: function(mode, groupID, svsID, squery, node){
+    , editSavedSearch: function(mode, groupID, svsID, squery, node, is_short){
 
         var that = this;
 
-        var callback = function(event, request) {
-            if(Hul.isempty(svsID)){     //new saved search
+        var callback = function(event, response) {
+            if(response.isNewSavedFilter){     //new saved search
 
                 //update tree after addition - add new search to root
                 if(Hul.isnull(node)){
-                    groupID = request.svs_UGrpID
+                    groupID = response.svs_UGrpID
                     if(groupID == window.hWin.HAPI4.currentUser.ugr_ID){
-                        groupID = request.domain; //all or bookmarks
+                        groupID = response.domain; //all or bookmarks
                     }
                     var tree = that.treeviews[groupID];
                     node = tree.rootNode;
                     node.folder = true;
                 }
                 var isfaceted = (mode=='faceted');
-                node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:isfaceted}
+                node.addNode( { title:response.svs_Name, key: response.new_svs_ID, isfaceted:isfaceted}
                     , node.folder?"child":"after" );
 
                 that._saveTreeData( groupID );
@@ -1761,7 +1761,7 @@ $.widget( "heurist.svs_list", {
 
             }else if(node){ //edit is called from this widget only - otherwise we have to implement search node by svsID
                 //edit - changed only title in treeview
-                node.setTitle(request.svs_Name);
+                node.setTitle(response.svs_Name);
                 node.render(true);
                 that._saveTreeData( groupID );
             }
@@ -1778,7 +1778,7 @@ $.widget( "heurist.svs_list", {
                 this.edit_dialog = new hSvsEdit();
             }
             //this.edit_dialog.callback_method  = callback;
-            this.edit_dialog.show( mode, groupID, svsID, squery, callback );
+            this.edit_dialog.showSavedFilterEditDialog( mode, groupID, svsID, squery, is_short, callback );
 
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svs_edit.js',

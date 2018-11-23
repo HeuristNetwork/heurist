@@ -157,7 +157,17 @@ $.widget( "heurist.resultList", {
 
                         if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
                             //new search from outside
-                            var new_title = window.hWin.HR(data.qname || that.options.title || 'Filtered Result');
+                            var new_title;
+                            if(data.qname>0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
+                                window.hWin.HAPI4.currentUser.usr_SavedSearch[data.qname])
+                            {
+                                that._currentSavedFilterID = data.qname;
+                                new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_NAME];
+                            }else{
+                                that._currentSavedFilterID = 0;
+                                new_title = window.hWin.HR(that.options.title || 'Filtered Result');        
+                            }
+                            
                             that._clearAllRecordDivs(new_title);
                             
                             if(that.search_save_hint){
@@ -206,7 +216,7 @@ $.widget( "heurist.resultList", {
 
                         if(that.btn_search_save){
                             that.btn_search_save.hide();
-                            that.btn_search_save_withorder.hide();
+                            //that.btn_search_save_withorder.hide();
                         } 
                     }else{
                         if(that.btn_search_save) {
@@ -216,7 +226,7 @@ $.widget( "heurist.resultList", {
                                 setTimeout(function(){that.search_save_hint.hide('slide', {}, 6000);}, 5000);    
                             }
                             
-                            that.btn_search_save_withorder.show();
+                            //that.btn_search_save_withorder.show();
                             //setTimeout(function(){that.search_save_hint.hide('puff');},3000);
                         }
                     }
@@ -433,7 +443,9 @@ $.widget( "heurist.resultList", {
                 this.div_actions = $('<div>')
                 .css({display:'inline-block','padding-bottom':'4px'})
                 //.css({'position':'absolute','top':3,'left':2})
-                .resultListMenu({menu_class:this.options.header_class})
+                .resultListMenu({
+                        menu_class: this.options.header_class,
+                        resultList: this.element})
                 .appendTo(this.div_toolbar);
             }
         }    
@@ -487,85 +499,18 @@ $.widget( "heurist.resultList", {
             } });    
             
             //order manually and save as search filter
-            
+            /*
             this.btn_search_save_withorder = $( "<button>", {
                 text: window.hWin.HR('Re-order and Save'),
-                title: window.hWin.HR('Re-order current result set and save as a link in the navigation tree')
+                title: window.hWin.HR('Allows manual reordering of the current results and saving as a fixed list of ordered records')
             })
             .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none', color: 'rgb(142, 169, 185)', float:'right'})
             .addClass('ui-state-focus')
             .appendTo( btndiv )
             .button().hide();
             
-            this._on( this.btn_search_save_withorder, {  click: function(){
-                    
-                    if(!this.sortResultList){
-                        
-                        this.sortResultListDlg = $('<div>').appendTo(this.element);
-                        //init result list
-                        this.sortResultList = $('<div>').appendTo(this.sortResultListDlg)
-                            .resultList({
-                               recordDiv_class: 'recordDiv_blue',
-                               eventbased: false, 
-                               isapplication: false, //do not listent global events @todo merge with eventbased
-                               multiselect: false,
-                               view_mode: 'list',
-                               sortable: true,
-                               show_toolbar: false,
-                               select_mode: 'select_single',
-                               entityName: this._entityName,
-                               pagesize: 9999999999999,
-                               renderer: function(recordset, record){ 
-                                   var recID = recordset.fld(record, 'rec_ID');
-                                    return '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
-                                            //+'<span style="min-width:150px">'
-                                            //+ recID + '</span>'
-                                            + window.hWin.HEURIST4.util.htmlEscape( recordset.fld(record, 'rec_Title') ) 
-                                            + '</div>';
-                               }
-                               });     
-                    }
-                    
-                    //fill result list with current page ids
-                    //get all ids on page
-                    var ids_on_current_page = [];
-                    this.div_content.find('.recordDiv').each(function(ids, rdiv){
-                        ids_on_current_page.push($(rdiv).attr('recid'));
-                    });
-                    //get susbet
-                    var page_recordset = this._currentRecordset.getSubSetByIds(ids_on_current_page);
-                    page_recordset.setOrder(ids_on_current_page); //preserver order
-                    this.sortResultList.resultList('updateResultSet', page_recordset);
-                    
-                    var that = this;    
-                        
-                    var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({element: $(this.sortResultListDlg)[0],
-                        title:'Drag records up and down to position, hit Save order to save the order as link',
-                        height:500,
-                        buttons:[
-                            {text:'Save Order', click: function(){
-                                //get new order of records ids
-                                var recordset = that.sortResultList.resultList('getRecordSet');
-                                var new_rec_order = recordset.getOrder();
-                                
-                                $dlg.dialog( "close" );
-                                
-                                if(new_rec_order.length>0){
-                                    //call for saved searches dialog
-                                    var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
-                                    if(app && app.widget){
-                                        var squery = 'ids:'+new_rec_order.join(',')+' sortby:f';
-                                        $(app.widget).svs_list('editSavedSearch', 'saved', undefined, null, squery); //call public method
-                                    }
-                                }
-                            }},
-                            {text:'Cancel', click: function(){$dlg.dialog( "close" );}}
-                        ]
-                        });
-                        
-                
-            } });    
-            
+            this._on( this.btn_search_save_withorder, {  click: this.setOrderAndSaveAsFilter });    
+            */
             
         }             
         
@@ -756,7 +701,7 @@ $.widget( "heurist.resultList", {
         this.action_buttons_div.remove();
         if(this.btn_search_save){
             this.btn_search_save.remove(); 
-            this.btn_search_save_withorder.remove(); 
+            //this.btn_search_save_withorder.remove(); 
             if(this.sortResultListDlg){
                     this.sortResultList.remove();
                     this.sortResultListDlg.remove();
@@ -2276,4 +2221,90 @@ $.widget( "heurist.resultList", {
             this._adjustHeadersPos();
         }
     },
+    
+    
+    setOrderAndSaveAsFilter: function(){
+                    
+        if(!this.sortResultList){
+            
+            this.sortResultListDlg = $('<div>').appendTo(this.element);
+            //init result list
+            this.sortResultList = $('<div>').appendTo(this.sortResultListDlg)
+                .resultList({
+                   recordDiv_class: 'recordDiv_blue',
+                   eventbased: false, 
+                   isapplication: false, //do not listent global events @todo merge with eventbased
+                   multiselect: false,
+                   view_mode: 'list',
+                   sortable: true,
+                   show_toolbar: false,
+                   select_mode: 'select_single',
+                   entityName: this._entityName,
+                   pagesize: 9999999999999,
+                   renderer: function(recordset, record){ 
+                       var recID = recordset.fld(record, 'rec_ID');
+                        return '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+                                //+'<span style="min-width:150px">'
+                                //+ recID + '</span>'
+                                + window.hWin.HEURIST4.util.htmlEscape( recordset.fld(record, 'rec_Title') ) 
+                                + '</div>';
+                   }
+                   });     
+        }
+        
+        //fill result list with current page ids
+        //get all ids on page
+        var ids_on_current_page = [];
+        this.div_content.find('.recordDiv').each(function(ids, rdiv){
+            ids_on_current_page.push($(rdiv).attr('recid'));
+        });
+        if(ids_on_current_page.length==0) return;
+        //get susbet
+        var page_recordset = this._currentRecordset.getSubSetByIds(ids_on_current_page);
+        page_recordset.setOrder(ids_on_current_page); //preserver order
+        this.sortResultList.resultList('updateResultSet', page_recordset);
+        
+        var that = this;    
+            
+        var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({element: $(this.sortResultListDlg)[0],
+            title:'Drag records up and down to position, then Save order to save as a fixed list in this order',
+            height:500,
+            buttons:[
+                {text:'Save Order', click: function(){
+                    //get new order of records ids
+                    var recordset = that.sortResultList.resultList('getRecordSet');
+                    var new_rec_order = recordset.getOrder();
+                    
+                    $dlg.dialog( "close" );
+                    
+                    if(new_rec_order.length>0){
+                    
+                        var svsID;
+                        if(that._currentSavedFilterID>0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
+                            window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID]){
+                           
+                           //if current saved search has sortby:f - just edit with new query
+                           var squery = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_QUERY];
+                           if(squery.indexOf('sortby:f')>=0){
+                                svsID = that._currentSavedFilterID;
+                           }else{
+                                var groupID =  window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_GRPID];
+                                window.hWin.HAPI4.save_pref('last_savedsearch_groupid', groupID);
+                           }
+                        }
+                    
+                        //call for saved searches dialog
+                        var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
+                        if(app && app.widget){
+                            var squery = 'ids:'+new_rec_order.join(',')+' sortby:f';
+                            $(app.widget).svs_list('editSavedSearch', 'saved', null, svsID, squery, null, true); //call public method
+                        }
+                    }
+                }},
+                {text:'Cancel', click: function(){$dlg.dialog( "close" );}}
+            ]
+            });
+                        
+                
+    },    
 });

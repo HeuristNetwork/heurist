@@ -26,6 +26,7 @@ $.widget( "heurist.resultListMenu", {
         // callbacks
         show_searchmenu:false,
         menu_class:null,
+        resultList:null  //reference to parent
     },
 
     _query_request: {}, //keep current query request
@@ -52,6 +53,7 @@ $.widget( "heurist.resultListMenu", {
         this._initMenu('Collected');
         this._initMenu('Recode');
         this._initMenu('Shared');
+        if(this.options.resultList) this._initMenu('Reorder');
         //this._initMenu('Layout');
         this.divMainMenuItems.menu();
 
@@ -128,6 +130,7 @@ $.widget( "heurist.resultListMenu", {
             this.menu_Collected.find('.logged-in-only').show();
             this.btn_Recode.show();
             this.btn_Shared.show();
+            this.btn_Reorder.show();
 
             //$(this.element).find('.logged-in-only').show();//.css('visibility','visible');
         }else{
@@ -136,6 +139,7 @@ $.widget( "heurist.resultListMenu", {
             this.menu_Collected.find('.logged-in-only').hide();
             this.btn_Recode.hide();
             this.btn_Shared.hide();
+            this.btn_Reorder.hide();
         }
     },
     //
@@ -157,6 +161,7 @@ $.widget( "heurist.resultListMenu", {
         this.menu_Recode.remove();
         this.btn_Shared.reSmove();
         this.menu_Shared.remove();
+        this.btn_Reorder.reSmove();
         this.divMainMenuItems.remove();
     },
 
@@ -203,45 +208,59 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         .appendTo( this.divMainMenuItems );
 
 
-        this['menu_'+name] = $('<ul>')                               //add to avoid cache in devtime '?t='+(new Date().getTime())
-        .load(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/resultListMenu'+name+'.html', function(){  
-            that['menu_'+name].addClass('menu-or-popup')
-            .css('position','absolute')
-            .appendTo( that.document.find('body') )
-            //.addClass('ui-menu-divider-heurist')
-            .menu({
-                icons: { submenu: "ui-icon-circle-triangle-e" },
-                select: function(event, ui){ 
-                event.preventDefault(); 
-                that._menuActionHandler(ui.item.attr('id')); 
-                return false; }});
-
-            if(window.hWin.HAPI4.has_access()){
-                that['menu_'+name].find('.logged-in-only').show();
-            }else{
-                that['menu_'+name].find('.logged-in-only').hide();
-            }
+        if(name=='Reorder'){
             
-            that['menu_'+name].find('li').css('padding-left',0);
+            this['btn_'+name].attr('title',
+            'Allows manual reordering of the current results and saving as a fixed list of ordered records');
             
-        })
-        //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
-        .hide();
-
-        //{select: that._menuActionHandler}
+            this._on( this['btn_'+name], {
+                click : function(){
+                       $(this.options.resultList).resultList('setOrderAndSaveAsFilter');
+                }
+            });
+            
+        }else{
         
+            this['menu_'+name] = $('<ul>')                               //add to avoid cache in devtime '?t='+(new Date().getTime())
+            .load(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/resultListMenu'+name+'.html', function(){  
+                that['menu_'+name].addClass('menu-or-popup')
+                .css('position','absolute')
+                .appendTo( that.document.find('body') )
+                //.addClass('ui-menu-divider-heurist')
+                .menu({
+                    icons: { submenu: "ui-icon-circle-triangle-e" },
+                    select: function(event, ui){ 
+                    event.preventDefault(); 
+                    that._menuActionHandler(ui.item.attr('id')); 
+                    return false; }});
+
+                if(window.hWin.HAPI4.has_access()){
+                    that['menu_'+name].find('.logged-in-only').show();
+                }else{
+                    that['menu_'+name].find('.logged-in-only').hide();
+                }
+                
+                that['menu_'+name].find('li').css('padding-left',0);
+                
+            })
+            //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
+            .hide();
+
+            //{select: that._menuActionHandler}
+            
 
 
-        this._on( this['btn_'+name], {
-            mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
-            mouseleave : function(){_hide(this['menu_'+name])}
-        });
-        this._on( this['menu_'+name], {
-            mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
-            mouseleave : function(){_hide(this['menu_'+name])}
-        });
+            this._on( this['btn_'+name], {
+                mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
+                mouseleave : function(){_hide(this['menu_'+name])}
+            });
+            this._on( this['menu_'+name], {
+                mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
+                mouseleave : function(){_hide(this['menu_'+name])}
+            });
 
-
+        }
+        
     },
 
 

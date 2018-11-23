@@ -66,6 +66,9 @@ function hSvsEdit(args) {
                     //{key:0, title:window.hWin.HR('Searches for guests')}  removed 2016-02-18
                 ],
                 function(){
+                    if(groupID == window.hWin.HAPI4.currentUser.ugr_ID){
+                        groupID = '';
+                    }
                     svs_ugrid.val(window.hWin.HEURIST4.util.isempty(groupID)?'all':groupID);
             });
 
@@ -87,7 +90,9 @@ function hSvsEdit(args) {
 
                 svs_id.val(svsID);
                 svs_name.val(svs[_NAME]);
-                svs_query.val( $.isArray(request.q)?JSON.stringify(request.q):request.q );
+                svs_query.val( !window.hWin.HEURIST4.util.isempty(squery)
+                                    ?squery  //overwrite (used in save fixed order)
+                                    : ($.isArray(request.q)?JSON.stringify(request.q):request.q) );
                 svs_rules.val( request.rules );
                 svs_rules_only.prop('checked', (request.rulesonly==1 || request.rulesonly==true));
                 svs_notes.val( request.notes );
@@ -220,9 +225,12 @@ function hSvsEdit(args) {
     * @param svsID
     * @param squery
     * @param mode - faceted, rules or saved
+    * @param is_short - works only for addition (from save fixed order)
     * @param callback
     */
-    function _showDialog( mode, groupID, svsID, squery, callback ){
+    function _showDialog( mode, groupID, svsID, squery, is_short, callback ){
+        
+        is_short = (!(svsID>0) && is_short===true);
 
         if(parseInt(svsID)>0){
             var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
@@ -349,7 +357,7 @@ function hSvsEdit(args) {
                 //that.
                 var isRules = _fromDataToUI(svsID, squery, groupID, allowChangeGroupID);
 
-                function __doSave(){   //save search
+                function __doSave(need_check_same_name){   //save search
 
                     var message = $dlg.find('.messages');
                     var svs_id = $dlg.find('#svs_ID');
@@ -361,10 +369,37 @@ function hSvsEdit(args) {
                     var svs_notes = $dlg.find('#svs_Notes');
 
                     allFields.removeClass( "ui-state-error" );
+                    
+                    svs_ugrid = svs_ugrid.val();
+                    var domain = 'all';
+                    if(svs_ugrid=="all" || svs_ugrid=="bookmark"){
+                        domain = svs_ugrid;
+                        svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID;
+                    }
 
                     var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 64 );
 
                     if(bValid){
+                        
+                        //validate that name is unique within group
+                        if(need_check_same_name!==false)
+                        {
+                            for (var id in window.hWin.HAPI4.currentUser.usr_SavedSearch){
+                                var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[id];
+                                if(svs[_NAME]==svs_name.val() && svs[_GRPID]==svs_ugrid && id!=svs_id.val()){
+                                    var $mdlg = window.hWin.HEURIST4.msg.showMsgDlg('Filter with such name already exists in group',
+                                    [
+                                      {text:'Replace existing', click: function(){ 
+                                            svs_id.val(id);
+                                            __doSave(false), 
+                                            $mdlg.dialog( "close" );}},
+                                      {text:'Cancel', click: function(){ $mdlg.dialog( "close" ); svs_name.focus() }}
+                                    ]
+                                    );
+                                    return;
+                                }
+                            }
+                        }
 
                         var bOk = isRules || window.hWin.HEURIST4.msg.checkLength( svs_query, "Query", null, 1 );
                         if(!bOk) bOk = window.hWin.HEURIST4.msg.checkLength( svs_rules, "Rules", null, 1 );
@@ -379,15 +414,6 @@ function hSvsEdit(args) {
                     }
 
                     if(bValid){
-
-                        var svs_ugrid = svs_ugrid.val();
-
-                        var domain = 'all';
-                        if(svs_ugrid=="all" || svs_ugrid=="bookmark"){
-                            domain = svs_ugrid;
-                            svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID;
-                            //if(domain!="all"){query_to_save.push('w='+domain);}
-                        }
 
                         /*if(window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val())){   //PURE RuleSet
                             domain = 'rules';
@@ -425,6 +451,7 @@ function hSvsEdit(args) {
                                     $dlg.dialog( "close" );
 
                                     request.new_svs_ID = svsID;
+                                    request.isNewSavedFilter = !isEdit;
 
                                     callback_method.call(that, null, request);
                                     //@todo that._updateAfterSave(request, 'saved');
@@ -492,14 +519,14 @@ function hSvsEdit(args) {
                     var code = (event.keyCode ? event.keyCode : event.which);
                     if (code == 13) {
                         window.hWin.HEURIST4.util.stopEvent(event);
-                        __doSave();
+                        __doSave(true);
                     }
                 });
 
 
                 $dlg.dialog({
                     autoOpen: false,
-                    height: 600,
+                    height: is_short?360:600,
                     width: 650,                                                                                               
                     modal: true,
                     resizable: false,
@@ -515,6 +542,12 @@ function hSvsEdit(args) {
                         allFields.val( "input, textarea" ).removeClass( "ui-state-error" );
                     }
                 });
+                
+                if(is_short){
+                    edit_dialog.find('.hide-if-short').hide();
+                }else{
+                    edit_dialog.find('.hide-if-short').show();    
+                }
 
                 $dlg.dialog("open");
                 $dlg.parent().addClass('ui-dialog-heurist');
@@ -524,6 +557,14 @@ function hSvsEdit(args) {
             //show dialogue
             var isRules = _fromDataToUI(svsID, squery, groupID, allowChangeGroupID);
             edit_dialog.dialog("option",'title', window.hWin.HR(isRules?'Edit RuleSet':'Edit saved filter criteria'));
+
+            edit_dialog.dialog("option",'height', is_short?360:600 );
+            if(is_short){
+                edit_dialog.find('.hide-if-short').hide();
+            }else{
+                edit_dialog.find('.hide-if-short').show();    
+            }
+            
             edit_dialog.dialog("open");
         }
 
@@ -543,8 +584,8 @@ function hSvsEdit(args) {
             edit_dialog = null;
         },
 
-        show: function( mode, groupID, svsID, squery, callback ) {
-            _showDialog( mode, groupID, svsID, squery, callback );
+        showSavedFilterEditDialog: function( mode, groupID, svsID, squery, is_short, callback ) {
+            _showDialog( mode, groupID, svsID, squery, is_short, callback );
         }
 
     }
