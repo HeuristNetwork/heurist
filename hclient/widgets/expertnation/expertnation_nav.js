@@ -220,7 +220,7 @@ $.widget( "heurist.expertnation_nav", {
     
     _constructNavigationMenu: function( recordset ){
     
-        
+             
         $("body").on("contextmenu",function(e){
             return false;
         });        
