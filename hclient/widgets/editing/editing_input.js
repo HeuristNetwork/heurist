@@ -497,19 +497,34 @@ $.widget( "heurist.editing_input", {
             .appendTo( $inputdiv ).hide();
             
             
-            function __showEditor(){
+              
+            var $btn_edit_switcher = $( '<span>html</span>', {title: 'Show/hide Rich text editor'})
+                //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                .addClass('smallbutton btn_add_term')
+                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                .appendTo( $inputdiv );
+                            
+            function __showEditor(is_manual){
                 var eid = '#'+$input.attr('id')+'_editor';                    
                 
                 $input.hide();
                         $(eid).html($.parseHTML($input.val())).width($input.width()).show();
+                        
+                        if(is_manual){
+                           $(eid).height($input.height()); 
+                        }   
+                        $btn_edit_switcher.text('text');
+                        
                         tinymce.init({
                                 //target: $editor, 
                                 selector: (eid),
                                 inline: false,
                                 branding: false,
                                 elementpath: false,
-                                statusbar: false,
+                                statusbar: true,
+                                resize: 'both',
                                 menubar: false,
+                                entity_encoding:'raw',
                                  setup:function(ed) {
                                    ed.on('change', function(e) {
                                        $input.val( ed.getContent() );
@@ -530,20 +545,13 @@ $.widget( "heurist.editing_input", {
                           });
   
             }
-            
-              
-            var $btn_edit_switcher = $( '<span>html</span>', {title: 'Show/hide Rich text editor'})
-                //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                .addClass('smallbutton btn_add_term')
-                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                .appendTo( $inputdiv );
+
                 
             this._on( $btn_edit_switcher, { click: function(){
                     
                     var eid = '#'+$input.attr('id')+'_editor';                    
                     if($input.is(':visible')){
-                        $btn_edit_switcher.text('text');
-                        __showEditor();
+                        __showEditor(true);
                     }else{
                         $btn_edit_switcher.text('html');
                         $input.show();
