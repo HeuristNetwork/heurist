@@ -1342,11 +1342,12 @@ $.widget( "heurist.resultList", {
                 if(this._currentRecordset){
                     recInfoUrl = this._currentRecordset.fld( this._currentRecordset.getById(selected_rec_ID), 'rec_InfoFull' );
                 }
+                var lt = 'WebSearch';//window.hWin.HAPI4.sysinfo['layout'];  
                 if( !recInfoUrl ){
-                    recInfoUrl = window.hWin.HAPI4.baseURL + "viewers/record/renderRecordData.php?db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
+                    recInfoUrl = window.hWin.HAPI4.baseURL + "viewers/record/renderRecordData.php?db="+window.hWin.HAPI4.database+"&ll="+lt+"&recID="+selected_rec_ID;
                 }
 
-                window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { width: 700, height: 800, title:'Record Info'});
+                window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { width: (lt=='WebSearch'?900:700), height: 800, title:'Record Info'});
                 return;
             }
         }

@@ -28,7 +28,7 @@
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  Records/View
-*/
+*/  
 
 require_once(dirname(__FILE__)."/../../hserver/System.php");
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
@@ -50,6 +50,8 @@ require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_users.php');
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
+$is_production = @$_REQUEST['ll']=='WebSearch';
+
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 
 $rectypesStructure = dbs_GetRectypeStructures($system); //getAllRectypeStructures(); //get all rectype names
@@ -376,14 +378,16 @@ function print_details($bib) {
     
         print_public_details($bib);
         
+        print_relation_details($bib);
+        print_linked_details($bib);
+
         if(!$is_map_popup){
             print_private_details($bib);
             print_other_tags($bib);
         //print_text_details($bib);
         }
         
-        print_relation_details($bib);
-        print_linked_details($bib);
+
     
     }else{
         
@@ -405,59 +409,42 @@ function print_header_line($bib) {
     $webIcon = mysql__select_value($system->get_mysqli(),
                     'select dtl_Value from recDetails where dtl_RecID='
                     .$bib['rec_ID'].' and dtl_DetailTypeID=347'); //DT_WEBSITE_ICON); 
-    //
-
-    if($system->has_access()){ //is logged in
-        ?>
-
-        <div id=recID>
-             ID:<?= htmlspecialchars($rec_id) ?>
-            <span class="link"><a id=edit-link class="normal"
-                        onClick="return sane_link_opener(this);"
-                        target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $rec_id ?>">
-                        <img src="../../common/images/edit-pencil.png" title="Edit record"></a>
-            </span>
-        </div>
-
-        <?php
-    }else{
-        print "<div id=recID>ID:".htmlspecialchars($rec_id)."</div>";
-    }
     ?>
 
-    <div class=HeaderRow style="margin-bottom:<?php echo ((@$url)?'20px;':'0px;min-height:0px;'); ?>">
+    <div class=HeaderRow style="margin-bottom:0px;min-height:0px;">
             <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
                 <?= $bib['rec_Title'] ?>
             </h2>
-    </div>        
-    <div id=footer>
     <?php 
     if(!$is_map_popup){ 
     ?>
-        <h3>
+        <h3 style="position:absolute;right:2;top:2">
             <div <?="style='padding-left:20px;height:16px;background-repeat: no-repeat;background-image:url(".HEURIST_ICON_URL.$bib['rty_ID'].".png)'"?> >
                 <?= htmlspecialchars($bib['rty_Name'])." [".$bib['rty_ID']."] " ?>
             </div>
         </h3>
         <br>
-        <?php if (@$url) { ?>
+        <?php 
+           if (false && @$url) {  //since 2018-11-24
+        ?>
             <span class="link">
                 <a target="_new" class="external-link" href="http://web.archive.org/web/*/<?=htmlspecialchars($url)?>">page history</a>
                 <a target="_new" class="external-link" href="<?=htmlspecialchars($url)?>"><?= output_chunker($url) ?></a>
                 <?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
             </span>
-        <?php } 
+        <?php 
+           } 
     }else{
         print '&nbsp;';
     } 
-    print '</div>'; //footer
+    print '</div>';        
 
 }
 
 
 //this  function displays private info if there is any.
 function print_private_details($bib) {
-    global $system;
+    global $system, $is_map_popup;
 
     if($bib['rec_OwnerUGrpID']==0){
         
@@ -497,11 +484,80 @@ function print_private_details($bib) {
         .'sysUGrps grp on tag_UGrpID=grp.ugr_ID left join sysUsrGrpLinks on ugl_GroupID=ugr_ID and ugl_UserID='
         .$system->get_user_id().' where rtl_RecID='.$bib['rec_ID']
         .' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order',0,0);
+
+    print '<div class="detailRowHeader" style="float:left;"><a href="#" onClick="$(\'.morePrivateInfo\').show();$(event.target).parents(\'.detailRowHeader\').hide()">more ...</a></div>';
+    print '<div class="detailRowHeader morePrivateInfo" style="float:left;display:none;">';
         
-    if ( $workgroup_name || count($kwds) || $bib['bkm_ID']) {
+    if($system->has_access()){ //is logged in
         ?>
-        <div class=detailRowHeader>Private
+
+        <div id=recID>
+             ID:<?= htmlspecialchars($bib['rec_ID']) ?>
+            <span class="link"><a id=edit-link class="normal"
+                        onClick="return sane_link_opener(this);"
+                        target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
+                        <img src="../../common/images/edit-pencil.png" title="Edit record"></a>
+            </span>
+        </div>
+
         <?php
+    }else{
+        print "<div id=recID>ID:".htmlspecialchars($bib['rec_ID'])."</div>";
+    }
+    
+    ?>
+    <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
+        <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>">
+            <a target=_blank class="external-link" 
+                href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML</a>
+            &nbsp;&nbsp;
+            <a target=_blank class="external-link" 
+            href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&fmt=html&db=".HEURIST_DBNAME ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
+    </div>
+    <?php
+    
+    $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']); //get form database in server time
+    
+    if($add_date && $bib['rec_Added']!='0000-00-00 00:00:00'){
+        $add_date = $add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
+        $add_date_local = ' (<span id="lt0"></span><script type="text/javascript">printLTime("'.  //output in js in local time
+                            $add_date.'", "lt0")</script> local)';
+
+    }else{
+        $add_date = false;
+    }
+
+    $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']); //get form database in server time
+    if($mod_date){
+        $mod_date = $mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
+        $mod_date_local = ' (<span id="lt1"></span><script type="text/javascript">printLTime("'.  //output in js in local time
+                            $mod_date.'", "lt1")</script> local)';
+    }else{
+        $mod_date = false;
+    }
+    if($add_date){
+        ?>
+        <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
+            <div class=detailType>Added</div><div class=detail>
+                <?php print $add_date.'  '
+                .' '.$add_date_local; ?>
+            </div>
+        </div>
+        <?php
+    }
+    if($mod_date){
+        ?>
+        <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
+            <div class=detailType>Updated</div><div class=detail>
+                <?php print $mod_date
+                .' '.$mod_date_local; ?>
+            </div>
+        </div>
+        <?php
+    }
+       
+        
+    if ( $workgroup_name || count($kwds) || @$bib['bkm_ID']) {
         if ( $workgroup_name) {
             ?>
             <div class=detailRow>
@@ -561,11 +617,12 @@ function print_private_details($bib) {
 
                     <?php
                 }
-            }
-            if (is_array($bib) && array_key_exists('bkm_ID',$bib)) {
+    }
+    if (is_array($bib) && array_key_exists('bkm_ID', $bib)) {
                 print_personal_details($bib);
-            }
-        }
+    }
+    print '</div>';
+}
 
 
 //this function outputs the personal information from the bookmark
@@ -605,7 +662,9 @@ function print_personal_details($bkmk) {
 
 
 function print_public_details($bib) {
-    global $system, $terms, $is_map_popup, $ACCESSABLE_OWNER_IDS;
+    global $system, $terms, $is_map_popup, $is_production, $ACCESSABLE_OWNER_IDS;
+    
+    $has_thumbs = false;
     
     $mysqli = $system->get_mysqli();
 
@@ -872,6 +931,7 @@ function print_public_details($bib) {
     }else{  
 
         //print info about parent record
+        if(!$is_production) {
         foreach ($bds as $bd) {
             if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY){
                 print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
@@ -880,15 +940,18 @@ function print_public_details($bib) {
                 break;
             }
         }
+        }
 
-        echo '<div class=detailRowHeader>Shared';
+        //echo '<div class=detailRowHeader>Shared';
     }
     ?>
-    <div class=thumbnail>
+    <div class="thumbnail" <?php echo (!$is_map_popup && $is_production?'style="float:right"':'')?>>
         <?php
-        foreach ($thumbs as $thumb) {
+        
+        $has_thumbs = (count($thumbs)>0);        
 
-            print '<div class=thumb_image>';
+        foreach ($thumbs as $thumb) {
+            print '<div class="thumb_image"'.($is_production?' style="margin-left:0px !important"':'').'>';
 
             $url = @$thumb['external_url']?$thumb['external_url']:(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
 
@@ -920,92 +983,37 @@ function print_public_details($bib) {
                 print '<br>';
                 break; //in map popup show the only thumbnail
             }
-        };
+        }//for
         ?>
     </div>
+    <div style="float:left;<?php echo (($has_thumbs)?'max-width:600px':'')?>">
     <?php
 
     $always_visible_dt = array(DT_SHORT_SUMMARY);
     if(defined('DT_GEO_OBJECT')){
-        $always_visible_dt[] = DT_GEO_OBJECT;
+        $always_visible_dt[] = DT_GEO_OBJECT;                                                 
     }
-
 
     $prevLbl = null;
     foreach ($bds as $bd) {
-        if(defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
+        if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
+        
         print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;'
-        .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
-        .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
-        .'</div><div class="detail'
-        .($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
-        /* debug
-        .$bd['rst_DisplayOrder']
-        .' '.@$bd['order_by_date']
-        .' '.$bd['dtl_ID']
-        .' '.$bd['dty_ID']  */
+            .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
+            .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
+        .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
         .' '.$bd['val'].'</div></div>';
         $prevLbl = $bd['name'];
+        
     }
 
-    $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']); //get form database in server time
-    
-    if($add_date && $bib['rec_Added']!='0000-00-00 00:00:00'){
-        $add_date = $add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
-        $add_date_local = ' (<span id="lt0"></span><script type="text/javascript">printLTime("'.  //output in js in local time
-                            $add_date.'", "lt0")</script> local)';
-
-    }else{
-        $add_date = false;
-    }
-
-    $mod_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Modified']); //get form database in server time
-    if($mod_date){
-        $mod_date = $mod_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
-        $mod_date_local = ' (<span id="lt1"></span><script type="text/javascript">printLTime("'.  //output in js in local time
-                            $mod_date.'", "lt1")</script> local)';
-    }else{
-        $mod_date = false;
-    }
-    if($add_date){
-        ?>
-        <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
-            <div class=detailType>Added</div><div class=detail>
-                <?php print $add_date.'  '
-                .' '.$add_date_local; ?>
-            </div>
-        </div>
-        <?php
-    }
-    if($mod_date){
-        ?>
-        <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
-            <div class=detailType>Updated</div><div class=detail>
-                <?php print $mod_date
-                .' '.$mod_date_local; ?>
-            </div>
-        </div>
-        <?php
-    }
-    ?>
-    <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
-        <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>">
-            <a target=_blank class="external-link" 
-                href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML</a>
-            &nbsp;&nbsp;
-            <a target=_blank class="external-link" 
-            href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&fmt=html&db=".HEURIST_DBNAME ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
-    </div>
-
-
-    <?php
     // </div>  
     if($is_map_popup){
         echo '<div class=detailRow><a href="#" onClick="$(\'.detailRow\').show();$(event.target).hide()">more ...</a></div>';
         echo '<div class=detailRow>&nbsp;</div>';
     }
 
-    echo '</div>';            
+    echo '</div></div>';            
 }
 
 
@@ -1149,7 +1157,7 @@ function reltype_inverse($relTermID) { //saw Enum change - find inverse as an id
 
 function print_relation_details($bib) {
 
-        global $system, $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
+        global $system, $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
 
         $mysqli = $system->get_mysqli();
         
@@ -1176,7 +1184,7 @@ function print_relation_details($bib) {
     if($is_map_popup){
        print '<div>';
     }else{
-       print '<div class=detailRowHeader>Related'; 
+       print '<div class="detailRowHeader" style="float:left">Related'; 
     }
 
     $accessCondition = '(rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
@@ -1263,7 +1271,7 @@ function print_relation_details($bib) {
 
 
 function print_linked_details($bib) {
-    global $system, $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $rectypesStructure;
+    global $system, $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
     
     $query = 'select * '.
     'from recDetails '.
@@ -1286,7 +1294,8 @@ function print_linked_details($bib) {
     if($is_map_popup){
        print '<div>';
     }else{
-       print '<div class=detailRowHeader>Linked from'; 
+       print '<div class="detailRowHeader" style="float:left">Linked from'; 
+       if(!$is_production){
     ?>
         <div class=detailRow>
             <div class=detailType>Referencing records</div>
@@ -1295,17 +1304,18 @@ function print_linked_details($bib) {
             </div>
         </div>
     <?php
-        }
+       }
+    }
         
         $lbl = 'Linked from';
 
         while ($row = $res->fetch_assoc()) {
 
             print '<div class=detailRow>';
-                print '<div class=detailType>'.$lbl.'</div>';
-                print '<div class="detail'.($is_map_popup?' truncate':'').'">';
-                    print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
-                    print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a>';
+                if(!$is_production) print '<div class=detailType>'.$lbl.'</div>';
+                print '<div class="detail'.($is_map_popup?' truncate':'').'" style="display: table-row;">';
+                    print '<div style="display: table-cell;width:28px;text-align: right;padding-right:4px"><img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif"></div>';
+                    print '<div style="display: table-cell;"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a></div>';
                 print '</div></div>';
 
             $lbl = '';
