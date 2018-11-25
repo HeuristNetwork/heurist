@@ -112,6 +112,7 @@ if(!$is_map_popup){
                 var thumb = thumb;
                 var url = url;
                 var currentImg = obj;
+            
                 if (currentImg.parentNode.className != "fullSize"){
                     $(currentImg).hide();                    
                     currentImg.src = url;
@@ -119,10 +120,13 @@ if(!$is_map_popup){
                         $(currentImg).fadeIn(500);
                     }                    
                     currentImg.parentNode.className = "fullSize";
+                    currentImg.parentNode.parentNode.style.width = '100%';
 
                 }else{
                     currentImg.src = thumb;
                     currentImg.parentNode.className = "thumb_image";
+                    currentImg.parentNode.parentNode.style.width = 'auto';
+                    //currentImg.parentNode.parentNode.style.float = 'right';
                 }
             }
             
@@ -146,6 +150,7 @@ if(!$is_map_popup){
                 if (currentImg.parentNode.className != "fullSize"){  //thumb to player
                     currentImg.style.display = 'none';
                     currentImg.parentNode.className = "fullSize";
+                    currentImg.parentNode.parentNode.style.width = '100%';
                     
                     //add content to player div
         $.ajax({
@@ -162,8 +167,17 @@ if(!$is_map_popup){
                             var  elem = document.getElementById('player'+id);
                             elem.innerHTML = obj;
                             elem.style.display = 'block';
+                            
+                            function __closePlayer(){
+                                hidePlayer( id );            
+                            }
+                            
+                            $(elem).find('img').click( __closePlayer );
+                            
+                            //show thumbnail link
                             elem = document.getElementById('lnk'+id);
-                            elem.style.display = 'block';
+                            elem.style.display = 'inline-block';
+                            elem.onclick = __closePlayer;
                         }
             }
         });
@@ -182,6 +196,9 @@ if(!$is_map_popup){
                         }, null);
                      */
                 }
+                else{
+                    hidePlayer( id );
+                }
             }
             function hidePlayer(id) {
                 var  elem = document.getElementById('player'+id);
@@ -192,6 +209,8 @@ if(!$is_map_popup){
 
                 elem = document.getElementById('img'+id);
                 elem.parentNode.className = "thumb_image";
+                elem.parentNode.parentNode.style.width = 'auto';
+                //elem.parentNode.parentNode.style.float = 'right';
                 elem.style.display = 'inline-block';
             }
 
@@ -399,7 +418,7 @@ function print_details($bib) {
 
 // this functions outputs the header line of icons and links for managing the record.
 function print_header_line($bib) {
-    global $is_map_popup, $system;
+    global $is_map_popup, $is_production, $system;
     
     $rec_id = $bib['rec_ID'];
     $url = $bib['rec_URL'];
@@ -409,18 +428,22 @@ function print_header_line($bib) {
     $webIcon = mysql__select_value($system->get_mysqli(),
                     'select dtl_Value from recDetails where dtl_RecID='
                     .$bib['rec_ID'].' and dtl_DetailTypeID=347'); //DT_WEBSITE_ICON); 
+                    
+                    //(($is_production)?'':'padding-top:21px')
     ?>
 
     <div class=HeaderRow style="margin-bottom:0px;min-height:0px;">
-            <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
+            <h2 style="float:left;text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
                 <?= $bib['rec_Title'] ?>
             </h2>
     <?php 
     if(!$is_map_popup){ 
+        //position:absolute;right:17px;top:2px"
     ?>
-        <h3 style="position:absolute;right:2;top:2">
-            <div <?="style='padding-left:20px;height:16px;background-repeat: no-repeat;background-image:url(".HEURIST_ICON_URL.$bib['rty_ID'].".png)'"?> >
-                <?= htmlspecialchars($bib['rty_Name'])." [".$bib['rty_ID']."] " ?>
+        <h3 style="float:right;padding:2px 17px;margin:0">
+            <div <?="style='padding-left:20px;height:16px;background-repeat: no-repeat;background-image:url("
+                        .HEURIST_ICON_URL.$bib['rty_ID'].".png)' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
+                Type&nbsp;<?= $bib['rty_ID'].': '.htmlspecialchars($bib['rty_Name'])." " ?>
             </div>
         </h3>
         <br>
@@ -485,7 +508,10 @@ function print_private_details($bib) {
         .$system->get_user_id().' where rtl_RecID='.$bib['rec_ID']
         .' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order',0,0);
 
-    print '<div class="detailRowHeader" style="float:left;"><a href="#" onClick="$(\'.morePrivateInfo\').show();$(event.target).parents(\'.detailRowHeader\').hide()">more ...</a></div>';
+    print '<div class="detailRowHeader" style="float:left;padding-bottom:40px"><a href="#" ';
+    print 'onClick="$(\'.morePrivateInfo\').show();$(event.target).parents(\'.detailRowHeader\').hide();';
+    print 'setTimeout(function(){window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);},200);';
+    print '">more ...</a></div>';
     print '<div class="detailRowHeader morePrivateInfo" style="float:left;display:none;">';
         
     if($system->has_access()){ //is logged in
@@ -973,7 +999,7 @@ function print_public_details($bib) {
             }
             print '<br/><div class="download_link">';
             if($thumb['player'] && !$is_map_popup){
-                print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">CLOSE</a>&nbsp;';
+                print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">SHOW THUMBNAIL</a>&nbsp;&nbsp;&nbsp;';
             }
             
             print '<a href="' . htmlspecialchars($url) 
