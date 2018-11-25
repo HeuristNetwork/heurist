@@ -78,6 +78,7 @@ facet search general parameters are the same to saved search plus several specia
 domain
 rules
 ui_title - title in user interface
+ui_viewmode - result list viewmode
 title_hierarchy - show hierarchy in facet header
 sup_filter - suplementary filter that is set in design time
 add_filter - additional filter that can be set in run time 
@@ -861,6 +862,7 @@ $.widget( "heurist.search_faceted", {
                             source:this.element.attr('id'), 
                             qname: this.options.query_name,
                             rules: this.options.params.rules,
+                            viewmode: this.options.params.ui_viewmode,
                             //to keep info what is primary record type in final recordset
                             primary_rt: this.options.params.rectypes[0] 
                             }; //, facets: facets

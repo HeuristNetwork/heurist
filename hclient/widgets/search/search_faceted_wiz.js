@@ -613,6 +613,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 
                 $dlg.find('#svs_Title').val(this.options.params.ui_title);
+                $dlg.find('#svs_ViewMode').val(this.options.params.ui_viewmode);
                 $dlg.find('#svs_SearchOnReset').attr('checked', this.options.params.search_on_reset);
 
             }else{ //add new saved search
@@ -1517,6 +1518,7 @@ $.widget( "heurist.search_faceted_wiz", {
         }
 
         this.options.params.ui_title =  $dlg.find('#svs_Title').val();
+        this.options.params.ui_viewmode = $dlg.find('#svs_ViewMode').val();
         this.options.params.search_on_reset = $dlg.find('#svs_SearchOnReset').is(':checked');
 
         var svs_ugrid = svs_ugrid.val();

@@ -55,6 +55,7 @@ function hSvsEdit(args) {
             var svs_rules = $dlg.find('#svs_Rules');
             var svs_rules_only = $dlg.find('#svs_RulesOnly');
             var svs_notes = $dlg.find('#svs_Notes');
+            var svs_viewmode = $dlg.find('#svs_ViewMode');
             //svs_query.parent().show();
             //svs_ugrid.parent().show();
 
@@ -96,6 +97,7 @@ function hSvsEdit(args) {
                 svs_rules.val( request.rules );
                 svs_rules_only.prop('checked', (request.rulesonly==1 || request.rulesonly==true));
                 svs_notes.val( request.notes );
+                svs_viewmode.val( request.viewmode );
 
 
             }else{ //add new saved search
@@ -107,6 +109,7 @@ function hSvsEdit(args) {
                 svs_rules.val('');
                 svs_rules_only.prop('checked', false);
                 svs_notes.val('');
+                svs_viewmode.val('');
                 svs_ugrid.parent().show();
 
                 //var domain = 'all';
@@ -326,7 +329,7 @@ function hSvsEdit(args) {
                     $(this).html(window.hWin.HR($(this).html()));
                 })
 
-                $dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
+                //$dlg.find("#svs_btnset").css({'width':'20px'}).position({my: "left top", at: "right+4 top", of: $dlg.find('#svs_Rules') });
 
                 $dlg.find("#svs_Rules_edit")
                 .button({icons: {primary: "ui-icon-pencil"}, text:false})
@@ -367,6 +370,7 @@ function hSvsEdit(args) {
                     var svs_rules = $dlg.find('#svs_Rules');
                     var svs_rules_only = $dlg.find('#svs_RulesOnly');
                     var svs_notes = $dlg.find('#svs_Notes');
+                    var svs_viewmode = $dlg.find('#svs_ViewMode');
 
                     allFields.removeClass( "ui-state-error" );
                     
@@ -419,11 +423,20 @@ function hSvsEdit(args) {
                             domain = 'rules';
                             svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID; //@todo!!!! it may by rule accessible by guest
                         }*/
+                        
+                        var rules = window.hWin.HEURIST4.util.cleanRules(svs_rules.val());  
+                        if(rules!=null){ 
+                            rules = JSON.stringify(rules);
+                        }
 
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
                             svs_Name: svs_name.val(),
-                            svs_Query: window.hWin.HEURIST4.util.composeHeuristQuery(svs_query.val(), 
-                                    domain, svs_rules.val(), svs_rules_only.is(':checked'), svs_notes.val(), false),
+                            svs_Query: window.hWin.HEURIST4.util.composeHeuristQuery2({q:svs_query.val(), 
+                                    w:domain, 
+                                    rules:rules, 
+                                    rulesonly:svs_rules_only.is(':checked'), 
+                                    notes:svs_notes.val(),
+                                    viewmode:svs_viewmode.val()  }, false),
                                     
                             svs_UGrpID: svs_ugrid,
                             domain:domain};

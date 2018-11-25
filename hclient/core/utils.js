@@ -209,46 +209,59 @@ window.hWin.HEURIST4.util = {
             return query_string;        
     },
 
+    /* 
+    params:{
+    q,
+    w or domain,
+    rules,
+    rulesonly
+    notes
+    viewmode
+    }}
+    
+    */
     composeHeuristQuery2: function(params, encode){
         if(params){
         
-            var rules = params.rules;
-            rules = window.hWin.HEURIST4.util.cleanRules(rules);  
-            if(rules!=null){ 
-                rules = JSON.stringify(rules);
-            }
-        
-            return window.hWin.HEURIST4.util.composeHeuristQuery(params.q, 
-                                        params.w, rules, params.rulesonly, params.notes, encode);
-        }else
-            return '?';
-    },
-
-    composeHeuristQuery: function(query, domain, rules, rulesonly, notes, encode){
+            var query, rules = params.rules;
             var query_to_save = [];
-            if(!(window.hWin.HEURIST4.util.isempty(domain) || domain=="all")){
-                query_to_save.push('w='+domain);
+            
+            if(!(window.hWin.HEURIST4.util.isempty(params.w) || params.w=="all")){
+                query_to_save.push('w='+params.w);
             }
-            if(!window.hWin.HEURIST4.util.isempty(query)){
+            
+            if(!window.hWin.HEURIST4.util.isempty(params.q)){
                 
-               if($.isArray(query) || $.isPlainObject(query)){
-                  query = JSON.stringify(query);
-               }  
+               if($.isArray(params.q) || $.isPlainObject(params.q)){
+                  query = JSON.stringify(params.q);
+               } else{
+                  query = params.q;
+               }
                query_to_save.push('q='+ (encode?encodeURIComponent(query):query) );
             }
+            
+
             if(!window.hWin.HEURIST4.util.isempty(rules)){
               query_to_save.push('rules='+ (encode?encodeURIComponent(rules):rules));
               if(rulesonly==1 || rulesonly==true){
                   query_to_save.push('rulesonly=1');
               }
             }
-            if(!window.hWin.HEURIST4.util.isempty(notes)){
-               query_to_save.push('notes='+ (encode?encodeURIComponent(notes):notes));
+            
+            if(!window.hWin.HEURIST4.util.isempty(params.notes)){
+               query_to_save.push('notes='+ (encode?encodeURIComponent(params.notes):params.notes));
             }
+            
+            if(!window.hWin.HEURIST4.util.isempty(params.viewmode)){
+               query_to_save.push('viewmode='+ params.viewmode);
+            }
+            
             return '?'+query_to_save.join('&');
+                                        
+        }else
+            return '?';
     },
-    
-    
+
     cleanRules: function(rules){
         
         if(window.hWin.HEURIST4.util.isempty(rules)){
@@ -361,7 +374,7 @@ window.hWin.HEURIST4.util = {
     //
     parseHeuristQuery: function(qsearch)
     {
-        var domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null;
+        var domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '';
         if(qsearch){
             
             if(typeof qsearch === 'string' && qsearch.indexOf('?')==0){ //this is quesry in form of URL 
@@ -369,6 +382,7 @@ window.hWin.HEURIST4.util = {
                 rules   = window.hWin.HEURIST4.util.getUrlParameter('rules', qsearch);
                 rulesonly = window.hWin.HEURIST4.util.getUrlParameter('rulesonly', qsearch);
                 notes   = window.hWin.HEURIST4.util.getUrlParameter('notes', qsearch);
+                viewmode = window.hWin.HEURIST4.util.getUrlParameter('viewmode', qsearch);
                 qsearch = window.hWin.HEURIST4.util.getUrlParameter('q', qsearch);
             }else{ //it may be aquery in form of json
             
@@ -388,7 +402,7 @@ window.hWin.HEURIST4.util = {
         }
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
-        return {q:qsearch, w:domain, rules:rules, rulesonly:rulesonly, notes:notes, primary_rt:primary_rt};
+        return {q:qsearch, w:domain, rules:rules, rulesonly:rulesonly, notes:notes, primary_rt:primary_rt, viewmode:viewmode};
     },
 
     //

@@ -138,6 +138,11 @@ $.widget( "heurist.resultList", {
                     that.loadanimation(false);
 
                     if(that._query_request!=null && data && data.queryid()==that._query_request.id) {
+                        
+                        if(that._query_request.viewmode){
+                            that.applyViewMode( that._query_request.viewmode );
+                        }
+                        
 
                         that._renderRecordsIncrementally(data); //hRecordSet
                     }
