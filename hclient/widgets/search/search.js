@@ -143,7 +143,7 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search );
 
         this.input_search_prompt = $( "<span>" ).text(window.hWin.HR("enter search/filter or use filter builder at right"))
-        .css({'color':'gray','font-size':'0.8em', 'margin': '0.2em 0 0 0.5em',
+        .css({'color':'gray','font-size':'0.8em', 'margin': '1.7em 0 0 0.5em',
               'position': 'absolute'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt, {click: function(){
@@ -153,7 +153,7 @@ $.widget( "heurist.search", {
 
         
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'6.6em', //'height':'2.5em', 'max-height':'67px', 
+        .css({'margin-top': '12px','margin-right':'0.2em', 'height':'2.5em', 'max-height':'6.6em', //'height':'2.5em', 'max-height':'67px', 
             'max-width':sz_input, 'padding':'0.4em', 
             'min-width':'10em', 'width':sz_input, 'padding-right':'18px' }) 
         .addClass("text ui-widget-content ui-corner-all")
@@ -165,20 +165,39 @@ $.widget( "heurist.search", {
             });
         
         window.hWin.HEURIST4.util.setDisabled(this.input_search, true);
+        
+        var div_search_help_links = $('<div>').appendTo(this.div_search_input);
 
-        var link = $('<a>',{href:'#', title:'Show syntax and examples of the Heurist query/filter language', text:'help'})
-        .css({'text-decoration':'none','color':'gray', 'outline':0})
-        //.addClass('ui-icon ui-icon-gear') 'padding-right':'1.5em',
-        .appendTo(this.div_search_input)
-        .position({
-            of: this.input_search,
-            my: 'left top',
-            at: 'left bottom'});
+        var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
+        +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')                
+        .css({'text-decoration':'none','color':'gray', 'outline':0, cursor:'pointer'})
+        .appendTo(div_search_help_links);
         
         this._on( link, {  click: function(){
             window.open('context_help/advanced_search.html','_blank');
         } });
         
+        
+        this.filter_by_entity = $('<span title="Show list of entities to filter">'
+        +'entities <span class="ui-icon ui-icon-carat-1-s"></span></span>')                                          //
+        .css({'text-decoration':'none','color':'gray','padding-left':'45px','outline':0, cursor:'pointer'})
+        .appendTo(div_search_help_links);
+        
+        this._on( this.filter_by_entity, {  click: function(){
+            
+                this.select_rectype_filter.hSelect('open');
+                this.select_rectype_filter.hSelect('menuWidget')
+                    .position({my: "left top", at: "right bottom+10", of: this.filter_by_entity });
+                return false;
+            
+        } });
+
+       
+        /*div_search_help_links.position({
+            of: this.input_search,
+            my: 'left top',
+            at: 'left bottom'});*/
+
         
         var menu_h = window.hWin.HEURIST4.util.em(1);
 
@@ -521,7 +540,7 @@ $.widget( "heurist.search", {
                 that._doSearch(true);
             }
         });
-
+        
         this._on( this.input_search, {
             keypress: function(e){
                 var code = (e.keyCode ? e.keyCode : e.which);
@@ -696,6 +715,27 @@ $.widget( "heurist.search", {
                    return false;
                 }
             });
+        }
+        if(!this.select_rectype_filter){
+            
+            this.select_rectype_filter = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, {useIcons: true});
+            if(this.select_rectype_filter.hSelect("instance")!=undefined){
+                this.select_rectype_filter.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
+            }
+
+            var that = this;
+            this.select_rectype_filter.hSelect({change: function(event, data){
+                    
+                   var selval = data.item.value;
+                   that.select_rectype_filter.val(selval);
+                   
+                   that.input_search.val('t:'+selval);
+                   that._doSearch(true);
+                   
+                   return false;
+                }
+            });
+        
         }
             
         var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');

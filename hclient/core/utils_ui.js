@@ -787,6 +787,18 @@ window.hWin.HEURIST4.ui = {
     //
     createRectypeSelect: function(selObj, rectypeList, topOptions, useHtmlSelect) {
 
+            return window.hWin.HEURIST4.ui.createRectypeSelectNew(selObj, 
+                {rectypeList:rectypeList, topOptions:topOptions, useHtmlSelect:useHtmlSelect});
+    },
+    
+    createRectypeSelectNew: function(selObj, options) {
+        
+        var rectypeList = options.rectypeList;
+        var topOptions = options.topOptions;
+        var useHtmlSelect = (options.useHtmlSelect===true);
+        var useIcons = !useHtmlSelect && (options.useIcons===true);
+        var useCount = (options.useCount===true);
+
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
         useHtmlSelect = (useHtmlSelect===true);
@@ -814,7 +826,13 @@ window.hWin.HEURIST4.ui = {
                     var name = rectypes.names[rectypeID];
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {
-                        window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
+                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
+                        
+                        if(useIcons){
+                            var icon = window.hWin.HAPI4.iconBaseURL + rectypeID + '.png';
+                            $(opt).attr('icon-url', icon);
+                        }
+                        
                     }
                 }
             }
@@ -858,11 +876,21 @@ window.hWin.HEURIST4.ui = {
                     if(!window.hWin.HEURIST4.util.isnull(name) && 
                         (rectypeList.length==0 || rectypeList.indexOf(rectypeID)>=0) )
                     {
+                        
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                         $(opt).attr('depth', 1);
                         
                         var desc = rectypes.typedefs[rectypeID].commonFields[idx_desc];
                         $(opt).attr('title', desc);
+                        
+                        
+                        if(useIcons){
+                            var icon = window.hWin.HAPI4.iconBaseURL + rectypeID + '.png';
+                            $(opt).attr('icon-url', icon);
+                        }
+                        
+                        
+                        
                     }
                 }
                 
@@ -2416,7 +2444,15 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     if( $(item.element).hasClass('required')) {
         wrapper.addClass('required');  
     }
+    
+    var icon_url = item.element.attr( "icon-url" );
+    if(icon_url){
+    
+        $('<span style="float:left;padding-right:2px"><img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        + '" class="rt-icon" style="background-image: url(&quot;'+icon_url+ '&quot;);"/></span>')
+          .appendTo( wrapper );    
 
+    }
 
 /*    
     if($(item.element).attr('depth')>0){
