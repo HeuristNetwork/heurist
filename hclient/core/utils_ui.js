@@ -1872,9 +1872,9 @@ window.hWin.HEURIST4.ui = {
         var isEdit = (selector_function!==false);
         
         if(info['trm_ID']>0){
-            sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:46px"><div class="btn-rel"/><div class="btn-del"/></div>';
+            sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:46px;text-align:right;"><div class="btn-rel"/><div class="btn-del"/></div>';
         }else if (!isHiddenRecord) {
-            sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:23px"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
+            sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:23px;text-align:right;"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
@@ -1885,22 +1885,22 @@ window.hWin.HEURIST4.ui = {
                         + 'style="display:table-cell;min-width:60ex;max-width:160ex;">'  //padding:2px;
                         
                         + (info['trm_ID']>0
-                           ?'<div class="detailType" style="display:table-cell;width:19ex;padding-top:4px;">'
+                           ?'<div class="detailType" style="display:table-cell;width:19ex;">'  //padding-top:4px;
                             + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
                            :'')                          
                         
                         + (info['rec_IsChildRecord']==1
                             ?'<span style="font-size:0.8em;color:#999999;padding:4px 2px;display:table-cell;min-width: 5ex;">child</span>':'')
-                        + (isEdit?'<span style="display:table-cell;padding-top:3px;"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //&nbsp;&nbsp;&nbsp;
-                        + '<span style="display:table-cell;padding-top:2px;vertical-align:top;">'
-                        + '<img src="'+ph_gif+'" style="vertical-align:top;margin-top:2px;margin-right:10px;background-image:url(\''
+                        + (isEdit?'<span style="display:table-cell;"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
+                        + '<span style="display:table-cell;vertical-align:top;">'  //;padding-top:2px;
+                        + '<img src="'+ph_gif+'" style="margin-right:10px;background-image:url(\''    //vertical-align:top;margin-top:2px;
                         + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
                         + '\');"/>'
                         //2017-11-08 no more link here
                         //+ '<a target=_new href="#" data-recID="'+info['rec_ID'] +'">'
                         //+ window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a>'
                         + '</span><span class="related_record_title" data-recID="'
-                                        +info['rec_ID'] +'" style="display:table-cell;padding-top:4px;">'
+                                        +info['rec_ID'] +'" style="display:table-cell;">'  //padding-top:4px;
                         + rec_Title
                         + '</span>'
                         + '</div>'
@@ -1923,7 +1923,7 @@ window.hWin.HEURIST4.ui = {
             //remove button
             ele.find('.btn-del').button({text:false, label:top.HR('Remove '+(info['relation_recID']>0?'relation':'link')),
                             icons:{primary:'ui-icon-circlesmall-close'}})
-            .css({'font-size': '0.8em', height: '18px', 'max-width': '18px'})
+            .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
             .click(function(event){
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     'You are about to delete link between records<br><br>Are you sure?',
@@ -1991,7 +1991,7 @@ window.hWin.HEURIST4.ui = {
             
             ele.find('.btn-rel').button({text:false, label:top.HR((isEdit?'Edit':'View')+' relationship record'),
                             icons:{primary:'ui-icon-pencil'}})
-            .css({'font-size': '0.8em', height: '18px', 'max-width': '18px'})
+            .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
             .click(function(event){
                 event.preventDefault();
                 
@@ -2071,11 +2071,13 @@ window.hWin.HEURIST4.ui = {
             btn_edit.button({text:false, label:top.HR('Edit linked record'),
                             icons:{primary:'ui-icon-pencil'}})
                         .attr('data-recID', info['rec_ID'])
-                        .css({'font-size': '0.8em', height: '18px', 'max-width': '18px'})
+                        .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
                         .click(function(event){
            
            
-            var recID = $(event.target).parent('.ui-button').attr('data-recID');
+            var recID = $(event.target).hasClass('ui-button')
+                    ?$(event.target).attr('data-recID')
+                    :$(event.target).parent('.ui-button').attr('data-recID');
           
             window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit,
             {selectOnSave:true, edit_obstacle: true, onselect: 
