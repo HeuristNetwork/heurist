@@ -306,6 +306,11 @@ if(!$is_map_popup){
             */
 
         </script>
+        <style>
+        .detailRowHeader{
+            padding: 20px 0 20px    
+        }
+        </style>
     </head>
     <body class="popup">
 
@@ -421,14 +426,6 @@ function print_header_line($bib) {
     global $is_map_popup, $is_production, $system;
     
     $rec_id = $bib['rec_ID'];
-    $url = $bib['rec_URL'];
-    if ($url  &&  ! preg_match('!^[^\\/]+:!', $url))
-        $url = 'http://' . $url;
-
-    $webIcon = mysql__select_value($system->get_mysqli(),
-                    'select dtl_Value from recDetails where dtl_RecID='
-                    .$bib['rec_ID'].' and dtl_DetailTypeID=347'); //DT_WEBSITE_ICON); 
-                    
                     //(($is_production)?'':'padding-top:21px')
     ?>
 
@@ -446,17 +443,7 @@ function print_header_line($bib) {
                 Type&nbsp;<?= $bib['rty_ID'].': '.htmlspecialchars($bib['rty_Name'])." " ?>
             </div>
         </h3>
-        <br>
-        <?php 
-           if (false && @$url) {  //since 2018-11-24
-        ?>
-            <span class="link">
-                <a target="_new" class="external-link" href="http://web.archive.org/web/*/<?=htmlspecialchars($url)?>">page history</a>
-                <a target="_new" class="external-link" href="<?=htmlspecialchars($url)?>"><?= output_chunker($url) ?></a>
-                <?php if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>"; ?>
-            </span>
-        <?php 
-           } 
+    <?php 
     }else{
         print '&nbsp;';
     } 
@@ -512,7 +499,7 @@ function print_private_details($bib) {
     print 'onClick="$(\'.morePrivateInfo\').show();$(event.target).parents(\'.detailRowHeader\').hide();';
     print 'setTimeout(function(){window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);},200);';
     print '">more ...</a></div>';
-    print '<div class="detailRowHeader morePrivateInfo" style="float:left;display:none;">';
+    print '<div class="detailRowHeader morePrivateInfo" style="float:left;padding-bottom:40px 0 20px;display:none;">';
         
     if($system->has_access()){ //is logged in
         ?>
@@ -1015,6 +1002,28 @@ function print_public_details($bib) {
     <div style="float:left;<?php echo (($has_thumbs)?'max-width:600px':'')?>">
     <?php
 
+    //print url first
+    $url = $bib['rec_URL'];
+    if ($url  &&  ! preg_match('!^[^\\/]+:!', $url)){
+        $url = 'http://' . $url;
+    }
+    /*
+    $webIcon = mysql__select_value($system->get_mysqli(),
+                    'select dtl_Value from recDetails where dtl_RecID='
+                    .$bib['rec_ID'].' and dtl_DetailTypeID=347'); //DT_WEBSITE_ICON); 
+    if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>";
+   */                 
+    if (@$url) {
+        print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
+            .'<div class=detailType>URL</div>'
+            .'<div class="detail'.($is_map_popup?' truncate':'').'">'
+            .'<span class="link">'
+                .'<a target="_new" class="external-link" href="http://web.archive.org/web/*/'.htmlspecialchars($url).'">page history</a>&nbsp;&nbsp;&nbsp;'
+                .'<a target="_new" class="external-link" href="'.htmlspecialchars($url).'">'.output_chunker($url).'</a>'
+            .'</span>'
+            .'</div></div>';
+    } 
+
     $always_visible_dt = array(DT_SHORT_SUMMARY);
     if(defined('DT_GEO_OBJECT')){
         $always_visible_dt[] = DT_GEO_OBJECT;                                                 
@@ -1037,6 +1046,8 @@ function print_public_details($bib) {
     if($is_map_popup){
         echo '<div class=detailRow><a href="#" onClick="$(\'.detailRow\').show();$(event.target).hide()">more ...</a></div>';
         echo '<div class=detailRow>&nbsp;</div>';
+    }else{
+        echo '<div class=detailType>&nbsp;</div>';
     }
 
     echo '</div></div>';            
