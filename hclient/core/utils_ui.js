@@ -797,7 +797,8 @@ window.hWin.HEURIST4.ui = {
         var topOptions = options.topOptions;
         var useHtmlSelect = (options.useHtmlSelect===true);
         var useIcons = !useHtmlSelect && (options.useIcons===true);
-        var useCount = (options.useCount===true);
+        var useCounts = (options.useCounts===true && window.hWin.HEURIST4.rectypes.counts);
+        var useGroups = (options.useGroups!==false);
 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
@@ -814,11 +815,20 @@ window.hWin.HEURIST4.ui = {
             if(!window.hWin.HEURIST4.util.isArray(rectypeList)){
                 rectypeList = rectypeList.split(',');
             }
+        }else if(!useGroups){ //all rectypes however plain list (not grouped)
+            rectypeList = Object.keys(window.hWin.HEURIST4.rectypes.names);
         }else{
             rectypeList = []; //all rectypes
         }
         
-        if(rectypeList.length>0 && rectypeList.length<4){  //show only specified list of rectypes
+        if(!useGroups || (rectypeList.length>0 && rectypeList.length<4)){  //show only specified list of rectypes
+        
+            if(useCounts){//sort by count
+                rectypeList.sort(function(a,b){
+                     return Number(window.hWin.HEURIST4.rectypes.counts[a])<Number(window.hWin.HEURIST4.rectypes.counts[b])?1:-1;
+                })
+            }
+        
             for (var idx in rectypeList)
             {
                 if(idx){
@@ -826,13 +836,17 @@ window.hWin.HEURIST4.ui = {
                     var name = rectypes.names[rectypeID];
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {
+                        if(useCounts && window.hWin.HEURIST4.rectypes.counts[rectypeID]<1) continue;
+                        
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                         
                         if(useIcons){
                             var icon = window.hWin.HAPI4.iconBaseURL + rectypeID + '.png';
                             $(opt).attr('icon-url', icon);
                         }
-                        
+                        if(useCounts){
+                            $(opt).attr('rt-count', window.hWin.HEURIST4.rectypes.counts[rectypeID]);
+                        }
                     }
                 }
             }
@@ -888,8 +902,9 @@ window.hWin.HEURIST4.ui = {
                             var icon = window.hWin.HAPI4.iconBaseURL + rectypeID + '.png';
                             $(opt).attr('icon-url', icon);
                         }
-                        
-                        
+                        if(useCounts){
+                            $(opt).attr('rt-count', window.hWin.HEURIST4.rectypes.counts[rectypeID]);
+                        }
                         
                     }
                 }
@@ -2454,6 +2469,13 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
     }
 
+    var rt_count = item.element.attr( "rt-count" );
+    if(rt_count>0){
+        $('<span style="float:right;padding-right:2px">'+rt_count+'</span>')
+          .appendTo( wrapper );    
+    }
+    
+    
 /*    
     if($(item.element).attr('depth')>0){
         console.log($(item.element).attr('depth')+'   '+item.label);

@@ -261,7 +261,8 @@ class DbDefRecTypes extends DbEntityBase
         $res = null;
                 
         if(@$this->data['mode']=='record_count'){
-            $query = 'SELECT d.rty_ID, count(r.rec_ID) FROM defRecTypes d LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID '
+            $query = 'SELECT d.rty_ID, count(r.rec_ID) FROM defRecTypes d '
+            .'LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID AND r.rec_FlagTemporary=0'
             .' GROUP BY d.rty_ID';
           
            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);

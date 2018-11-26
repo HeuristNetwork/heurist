@@ -164,6 +164,10 @@ function RectypeManager() {
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
                     _rt_counts = response.data;
+                    //refresh local structures
+                    window.hWin.HEURIST4.rectypes.counts = _rt_counts;
+                    window.hWin.HEURIST4.rectypes.counts_update = (new Date()).getTime();
+                    
                     //refresh datatable
                     var _currentTabIndex = tabView.get('activeIndex');
                     var dt = arrTables[_currentTabIndex];

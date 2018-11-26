@@ -143,7 +143,7 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search );
 
         this.input_search_prompt = $( "<span>" ).text(window.hWin.HR("enter search/filter or use filter builder at right"))
-        .css({'color':'gray','font-size':'0.8em', 'margin': '1.7em 0 0 0.5em',
+        .css({'color':'gray','font-size':'0.8em', 'margin': '22px 0 0 0.5em',
               'position': 'absolute'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt, {click: function(){
@@ -153,7 +153,7 @@ $.widget( "heurist.search", {
 
         
         this.input_search = $( "<textarea>" )
-        .css({'margin-top': '12px','margin-right':'0.2em', 'height':'2.5em', 'max-height':'6.6em', //'height':'2.5em', 'max-height':'67px', 
+        .css({'margin-top': '20px','margin-right':'0.2em', 'height':'2.5em', 'max-height':'6.6em', //'height':'2.5em', 'max-height':'67px', 
             'max-width':sz_input, 'padding':'0.4em', 
             'min-width':'10em', 'width':sz_input, 'padding-right':'18px' }) 
         .addClass("text ui-widget-content ui-corner-all")
@@ -166,7 +166,7 @@ $.widget( "heurist.search", {
         
         window.hWin.HEURIST4.util.setDisabled(this.input_search, true);
         
-        var div_search_help_links = $('<div>').appendTo(this.div_search_input);
+        var div_search_help_links = $('<div>').css('padding-top','4px').appendTo(this.div_search_input);
 
         var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
         +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')                
@@ -179,18 +179,73 @@ $.widget( "heurist.search", {
         
         
         this.filter_by_entity = $('<span title="Show list of entities to filter">'
-        +'entities <span class="ui-icon ui-icon-carat-1-s"></span></span>')                                          //
+        +'entities <span class="ui-icon ui-icon-triangle-1-s"></span></span>')                                          //
         .css({'text-decoration':'none','color':'gray','padding-left':'45px','outline':0, cursor:'pointer'})
         .appendTo(div_search_help_links);
         
         this._on( this.filter_by_entity, {  click: function(){
+
+                var that = this;
+                function __openSelect(){
+                    that.select_rectype_filter.hSelect('open');
+                    //that.select_rectype_filter.val(-1);
+                    //that.select_rectype_filter.hSelect('refresh');
+                    that.select_rectype_filter.hSelect('menuWidget')
+                        .position({my: "left top", at: "right bottom+10", of: that.filter_by_entity });
+                    var ele = $(that.select_rectype_filter.hSelect('menuWidget')[0]);
+                    ele.scrollTop(0);        
+                }
             
-                this.select_rectype_filter.hSelect('open');
-                this.select_rectype_filter.hSelect('menuWidget')
-                    .position({my: "left top", at: "right bottom+10", of: this.filter_by_entity });
+                if(!window.hWin.HEURIST4.rectypes.counts ||
+                    (new Date()).getTime() - window.hWin.HEURIST4.rectypes.counts_update > 30000)  //30 seconds
+                {
+                        window.hWin.HEURIST4.rectypes.counts_update = (new Date()).getTime();
+                    
+                        var request = {
+                                'a'       : 'counts',
+                                'entity'  : 'defRecTypes',
+                                'mode'    : 'record_count'
+                                };
+                                
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                                    window.hWin.HEURIST4.rectypes.counts = response.data;
+                                    
+                                    that._recreateSelectRectypeFilter();
+                                    
+                                    __openSelect();
+                        
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    window.hWin.HEURIST4.rectypes.counts_update = 0;
+                                }
+                        });
+
+                }else{
+                    __openSelect();
+                }    
+                
                 return false;
             
         } });
+        
+        /*
+        this.filter_by_entity_grp = $('<span title="Show list of entities to filter">'
+        +'(by group)<span class="ui-icon ui-icon-triangle-1-s"></span></span>')                                          //
+        .css({'text-decoration':'none','color':'gray','padding-left':'5px','outline':0, cursor:'pointer'})
+        .appendTo(div_search_help_links);
+        
+        this._on( this.filter_by_entity_grp, {  click: function(){
+            
+                this.select_rectype_filter_grp.hSelect('open');
+                this.select_rectype_filter_grp.hSelect('menuWidget')
+                    .position({my: "left top", at: "right bottom+10", of: this.filter_by_entity_grp });
+                return false;
+            
+        } });
+        */
 
        
         /*div_search_help_links.position({
@@ -718,24 +773,24 @@ $.widget( "heurist.search", {
         }
         if(!this.select_rectype_filter){
             
-            this.select_rectype_filter = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, {useIcons: true});
-            if(this.select_rectype_filter.hSelect("instance")!=undefined){
-                this.select_rectype_filter.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
+            /*
+            this.select_rectype_filter_grp = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, {useIcons: true});
+            if(this.select_rectype_filter_grp.hSelect("instance")!=undefined){
+                this.select_rectype_filter_grp.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
             }
-
             var that = this;
-            this.select_rectype_filter.hSelect({change: function(event, data){
-                    
+            
+            function __onSelectRectypeFilter(event, data){
                    var selval = data.item.value;
-                   that.select_rectype_filter.val(selval);
-                   
+                   //that.select_rectype_filter.val(selval);
                    that.input_search.val('t:'+selval);
                    that._doSearch(true);
-                   
                    return false;
-                }
-            });
-        
+            }            
+            
+            this.select_rectype_filter_grp.hSelect({change: __onSelectRectypeFilter});
+            */
+            this._recreateSelectRectypeFilter();
         }
             
         var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
@@ -755,6 +810,26 @@ $.widget( "heurist.search", {
         this.setOwnerAccessButtonLabel( add_rec_prefs );
        
         this._showhide_input_prompt();
+    },
+    
+    _recreateSelectRectypeFilter: function(){
+            var that = this;
+
+            this.select_rectype_filter = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, 
+                                                                {useIcons: true, useCounts:true, useGroups:false});
+            if(this.select_rectype_filter.hSelect("instance")!=undefined){
+                this.select_rectype_filter.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
+            }
+            
+            function __onSelectRectypeFilter(event, data){
+                   var selval = data.item.value;
+                   //that.select_rectype_filter.val(selval);
+                   that.input_search.val('t:'+selval);
+                   that._doSearch(true);
+                   return false;
+            }            
+            
+            this.select_rectype_filter.hSelect({change: __onSelectRectypeFilter});
     },
 
     _showAdvancedAssistant: function(){
