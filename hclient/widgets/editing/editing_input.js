@@ -508,11 +508,8 @@ $.widget( "heurist.editing_input", {
                 var eid = '#'+$input.attr('id')+'_editor';                    
                 
                 $input.hide();
-                        $(eid).html($.parseHTML($input.val())).width($input.width()).show();
-                        
-                        if(is_manual){
-                           $(eid).height($input.height()); 
-                        }   
+                        $(eid).html($.parseHTML($input.val())).width($input.width()).height($input.height()).show();
+
                         $btn_edit_switcher.text('text');
                         
                         tinymce.init({
@@ -527,7 +524,18 @@ $.widget( "heurist.editing_input", {
                                 entity_encoding:'raw',
                                  setup:function(ed) {
                                    ed.on('change', function(e) {
-                                       $input.val( ed.getContent() );
+                                       var newval = ed.getContent();
+                                       var nodes = $.parseHTML(newval);
+                                       if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
+                                           (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
+                                       { 
+                                           //remove the only tag
+                                           $input.val(nodes[0].textContent);
+                                       }else{
+                                           $input.val(newval);     
+                                       }
+                                       
+                                       //$input.val( ed.getContent() );
                                        that._onChange();
                                    });
                                  },
