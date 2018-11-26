@@ -188,7 +188,7 @@ $.widget( "heurist.search", {
                 var that = this;
                 function __openSelect(){
                     that.select_rectype_filter.hSelect('open');
-                    //that.select_rectype_filter.val(-1);
+                    that.select_rectype_filter.val(-1);
                     //that.select_rectype_filter.hSelect('refresh');
                     that.select_rectype_filter.hSelect('menuWidget')
                         .position({my: "left top", at: "right bottom+10", of: that.filter_by_entity });
@@ -823,7 +823,7 @@ $.widget( "heurist.search", {
             
             function __onSelectRectypeFilter(event, data){
                    var selval = data.item.value;
-                   //that.select_rectype_filter.val(selval);
+                   that.select_rectype_filter.val(selval);
                    that.input_search.val('t:'+selval);
                    that._doSearch(true);
                    return false;

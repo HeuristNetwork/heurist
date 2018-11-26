@@ -50,7 +50,7 @@ require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_users.php');
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
-$is_production = @$_REQUEST['ll']=='WebSearch';
+$is_production = !$is_map_popup && @$_REQUEST['ll']=='WebSearch';
 
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 
@@ -147,10 +147,10 @@ if(!$is_map_popup){
 
                 var currentImg = obj;
 
-                if (currentImg.parentNode.className != "fullSize"){  //thumb to player
+                if (currentImg.parentNode.className == "thumb_image"){  //thumb to player
                     currentImg.style.display = 'none';
                     currentImg.parentNode.className = "fullSize";
-                    currentImg.parentNode.parentNode.style.width = '100%';
+                    //!!!! currentImg.parentNode.parentNode.style.width = '100%';
                     
                     //add content to player div
         $.ajax({
@@ -168,6 +168,15 @@ if(!$is_map_popup){
                             elem.innerHTML = obj;
                             elem.style.display = 'block';
                             
+                            var player = elem;
+                            setTimeout(function(){
+                                var w = $(player).find('img').width();
+                                if(w>550){
+                                    player.parentNode.parentNode.style.float = 'none';
+                                    //$(player.parentNode.parentNode).css('float','none');
+                                }
+                            },300);
+                            
                             function __closePlayer(){
                                 hidePlayer( id );            
                             }
@@ -178,6 +187,9 @@ if(!$is_map_popup){
                             elem = document.getElementById('lnk'+id);
                             elem.style.display = 'inline-block';
                             elem.onclick = __closePlayer;
+                            //center parent of link
+                            //elem.parentNode.style.margin = '0 auto';
+                            //elem.parentNode.style.textAlign = 'left';
                         }
             }
         });
@@ -201,17 +213,28 @@ if(!$is_map_popup){
                 }
             }
             function hidePlayer(id) {
+                //clear and hide player div
                 var  elem = document.getElementById('player'+id);
                 elem.innerHTML = '';
                 elem.style.display = 'none';
+                
+                //hide show tumbnail link
                 elem = document.getElementById('lnk'+id);
                 elem.style.display = 'none';
+                //elem.parentNode.style.margin = 0;
+                //elem.parentNode.style.textAlign = 'center';
 
+                //show thumbnail
                 elem = document.getElementById('img'+id);
                 elem.parentNode.className = "thumb_image";
-                elem.parentNode.parentNode.style.width = 'auto';
-                //elem.parentNode.parentNode.style.float = 'right';
+                //!!! elem.parentNode.parentNode.style.width = 'auto';
                 elem.style.display = 'inline-block';
+                
+                //restore
+                if($(elem.parentNode.parentNode).hasClass('production')){
+                    $(elem.parentNode.parentNode).css({'float':'right'});
+                }
+                
             }
 
 
@@ -429,7 +452,7 @@ function print_header_line($bib) {
                     //(($is_production)?'':'padding-top:21px')
     ?>
 
-    <div class=HeaderRow style="margin-bottom:0px;min-height:0px;">
+    <div class=HeaderRow style="margin-bottom:10px;min-height:0px;">
             <h2 style="float:left;text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
                 <?= $bib['rec_Title'] ?>
             </h2>
@@ -821,7 +844,7 @@ function print_public_details($bib) {
                         //'mediaType'=>$filedata['mediaType'], 
                         'params'=>$params,
                         'mimeType'=>$mimeType, 
-                        'thumb_size'=>200,
+                        'file_size'=>$fileSize,
                         'thumb' => $file_thumbURL,
                         'player' => $file_playerURL,
                         'nonce' => $file_nonce
@@ -957,36 +980,63 @@ function print_public_details($bib) {
 
         //echo '<div class=detailRowHeader>Shared';
     }
-    ?>
-    <div class="thumbnail" <?php echo (!$is_map_popup && $is_production?'style="float:right"':'')?>>
-        <?php
+    
+    $hasAudioVideo = '';
+    if($is_production){
+        $hasNoAudioVideo = 'style="float:right"';
+        foreach ($thumbs as $thumb) {
+            if($thumb['player'] && 
+                   (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0)){
+                   $hasNoAudioVideo = '';
+                   break;
+            }
+        }
+        print '<div class="thumbnail production" '.$hasNoAudioVideo.'>';
+    }else{
+        print '<div class="thumbnail">';
+    }
         
         $has_thumbs = (count($thumbs)>0);        
 
         foreach ($thumbs as $thumb) {
-            print '<div class="thumb_image"'.($is_production?' style="margin-left:0px !important"':'').'>';
+            
+            $isAudioVideo = (strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0);
+            
+            $isImageOrPdf = (strpos($thumb['mimeType'],"image/")===0 || $thumb['mimeType']=='application/pdf');
+            
+            if($thumb['player'] && !$is_map_popup && $isAudioVideo){
+                print '<div class="fullSize" style="text-align:left;'.($is_production?'margin-left:100px':'').'">';
+            }else{
+                print '<div class="thumb_image"'.($isImageOrPdf?'':' style="cursor:default"').'>';
+            }
 
             $url = @$thumb['external_url']?$thumb['external_url']:(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
 
             if($thumb['player'] && !$is_map_popup){
 
-                if(strpos($thumb['mimeType'],'audio/')===0 || strpos($thumb['mimeType'],'video/')===0){
-                    print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;">';
+                if($isAudioVideo){
+                    //audio or video is maximized at once
+                    
+                    print '<div id="player'.$thumb['id'].'" style="min-height:100px;min-width:200px;text-align:left;">';
 
                     print fileGetPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['params'], $thumb['external_url']); //see db_files
                     
                     //print getPlayerTag($thumb['nonce'], $thumb['mimeType'], $thumb['url'], null); 
                     print '</div>';    
                 }else{
-                    print '<img id="img'.$thumb['id'].'" style="width:'.$thumb['thumb_size'].'px" src="'.htmlspecialchars($thumb['thumb']).'" onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')">';
-                    print '<div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
+                    print '<img id="img'.$thumb['id'].'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
+                    if($isImageOrPdf){
+                        print ' onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')"';
+                    }
+                    print '><div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
                 }
             }else{  //for usual image
-                print '<img src="'.htmlspecialchars($thumb['thumb']).'" onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')">';
+                print '<img src="'.htmlspecialchars($thumb['thumb']).'" '
+                    .($is_map_popup?'':'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
             }
             print '<br/><div class="download_link">';
             if($thumb['player'] && !$is_map_popup){
-                print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;" onclick="hidePlayer('.$thumb['id'].')">SHOW THUMBNAIL</a>&nbsp;&nbsp;&nbsp;';
+                print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;padding-right:20px" onclick="hidePlayer('.$thumb['id'].')">SHOW THUMBNAIL</a>';
             }
             
             print '<a href="' . htmlspecialchars($url) 
