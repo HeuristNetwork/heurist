@@ -167,16 +167,40 @@ if(!$is_map_popup){
                             var  elem = document.getElementById('player'+id);
                             elem.innerHTML = obj;
                             elem.style.display = 'block';
-                            
+
+                            //calculate width for data and image                             
                             var player = elem;
-                            setTimeout(function(){
-                                var w = $(player).find('img').width();
-                                if(w>550){
-                                    player.parentNode.parentNode.style.float = 'none';
-                                    //$(player.parentNode.parentNode).css('float','none');
+                            if($(player.parentNode.parentNode).hasClass('production')){
+                                
+                                var img = $(player).find('img');
+                                if(img.length>0){
+                                    
+                                    img = img[0];
+
+                                    function __onImgLoaded(){
+                                        
+                                        var w_img = $(img).width();
+                                        var w_win = window.innerWidth;
+ //       console.log(w_win, w_img);                                
+                                        if(w_win-w_img<600){
+                                            //draw image above data
+                                            player.parentNode.parentNode.style.float = 'none';
+                                            $('#div_public_data').css('max-width', w_win-40);    
+                                        }else{
+                                            //draw on the right and reduce max width for data
+                                            player.parentNode.parentNode.style.float = 'right';
+                                            $('#div_public_data').css('max-width', w_win-w_img-200);
+                                        }
+                                    }
+                                    
+                                    if(img.complete){
+                                         __onImgLoaded();
+                                    }else{
+                                         img.addEventListener('load', __onImgLoaded)
+                                    }
                                 }
-                            },300);
-                            
+                                
+                            }
                             function __closePlayer(){
                                 hidePlayer( id );            
                             }
@@ -233,6 +257,9 @@ if(!$is_map_popup){
                 //restore
                 if($(elem.parentNode.parentNode).hasClass('production')){
                     $(elem.parentNode.parentNode).css({'float':'right'});
+                    
+                    var w_win = window.innerWidth;
+                    $('#div_public_data').css('max-width', w_win-250);    
                 }
                 
             }
@@ -333,6 +360,9 @@ if(!$is_map_popup){
         .detailRowHeader{
             padding: 20px 0 20px    
         }
+<?php if($is_production){
+    print '.detailType {width:160px;}';
+}?>        
         </style>
     </head>
     <body class="popup">
@@ -452,26 +482,26 @@ function print_header_line($bib) {
                     //(($is_production)?'':'padding-top:21px')
     ?>
 
-    <div class=HeaderRow style="margin-bottom:10px;min-height:0px;">
-            <h2 style="float:left;text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
-                <?= $bib['rec_Title'] ?>
-            </h2>
+    <div class=HeaderRow style="margin-bottom:15px;min-height:0px;">
     <?php 
     if(!$is_map_popup){ 
         //position:absolute;right:17px;top:2px"
     ?>
-        <h3 style="float:right;padding:2px 17px;margin:0">
-            <div <?="style='padding-left:20px;height:16px;background-repeat: no-repeat;background-image:url("
+        <h3 style="float:right;padding:2px 10px 5px 2px;margin:0">
+            <div <?="style='padding-left:20px;height:10px;background-repeat: no-repeat;background-image:url("
                         .HEURIST_ICON_URL.$bib['rty_ID'].".png)' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
                 Type&nbsp;<?= $bib['rty_ID'].': '.htmlspecialchars($bib['rty_Name'])." " ?>
             </div>
         </h3>
     <?php 
-    }else{
-        print '&nbsp;';
     } 
-    print '</div>';        
-
+    ?>
+    
+        <h2 style="float:left;text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
+                <?= $bib['rec_Title'] ?>
+        </h2>
+    </div>       
+    <?php 
 }
 
 
@@ -1049,7 +1079,7 @@ function print_public_details($bib) {
         }//for
         ?>
     </div>
-    <div style="float:left;<?php echo (($has_thumbs)?'max-width:600px':'')?>">
+    <div id="div_public_data" style="float:left;<?php echo (($has_thumbs)?'max-width:900px':'')?>">
     <?php
 
     //print url first
