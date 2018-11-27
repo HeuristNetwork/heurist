@@ -51,6 +51,7 @@ $legalMethods = array(
     "saveDT",
     'checkDtPtr',
     "saveDTG",
+    "checkTerm",
     "saveTerms",
     "mergeTerms",
     "deleteTerms",

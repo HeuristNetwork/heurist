@@ -2450,7 +2450,7 @@ function EditTerms() {
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }                                        
                             
-                        }, params);
+                        });
                         
                     }else{
                         __proceed(false);
