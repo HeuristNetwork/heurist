@@ -60,7 +60,7 @@ $.widget( "heurist.search", {
         $.getScript(window.hWin.HAPI4.baseURL+'hclient/core/search_incremental.js', function(){ that._create(); } );
         return;
         }*/
-        this.element.css({'height':'6.88em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
+        this.element.css({'height':'7.88em', 'min-width':'1100px', 'border-bottom':'1px solid lightgray'});
         if(window.hWin.HAPI4.sysinfo['layout']!='H4Default' && window.hWin.HAPI4.sysinfo['layout']!='H5Default'){
             this.element.addClass('ui-heurist-header1'); //dark navy bg - used long ago in original layout - to remove
         }else{
@@ -166,7 +166,7 @@ $.widget( "heurist.search", {
         
         window.hWin.HEURIST4.util.setDisabled(this.input_search, true);
         
-        var div_search_help_links = $('<div>').css('padding-top','4px').appendTo(this.div_search_input);
+        var div_search_help_links = $('<div>').css('padding-top','6px').appendTo(this.div_search_input);
 
         var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
         +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')                
@@ -179,8 +179,8 @@ $.widget( "heurist.search", {
         
         
         this.filter_by_entity = $('<span title="Show list of entities to filter">'
-        +'entities <span class="ui-icon ui-icon-triangle-1-s"></span></span>')                                          //
-        .css({'text-decoration':'none','color':'gray','padding-left':'45px','outline':0, cursor:'pointer'})
+        +'entity types <span class="ui-icon ui-icon-triangle-1-s"></span></span>')                                          //
+        .css({'text-decoration':'none','color':'gray','padding-left':'16px','outline':0, cursor:'pointer'})
         .appendTo(div_search_help_links);
         
         this._on( this.filter_by_entity, {  click: function(){

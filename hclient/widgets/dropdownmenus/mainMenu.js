@@ -357,7 +357,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     
     //
     // menu element is <li> (button) for horizontal meny and drop-down that is loaded from html
-    // exp_level=3 hidden
+    // access_level =   -1 no verification
+        //  0 logged (DEFAULT)
+        //  groupid  - admin of group  
+        //  1 - db admin (admin of group #1)
+        //  2 - db owner
+    //
+    // exp_level=3 hidden, 0 expert, 1 advance, 2 begginner
     //
     _initMenu: function(name, access_level, parentdiv, exp_level){
 

@@ -193,7 +193,7 @@ var cfg_layouts = [
     },
         
     {id:'SearchAnalyze2', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
-        north:{size:'7em', resizable:false, overflow:'hidden',
+        north:{size:'8em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'h4_search', hasheader:false, 
                 css:{position:'absolute', top:0, left:0, right:0,
