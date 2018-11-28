@@ -542,11 +542,11 @@ function dbs_GetRectypeConstraint($system) {
         
         if($parentId>0){
             
-            if(in_array($parentId, $terms)){
+            if(in_array($parentId, $terms)){ //avoid recursion
                 return $termId;
             }else{
-                array_push($terms, $parentId[0]);
-                return getTermTopMostParent($mysqli, $parentId[0], $terms);
+                array_push($terms, $parentId);
+                return getTermTopMostParent($mysqli, $parentId, $terms);
             }
         }else{
             return $termId;
