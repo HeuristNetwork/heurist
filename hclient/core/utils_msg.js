@@ -178,6 +178,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         if(message.indexOf('dlg-prompt-value')<0){
             message = message+'<input id="dlg-prompt-value" class="text ui-corner-all" '
+                + (ext_options && ext_options['password']?'type="password"':'') 
                 + ' style="max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em"/>';    
         }
         

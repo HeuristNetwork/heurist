@@ -109,7 +109,9 @@ $indexServerAddress="";
 $indexServerPort="";
 
 $passwordForDatabaseCreation=""; // normally blank = any logged in user can create
-$passwordForDatabaseDeletion=""; // if blank, only database owner can delete, otherwise any admin user in DB owners group (with challenge)
+$passwordForDatabaseDeletion=""; // if less than 7 characters no one can delete db, 
+                                 //  if set (>7 characters) sysadmin or DB owner can delete with password challenge
+
 $passwordForReservedChanges=""; // if blank, no-one can modify reserved fields, otherwise challenge
 $passwordForServerFunctions=""; // if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
 

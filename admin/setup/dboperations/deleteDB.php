@@ -27,45 +27,29 @@ $res = false;
 
 $system = new System();
 
-
 /** Password check */
-if(isset($_POST['password'])) {
-    $pw = $_POST['password'];
-
-    // Password in configIni.php must be at least 6 characters
-    if(strlen($passwordForDatabaseDeletion) > 6) {
-        $comparison = strcmp($pw, $passwordForDatabaseDeletion);  // Check password
-        if($comparison == 0) { // Correct password
+if(!$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion, 14) )
+{
+    if(@$_REQUEST['database']){
         
-            if(@$_REQUEST['database']){
-                
-                //if database to be deleted is not current - only system admin can do it
-                $isSystemInited = $system->init(@$_REQUEST['db']); //need to verify credentials for current database
+        //if database to be deleted is not current - only system admin can do it
+        $isSystemInited = $system->init(@$_REQUEST['db']); //need to verify credentials for current database
 
-                /** Db check */
-                if($isSystemInited){
-                    if($system->is_system_admin() || 
-                            ($_REQUEST['database']==$_REQUEST['db'] && $system->is_dbowner()) )
-                    {
-                        $res = DbUtils::databaseDrop(false, $_REQUEST['database'], false);    
-                    }else{
-                        $system->addError(HEURIST_REQUEST_DENIED, 
-                            'You must be logged in as a system administrator or database owner to delete database',1);
-                    }
-                }
+        /** Db check */
+        if($isSystemInited){
+            if($system->is_system_admin() || 
+                    ($_REQUEST['database']==$_REQUEST['db'] && $system->is_dbowner()) )
+            {
+                $res = DbUtils::databaseDrop(false, $_REQUEST['database'], false);    
             }else{
-                $res = true; //password correct
+                $system->addError(HEURIST_REQUEST_DENIED, 
+                    'You must be logged in as a system administrator or database owner to delete database',1);
             }
-        }else{
-            // Invalid password
-            $system->addError(HEURIST_REQUEST_DENIED, 'Invalid password');
-        }    
+        }
     }else{
-        $system->addError(HEURIST_SYSTEM_CONFIG, 'Password in configIni.php must be at least 6 characters');
+        $res = true; //authentification passed
+        //$system->addError(HEURIST_INVALID_REQUEST, 'Database parameter is not defined');
     }
-}else{
-    //password not defined
-    $system->addError(HEURIST_INVALID_REQUEST, 'Password not specified');
 }
 
 if(is_bool($res) && !$res){

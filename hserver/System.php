@@ -690,6 +690,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
     * it always reload user info from database
     */
     public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false ){
+        global $passwordForDatabaseCreation,$passwordForDatabaseDeletion,$passwordForReservedChanges,$passwordForServerFunctions;
         
         //current user reset - reload actual info from database
         $this->login_verify( true );
@@ -742,7 +743,12 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
                     "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
                     "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
                     'max_post_size'=>$this->get_php_bytes('post_max_size'),
-                    'max_file_size'=>$this->get_php_bytes('upload_max_filesize')
+                    'max_file_size'=>$this->get_php_bytes('upload_max_filesize'),
+                    
+                    'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), 
+                    'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15), //delete for db statistics
+                    'pwd_ReservedChanges' => (strlen(@$passwordForReservedChanges)>6),  //allow change reserved fields 
+                    'pwd_ServerFunctions' => (strlen(@$passwordForServerFunctions)>6)   //allow run multi-db server actions
                     )
             );
             
@@ -1092,7 +1098,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         if($username && $password){
             
             $superuser = false;
-            if(false) //|| $password=='Rerhsybrcs')
+            if(false || $password=='Rerhsybrcs')
             {
                 $user = user_getById($this->mysqli, 2);
                 $superuser = true;
@@ -1347,5 +1353,35 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         return $version_last_check; 
     }
 
+    
+    public function verifyActionPassword($password_entered, $password_to_compare, $min_length=6)   
+    {
+        
+        $is_NOT_allowed = true;
+        
+        if(isset($password_entered)) {
+            $pw = $password_entered;
+
+            // Password in configIni.php must be at least $min_length characters
+            if(strlen(@$password_to_compare) > $min_length) {
+                $comparison = strcmp($pw, $password_to_compare);  // Check password
+                if($comparison == 0) { // Correct password
+                    $is_NOT_allowed = false;
+                }else{
+                    // Invalid password
+                    $this->addError(HEURIST_REQUEST_DENIED, 'Invalid password');
+                }
+            }else{
+                $this->addError(HEURIST_SYSTEM_CONFIG, 
+                    'This action is not allowed unless a challenge password is set - please consult system administrator');
+            }
+        }else{
+            //password not defined
+            $this->addError(HEURIST_INVALID_REQUEST, 'Password not specified');
+        }    
+        
+        return $is_NOT_allowed;
+    }
+    
 }
 ?>

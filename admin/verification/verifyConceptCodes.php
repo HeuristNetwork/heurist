@@ -29,6 +29,11 @@ define('PDIR','../../');  //need for proper path to js and css
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
+if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
+    print $response = $system->getError()['message'];
+    exit();
+}
+
 $mysqli = $system->get_mysqli();
     
     //1. find all database

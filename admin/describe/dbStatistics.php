@@ -26,6 +26,14 @@ define('PDIR','../../');  //need for proper path to js and css
     
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
+
+if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
+    print $response = $system->getError()['message'];
+    exit();
+}
+
+$is_delete_allowed = (strlen(@$passwordForDatabaseDeletion) > 14);
+
 set_time_limit(0); //no limit
 
 $mysqli = $system->get_mysqli();
@@ -132,7 +140,7 @@ function dirsize($dir)
         <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
         <div id="page-inner">
             <?php echo "System admin: <a class='dotted-link' href='mailto:" .HEURIST_MAIL_TO_ADMIN. "'>" .HEURIST_MAIL_TO_ADMIN. "</a>"; ?>
-            <?php if($sysadmin) { ?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button><br><br> <?php } ?>
+            <?php if($is_delete_allowed && $sysadmin) { ?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button><br><br> <?php } ?>
             <div id="tabContainer"></div>
         </div>
 
@@ -241,7 +249,7 @@ function dirsize($dir)
                 { key: "owner", label: "Owner", width:200, formatter: function(elLiner, oRecord, oColumn, oData){
                     elLiner.innerHTML = "<div style='max-width:100px' class='three-lines' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
                 }}
-                <?php if($sysadmin) { ?>
+                <?php if($sysadmin && $is_delete_allowed) { ?>
                     ,{ key: 'deleteable', label: 'Delete', className: 'right', formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<input type=\"checkbox\" value=\"'+oRecord.getData('dbname')+'\">';
                     }}
@@ -345,7 +353,7 @@ function dirsize($dir)
                     this.password = document.getElementById("db-password").value;
                     
                     var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
-                    var request = {password: password, db:window.hWin.HEURIST4.util.getUrlParameter('db')};
+                    var request = {pwd: password, db:window.hWin.HEURIST4.util.getUrlParameter('db')};
                     
                     // Authenticate user
                     window.hWin.HEURIST4.util.sendRequest(url, request, null,
@@ -380,7 +388,7 @@ function dirsize($dir)
                         }else{
                         
                             var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
-                            var request = {password: password, 
+                            var request = {pwd: password, 
                                            db: window.hWin.HEURIST4.util.getUrlParameter('db'),
                                            database: databases[i]};
                         

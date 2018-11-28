@@ -274,21 +274,51 @@ function hAPI(_db, _oninit) { //, _currentUser
             *  1 - db admin (admin of group #1)
             *  2 - db owner
             * 
+            * password_protected - name of password 
+            * 
+            * 
             *  need to call this method before every major action or open popup dialog
             *  for internal actions use client side methods of hapi.is_admin, is_member, has_access
             */
-            , verify_credentials: function(callback, requiredLevel){
+            , verify_credentials: function(callback, requiredLevel, password_protected, password_entered){
 
+                if(!window.hWin.HEURIST4.util.isempty(password_protected)){
+                    
+                    if(window.hWin.HAPI4.sysinfo['pwd_'+password_protected]){
+                    
+                        window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
+                            function(password_entered){
+                                
+                                window.hWin.HAPI4.SystemMgr.action_password({action:password_protected, password:password_entered},
+                                    function(response){
+                                        if(response.status == window.hWin.ResponseStatus.OK && response.data=='ok'){
+                                            window.hWin.HAPI4.SystemMgr.verify_credentials(callback, requiredLevel, null, password_entered);                                        ;
+                                        }else{
+                                            window.hWin.HEURIST4.msg.showMsgFlash('Wrong password');
+                                        }
+                                    }
+                                );
+                                
+                            },
+                        'This action is password-protected');//, {password:true});
+                    
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgDlg('This action is not allowed unless a challenge password is set - please consult system administrator');
+                    }
+                    return false;
+                }                
+                
+                
                 requiredLevel = Number(requiredLevel);
                 if(requiredLevel<0){ //no verification required - everyone access
-                    callback(); 
+                    callback(password_entered); 
                     return; 
                 }
                 
                 function __verify(){
                     
                         if(window.hWin.HAPI4.has_access(requiredLevel)){ 
-                              callback();  
+                              callback( password_entered );  
                         }else{
                             var response = {};
                             response.sysmsg = 0;
@@ -333,7 +363,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 
                 //MODE1 verify locally only
                 if(true){
-                    __verify(); //verification temporarely disabled
+                    __verify(); //verification on server temporarely disabled
                 
                 }else{
                     //MODE2 verify via server each time
@@ -446,6 +476,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                 _callserver('usr_info', request);
             }
 
+            //
+            // verify special system passwords for some password-protection actions
+            //
             ,action_password: function(request, callback){
                 if(request) request.a = 'action_password';
                 _callserver('usr_info', request, callback);

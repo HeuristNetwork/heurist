@@ -55,6 +55,12 @@
 <?php        
     }
     
+    if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
+        print $response = $system->getError()['message'];
+        $system->clearError();
+    }else{
+    
+    
     $test_optfields = (@$_REQUEST['optfields']==1);
     $test_recfields = (@$_REQUEST['recfields']==1);
     
@@ -459,6 +465,10 @@
         
 
     }//while  databases
+    
+    }//password check
+    
+    
     if(@$_REQUEST['verbose']!=1){
 ?>
 </body></html>

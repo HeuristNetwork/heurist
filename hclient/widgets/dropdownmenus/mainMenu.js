@@ -158,6 +158,7 @@ $.widget( "heurist.mainMenu", {
                 .addClass('horizontalmenu')
                 .appendTo( this.divProfileMenu );
         
+        //check if menu among allowed topis  - they can be set via layout 
         function __include(topic){
              return (!that.options.topics || that.options.topics.indexOf(topic.toLowerCase())>=0);
         }
@@ -174,6 +175,7 @@ $.widget( "heurist.mainMenu", {
         }
             
         if(__include('Management')) this._initMenu('Management', 0);
+        
         if(__include('Admin')) this._initMenu('Admin', 2, null, 0);
         
         if(__include('FAIMS')) this._initMenu('FAIMS', 1, null, 1);
@@ -363,7 +365,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         //  1 - db admin (admin of group #1)
         //  2 - db owner
     //
-    // exp_level=3 hidden, 0 expert, 1 advance, 2 begginner
+    // exp_level = 3 hidden, 0 expert, 1 advance, 2 begginner
     //
     _initMenu: function(name, access_level, parentdiv, exp_level){
 
@@ -422,8 +424,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(exp_level>=0){
             this.menues['btn_'+name].attr('data-exp-level', exp_level);
         }
-
-
         
         // Load content for all menus except Database when user is logged out
 
@@ -574,6 +574,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var action = item.attr('id');
         var action_log = item.attr('data-logaction');
         var action_level = item.attr('data-level');
+        var action_passworded = item.attr('data-pwd');
         var href = item.attr('data-link');
         var target = item.attr('target');
 
@@ -585,7 +586,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var requiredLevel = (action_level==-1 || action_level>=0) ?action_level :0;
         
         window.hWin.HAPI4.SystemMgr.verify_credentials(
-            function(){
+            function( entered_password ){
             
             if(action_log){
                 window.hWin.HAPI4.SystemMgr.user_log(action_log);
@@ -747,6 +748,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?')>=0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
             }
             
+            if(!window.hWin.HEURIST4.util.isempty(entered_password)){
+                 href =  href + '&pwd=' + entered_password;
+            }
+            
             if(!window.hWin.HEURIST4.util.isempty(target)){
                 window.open( href, target);    
             }else{
@@ -785,7 +790,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         
         },
-            requiredLevel //needed level of credentials any, logged (by default), admin of group, db admin, db owner
+            requiredLevel, //needed level of credentials any, logged (by default), admin of group, db admin, db owner
+            action_passworded    //this is type of password, if it is not set action is to allowed - otherwise need to enter password
         );
 
         if(event) window.hWin.HEURIST4.util.stopEvent(event);
