@@ -284,28 +284,31 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                 if(!window.hWin.HEURIST4.util.isempty(password_protected)){
                     
-                    if(window.hWin.HAPI4.sysinfo['pwd_'+password_protected]){
-                    
-                        window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
-                            function(password_entered){
-                                
-                                window.hWin.HAPI4.SystemMgr.action_password({action:password_protected, password:password_entered},
-                                    function(response){
-                                        if(response.status == window.hWin.ResponseStatus.OK && response.data=='ok'){
-                                            window.hWin.HAPI4.SystemMgr.verify_credentials(callback, requiredLevel, null, password_entered);                                        ;
-                                        }else{
-                                            window.hWin.HEURIST4.msg.showMsgFlash('Wrong password');
+                    if(!(password_protected=='DatabaseDeletion' && window.hWin.HAPI4.has_access(2))) //owner can delete without password
+                    {
+                        if(window.hWin.HAPI4.sysinfo['pwd_'+password_protected]){ //password defined
+                        
+                            window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
+                                function(password_entered){
+                                    
+                                    window.hWin.HAPI4.SystemMgr.action_password({action:password_protected, password:password_entered},
+                                        function(response){
+                                            if(response.status == window.hWin.ResponseStatus.OK && response.data=='ok'){
+                                                window.hWin.HAPI4.SystemMgr.verify_credentials(callback, requiredLevel, null, password_entered);                                        ;
+                                            }else{
+                                                window.hWin.HEURIST4.msg.showMsgFlash('Wrong password');
+                                            }
                                         }
-                                    }
-                                );
-                                
-                            },
-                        'This action is password-protected');//, {password:true});
-                    
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgDlg('This action is not allowed unless a challenge password is set - please consult system administrator');
+                                    );
+                                    
+                                },
+                            'This action is password-protected', {password:true});
+                        
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgDlg('This action is not allowed unless a challenge password is set - please consult system administrator');
+                        }
+                        return false;
                     }
-                    return false;
                 }                
                 
                 

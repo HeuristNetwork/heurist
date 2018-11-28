@@ -876,8 +876,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
            }
            if(ext_options.my && ext_options.at && ext_options.of){
                options.position = {my:ext_options.my, at:ext_options.at, of:ext_options.of};
-           }else if(!ext_options.options){  
-                options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
+           }else if(!ext_options.options && !$.isPlainObject(ext_options)){  
+                var posele = $(ext_options);
+                if(posele.length>0)
+                    options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
            }
         }
         

@@ -20,7 +20,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-define('OWNER_REQUIRED', 1);   
+define('MANAGER_REQUIRED', 1);   
 define('PDIR','../../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
@@ -60,9 +60,14 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
     <div class='banner'><h2>Clear Records from Current Heurist database</h2></div>
     <div id='page-inner' style='overflow:auto'>
 <?php
+    //owner can delete without password
+    if(!$system->is_dbowner() && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion) ){
+            print '<div class="ui-state-error">'.$response = $system->getError()['message'].'</div>';
+    }else{
+
     $dbname = $_REQUEST['db'];
 
-    if(!@$_REQUEST['mode']) {
+    if(!@$_REQUEST['mode']) {        //dialog if mode set this is action
 ?>
 
     <div class="gray-gradient" style="display:inline-block;">
@@ -75,13 +80,14 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 
     <h3>This will clear (delete) all records and reset counter to 1 for the current database: </h3>
     <h2>Clear database: <?=$dbname?></h2>
-    <form name='deletion' action='clearCurrentDB.php' method='get'>
+    <form name='deletion' action='clearCurrentDB.php' method='post'>
         <p>Database definitions - record types, fields, terms, tags, users etc. - are not affected.
         Uploaded files are not deleted. Bookmarks and tags on specific records are deleted.<p>
         This operation may take some minutes on a large database<br>
         <p>Enter the words CLEAR ALL RECORDS in ALL-CAPITALS to confirm that you want to clear all records from the current database
         <p>Type the words above to confirm deletion of records: <input type='input' maxlength='20' size='20' name='del' id='del'>
         &nbsp;&nbsp;&nbsp;&nbsp;<input type='submit' value='OK to Clear' class="h3button" style='font-weight: bold;' >
+        <input name="pwd" value"<?php echo @$_REQUEST['pwd'];?>" type="hidden">
         <input name='mode' value='2' type='hidden'>
         <input name='db' value='<?=$dbname?>' type='hidden'>
     </form>
@@ -273,10 +279,10 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
             }
         }
         else { // didn't request properly
-            print "<p><h2>Request disallowed</h2>Incorrect challenge words entered. Data was not deleted from <b>$dbname</b></p>";
+            print "<p class='ui-state-error'><h2>Request disallowed</h2>Incorrect challenge words entered. Data was not deleted from <b>$dbname</b></p>";
         }
     }
-
+    }
 ?>
  </div>
  </body>

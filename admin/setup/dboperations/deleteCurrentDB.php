@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-define('OWNER_REQUIRED', 1);   
+define('MANAGER_REQUIRED', 1);   
 define('PDIR','../../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
@@ -64,6 +64,11 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
     </head>
     <body class="popup">
 <?php
+    //owner can delete without password
+    if(!$system->is_dbowner() && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion) ){
+            print '<div class="ui-state-error">'.$response = $system->getError()['message'].'</div>';
+    }else{
+
             $dbname = $_REQUEST['db'];
 
             if(!@$_REQUEST['mode']) {
@@ -79,12 +84,13 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
                 <h1 style='display:inline-block;font-size: 16px;'>DELETION OF CURRENT DATABASE</h1><br>
                 <h3>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h3>
                 <h2>About to delete database: <?=$dbname?></h2>
-                <form name='deletion' action='deleteCurrentDB.php' method='get'>
+                <form name='deletion' action='deleteCurrentDB.php' method="post">
                     <p>Enter the words DELETE MY DATABASE below in ALL-CAPITALS to confirm that you want to delete the current database
                     <p>Type the words above to confirm deletion <input type='input' maxlength='20' size='20' name='del' id='del'>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <input type='button' class="h3button" value='OK to Delete' style='font-weight: bold;' 
                         onclick="$('#page-inner').hide(); forms[0].submit();">
+                    <input name="pwd" value"<?php echo @$_REQUEST['pwd'];?>" type="hidden">
                     <input name='mode' value='2' type='hidden'>
                     <input name='db' value='<?=$dbname?>' type='hidden'>
                 </form>
@@ -147,6 +153,7 @@ function () {
                     print "<div class='ui-state-error'><h2>Request disallowed</h2>Incorrect challenge words entered. Database <b>$dbname</b> was not deleted</div>";
                 }
             } // request mode 2
+    }
             ?>
     </body>
 </html>
