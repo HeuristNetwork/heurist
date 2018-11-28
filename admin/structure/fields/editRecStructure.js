@@ -3114,7 +3114,8 @@ function onStatusChange(evt){
     var new_value = el.value;
         
     if(curr_value=='reserved' && new_value!=curr_value){ //value was changed - confirm
-            el.value = curr_value; //restore
+        el.value = curr_value; //restore
+        if(window.hWin.HAPI4.sysinfo['pwd_ReservedChanges']){ //password defined
             //show prompt
             window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
                 function(value){
@@ -3132,7 +3133,9 @@ function onStatusChange(evt){
                     
                 },
             'To reset field status from "reserved"');
-    
+        }else{
+            window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes is not allowed unless a challenge password is set - please consult system administrator');
+        }
     }
     
     

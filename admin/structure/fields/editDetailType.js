@@ -982,13 +982,47 @@ function DetailTypeEditor() {
             for(val in values) {
                 oDetailType.detailtype.defs[_dtyID].common.push(values[val]);
             }
-
-            // 3. sends data to server
-            var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
-            var callback = _updateResult;
             
-            var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};
-            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+            function __performSave(){
+                // 3. sends data to server
+                var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+                var callback = _updateResult;
+                
+                var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};
+                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
+            }
+            
+            
+            if(window.hWin.HEURIST4.detailtypes.typedefs[_dtyID] &&
+               'reserved'==window.hWin.HEURIST4.detailtypes.typedefs[_dtyID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Status])
+            {
+                    
+                        if(window.hWin.HAPI4.sysinfo['pwd_ReservedChanges']){ //password defined
+                        
+                            window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
+                                function(password_entered){
+                                    
+                                    window.hWin.HAPI4.SystemMgr.action_password({action:'ReservedChanges', password:password_entered},
+                                        function(response){
+                                            if(response.status == window.hWin.ResponseStatus.OK && response.data=='ok'){
+                                                __performSave();
+                                            }else{
+                                                window.hWin.HEURIST4.msg.showMsgFlash('Wrong password');
+                                            }
+                                        }
+                                    );
+                                    
+                                },
+                            'This action is password-protected', {password:true});
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes is not allowed unless a challenge password is set - please consult system administrator');
+                        }
+                        $('#btnSave').removeAttr('disabled');
+                        return false;
+            }
+
+            
+            __performSave();
             
         } else {
             window.close(null);
