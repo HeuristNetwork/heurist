@@ -1555,6 +1555,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID] = [request.svs_Name, request.svs_Query, request.svs_UGrpID];
 
                     request.new_svs_ID = svsID;
+                    request.isNewSavedFilter  = !isEdit;
 
                     that._trigger( "onsave", null, request );
 

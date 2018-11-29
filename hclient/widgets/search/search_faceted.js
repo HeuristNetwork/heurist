@@ -225,6 +225,25 @@ $.widget( "heurist.search_faceted", {
         }
     },
 
+    _refreshTitle: function(){    
+        if(this.div_title) {
+            if(this.options.params.ui_title){
+                new_title = this.options.params.ui_title;
+            }else{
+                var svsID = this.options.query_name;
+                if(svsID > 0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
+                                window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID])
+                {
+                    new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][0];//_NAME];
+                }else{
+                    new_title = svsID;
+                }
+            }
+            if(window.hWin.HEURIST4.util.isnull(new_title)) new_title='';
+            this.div_title.html(new_title);
+        }
+    },
+    
     /* 
     * private function    - NOT USED
     * show/hide buttons depends on current login status
@@ -240,9 +259,7 @@ $.widget( "heurist.search_faceted", {
               }
          }
         
-        if(this.div_title) this.div_title.html(this.options.params.ui_title
-                            ?this.options.params.ui_title:this.options.query_name);
-
+        this._refreshTitle();
                             
         if(this.options.ispreview){
             this.btn_save.hide(); 
@@ -484,11 +501,9 @@ $.widget( "heurist.search_faceted", {
         }else{
             this.btn_close.show(); 
         }
-        if(this.div_title) {
-            this.div_title.html(this.options.params.ui_title
-                            ?this.options.params.ui_title:this.options.query_name);
-            //this.div_title.css('width','70%');    
-        }
+        
+        this._refreshTitle();
+
         this.btn_reset.hide()   
         this.btn_save.hide(); 
        
