@@ -176,7 +176,7 @@ $.widget( "heurist.mainMenu", {
             
         if(__include('Management')) this._initMenu('Management', 0);
         
-        if(__include('Admin')) this._initMenu('Admin', 2, null, 0);
+        if(__include('Admin')) this._initMenu('Admin', 0, null, 0);
         
         if(__include('FAIMS')) this._initMenu('FAIMS', 1, null, 1);
         if(__include('Help')) this._initMenu('Help', -1);
@@ -913,7 +913,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                     (request['bookmarks_on']=='1')?'inline-block':'none');
                             }
                             
-                            $(request).each(function(key,value){
+                            $.each(request, function(key,value){
                                 window.hWin.HAPI4.currentUser['ugr_Preferences'][key] = value;    
                             });
 
