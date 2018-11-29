@@ -111,13 +111,16 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         selScope.appendChild(opt);
         
         var is_initscope_empty = window.hWin.HEURIST4.util.isempty(init_scope_type);
+        var inititally_selected = '';
         
         if(init_scope_type=='all'){
             opt = new Option("All records", "All");
             selScope.appendChild(opt);
+            inititally_selected = 'All';
         }else if(init_scope_type>0 && window.hWin.HEURIST4.rectypes.pluralNames[init_scope_type]){
             opt = new Option(window.hWin.HEURIST4.rectypes.pluralNames[init_scope_type], init_scope_type);
             selScope.appendChild(opt);
+            inititally_selected = init_scope_type;
         }else{
             
             //selected count option
@@ -125,11 +128,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                (window.hWin.HAPI4.currentRecordsetSelection &&  window.hWin.HAPI4.currentRecordsetSelection.length > 0)) {
                 opt = new Option("Selected results set (count=" + window.hWin.HAPI4.currentRecordsetSelection.length+")", "Selected");
                 selScope.appendChild(opt);
+                inititally_selected = 'Selected';
             }
             if(is_initscope_empty || init_scope_type=='current'){
                 //add result count option default
                 opt = new Option("Current results set (count="+ window.hWin.HAPI4.currentRecordset.length()+")", "Current");
                 selScope.appendChild(opt);
+                inititally_selected = 'Current';
             }
             if(is_initscope_empty){
                 //find all types for result and add option for each with counts.
@@ -144,6 +149,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 }
             }
         }
+        $(selScope).val(inititally_selected);
+        
         _onRecordScopeChange();
         
         if(action_type=='rectype_change'){
