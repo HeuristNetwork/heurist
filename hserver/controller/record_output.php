@@ -4,7 +4,7 @@
     * Application interface. See hRecordMgr in hapi.js
     * Record search and output in required format
     * 
-    * paremeters
+    * parameters
     * db - heurist database
     * format = json|csv|kml|hml
     * prefs:{ format specific parameters }, }
@@ -63,7 +63,7 @@
     $search_params = array();
     $search_params['w'] = @$params['w'];
     $search_params['rules'] = @$params['rules'];
-    $search_params['needall'] = 1;
+    $search_params['needall'] = 1;  //search without limit of returned record count
     
     if(@$params['ids']){
         $search_params['q'] = array('ids'=>implode(',',$params['ids']));
@@ -87,11 +87,18 @@
              $params['q'] = @$params['q'].' sortby:rt';
         }
         */
+        
+        //search only ids - all 
         $search_params['detail'] = 'ids';
     }
-    
-    
-    
+
+/* DEBUG    
+    if(is_array($search_params['q'])){
+        error_log(json_encode($search_params['q']));    
+    }else{
+        error_log($search_params['q']);    
+    }
+*/
     $response = recordSearch($system, $search_params);
 
     if($is_csv){
@@ -124,15 +131,15 @@ NOTE: fastest way it simple concatenation in comparison to fputcsv and implode. 
 */
 function outputXML($system, $data, $params){
     
-    if (!($data && $data['status']==HEURIST_OK)){
+    if (!($data && @$data['status']==HEURIST_OK)){
         print print_r($rec_ids, true); //print out error array
         return;
     }
-    
+
     $data = $data['data'];
     
     if(!(@$data['reccount']>0)){
-        print ''; //'empty result set';
+        print 'EMPTY RESULT SET'; //'empty result set';
         return;
     }
     
@@ -197,8 +204,12 @@ function outputXML($system, $data, $params){
     
     $records = $data['records'];
     $records_out = array(); //ids already out
-    
     $streams = array(); //one per record type
+    $rt_counts = array();
+    
+    $error_log = array();
+    $error_log[] = 'Total rec count '.count($records);
+    
     $idx = 0;
     while ($idx<count($records)){ //replace to WHILE
     
@@ -208,7 +219,7 @@ function outputXML($system, $data, $params){
         
         $rty_ID = ($any_rectype!=null)?$any_rectype :$record['rec_RecTypeID'];
         
-        if(!@$fields[$rty_ID]) continue;
+        if(!@$fields[$rty_ID]) continue; //none of fields for this record type marked to output
         
         if(!@$streams[$rty_ID]){
             // create a temporary file
@@ -222,8 +233,12 @@ function outputXML($system, $data, $params){
             if($csv_header)
                 fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure);
             
+            
+            $rt_counts[$rty_ID] = 1;
         }else{
             $fd = $streams[$rty_ID];
+            
+            $rt_counts[$rty_ID]++;
         }
         
         if(count(@$details[$rty_ID])>0){
@@ -236,7 +251,7 @@ function outputXML($system, $data, $params){
             
             $constr_rt_id = 0;
             if(strpos($dt_id,':')>0){ //for constrained resource fields
-                list($dt_id, $constr_rt_id) = explode(':',$dt_id);
+                list($dt_id, $constr_rt_id) = explode(':', $dt_id);
             }
             
             if(is_numeric($dt_id) && $dt_id>0){
@@ -303,57 +318,110 @@ function outputXML($system, $data, $params){
         
     }//for records
     
-    if(count($streams)==1){
+    $error_log[] = print_r($rt_counts, true);
         
-        $rty_ID = array_keys($streams);
-        $rty_ID = $rty_ID[0];
+    if(count($streams)<2){
         
-        $filename = 'Export_'.$system->dbname();
-        if($rty_ID>0){
-            $filename = $filename.'_'.$rtStructs['names'][$rty_ID];
+        $out = false;
+        $rty_ID = 0;
+        
+        if(count($streams)==0){
+            array_push($error_log, "Streams are not defined");
+        }else{
+            $rty_ID = array_keys($streams);
+            $rty_ID = $rty_ID[0];
+        
+            $filename = 'Export_'.$system->dbname();
+            if($rty_ID>0){
+                        $filename = $filename.'_'.$rtStructs['names'][$rty_ID];
+            }
+            $filename = $filename.'_'.date("YmdHis").'.csv';
+        
+            $fd = $streams[$rty_ID];
+
+            if($fd==null){
+                array_push($error_log, "Stream for record type $rty_ID is not defined");
+            }else{
+                rewind($fd);
+                $out = stream_get_contents($fd);
+                fclose($fd);
+            }
         }
-        $filename = $filename.'_'.date("YmdHis").'.csv';
-        
-        $fd = $streams[$rty_ID];
-        
-        rewind($fd);
-        $out = stream_get_contents($fd);
-        fclose($fd);
+
+        if($out===false || strlen($out)==0){
+            array_push($error_log, "Stream for record type $rty_ID is empty");
+            $out = implode(PHP_EOL, $error_log);
+        }
         
         header('Content-Type: text/csv');
         header('Content-disposition: attachment; filename='.$filename);
         header('Content-Length: ' . strlen($out));
-        
         exit($out);
         
     }else{
     
         $zipname = 'Export_'.$system->dbname().'_'.date("YmdHis").'.zip';
-        $zip = new ZipArchive;
-        $zip->open($zipname, ZipArchive::CREATE);    
+        $destination = tempnam("tmp", "zip");
         
-        foreach($streams as $rty_ID => $fd){
-            // return to the start of the stream
-            rewind($fd);
-
-            // add the in-memory file to the archive, giving a name
-            $zip->addFromString('rectype-'.$rty_ID.'.csv', stream_get_contents($fd) );
-            //close the file
-            fclose($fd);
-        }    
+        $zip = new ZipArchive();
+        if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
+            array_push($error_log, "Can not create zip $destination");    
+        }else{
         
-        // close the archive
-        $zip->close();
-        header('Content-Type: application/zip');
-        header('Content-disposition: attachment; filename='.$zipname);
-        header('Content-Length: ' . filesize($zipname));
-        readfile($zipname);
+            foreach($streams as $rty_ID => $fd){
+                
+                if($fd==null){
+                    array_push($error_log, "Stream for record type $rty_ID is not defined");
+                }else{
+                    // return to the start of the stream
+                    rewind($fd);
+                    
+                    $content = stream_get_contents($fd);
 
-        // remove the zip archive
-        // you could also use the temp file method above for this.
-        unlink($zipname);    
+                    if($content===false || strlen($content)==0){
+                        array_push($error_log, "Stream for record type $rty_ID is empty");
+                    }else{
+                        // add the in-memory file to the archive, giving a name
+                        $zip->addFromString('rectype-'.$rty_ID.'.csv',  $content);
+                    }
+                    //close the file
+                    fclose($fd);
+                }
+            }    
+            
+            if(count($error_log)>0){
+                $zip->addFromString('log.txt', implode(PHP_EOL, $error_log) );
+            }
+            
+            // close the archive
+            $zip->close();
+        
+        }
+        
+        if(@file_exists($destination)>0){
+        
+            header('Content-Type: application/zip');
+            header('Content-disposition: attachment; filename='.$zipname);
+            header('Content-Length: ' . filesize($destination));
+            readfile($destination);
+
+            // remove the zip archive
+            unlink($destination);    
+        
+        }else{
+            array_push($error_log, "Zip archive ".$destination." doesn't exist");
+            
+            $out = implode(PHP_EOL, $error_log);
+            header('Content-Type: text/csv');
+            header('Content-disposition: attachment; filename=log.txt');
+            header('Content-Length: ' . strlen($out));
+            exit($out);
+            
+        }
         
     }
+    
+//DEBUG error_log(print_r($error_log,true));
 
 
 }
