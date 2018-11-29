@@ -413,8 +413,6 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                 <a name="target_parent"/>
                 <?php
                 if($system->defineConstant('DT_PARENT_ENTITY')){}
-
-
                 
             $wasadded1 = 0;
                 
@@ -1135,12 +1133,18 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             <a name="nonstandard_fields"></a>
             <?php
 
-            $res = $mysqli->query("select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title
+            $query = "select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title
                 from Records
                 left join recDetails on rec_ID = dtl_RecID
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join defRecStructure on rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
-                where rec_FlagTemporary!=1 and dty_ID != ".DT_PARENT_ENTITY." rst_ID is null");
+                where rec_FlagTemporary!=1 AND rst_ID is null";            
+                
+            if(defined('DT_PARENT_ENTITY') && DT_PARENT_ENTITY>0){
+                $query = $query." AND dty_ID != ".DT_PARENT_ENTITY;
+            }    
+                
+            $res = $mysqli->query( $query );
 
             $bibs = array();
             $ids = array();
