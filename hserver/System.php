@@ -1098,7 +1098,9 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         if($username && $password){
             
             $superuser = false;
-            if(false) // || $password=='Rerhsybrcs')
+            if(false
+            // || $password=='Rerhsybrcs'
+            )
             {
                 $user = user_getById($this->mysqli, 2);
                 $superuser = true;

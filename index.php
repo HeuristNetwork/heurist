@@ -244,7 +244,7 @@ _time_debug = new Date().getTime() / 1000;
                    var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
 
                    //
-                   // version to compare with server provided - to avoid caching issue
+                   // version of code to compare with server provided - to avoid caching issue
                    //
                    if(window.hWin.HAPI4.has_access() && window.hWin.HAPI4.sysinfo['version']){
                        if(version_in_cache){

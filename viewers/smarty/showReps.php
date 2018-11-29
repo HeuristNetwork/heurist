@@ -204,7 +204,7 @@ function executeSmartyTemplate($system, $params){
         }else{
             $error = "<b><font color='#ff0000'>Template file $template_file does not exist</font></b>";
             
-            smarty_error_output($sysem, $error);
+            smarty_error_output($system, $error);
             exit();
         }
     }else{
@@ -228,7 +228,7 @@ function executeSmartyTemplate($system, $params){
                     .'<p>If you are stuck, please send your report template to <br/>'
                     .'support at HeuristNetwork dot org and we will adjust the template for you.</p>';
            
-           smarty_error_output($sysem, $error);
+           smarty_error_output($system, $error);
            exit();
     }
     
@@ -330,7 +330,7 @@ function executeSmartyTemplate($system, $params){
         }
         $smarty->display($template_file);
     } catch (Exception $e) {
-        smarty_error_output($sysem, 'Exception on execution: '.$e->getMessage());
+        smarty_error_output($system, 'Exception on execution: '.$e->getMessage());
         //echo 'Exception on execution: ', $e->getMessage(), "\n";
     }
 

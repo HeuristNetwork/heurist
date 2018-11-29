@@ -125,7 +125,7 @@ $is_csv = (@$_REQUEST['html']!=1);
                     .$db_name.'.recDetails WHERE  dtl_DetailTypeID='.$row[3];                
                 $rec_usage = mysql__select_value($mysqli, $query);    
             }else{
-                $rec_usage = '';
+                $rec_usage = 'not determined';
             }
             
             
