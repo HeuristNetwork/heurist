@@ -143,18 +143,32 @@ function outputXML($system, $data, $params){
         return;
     }
     
+    $include_term_label_and_code =  (@$params['prefs']['include_term_label_and_code']==1);
+    
     $fields = @$params['prefs']['fields'];
     $details = array();
     
     $rtStructs = dbs_GetRectypeStructures($system, null, 2);
     $idx_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
+
+    if($include_term_label_and_code){
+        $rtTerms = dbs_GetTerms($system);
+        $idx_term_label = $rtTerms['fieldNamesToIndex']['trm_Label'];
+        $idx_term_code = $rtTerms['fieldNamesToIndex']['trm_Code'];
+        $rtTerms = $rtTerms['termsByDomainLookup']['enum'];
+    }
     
     //create header
     $any_rectype = null;
     $headers = array();
     if($fields){
         foreach($fields as $rt=>$flds){
+            
+            //always include ID field into output
+            if($flds[0]!='rec_ID') array_unshift($flds, 'rec_ID');
+            $fields[$rt] = $flds;
+            
             $details[$rt] = array();
             $headers[$rt] = array();
             foreach($flds as $dt_id){
@@ -171,10 +185,12 @@ function outputXML($system, $data, $params){
                     
                     //get field name from structure
                     $field_name = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_name];
+                    $field_type = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
                     if($constr_rt_id>0){
                         $field_name = $field_name.' ('.$rtStructs['names'][$constr_rt_id].') H-ID';
                     }
                 }else{
+                    $field_type = null;
                     
                     if($dt_id=='rec_ID'){
                         if($rt>0){
@@ -189,6 +205,10 @@ function outputXML($system, $data, $params){
                 }
     
                 array_push($headers[$rt], $field_name);            
+                if($include_term_label_and_code && $field_type=='enum'){
+                    array_push($headers[$rt], $field_name.' (Label)');            
+                    array_push($headers[$rt], $field_name.' (Code)' );            
+                }
             }
         }
     }
@@ -249,6 +269,8 @@ function outputXML($system, $data, $params){
         $record_row = array();
         foreach($fields[$rty_ID] as $dt_id){
             
+            $enum_label = array();
+            $enum_code = array();
             $constr_rt_id = 0;
             if(strpos($dt_id,':')>0){ //for constrained resource fields
                 list($dt_id, $constr_rt_id) = explode(':', $dt_id);
@@ -292,6 +314,13 @@ function outputXML($system, $data, $params){
                             foreach($values as $val){
                                  $vals[] = temporalToHumanReadableString(trim($val));
                             }                        
+                    }else if($include_term_label_and_code && $dt_type=='enum'){
+                        
+                            foreach($values as $val){
+                                $enum_label[] = @$rtTerms[$val][$idx_term_label];
+                                $enum_code[] = @$rtTerms[$val][$idx_term_code];
+                            }                        
+                            $vals = $values;
                     }else{
                         $vals = $values;
                     }
@@ -311,6 +340,12 @@ function outputXML($system, $data, $params){
             if($value==null) $value = '';
             
             $record_row[] = $value;
+            
+            if(count($enum_label)>0){
+                $record_row[] = implode($csv_mvsep,$enum_label);    
+                $record_row[] = implode($csv_mvsep,$enum_code);    
+            }
+            
         }//for fields
         
         // write the data to csv

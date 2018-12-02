@@ -203,7 +203,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 'csv_enclosure':  this.element.find('#quoteSelect').val(),
                 'csv_mvsep':'|',
                 'csv_linebreak':'nix', //not used at tne moment
-                'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked')
+                'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked'),
+                'include_term_label_and_code': this.element.find('#cbIncludeTermLabels').is(':checked')?1:0
                 }};
                 
             if(rec_RecTypeID>0){
