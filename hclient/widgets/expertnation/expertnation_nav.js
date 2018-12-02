@@ -63,6 +63,8 @@ $.widget( "heurist.expertnation_nav", {
 
     DT_GEO: 28,
     DT_PARENT_PERSON: 16,
+    DT_MEDIAFILE: 38,
+    DT_THUMBNAIL: 39,
     DT_EVENT_TYPE: 77,
     DT_PLACE: 78,
     DT_DEGREE: 80,
@@ -220,7 +222,7 @@ $.widget( "heurist.expertnation_nav", {
     
     _constructNavigationMenu: function( recordset ){
     
-             
+
         $("body").on("contextmenu",function(e){
             return false;
         });        
@@ -1216,6 +1218,8 @@ $.widget( "heurist.expertnation_nav", {
     //
     getTimelineByPersonAndPlace: function(person, placeID){
         
+            var isAdleaide = (window.hWin.HAPI4.sysinfo['layout']=='UAdelaide');
+        
             var that = this;
             var timeline = []; //{year: , date: , story: , descrption:}
             var mapids = [];
@@ -1438,8 +1442,19 @@ $.widget( "heurist.expertnation_nav", {
                         
                         var eventDate = that.__getEventDates(record);
                         var sEventType = that.__getTerm(termID);
-                        
                         var place = that.__getPlace(record, 0);
+                        var sEventLinks = that.recset.fld(record, 2898); //other organization or person linked to this event
+                        if(sEventLinks==null) sEventLinks = '';
+
+                        var sEventNotes = that.recset.fld(record, 3); //notes 
+                        if(sEventNotes==null || !isAdleaide){
+                            sEventNotes = '';
+                        }else{
+                            sEventNotes = '<div><i>' + sEventNotes + '</i></div>'
+                        }
+                            
+                        
+                        //for mapping
                         if(termID==4254 || termID==3694){ //married, lived
                         
                             if(place.hasGeo){
@@ -1454,26 +1469,29 @@ $.widget( "heurist.expertnation_nav", {
                             }
                         }
                         
-                        var sEventNotes = that.recset.fld(record, 2898); //organization or person linked to this event
-                        if(sEventNotes==null) sEventNotes = '';
-                        
                         if(placeID==0 || window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0){
                             
-                            if(termID==3302){
+                            if(termID==3302){  //Enlisted
                                 enlistedDateOrder = that.__getYear(eventDate.date, ord);
                             }
 
                             var year_main = that.__getYear(eventDate.date, ord);
                             var year_end = that.__getYear(eventDate.date_end, year_main);
                             
+                            //type of event - other person/organisation - place - date and then Notes on following line).
                             timeline.push({year: year_main,
                                 year_end: year_end, 
                                 date: that.__getYear(eventDate.date), 
                                 date2: eventDate.date,
                                 eventTypeID: termID,
-                                story: sEventType.toLowerCase()+' '+sEventNotes,
+                                story: sEventType.toLowerCase()+' '+sEventLinks,
                                                     //that.__getYear(eventDate.date, ord)+'  '+
-                                description: sEventType+' '+sEventNotes+' '+(place.link?place.link:'')+' '+eventDate.desc });//', '
+                                description: sEventType+' '+sEventLinks+' '+(place.link?place.link:'')
+                                    +' '+eventDate.desc + sEventNotes});//', '
+                        
+                               
+                                
+                                
                         }
                     }
                 }
@@ -1875,7 +1893,7 @@ $.widget( "heurist.expertnation_nav", {
                 if(!that.isempty(fval)){
                     var record = that.recset.getById(fval[idx]);
                     
-                    var nonce = that.recset.fld(record, 38);
+                    var nonce = that.recset.fld(record, that.DT_MEDIAFILE);
                     if(nonce) nonce = nonce[0];
                     
                     var scnt = (fval.length>1)?('#'+(1+parseInt(idx))):'';
@@ -1930,7 +1948,7 @@ $.widget( "heurist.expertnation_nav", {
                 if(!that.isempty(fval)){
                     var record = that.recset.getById(fval[idx]);
                     var filename = that.recset.fld(record, 62);
-                    var obf = that.recset.fld(record, 38);
+                    var obf = that.recset.fld(record, that.DT_MEDIAFILE);
                     var img_title = that.recset.fld(record, 'rec_Title');
                     if( window.hWin.HEURIST4.util.isempty(img_title) ) img_title = '';
                     
@@ -1940,12 +1958,23 @@ $.widget( "heurist.expertnation_nav", {
                     }else{
                         img_description = img_title;
                     }
-                    
-                    var isScan = (that.recset.fld(record, 'rec_RecTypeID')==144);
-//console.log(record);
-                    var stitle = isScan?'Document scan':('Photograph of '+fullName);
+                    img_description = window.hWin.HEURIST4.util.htmlEscape( img_description );
+
+                    var stitle;                    
+                    var nonce_thumb = null;
                     var ext = that.recset.fld(record, 64);
                     if(ext==null) ext = '';
+                    
+                    var isScan = (that.recset.fld(record, 'rec_RecTypeID')==144 || ext.toLowerCase()=='pdf');
+                    
+                    if(isScan){
+                        nonce_thumb = that.recset.fld(record, that.DT_THUMBNAIL); //thumbnail
+                        if(nonce_thumb) nonce_thumb = nonce_thumb[0];
+                        stitle = 'Document scan';
+                    }else{
+                        stitle = 'Photograph of '+fullName;
+                    }
+
                     //var slightbox = (ext.toLowerCase()=='pdf')?' target="_blank"':'data-fancybox="profile-images" data-lightbox="profile-images"';
                     var slightbox = 'data-fancybox="profile-images" data-lightbox="profile-images" '
                                     +' data-caption="' + img_description + '"';
@@ -1983,7 +2012,7 @@ $.widget( "heurist.expertnation_nav", {
                             + href +'">'
                             + '<img class="bor-thumbnail" src="' 
                             + window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database 
-                            + '&thumb=' + obf[0]
+                            + '&thumb=' + (nonce_thumb?nonce_thumb:obf[0])
                             + '" alt="'+stitle+'" style="max-height:100px;max-width:100px;">'
                         +'</a>';      
                                       
@@ -2342,7 +2371,9 @@ $.widget( "heurist.expertnation_nav", {
                 
     },
 
-
+    //
+    // for mapping
+    //
     __setPlaceDesc: function(place, icon, description){
 
         for(var i=0;i<place.ids.length;i++){
