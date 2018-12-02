@@ -1080,7 +1080,8 @@ $.widget( "heurist.resultList", {
         var recID = fld('rec_ID');
         var rectypeID = fld('rec_RecTypeID');
         var bkm_ID = fld('bkm_ID');
-        var recTitle = window.hWin.HEURIST4.util.htmlEscape(fld('rec_Title'));
+        var recTitle = fld('rec_Title'); 
+        var recTitle_strip = window.hWin.HEURIST4.util.htmlEscape(fld('rec_Title'));
         var recIcon = fld('rec_Icon');
         if(!recIcon) recIcon = rectypeID;
         recIcon = window.hWin.HAPI4.iconBaseURL + recIcon + '.png';
@@ -1157,9 +1158,9 @@ $.widget( "heurist.resultList", {
         + '</div>'
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
-        + '<div title="dbl-click to edit : '+recTitle+'" class="recordTitle">'
+        + '<div title="dbl-click to edit : '+recTitle_strip+'" class="recordTitle">'
         +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
-            + recTitle + "</a>") :recTitle)
+            + recTitle_strip + "</a>") :recTitle)
         + '</div>'
 
         // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
