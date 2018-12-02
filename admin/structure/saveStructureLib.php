@@ -1232,10 +1232,10 @@ copy_IconAndThumb_FromLibrary
         $dtCount = mysql__select_value($mysqli, "select count(dtl_ID) from recDetails where dtl_DetailTypeID =$dtyID");
 		if ($dtCount) { // there are records existing of this rectype, need to return error and the recIDs
 			$ret['error'] = "You cannot delete field type $dtyID as it is used $dtCount times in the data";
-			$ret['dtlIDs'] = array();
+			/*$ret['dtlIDs'] = array();
 			while ($row = $res->fetch_row()) {
 				array_push($ret['dtlIDs'], $row[0]);
-			}
+			}*/
 		} else { // no records ok to delete this rectype. Not that this should cascade for all dependent definitions
 			$query = "delete from defDetailTypes where dty_ID = $dtyID";
 			$res = $mysqli->query($query);
