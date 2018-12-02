@@ -26,6 +26,7 @@ define('PDIR','../../');  //need for proper path to js and css
     
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
+$is_csv = (@$_REQUEST['csv']==1);
 
 if( $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
     print $response = $system->getError()['message'];
@@ -94,8 +95,79 @@ function dirsize($dir)
     return $size;
 }
 
-?>
+if($is_csv){                                                  
+    $fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
+    if (false === $fd) {
+        die('Failed to create temporary file');
+    } 
+    $record_row = array('Name','Reg ID','Records','Values','DB Vsn','Modified','Access','Owner','eMail','Institution');
+    fputcsv($fd, $record_row, ',', '"');
+}else{
+    $arr_databases = array();
+}
 
+$i = 0;
+foreach ($dbs as $db){
+
+    //ID  Records     Values    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
+
+    $record_row = array (substr($db, 4),
+    mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
+    mysql__select_val("select count(*) from ".$db.".Records"),
+    mysql__select_val("select count(*) from ".$db.".recDetails"),
+    /* Removed Ian 10/12/16 to speed up - very slow on USyd server with very large # of DBs. See additional comment-outs below
+    mysql__select_val("select count(*) from ".$db.".defRecTypes").",".
+    mysql__select_val("select count(*) from ".$db.".defDetailTypes").",".
+    mysql__select_val("select count(*) from ".$db.".defTerms").",".
+    mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='workgroup'").",".
+    mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='user'").",".
+    */
+    mysql__select_val("select concat_ws('.',cast(sys_dbVersion as char),cast(sys_dbSubVersion as char)) "
+        ." from ".$db.".sysIdentification where 1"),
+    /*
+    mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1)"
+    ." FROM information_schema.tables where table_schema='".$db."'").",".
+    round( (dirsize(HEURIST_FILESTORE_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
+    */
+    mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
+    mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps") );
+    
+
+    $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
+        "FROM ".$db.".sysUGrps where ugr_id=2");
+        
+    if($is_csv){    
+        $record_row[] = $owner[0];
+        $record_row[] = $owner[1];
+        $record_row[] = $owner[2];
+        fputcsv($fd, $record_row, ',', '"');
+    }else{
+        $record_row[] = implode(' ', $owner);
+        $record_row[] = $sysadmin;
+        $arr_databases[] = '"'.implode('","', $record_row).'"';
+    }
+    
+    
+    $i++;
+    //if($i>100) break;
+}//foreach
+
+if($is_csv){
+
+        $filename = 'ServerUsageStatistics.csv';
+        
+        rewind($fd);
+        $out = stream_get_contents($fd);
+        fclose($fd);
+        
+        header('Content-Type: text/csv');
+        header('Content-disposition: attachment; filename='.$filename);
+        header('Content-Length: ' . strlen($out));
+        
+        exit($out);
+    
+}else{
+?>
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -174,44 +246,9 @@ function dirsize($dir)
             var showTimer,hideTimer;
             var arr = [
                 <?php
-                $com = "";
-                $i = 0;
-                foreach ($dbs as $db){
-
-                    $owner = mysql__select_val("SELECT concat(ugr_FirstName,' ',ugr_LastName,' ',ugr_eMail,' ',ugr_Organisation) ".
-                        "FROM ".$db.".sysUGrps where ugr_id=2");
-                    $owner = str_replace("'","\'",$owner);
-                    $owner = str_replace("\n","",$owner);
-
-                    //ID  Records     Values    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
-
-                    print $com."['". substr($db, 4) ."',".
-                    mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1").",".
-                    mysql__select_val("select count(*) from ".$db.".Records").",".
-                    mysql__select_val("select count(*) from ".$db.".recDetails").",".
-                    /* Removed Ian 10/12/16 to speed up - very slow on USyd server with very large # of DBs. See additional comment-outs below
-                    mysql__select_val("select count(*) from ".$db.".defRecTypes").",".
-                    mysql__select_val("select count(*) from ".$db.".defDetailTypes").",".
-                    mysql__select_val("select count(*) from ".$db.".defTerms").",".
-                    mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='workgroup'").",".
-                    mysql__select_val("select count(*) from ".$db.".sysUGrps where ugr_Type='user'").",".
-                    */
-                    mysql__select_val("select concat_ws('.',cast(sys_dbVersion as char),cast(sys_dbSubVersion as char)) "
-                        ." from ".$db.".sysIdentification where 1").",".
-                    /*
-                    mysql__select_val("SELECT Round(Sum(data_length + index_length) / 1024 / 1024, 1)"
-                    ." FROM information_schema.tables where table_schema='".$db."'").",".
-                    round( (dirsize(HEURIST_FILESTORE_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
-                    */
-                    "'".mysql__select_val("select max(rec_Modified)  from ".$db.".Records")."','".
-                    mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps")."','".
-                    $owner."','".
-                    $sysadmin."']";
-
-                    $com = ",\n";
-                    $i++;
-                    //if($i>100) break;
-                }//foreach
+                    foreach ($arr_databases as $db) {
+                        print '['.$db.'],'.PHP_EOL;
+                    }
                 ?>
             ];
 
@@ -437,3 +474,6 @@ function dirsize($dir)
             <?php } ?>
     </body>
 </html>
+<?php 
+}
+?>
