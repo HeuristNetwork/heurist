@@ -277,33 +277,7 @@ $.widget( "heurist.recordAction", {
     //
     //
     doAction: function(){
-    
-            return;
-        
-            var request = {
-                'a'          : 'delete',
-                'entity'     : this.options.entity.entityName,
-                'request_id' : window.hWin.HEURIST4.util.random(),
-                'recID'      : this._currentEditID                     
-                };
-                
-                var that = this;                                                
-                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-
-                            var recID = that._currentEditID;
-                            if(that.options.use_cache){
-                                that._cachedRecordset.removeRecord( recID );
-                            }
-                            that._afterActionEvenHandler( recID );
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-        
+        return;
     },
 
     //  -----------------------------------------------------

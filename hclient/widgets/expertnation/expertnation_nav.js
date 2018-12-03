@@ -465,8 +465,7 @@ $.widget( "heurist.expertnation_nav", {
                                         
                                         window.open('http://sydney.edu.au/arms/archives/beyond1914_resources.shtml','_blank');
                                         
-                                        return false;
-                                        
+                                        /* TEMP REMARKED as we use static resource page instead of smarty report
                                         
                                         //that.history.push({page_name:'search'});
                                         
@@ -484,18 +483,13 @@ $.widget( "heurist.expertnation_nav", {
                                                 + (rep_id=='general'?5:4)
                                                 + '&db='+window.hWin.HAPI4.database;
                                                 
-                                        /*var repurl = window.hWin.HAPI4.baseURL
-                                            +'viewers/smarty/showReps.php?db='+window.hWin.HAPI4.database
-                                            +'&w=a&q=t%3A71%20f%3A29609%3A'
-                                            +(rep_id=='general'?6684:6685)
-                                            +'&h4=1&publish=1&debug=0&template=Beyond%201914%20Resources%20List.tpl'*/                                                          
                                         ele.load(repurl,
                                         function(){
                                             $('.bor-page-loading').hide();
                                             ele.show();
                                         });
                                         hdoc.scrollTop(0);
-                        
+                                        */
                     }});
                 
             var resource_btn = menu_ele.find('.nav-link[data-id="resources"]');
@@ -2515,7 +2509,7 @@ $.widget( "heurist.expertnation_nav", {
     //
     stepBack: function(){
         
-        console.log('step back');      
+        //console.log('step back');      
         if(this.historyNav.length>1){
             var toidx = ((this.currentNavIdx==0)?this.historyNav.length:this.currentNavIdx)-1;
             var nav = this.historyNav[toidx];
@@ -2523,14 +2517,14 @@ $.widget( "heurist.expertnation_nav", {
             this._setOptions( nav );
         }
         
-        
-        return; //ignore
+        /*ignore
         
         if(this.history.length>1){
                 this.history.pop(); //current page
                 var step = this.history.pop(); //previous
                 this._setOptions(step);
         }
+        */
     },
     
     //

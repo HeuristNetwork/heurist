@@ -650,21 +650,10 @@ $.widget( "heurist.resultList", {
 
             if(this.max_page>1) this.span_pagination.css({'display':'inline-block'});
             this.span_info.css({'display':'inline-block'});
-            return; //NOT HIDE ANYMORE - we use wrap now
-
+            
+            /*NOT HIDE ANYMORE - we use wrap now
             var w = this.element.width();
-            /* pagination has more priority than reccount
-            if ( w < 380 || (w < 440 && this.max_page>1) ) {
-            this.span_info.hide();
-            }else{
-            this.span_info.show();
-            }
-            if ( w < 380 ) {
-            this.span_pagination.hide();
-            }else{
-            this.span_pagination.show();
-            }
-            */
+
             // pagination has LESS priority than reccount
             if ( w > 440 && this.max_page>1) {
                 this.span_pagination.show();
@@ -676,8 +665,8 @@ $.widget( "heurist.resultList", {
             }else{
                 this.span_info.hide();
             }
-
             this._updateInfo();
+            */
         }else{
             this.span_pagination.hide();
             this.span_info.hide();
