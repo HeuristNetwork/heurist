@@ -38,6 +38,7 @@
     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
     require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
+    require_once(dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
     
     $response = array();
@@ -143,14 +144,20 @@ function outputXML($system, $data, $params){
         return;
     }
     
-    $include_term_label_and_code =  (@$params['prefs']['include_term_label_and_code']==1);
+    $include_term_label_and_code = true;
+    $include_term_code = (@$params['prefs']['include_term_label_and_code']==1);
+    $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
     
     $fields = @$params['prefs']['fields'];
-    $details = array();
+    $details = array();  //array of detail fields included into output
+    $relmarker_details = array(); //relmarker fields included into output
     
     $rtStructs = dbs_GetRectypeStructures($system, null, 2);
     $idx_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
+    $idx_term_tree = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
+    $idx_term_nosel = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+    
 
     if($include_term_label_and_code){
         $rtTerms = dbs_GetTerms($system);
@@ -171,24 +178,31 @@ function outputXML($system, $data, $params){
             
             $details[$rt] = array();
             $headers[$rt] = array();
+            $relmarker_details[$rt] = array();
+            
             foreach($flds as $dt_id){
                 
                 $constr_rt_id = 0;
                 if(strpos($dt_id,':')>0){ //for constrained resource fields
-                //example author:person or organization
+                    //example author:person or organization
                     list($dt_id, $constr_rt_id) = explode(':',$dt_id);
                 }
                 
                 if(is_numeric($dt_id) && $dt_id>0){
                     
-                    array_push($details[$rt], $dt_id);
-                    
                     //get field name from structure
                     $field_name = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_name];
                     $field_type = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
                     if($constr_rt_id>0){
+                        $field_name_title = $field_name.'('.$rtStructs['names'][$constr_rt_id].' Title)';
                         $field_name = $field_name.' ('.$rtStructs['names'][$constr_rt_id].') H-ID';
                     }
+                    if($field_type=='relmarker'){
+                        $relmarker_details[$rt][$dt_id] = $constr_rt_id; 
+                    }else{
+                        array_push($details[$rt], $dt_id);    
+                    }
+                    
                 }else{
                     $field_type = null;
                     
@@ -207,7 +221,9 @@ function outputXML($system, $data, $params){
                 array_push($headers[$rt], $field_name);            
                 if($include_term_label_and_code && $field_type=='enum'){
                     array_push($headers[$rt], $field_name.' (Label)');            
-                    array_push($headers[$rt], $field_name.' (Code)' );            
+                    if($include_term_code) array_push($headers[$rt], $field_name.' (Code)' );            
+                }else if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
+                    array_push($headers[$rt], $field_name_title);            
                 }
             }
         }
@@ -262,15 +278,29 @@ function outputXML($system, $data, $params){
         }
         
         if(count(@$details[$rty_ID])>0){
+            //fills $record
             recordSearchDetails($system, $record, $details[$rty_ID]);
+        }
+        if(count(@$relmarker_details[$rty_ID])>0){
+            $related_recs = recordSearchRelated($system, array($recID), 0);
+            if(@$related_recs['status']==HEURIST_OK){
+                $related_recs = $related_recs['data'];
+            }else{
+                $related_recs = array();    
+            }
+        }else{
+            $related_recs = array();
         }
         
         //prepare output array
         $record_row = array();
         foreach($fields[$rty_ID] as $dt_id){
             
+            //suppl.fields for enum and resource fields
             $enum_label = array();
             $enum_code = array();
+            $resource_titles = array();
+            
             $constr_rt_id = 0;
             if(strpos($dt_id,':')>0){ //for constrained resource fields
                 list($dt_id, $constr_rt_id) = explode(':', $dt_id);
@@ -278,57 +308,146 @@ function outputXML($system, $data, $params){
             
             if(is_numeric($dt_id) && $dt_id>0){
                 
-                $values = @$record['details'][$dt_id];
-                if($values){
-                    
-                    $dt_type = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_dtype];
-                    
-                    //$values = array_values($values); //get plain array
+                if ($constr_rt_id>0 && @$relmarker_details[$rty_ID][$dt_id]==$constr_rt_id) {  //relation
+                
                     $vals = array();
                     
-                    if($dt_type=="resource"){
-                        
-                            //if record type among selected -  add record to list to be exported
-                            //otherwise export only ID  as field "Rectype H-ID"
-                            foreach($values as $val){
-                                if( (!($constr_rt_id>0)) || $constr_rt_id==$val['type'] ){ //unconstrained or exact required rt
-                                    
-                                    if($fields[$val['type']]){ //record type exists in output
-                                        if(!in_array($val['id'], $records)){
-                                                 array_push($records, $val['id']);  //add to be exported  
-                                        }
+                    //if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))
+                
+                    foreach($related_recs['direct'] as $relation){
+                        $target_rt = $related_recs['headers'][$relation->targetID][1];
+                        if( $constr_rt_id==$target_rt && $relation->trmID>0){ //contrained rt and allowed relation type
+                            
+                            $all_terms = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_tree];
+                            $nonsel_terms = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_nosel];
+                            $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);    
+                            
+                            if($is_allowed){
+                                //if record type among selected -  add record to list to be exported
+                                //otherwise export only ID  as field "Rectype H-ID"
+                                if($fields[$target_rt]){ //record type exists in output
+                                    if(!in_array($relation->targetID, $records)){
+                                             array_push($records, $relation->targetID);  //add to be exported  
                                     }
-                                    $vals[] = $val['id'];
+                                }
+                                $vals[] = $relation->targetID;
+                                
+                                if($include_resource_titles){
+                                     $resource_titles[] = $related_recs['headers'][$relation->targetID][0];
                                 }
                             }
+                        }
+                    }//foreach
+                    
+                    //reverse will work only in case source record has detail id as in target
+                    foreach($related_recs['reverse'] as $relation){
+                        $source_rt = $related_recs['headers'][$relation->sourceID][1];
+                        if( $constr_rt_id==$source_rt && $relation->trmID>0
+                            && @$rtStructs['typedefs'][$source_rt]['dtFields'][$dt_id]
+                           ){ //contrained rt and allowed relation type
                             
-                    }else if($dt_type=='geo'){
-                            foreach($values as $val){
-                                 $vals[] = $val['geo']['wkt'];
+                            $all_terms = $rtStructs['typedefs'][$source_rt]['dtFields'][$dt_id][$idx_term_tree];
+                            $nonsel_terms = $rtStructs['typedefs'][$source_rt]['dtFields'][$dt_id][$idx_term_nosel];
+                            $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);    
+                            
+                            if($is_allowed){
+                                //if record type among selected -  add record to list to be exported
+                                //otherwise export only ID  as field "Rectype H-ID"
+                                if($fields[$source_rt]){ //record type exists in output
+                                    if(!in_array($relation->sourceID, $records)){
+                                             array_push($records, $relation->sourceID);  //add to be exported  
+                                    }
+                                }
+                                $vals[] = $relation->sourceID;
+                                
+                                if($include_resource_titles){
+                                     $resource_titles[] = $related_recs['headers'][$relation->sourceID][0];
+                                }
                             }
-                    }else if($dt_type=='file'){
-                            foreach($values as $val){
-                                 $vals[] = $val['file']['ulf_ObfuscatedFileID'];
-                            }                        
-                    }else if($dt_type=='date'){
-                            foreach($values as $val){
-                                 $vals[] = temporalToHumanReadableString(trim($val));
-                            }                        
-                    }else if($include_term_label_and_code && $dt_type=='enum'){
-                        
-                            foreach($values as $val){
-                                $enum_label[] = @$rtTerms[$val][$idx_term_label];
-                                $enum_code[] = @$rtTerms[$val][$idx_term_code];
-                            }                        
-                            $vals = $values;
-                    }else{
-                        $vals = $values;
+                        }
+                    }                    
+                
+                    $value = implode($csv_mvsep, $vals);
+                    
+                    if($include_resource_titles && count($vals)<1){ //empty value
+                        $resource_titles[] = '';
                     }
                     
-                    $value = implode($csv_mvsep, $vals);
                 }else{
-                    $value = null;
+                
+                    $dt_type = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_dtype];
+                        
+                    $values = @$record['details'][$dt_id];
+                    
+                    if($values){
+                        
+                        //$values = array_values($values); //get plain array
+                        $vals = array();
+                        
+                        if($dt_type=="resource"){
+                            
+                                //if record type among selected -  add record to list to be exported
+                                //otherwise export only ID (and optionally title)  as field "Rectype H-ID"
+                                foreach($values as $val){
+                                    if( (!($constr_rt_id>0)) || $constr_rt_id==$val['type'] ){ //unconstrained or exact required rt
+                                        
+                                        if($fields[$val['type']]){ //record type exists in output
+                                            if(!in_array($val['id'], $records)){
+                                                     array_push($records, $val['id']);  //add to be exported  
+                                            }
+                                        }
+                                        $vals[] = $val['id'];
+                                        
+                                        if($include_resource_titles){
+                                             $resource_titles[] = $val['title'];
+                                        }
+                                    }
+                                }
+                        }else if($dt_type=='geo'){
+                                foreach($values as $val){
+                                     $vals[] = $val['geo']['wkt'];
+                                }
+                        }else if($dt_type=='file'){
+                                foreach($values as $val){
+                                     $vals[] = $val['file']['ulf_ObfuscatedFileID'];
+                                }                        
+                        }else if($dt_type=='date'){
+                                foreach($values as $val){
+                                     $vals[] = temporalToHumanReadableString(trim($val));
+                                }                        
+                        }else if($include_term_label_and_code && $dt_type=='enum'){
+                            
+                                if(count($values)>0){
+                                    foreach($values as $val){
+                                        $enum_label[] = @$rtTerms[$val][$idx_term_label]?$rtTerms[$val][$idx_term_label]:'';
+                                        $enum_code[] = @$rtTerms[$val][$idx_term_code]?$rtTerms[$val][$idx_term_code]:'';
+                                    }                        
+                                }else{
+                                    $enum_label[] = '';
+                                    $enum_code[] = ''; 
+                                }
+                                $vals = $values;
+                        }else{
+                            $vals = $values;
+                        }
+                        
+                        $value = implode($csv_mvsep, $vals);
+                    }else{
+                        $value = null;
+                    }
+                    
+                    //empty values
+                    if($value == null){
+                        if($include_term_label_and_code && $dt_type=='enum'){
+                            $enum_label[] = '';
+                            $enum_code[] = ''; 
+                        }else if($include_resource_titles && $dt_type=='resource'){
+                            $resource_titles[] = $val['title'];
+                        }
+                    }
+                    
                 }
+                
             }else if ($dt_id=='rec_Tags'){
                 
                 $value = recordSearchPersonalTags($system, $recID);
@@ -337,13 +456,15 @@ function outputXML($system, $data, $params){
             }else{
                 $value = @$record[$dt_id]; //from record header
             }
-            if($value==null) $value = '';
+            if($value==null) $value = '';                       
             
             $record_row[] = $value;
             
             if(count($enum_label)>0){
                 $record_row[] = implode($csv_mvsep,$enum_label);    
-                $record_row[] = implode($csv_mvsep,$enum_code);    
+                if($include_term_code) $record_row[] = implode($csv_mvsep,$enum_code);    
+            }else if (count($resource_titles)>0){
+                $record_row[] = implode($csv_mvsep,$resource_titles);    
             }
             
         }//for fields
@@ -353,9 +474,17 @@ function outputXML($system, $data, $params){
         
     }//for records
     
+    //calculate number of streams with columns more than one
+    $count_streams = 0;
+    foreach($headers as $rty_ID => $columns){
+        if(count($columns)>1){
+            $count_streams++;        
+        }
+    }
+    
     $error_log[] = print_r($rt_counts, true);
         
-    if(count($streams)<2){
+    if($count_streams<2){
         
         $out = false;
         $rty_ID = 0;
@@ -402,6 +531,7 @@ function outputXML($system, $data, $params){
         if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
             array_push($error_log, "Can not create zip $destination");    
         }else{
+            $is_first = true;
         
             foreach($streams as $rty_ID => $fd){
                 
@@ -411,13 +541,18 @@ function outputXML($system, $data, $params){
                     // return to the start of the stream
                     rewind($fd);
                     
-                    $content = stream_get_contents($fd);
+                    if($is_first || count($headers[$rty_ID])>1){
+                        $is_first = false;
+                    
+                        $content = stream_get_contents($fd);
 
-                    if($content===false || strlen($content)==0){
-                        array_push($error_log, "Stream for record type $rty_ID is empty");
-                    }else{
-                        // add the in-memory file to the archive, giving a name
-                        $zip->addFromString('rectype-'.$rty_ID.'.csv',  $content);
+                        if($content===false || strlen($content)==0){
+                            array_push($error_log, "Stream for record type $rty_ID is empty");
+                        }else{
+                            // add the in-memory file to the archive, giving a name
+                            $zip->addFromString('rectype-'.$rty_ID.'.csv',  $content);
+                        }
+                        
                     }
                     //close the file
                     fclose($fd);
@@ -430,7 +565,6 @@ function outputXML($system, $data, $params){
             
             // close the archive
             $zip->close();
-        
         }
         
         if(@file_exists($destination)>0){

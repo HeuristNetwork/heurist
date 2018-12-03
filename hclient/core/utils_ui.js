@@ -394,7 +394,7 @@ window.hWin.HEURIST4.ui = {
     },
 
     //
-    //
+    // check taht given selectedTermID is among allowed termIDTree (except headerTermIDsList)
     //
     isTermInList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         

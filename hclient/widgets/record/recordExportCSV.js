@@ -204,7 +204,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 'csv_mvsep':'|',
                 'csv_linebreak':'nix', //not used at tne moment
                 'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked'),
-                'include_term_label_and_code': this.element.find('#cbIncludeTermLabels').is(':checked')?1:0
+                'include_term_label_and_code': this.element.find('#cbIncludeTermLabels').is(':checked')?1:0,
+                'include_resource_titles': this.element.find('#cbIncludeResourceTitles').is(':checked')?1:0
                 }};
                 
             if(rec_RecTypeID>0){

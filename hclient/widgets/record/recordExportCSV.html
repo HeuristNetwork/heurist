@@ -31,19 +31,13 @@
         </select>
     </div>
 </div>
-
-<div style="padding: 0.2em; min-width: 600px;" class="input">
-    <div class="header" style="padding: 0 16px 0 16px;"><label>Include field names as first output row:</label></div>
-    <div class="detailRow" style="padding-bottom:1em;">
-        <input type="checkbox" checked id="cbNamesAsFirstRow"/>
-    </div>
+<div style="display:block">
+    <label style="padding-right:2em;"><input type="checkbox" checked id="cbNamesAsFirstRow"/>Include field names as first output row</label>
     
-    <div class="header" style="padding: 0 16px 0 16px;"><label>Include terms labels and codes:</label></div>
-    <div class="detailRow" style="padding-bottom:1em;">
-        <input type="checkbox" checked id="cbIncludeTermLabels"/>
-    </div>
-</div>    
-
+    <label style="padding-right:2em;"><input type="checkbox" checked id="cbIncludeResourceTitles"/>Include titles for resource records</label>
+    
+    <label><input type="checkbox" checked id="cbIncludeTermLabels"/>Include term codes</label>
+</div>
 </fieldset>
 <!-- hidden form -->
 <form method="post" target="_blank" id="postform">

@@ -6,8 +6,18 @@
     *
     * recordSearchMinMax - Find minimal and maximal values for given detail type and record type
     * recordSearchFacets
+    * 
     * recordSearchRelated
+    * recordSearchPermissions
+    * recordGetRelationshipType
+    * recordGetLinkedRecords
+    * recordGetRelationship
+    * 
     * recordSearch
+    * recordSearchByID
+    * recordSearchDetails
+    * recordSearchPersonalTags
+    * 
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

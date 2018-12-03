@@ -117,7 +117,7 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
             }
         }
     }else{
-        
+        //take from store 
         $allowed_terms = self::$dtyIDDefs[$dtyID];
     }
     return $allowed_terms;
