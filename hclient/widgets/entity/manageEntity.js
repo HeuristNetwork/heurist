@@ -820,9 +820,10 @@ $.widget( "heurist.manageEntity", {
                 this._as_dialog.addClass('manageRecords');
             }
             
+            var helpURL = window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content';
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
                 null, //'prefs_'+this._entityName,
-                window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content', false);
+                helpURL, false);
             
         }
     },
@@ -1321,9 +1322,10 @@ $.widget( "heurist.manageEntity", {
                     });        
                     
                     //help and tips buttons on dialog header
+                    var helpURL = window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content';
                     window.hWin.HEURIST4.ui.initDialogHintButtons(this.editFormPopup,
                      null,  //  'prefs_'+this._entityName,
-                     window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content', false);
+                     helpURL, false);
                      
                 this._toolbar = this._edit_dialog.parent();     
                      

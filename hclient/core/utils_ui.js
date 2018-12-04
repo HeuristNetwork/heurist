@@ -1474,6 +1474,9 @@ window.hWin.HEURIST4.ui = {
     //
     initDialogHintButtons: function($dialog, button_container_id, helpcontent_url, hideHelpButton){
         
+        //IJ 2018-12-04 hide it! 
+        var hasContextHelp =  false && !window.hWin.HEURIST4.util.isempty(helpcontent_url);
+        
         var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
         if(titlebar.length==0){
             titlebar = $dialog.find(button_container_id);
@@ -1485,9 +1488,10 @@ window.hWin.HEURIST4.ui = {
                 +'<li data-level="0"><a><span class="ui-icon"/>Expert</a></li><ul>')
                 .width(150).hide().appendTo($dialog);
             
-        var $help_button = $('<div>').button({icons: { primary: "ui-icon-book" }, label:'Show help hints', text:false})
+        var $help_button = $('<div>').button({icons: { primary: "ui-icon-book" }, 
+                    label:'Set experience level for user interface', text:false})
                     .addClass('dialog-title-button')
-                    .css({'right':'48px'})
+                    .css({'right':hasContextHelp?'48px':'26px'})
                     .appendTo(titlebar)
                     .on('click', function(event){
                            //show popup menu 
@@ -1528,7 +1532,7 @@ window.hWin.HEURIST4.ui = {
            //window.hWin.HEURIST4.ui.switchHintState(usrPrefKey, $dialog, false);         
         }
 
-        if(helpcontent_url){                    
+        if(hasContextHelp){                    
             var $info_button = $('<div>')
                     .addClass('dialog-title-button')
                     .css({'right':'26px'})
@@ -1637,24 +1641,32 @@ window.hWin.HEURIST4.ui = {
                             }
 
                            
-                            $helper_div.load(content_url, function(){
+                            $helper_div.load(content_url, function(response, status, xhr){
+                                
+                                if(status=='error'){
+                                    
+                                    window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found');
+                                    
+                                }else{
 
-                                var div_height = Math.min(500, $(document.body).height()-$help_button.position().top);
-                                var div_width  = Math.min(700, $(document.body).width() *0.8);
-                               
-                                var title = (content_title)?content_title:'Heurist context help';
-                                var head = $helper_div.find('#content>h2');
-                                if(head.length==1){
-                                    title = head.text();
-                                    head.empty();
+                                    var div_height = Math.min(500, $(document.body).height()-$help_button.position().top);
+                                    var div_width  = Math.min(700, $(document.body).width() *0.8);
+                                   
+                                    var title = (content_title)?content_title:'Heurist context help';
+                                    var head = $helper_div.find('#content>h2');
+                                    if(head.length==1){
+                                        title = head.text();
+                                        head.empty();
+                                    }
+                                
+                                    if(title!='') $helper_div.dialog('option','title',title);
+                                    $helper_div.dialog('option', {width:div_width, height: div_height, position: divpos});
+                                    $helper_div.dialog( "open" );
+                                    setTimeout(function(){
+                                            $helper_div.find('#content').scrollTop(1);
+                                    }, 1000);
+                                
                                 }
-                            
-                                if(title!='') $helper_div.dialog('option','title',title);
-                                $helper_div.dialog('option', {width:div_width, height: div_height, position: divpos});
-                                $helper_div.dialog( "open" );
-                                setTimeout(function(){
-                                        $helper_div.find('#content').scrollTop(1);
-                                }, 1000);
                             });
                         }
                  });

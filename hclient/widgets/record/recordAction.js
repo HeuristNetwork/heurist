@@ -252,8 +252,8 @@ $.widget( "heurist.recordAction", {
 
             this._as_dialog.dialog("open");
             
-            var helpURL = (this.options.helpContent)                                       //+' #content'
-                        ?(window.hWin.HAPI4.baseURL+'context_help/'+this.options.helpContent):null;
+            var helpURL = (this.options.helpContent)
+                ?(window.hWin.HAPI4.baseURL+'context_help/'+this.options.helpContent+' #content'):null;
             
             window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);
         }

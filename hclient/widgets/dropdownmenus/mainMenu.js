@@ -773,7 +773,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 if(!window.hWin.HEURIST4.util.isempty(dlg_title)){
                     options['title'] = dlg_title;
                 }           
-                if(!window.hWin.HEURIST4.util.isempty(dlg_title)){
+                if(!window.hWin.HEURIST4.util.isempty(dlg_help)){
                     options['context_help'] = window.hWin.HAPI4.baseURL+'context_help/'+dlg_help+'.html #content';
                 }
                 
