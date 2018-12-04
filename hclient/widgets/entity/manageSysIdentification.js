@@ -89,7 +89,6 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         });
         
         
-        
     },
     
 });

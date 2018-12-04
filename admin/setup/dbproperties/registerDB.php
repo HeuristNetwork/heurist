@@ -55,6 +55,8 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
         <title>Register Database with Heurist Master Index</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        
     </head>
 
     <script type="text/javascript">
@@ -280,8 +282,6 @@ function registerDatabase() {
                 ."&serverURL=" . rawurlencode($serverURL);
 
                 
-                
-                //$data = loadRemoteURLContent($reg_url);
                 $data = loadRemoteURLContentSpecial($reg_url); //without proxy
 
                 if (!isset($data) || $data==null) {
@@ -355,7 +355,18 @@ function registerDatabase() {
                         }
                         ?>
                         <script> // automatically call Heurist_Master_Index metadata edit form for this database
-                            window.open("<?=$edit_url?>",'_blank');
+                            //need reload local defintitions and sysinfo on client side    
+                            if(window.hWin){
+                                window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
+                                window.hWin.HAPI4.SystemMgr.sys_info( function(){
+                                    window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, 
+                                            function(){
+                                                window.open("<?=$edit_url?>",'_blank');    
+                                            }
+                                        );
+                                    }
+                                );
+                            }
                         </script>
                         <?php
                     } else {

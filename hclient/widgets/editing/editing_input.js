@@ -2321,7 +2321,8 @@ $.widget( "heurist.editing_input", {
                 
                 }else{
                     //type: select, radio, checkbox
-                    //hideclear                    
+                    //hideclear   
+                    //values                 
                     $input = window.hWin.HEURIST4.ui.createInputSelect($input, allTerms);
                     
                 }

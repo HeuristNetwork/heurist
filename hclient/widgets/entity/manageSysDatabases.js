@@ -212,5 +212,4 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         }
     },
     
-    
 });

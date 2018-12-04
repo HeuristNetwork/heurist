@@ -171,10 +171,11 @@ window.hWin.HEURIST4.ui = {
             
             return $inpt_group;
             
-        }else { //select bu default
+        }else { //select by default
             if($inpt==null || !$inpt.is('select')){
-                $inpt = $('<select>').uniqueId();
+                $inpt = $('<select style="width:100px">').uniqueId();
             }
+            if($inpt.width()<100) $inpt.width(100);
             
             return window.hWin.HEURIST4.ui.createSelector($inpt[0], options.values);
         }
