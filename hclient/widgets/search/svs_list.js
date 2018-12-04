@@ -974,19 +974,19 @@ $.widget( "heurist.svs_list", {
                     return true;
                 },
                 dragEnter: function(node, data) {
-                    // return ["before", "after"];
-                    return node.folder ?true :["before", "after"];
-                    
-                    /*allows only the same ID
-                    if(node.tree._id == data.otherNode.tree._id){ 
-                        return node.folder ?true :["before", "after"];
-                    }else{
+                    //data.otherNode - dragging node
+                    //node - target node
+                    if(data.otherNode.folder && node.tree._id != data.otherNode.tree._id){
+                        //do not allow drag folders between trees
                         return false;
-                    }*/
-
+                    }else{
+                        return node.folder ?true :["before", "after"];
+                    }
 
                 },
                 dragDrop: function(node, data) {
+                    
+                    //check that tree was not modified by other user
                     that._avoidConflictForGroup(groupID, function(){
                         //data.otherNode - dragging node
                         //node - target node
@@ -1003,7 +1003,7 @@ $.widget( "heurist.svs_list", {
 //+' to '+newGroupID_for_db+' ('+newGroupID+') '+node.key+' '+node.title);
 
                             var request = { svs_ID: mod_node.key, 
-                                        svs_UGrpID: newGroupID_for_db };
+                                            svs_UGrpID: newGroupID_for_db };
                             
                             window.hWin.HAPI4.SystemMgr.ssearch_save(request,
                                 function(response){
