@@ -318,9 +318,6 @@ function executeSmartyTemplate($system, $params){
 
     if($publishmode==0 && $session_id!=null){
         mysql__update_progress($mysqli, $session_id, true, '0,'.count($results));
-        /*session_start();
-        $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] = '0,'.count($results);
-        session_write_close();*/
     }
     $execution_counter = -1;
     $execution_total_counter = count($results);
@@ -573,13 +570,6 @@ function smarty_function_progress($params, &$smarty){
             mysql__update_progress($mysqli, $session_id, false, $session_val);
 
             //$mysqli->close();
-
-            /* it does not worl properly            
-            session_start();
-            $current_val = @$_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'];
-            $_SESSION[HEURIST_SESSION_DB_PREFIX.'heurist']['smarty_progress2'] = $execution_counter.','.$tot_count;
-            session_write_close();
-            */
         }
 
     }

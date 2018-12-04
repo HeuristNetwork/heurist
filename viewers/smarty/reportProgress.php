@@ -21,19 +21,6 @@
             $mysqli->close();
         }
         
-/*        
-        $dbname_full = 'hdb_'.$_REQUEST['db'];
-        session_start();
-
-        if(@$_REQUEST['terminate']==1){
-            $_SESSION[$dbname_full.'.heurist']['smarty_progress2'] = 'terminate';
-            $res = 'terminate';
-        }else{
-            $res = @$_SESSION[$dbname_full.'.heurist']['smarty_progress2'];
-        }
- */       
-        
-        
         print $res;
     }else{
         print 'done';

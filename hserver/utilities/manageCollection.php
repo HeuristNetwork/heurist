@@ -45,9 +45,13 @@ if(strpos($db, HEURIST_DB_PREFIX)===0){
 
 //since this script is called after system is inited we can be sure that session is available already
 if (@$_COOKIE['heurist-sessionid']) {
-    session_id($_COOKIE['heurist-sessionid']);
-    session_cache_limiter('none');
-    @session_start();
+        session_name('heurist-sessionid');
+        /* @todo test
+        session_set_cookie_params ( 0, '/', '', $is_https);
+        session_cache_limiter('none');
+        session_id($_COOKIE['heurist-sessionid']);
+        */
+        @session_start();
 }
 
 // note $collection is a reference - SW also we suppress warnings to let the system create the key
