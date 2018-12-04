@@ -28,8 +28,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
 $is_csv = (@$_REQUEST['csv']==1);
 
-if( $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
-    print $response = $system->getError()['message'];
+if( $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
+    $response = $system->getError();
+    print $response['message'];
     exit();
 }
 
@@ -110,11 +111,14 @@ $i = 0;
 foreach ($dbs as $db){
 
     //ID  Records     Values    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
+    if(true || $i>1000){
+        
+//error_log(substr($db, 4));        
 
     $record_row = array (substr($db, 4),
     mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
     mysql__select_val("select count(*) from ".$db.".Records"),
-    mysql__select_val("select count(*) from ".$db.".recDetails"),
+    0,//mysql__select_val("select count(*) from ".$db.".recDetails"),
     /* Removed Ian 10/12/16 to speed up - very slow on USyd server with very large # of DBs. See additional comment-outs below
     mysql__select_val("select count(*) from ".$db.".defRecTypes").",".
     mysql__select_val("select count(*) from ".$db.".defDetailTypes").",".
@@ -147,13 +151,15 @@ foreach ($dbs as $db){
         $arr_databases[] = '"'.implode('","', $record_row).'"';
     }
     
+    }
     
     $i++;
-    //if($i>100) break;
+    if($i>2000) break;
 }//foreach
 
 if($is_csv){
 
+        /*
         $filename = 'ServerUsageStatistics.csv';
         
         rewind($fd);
@@ -163,8 +169,39 @@ if($is_csv){
         header('Content-Type: text/csv');
         header('Content-disposition: attachment; filename='.$filename);
         header('Content-Length: ' . strlen($out));
-        
         exit($out);
+        */
+        
+        $zipname = 'ServerUsageStatistics.zip';
+        $destination = tempnam("tmp", "zip");
+        
+        $zip = new ZipArchive();
+        if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
+            print "Can not create zip $destination";    
+        }else{
+            // return to the start of the stream
+            rewind($fd);
+            $content = stream_get_contents($fd);
+            // add the in-memory file to the archive, giving a name
+            $zip->addFromString('ServerUsageStatistics.csv',  $content);
+            //close the file
+            fclose($fd);
+            // close the archive
+            $zip->close();
+        }
+        
+        if(@file_exists($destination)>0){
+        
+            header('Content-Type: application/zip');
+            header('Content-disposition: attachment; filename='.$zipname);
+            header('Content-Length: ' . filesize($destination));
+            readfile($destination);
+            // remove the zip archive
+            unlink($destination);    
+        }else{
+            print "Zip archive ".$destination." doesn't exist";
+        }
+        
     
 }else{
 ?>
