@@ -62,6 +62,12 @@
         $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary']);
         $res = true;
         
+        if(@$_REQUEST['activity']=='impEmails'){
+            $msg = 'Click on "Harvest EMail" in menu. DATABASE: '.@$_REQUEST['db'];
+            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $msg, $msg, null);
+        }
+        
+        
     } else if ($action == "save_prefs"){ //save preferences into session
 
         if($system->verify_credentials(@$_REQUEST['db'])>0){

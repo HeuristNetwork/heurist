@@ -700,7 +700,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('New_Function_Conversion')
                     + '<br><br>'+window.hWin.HR('New_Function_Contact_Team'));
-            
+                    
         }else 
         if(action == "menu-manage-dashboards"){
             

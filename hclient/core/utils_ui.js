@@ -2529,7 +2529,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
             
             $('.menu-or-popup').hide(); //hide other
             
-            parent.click();
+            //parent.click();
             
             return false;
         };
