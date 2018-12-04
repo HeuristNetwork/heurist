@@ -15,6 +15,8 @@
 */
 
 /**
+* @todo little/no used - to be converted to H5
+* 
 * upgradeToNamedFiles.php
 * copies file with jsut a number as the name to a new file with number + original name
 * changing the file name frm 'n' to 00000n-origFileName and updating ulf_FilePath and ulf_FileName to this new path + name

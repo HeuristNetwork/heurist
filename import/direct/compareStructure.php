@@ -15,6 +15,8 @@
 */
 
 /**
+* @todo little/no used - to be converted to H5
+* 
 * compareStructure.php
 * gets all structure definitions (terms, fields, rectypes) in a specified database and compare to current DB
 *

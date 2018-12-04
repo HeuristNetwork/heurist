@@ -15,6 +15,8 @@
 */
 
 /**
+* @todo little/no used - to be converted to H5
+* 
 * getRecordsFromDB.php
 * gets all records in a specified database (later, a selection) and write directly to current DB
 * Reads from either vsn 2 or vsn 3 format databases
