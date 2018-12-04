@@ -29,59 +29,62 @@ if (!@$serverName) $serverName = null; // override default taken from request he
 
 // ------ VALUES YOU SHOULD SET -------------------------------------------------------------------------------------------
 
-if (!@$dbHost) {
-    $dbHost= "";              //optional, blank = localhost
-    $dbAdminUsername = "";    // REQUIRED MySQL user names and passwords
-    $dbAdminPassword = "";    // REQUIRED
-    $dbReadonlyUsername = ""; // REQUIRED
-    $dbReadonlyPassword = ""; // REQUIRED
-}
+// ------ ESSENTIAL SETTINGS ------------------------------------------------------------------------------------------------
+
+// MySQL user with full write (create) access on this database server
+// The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
+// but you can specify another user and password with full access if preferred. Password cannot be null
+// MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
+if (!@$dbAdminUsername) $dbAdminUsername = "";  // required
+if (!@$dbAdminPassword) $dbAdminPassword = ""; // required
+
+// MySQL user with readonly access on this database server. For example, if there is a user account
+// MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
+if (!@$dbReadonlyUsername) $dbReadonlyUsername = ""; // required, can re-use root or have special user
+if (!@$dbReadonlyPassword) $dbReadonlyPassword = ""; //required
+
+
+// [folders]
 
 if (!@$defaultRootFileUploadURL) $defaultRootFileUploadURL = "http://localhost/HEURIST/HEURIST_FILESTORE/";
 // REQUIRED: defines URL of Heurist filestore - location of files associated with databases
-
 if (!@$defaultRootFileUploadPath) $defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";
-// REQUIRED: defines Heurist filestore - location of files associated with databases
 
-// REQUIRED
-// You may need to change this free thumbnailing URL to another (paid) service
-// as you may exhaust its willingness to fgive you thumbnails for free
-if (!@$websiteThumbnailService) $websiteThumbnailService = "http://immediatenet.com/t/m?Size=1024x768&URL=[URL]";
+// [email]
 
-if (!@$websiteThumbnailUsername) $websiteThumbnailUsername = "";
-if (!@$websiteThumbnailPassword) $websiteThumbnailPassword = "";
-if (!@$websiteThumbnailXsize) $websiteThumbnailXsize = 500; // required
-if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
-
-
-if (!@$sysAdminEmail) $sysAdminEmail = "info@HeuristNetwork.org";
+if (!@$sysAdminEmail) $sysAdminEmail = "info@HeuristNetwork.org"; 
 // REQUIRED, please set to email of the system administrator or mailing group
-
 if (!@$infoEmail) $infoEmail = "info@HeuristNetwork.org";
 // recommended, please set to the email of whoever provides user assistance
 if (!@$bugEmail) $bugEmail = "info@HeuristNetwork.org";
 // recommended, set to info@heuristNetwork.org if your server is running a standard Heurist installation
 
+// -------- THE REST IS OPTIONAL ----------------------------------------------------------------------------------------------
 
-// -------- THE REST IS OPTIONAL --------------------------------------------------------------------------
+// A simple challenge password for creation of new databases. If left blank, any logged in user can create a new database
+if (!@$passwordForDatabaseCreation) $passwordForDatabaseCreation=""; // normally blank = any logged in user can create
+if (!@$passwordForDatabaseDeletion) $passwordForDatabaseDeletion=""; // if blank only db owner can delete
+if (!@$passwordForReservedChanges) $passwordForReservedChanges="";// if blank, no-one can modify reserved fields, otherwise challenge
+if (!@$passwordForServerFunctions) $passwordForServerFunctions="";// if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
 
-if (!@$dbPrefix) $dbPrefix = "hdb_"; // recommend retaining hdb_
-
-if (!@$indexServerAddress) $indexServerAddress = ""; // set to IP address of Elastic search server, if used
+if (!@$dbHost) $dbHost= ""; //optional, blank = localhost
+if (!@$httpProxy) $httpProxy = ""; // blank = assumes direct internet access from server
+if (!@$httpProxyAuth) $httpProxyAuth = ""; // authorization for proxy server "username:password"
+if (!@$indexServerAddress) $indexServerAddress = ""; 
 if (!@$indexServerPort) $indexServerPort = "9200";
 
-if (!@$defaultDBname) $defaultDBname = ""; // not required, generally best left blank
-if (!@$httpProxy) $httpProxy = ""; // if access to the outside world is through a proxy
-if (!@$httpProxyAuth) $httpProxyAuth = ""; // ditto
+// dbPrefix will be prepended to all database names so that you can easily distinguish Heurist databases on your database server
+// from other MySQL databases. Some Admin tools such as PHPMyAdmin will group databases with common prefixes ending in underscore
+// The prefix may be left blank, in which case nothing is prepended. For practial management we strongly recommend a prefix.
+if (!@$dbPrefix) $dbPrefix = "hdb_"; // WE STRONGLY recommend retaining hdb_
 
-if (!@$passwordForDatabaseCreation) $passwordForDatabaseCreation=""; 
-    // normally blank = any logged in user can create
-if (!@$passwordForDatabaseDeletion) $passwordForDatabaseDeletion=""; 
-    // if blank, only database owner can delete, otherwise any admin user in DB owners group (with challenge)
-if (!@$passwordForReservedChanges) $passwordForReservedChanges=""; 
-    // if blank, no-one can modify reserved fields, otherwise challenge
-if (!@$passwordForServerFunctions) $passwordForServerFunctions=""; 
-    // if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
-
-
+// URL of 3d party website thumbnail service. Heurist can call any thumbnailing service which returns an
+// appropriate JPEG or GIF file when passed the URL of a web page. This may be a thumbnail of a security block page
+// if the URL is passworded. The thumbnailing service is called automatically when web pages are bookmarked.
+// Beware of exceeding free thumbnailign limits if your database is used for a lot of web page bookmarking
+if (!@$websiteThumbnailService) $websiteThumbnailService = "https://api.thumbnail.ws/api/ab73cfc7f4cdf591e05c916e74448eb37567feb81d44/thumbnail/get?url=[URL]&width=320";
+if (!@$websiteThumbnailUsername) $websiteThumbnailUsername = "";
+if (!@$websiteThumbnailPassword) $websiteThumbnailPassword = "";
+if (!@$websiteThumbnailXsize) $websiteThumbnailXsize = 500; // required
+if (!@$websiteThumbnailYsize) $websiteThumbnailYsize = 300; // required
 ?>
