@@ -1359,6 +1359,7 @@ window.hWin.HEURIST4.ui = {
             
         }else{
             
+            
             var parent_ele = $(selObj).parents('.ui-dialog');
             if(!parent_ele || parent_ele.length==0) {
                 
@@ -2508,6 +2509,40 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     */   
 
     return li.append( wrapper ).appendTo( ul );
+  },
+  
+  
+  hideOnMouseLeave: function(parent){
+      
+        var myTimeoutId = -1;
+        
+        //show hide function
+        var _hide = function(ele) {
+            myTimeoutId = setTimeout(function() {
+                ele.hSelect('close');
+                //$( ele ).hide();
+                }, 800);
+        },
+        _show = function(ele, parent) {
+            clearTimeout(myTimeoutId);
+            
+            $('.menu-or-popup').hide(); //hide other
+            
+            parent.click();
+            
+            return false;
+        };
+      
+
+        this._on( parent, {
+            mouseenter : function(){_show(this.element, parent)},
+            mouseleave : function(){_hide(this.element)}
+        });
+        this._on( this.element.hSelect('menuWidget'), {
+            mouseenter : function(){_show(this.element, parent)},
+            mouseleave : function(){_hide(this.element)}
+        });
+      
   }
 });
 

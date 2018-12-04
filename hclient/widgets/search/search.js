@@ -184,69 +184,10 @@ $.widget( "heurist.search", {
         .appendTo(div_search_help_links);
         
         this._on( this.filter_by_entity, {  click: function(){
-
-                var that = this;
-                function __openSelect(){
-                    that.select_rectype_filter.hSelect('open');
-                    that.select_rectype_filter.val(-1);
-                    //that.select_rectype_filter.hSelect('refresh');
-                    that.select_rectype_filter.hSelect('menuWidget')
-                        .position({my: "left top", at: "right bottom+10", of: that.filter_by_entity });
-                    var ele = $(that.select_rectype_filter.hSelect('menuWidget')[0]);
-                    ele.scrollTop(0);        
-                }
-            
-                if(!window.hWin.HEURIST4.rectypes.counts ||
-                    (new Date()).getTime() - window.hWin.HEURIST4.rectypes.counts_update > 30000)  //30 seconds
-                {
-                        window.hWin.HEURIST4.rectypes.counts_update = (new Date()).getTime();
-                    
-                        var request = {
-                                'a'       : 'counts',
-                                'entity'  : 'defRecTypes',
-                                'mode'    : 'record_count'
-                                };
-                                
-                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                            function(response){
-                                if(response.status == window.hWin.ResponseStatus.OK){
-                    
-                                    window.hWin.HEURIST4.rectypes.counts = response.data;
-                                    
-                                    that._recreateSelectRectypeFilter();
-                                    
-                                    __openSelect();
-                        
-                                }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                                    window.hWin.HEURIST4.rectypes.counts_update = 0;
-                                }
-                        });
-
-                }else{
-                    __openSelect();
-                }    
-                
+                this._openSelectRectypeFilter();
                 return false;
-            
         } });
         
-        /*
-        this.filter_by_entity_grp = $('<span title="Show list of entities to filter">'
-        +'(by group)<span class="ui-icon ui-icon-triangle-1-s"></span></span>')                                          //
-        .css({'text-decoration':'none','color':'gray','padding-left':'5px','outline':0, cursor:'pointer'})
-        .appendTo(div_search_help_links);
-        
-        this._on( this.filter_by_entity_grp, {  click: function(){
-            
-                this.select_rectype_filter_grp.hSelect('open');
-                this.select_rectype_filter_grp.hSelect('menuWidget')
-                    .position({my: "left top", at: "right bottom+10", of: this.filter_by_entity_grp });
-                return false;
-            
-        } });
-        */
-
        
         /*div_search_help_links.position({
             of: this.input_search,
@@ -830,6 +771,53 @@ $.widget( "heurist.search", {
             }            
             
             this.select_rectype_filter.hSelect({change: __onSelectRectypeFilter});
+            this.select_rectype_filter.hSelect('hideOnMouseLeave', this.filter_by_entity);
+    },
+    
+    _openSelectRectypeFilter: function(){
+        
+                var that = this;
+                function __openSelect(){
+                    
+                    that.select_rectype_filter.hSelect('open');
+                    that.select_rectype_filter.val(-1);
+                    that.select_rectype_filter.hSelect('menuWidget')
+                        .position({my: "left top", at: "left+10 bottom", of: that.filter_by_entity });
+            
+                    var ele = $(that.select_rectype_filter.hSelect('menuWidget')[0]);
+                    ele.scrollTop(0);        
+                }
+            
+                if(!window.hWin.HEURIST4.rectypes.counts ||
+                    (new Date()).getTime() - window.hWin.HEURIST4.rectypes.counts_update > 30000)  //30 seconds
+                {
+                        window.hWin.HEURIST4.rectypes.counts_update = (new Date()).getTime();
+                    
+                        var request = {
+                                'a'       : 'counts',
+                                'entity'  : 'defRecTypes',
+                                'mode'    : 'record_count'
+                                };
+                                
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                                    window.hWin.HEURIST4.rectypes.counts = response.data;
+                                    
+                                    that._recreateSelectRectypeFilter();
+                                    
+                                    __openSelect();
+                        
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    window.hWin.HEURIST4.rectypes.counts_update = 0;
+                                }
+                        });
+
+                }else{
+                    __openSelect();
+                }    
     },
 
     _showAdvancedAssistant: function(){
