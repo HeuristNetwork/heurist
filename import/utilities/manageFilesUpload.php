@@ -383,6 +383,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                         .click( function(e){ 
                             e.preventDefault();
                             $('#btnCancel').click(); 
+                            setTimeout(function(){ window.close(); }, 500);
                             return false; });
                 
                 // Enable iframe cross-domain access via redirect option:
