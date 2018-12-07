@@ -147,8 +147,6 @@ else{
     print '<script>var prepared_params = {};</script>';
 }   
 ?>
-<!-- <?php echo PDIR;?> -->
-
         <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
 
