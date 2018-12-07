@@ -178,11 +178,86 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
         
         <div id="page-inner" style="top:110px">
             
+            <br/><p></p>
+            <!-- Records with by non-existent users -->
+
+            <?php
+            flush_buffers();
+            
+
+            $wasassigned1 = 0;
+            $wasassigned2 = 0;
+            if(@$_REQUEST['fixusers']=="1"){
+                $mysqli->query('SET SQL_SAFE_UPDATES=0');
+
+                $query = 'UPDATE Records left join sysUGrps on rec_AddedByUGrpID=ugr_ID '
+                .' SET rec_AddedByUGrpID=2 WHERE ugr_ID is null';
+                $res = $mysqli->query( $query );
+                if(! $res )
+                {
+                    print "<div class='error'>Cannot delete invalid pointers from Records.</div>";
+                }else{
+                    $wasassigned1 = $mysqli->affected_rows;
+                }
+                
+                $query = 'UPDATE Records left join sysUGrps on rec_OwnerUGrpID=ugr_ID '
+                .' SET rec_AddedByUGrpID=2 WHERE ugr_ID is null';
+                $res = $mysqli->query( $query );
+                if(! $res )
+                {
+                    print "<div class='error'>Cannot delete invalid pointers from Records.</div>";
+                }else{
+                    $wasassigned2 = $mysqli->affected_rows;
+                }
+                
+                $mysqli->query('SET SQL_SAFE_UPDATES=1');
+            }
+
+            $wrongUser_Add = 0;
+            $wrongUser_Owner = 0;
+            
+            $res = $mysqli->query('SELECT count(distinct rec_ID) FROM Records left join sysUGrps on rec_AddedByUGrpID=ugr_ID where ugr_ID is null');
+            $row = $res->fetch_row();
+            if($row && $row[0]>0){
+                $wrongUser_Add = $row[0];
+            }
+            $res = $mysqli->query('SELECT count(distinct rec_ID) FROM Records left join sysUGrps on rec_OwnerUGrpID=ugr_ID where ugr_ID is null');
+            $row = $res->fetch_row();
+            if($row && $row[0]>0){
+                $wrongUser_Owner = $row[0];
+            }
+
+            if($wrongUser_Add==0 && $wrongUser_Owner==0){
+                print "<div><h3>All record have valid Owner and Added by User references</h3></div>";
+                if($wasassigned1>0){
+                    print "<div>$wasassigned1 records 'Added by' value were set to user # 2 Database Manager</div>";
+                }
+                if($wasassigned2>0){
+                    print "<div>$wasassigned2 records were attributed to owner # 2 Database Manager</div>";
+                }
+            }
+            else
+            {
+                print '<div>';
+                if($wrongUser_Add>0){
+                    print '<h3>'.$wrongUser_Add.' records are owned by non-existent users</h3>';
+                }
+                if($wrongUser_Owner>0){
+                    print '<h3>'.$wrongUser_Owner.' records are owned by non-existent users</h3>';
+                }
+                ?>
+                <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixusers=1','_self')">
+                            Attribute them to owner # 2 Database Manager</button>
+                </div>
+                <?php
+            }
+            ?>
+            
+            <hr />
 
             <!-- CHECK FOR FIELD TYPE ERRORS -->
 
             <?php
-            flush_buffers();
             
             if (count(@$dtysWithInvalidTerms)>0 || 
                 count(@$dtysWithInvalidNonSelectableTerms)>0 || 
@@ -260,7 +335,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 }
 
             }else{
-                print "<br/><p><br/></p><h3>All field type definitions are valid</h3>";
+                print "<br/><h3>All field type definitions are valid</h3>";
             }
             ?>
 
@@ -1239,5 +1314,12 @@ include(dirname(__FILE__).'/checkRectypeTitleMask.php');
 
 
         </div>
+<script>
+/*
+    var parent = $(window.parent.document);
+    parent.find('#verification_output').css({width:'100%',height:'100%'}).show(); 
+    parent.find('#in_porgress').hide();
+*/    
+</script>        
     </body>
 </html>
