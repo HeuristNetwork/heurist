@@ -543,11 +543,13 @@ function zip($source, $folders, $destination, $verbose=true) {
                 $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
             }
             else if (is_file($file) === true) { // File
-                $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+                $zip->addFile($file);
+                //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
             }
         }
     } else if (is_file($source) === true) {
-        $zip->addFromString(basename($source), file_get_contents($source));
+        $zip->addFile($source);
+        //$zip->addFromString(basename($source), file_get_contents($source));
     }
 
     // Close zip and show output if verbose
