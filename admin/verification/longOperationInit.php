@@ -1,9 +1,9 @@
 <?php
 
 /**
-* listDatabaseErrorsInit.php: 
+* longOperationInit.php: 
 * 
-* iframe (wait) wrapper for listUploadedFilesErrors and listDatabaseErrors
+* iframe (wait) wrapper for listUploadedFilesErrors and listDatabaseErrors and rebuild titles
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -23,9 +23,28 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+            
+ if(@$_REQUEST['type']=='titles'){
+    if(@$_REQUEST['recTypeIDs']){
+        $srcURL = 'recalcTitlesSpecifiedRectypes.php?recTypeIDs='.$_REQUEST['recTypeIDs'].'&db='.$_REQUEST['db'];    
+    }else{
+        $srcURL = 'recalcTitlesAllRecords.php?db='.$_REQUEST['db'];    
+    }
+    $sTitle = 'Recalculation of composite record titles';
+ }else
+ if(@$_REQUEST['type']=='files'){
+    $srcURL = 'listUploadedFilesErrors.php?db='.$_REQUEST['db'];
+    $sTitle = 'Verifying files';
+ }else{
+    $srcURL = 'listDatabaseErrors.php?db='.$_REQUEST['db'];
+    $sTitle = 'Verifying database';
+ }
+
 ?>
 <html>
     <head>
+        <title><?php echo $sTitle; ?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
@@ -34,19 +53,15 @@
         
         $(document).ready(function() {   
         
-            var $dosframe = $('#verification_output');
-            $dosframe.on('load', function(){
-                $dosframe.css({width:'100%',height:'100%'}).show(); 
-                $('#in_porgress').hide()
-            });
-            
-            <?php
-             if(@$_REQUEST['type']=='files'){
-                print '$dosframe.attr("src", "listUploadedFilesErrors.php?db='.$_REQUEST['db'].'");';     
-             }else{
-                print '$dosframe.attr("src", "listDatabaseErrors.php?db='.$_REQUEST['db'].'");';     
-             }
-             ?>
+            setTimeout(function(){
+                var $dosframe = $('#verification_output');
+                $dosframe.on('load', function(){
+                    $dosframe.css({width:'100%',height:'100%'}).show(); 
+                    $('#in_porgress').hide()
+                });
+                
+                $dosframe.attr("src", "<?php echo $srcURL; ?>");
+             },500);
         });
         
         </script>
@@ -63,8 +78,8 @@
         </style>            
     </head>
     <body class="popup" style="overflow:hidden">
-        <div id='in_porgress'><h2>Verifying <?php echo @$_REQUEST['type']=='files'?'files':'database'; ?>. This may take up to a minute...</h2></div>    
-        <iframe id="verification_output" style='display:none;border:none'>
+        <div id='in_porgress'><h2><?php echo $sTitle; ?>. This may take up to a few minutes for large database...</h2></div>    
+        <iframe id="verification_output" style='display:none;border:none;width:1;height:1'>
         </iframe>
     </body>
 </html>

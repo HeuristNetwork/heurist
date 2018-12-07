@@ -82,7 +82,7 @@ function EditRectypeTitle() {
 
     function _onGenerateVars(context){
 
-console.log(context);
+//console.log(context);
         
         if(!Hul.isnull(context))
             {
@@ -594,8 +594,10 @@ console.log(context);
     * Third step - update records - change title
     */
     function _updateTitleMask(){
-        var sURL = window.hWin.HAPI4.baseURL + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="
-                            +window.hWin.HAPI4.database+"&recTypeIDs="+_rectypeID;
+        
+        //recalcTitlesSpecifiedRectypes.php
+        var sURL = window.hWin.HAPI4.baseURL + 'admin/verification/longOperationInit.php?type=titles&db='
+                                +window.hWin.HAPI4.database+"&recTypeIDs="+_rectypeID;
 
         window.hWin.HEURIST4.msg.showDialog(sURL, {
 

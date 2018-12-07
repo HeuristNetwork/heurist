@@ -1163,7 +1163,10 @@ function RectypeManager() {
 
     //art 2014-05-26 - NOT USED ANYMORE now it updates in editRectypeTitle
     function _updateTitleMask(rty_ID){
-        var sURL = window.hWin.HAPI4.baseURL + "admin/verification/recalcTitlesSpecifiedRectypes.php?db="+window.hWin.HAPI4.database+"&recTypeIDs="+rty_ID;
+        
+        //recalcTitlesSpecifiedRectypes.php
+        var sURL = window.hWin.HAPI4.baseURL + 'admin/verification/longOperationInit.php?type=titles&db='
+                                +window.hWin.HAPI4.database+"&recTypeIDs="+rty_ID;
 
         window.hWin.HEURIST4.msg.showDialog( sURL, {
                 "close-on-blur": false,

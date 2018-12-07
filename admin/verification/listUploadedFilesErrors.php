@@ -809,5 +809,12 @@ $mysqli = $system->get_mysqli();
     
             
         </div>
+<script>
+/*
+    var parent = $(window.parent.document);
+    parent.find('#verification_output').css({width:'100%',height:'100%'}).show(); 
+    parent.find('#in_porgress').hide();
+*/    
+</script>        
     </body>
 </html>
