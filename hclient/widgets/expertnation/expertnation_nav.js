@@ -750,7 +750,7 @@ $.widget( "heurist.expertnation_nav", {
                                     //persons with tertiary and schooling
                                   {"query":"t:27,31 linked_to:26-97",
                                         "levels":[{"query":"t:10 linked_to:27,31 f:196:"+this.options.uni_ID}]} ] }];
-            //or linkedfrom via field 16
+            //or linkedfrom via field 16 (DT_PARENT_PERSON)
             //{"f:196":"4705"}
         }else if(entType=='institution'){
 
