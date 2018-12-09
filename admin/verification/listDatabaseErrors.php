@@ -182,7 +182,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             <!-- Records with by non-existent users -->
 
             <?php
-            flush_buffers();
+//            flush_buffers();
             
 
             $wasassigned1 = 0;

@@ -40,7 +40,6 @@
     require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
     require_once(dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
-    
     $response = array();
 
     $system = new System();
@@ -73,7 +72,7 @@
     }
 
     $is_csv = (@$params['format'] == 'csv');
-    if($is_csv){
+    if(@$params['format']){
         /*forcefully sort by record type    
         if(is_array(@$params['q'])){
             $query_json = $params['q'];
@@ -104,7 +103,8 @@
 
     if($is_csv){
         outputXML($system, $response, $params);
-    }else {
+    }else{
+        // By default json
         // Return the response object as JSON
         header('Content-type: application/json;charset=UTF-8');
         print json_encode($response);
@@ -133,7 +133,7 @@ NOTE: fastest way it simple concatenation in comparison to fputcsv and implode. 
 function outputXML($system, $data, $params){
     
     if (!($data && @$data['status']==HEURIST_OK)){
-        print print_r($rec_ids, true); //print out error array
+        print print_r($data, true); //print out error array
         return;
     }
 

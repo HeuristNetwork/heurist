@@ -72,9 +72,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 _onRecordScopeChange();
             }
         );
-        _fillSelectRecordScope();
-        
         btn_start_action.addClass('ui-state-disabled'); //.click(_startAction);        
+        
+        _fillSelectRecordScope();
         
         $('#btn-cancel').button({label:window.hWin.HR('Cancel')}).click(function(){window.close();});
 
@@ -149,7 +149,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 }
             }
         }
-        $(selScope).val(inititally_selected);
+        //$(selScope)
+        selectRecordScope.val(inititally_selected);
         
         _onRecordScopeChange();
         
@@ -179,6 +180,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             case 'add_detail':
             case 'replace_detail':
             case 'delete_detail':
+            case 'extract_pdf':
                 $('#div_sel_fieldtype').show();
                 _fillSelectFieldTypes();
                 break;
@@ -252,11 +254,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             allowed.splice(allowed.indexOf("relmarker"),1);
             allowed.splice(allowed.indexOf("geo"),1);
             allowed.splice(allowed.indexOf("file"),1);
-
+            
+            if(action_type=='extract_pdf'){
+                allowed = ['blocktext'];    
+            }
 
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
         }
-        
         
         fieldSelect.onchange = _createInputElements;
         _createInputElements();
@@ -449,6 +453,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         return;
                     }
                 }
+            }else if(action_type=='extract_pdf'){
+                
+                request['a'] = action_type;
             }
 
         }

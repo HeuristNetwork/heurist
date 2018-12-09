@@ -430,6 +430,10 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             if(this.isResultSetEmpty()) return;
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink');
             
+        }else if(action == "menu-selected-extract-pdf"){
+
+            this.detailBatchEditPopup('extract_pdf');
+            
         }else if(action == "menu-selected-rectype-change"){
 
             this.detailBatchEditPopup('rectype_change');

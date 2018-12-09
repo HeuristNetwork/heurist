@@ -19,9 +19,12 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+// Include Composer autoloader if not already done.
+include dirname(__FILE__).'/../../vendor/autoload.php';
 
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_records.php');
+require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 
 class DbRecDetails
@@ -65,6 +68,11 @@ class DbRecDetails
        $this->data = $data;
     }
 
+    
+    public function getReport(){
+        return $this->result_data;
+    }
+    
     //
     //
     //
@@ -263,7 +271,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 $syserror = $mysqli->error;
                 $mysqli->rollback();
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
-                return $system->addError(HEURIST_DB_ERROR, 
+                return $this->system->addError(HEURIST_DB_ERROR, 
                     'Unable to insert reverse pointer for child record ID:'.$child_id.' - ', $syserror);
             }else if($res==0){ 
                  array_push($childAlready, $child_id);
@@ -420,6 +428,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
     /**
     * Replace detail value for given set of records and detail type and values
+    * sVal - search value to replace otherwise replace all values 
+    * rVal - new value
     */
     public function detailsReplace(){
 
@@ -438,32 +448,33 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
         
         $mysqli = $this->system->get_mysqli();
-        
-        $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
-        switch ($basetype) {
-            case "freetext":
-            case "blocktext":
-                $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string(@$this->data['sVal'])."%\"";
-                $partialReplace = true;
-                break;
-            case "enum":
-            case "relationtype":
-            case "float":
-            case "integer":
-            case "resource":
-            case "date":
-                $searchClause = "dtl_Value = \"".$mysqli->real_escape_string(@$this->data['sVal'])."\"";
-                $partialReplace = false;
-                break;
-            default:
-                $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by value-replace service");
-                return false;
-        }
-        
+
         if(!@$this->data['sVal']){  
             $searchClause = '1=1';
             $replace_all_occurences = true;  
         }else{
+            
+            $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
+            switch ($basetype) {
+                case "freetext":
+                case "blocktext":
+                    $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string(@$this->data['sVal'])."%\"";
+                    $partialReplace = true;
+                    break;
+                case "enum":
+                case "relationtype":
+                case "float":
+                case "integer":
+                case "resource":
+                case "date":
+                    $searchClause = "dtl_Value = \"".$mysqli->real_escape_string(@$this->data['sVal'])."\"";
+                    $partialReplace = false;
+                    break;
+                default:
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by value-replace service");
+                    return false;
+            }
+        
             $replace_all_occurences = false;
         }
 
@@ -743,6 +754,106 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         return $this->result_data;        
     }
+
+
+    /**
+    * Extract PDF change RecordType InBatch
+    */
+    public function extractPDF(){
+
+        //default value to pass validation
+        if(!@$this->data['dtyID']){
+            if(!defined('DT_EXTRACTED_TEXT')){
+                $this->system->addError(HEURIST_NOT_FOUND, 'Field "Extracted text" (2-652) not found');
+                return false;
+            }
+            $this->data['dtyID'] = DT_EXTRACTED_TEXT;    
+        }
+        
+        if(!$this->_validateParamsAndCounts()){
+            return false;
+        }else if (count(@$this->recIDs)==0){
+            return $this->result_data;
+        }
+
+        $mysqli = $this->system->get_mysqli();
+        
+        $processedRecIDs = array();//success  
+        $sqlErrors = array();
+                     
+        $now = date('Y-m-d H:i:s');
+        $dtl = Array('dtl_DetailTypeID'  => $this->data['dtyID'],
+                     'dtl_Modified'  => $now);
+        $rec_update = Array('rec_ID'  => 'to-be-filled',
+                     'rec_Modified'  => $now);
+        
+        $baseTag = "~extract pdf $now";
+
+        $parser = new \Smalot\PdfParser\Parser();
+        
+        foreach ($this->recIDs as $recID) {
+            
+            $details = array();
+        
+            $record = recordSearchByID($this->system, $recID, array('file'));
+            foreach ($record['details'] as $dtl_ID => $detailValue){
+    // 2. find assosiated pdf files 
+                if(is_array($detailValue))
+                foreach ($detailValue as $id => $fileValue){
+                    if($fileValue['file']['fxm_MimeType']=='application/pdf'){
+                        $file = $fileValue['file']['fullPath'];
+                        $file = resolveFilePath($file);
+                        if(file_exists($file)){
+        // 3. Parse pdf file
+                            try{
+                                $pdf    = $parser->parseFile($file);
+                                $details[] = $pdf->getText();
+                            } catch (\Exception $ex) {
+                                //throw new ParseException($ex);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if(count($details)){
+    // 4. remove old 2-652 "Extracted text" 
+                $sql = 'delete from recDetails where dtl_RecID='.$recID.' AND dtl_ID = '.$this->data['dtyID'];
+                if ($mysqli->query($sql) === TRUE) {
+
+    // 5. Add new values to 2-652 - one entry per file
+                    $dtl['dtl_RecID'] = $recID;
+                    foreach($details as $text){
+                        $dtl['dtl_Value'] = $text;
+                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
+                        if (!is_numeric($ret)) {
+                            $sqlErrors[$recID] = $ret;
+                            break;
+                        }
+                    }
+                    if(@$sqlErrors[$recID]) continue;
+
+                    //update record edit date
+                    $rec_update['rec_ID'] = $recID;
+                    $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
+                    if (!is_numeric($ret)) {
+                        $sqlErrors[$recID] = 'Cannot update record "Modify date". '.$ret;
+                    }
+                    $processedRecIDs[] = $recID;
+                    
+                }else{
+                    $sqlErrors[$recID] = 'Cannot remove dt#'.$this->data['dtyID'].' for record # '.$recID.'  '.$mysqli->error;
+                }
+            }
+
+        }//for recors
+        
+        //assign special system tags
+        $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
+        $this->_assignTagsAndReport('errors',    $sqlErrors, $baseTag);
+        
+        return $this->result_data;        
+    }
     
 /*    
 public methods
@@ -753,6 +864,7 @@ public methods
     changeRecordTypeInBatch    
     addRevercePointerForChild
     setRecordAsChild
+    extractPDF
     -------------
 */
 
@@ -791,6 +903,7 @@ public methods
                 if($success){
                     $this->result_data[$type.'_tag'] = $baseTag;
                 }else{
+                    //error on tag assign
                     $this->result_data[$type.'_tag_error'] = $this->system->getError();
                 }
             }

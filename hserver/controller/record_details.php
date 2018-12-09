@@ -61,6 +61,10 @@
 
             $res = $dbRecDetails->changeRecordTypeInBatch();
 
+        }else if(@$_REQUEST['a'] == 'extract_pdf'){
+
+            $res = $dbRecDetails->extractPDF();
+
         }else {
 
             $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");

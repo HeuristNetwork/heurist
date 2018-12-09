@@ -328,8 +328,9 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_ZIP_FILE' => array(3, 1072),
     'DT_SHAPE_FILE' => array(3, 1069),
     'DT_DBF_FILE' => array(3, 1070),
-    'DT_SHX_FILE' => array(3, 1071)
+    'DT_SHX_FILE' => array(3, 1071),
 
+    'DT_EXTRACTED_TEXT' => array(2, 652)
 
 ); //TODO: add email magic numbers
 
