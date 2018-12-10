@@ -458,10 +458,11 @@ function hEditing(_options) {
         var idx, ele;
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
-            if(ele.editing_input('option', 'dtID')  == fieldName){
+            if(ele.editing_input('instance') && ele.editing_input('option', 'dtID')  == fieldName){
                 return ele;
             }
         }
+        return null;
     }
 
     //

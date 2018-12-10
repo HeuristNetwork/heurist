@@ -727,7 +727,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             window.hWin.HEURIST4.ui.showEntityDialog('usrReminders');
         }else 
         if(action == "menu-profile-files"){
-            window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles');
+            window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles',{width:950});
         }else 
         if(action == "menu-profile-groups"){
             window.hWin.HEURIST4.ui.showEntityDialog('sysGroups');

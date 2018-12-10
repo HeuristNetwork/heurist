@@ -39,6 +39,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 640;
+        this.options.edit_width = 1290;
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -69,7 +70,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         // init search header
         this.searchForm.searchRecUploadedFiles(this.options);
-        var iheight = 7.4;
+        var iheight = 11.4;
         
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 8;
@@ -94,8 +95,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
         }
-
+        
+        //if(this.options.edit_mode!='none'){
+        //    this._initUploadFile();
+        //}
+        
         this._on( this.searchForm, {
+                "searchrecuploadedfilesoninit": this._initUploadFile,
                 "searchrecuploadedfilesonresult": this.updateRecordList,
                 "searchrecuploadedfilesonaddext": function() { this.addEditRecord(-1); },
                 "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister
@@ -378,6 +384,56 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         this._isAdditionOfLocal = false;
     },
     
+
+    //
+    //
+    //    
+    _initUploadFile:function(){
+        
+        if(this.options.edit_mode=='none') return;
+        
+        var that = this;
+        
+            if(!this._editing_uploadfile){ //form is not yet defined
+
+                //var container = this.searchForm.find('#btn_add_record_loc');
+                var container = this.searchForm.searchRecUploadedFiles('getUploadContainer');
+                
+                this._editing_uploadfile = new hEditing({entity:this.options.entity, container:container, 
+                 onchange:
+                function(){
+                    var ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');
+                    if(ele){
+                        var res = ele.editing_input('getValues'); 
+                        var ulf_ID = res[0];
+
+                        if(ulf_ID>0){
+                            that._currentEditID = null;//to prevent warn about save
+                            that.addEditRecord(ulf_ID);
+                            that._isAdditionOfLocal = true;
+                        }
+                    }
+                    //clear image
+                    
+                }}); //pass container
+            
+                //init hidden edit form  that contains the only field - file uploader
+                this._editing_uploadfile.initEditForm([                {
+                    "dtID": "ulf_FileUpload",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"New Local:",
+                        "rst_FieldConfig":{"entity":"recUploadedFiles","hideclear":1},
+                        "dty_Role":"virtual"
+                    }
+                }], null);
+
+                container.removeClass('ui-heurist-bg-light');
+                
+
+        
+            }
+    },
     
     //
     // open empty edit dialog

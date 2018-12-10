@@ -174,7 +174,7 @@ if($response!=null){
         if(@$file->error){
             $response = $system->addError(HEURIST_UNKNOWN_ERROR, "File cannot be processed ".$file->error, null);
             break;            
-        }else if($entity_name=="recUploadedFiles"){
+        }else if($entity_name=="recUploadedFiles"){ //register at once
             
             $entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
             $ret = $entity->registerFile($file, null); //it returns ulf_ID

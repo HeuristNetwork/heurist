@@ -1740,6 +1740,9 @@ $.widget( "heurist.editing_input", {
             else
             if( this.detailType=='file' ){
                 
+                
+                        this.options.showclear_button = (this.configMode.hideclear!=1);
+                
                         //url for thumb
                         var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, this.options.recID, 'thumb', 1);
                         var dt = new Date();
@@ -1750,9 +1753,9 @@ $.widget( "heurist.editing_input", {
                                 .css({position: 'absolute', margin: '5px 0px 0px 8px'}).insertBefore( $input ); 
                         
                         //container for image
-                        var $input_img = $('<div class="image_input fileupload ui-widget-content ui-corner-all">'
-                            + '<img src="'+urlThumb+'" class="image_input"></div>').appendTo( $inputdiv );                
-                            
+                        var $input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px">'
+                            + '<img src="'+urlThumb+'" class="image_input">'
+                            + '</div>').appendTo( $inputdiv );                
                          
                         window.hWin.HAPI4.checkImageUrl(this.configMode.entity, this.options.recID, 'thumb',
                             function(response){
@@ -1802,7 +1805,7 @@ $.widget( "heurist.editing_input", {
                         var $progress_bar = $progress_dlg.find('.progressbar');
                         var $progressLabel = $progress_dlg.find('.progress-label');
                         
-                        var $select_imagelib_dlg = $('<div/>').appendTo( $inputdiv );
+                        var $select_imagelib_dlg = $('<div/>').hide().appendTo( $inputdiv );//css({'display':'inline-block'}).
          
                         $progress_bar.progressbar({
                               value: false,
@@ -1827,6 +1830,7 @@ $.widget( "heurist.editing_input", {
     //autoUpload: true,
     sequentialUploads:true,
     dataType: 'json',
+    pasteZone: $input_img,
     dropZone: $input_img,
     // add: function (e, data) {  data.submit(); },
     submit: function (e, data) { //start upload
@@ -1859,8 +1863,10 @@ $.widget( "heurist.editing_input", {
                             that.newvalues[$input.attr('id')] = file.ulf_ID;
                         }else{
                             
-                            var urlThumb = window.hWin.HAPI4.getImageUrl(that.configMode.entity, 
-                                        newfilename+'.png', 'thumb', 1);
+                            //var urlThumb = window.hWin.HAPI4.getImageUrl(that.configMode.entity, 
+                            //            newfilename+'.png', 'thumb', 1);
+                                        
+                            var urlThumb = file.thumbnailUrl;
                             
                             // file.thumbnailUrl - is correct but inaccessible for heurist server
                             // we get image via fileGet.php
@@ -1890,9 +1896,35 @@ $.widget( "heurist.editing_input", {
                 
                         //init click handlers
                         //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
-                        $input_img.on({click: function(){ //find('a')
-                                $input.click();}
-                        }); 
+                        $input_img.on({click: function(e){ //find('a')
+                            if($(e.target).is('img')){
+                                $input.click(); //open file browse
+                            }else{
+                                
+                            }
+                        }});
+                        /*focus: function(){
+                             $input_img.css({border:'dashed green 2px'});
+                        },
+                        blur: function(){
+                             $input_img.css({border:'none'});
+                        }});*
+/*                        
+                        paste:function(e){
+console.log('onpaste');                            
+
+    var items = e.originalEvent.clipboardData.items;
+    for (var i = 0 ; i < items.length ; i++) {
+        var item = items[i];
+        if (item.type.indexOf("image") >=0) {
+            console.log("FILE!");
+        } else {
+            console.log("Ignoring non-image.");
+        }
+    }
+                        }});
+*/                        
+                        
                         
             }
             else //------------------------------------------------------------------------------------

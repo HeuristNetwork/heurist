@@ -94,7 +94,7 @@
                     "dtFields":{
                         "dty_Type":"file",
                         "rst_DisplayName":"Database picture:",
-                        "rst_DisplayHelpText": "Image to represent this database", 
+                        "rst_DisplayHelpText": "Image to represent this database. Click to browse, Drag and Drop or Ctrl+V to paste an image", 
                         "rst_FieldConfig":{"entity":"sysIdentification", "accept":".png,.jpg,.gif", "size":200},
                         "dty_Role":"virtual"
                     }
