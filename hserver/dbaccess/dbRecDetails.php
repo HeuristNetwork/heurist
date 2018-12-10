@@ -57,7 +57,7 @@ class DbRecDetails
     noaccess    
     processed - no rights to edit
     undefined - field definition not found (add) or search value not found (edit,delete)
-    limitted  
+    limited  
     errors    - sql error on search or updata
     */
     private $result_data = array();
@@ -364,7 +364,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         $undefinedFieldsRecIDs = array(); //limit not defined
         $processedRecIDs = array();       //success  
-        $limittedRecIDs = array();        //over limit - skip
+        $limitedRecIDs = array();        //over limit - skip
         $sqlErrors = array();
         
         foreach ($this->recIDs as $recID) {
@@ -390,7 +390,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 array_push($undefinedFieldsRecIDs, $recID);
                 continue;
             }else if (intval($rtyLimits[$rectype_ID])>0 && $row[1]>0 && ($rtyLimits[$rectype_ID] - $row[1]) < 1){
-                array_push($limittedRecIDs, $recID);  //over limit - skip
+                array_push($limitedRecIDs, $recID);  //over limit - skip
                 continue;
             }
 
@@ -418,7 +418,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
         $this->_assignTagsAndReport('undefined', $undefinedFieldsRecIDs, $baseTag);
-        $this->_assignTagsAndReport('limitted',  $limittedRecIDs, $baseTag);
+        $this->_assignTagsAndReport('limited',  $limitedRecIDs, $baseTag);
         $this->_assignTagsAndReport('errors',    $sqlErrors, $baseTag);
 
         
@@ -612,7 +612,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
         $undefinedFieldsRecIDs = array(); //value not found
         $processedRecIDs = array();       //success  
-        $limittedRecIDs = array(); //it is npt possible to delete requried fields
+        $limitedRecIDs = array(); //it is npt possible to delete requried fields
         $sqlErrors = array();
         
         $now = date('Y-m-d H:i:s');
@@ -650,7 +650,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     
                 }
                 if($isDeleteAll || ($total_cnt == count($valuesToBeDeleted))){
-                    array_push($limittedRecIDs, $recID);
+                    array_push($limitedRecIDs, $recID);
                     continue;
                 }
             }
@@ -679,7 +679,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         //assign special system tags
         $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
         $this->_assignTagsAndReport('undefined', $undefinedFieldsRecIDs, $baseTag);
-        $this->_assignTagsAndReport('limitted',  $limittedRecIDs, $baseTag);
+        $this->_assignTagsAndReport('limited',  $limitedRecIDs, $baseTag);
         $this->_assignTagsAndReport('errors',    $sqlErrors, $baseTag);
         
         return $this->result_data;        
@@ -780,6 +780,13 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         $processedRecIDs = array();//success  
         $sqlErrors = array();
+        $skippedRecIDs = array(); //values already defined
+        
+        $skippedNoPDF   = array();  //no assosiated records
+        $skippedEmpty   = array();  //empty
+        $skippedParseEx = array();  //parse exception
+        
+        
                      
         $now = date('Y-m-d H:i:s');
         $dtl = Array('dtl_DetailTypeID'  => $this->data['dtyID'],
@@ -793,7 +800,16 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         foreach ($this->recIDs as $recID) {
             
+            $sql = 'select count(dtl_ID) from recDetails where dtl_RecID='.$recID.' AND dtl_DetailTypeID = '.$this->data['dtyID'];
+            $isExistsAlready = mysql__select_value($mysqli, $sql)>0;
+
+            if($isExistsAlready){
+               $skippedRecIDs[] = $recID;
+               continue;
+            }
+            
             $details = array();
+            $hasPDFs = false;
         
             $record = recordSearchByID($this->system, $recID, array('file'));
             foreach ($record['details'] as $dtl_ID => $detailValue){
@@ -801,26 +817,48 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 if(is_array($detailValue))
                 foreach ($detailValue as $id => $fileValue){
                     if($fileValue['file']['fxm_MimeType']=='application/pdf'){
+                        
+                        $hasPDFs = true;
+                        
                         $file = $fileValue['file']['fullPath'];
                         $file = resolveFilePath($file);
                         if(file_exists($file)){
         // 3. Parse pdf file
                             try{
                                 $pdf    = $parser->parseFile($file);
-                                $details[] = $pdf->getText();
+                                $text = $pdf->getText();
+                                if($text==null || strlen(trim($text))==0){
+                                    $skippedEmpty[] = $recID;
+                                }else{
+                                    if(strlen($text)>64000){
+                                        $text = substr($text,0,64000)
+                                            .' <more text is available. Remaining text has not been extracted from file>';
+                                    }
+                                    $details[] = $text;    
+                                }
                             } catch (\Exception $ex) {
                                 //throw new ParseException($ex);
+                                $skippedParseEx[$recID] = 'PDF parser exception';//.print_r($ex,true);
                             }
+                        }else{
+                            $skippedNoPDF[$recID] = 'PDF file not found';
                         }
                     }
                 }
             }
             
-            if(count($details)){
-    // 4. remove old 2-652 "Extracted text" 
+            if(!$hasPDFs){
+                $skippedNoPDF[] = $recID;
+            }else
+            if(count($details)>0){
+    
+                /*
+                // 4. remove old 2-652 "Extracted text"             
                 $sql = 'delete from recDetails where dtl_RecID='.$recID.' AND dtl_ID = '.$this->data['dtyID'];
-                if ($mysqli->query($sql) === TRUE) {
-
+                if ($mysqli->query($sql) !== TRUE) {
+                    $sqlErrors[$recID] = 'Cannot remove dt#'.$this->data['dtyID'].' for record # '.$recID.'  '.$mysqli->error;
+                }else{}
+                */    
     // 5. Add new values to 2-652 - one entry per file
                     $dtl['dtl_RecID'] = $recID;
                     foreach($details as $text){
@@ -840,16 +878,16 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         $sqlErrors[$recID] = 'Cannot update record "Modify date". '.$ret;
                     }
                     $processedRecIDs[] = $recID;
-                    
-                }else{
-                    $sqlErrors[$recID] = 'Cannot remove dt#'.$this->data['dtyID'].' for record # '.$recID.'  '.$mysqli->error;
-                }
             }
 
-        }//for recors
+        }//for recodrs
         
         //assign special system tags
         $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
+        $this->_assignTagsAndReport('undefined', $skippedNoPDF, null);  //no pdf assigned
+        $this->_assignTagsAndReport('limited',   $skippedRecIDs, null);  //value already defined
+        $this->_assignTagsAndReport('parseexception', $skippedParseEx, null);  
+        $this->_assignTagsAndReport('empty', $skippedEmpty, null);  
         $this->_assignTagsAndReport('errors',    $sqlErrors, $baseTag);
         
         return $this->result_data;        
@@ -893,7 +931,7 @@ public methods
             
             $needBookmark = (@$this->data['tag']==1);
             
-            if($needBookmark){
+            if($baseTag!=null && $needBookmark){
                 
                 if($type!='processed'){
                     $baseTag = $baseTag.' '.$type;

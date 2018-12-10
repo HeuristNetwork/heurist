@@ -618,6 +618,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
     }
 
     /**
+    * produce json output and 
     * terminate execution of script 
     * 
     * @param mixed $message

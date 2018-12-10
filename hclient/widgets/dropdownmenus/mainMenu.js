@@ -700,7 +700,16 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('New_Function_Conversion')
                     + '<br><br>'+window.hWin.HR('New_Function_Contact_Team'));
-                    
+                 
+                 
+        }else 
+        if(action == 'menu-extract-pdf'){
+            //this menu should not be in main menu. IJ request
+            var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetById('h3_resultList');
+            if(app && app.widget){
+                $(app.widget).resultList('callResultListMenu', 'menu-selected-extract-pdf'); //call method
+            }
+            
         }else 
         if(action == "menu-manage-dashboards"){
             

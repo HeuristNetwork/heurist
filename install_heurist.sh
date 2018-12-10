@@ -102,6 +102,7 @@ cd /var/www/html/HEURIST/$1
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/vendor vendor
 
 # simlink in web root to this version of h4
 cd /var/www/html

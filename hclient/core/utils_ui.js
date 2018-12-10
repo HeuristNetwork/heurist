@@ -1455,6 +1455,16 @@ window.hWin.HEURIST4.ui = {
                 $context.find('.heurist-helper1').css('display','none');
             }
             
+            
+            $context.find('li[data-exp-level]').each(function(){
+                if(exp_level > $(this).data('exp-level')){
+                    $(this).hide();    
+                }else{
+                    $(this).show();    
+                }
+            });
+            
+            
             if($context.hasClass('manageRecords')){
                 //special bhaviour for record edit form
                 var prefs = window.hWin.HAPI4.get_prefs_def('prefs_records');

@@ -454,7 +454,7 @@ $.widget( "heurist.resultList", {
                 .appendTo(this.div_toolbar);
             }
         }    
-
+        
         this.span_pagination = $( "<div>")
         .css({'float':'right','padding': '3px 0.5em 0 0'})
         //'vertical-align':'top',
@@ -2306,4 +2306,14 @@ $.widget( "heurist.resultList", {
                         
                 
     },    
+    
+    //
+    //
+    //
+    callResultListMenu:function( action ){
+        if(this.div_actions){
+                this.div_actions.resultListMenu('menuActionHandler', action);
+        }
+    }
+    
 });

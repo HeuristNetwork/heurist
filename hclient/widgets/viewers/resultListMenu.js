@@ -54,6 +54,7 @@ $.widget( "heurist.resultListMenu", {
         this._initMenu('Recode');
         this._initMenu('Shared');
         if(this.options.resultList) this._initMenu('Reorder');
+        //this._initMenu('Experimental',0);
         //this._initMenu('Layout');
         this.divMainMenuItems.menu();
 
@@ -68,7 +69,8 @@ $.widget( "heurist.resultListMenu", {
         //-----------------------     listener of global events
         var sevents = window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
                  +window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '
-                 +window.hWin.HAPI4.Event.ON_REC_SELECT;
+                 +window.hWin.HAPI4.Event.ON_REC_SELECT; //+'  competency'
+
         /*window.hWin.HAPI4.Event.ON_CREDENTIALS;
         if(this.options.isapplication){
         sevents = sevents + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT;
@@ -146,7 +148,7 @@ $.widget( "heurist.resultListMenu", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
 
-        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT);
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT); //+' '+window.hWin.HAPI4.Event.ON_COMPETENCY
 
         // remove generated elements
         if(this.btn_Search){
@@ -165,7 +167,7 @@ $.widget( "heurist.resultListMenu", {
         this.divMainMenuItems.remove();
     },
 
-    _initMenu: function(name){
+    _initMenu: function(name, competency_level){
 
         var that = this;
         var myTimeoutId = -1;
@@ -206,7 +208,16 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         this['btn_'+name] = $('<li>').append(link)
         .appendTo( this.divMainMenuItems );
-
+        
+        
+        var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+        
+        if(competency_level>=0){
+            this['btn_'+name].addClass('heurist-competency'+competency_level);    
+            if(usr_exp_level>competency_level){
+                this['btn_'+name].hide();    
+            }
+        }
 
         if(name=='Reorder'){
             
@@ -231,7 +242,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                     icons: { submenu: "ui-icon-circle-triangle-e" },
                     select: function(event, ui){ 
                     event.preventDefault(); 
-                    that._menuActionHandler(ui.item.attr('id')); 
+                    that.menuActionHandler(ui.item.attr('id')); 
                     return false; }});
 
                 if(window.hWin.HAPI4.has_access()){
@@ -240,13 +251,22 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                     that['menu_'+name].find('.logged-in-only').hide();
                 }
                 
+                that['menu_'+name].find('li[data-exp-level]').each(function(){
+                    if(usr_exp_level > $(this).data('exp-level')){
+                        $(this).hide();    
+                    }else{
+                        $(this).show();    
+                    }
+                });
+                
+                
                 that['menu_'+name].find('li').css('padding-left',0);
                 
             })
             //.position({my: "left top", at: "left bottom", of: this['btn_'+name] })
             .hide();
 
-            //{select: that._menuActionHandler}
+            //{select: that.menuActionHandler}
             
 
 
@@ -264,7 +284,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     },
 
 
-    _menuActionHandler: function(action){
+    menuActionHandler: function(action){
 
         var that = this;
 

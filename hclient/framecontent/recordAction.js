@@ -411,7 +411,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         if(action_type!='rectype_change'){
 
             var dtyID = $('#sel_fieldtype').val();
-            if(window.hWin.HEURIST4.util.isempty(dtyID)) {
+            if(window.hWin.HEURIST4.util.isempty(dtyID) && action_type!='extract_pdf') {
                 alert('Field is not defined');
                 return;
             }
@@ -545,8 +545,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 *       noaccess - no rights to edit
                 *       processed - success
                 _tag   _tag_error
-                *       undefined - value not found
-                *       limitted
+                *       undefined - value not found (no assosiated pdf files)
+                *       limited - skipped
                 *       errors     - sql error on search or updata
                 errors_list
                 */
@@ -566,21 +566,36 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&q=tag:"'+response[key+'_tag']+'"')+
                             '" target="_blank">view</a></span>';
+                            
                         }else if(response[key+'_tag_error']){
                             tag_link = '<span>'+response[key+'_tag_error']['message']+'</span>';
+                            
                         }else if(key=="processed"){
+                            
                             tag_link = '<span><a href="'+
                             encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&q=sortby:-m after:"5 minutes ago"')+
                             '" target="_blank">view recent changes</a></span>';
                         }
-
+                        
                         sResult = sResult + '<div style="padding:4px"><span>'+lbl+'</span><span>&nbsp;&nbsp;'
                         +response[key]+'</span>'
-                        +tag_link+'</div>'
-
+                        +tag_link+'</div>';
+                        
+                        if(key=='errors' && response['errors_list']){
+                            var recids = Object.keys(response['errors_list']);
+                            if(recids && recids.length>0){
+                                sResult += '<div style="max-height:300;overflow-y:auto;background-color:#ffcccc">';
+                                for(key in response['errors_list']){
+                                    sResult += (key+': '+response['errors_list'][key] + '<br>');   
+                                }
+                                sResult += '</div>';   
+                            }
+                        }
                     }
                 }
+                
+console.log(response);               
 
                 $('#div_result').html(sResult);
                 $('#div_result').css({padding:'10px'}).show();
