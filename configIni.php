@@ -62,8 +62,9 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.0.2"; // sets current program version number, determined by Heurist development lead
+$version = "5.0.3"; // sets current program version number, determined by Heurist development lead
 
+// 5.0.3 11 Dec 2018 WYSIWYG edito for memos, extract text from PDFs, improve verification and child record conversion, fix thumbnail and bookmarklet services, manually sorted result sets, improved ViewRecord, entity types with counts shortcut, filtering menus by user level, fixes to CSV export, finalise Beyond 1914 and Adelaide websites
 // 5.0.2 10 Nov 2018 Really working h5. Dashboard, streamlined field definition, read-only groups, revised import templates, conversion to child records, U of Adelaide website from Expert nation, finalise Beyond1914.
 // 5.0.1 25 Jul 18  1)php7 conformity 2)got rid h3 client libs 3)got rid mysql__ functions
 // 4.5.13 13 Jul 18 Handle multi valus for pointer field in CSV import, bug fixing/cosmetics on mapping, reinstate time filter
