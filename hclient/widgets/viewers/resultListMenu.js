@@ -251,7 +251,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                     that['menu_'+name].find('.logged-in-only').hide();
                 }
                 
-                that['menu_'+name].find('li[data-exp-level]').each(function(){
+                that['menu_'+name].find('li[data-experience-level]').each(function(){
                     if(usr_exp_level > $(this).data('exp-level')){
                         $(this).hide();    
                     }else{

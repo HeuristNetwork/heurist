@@ -30,73 +30,73 @@
 
 <li>
     <!-- export/dbbackup/exportMyDataPopup.php?inframe=1 -->
-    <a href="export/dbbackup/exportMyDataPopup.php" data-level="1" id="menu-manage-archive"
+    <a href="export/dbbackup/exportMyDataPopup.php" data-usrgrp-level="1" id="menu-manage-archive"
         data-logaction="adminArchive"
         title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
         Create data archive package</a>
 </li>
 
-<li data-level="1">-</li>
+<li data-usrgrp-level="1">-</li>
 
 <li>
     <a href="admin/verification/removeDatabaseLocks.php"
-        data-level="1" data-header="Management &gt; Remove database locks" data-exp-level="1"
+        data-usrgrp-level="1" data-header="Management &gt; Remove database locks" data-experience-level="1"
         title="Remove database locks - use ONLY if you are sure no-one else is accessing adminstrative functions">
         Clear database locks
     </a>
 </li>
 <li>
     <a href="admin/verification/longOperationInit.php?type=titles" id="menu-manage-rectitles"
-        data-level="1" data-logaction="stRebuildTitles" data-header="Management &gt; Rebuild record titles"
+        data-usrgrp-level="1" data-logaction="stRebuildTitles" data-header="Management &gt; Rebuild record titles"
         title="Rebuilds the constructed record titles listed in search results, for all records">
         Rebuild record titles</a>
 </li>                    
 <li>
     <a href="admin/verification/rebuildLuceneIndices.php" id="menu-manage-lucene"
-        data-level="1" data-header="Management &gt; Rebuild Lucene index" data-exp-level="1"
+        data-usrgrp-level="1" data-header="Management &gt; Rebuild Lucene index" data-experience-level="1"
         title="Rebuilds the Lucene indices used by Elastic Search, for all record types - no result if Elastic server not specified in configuration">
         Rebuild Lucene index
     </a>
 </li>
 <li>
     <a href="hserver/utilities/recreateRecLinks.php"
-        data-level="1" data-header="Management &gt; Rebuild relationships cache" data-exp-level="1"
+        data-usrgrp-level="1" data-header="Management &gt; Rebuild relationships cache" data-experience-level="1"
         title="Rebuild the cache of pointers and relationship records, which is used to speed search/filter actions">
         Rebuild relationships cache
     </a>
 </li>
                    
-<li data-level="1" data-exp-level="1">-</li>
+<li data-usrgrp-level="1" data-experience-level="1">-</li>
 
 <li>
     <!-- import/direct/getRecordsFromDB.php -->
-    <a href="#" id="menu-manage-interdbtransfer" data-exp-level="1" 
+    <a href="#" id="menu-manage-interdbtransfer" data-experience-level="1" 
         title="Import records directly from one database to another, mapping record types, fields types and terms">
         Inter-database transfer
     </a>
 </li>
 
-<li data-exp-level="1">-</li>
+<li data-experience-level="1">-</li>
 
             <li>
-                <a href="admin/describe/listRectypeRelations.php?action=simple" data-size="medium" data-exp-level="1"
+                <a href="admin/describe/listRectypeRelations.php?action=simple" data-size="medium" data-experience-level="1"
                     title="Display/print a listing of the record types and their simple fields (text, numeric etc.), including usage counts">
                     Simple fields schema</a>
             </li>
             <li>
-                <a href="admin/describe/listRectypeRelations.php?action=relations" data-size="medium" data-exp-level="1"
+                <a href="admin/describe/listRectypeRelations.php?action=relations" data-size="medium" data-experience-level="1"
                     title="Display/print a listing of the record types and their pointer and relationship fields, including usage counts">
                     Relationships schema</a>
             </li>
             <li>
-                <a href="admin/describe/listRectypeRelations.php?action=all" data-size="medium" data-exp-level="1"
+                <a href="admin/describe/listRectypeRelations.php?action=all" data-size="medium" data-experience-level="1"
                     title="Display/print a listing of the record types and all fields, including usage counts">
                     Combined schema</a>
             </li>
 
             <li>
                 <a  href="admin/describe/getDBStructureAsXML.php" id="menu-manage-structure-asxml"
-                    target="_blank" data-exp-level="1"
+                    target="_blank" data-experience-level="1"
                     title="Lists the record type and field definitions in XML format (HML - Heurist Markup Language)">
                    Structure (XML)
                    </a>
@@ -104,7 +104,7 @@
 
             <li>
                 <a href="admin/describe/getDBStructureAsSQL.php?pretty=1" id="menu-manage-structure-assql"
-                    target="_blank" data-exp-level="1"
+                    target="_blank" data-experience-level="1"
                     title="Lists the record type and field definitions in an SQL-related computer-readable form (deprecated 2014)">
                     Structure (SQL)</a>
             </li>

@@ -22,14 +22,14 @@
 
 <li>
     <a href="#" id="menu-structure-refresh"
-        data-level="0" data-logaction="stRefresh"
+        data-usrgrp-level="0" data-logaction="stRefresh"
         title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
         Refresh memory</a>
 </li>
 
 <li>
     <a href="admin/verification/longOperationInit.php" id="menu-structure-verify"
-        data-level="1" data-logaction="stVerify" data-size="medium"
+        data-usrgrp-level="1" data-logaction="stVerify" data-size="medium"
         data-header="Verify &gt; Errors in database structure"
         title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missed data etc)">
         Verify integrity</a>
@@ -39,37 +39,37 @@
 
 <li>
     <a href="admin/verification/listDuplicateRecords.php?fuzziness=10"
-       data-level="1" data-size="medium"
+       data-usrgrp-level="1" data-size="medium"
        data-header="Verify &gt; Potential duplicate records"
        title="Fuzzy search to identify records which might contain duplicate data">
        Potential duplicate records
     </a>
 </li>
 <li>
-    <a href="?w=bookmark&q=-tag&label=Bookmarks without tags" target="_blank" data-level="0" data-exp-level="1"
+    <a href="?w=bookmark&q=-tag&label=Bookmarks without tags" target="_blank" data-usrgrp-level="0" data-experience-level="1"
         title="Show bookmarked records which you have not tagged">
          Bookmarks w/o tags
     </a>
 </li>
 <li>
-    <a href="?q=_BROKEN_&w=all" target="_blank" data-level="0" data-exp-level="1"
+    <a href="?q=_BROKEN_&w=all" target="_blank" data-usrgrp-level="0" data-experience-level="1"
        title="Show records with URLs which point to a non-existant or otherwise faulty address - this only works if nightly verification is turned ON in Database > Properties">
        Records with broken URLs
     </a>
 </li>
 <li>
-    <a href="?q=_NOTLINKED_&w=all" target="_blank" data-level="0" data-exp-level="1"
+    <a href="?q=_NOTLINKED_&w=all" target="_blank" data-usrgrp-level="0" data-experience-level="1"
         title="Show records with no outgoing or incoming pointers (includes records without any relationships)">
         Records without links
     </a>
 </li>
 
 <!--                    
-<li data-level="1">-</li>
+<li data-usrgrp-level="1">-</li>
 
 <li>
     <a href="admin/verification/checkXHTML.php"
-        data-level="1"
+        data-usrgrp-level="1"
         data-header="Verify &gt; Verify wysiwyg texts"
         title="Check the wysiwyg text fields in records/blog entries for structural errors">
         Verify wysiwyg texts                           
@@ -78,7 +78,7 @@
 
 <li>
     <a href="admin/verification/checkInvalidChars.php"
-        data-level="1" 
+        data-usrgrp-level="1" 
         data-header="Verify &gt; Fix invalid characters"
         title="Check the text fields in records entries for invalid characters">
         Fix invalid characters
@@ -87,14 +87,14 @@
 
 <li class="admin-only">
     <a href="admin/verification/longOperationInit.php?type=files"
-        data-level="1" data-size="medium"
+        data-usrgrp-level="1" data-size="medium"
         data-header="Verify &gt; Files">
         Verify files</a>
 </li>
 
 <li>
     <a href="admin/verification/checkRectypeTitleMask.php?check=1"
-        data-level="1" data-size="medium"
+        data-usrgrp-level="1" data-size="medium"
         data-header="Verify &gt; Title masks"
         title="Check correctness of each Record Type\'s title mask with respect to field definitions">
         Verify title masks
