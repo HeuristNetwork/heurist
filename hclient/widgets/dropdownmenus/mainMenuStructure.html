@@ -22,7 +22,7 @@
 
 <li>
     <a href="admin/structure/rectypes/manageRectypes.php" id="menu-structure-rectypes"
-        data-usrgrp-level="1" data-logaction="stManage" data-size="large"
+        data-user-admin-status="1" data-logaction="stManage" data-size="large"
         data-header="Structure &gt; Modify Record types"
         title="Add new and modify existing record types - general characteristics, data fields and the rules which compose a record">
         Modify / Extend</a>
@@ -31,14 +31,14 @@
 
 <li>
     <a href="#" id="menu-structure-import-express"
-        data-usrgrp-level="1" data-logaction="stImport"
+        data-user-admin-status="1" data-logaction="stImport"
         title="Import record types, fields, terms from Heurist Reference Set">
         Express setup</a>
 </li>
 
 <li>
     <a href="#" id="menu-structure-import"
-        data-usrgrp-level="1" data-logaction="stImport"
+        data-user-admin-status="1" data-logaction="stImport"
         title="Selectively import record types, fields, terms and connected record types from other Heurist databases">
         Browse templates</a>
 </li>
@@ -46,7 +46,7 @@
 <!-- Remarked temporarely 2016-05-11
 <li>
     <a href="#" id="menu-structure-import-templates"
-        data-usrgrp-level="1" data-logaction="stAcquire"
+        data-user-admin-status="1" data-logaction="stAcquire"
         title="Browse documented record type templates on HeuristNetwork.org and selectively import into the current database">
         Browse templates</a>
 </li>
@@ -57,7 +57,7 @@
 
 <li>
     <a href="admin/structure/terms/editTerms.php?treetype=enum" id="menu-structure-terms"
-        data-usrgrp-level="1" data-logaction="stTerms" data-size="medium"
+        data-user-admin-status="1" data-logaction="stTerms" data-size="medium"
         data-header="Structure &gt; Modify Terms"
         title="Browse and edit the terms used for relationship types and for other enumerated (term list) fields" onclick= "{return false;}">
         Manage terms</a>
@@ -65,7 +65,7 @@
 
 <li>
     <a  href="admin/structure/terms/editTerms.php?treetype=relation" id="menu-structure-reltypes"
-        data-usrgrp-level="1" data-logaction="stRelations" data-size="medium"
+        data-user-admin-status="1" data-logaction="stRelations" data-size="medium"
         data-header="Structure &gt; Modify Relationship types"
         title="Browse and edit the relationship types"  onclick= "{return false;}">
         Manage relationship types</a>
@@ -76,18 +76,18 @@
 
 <li>
     <a href="hclient/framecontent/visualize/databaseSummary.php" id="menu-structure-summary"
-        data-usrgrp-level="-1" data-logaction="stVis" data-size="large"
+        data-user-admin-status="-1" data-logaction="stVis" data-size="large"
         data-header="Structure &gt; Visualization of links between record types"
         title="Visualise the internal connections between record types in the database and add connections (record pointers and relationshi markers) between them">
         Visualise</a>
 </li>
 
-<li data-experience-level="1">-</li>
+<li data-user-experience-level="1">-</li>
 
 
 <li>
     <a href="admin/structure/fields/manageDetailTypes.php" id="menu-structure-fields"
-        data-usrgrp-level="1" data-size="medium" data-experience-level="1"
+        data-user-admin-status="1" data-size="medium" data-user-experience-level="1"
         data-header="Structure &gt; Modify base field type"
         title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
         Manage base field types</a>
@@ -95,7 +95,7 @@
 
 <li>
     <a href="#" id="menu-structure-mimetypes"
-        data-usrgrp-level="1" data-size="medium" data-experience-level="1"
+        data-user-admin-status="1" data-size="medium" data-user-experience-level="1"
         data-header="Structure &gt; Define mime types"
         title="Define file mime types and extensions">
         Define mime types</a>

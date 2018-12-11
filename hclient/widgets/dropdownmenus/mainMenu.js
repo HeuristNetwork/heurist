@@ -251,9 +251,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         function ___set_menu_item_visibility(idx, item, is_showhide){
 
-                var lvl = $(item).attr('data-usrgrp-level'); //level of access by workgroup membership
+                var lvl = $(item).attr('data-user-admin-status'); //level of access by workgroup membership
                 
-                var lvl_exp = $(item).attr('data-experience-level');  //level by ui experience
+                var lvl_exp = $(item).attr('data-user-experience-level');  //level by ui experience
                 
                 var is_visible = true;
                 
@@ -278,7 +278,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         window.hWin.HEURIST4.util.setDisabled(elink, true);
                         
                         item.attr('title', 'Only '
-                        + (item.attr('data-usrgrp-level')==2?'the database owner':'database managers')
+                        + (item.attr('data-user-admin-status')==2?'the database owner':'database managers')
                         + ' can delete all records / the database');
                     }
                 }   
@@ -419,10 +419,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             .append(link)
             .appendTo( parentdiv?parentdiv:this.divMainMenuItems );
         if(access_level>=0){
-            this.menues['btn_'+name].attr('data-usrgrp-level', access_level);
+            this.menues['btn_'+name].attr('data-user-admin-status', access_level);
         }    
         if(exp_level>=0){
-            this.menues['btn_'+name].attr('data-experience-level', exp_level);
+            this.menues['btn_'+name].attr('data-user-experience-level', exp_level);
         }
         
         // Load content for all menus except Database when user is logged out
@@ -573,7 +573,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         var action = item.attr('id');
         var action_log = item.attr('data-logaction');
-        var action_level = item.attr('data-usrgrp-level');
+        var action_level = item.attr('data-user-admin-status');
         var action_passworded = item.attr('data-pwd');
         var href = item.attr('data-link');
         var target = item.attr('target');

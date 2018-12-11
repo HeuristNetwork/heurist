@@ -1456,7 +1456,7 @@ window.hWin.HEURIST4.ui = {
             }
             
             
-            $context.find('li[data-experience-level]').each(function(){
+            $context.find('li[data-user-experience-level]').each(function(){
                 if(exp_level > $(this).data('exp-level')){
                     $(this).hide();    
                 }else{
@@ -1495,9 +1495,9 @@ window.hWin.HEURIST4.ui = {
         } 
         
         if(!hideHelpButton){
-            var $help_menu = $('<ul><li data-usrgrp-level="2"><a><span class="ui-icon"/>Beginner</a></li>'
-                +'<li data-usrgrp-level="1"><a><span class="ui-icon"/>Intermediate</a></li>'
-                +'<li data-usrgrp-level="0"><a><span class="ui-icon"/>Expert</a></li><ul>')
+            var $help_menu = $('<ul><li data-user-admin-status="2"><a><span class="ui-icon"/>Beginner</a></li>'
+                +'<li data-user-admin-status="1"><a><span class="ui-icon"/>Intermediate</a></li>'
+                +'<li data-user-admin-status="0"><a><span class="ui-icon"/>Expert</a></li><ul>')
                 .width(150).hide().appendTo($dialog);
             
         var $help_button = $('<div>').button({icons: { primary: "ui-icon-book" }, 
@@ -1510,7 +1510,7 @@ window.hWin.HEURIST4.ui = {
                            var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
                            
                            $help_menu.find('span').removeClass('ui-icon-check');
-                           $help_menu.find('li[data-usrgrp-level="'+exp_level+'"] > a > span').addClass('ui-icon-check');
+                           $help_menu.find('li[data-user-admin-status="'+exp_level+'"] > a > span').addClass('ui-icon-check');
                            
                            
                            if($help_menu.parent().length==0){
@@ -1520,14 +1520,14 @@ window.hWin.HEURIST4.ui = {
                                //mouseenter : function(){_show(this['menu_'+name], this['btn_'+name])},
                                click: function(event){ 
                                    //change level
-                                   var exp_level = $(event.target).parents('li').attr('data-usrgrp-level');
+                                   var exp_level = $(event.target).parents('li').attr('data-user-admin-status');
 
                                    window.hWin.HAPI4.save_pref('userCompetencyLevel', exp_level);
 
                                    window.hWin.HEURIST4.ui.applyCompetencyLevel(exp_level, $dialog);
 
                                    $help_menu.find('span').removeClass('ui-icon-check');
-                                   $help_menu.find('li[data-usrgrp-level="'+exp_level+'"] > a > span').addClass('ui-icon-check');
+                                   $help_menu.find('li[data-user-admin-status="'+exp_level+'"] > a > span').addClass('ui-icon-check');
                                    $help_menu.hide();
                                },
                                mouseleave : function(){ $help_menu.hide()}
