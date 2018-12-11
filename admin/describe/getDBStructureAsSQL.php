@@ -299,6 +299,26 @@ if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 
 
+// ------------------------------------------------------------------------------------------
+// sysDashboard
+
+print "\n\n\n-- Dashboard entries";print "\n";
+if($isHTML) print "<p>";
+include HEURIST_DIR.'admin/structure/crosswalk/sysDashboard.inc'; // sets value of $flds
+print "-- $flds \n";
+$query = "select $flds from sysDashboard";
+$res = $mysqli->query($query);
+$fmt = 'sysDashboard'; // update format if fields added
+
+if($isHTML) print "<p>";
+print "\n$startToken\n";
+while ($row = $res->fetch_assoc()) { print_row($row, $fmt); }
+$res->close();
+
+print "\n$endToken\n";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
+
+
 // As at June 2015, we are not extracting further data below this when creating new database
 // Add later if required
 
@@ -322,6 +342,7 @@ $res->close();
 print "\n$endToken\n";
 if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
+
 // ------------------------------------------------------------------------------------------
 // defCrosswalk
 
@@ -332,25 +353,6 @@ print "-- $flds \n";
 $query = "select $flds from defCrosswalk";
 $res = $mysqli->query($query);
 $fmt = 'defCrosswalk'; // update format if fields added
-
-if($isHTML) print "<p>";
-print "\n$startToken\n";
-while ($row = $res->fetch_assoc()) { @print_row($row, $fmt); }
-$res->close();
-
-print "\n$endToken\n";
-if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
-
-// ------------------------------------------------------------------------------------------
-// defLanguages
-
-print "\n\n\n-- DEF LANGUAGE";print "\n";
-if($isHTML) print "<p>";
-include HEURIST_DIR.'admin/structure/crosswalk/defLanguagesFields.inc'; // sets value of $flds
-print "-- $flds \n";
-$query = "select $flds from defLanguages";
-$res = $mysqli->query($query);
-$fmt = 'defLanguages';  // update format if fields added
 
 if($isHTML) print "<p>";
 print "\n$startToken\n";
@@ -379,26 +381,24 @@ $res->close();
 print "\n$endToken\n";
 if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
-
 // ------------------------------------------------------------------------------------------
-// sysDashboard
+// defLanguages
 
-print "\n\n\n-- Dashboard entries";print "\n";
+print "\n\n\n-- DEF LANGUAGE";print "\n";
 if($isHTML) print "<p>";
-include HEURIST_DIR.'admin/structure/crosswalk/sysDashboard.inc'; // sets value of $flds
+include HEURIST_DIR.'admin/structure/crosswalk/defLanguagesFields.inc'; // sets value of $flds
 print "-- $flds \n";
-$query = "select $flds from sysDashboard";
+$query = "select $flds from defLanguages";
 $res = $mysqli->query($query);
-$fmt = 'sysDashboard'; // update format if fields added
+$fmt = 'defLanguages';  // update format if fields added
 
 if($isHTML) print "<p>";
 print "\n$startToken\n";
-while ($row = $res->fetch_assoc()) { print_row($row, $fmt); }
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt); }
 $res->close();
 
 print "\n$endToken\n";
 if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
-
 
 
 // ------------------------------------------------------------------------------------------
@@ -706,7 +706,7 @@ function print_row($row,$fmt) {
         case 'defLanguages':
             $lng_Name = $mysqli->real_escape_string($row['lng_Name']);
             $lng_Notes = $mysqli->real_escape_string($row['lng_Notes']);
-            print "('$row[NISOZ3953]','$row[lng_ISO639]','$lng_Name','$lng_Notes'),";
+            print "('$row[lng_NISOZ3953]','$row[lng_ISO639]','$lng_Name','$lng_Notes'),";
             break;
 
         // As at 12/11/18 only the tables above are imported by admin/structure/import/importDefinitions 

@@ -200,7 +200,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         }
 */
 
-            if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, smarty templates etc
+            if(file_exists($templateFoldersContent) && filesize($templateFoldersContent)>0){ //override content of setting folders with template database files - rectype icons, dashboard icons, smarty templates etc
                 $upload_root = $system->getFileStoreRootFolder();
                 unzip($templateFoldersContent, $upload_root.$database_name."/");    
             }            

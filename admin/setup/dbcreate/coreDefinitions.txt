@@ -1,7 +1,7 @@
--- Heurist Definitions Exchange File generated: 12 Nov 2018 @ 12:38
--- Installation = http://heurist.sydney.edu.au/HEURIST/h5-ij/
+-- Heurist Definitions Exchange File generated: 11 Dec 2018 @ 23:39
+-- Installation = http://heurist.sydney.edu.au/h5-ao/
 -- Database = Heurist_Core_Definitions
--- Program Version: 5.0.2
+-- Program Version: 5.0.3
 -- Database Version: 1.2.0
 
 -- RECORD TYPE GROUPS
@@ -10,6 +10,7 @@
 >>StartData>> ('1','Basic record types','functionalgroup','000','Common generic record types which will be useful in many databases'),
 ('4','System Internals','functionalgroup','002','Record types used by the Heurist system for specific workflows and functions'),
 ('8','Spatial and Mapping','functionalgroup','001','Entities used for spatial and temporal aspects of a domain'),
+('9','Addition of special fields','functionalgroup','003','These record types are simply dummies which add a particular field or field(s) required for new functions as indicated, which might not exist in older databases'),
 >>EndData>>
 
  
@@ -773,7 +774,8 @@
 ('29','Mappable query','0','MAP DATA SOURCE: A Heurist query which can be used as the source of a map layer - the objects retrieved by the query contribute their spatial and/or temporal data, plus name, icon and potentially other attributes, to the content of the layer','[2-1] [[ q = [2-12] ]]', '[1]','Mappable querys','approved', '3','KML','1021', 'viewable','1','8','', '0','','','normal', '0','1','1'),
 ('44','Shapefile','0','MAP DATA SOURCE: Shapefile file, generally for use as a map layer','[2-1]', '[1]','Shapefiles','approved', '3','KML','1017', 'viewable','1','8','', '0','','','normal', '0','1','1'),
 ('48','Life event','0','A dated and/or spatially located fact about a person eg. birth, death, burial. Can also be applied to organisations, structures etc.','[2-247.Family name], [2-247.Given name(s)] : [9-77.Term] [2-9] [2-10] [2-11] @ [2-134.2-1], [2-134.1125-129]', '[invalid field Type of event of type enum] [9] ([16.1], [16.18])','Life events','approved', '9','Eventlet','24', 'viewable','1','1','', '0','','','normal', '0','1','1'),
-('49','Additional fields for mapping','0','This record type is simply a container for any additional fields which need to be added to very old databases - do not import unless you know this is what you need','[2-1]', '','Additional fields for mappings','open', '2','Additional fields for mapping','49', 'viewable','1','8','', '0','','','normal', '0','1','1'),
+('49','Additional fields for mapping','0','This record type is simply a container for additional fields which need to be added to very old databases to support newer mapping functions. Import to add these fields. Record type can be deleted after import (the field(s) remain).','[2-1]', '','Additional fields for mappings','open', '2','Additional fields for mapping','49', 'viewable','1','9','', '0','','','normal', '0','1','1'),
+('50','Add field: Extracted text/images','0','This record type is simply a container for additional field(s) which need to be added to older databases to support extraction of plain text from multimedia files. Import this record type to add the field(s). Record type can be deleted after import (the field(s) remain).','[2-1]', '','Add field: Extracted text/imagess','open', '2','Add field: Extracted text/images','50', 'viewable','1','9','', '0','','','normal', '0','1','1'),
 >>EndData>>
 
  
@@ -898,6 +900,8 @@
 ('263','Person type','Please document the nature of this detail type (field)) ...','enum','The type or role of a person in the database', '','','open','2', 'Person type','263','1', '0','5432','', '',0,'1','viewable', '0',''),
 ('551','Background colour','Please document the nature of this detail type (field)) ...','enum','The background or fill colour to be used for symbols/areas plotted on the map', '','','open','2', 'Background colour','551','1', '0','3324','', '',0,'1','viewable', '0',''),
 ('581','GeoNames ID','Please document the nature of this detail type (field)) ...','float','The ID of the place in GeoNames. Info is then available at http://www.geonames.org/', '','','open','2', 'GeoNames ID','581','1', '0','','', '',0,'1','viewable', '0',''),
+('652','Extracted text','Please document the nature of this detail type (field)) ...','blocktext','Field to hold plain text extracted automatically from the file. This can be text from a Word document or PDF, OCRd text from images etc.', 'Please provide an extended description for display on rollover ...','','open','2', 'Extracted text','652','1', '0','','', '',0,'1','viewable', '0',''),
+('731','Extracted images','Please document the nature of this detail type (field)) ...','file','Embedded images found within the primary media file', 'Please provide an extended description for display on rollover ...','','open','2', 'Extracted images','731','1', '0','','', '',0,'1','viewable', '0',''),
 >>EndData>>
 
  
@@ -938,11 +942,11 @@
 ('32', '5', '1', 'Media item title', 'A succinct descriptive title of the media item, preferably one that will uniquely identify it in the database', '', '001', '120', '3', '', '1', '', '', 'required', 'viewable', 'reserved', 'open', '2', '32', '1', '1', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('33', '5', '38', 'Media file', 'Browse to media file and upload, or enter remote file or streamed media reference eg. Flickr, YouTube, SoundCloud. Recommended max size for file-based media for web viewing 5 MBytes and JPG, PNG or GIF format', '', '002', '60', '3', '', '2', '', '', 'required', 'viewable', 'reserved', 'open', '2', '33', '1', '1', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('34', '5', '3', 'Short summary / description', 'Short summary, typically used in annotated listings, information popups and so forth. Aim for 100 - 200 words.', '', '004', '120', '3', '', '0', '', '', 'recommended', 'viewable', 'reserved', 'open', '2', '34', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('35', '5', '15', 'Creator(s)', 'The creator(s) - author, photographer, recordist etc. - of the media item (might be interpreted as the author of the content for photographs of works of art etc.)', '', '017', '30', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '35', '', '0', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
-('36', '5', '10', 'Date of creation', 'Date of creation or publication of this media item', '', '018', '10', '3', 'today', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '36', '1', '0', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
+('35', '5', '15', 'Creator(s)', 'The creator(s) - author, photographer, recordist etc. - of the media item (might be interpreted as the author of the content for photographs of works of art etc.)', '', '019', '30', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '35', '', '0', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
+('36', '5', '10', 'Date of creation', 'Date of creation or publication of this media item', '', '020', '10', '3', 'today', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '36', '1', '0', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('37', '5', '39', 'Thumbnail image', 'Thumbnail image, up to 400 wide, for display normally 100 - 200 wide in search results, lists and reports', '', '003', '40', '3', '', '0', '', '', 'recommended', 'viewable', 'reserved', 'open', '2', '37', '1', '0', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('38', '5', '28', 'Location (mappable)', 'Geospatial location(s) to which this media item relates. Use for simple mapping where locations are identified by coordinates rather than names.', '', '006', '40', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '38', '', '0', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
-('39', '5', '35', 'Copyright information / URL', 'Copyright information for this media item (copyright statement or URL) where not Creative Commons', '', '019', '120', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '39', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('39', '5', '35', 'Copyright information / URL', 'Copyright information for this media item (copyright statement or URL) where not Creative Commons', '', '021', '120', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '39', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('45', '7', '1', 'Title of post', 'A title for the blog entry, date will be added automatically', '', '001', '120', '3', '', '1', '', '', 'required', 'viewable', 'reserved', 'open', '2', '45', '1', '1', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('46', '7', '39', 'Thumbnail image', 'Thumbnail image for this post, up to 400 wide, for display normally 100 - 200 wide in search results, lists and reports', '', '002', '30', '3', '', '0', '', '', 'recommended', 'viewable', 'reserved', 'open', '2', '46', '1', '0', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('47', '7', '28', 'Location (mappable)', 'Location or extent of this blog entry, can be rendered on the map', '', '007', '30', '3', '', '0', '', '', 'recommended', 'viewable', 'approved', 'open', '2', '47', '', '0', '1', '0', '', '', '0', '', '', '0', '0', '', '', '1'),
@@ -992,23 +996,23 @@
 ('1418', '3', '15', 'Author(s)', 'The person(s) or organisation(s) who created the note (where different from the person who created the record)', 'May include authors, artists, organisations that sponsored a resource etc.', '006', '0', '3', '', '0', '', '', 'forbidden', 'viewable', 'open', 'open', '2', '1418', '', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('1419', '3', '57', 'Additional information', '', '', '005', '0', '3', '', '0', '', '', 'forbidden', 'viewable', 'open', 'open', '2', '1419', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('1420', '4', '61', 'Relevant multimedia items', 'Multimedia records - use this in preference to a file field if you want to record additional metadata about the media file or use it in multiple records ', '', '019', '0', '3', '', '0', '', '', 'forbidden', 'viewable', 'approved', 'open', '2', '1420', '', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('1421', '5', '41', 'File Type', 'The type of media file, may be used to determine presentation and playback methods', '', '011', '0', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1421', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('1422', '5', '62', 'File name', 'The original name of the file, excluding path, including extension', '', '009', '60', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1422', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('1423', '5', '63', 'File path', 'The full path to the file, created automatically for files imported with the in situ file importer. Path is relative to the database files folder if located within that folder and its sub-folders.', '', '008', '80', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1423', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('1424', '5', '64', 'File extension', 'The (normally three letter) file extension of the file, created automatically for files imported with the in situ file importer', '', '010', '5', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1424', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('1425', '5', '65', 'File recording device', 'The device used to collect files, may be generic \'image\' or more specific eg. camera make and model', '', '014', '40', '3', '', '0', '', '', 'forbidden', 'viewable', 'approved', 'open', '2', '1425', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('1426', '5', '66', 'File duration (secs)', 'The duration of a media object, such as sound or video, in seconds', '', '015', '10', '3', '', '0', '', '', 'forbidden', 'viewable', 'approved', 'open', '2', '1426', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('1427', '5', '67', 'File size (bytes)', 'The size of the file in bytes, created automatically for files imported with the in situ file importer', '', '012', '10', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1427', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('1428', '5', '68', 'MD5 checksum', 'The calculated MD5 checksum for the file, created automatically for files imported with the in situ file importer', '', '013', '40', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1428', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('1429', '5', '57', 'Technical information', 'This is created automatically if using in situ file indexing', '', '007', '0', '3', '', '0', '', '', 'optional', 'viewable', 'open', 'open', '2', '1429', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('1421', '5', '41', 'File Type', 'The type of media file, may be used to determine presentation and playback methods', '', '013', '0', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1421', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('1422', '5', '62', 'File name', 'The original name of the file, excluding path, including extension', '', '011', '60', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1422', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('1423', '5', '63', 'File path', 'The full path to the file, created automatically for files imported with the in situ file importer. Path is relative to the database files folder if located within that folder and its sub-folders.', '', '010', '80', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1423', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('1424', '5', '64', 'File extension', 'The (normally three letter) file extension of the file, created automatically for files imported with the in situ file importer', '', '012', '5', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1424', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('1425', '5', '65', 'File recording device', 'The device used to collect files, may be generic \'image\' or more specific eg. camera make and model', '', '016', '40', '3', '', '0', '', '', 'forbidden', 'viewable', 'approved', 'open', '2', '1425', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('1426', '5', '66', 'File duration (secs)', 'The duration of a media object, such as sound or video, in seconds', '', '017', '10', '3', '', '0', '', '', 'forbidden', 'viewable', 'approved', 'open', '2', '1426', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('1427', '5', '67', 'File size (bytes)', 'The size of the file in bytes, created automatically for files imported with the in situ file importer', '', '014', '10', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1427', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('1428', '5', '68', 'MD5 checksum', 'The calculated MD5 checksum for the file, created automatically for files imported with the in situ file importer', '', '015', '40', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '1428', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('1429', '5', '57', 'Technical information', 'This is created automatically if using in situ file indexing', '', '009', '0', '3', '', '0', '', '', 'optional', 'viewable', 'open', 'open', '2', '1429', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('1430', '2', '58', 'Location', 'The location(s) to which the web page relates', '', '006', '0', '3', '', '0', '', '', 'forbidden', 'viewable', 'open', 'open', '2', '1430', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('1431', '4', '69', 'Location information', ' ', '', '011', '0', '3', '', '0', '', '', 'forbidden', 'viewable', 'open', 'open', '2', '1431', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('1433', '10', '70', 'Primary information', '', '', '000', '0', '3', '', '0', '', '', 'optional', 'viewable', 'open', 'open', '2', '1433', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '0'),
-('1712', '5', '58', 'Attribution', 'Ownership and copyright of the media item', '', '016', '0', '3', '', '0', '', '', 'optional', 'viewable', 'open', 'open', '2', '1712', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('1712', '5', '58', 'Attribution', 'Ownership and copyright of the media item', '', '018', '0', '3', '', '0', '', '', 'optional', 'viewable', 'open', 'open', '2', '1712', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('1714', '10', '26', 'Country of birth', 'Country. The list is prepopulated, but can be extended, and includes 2 and 3 letter country codes', '', '015', '0', '3', '', '0', '', '', 'forbidden', 'viewable', 'approved', 'open', '2', '1714', '', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('1746', '12', '1', 'Primary place name', 'Commonly used name of the place. Do not abbreviate or use hierarchichal naming (put that under country, state etc.)', '', '001', '60', '3', '', '0', '0', '', 'required', 'viewable', 'reserved', 'open', '3', '2274', '1', '1', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '1'),
 ('1748', '12', '3', 'Short description', 'Short summary, typically used in annotated listings, information popups and so forth. Aim for 100 - 200 words.', '', '005', '120', '3', '', '0', '0', '', 'recommended', 'viewable', 'reserved', 'open', '3', '2280', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '1'),
-('1752', '12', '26', 'Country', 'Country. The list is prepopulated, but can be extended, and includes 2 and 3 letter country codes', '', '017', '60', '3', '', '0', '0', '', 'forbidden', 'viewable', 'approved', 'open', '3', '2285', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '1'),
+('1752', '12', '26', 'Country', 'Country. The list is prepopulated, but can be extended, and includes 2 and 3 letter country codes', '', '017', '60', '3', '', '0', '0', '', 'recommended', 'viewable', 'approved', 'open', '3', '2285', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '1'),
 ('1753', '12', '28', 'Location (mappable)', 'Geospatial location(s) to which this record relates. Use for simple mapping where locations are identified by coordinates rather than names.', '', '004', '60', '3', '', '0', '0', '', 'recommended', 'viewable', 'reserved', 'open', '3', '2279', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '1'),
 ('1755', '12', '39', 'Representative image (thumbnail)', 'Thumbnail image, up to 400 wide, for display normally 100 - 200 wide in search results, lists and reports', '', '012', '60', '3', '', '0', '0', '', 'forbidden', 'viewable', 'open', 'open', '3', '2278', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '1'),
 ('1758', '12', '80', 'Geographic location', '', '', '018', '0', '3', '', '0', '0', '', 'forbidden', 'viewable', 'open', 'open', '0', '0', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
@@ -1110,7 +1114,7 @@
 ('2270', '10', '134', 'Place of birth', 'Place of birth expressed as a location (place) record', '', '014', '0', '3', '', '0', '', '', 'forbidden', 'viewable', 'approved', 'open', '2', '2270', '', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('2271', '10', '58', 'Biography', 'See HeuristNetwork.org for method of handling detailed biographical informatione', '', '009', '0', '3', '', '0', '', '', 'forbidden', 'viewable', 'open', 'open', '2', '2271', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('2273', '5', '134', 'Location (places)', 'Place(s) to which the media file relates. Use in place of geospatial location where location of media is generally identified by named place rather than spatial coordinates', '', '005', '0', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '2273', '', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
-('2274', '5', '203', 'Creative Commons Licences', 'Type of CC Open Source license applicable (see http://creativecommons.org.au/learn-more/licences)', 'When you publish your work using a Creative Commons licence, you can select which of these licence elements suits you. This in turn creates the six core Creative Commons licences listed below. We have listed them starting with the most liberal licence and ending with the most restrictive licence. You can download a printable fact sheet about the licences here.', '020', '0', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '2274', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('2274', '5', '203', 'Creative Commons Licences', 'Type of CC Open Source license applicable (see http://creativecommons.org.au/learn-more/licences)', 'When you publish your work using a Creative Commons licence, you can select which of these licence elements suits you. This in turn creates the six core Creative Commons licences listed below. We have listed them starting with the most liberal licence and ending with the most restrictive licence. You can download a printable fact sheet about the licences here.', '022', '0', '3', '', '0', '', '', 'optional', 'viewable', 'approved', 'open', '2', '2274', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
 ('2275', '5', '69', 'Primary information', 'Minimum recommended information for multimedia', '', '000', '0', '3', '', '0', '', '', 'optional', 'viewable', 'open', 'open', '2', '2275', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '0'),
 ('2276', '2', '69', 'Primary information', '', '', '000', '0', '3', '', '0', '', '', 'optional', 'viewable', 'open', 'open', '2', '2276', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '0'),
 ('2277', '3', '58', 'Primary information', '', '', '000', '0', '3', '', '0', '', '', 'optional', 'viewable', 'open', 'open', '2', '2277', '1', '0', '1', '1', '', '', '0', '', '', '0', '0', '', '', '0'),
@@ -1185,6 +1189,12 @@
 ('2444', '12', '176', 'Point object override symbol', 'A symbol to override the default symbol for point objects', '', '011', '0', '0', '', '0', '0', '', 'forbidden', 'viewable', 'open', 'open', '0', '', '', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
 ('2445', '12', '551', 'Background colour', 'The background or fill colour to be used for symbols/areas plotted on the map', '', '009', '0', '0', '', '0', '0', '', 'forbidden', 'viewable', 'open', 'open', '0', '', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
 ('2446', '12', '581', 'GeoNames ID', 'The ID of the place in GeoNames. Info is then available at http://www.geonames.org/', '', '007', '20', '0', '', '0', '0', '', 'forbidden', 'viewable', 'open', 'open', '0', '', '', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
+('2447', '5', '652', 'Extracted text', 'Field to hold plain text extracted automatically from the file. This can be text from a Word document or PDF, OCRd text from images etc.', 'Please provide an extended description for display on rollover ...', '007', '100', '8', '', '0', '0', '', 'optional', 'viewable', 'open', 'open', '0', '', '', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
+('2448', '50', '1', 'Name / Title', 'The main name or title for the object. Title of a work, family name of person, name of organisation etc.', '', '001', '100', '0', '', '0', '', '', 'required', 'viewable', 'open', 'open', '2', '', '1', '1', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('2450', '50', '57', 'Identification', '', '', '000', '100', '0', '', '0', '', '', 'optional', 'viewable', 'open', 'open', '2', '', '1', '1', '1', '1', '', '', '0', '', '', '0', '0', '', '', '1'),
+('2455', '50', '652', 'Extracted text', 'Field to hold plain text extracted automatically from the file. This can be text from a Word document or PDF, OCRd text from images etc.', 'Please provide an extended description for display on rollover ...', '002', '100', '8', '', '0', '0', '', 'optional', 'viewable', 'open', 'open', '0', '', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
+('2456', '5', '731', 'Extracted images', 'Embedded images found within the primary media file', 'Please provide an extended description for display on rollover ...', '008', '0', '0', '', '0', '0', '', 'optional', 'viewable', 'open', 'open', '0', '', '', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
+('2457', '50', '731', 'Extracted images', 'Embedded images found within the primary media file', 'Please provide an extended description for display on rollover ...', '003', '0', '0', '', '0', '0', '', 'optional', 'viewable', 'open', 'open', '0', '', '', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
 >>EndData>>
 
  
@@ -1424,6 +1434,28 @@
 
  
 
+-- Dashboard entries
+
+-- `dsh_ID`,`dsh_Order`,`dsh_Label`,`dsh_Description`,`dsh_Enabled`,`dsh_ShowIfNoRecords`,`dsh_CommandToRun`,`dsh_Parameters`
+
+>>StartData>> ('1','4','Add a Person','Adds a Person record, editable and viewable by any logged in user','y','y', 'action-AddRecord','{\"RecTypeID\":\"10\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"viewable\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
+('2','5','Add a Place','Adds a Place record, editable by any logged in user, publicly viewable','y','y', 'action-AddRecord','{\"RecTypeID\":\"12\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"public\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
+('3','9','Quick filter builder','Simple form to build a single criterion search/filter','y','y', 'action-CreateFilter',''),
+('4','11','Persons search','Run a saved filter to retrieve all Persons in the database','y','y', 'action-SearchById','29'),
+('5','1','Set your preferences','Set your preferences for page length, startup filter, map clustering and other behaviours','y','y', 'menu-profile-preferences',''),
+('6','8','Structure editing','Define or modify entity types, fields and vocabularies','y','y', 'menu-structure-rectypes',''),
+('7','7','Browse templates','Borrow structure (entity types, fields, vocabularies) from templates and other users\' databases','y','y', 'menu-structure-import',''),
+('8','2','Import a user','Imports the profile of an existing user from another database','y','y', 'menu-profile-import',''),
+('9','10','Export CSV file','Exports a selection of fields for the current database susbset to a CSV file','y','y', 'menu-export-csv',''),
+('10','3','Import CSV file','Imports a spreadsheet CSV file, normalising multiple entity types','y','y', 'menu-export-csv',''),
+('11','6','Add a new record','Add a new record selecting record (entity) type and access rights','y','y', 'menu-import-add-record',''),
+('12','12','Archive database','Create a single self-documenting file containing all data (XML, SQL, original uploads)','y','y', 'menu-help-tipofday',''),
+>>EndData>>
+
+ 
+
+ 
+
 -- DEF CALC FUNCTIONS
 
 -- `cfn_ID`,`cfn_Domain`,`cfn_FunctionSpecification`
@@ -1444,52 +1476,6 @@
 
  
 
--- DEF LANGUAGE
-
--- `lng_NISOZ3953`,`lng_ISO639`,`lng_Name`,`lng_Notes`
-
->>StartData>> ('','AR','Arabic',''),
-('','KM','Khmer',''),
-('','ZH','Chinese',''),
-('','CS','Czech',''),
-('','DA','Danish',''),
-('','NL','Dutch',''),
-('','EN','English',''),
-('','ET','Estonian',''),
-('','FI','Finish',''),
-('','FR','French',''),
-('','DE','German',''),
-('','EL','Greek',''),
-('','HE','Hebrew',''),
-('','HI','Hindi',''),
-('','HU','Hungarian',''),
-('','ID','Indonesian',''),
-('','IT','Italian',''),
-('','JA','Japanese',''),
-('','KO','Korean',''),
-('','LV','Latvian',''),
-('','MS','Malay',''),
-('','NO','Norwegian',''),
-('','PL','Polish',''),
-('','PT','Portuguese',''),
-('','RU','Russian',''),
-('','HR','Croatian',''),
-('','SR','Serbian',''),
-('','SK','Slovak',''),
-('','ES','Spanish',''),
-('','SW','Swahili',''),
-('','SV','Swedish',''),
-('','TH','Thai',''),
-('','TR','Turkish',''),
-('','UK','Ukranian',''),
-('','VI','Vietnamese',''),
-('','YI','Yiddish',''),
->>EndData>>
-
- 
-
- 
-
 -- DEF URL PREFIXES
 
 -- `urp_ID`, `urp_Prefix`
@@ -1500,22 +1486,46 @@
 
  
 
--- Dashboard entries
+-- DEF LANGUAGE
 
--- `dsh_ID`,`dsh_Order`,`dsh_Label`,`dsh_Description`,`dsh_Enabled`,`dsh_ShowIfNoRecords`,`dsh_CommandToRun`,`dsh_Parameters`
+-- `lng_NISOZ3953`,`lng_ISO639`,`lng_Name`,`lng_Notes`
 
->>StartData>> ('1','4','Add a Person','Adds a Person record, editable and viewable by any logged in user','y','y', 'action-AddRecord','{\"RecTypeID\":\"10\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"viewable\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
-('2','5','Add a Place','Adds a Place record, editable by any logged in user, publicly viewable','y','y', 'action-AddRecord','{\"RecTypeID\":\"12\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"public\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
-('3','9','Quick filter builder','Simple form to build a single criterion search/filter','y','y', 'action-CreateFilter',''),
-('4','11','Persons search','Run a saved filter to retrieve all Persons in the database','y','y', 'action-SearchById','29'),
-('5','1','Set your preferences','Set your preferences for page length, startup filter, map clustering and other behaviours','y','y', 'menu-profile-preferences',''),
-('6','8','Structure editing','Define or modify entity types, fields and vocabularies','y','y', 'menu-structure-rectypes',''),
-('7','7','Browse templates','Borrow structure (entity types, fields, vocabularies) from templates and other users\' databases','y','y', 'menu-structure-import',''),
-('8','2','Import a user','Imports the profile of an existing user from another database','y','y', 'menu-profile-import',''),
-('9','10','Export CSV file','Exports a selection of fields for the current database susbset to a CSV file','y','y', 'menu-export-csv',''),
-('10','3','Import CSV file','Imports a spreadsheet CSV file, normalising multiple entity types','y','y', 'menu-export-csv',''),
-('11','6','Add a new record','Add a new record selecting record (entity) type and access rights','y','y', 'menu-import-add-record',''),
-('12','12','Archive database','Create a single self-documenting file containing all data (XML, SQL, original uploads)','y','y', 'menu-help-tipofday',''),
+>>StartData>> ('ARA','AR','Arabic',''),
+('CAM','KM','Khmer',''),
+('CHI','ZH','Chinese',''),
+('CZE','CS','Czech',''),
+('DAN','DA','Danish',''),
+('DUT','NL','Dutch',''),
+('ENG','EN','English',''),
+('EST','ET','Estonian',''),
+('FIN','FI','Finish',''),
+('FRE','FR','French',''),
+('GER','DE','German',''),
+('GRE','EL','Greek',''),
+('HEB','HE','Hebrew',''),
+('HIN','HI','Hindi',''),
+('HUN','HU','Hungarian',''),
+('IND','ID','Indonesian',''),
+('ITA','IT','Italian',''),
+('JPN','JA','Japanese',''),
+('KOR','KO','Korean',''),
+('LAV','LV','Latvian',''),
+('MAL','MS','Malay',''),
+('NOR','NO','Norwegian',''),
+('POL','PL','Polish',''),
+('POR','PT','Portuguese',''),
+('RUS','RU','Russian',''),
+('SCC','HR','Croatian',''),
+('SCR','SR','Serbian',''),
+('SLO','SK','Slovak',''),
+('SPA','ES','Spanish',''),
+('SWA','SW','Swahili',''),
+('SWE','SV','Swedish',''),
+('THA','TH','Thai',''),
+('TUR','TR','Turkish',''),
+('UKR','UK','Ukranian',''),
+('VIE','VI','Vietnamese',''),
+('YID','YI','Yiddish',''),
 >>EndData>>
 
  

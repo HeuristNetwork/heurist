@@ -1,7 +1,7 @@
 <?php
 /**
 * importDefinitions.php - add definitions to database
-* see createDB
+* see createDB - creates database defintions from file created with getDBStructureAsSQL. coreDefinitions.txt
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -149,9 +149,9 @@ class ImportDefinitions {
         'defFileExtToMimetype',
         'defTranslations',
         'usrSavedSearches',
-        'sysDashboard', // added 12/11/18
-        'defLanguages' // added 12/11/18
+        'sysDashboard' // added 12/11/18
         // there are several more tables which are not used as at 12/11/18
+        //'defLanguages', // added 12/11/18 - AO it is already populated in blankDBStructure.sql
         );
         
         $splittedData = explode(START_TOKEN, $data);
@@ -171,14 +171,16 @@ class ImportDefinitions {
                 include HEURIST_DIR.'admin/structure/crosswalk/'.$tables[$idx].'Fields.inc';
                 $query = 'INSERT INTO `'.$tables[$idx]."` ($flds) VALUES ". $dataSet;
                 $this->mysqli->query($query);
-                if($this->mysqli->error) {
+                if($this->mysqli->error && $this->mysqli->error!='') {
+
+                    $merror = $this->mysqli->error;
+                    $error = 'Error inserting data into '.$tables[$idx];
                     
                     $this->mysqli->query("SET SESSION sql_mode=''");
                     $this->mysqli->query('SET FOREIGN_KEY_CHECKS = 1');
         
-                    $error = 'Error inserting data into '.$tables[$idx];
                     //add error
-                    $this->system->addError(HEURIST_DB_ERROR,  $error, $this->mysqli->error);
+                    $this->system->addError(HEURIST_DB_ERROR,  $error, $merror);
                     return false;
                 }
             }            
