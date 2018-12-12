@@ -243,6 +243,7 @@ $.widget( "heurist.expertnation_nav", {
         this.static_pages = {};
         
         var html = '<ul class="nav navbar-nav">';
+        var home_page_id;
         
         for(; idx<rec_order.length; idx++) {
             recID = rec_order[idx];
@@ -270,6 +271,7 @@ $.widget( "heurist.expertnation_nav", {
 
                     //add content of monthly story for home page
                     if(name.toLowerCase()=='home'){ 
+                        home_page_id = recID;
                         var section = ele.find('#monthly_story_on_home_page');
                         var story_record_id = section.attr('data-refer-recid');
                         if(story_record_id>0){
@@ -278,7 +280,7 @@ $.widget( "heurist.expertnation_nav", {
                         }
                     }
                     var lt = window.hWin.HAPI4.sysinfo['layout'];
-                    if(name.toLowerCase()!=='contribute' && lt=='Beyond1914'){ //substrcibe for Syndey only
+                    if(name.toLowerCase()!=='contribute' && lt=='Beyond1914'){ //substrcibe for Sydney only
                         //add registration form
                         ele = $('<div>').attr('data-recID', recID).appendTo(ele); 
                         
@@ -290,7 +292,7 @@ $.widget( "heurist.expertnation_nav", {
                             var edit_form = $('.bor-page-'+recID).find('.newsletter-form');
 
                             if(edit_form.length>0){
-                                that._refreshCaptcha(edit_form);
+                                if(home_page_id == recID) that._refreshCaptcha(edit_form); //on load for home only
                                 edit_form.find('#newsletter_type_submit').click(function(event){
                                     that._doSubsribeNewsLetter(edit_form);
                                     return false;
@@ -421,7 +423,7 @@ $.widget( "heurist.expertnation_nav", {
                 if(recID>0){
                     var edit_form = hdoc.find('.bor-page-'+recID).find('.newsletter-form');
                     if(edit_form.length>0){
-                        that._refreshCaptcha(edit_form);
+                        that._refreshCaptcha(edit_form); //on show page
                     }
                 }
                 
@@ -2478,7 +2480,7 @@ $.widget( "heurist.expertnation_nav", {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
 
                             edit_form.find("#captcha").val('');
-                            that._refreshCaptcha(edit_form);
+                            that._refreshCaptcha(edit_form);  //after save
                         }
                     }
                 );
