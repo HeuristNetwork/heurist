@@ -308,28 +308,36 @@ class DbRecUploadedFiles extends DbEntityBase
         
             if(@$record['ulf_ExternalFileReference']){
                 $this->records[$idx]['ulf_OrigFileName'] = '_remote';
+            }else if(@$record['ulf_FileUpload']){
+                
+                $fields_for_reg = $this->getFileInfoForReg($record['ulf_FileUpload'], null);            
+                if(is_array($fields_for_reg)){
+                    $this->records[$idx] = array_merge($this->records[$idx], $fields_for_reg);
+                }
             }
+                
             if($isinsert){
                 $this->records[$idx]['ulf_UploaderUGrpID'] = $this->system->get_user_id();
                 $this->records[$idx]['ulf_Added'] = date('Y-m-d H:i:s');
             }else{
                 //do not change these params on update
                 if(@$this->records[$idx]['ulf_FilePath']=='') unset($this->records[$idx]['ulf_FilePath']);
-                if(@$this->records[$idx]['ulf_FileName']=='') unset($this->records[$idx]['ulf_FileName']);
             }
+            if(@$this->records[$idx]['ulf_FileName']=='') unset($this->records[$idx]['ulf_FileName']);
+            
             if(@$record['ulf_ExternalFileReference']==null || @$record['ulf_ExternalFileReference']==''){
                 $this->records[$idx]['ulf_ExternalFileReference'] = null;
                 unset($this->records[$idx]['ulf_ExternalFileReference']);
             }
             
             //change mimetype to extension
-            $mimeType = strtolower($record['ulf_MimeExt']);
+            $mimeType = strtolower($this->records[$idx]['ulf_MimeExt']);
             if(strpos($mimeType,'/')>0){ //this is extension
                 $this->records[$idx]['ulf_MimeExt'] = mysql__select_value($this->system->get_mysqli(), 
                     'select fxm_Extension from defFileExtToMimetype where fxm_Mimetype="'.addslashes($mimeType).'"');
             }
 
-            if(!$record['ulf_FileSizeKB']) {
+            if(!$this->records[$idx]['ulf_FileSizeKB']) {
                 $this->records[$idx]['ulf_FileSizeKB'] = 0;
             }
             
@@ -344,8 +352,10 @@ class DbRecUploadedFiles extends DbEntityBase
         
     }    
 
-    //
-    // two steps - first save record, then update it with  ulf_ObfuscatedFileID and ulf_FileName
+    // there are 3 ways
+    // 1) add for local files - via register
+    // 2) remote - save as usual the ndefine ulf_ObfuscatedFileID and ulf_FileName
+    // 3) updatate just parent:save
     //
     public function save(){
 
@@ -380,7 +390,8 @@ class DbRecUploadedFiles extends DbEntityBase
                     $file2['ulf_ObfuscatedFileID'] = $nonce;
                     
                     if(!@$record['ulf_ExternalFileReference'] && !@$record['ulf_FileName']){
-                        $file2['ulf_FileName'] = 'ulf_'.$ulf_ID.'_'.$record['ulf_OrigFileName']; 
+                        $this->records[$rec_idx]['ulf_FileName'] = 'ulf_'.$ulf_ID.'_'.$record['ulf_OrigFileName']; 
+                        $file2['ulf_FileName'] = $this->records[$rec_idx]['ulf_FileName']; 
                     }
 
                     $res = mysql__insertupdate($this->system->get_mysqli(), $this->config['tableName'], 'ulf', $file2);
@@ -391,6 +402,42 @@ class DbRecUploadedFiles extends DbEntityBase
                     }
                 }
             }
+            
+            //if there is file to be ccopied                        
+            if($this->records[$rec_idx]['ulf_TempFile']){ 
+                    
+                    $ulf_ID = $this->records[$rec_idx]['ulf_ID'];
+                    $ulf_ObfuscatedFileID = $this->records[$rec_idx]['ulf_ObfuscatedFileID'];
+                    
+                    //copy temp file from scratch to fileupload folder
+                    $tmp_name = $this->records[$rec_idx]['ulf_TempFile'];
+                    $new_name = $this->records[$rec_idx]['ulf_FileName']; 
+                    
+                    if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) ) 
+                    {
+                        //remove temp file
+                        unlink($tmp_name);
+                        
+                        //copy thumbnail
+                        if(@$record['ulf_TempFileThumb']){
+                            $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$record['ulf_TempFileThumb'];
+                            if(file_exists($thumb_name)){
+                                $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
+                                copy($thumb_name, $new_name);
+                                //remove temp file
+                                unlink($thumb_name);
+                            }
+                        }
+                        
+                    }else{
+                        $this->system->addError(HEURIST_INVALID_REQUEST,
+                             "Upload file: $name couldn't be saved to upload path definied for db = "
+                            . $this->system->dbname().' ('.HEURIST_FILES_DIR
+                            .'). Please ask your system administrator to correct the path and/or permissions for this directory');
+                    }                    
+
+            }
+            
         }//after save loop
         return $ret;
     } 
@@ -489,31 +536,42 @@ class DbRecUploadedFiles extends DbEntityBase
  
     }   
 
-    /**
-    * register file in database
-    * 
-    * @param mixed $file - flle object see UploadHabdler->get_file_object) 
-    *     
-            $file = new \stdClass();
-            original_name, type, name, size, url (get_download_url), 
-    * 
-    * 
-    * @param mixed $needclean - remove file from temp lcoation after reg
-    * @returns record or false
-    */
-    public function registerFile($file, $newname, $needclean = true){
+    //
+    // 
+    //
+    private function getFileInfoForReg($file, $newname){
         
         if(!is_a($file,'stdClass')){
             
-            $tmp_name  = $file;
+            $tmp_thumb = null;
+            
+            if(is_array($file)){
+                
+                $tmp_name  = $file[0]['name'];
+                $newname   = $file[0]['original_name'];
+                $tmp_thumb = @$file[0]['thumbnailName'];
+
+            }else{
+                $tmp_name  = $file;
+            }
+            
+            if(!file_exists($tmp_name)){
+                $fileinfo = pathinfo($tmp_name);
+                if($fileinfo['basename']==$tmp_name){
+                    $tmp_name = HEURIST_SCRATCH_DIR.$tmp_name;
+                }
+            }
+            
             if(file_exists($tmp_name)){
                 $fileinfo = pathinfo($tmp_name);
                 
                 $file = new \stdClass();
                 $file->original_name = $newname?$newname:$fileinfo['filename'];
                 $file->name = $file->original_name;
-                $file->size = filesize($file_path); //fix_integer_overflow
+                $file->size = filesize($tmp_name); //fix_integer_overflow
                 $file->type = $fileinfo['extension'];
+                
+                $file->thumbnailName = $tmp_thumb;
             }
             
         }else{
@@ -538,57 +596,18 @@ class DbRecUploadedFiles extends DbEntityBase
                     $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
                 }
                 
-                
-                $fields = array(    
+                $ret = array(    
                 'ulf_OrigFileName' => $name,
                 'ulf_MimeExt' => $extension?$extension:$file->type, //extension or mimetype allowed
                 'ulf_FileSizeKB' => ($file->size<1024?1:intval($file->size/1024)),
-                'ulf_FilePath' => 'file_uploads/'); //relative path to HEURIST_FILESTORE_DIR - db root
-                //,'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt)); //backward capability            
-                    
-                $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
+                'ulf_FilePath' => 'file_uploads/',   //relative path to HEURIST_FILESTORE_DIR - db root
+                'ulf_TempFile' => $tmp_name);   //file in scratch to be copied 
                 
-                $this->setData($fileinfo);
-                $ret = $this->save();   //it returns ulf_ID
-                
-                if($ret!==false){
-                    
-                    $records = $this->records();
-                    
-                    $ulf_ID = $records[0]['ulf_ID'];
-                    $ulf_ObfuscatedFileID = $records[0]['ulf_ObfuscatedFileID'];
-                    
-                    //copy temp file from scratch to fileupload folder
-                    $new_name = 'ulf_'.$ret[0].'_'.$name;
-                    
-                    if( copy($tmp_name, HEURIST_FILES_DIR.$new_name) ) 
-                    {
-                        //remove temp file
-                        if($needclean) unlink($tmp_name);
-                        
-                        //copy thumbnail
-                        if(isset($file->thumbnailName)){
-                            $thumb_name = HEURIST_SCRATCH_DIR.'thumbs/'.$file->thumbnailName;
-                            if(file_exists($thumb_name)){
-                                $new_name = HEURIST_THUMB_DIR.'ulf_'.$ulf_ObfuscatedFileID.'.png';
-                                copy($thumb_name, $new_name);
-                                //remove temp file
-                                if($needclean) unlink($thumb_name);
-                            }
-                        }
-                        
-                        $ret = $ulf_ID;
-                        
-                    }else{
-                        $errorMsg = "Upload file: $name couldn't be saved to upload path definied for db = "
-                            . $this->system->dbname().' ('.HEURIST_FILES_DIR
-                            .'). Please ask your system administrator to correct the path and/or permissions for this directory';
-                    }
-                
-                }else{ 
-                    //remove temp file from scratch
-                    if($needclean) unlink($tmp_name);
+                if(isset($file->thumbnailName)){
+                    $ret['ulf_TempFileThumb'] = $file->thumbnailName;
                 }
+                
+                //,'ulf_Parameters' => "mediatype=".getMediaType($mimeType, $mimetypeExt)); //backward capability            
                 
         }else{
         
@@ -602,12 +621,44 @@ class DbRecUploadedFiles extends DbEntityBase
             }
             $errorMsg = $errorMsg
                     .'. Please ask your system administrator to correct the path and/or permissions for this directory';
-        }
-       
-        if($errorMsg!=null){
-            $this->system->addError(HEURIST_INVALID_REQUEST, $errorMsg);
+                    
+            $this->system->addError(HEURIST_INVALID_REQUEST, $errorMsg);        
+            
             $ret = false;
         }
+       
+        return $ret;
+    }
+    
+    
+    /**
+    * register file in database
+    * 
+    * @param mixed $file - flle object see UploadHabdler->get_file_object) 
+    *     
+            $file = new \stdClass();
+            original_name, type, name, size, url (get_download_url), 
+    * 
+    * 
+    * @param mixed $needclean - remove file from temp lcoation after reg
+    * @returns record or false
+    */
+    public function registerFile($file, $newname, $needclean = true){
+        
+       $fields = $this->getFileInfoForReg($file, $newname);
+                    
+       if($fields!==false){             
+           
+                $tmp_name = $fields['ulf_TempFile'];
+                //unset($fields['ulf_TempFile']);
+           
+                $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
+                
+                $this->setData($fileinfo);
+                $ret = $this->save();   //it returns ulf_ID
+                
+                unlink($tmp_name);
+       }        
             
         return $ret;    
     }

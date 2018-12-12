@@ -109,6 +109,7 @@ class DbSysIdentification extends DbEntityBase
 
        
         if($ret!==false){
+            //copy temporary file
             foreach($this->records as $idx=>$record){
                 $sys_ID = @$record['sys_ID'];
                 if($sys_ID>0 && in_array($sys_ID, $ret)){

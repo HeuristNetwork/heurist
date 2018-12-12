@@ -1,5 +1,5 @@
 <div>
-    <div style="width:250px;float:left;">
+    <div style="width: 100%;min-height: 35px;">
 
         <div style="float:left;padding:0.2em">
             <div class="header4" style="display: inline-block;width:3em">
@@ -48,34 +48,34 @@
     -->                        
                 </select>
         </div>
-        <div id="btn_search_start"></div>      
+        <div id="btn_search_start" style="float:left;"></div>      
+        
+        
+        <div id="input_sort_type_div" style="float:right;">
+            <div class="header4" style="display: inline-block;width:5em;text-align:right;">
+                <label for="input_sort_type" accesskey="M"><U>S</U>ort by</label></div>
+            <select id="input_sort_type" class="text ui-widget-content ui-corner-all" 
+                style="width:90px; margin-right:1em">
+                    <option value="name">Name</option>            
+                    <option value="recent">Recent</option>
+                    <option value="size">Size</option>
+                </select>
+            <label for="input_search_my" accesskey="M">
+                <input id="input_search_my" type="checkbox" class="text ui-widget-content ui-corner-all"/>
+                Owned by <U>me</U>
+            </label>
+        </div>
     </div>
 
-    <div style="width:250px;float:left;">
-            <div id="input_sort_type_div">
-                <div class="header4" style="display: inline-block;width:5em;text-align:right;">
-                    <label for="input_sort_type" accesskey="M"><U>S</U>ort by</label></div>
-                <select id="input_sort_type" class="text ui-widget-content ui-corner-all" 
-                    style="width:90px; margin-right:0.2em">
-                        <option value="name">Name</option>            
-                        <option value="recent">Recent</option>
-                        <option value="size">Size</option>
-                    </select>
-            </div>
-            <div style="padding:10px 15px">
-                <label for="input_search_my" accesskey="M">
-                    <input id="input_search_my" type="checkbox" class="text ui-widget-content ui-corner-all"/>
-                    Owned by <U>me</U>
-                </label>
-            </div>
-    </div>
         
    
      
-    <div id="div_add_record" style="float:right;">
+    <div id="div_add_record" style="padding-left:5em">
         <div id="btn_add_record_loc"></div>
+
+        <div id="btn_add_record_popup" style="margin-left:2em"></div>
         
-        <div id="btn_add_record_ext"></div>
+        <div id="btn_add_record_ext" style="margin-left:2em"></div>
     </div>
 
     

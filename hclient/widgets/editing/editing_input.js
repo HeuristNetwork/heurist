@@ -1372,7 +1372,7 @@ $.widget( "heurist.editing_input", {
                             }
                         }else if(window.hWin.HEURIST4.util.isnull($btn_extlink)){
                             
-                            if(!($input.val().indexOf('http://')==0 || $input.val().indexOf('https://')==0)){
+                            if($input.val()!='' && !($input.val().indexOf('http://')==0 || $input.val().indexOf('https://')==0)){
                                 $input.val( 'http://'+$input.val());
                             }
                             $input.addClass('rec_URL').removeClass('text').attr('readonly','readonly');
@@ -1756,6 +1756,9 @@ $.widget( "heurist.editing_input", {
                         var $input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px">'
                             + '<img src="'+urlThumb+'" class="image_input">'
                             + '</div>').appendTo( $inputdiv );                
+                       if(this.configMode.entity=='recUploadedFiles'){
+                           $input_img.css({'min-height':'320px','min-width':'320px'});
+                       }
                          
                         window.hWin.HAPI4.checkImageUrl(this.configMode.entity, this.options.recID, 'thumb',
                             function(response){
@@ -1823,6 +1826,7 @@ $.widget( "heurist.editing_input", {
     //url: 'templateOperations.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
+                {name:'registerAtOnce', value:this.configMode.registerAtOnce},
                 {name:'recID', value:that.options.recID}, //need to verify permissions
                 //{name:'DBGSESSID', value:'425944380594800002;d=1,p=0,c=07'},
                 {name:'newfilename', value:newfilename }], //unique temp name
@@ -1859,7 +1863,7 @@ $.widget( "heurist.editing_input", {
                         window.hWin.HEURIST4.msg.showMsgErr(file.error);
                     }else{
 
-                        if(file.ulf_ID>0){
+                        if(file.ulf_ID>0){ //file is registered at once and it returns ulf_ID
                             that.newvalues[$input.attr('id')] = file.ulf_ID;
                         }else{
                             
@@ -1871,7 +1875,12 @@ $.widget( "heurist.editing_input", {
                             // file.thumbnailUrl - is correct but inaccessible for heurist server
                             // we get image via fileGet.php
                             $input_img.find('img').prop('src', urlThumb);
-                            that.newvalues[$input.attr('id')] = newfilename;  
+                            
+                            if(that.configMode.entity=='recUploadedFiles'){
+                                that.newvalues[$input.attr('id')] = file;
+                            }else{
+                                that.newvalues[$input.attr('id')] = newfilename;  //keep only tempname
+                            }
                         }
                         $input.attr('title', file.name);
                         that._onChange();//need call it manually since onchange event is redifined by fileupload widget
@@ -1897,10 +1906,10 @@ $.widget( "heurist.editing_input", {
                         //init click handlers
                         //this._on( $btn_fileselect_dialog, { click: function(){ $input_img.click(); } } );
                         $input_img.on({click: function(e){ //find('a')
+                            $input.click(); //open file browse
+                            
                             if($(e.target).is('img')){
-                                $input.click(); //open file browse
                             }else{
-                                
                             }
                         }});
                         /*focus: function(){
@@ -2791,9 +2800,12 @@ console.log('onpaste');
 
         } else if(this.detailType=="url"){
 
+            var def_value = this.f('rst_DefaultValue');
+            if(window.hWin.HEURIST4.util.isempty(value)) value = def_value;
             
-            if(!(value.indexOf('http://')==0 || value.indexOf('https://')==0)){
-                value = 'http://'+value;
+            if(!window.hWin.HEURIST4.util.isempty(value) &&
+               !(value.indexOf('http://')==0 || value.indexOf('https://')==0)){
+                value = 'http://'+ value;
             }
             disp_value = '<a href="'+value+'" target="_blank" title="'+value+'">'+value+'</a>';
             

@@ -138,6 +138,16 @@
                         "dty_Role":"virtual",
                         "rst_Display":"readonly"
                     }
+                },
+                {
+                    "dtID": "ulf_FileUpload",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Upload file:",
+                        "rst_FieldConfig":{"entity":"recUploadedFiles","hideclear":1},
+                        "dty_Role":"virtual",
+                        "rst_RequirementType":"required"
+                    }
                 }
      ]
 }

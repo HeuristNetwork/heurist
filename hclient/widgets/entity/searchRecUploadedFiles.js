@@ -28,22 +28,34 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         
         this.btn_add_record_loc = this.element.find('#btn_add_record_loc');
         this.btn_add_record_ext = this.element.find('#btn_add_record_ext');
+        this.btn_add_record_popup = this.element.find('#btn_add_record_popup'); 
         if(this.options.edit_mode=='none'){
             this.element.find('#div_add_record').hide();
         }else{
-            this.btn_add_record_loc.css({position:'absolute',top:0,right:170,'max-width':300,'max-height':150});
+            //this.btn_add_record_inline.hide();
+            //.css({position:'absolute',top:0,right:170,'max-width':300,'max-height':150});
                         
-            /*
+            
             this.btn_add_record_loc.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Upload file"), icons: {
+                    .button({label: window.hWin.HR("Select file to upload"), icons: {
                             primary: "ui-icon-plus"
                     }})
                 .click(function(e) {
                     that._trigger( "onaddlocal" );
                 }); 
-            */
+
+            this.btn_add_record_popup.css({'min-width':'9m','z-index':2})
+                    .button({label: window.hWin.HR("Paste file to upload"), icons: {
+                            primary: "ui-icon-plus"
+                    }})
+                .click(function(e) {
+                    that._trigger( "onaddpopup" );
+                }); 
+            
             this.btn_add_record_ext.css({'min-width':'9em','z-index':2})
-                    .button({label: window.hWin.HR("New external")})
+                    .button({label: window.hWin.HR("Specify external file/URL"),icons: {
+                            primary: "ui-icon-plus"
+                    }})
                 .click(function(e) {
                     that._trigger( "onaddext" );
                 }); 
@@ -92,7 +104,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             this.element.find('#input_search_type_div').css('float','left');
         }
         
-        this.btn_search_start.removeClass('ui-button-icon-only').css('margin-left','4em');
+        //this.btn_search_start.removeClass('ui-button-icon-only').css('margin-left','4em');
                       
         this.startSearch();   
         
@@ -217,7 +229,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
     },
     
     getUploadContainer:function(){
-        return this.btn_add_record_loc; //element.find('#btn_add_record_loc');
+        return this.btn_add_record_inline; //element.find('#btn_add_record_loc');
     }
     
 
