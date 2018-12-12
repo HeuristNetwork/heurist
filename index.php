@@ -232,7 +232,7 @@ _time_debug = new Date().getTime() / 1000;
                     }
                     
                 }else if(window.hWin.HAPI4.sysinfo.db_total_records<1){
-                    showTipOfTheDay(false);
+                    //IJ request 2018-12-11 showTipOfTheDay(false);
                 }
                 
                
