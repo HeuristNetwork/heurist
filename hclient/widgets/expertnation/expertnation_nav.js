@@ -1284,8 +1284,10 @@ $.widget( "heurist.expertnation_nav", {
                 }
             }
             
+            var deathYear = that.__getYear(sDate,9997);//last are buried and commemorated
+            
             if(placeID==0 || window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0){
-                timeline.push({year:that.__getYear(sDate,9998),   //sort year
+                timeline.push({year:9997, //that.__getYear(sDate,9998),   //sort year
                         date: that.__getYear(sDate), 
                         date2: sDate,
                         story: sDeathType.toLowerCase(),
@@ -1416,10 +1418,12 @@ $.widget( "heurist.expertnation_nav", {
             
             //Events (79->t:24) -------------------------------
             
+            //3301 - Buried
+            
             // 4 - before service, 10 after service
-            //Enlisted, Embarked, Served, Wounded, Demobilized, Returned, Married, Lived
-            var allowed = [3302,4578,3693,4355,3303,3304,4254,3694];
-            var deforder = [1914,1914,1914,1918,1919,1919,1919,1920];
+            //Enlisted, Embarked, Served, Wounded, Demobilized, Returned, Married, Lived, Buried, Commemorated
+            var allowed = [3302,4578,3693,4355,3303,3304,4254,3694,3301,3310];
+            var deforder = [1914,1914,1914,1918,1919,1919,(deathYear<1919?1913:1919),(deathYear<1919?1913:1920),9998,9999];
             var enlistedDateOrder = 1914;
             var events = that.recset.values(person, 79);
             
@@ -1475,7 +1479,7 @@ $.widget( "heurist.expertnation_nav", {
                             var year_end = that.__getYear(eventDate.date_end, year_main);
                             
                             //type of event - other person/organisation - place - date and then Notes on following line).
-                            timeline.push({year: year_main,
+                            timeline.push({year: (termID==3301?9998:year_main), //buried always last
                                 year_end: year_end, 
                                 date: that.__getYear(eventDate.date), 
                                 date2: eventDate.date,
@@ -1525,7 +1529,8 @@ $.widget( "heurist.expertnation_nav", {
                         
                         if(placeID==0 || (place!=null && window.hWin.HEURIST4.util.findArrayIndex(placeID, place.ids)>=0)){     
 
-                            var year_main = that.__getYear(eventDate.date, 1920);
+                            //if death before or during war - then server before war by default
+                            var year_main = that.__getYear(eventDate.date, (deathYear<1919?1913.8:1920));
                             var year_end = that.__getYear(eventDate.date_end, year_main);
   
                             //don't include sOccupationOrg if it is the same as one of place.names 
