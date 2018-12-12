@@ -399,12 +399,20 @@ class DbUtils {
 
         $warnings = array();
         
-        if(folderRecurseCopy( HEURIST_DIR."admin/setup/rectype-icons", $database_folder."rectype-icons" )){
+        if(folderRecurseCopy( HEURIST_DIR."admin/setup/rectype-icons", $database_folder."rectype-icons" )){//todo move to entity
             
             folderAddIndexHTML($database_folder."rectype-icons"); // index file to block directory browsing
         }else{
             $warnings[] = "Unable to create/copy record type icons folder rectype-icons to $database_folder";
         }
+        if(folderRecurseCopy( HEURIST_DIR."admin/setup/entity", $database_folder."entity" )){
+            
+            folderAddIndexHTML($database_folder."entity"); // index file to block directory browsing
+        }else{
+            $warnings[] = "Unable to create/copy entity folder (icons) to $database_folder";
+        }
+        
+        
 
         if(folderRecurseCopy( HEURIST_DIR."admin/setup/smarty-templates", $database_folder."smarty-templates" )){
             
@@ -427,6 +435,7 @@ class DbUtils {
             $warnings[] = "Unable to create/copy documentation folder to $database_folder";
         }
 
+        
         // Create all the other standard folders required for the database
         // index.html files are added by createFolder to block index browsing
         $warnings[] = folderCreate2($database_folder. '/filethumbs', 'used to store thumbnails for uploaded files', true);
@@ -436,7 +445,7 @@ class DbUtils {
         $warnings[] = folderCreate2($database_folder. '/html-output', 'used to write published records as generic html files', true);
         $warnings[] = folderCreate2($database_folder. '/generated-reports', 'used to write generated reports');
         $warnings[] = folderCreate2($database_folder. '/backup', 'used to write files for user data dump');
-        $warnings[] = folderCreate2($database_folder. '/term-images', 'used for images illustrating terms');
+        $warnings[] = folderCreate2($database_folder. '/term-images', 'used for images illustrating terms'); //todo move to entity
         
         //remove empty warns
         $warnings = array_filter($warnings, function($value) { return $value !== ''; });
