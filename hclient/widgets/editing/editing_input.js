@@ -2190,7 +2190,7 @@ console.log('onpaste');
                 return;
             }
         
-            if($.isPlainObject(value)){
+            if($.isPlainObject(value) && value.ulf_ObfuscatedFileID){
         
                 var rec_Title = value.ulf_ExternalFileReference;
                 if(window.hWin.HEURIST4.util.isempty(rec_Title)){
@@ -2205,7 +2205,31 @@ console.log('onpaste');
                         
             }else{
                  //call server for file details
-                
+                 var recid = ($.isPlainObject(value))?value.ulf_ID :value;
+                 if(recid>0){
+                     
+                     var request = {};
+                        request['recID']  = recid;
+                        request['a']          = 'search'; //action
+                        request['details']    = 'list';
+                        request['entity']     = 'recUploadedFiles';
+                        request['request_id'] = window.hWin.HEURIST4.util.random();
+                        
+                        window.hWin.HAPI4.EntityMgr.doRequest(request,
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                        var recordset = new hRecordSet(response.data);
+                                        var record = recordset.getFirstRecord();
+                                        if(record){
+                                        var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
+                                                        ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
+                                                        ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
+                                                        ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID')};
+                                                        that._findAndAssignTitle(ele, newvalue, selector_function);
+                                        }
+                                }
+                            });
+                 }
             }
                     
         }else if(this.detailType=='file'){  // FILE FOR OTHER ENTITIES - @todo test

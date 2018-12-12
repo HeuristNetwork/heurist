@@ -125,7 +125,6 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             isLocal = this._isAdditionOfLocal;
             //change popup title
         }
-console.log('!!!!11');        
         
         var i_url = this.getEntityFieldIdx('ulf_HeuristURL');
         var i_url_ext = this.getEntityFieldIdx('ulf_ExternalFileReference');
@@ -418,7 +417,6 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     _uploadFileAndRegister: function(){
         
-console.log('22222');       
         //find file element
         var that = this;
         
