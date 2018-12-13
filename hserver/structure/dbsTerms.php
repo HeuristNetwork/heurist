@@ -55,9 +55,9 @@ class DbsTerms
     public function findTermByConceptCode($ccode, $domain=null){
 
         if($domain==null){
-            $term_id = findTermByConceptCode($ccode, 'enum');
+            $term_id = $this->findTermByConceptCode($ccode, 'enum');
             if($term_id==null){
-                $term_id = findTermByConceptCode($ccode, 'relation');
+                $term_id = $this->findTermByConceptCode($ccode, 'relation');
             }
             return $term_id;
         }
@@ -65,7 +65,7 @@ class DbsTerms
         $terms = $this->data['termsByDomainLookup'][$domain];
         $idx_ccode = intval($this->data['fieldNamesToIndex']["trm_ConceptID"]);
 
-        foreach ($this->data as $term_id => $def) {
+        foreach ($terms as $term_id => $def) {
             if(is_numeric($term_id) && $def[$idx_ccode]==$ccode){
                 return $term_id;
             }
@@ -138,6 +138,42 @@ class DbsTerms
         }
         return null; //not found
     }    
+    
+    
+    
+    // Disambiguate elements (including terms at the same level of a vocabulary) which have the same label but
+    // different concept IDs, by adding 1, 2, 3 etc. to the end of the label.
+    //
+    // $lvl_src - level to search
+    // $idx - field index to check
+    // return new term name with index
+    //
+    public function doDisambiguateTerms($term_import, $lvl_src, $domain, $idx){
+
+        $terms = $this->data;
+
+        if(!$term_import || $term_import=="") return $term_import;
+
+        if(is_array($lvl_src)){
+
+            $found = 0;
+            $name = removeLastNum($term_import);
+
+            foreach($lvl_src as $trmId=>$childs){
+                $name1 = removeLastNum($terms['termsByDomainLookup'][$domain][$trmId][$idx]);
+                if($name == $name1){
+                    $found++;
+                }
+            }
+            if($found>0){
+                $term_import = $name." ".($found+1);
+            }
+
+        }
+
+        return $term_import;
+    }
+    
     
 }  
 ?>

@@ -183,7 +183,7 @@ $.widget( "heurist.importStructure", {
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             //refresh target
-            window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,false);
+            window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
             
             that.showRecTypeTree();
             window.hWin.HEURIST4.util.setDisabled(that.btn_import, true);
@@ -936,9 +936,9 @@ $.widget( "heurist.importStructure", {
         
         var rtyCode = this._selectedDB + '-' + this._selectedRtyID;
         
-        var request = {code:rtyCode, db:window.hWin.HAPI4.database}
+        var request = {code:rtyCode, db:window.hWin.HAPI4.database, import:'rectype'};
         
-        var url = window.hWin.HAPI4.baseURL + 'admin/structure/import/importRectype.php';
+        var url = window.hWin.HAPI4.baseURL + 'hserver/controller/sys_structure.php';
         
         var that = this;
         

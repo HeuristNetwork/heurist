@@ -1199,4 +1199,17 @@ function dbs_GetRectypeConstraint($system) {
             //"urlinclude" => "File/URL of include content",
             "boolean" => "Boolean (T/F)");
     }
+    
+    //
+    // utility
+    //    
+    function removeLastNum($name){
+
+        $k = strrpos($name," ");
+
+        if( $k>0 && is_numeric(substr($name, $k+1)) ){
+            $name = substr($name,0,$k);
+        }
+        return $name;
+    }
 ?>

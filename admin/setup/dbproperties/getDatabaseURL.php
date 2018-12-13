@@ -61,6 +61,7 @@
         }
        
     }else{
+        //on this server
         
         $system2 = new System();
         $system2->init('hdb_Heurist_Master_Index', true, false); //init without paths and consts

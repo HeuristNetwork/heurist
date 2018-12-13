@@ -313,7 +313,7 @@ copy_IconAndThumb_FromLibrary
     * @return $ret an array of return values for the various data elements created or errors if they occurred
     **/
     function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTitleMask=true, $icon_filename=null, $newfields=null) {
-        global $mysqli, $rtyColumnNames;
+        global $system, $mysqli, $rtyColumnNames;
 
         $ret = null;
 
@@ -368,8 +368,8 @@ copy_IconAndThumb_FromLibrary
             } else {
                 $rtyID = $mysqli->insert_id;
                 
-                if(HEURIST_DBID>0){
-                    $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.HEURIST_DBID
+                if($system->get_system('sys_dbRegisteredID')>0){
+                    $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$system->get_system('sys_dbRegisteredID')
                         .', rty_NameInOriginatingDB=rty_Name'
                         .', rty_IDInOriginatingDB='.$rtyID
                         .' WHERE (NOT rty_OriginatingDBID>0) AND rty_ID='.$rtyID;
@@ -481,10 +481,11 @@ copy_IconAndThumb_FromLibrary
 				} else {
 					$ret = $rtyID;
                     
-                    if(HEURIST_DBID>0){
+                    if($system->get_system('sys_dbRegisteredID')>0){
                         $query= 'UPDATE defRecTypes SET rty_NameInOriginatingDB=rty_Name '
                             .' WHERE rty_ID='.$rtyID
-                            .' AND rty_IDInOriginatingDB='.$rtyID.' AND rty_OriginatingDBID='.HEURIST_DBID;
+                            .' AND rty_IDInOriginatingDB='.$rtyID
+                            .' AND rty_OriginatingDBID='.$system->get_system('sys_dbRegisteredID');
                         $res = $mysqli->query($query);
                     }
                     
@@ -1060,7 +1061,7 @@ copy_IconAndThumb_FromLibrary
 
 		$dtg_ID = mysql__select_value($mysqli, "select dtg_ID from defDetailTypeGroups where dtg_ID = $dtgID");
 
-		if (!(dtg_ID>0)){
+		if (!($dtg_ID>0)){
 			return array("error" => "Error: looking for invalid field type group ID (dtg_ID) $dtgID in defDetailTypeGroups table");
 		}
 

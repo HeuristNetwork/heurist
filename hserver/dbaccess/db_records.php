@@ -227,6 +227,9 @@
         //check capture for newsletter subscription
         if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
             
+//error_log(session_id());
+//error_log($_SESSION["captcha_code"]);
+            
             $is_InValid = (@$_SESSION["captcha_code"] != @$record['Captcha']);
             
             if (@$_SESSION["captcha_code"]){

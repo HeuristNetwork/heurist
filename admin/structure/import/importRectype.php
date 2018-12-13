@@ -1050,18 +1050,6 @@ function importVocabulary($term_id, $domain, $children=null){
 
 
 
-function removeLastNum($name){
-
-    $k = strrpos($name," ");
-
-    if( $k>0 && is_numeric(substr($name, $k+1)) ){
-        $name = substr($name,0,$k);
-    }
-    return $name;
-}
-
-
-
 // Disambiguate elements (including terms at the same level of a vocabulary) which have the same label but ----------
 // different concept IDs, by adding 1, 2, 3 etc. to the end of the label.
 //

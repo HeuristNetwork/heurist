@@ -24,6 +24,7 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_structure.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_structure_tree.php');
+    require_once (dirname(__FILE__).'/../structure/dbsImport.php');
 
     /* DEBUG
     $_REQUEST['db'] = 'dos_3';
@@ -63,13 +64,41 @@
        }
     }
     
-    if(!$is_remote){
 
-        $system = new System();
-        if( ! $system->init(@$_REQUEST['db']) ){
+    $mode = 0;
+    $system = new System();
+    if( ! $system->init(@$_REQUEST['db']) ){
 
-            //get error and response
-            $response = $system->getError();
+        //get error and response
+        $response = $system->getError();
+        
+    }else{
+        
+        if(@$_REQUEST["import"]){ //this is import
+            if(!$system->is_admin()){
+                $system->error_exit('To perform this action you must be logged in as '
+                        .'Administrator of group \'Database Managers\'',
+                        HEURIST_REQUEST_DENIED);
+            }
+            
+            //combination of db and record type id eg. 1126-13            
+            $code = @$_REQUEST['code']; //this is not concept code - these are source database and rectype id in it
+            //concept code is unique for record type unfortunately it does not specify exactly what database is preferable as a source of donwloading
+            
+            $isOK = false;  
+
+            $importDef = new DbsImport( $system );
+
+            if($importDef->doPrepare(  array('defType'=>$_REQUEST["import"], 'conceptCode'=>$_REQUEST['code']) )){
+                $isOK = $importDef->doImport();
+            }
+
+            if(!$isOK){
+                $system->error_exit(null);  //produce json output and exit script
+            }
+            $response = $importDef->getReport();
+
+            $response['status'] = HEURIST_OK;            
             
         }else{
 
@@ -89,7 +118,6 @@
             if (@$_REQUEST['rectypes']) {
                 $ids = $_REQUEST['rectypes']=='all'?null:$_REQUEST['rectypes'];
                 $mode = intval(@$_REQUEST['mode']);
-
 
                 if($mode>2){
                     $data["rectypes"] = dbs_GetRectypeStructureTree($system, $ids, $mode, @$_REQUEST['fieldtypes'], @$_REQUEST['parentcode']);
@@ -119,9 +147,11 @@
                     $response = array("status"=>HEURIST_OK, "data"=> $data );
             }   
         
-        }            
+        }
+
     
-    }
+    }            
+
     
     /*
     if ( extension_loaded('zlib') && (substr_count($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip')) )
