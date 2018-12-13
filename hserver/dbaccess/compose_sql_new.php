@@ -99,7 +99,7 @@ select
 
 */
 $mysqli = null;
-$wg_ids = null;
+$wg_ids = null; //groups current user is member
 $publicOnly = false;
 
 //keep params for debug only!
@@ -291,10 +291,11 @@ class HQuery {
             }
 
             $where2 = '';    
+            
+            
             if($recVisibilityType && $recVisibilityType!="hidden"){
                 $where2 = '(r0.rec_NonOwnerVisibility="'.$recVisibilityType.'")';  //'pending','public','viewable'
             }else{
-                
                 $where2_conj = '';
                 if($recVisibilityType){ //hidden
                     $where2 = '(r0.rec_NonOwnerVisibility="hidden")';
@@ -314,9 +315,11 @@ class HQuery {
                     }
                     
                     $where2_conj = ' or ';
+                }else if ($this->search_domain != BOOKMARK){ //database owner can search everything
+                    $wg_ids = array();
                 }
                 
-                if(count($wg_ids)>0){
+                if($this->currUserID>0 && count($wg_ids)>0){
                     $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
                 }
             }
