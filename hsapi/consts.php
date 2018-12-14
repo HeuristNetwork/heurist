@@ -61,7 +61,7 @@ $REQUEST_PROTOCOL = $isSecure ? 'https' : 'http';
 $serverBaseURL = $REQUEST_PROTOCOL . "://" . $serverName;
 
 // calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
-$topdirs = "admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
+$topdirs = "admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
 
 $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
 if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank

@@ -816,7 +816,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                         print "Send : ".(filesize($filename) % 1024)." kB ".date("F d Y H:i:s.", fileatime($filename))."<br>";
                         ob_flush();flush();
 
-                        // TODO: this does not appear to be a valid URL. api directory was in /php/api which would not be reached by this path. /php/api is now /hserver/controller
+                        // TODO: this does not appear to be a valid URL. api directory was in /php/api which would not be reached by this path. /php/api is now /hsapi/controller
                         $url = $protocol.$host."/api/upload?uploadedItem=".urlencode($metadata_file);
                         $postdata = array(
                             //"uploadedItem" => $rtfolder."/dataset.xml",

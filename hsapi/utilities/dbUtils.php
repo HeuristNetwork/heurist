@@ -38,7 +38,7 @@
 * - databaseRegister - set register ID to sysIdentification and rectype, detail and term defintions
 */
 
-require_once(dirname(__FILE__).'/../../hserver/utilities/utils_db_load_script.php');
+require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_db_load_script.php');
 
 class DbUtils {
 

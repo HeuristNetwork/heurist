@@ -58,7 +58,7 @@ var cfg_widgets = [
 
     {id:'ha52', name:'Report', title:'Smarty report system', url:'hclient/widgets/viewers/smarty/rep_smarty.php'},
     {id:'ha53', name:'Transform', url:'hclient/widgets/viewers/transforms/rep_xslt.php'},
-    {id:'ha54', name:'Crosstabs', url:'hserver/analysis/crosstabulation.php', isframe:true},
+    {id:'ha54', name:'Crosstabs', url:'hsapi/analysis/crosstabulation.php', isframe:true},
     {id:'ha61', name:'Ext Record Viewer', widgetname:'rec_viewer_ext', script:'hclient/widgets/viewers/rec_viewer_ext.js'},
     */
 

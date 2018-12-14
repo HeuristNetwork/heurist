@@ -50,12 +50,12 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
         //
-        var installDir = window.hWin.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in 2 places this file and 6 other files if changed
+        var installDir = window.hWin.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in 2 places this file and 6 other files if changed
         //TODO: top directories - admin|applications|common| ... are defined in SEVEN separate locations. Rationalise.
         that.baseURL = window.hWin.location.protocol + '//'+window.hWin.location.host + installDir;
 
         // TODO: This is actually a proto URL rather than a base URL. Rename.
-        that.iconBaseURL = that.baseURL + 'hserver/dbaccess/rt_icon.php?db='+_database+'&id=';
+        that.iconBaseURL = that.baseURL + 'hsapi/dbaccess/rt_icon.php?db='+_database+'&id=';
         that.database = _database;
 
         //global variable defined in localization.js
@@ -98,7 +98,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     /*
     * internal function see hSystemMgr, hRecordMgr - ajax request to server
     *
-    * @param action   - name of php script in hserver/controller foolder on server side
+    * @param action   - name of php script in hsapi/controller foolder on server side
     * @param request - data to be sent to server side
     * @param callback - callback function, it obtains object with 2 properties:
     *       status - see ResponseStatus
@@ -118,7 +118,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
-        var url = that.baseURL+"hserver/controller/"+action+".php"; //+(new Date().getTime());
+        var url = that.baseURL+"hsapi/controller/"+action+".php"; //+(new Date().getTime());
         
         var request_code = {script:action, action:request.a};
         //note jQuery ajax does not properly in the loop - success callback does not work often
@@ -1301,7 +1301,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             //if file not found return empty gif (0) or add image gif (1) or default icon/thumb for entity (2)
             if(!(def>=0||def<3)) def = 2;
 
-            return window.hWin.HAPI4.baseURL + 'hserver/utilities/fileGet.php'
+            return window.hWin.HAPI4.baseURL + 'hsapi/utilities/fileGet.php'
                     +'?db='+ (database?database:window.hWin.HAPI4.database)
                     +'&entity='+entityName
                     +'&id='+recID
@@ -1318,7 +1318,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                     version:version,
                     def: 'check'};
             
-            window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hserver/utilities/fileGet.php', 
+            window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hsapi/utilities/fileGet.php', 
                         request, null, callback);
         }
 

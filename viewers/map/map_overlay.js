@@ -159,7 +159,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         if(current_map_document_id>0)
         {
 
-            var baseurl = window.hWin.HAPI4.baseURL + 'hserver/controller/map_data.php';
+            var baseurl = window.hWin.HAPI4.baseURL + 'hsapi/controller/map_data.php';
             var request = {db:window.hWin.HAPI4.database, id:current_map_document_id};
             
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response) {

@@ -35,9 +35,9 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hsapi/System.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 
     $system = new System();
     if( !$system->init(@$_REQUEST['db']) ){

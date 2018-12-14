@@ -159,7 +159,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         </a>
                     </li>
                     <li>
-                        <a href="hserver/utilities/recreateRecLinks.php" name="auto-popup" class="h3link"
+                        <a href="hsapi/utilities/recreateRecLinks.php" name="auto-popup" class="h3link"
                             onClick="{return false;}"
                             title="Rebuild the cache of pointers and relationship records, which is used to speed search/filter actions">
                             Rebuild relationships cache

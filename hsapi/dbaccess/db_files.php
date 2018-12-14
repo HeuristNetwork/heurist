@@ -217,7 +217,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
         if(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
             $thumb_url = HEURIST_THUMB_URL.$thumbfile;
         }else{
-            //hserver/dbaccess/file_download.php
+            //hsapi/dbaccess/file_download.php
             $thumb_url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&thumb=".$fileid;
         }
         

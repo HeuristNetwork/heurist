@@ -482,7 +482,7 @@ function EditRectypeTitle() {
         var mask = document.getElementById('rty_TitleMask').value;
         var rectypeID = window.hWin.HEURIST4.util.getUrlParameter('rectypeID', location.search);
 
-        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
 
         var request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
         
@@ -538,7 +538,7 @@ function EditRectypeTitle() {
         
         //verify text mask 
         var mask = document.getElementById('rty_TitleMask').value;
-        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
 
         var request = {rty_id:_rectypeID, mask:mask, db: window.hWin.HAPI4.database, check:1}; //verify titlemask
         
@@ -623,7 +623,7 @@ function EditRectypeTitle() {
         var mask = (mode==2)?document.getElementById('rty_TitleMask').value :document.getElementById('rty_CanonincalMask').value;
         var rectypeID = window.hWin.HEURIST4.util.getUrlParameter('rectypeID', location.search);
         
-        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
 
         var request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
         

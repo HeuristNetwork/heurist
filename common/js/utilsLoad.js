@@ -36,7 +36,7 @@ if (! document.body) {
 
 if (! top.HEURIST) {
 
-    var installDir = top.location.pathname.replace(/(((admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, "");
+    var installDir = top.location.pathname.replace(/(((admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*))/, "");
     if(top.installDirFromH4){
          installDir = top.installDirFromH4;
     }

@@ -43,8 +43,8 @@ if(@$_REQUEST["db"]!='Heurist_Master_Index'){
     return;
 }
 
-    require_once (dirname(__FILE__).'/../../../hserver/System.php');
-    require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_mail.php');
+    require_once (dirname(__FILE__).'/../../../hsapi/System.php');
+    require_once(dirname(__FILE__).'/../../../hsapi/utilities/utils_mail.php');
 
     $connect_failure = false;
     

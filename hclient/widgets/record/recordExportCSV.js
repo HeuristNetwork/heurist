@@ -212,7 +212,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
             
-            var url = window.hWin.HAPI4.baseURL + 'hserver/controller/record_output.php'
+            var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_output.php'
             
             this.element.find('#postdata').val( JSON.stringify(request) );
             this.element.find('#postform').attr('action', url);

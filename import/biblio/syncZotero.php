@@ -26,9 +26,9 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_records.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/conceptCode.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 
 require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
 //require_once dirname(__FILE__).'/../../external/libZotero/build/libZoteroSingle.php';

@@ -26,7 +26,7 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
-require_once(dirname(__FILE__).'/../../hserver/utilities/utils_mail.php');
+require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_mail.php');
 
 // POST request
 if(isset($_POST['data'])) {

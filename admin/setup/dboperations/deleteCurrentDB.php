@@ -24,7 +24,7 @@ define('MANAGER_REQUIRED', 1);
 define('PDIR','../../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/dbUtils.php');
+require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 ?>
 <html>
@@ -123,7 +123,7 @@ function () {
              width:700,
              height:180,
             close: function(){
-                window.hWin.document.location = window.hWin.HAPI4.baseURL; //+ "hserver/utilities/list_databases.php";
+                window.hWin.document.location = window.hWin.HAPI4.baseURL; //+ "hsapi/utilities/list_databases.php";
             }
        }}
     );

@@ -25,12 +25,12 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__)."/../../hserver/System.php");
+require_once(dirname(__FILE__)."/../../hsapi/System.php");
 
 
 if(defined('IS_INDEX_PAGE')){
     //if PDIR is defined this script is main (root)
-    define('ERROR_REDIR','hserver/utilities/list_databases.php');
+    define('ERROR_REDIR','hsapi/utilities/list_databases.php');
 }else{
     if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css
     define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');

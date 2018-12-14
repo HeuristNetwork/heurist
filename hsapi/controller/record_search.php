@@ -112,7 +112,7 @@
             
                 if(!@$_REQUEST['q']) $_REQUEST['q'] = 't:22'; //all registred db
             
-                $reg_url = HEURIST_INDEX_BASE_URL.'hserver/controller/record_search.php?db=Heurist_Master_Index&q='.$_REQUEST['q'];
+                $reg_url = HEURIST_INDEX_BASE_URL.'hsapi/controller/record_search.php?db=Heurist_Master_Index&q='.$_REQUEST['q'];
                 if(@$_REQUEST['detail']){
                     $reg_url = $reg_url.'&detail='
                         .(is_array($_REQUEST['detail'])?json_encode($_REQUEST['detail']):$_REQUEST['detail']);

@@ -100,10 +100,10 @@ if (@$argv) {
 
 }
 
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/conceptCode.php');
+require_once(dirname(__FILE__).'/../../hsapi/System.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 
 
 if(@$_REQUEST['file']){ // output manifest + files ??

@@ -57,10 +57,10 @@ function doLogin(isforsed){
                     var $dd = $dlg.find('#imgdiv');
                     var id = window.hWin.HEURIST4.util.random();
                     if(true){
-                        $dd.load(window.hWin.HAPI4.baseURL+'hserver/utilities/captcha.php?id='+id);
+                        $dd.load(window.hWin.HAPI4.baseURL+'hsapi/utilities/captcha.php?id='+id);
                     }else{
                         $dd.empty(); //find("#img").remove();
-                        $('<img id="img" src="hserver/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
+                        $('<img id="img" src="hsapi/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
                     }
                 }
 
@@ -194,7 +194,7 @@ function doLogin(isforsed){
                     allFields.val( "" ).removeClass( "ui-state-error" );
                     if( isforsed && !window.hWin.HAPI4.has_access() ){
                         //redirect to select database
-                        window.location  = window.HAPI4.baseURL; //+ "hserver/utilities/list_databases.php";
+                        window.location  = window.HAPI4.baseURL; //+ "hsapi/utilities/list_databases.php";
                     }
                 },
                 open: function() {

@@ -645,7 +645,7 @@ $mysqli->commit();
         }else{
         //2b. if remote server - call sys_strcture.php with loadRemoteURLContentWithRange
         
-           $remoteURL = $remote_url.'hserver/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
+           $remoteURL = $remote_url.'hsapi/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
            if(!$only_terms){
                 $remoteURL = $remoteURL.'&rectypes=all&detailtypes=all';
            }
@@ -664,7 +664,7 @@ $mysqli->commit();
             return false;
         }
         
-        $this->sourceIconURL = $remote_url.'hserver/dbaccess/rt_icon.php?db='.$remote_dbname.'&id=';
+        $this->sourceIconURL = $remote_url.'hsapi/dbaccess/rt_icon.php?db='.$remote_dbname.'&id=';
         $this->source_db_name = $remote_dbname;
         
         return $defs; 

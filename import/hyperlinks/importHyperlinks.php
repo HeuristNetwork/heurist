@@ -35,8 +35,8 @@ define('PDIR','../../');  //need for proper path to js and css
 
 require_once (dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 require_once (dirname(__FILE__).'/../../records/disambig/testSimilarURLs.php');
-require_once (dirname(__FILE__).'/../../hserver/entity/dbUsrTags.php');
-require_once (dirname(__FILE__).'/../../hserver/dbaccess/db_records.php');
+require_once (dirname(__FILE__).'/../../hsapi/entity/dbUsrTags.php');
+require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
 
 
 $nextmode = 'inputselect';

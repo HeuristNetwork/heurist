@@ -1586,7 +1586,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             }
 
 
-            // TODO: this also exists in hserver\sync\faims_to_heurist.php
+            // TODO: this also exists in hsapi\sync\faims_to_heurist.php
 
             function faimsToHeurist_dt_mapping($ftype){
 

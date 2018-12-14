@@ -27,8 +27,8 @@
 * @todo - only one kml per record, perhaps need to return the combination of kml
 */
 
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hsapi/System.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');

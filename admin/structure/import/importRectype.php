@@ -20,12 +20,12 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-require_once(dirname(__FILE__).'/../../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../../hserver/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../../hserver/structure/dbsTerms.php');
+require_once(dirname(__FILE__).'/../../../hsapi/System.php');
+require_once(dirname(__FILE__).'/../../../hsapi/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../../hsapi/structure/dbsTerms.php');
 
-require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_mail.php');
-require_once(dirname(__FILE__).'/../../../hserver/utilities/utils_file.php');
+require_once(dirname(__FILE__).'/../../../hsapi/utilities/utils_mail.php');
+require_once(dirname(__FILE__).'/../../../hsapi/utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
 
@@ -135,7 +135,7 @@ if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same domain
   
 }else{
 //2b. if remote server - call sys_strcture.php with loadRemoteURLContentWithRange
-   $remoteURL = $remote_url.'hserver/controller/sys_structure.php?rectypes=all&detailtypes=all&terms=all&mode=2&db='.$remote_dbname;
+   $remoteURL = $remote_url.'hsapi/controller/sys_structure.php?rectypes=all&detailtypes=all&terms=all&mode=2&db='.$remote_dbname;
 
    $defs = loadRemoteURLContent($remoteURL);            
    $defs = json_decode(gzdecode($defs), true);
@@ -147,7 +147,7 @@ if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same domain
 if (!($defs['rectypes'] && $defs['detailtypes'] && $defs['terms'])) {
     $system->error_exit("Structure definitions read from source database # $database_id are invalid. Please advise Heurist development team");
 }
-$sourceIconURL = $remote_url.'hserver/dbaccess/rt_icon.php?db='.$remote_dbname.'&id=';
+$sourceIconURL = $remote_url.'hsapi/dbaccess/rt_icon.php?db='.$remote_dbname.'&id=';
 
 //remote(source) database
 $def_rts = $defs['rectypes']['typedefs'];

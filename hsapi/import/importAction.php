@@ -24,7 +24,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 require_once(dirname(__FILE__)."/../../admin/verification/verifyValue.php");
-require_once(dirname(__FILE__)."/../../hserver/dbaccess/db_records.php");
+require_once(dirname(__FILE__)."/../../hsapi/dbaccess/db_records.php");
 
 require_once('UTMtoLL.php');
 require_once('GpointConverter.php');

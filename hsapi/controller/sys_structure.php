@@ -48,7 +48,7 @@
            //load structure from remote server
                 $splittedURL = explode('?', $remoteURL);
                    
-                $remoteURL = $splittedURL[0].'hserver/controller/sys_structure.php?db='.$match[1];
+                $remoteURL = $splittedURL[0].'hsapi/controller/sys_structure.php?db='.$match[1];
                 if (@$_REQUEST['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$_REQUEST['rectypes'];
                 if (@$_REQUEST['mode']) $remoteURL = $remoteURL.'&mode='.$_REQUEST['mode'];
                                                                     

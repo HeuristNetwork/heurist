@@ -2343,7 +2343,7 @@ function EditRecStructure() {
         var typedef = window.hWin.HEURIST4.rectypes.typedefs[rty_ID];
         var mask = typedef.commonFields[ window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
         
-        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
 
         var request = {rty_id:rty_ID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
         

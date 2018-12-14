@@ -32,8 +32,8 @@
 * @subpackage  Viewers/Map
 * @deprecated
 */
-    require_once (dirname(__FILE__).'/../../hserver/System.php');
-    require_once (dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
+    require_once (dirname(__FILE__).'/../../hsapi/System.php');
+    require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
     
     require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
     require_once(dirname(__FILE__)."/encodePolyline.php");

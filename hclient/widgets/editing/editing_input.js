@@ -1822,7 +1822,7 @@ $.widget( "heurist.editing_input", {
          
                         //init upload widget
                         $input.fileupload({
-    url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
+    url: window.hWin.HAPI4.baseURL +  'hsapi/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
     //url: 'templateOperations.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},

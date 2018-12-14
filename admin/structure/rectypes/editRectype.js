@@ -732,7 +732,7 @@ function testTitleMask()
 
         var mask = document.getElementById("rty_TitleMask").value;
         
-        var baseurl = window.hWin.HAPI4.baseURL + "hserver/controller/rectype_titlemask.php";
+        var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
 
         var request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
         

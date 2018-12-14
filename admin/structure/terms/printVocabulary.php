@@ -19,8 +19,8 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    require_once (dirname(__FILE__).'/../../../hserver/System.php');
-    require_once (dirname(__FILE__).'/../../../hserver/dbaccess/db_structure.php');
+    require_once (dirname(__FILE__).'/../../../hsapi/System.php');
+    require_once (dirname(__FILE__).'/../../../hsapi/dbaccess/db_structure.php');
 
     $error = null;
     

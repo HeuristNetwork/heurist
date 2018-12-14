@@ -34,7 +34,7 @@
 function getInstallationDirectory2($scriptName){
     
     // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
-    $topDirs = "admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external";
+    $topDirs = "admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external";
 
     // calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
     $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", $scriptName); // remove "/top level dir" and everything that follows it.

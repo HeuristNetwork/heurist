@@ -1,0 +1,75 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css">
+    <script type="text/javascript" src="ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+    <script type="text/javascript" src="ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+
+        <script src="ext/tinymce/tinymce.min.js"></script>
+        <script src="ext/tinymce/jquery.tinymce.min.js"></script>
+    
+<script>
+$(document).ready(function() {
+
+    //whatisinside();
+$(document).on('focusin', function(e) {
+    if ($(e.target).closest(".mce-window, .moxman-window").length) {
+        e.stopImmediatePropagation();
+    }
+});   
+    
+        tinymce.init({
+                    //selector: 'textarea',
+                    selector: '.editable',
+                    inline: true,
+                    menubar: false,
+                    plugins: [
+                        'advlist autolink lists link image preview textcolor', //anchor charmap print 
+                        'searchreplace visualblocks code fullscreen',
+                        'media table contextmenu paste help'  //insertdatetime  wordcount
+                      ],      
+                      //code insert  |  fontselect fontsizeselect |  forecolor backcolor | alignleft aligncenter alignright alignjustify            
+                    toolbar: ['undo redo | formatselect | bold italic forecolor',
+                             'align | bullist numlist outdent indent | media image link | removeformat | help'],
+                    content_css: [
+                        '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+                        //,'//www.tinymce.com/css/codepen.min.css'
+                        ]                    
+              });
+    
+});    
+function whatisinside(){
+    var t = document.querySelector("#t");
+    var htmlDocument = t.contentDocument;
+    console.log(htmlDocument);
+}
+</script>
+</head>
+<body>
+
+<div>
+    <button value="Check" onclick="whatisinside()">CHECK</button>
+</div>
+
+<!--
+
+<object id="t" oncontextmenu="return false;" name="plugin" 
+    data="http://heurist.sydney.edu.au/h5-ao/hsapi/dbaccess/file_download.php?db=ExpertNation&amp;embed=1&amp;file=ae2c4f32b9f3fe7b4e9e36689a87790c942aa083#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;statusbar=0&amp;messages=0&amp;scrollbar=0" type="application/pdf" width="100%" height="100%"></object>
+
+https://stackoverflow.com/questions/8798745/how-to-get-html-elements-from-an-object-tag
+
+var t=document.querySelector("#t");
+var htmlDocument= t.contentDocument;
+-->
+
+<div>Bla ba babababa</div>
+
+
+Text1: <div class="editable">AAA</div>
+
+<div>Some not editable text</div>
+
+
+Text2: <div class="editable" style="border:1px solid blue;min-width:300px;padding:3px">BBB</div>
+
+</body>
+</html>

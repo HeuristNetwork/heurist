@@ -142,7 +142,7 @@ $.widget( "heurist.help_tips", {
                 }
                 
                 $.ajax( {
-                    url: window.hWin.HAPI4.baseURL + 'hserver/utilities/fileGet.php?check=context_help/tips/tip'+(idx+1)+'.html',
+                    url: window.hWin.HAPI4.baseURL + 'hsapi/utilities/fileGet.php?check=context_help/tips/tip'+(idx+1)+'.html',
                     })
                     .error(function() {
                     })

@@ -327,7 +327,7 @@ class DbEntityBase
     private function _readConfig(){
 
         //$entity_file = dirname(__FILE__)."/".@$this->data['entity'].'.json';
-        $entity_file = HEURIST_DIR.'hserver/entity/'.@$this->data['entity'].'.json';
+        $entity_file = HEURIST_DIR.'hsapi/entity/'.@$this->data['entity'].'.json';
         
         if(file_exists($entity_file)){
             

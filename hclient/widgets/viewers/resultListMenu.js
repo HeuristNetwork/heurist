@@ -39,7 +39,7 @@ $.widget( "heurist.resultListMenu", {
 
         var that = this;
 
-        this._collectionURL = window.hWin.HAPI4.baseURL + "hserver/utilities/manageCollection.php";
+        this._collectionURL = window.hWin.HAPI4.baseURL + "hsapi/utilities/manageCollection.php";
 
         this.element
         .css('font-size', '0.9em')

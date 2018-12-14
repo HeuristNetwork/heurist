@@ -9,9 +9,9 @@ getLinkedRecords - returns array of linkedto and linkedfrom record IDs
 getWootText  - returns text related with given record ID
 */
 
-require_once(dirname(__FILE__).'/../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_structure.php');
-require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hsapi/System.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 //require_once(dirname(__FILE__).'/../../records/woot/woot.php');

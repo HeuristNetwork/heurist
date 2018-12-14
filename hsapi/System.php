@@ -471,7 +471,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
         define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
 
-        define('HEURIST_ICON_SCRIPT', HEURIST_BASE_URL.'hserver/dbaccess/rt_icon.php?db='.$dbname.'&id=');
+        define('HEURIST_ICON_SCRIPT', HEURIST_BASE_URL.'hsapi/dbaccess/rt_icon.php?db='.$dbname.'&id=');
         
         define('HEURIST_TERM_ICON_DIR', HEURIST_FILESTORE_DIR . 'term-icons/');
         define('HEURIST_TERM_ICON_URL', HEURIST_FILESTORE_URL . 'term-icons/');
@@ -499,7 +499,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
         if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
 
-        $topDirs = "admin|applications|common|context_help|export|hapi|hclient|hserver|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
+        $topDirs = "admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
         $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
 
         if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank

@@ -400,7 +400,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(this.options.import_structure){
             //Ian dwi
             rtIcon = this.options.import_structure.databaseURL
-                                + '/hserver/dbaccess/rt_icon.php?db='
+                                + '/hsapi/dbaccess/rt_icon.php?db='
                                 + this.options.import_structure.database + '&id=';
             recThumb = rtIcon+'thumb/th_'+recID;
             rtIcon = rtIcon + recID;

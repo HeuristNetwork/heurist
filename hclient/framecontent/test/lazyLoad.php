@@ -122,7 +122,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                                     var node = data.node;
 console.log(node.data.rt_ids);                                    
                                     
-                                    var sURL = window.hWin.HAPI4.baseURL + "hserver/controller/sys_structure.php";
+                                    var sURL = window.hWin.HAPI4.baseURL + "hsapi/controller/sys_structure.php";
                                     /*"?db="
                                         + window.hWin.HAPI4.database
                                         +'&mode=4&rectypes='+data.node.key

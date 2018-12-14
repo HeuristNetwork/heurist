@@ -1985,7 +1985,7 @@ $.widget( "heurist.expertnation_nav", {
                         href = 'javascript:;';
                         
                         var fileURL_forembed = window.hWin.HAPI4.baseURL
-                                + 'hserver/dbaccess/file_download.php?db=' 
+                                + 'hsapi/dbaccess/file_download.php?db=' 
                                 + window.hWin.HAPI4.database + '&embed=1&file='+obf[0];
                                 
   /*div.pdf {
@@ -2502,10 +2502,10 @@ $.widget( "heurist.expertnation_nav", {
         var $dd = edit_form.find('#captcha_img');
         var id = window.hWin.HEURIST4.util.random();
         if(true){  //simple captcha
-            $dd.load(window.hWin.HAPI4.baseURL+'hserver/utilities/captcha.php?id='+id);
+            $dd.load(window.hWin.HAPI4.baseURL+'hsapi/utilities/captcha.php?id='+id);
         }else{ //image captcha
             $dd.empty();
-            $('<img src="'+window.hWin.HAPI4.baseURL+'hserver/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
+            $('<img src="'+window.hWin.HAPI4.baseURL+'hsapi/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
         }
         
         

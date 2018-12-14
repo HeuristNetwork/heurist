@@ -938,7 +938,7 @@ $.widget( "heurist.importStructure", {
         
         var request = {code:rtyCode, db:window.hWin.HAPI4.database, import:'rectype'};
         
-        var url = window.hWin.HAPI4.baseURL + 'hserver/controller/sys_structure.php';
+        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/sys_structure.php';
         
         var that = this;
         

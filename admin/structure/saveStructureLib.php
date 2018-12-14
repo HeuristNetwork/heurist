@@ -30,9 +30,9 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-    require_once(dirname(__FILE__).'/../../hserver/utilities/titleMask.php');
-    require_once(dirname(__FILE__).'/../../hserver/dbaccess/db_records.php');  //to delete temporary records
-    require_once(dirname(__FILE__).'/../../hserver/dbaccess/conceptCode.php'); 
+    require_once(dirname(__FILE__).'/../../hsapi/utilities/titleMask.php');
+    require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');  //to delete temporary records
+    require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php'); 
     require_once(dirname(__FILE__).'/../../common/php/imageLibrary.php');
 /* in imageLibrary we use 
 getRectypeIconURL    
@@ -421,7 +421,7 @@ copy_IconAndThumb_FromLibrary
     **/
 	function updateRectype($commonNames, $rtyID, $rt) {
 
-		global $mysqli, $rtyColumnNames;
+		global $system, $mysqli, $rtyColumnNames;
 
 		$ret = null;
 

@@ -30,8 +30,8 @@
 * @todo    (art) replace document.getElementById to jquery $
 * @todo    (art) use display block for terms fields instead of dynamic addition
 */
-require_once(dirname(__FILE__).'/../../../hserver/System.php');
-require_once(dirname(__FILE__).'/../../../hserver/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../../hsapi/System.php');
+require_once(dirname(__FILE__).'/../../../hsapi/dbaccess/db_structure.php');
 
 
 $res = false;

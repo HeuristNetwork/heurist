@@ -1711,7 +1711,7 @@ function EditTerms() {
         if(_currentNode===null) return;
 
         //window.hWin.HAPI4.iconBaseURL
-        var baseurl = window.hWin.HAPI4.baseURL + 'hserver/dbaccess/rt_icon.php';
+        var baseurl = window.hWin.HAPI4.baseURL + 'hsapi/dbaccess/rt_icon.php';
         var request = {
             id:_currentNode.data.id,
             db:window.hWin.HAPI4.database,
@@ -1735,7 +1735,7 @@ function EditTerms() {
         var $input_img = $('#termImage');
 
         $input.fileupload({
-            url: window.hWin.HAPI4.baseURL +  'hserver/utilities/fileUpload.php',
+            url: window.hWin.HAPI4.baseURL +  'hsapi/utilities/fileUpload.php',
             formData: [ {name:'db', value: window.hWin.HAPI4.database},
                 {name:'entity', value:'terms'},
                 {name:'newfilename', value: document.getElementById ('edId').value }],
