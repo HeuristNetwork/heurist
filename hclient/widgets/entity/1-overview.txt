@@ -1,8 +1,15 @@
 Directory:    /hclient/widgets/entity
 
-Overview:   Manage personal details of the user, their login information and interface preferences
+Overview:   Search, manage and edit forms for all tables 
 
-Updated:     18 Oct 2015
+manageEntity.js base widget (ancestor) for all manageXXX widgets
+
+It consists of recordList widgets and manages edit form (editing/editing2.js) (based on entity.json config file) 
+
+searchEntity.js base search widget. It loads searchXXX.html template with search form and generates search request
+
+
+Updated:     14 Dec 2018
 
 ----------------------------------------------------------------------------------------------------------------
 
