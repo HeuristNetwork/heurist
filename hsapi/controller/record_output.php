@@ -37,6 +37,7 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
+    require_once (dirname(__FILE__).'/../structure/dbsTerms.php');
     require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
     require_once(dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
@@ -147,6 +148,7 @@ function outputXML($system, $data, $params){
     $include_term_label_and_code = true;
     $include_term_code = (@$params['prefs']['include_term_label_and_code']==1);
     $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
+    $include_term_hierarchy = (@$params['prefs']['include_term_hierarchy']==1);
     
     $fields = @$params['prefs']['fields'];
     $details = array();  //array of detail fields included into output
@@ -161,9 +163,12 @@ function outputXML($system, $data, $params){
 
     if($include_term_label_and_code){
         $rtTerms = dbs_GetTerms($system);
+        /*
         $idx_term_label = $rtTerms['fieldNamesToIndex']['trm_Label'];
         $idx_term_code = $rtTerms['fieldNamesToIndex']['trm_Code'];
         $rtTerms = $rtTerms['termsByDomainLookup']['enum'];
+        */
+        $rtTerms = new DbsTerms($system, $rtTerms);
     }
     
     //create header
@@ -194,8 +199,13 @@ function outputXML($system, $data, $params){
                     $field_name = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_name];
                     $field_type = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
                     if($constr_rt_id>0){
-                        $field_name_title = $field_name.'('.$rtStructs['names'][$constr_rt_id].' Title)';
-                        $field_name = $field_name.' ('.$rtStructs['names'][$constr_rt_id].') H-ID';
+                        $rectypename_is_in_fieldname = (strpos(strtolower($field_name), 
+                                            strtolower($rtStructs['names'][$constr_rt_id]))!==false);
+                        $field_name_title = $field_name.'('.
+                                                ($rectypename_is_in_fieldname?'':($rtStructs['names'][$constr_rt_id].' '))
+                                                .'Title)';
+                        $field_name = $field_name.($rectypename_is_in_fieldname
+                                            ?'':' ('.$rtStructs['names'][$constr_rt_id].')').' H-ID';
                     }
                     if($field_type=='relmarker'){
                         $relmarker_details[$rt][$dt_id] = $constr_rt_id; 
@@ -221,7 +231,8 @@ function outputXML($system, $data, $params){
                 array_push($headers[$rt], $field_name);            
                 if($include_term_label_and_code && $field_type=='enum'){
                     array_push($headers[$rt], $field_name.' (Label)');            
-                    if($include_term_code) array_push($headers[$rt], $field_name.' (Code)' );            
+                    if($include_term_code) array_push($headers[$rt], $field_name.' (Code)' );   
+                             
                 }else if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
                     array_push($headers[$rt], $field_name_title);            
                 }
@@ -419,8 +430,10 @@ function outputXML($system, $data, $params){
                             
                                 if(count($values)>0){
                                     foreach($values as $val){
-                                        $enum_label[] = @$rtTerms[$val][$idx_term_label]?$rtTerms[$val][$idx_term_label]:'';
-                                        $enum_code[] = @$rtTerms[$val][$idx_term_code]?$rtTerms[$val][$idx_term_code]:'';
+                                        $enum_label[] = $rtTerms->getTermLabel($val, $include_term_hierarchy);
+                                        // @$rtTerms[$val][$idx_term_label]?$rtTerms[$val][$idx_term_label]:'';
+                                        $enum_code[] = $rtTerms->getTermCode($val);
+                                        //@$rtTerms[$val][$idx_term_code]?$rtTerms[$val][$idx_term_code]:'';
                                     }                        
                                 }else{
                                     $enum_label[] = '';
@@ -442,7 +455,7 @@ function outputXML($system, $data, $params){
                             $enum_label[] = '';
                             $enum_code[] = ''; 
                         }else if($include_resource_titles && $dt_type=='resource'){
-                            $resource_titles[] = $val['title'];
+                            $resource_titles[] = '';
                         }
                     }
                     

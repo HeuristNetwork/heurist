@@ -62,10 +62,9 @@ class DbsTerms
             return $term_id;
         }
         
-        $terms = $this->data['termsByDomainLookup'][$domain];
         $idx_ccode = intval($this->data['fieldNamesToIndex']["trm_ConceptID"]);
 
-        foreach ($terms as $term_id => $def) {
+        foreach ($this->data['termsByDomainLookup'][$domain] as $term_id => $def) {
             if(is_numeric($term_id) && $def[$idx_ccode]==$ccode){
                 return $term_id;
             }
@@ -96,11 +95,9 @@ class DbsTerms
             $termIDs = explode(",",$temp);
         }
 
-        $terms = $this->data;
-        
         // Validate termIDs
         if($domain!=null){
-            $TL = $terms['termsByDomainLookup'][$domain];
+            $TL = $this->data['termsByDomainLookup'][$domain];
 
             foreach ($termIDs as $trmID) {
                 // check that the term valid
@@ -115,16 +112,79 @@ class DbsTerms
     }    
 
     //
+    //
+    //
+    public function getTermLabel($term_id, $with_hierarchy=false) {
+    
+        $term = $this->getTerm($term_id);
+        if($term){
+            
+            $idx_term_label = $this->data['fieldNamesToIndex']['trm_Label'];
+            
+            if($with_hierarchy){
+                $labels = '';
+                $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
+                $idx_term_doamin = $this->data['fieldNamesToIndex']['trm_Domain'];
+                
+                
+                $labels = array();
+                array_push($labels, $term[$idx_term_label]);
+                
+                while ( $term[$idx_term_parent]>0 ) {
+                    $term = $this->getTerm($term[$idx_term_parent]);
+                    //if(!$term) break;
+                    if($term[$idx_term_parent]>0){
+                        array_unshift($labels, $term[$idx_term_label]);
+                    }else{
+                        break; //ignore vocabulary
+                    }
+                }
+                return implode('.',$labels);
+            }else{
+                return @$term[$idx_term_label]?$term[$idx_term_label]:'';    
+            }
+        }else{
+            return '';
+        }
+        
+    }
+
+    //
+    //
+    //
+    public function getTermCode($term_id) {
+        
+        $term = $this->getTerm($term_id);
+        if($term){
+            $idx_term_code = $this->data['fieldNamesToIndex']['trm_Code'];
+            return @$term[$idx_term_code]?$term[$idx_term_code]:'';
+        }else{
+            return '';
+        }
+    }
+    
+    //
+    //
+    public function getTerm($term_id, $domain='enum') {
+        $term = null;
+        
+        if(@$this->data['termsByDomainLookup'][$domain][$term_id]!=null){
+            $term = $this->data['termsByDomainLookup'][$domain][$term_id];
+        }else{
+            $term = $this->data['termsByDomainLookup'][$domain=='enum'?'relation':'enum'][$term_id];            
+        }
+        return $term;
+    }
+    
+    //
     //  Find vocabulary ID
     //
     public function getTopMostTermParent($term_id, $domain, $topmost=null) {
 
-        $terms = $this->data;
-
         if(is_array($domain)){
             $lvl = $domain;
         }else{
-            $lvl = $terms['treesByDomain'][$domain];
+            $lvl = $this->data['treesByDomain'][$domain];
         }
         foreach($lvl as $sub_term_id=>$childs){
 
@@ -150,8 +210,6 @@ class DbsTerms
     //
     public function doDisambiguateTerms($term_import, $lvl_src, $domain, $idx){
 
-        $terms = $this->data;
-
         if(!$term_import || $term_import=="") return $term_import;
 
         if(is_array($lvl_src)){
@@ -160,7 +218,7 @@ class DbsTerms
             $name = removeLastNum($term_import);
 
             foreach($lvl_src as $trmId=>$childs){
-                $name1 = removeLastNum($terms['termsByDomainLookup'][$domain][$trmId][$idx]);
+                $name1 = removeLastNum($this->data['termsByDomainLookup'][$domain][$trmId][$idx]);
                 if($name == $name1){
                     $found++;
                 }

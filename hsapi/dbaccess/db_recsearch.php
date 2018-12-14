@@ -1775,7 +1775,7 @@ $loop_cnt++;
         
         if(is_array($need_details) && count($need_details)>0 ){
             
-            if(is_int($need_details[0]) && $need_details[0]>0){
+            if(is_numeric($need_details[0]) && $need_details[0]>0){ //
                 $squery = $squery. ' AND dtl_DetailTypeID in ('.implode(',',$need_details).')';
             }else{
                 $squery = $squery. ' AND dty_Type in ("'.implode('","',$need_details).'")';
