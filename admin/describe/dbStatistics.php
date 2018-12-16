@@ -177,7 +177,7 @@ if($is_csv){
         
         $zip = new ZipArchive();
         if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
-            print "Can not create zip $destination";    
+            print "Cannot create zip $destination";    
         }else{
             // return to the start of the stream
             rewind($fd);

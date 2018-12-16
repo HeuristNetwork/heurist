@@ -1642,7 +1642,7 @@ copy_IconAndThumb_FromLibrary
     
     /**
     * verify whether term is in use in field that uses vocabulry
-    * if yes it means it can not be moved into different vocabulary
+    * if yes it means it cannot be moved into different vocabulary
     */
     function checkTerms($termID){
     

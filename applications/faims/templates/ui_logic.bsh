@@ -266,7 +266,7 @@ onAddNewEntityWhenSelect(){
     for (String rt : tabs_edit) {
         if (rt.equals(rectypeTab) ) {
             //prevents show edit form in case it is already in use
-            showWarning("Already in use", "Can not create new "+rectypeTab+". Save previous");
+            showWarning("Already in use", "Cannot create new "+rectypeTab+". Save previous");
             return;
         }
     }
@@ -379,14 +379,14 @@ newEntity(String rectypeTab){
         entName = getFieldValue("control/data/entityTypeList");
         rectypeTab = getTabnameByEntityName(entName);
 		if(isNull(rectypeTab)){
-            showWarning("Cannot edit", "Entity type '"+entName+"' can not be edited");
+            showWarning("Cannot edit", "Entity type '"+entName+"' cannot be edited");
             return;
 		}
     }
 
     for (String rt : tabs_edit) {
         if (rt.equals(rectypeTab) ) {
-            showWarning("Already in use", "Can not create new '"+rectypeTab+"'. Save previous");
+            showWarning("Already in use", "Cannot create new '"+rectypeTab+"'. Save previous");
             return;
         }
     }

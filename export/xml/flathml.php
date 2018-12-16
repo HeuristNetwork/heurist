@@ -128,7 +128,7 @@ if(@$_REQUEST['filename']){ //write the output into single file
 if(!defined('PDIR')){
     $system = new System();
     if( !$system->init(@$_REQUEST['db']) ){
-        die("Can not connect to database");
+        die("Cannot connect to database");
     }
 }
 

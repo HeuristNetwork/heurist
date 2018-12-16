@@ -3423,7 +3423,7 @@ var sName = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[rst_ID][fi.r
 sMsg = '<h3>Conversion of records to child records</h3><br><b>Pointer field:'+ sName +'</b><br><br>'
 +'<div>'+response.data['passed']+' values were found (child record ids)</div>'
 +(response.data['disambiguation']>0?('<div>'+response.data['disambiguation']+' values ignored. The same records were pointed to as a child record by more than one parent</div>'):'')
-+(response.data['noaccess']>0?('<div>'+response.data['noaccess']+' records can not be converted to child records (no access rights)</div>'):'');
++(response.data['noaccess']>0?('<div>'+response.data['noaccess']+' records cannot be converted to child records (no access rights)</div>'):'');
 
 if(response.data['processedParents'].length>0){
 sMsg = sMsg

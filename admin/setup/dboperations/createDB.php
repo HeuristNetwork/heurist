@@ -211,7 +211,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             
             $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', $user_record);
             if($ret!=2){
-                array_push($warnings, 'Can not set owner user. '.$ret);                
+                array_push($warnings, 'Cannot set owner user. '.$ret);                
             }
            
             //add default saved searches and tree
@@ -219,7 +219,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                         
             $ret = mysql__insertupdate($mysqli, 'sysUGrps', 'ugr', array('ugr_ID'=>1, 'ugr_NavigationTree'=>$navTree ));
             if($ret!=1){
-                array_push($warnings, 'Can not set navigation tree for group 1. '.$ret);                
+                array_push($warnings, 'Cannot set navigation tree for group 1. '.$ret);                
             }
             
 

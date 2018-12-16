@@ -542,7 +542,7 @@ function outputXML($system, $data, $params){
         
         $zip = new ZipArchive();
         if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
-            array_push($error_log, "Can not create zip $destination");    
+            array_push($error_log, "Cannot create zip $destination");    
         }else{
             $is_first = true;
         

@@ -151,7 +151,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                             array_push($dirs2, $dir);
                         }else{
                             if(in_array($dir, $system_folders)){
-                                print 'Folder "'.$dir.'" is system one and can not be used for file upload<br>';    
+                                print 'Folder "'.$dir.'" is system one and cannot be used for file upload<br>';    
                             }else{
                                 print 'Folder "'.$dir.'" does not exist<br>';
                                 if (!mkdir($dir, 0777, true)) {

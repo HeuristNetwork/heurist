@@ -402,7 +402,7 @@ class DbSysGroups extends DbEntityBase
         $ret = true;
         
         
-        //group can not be without admin. 
+        //group cannot be without admin. 
         if($this->data['role']=='remove' || $this->data['role']=='member'){
             
             //verification

@@ -1,6 +1,6 @@
 <?php
 /**
-* dbsImport.php - import defintion from other database
+* dbsImport.php - import definition from other database
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -121,7 +121,7 @@ class DbsImport {
         }
         
         if (!($def_id>0)) { //definition not found in source database
-            $this->system->addError(HEURIST_ERROR, 'Can not get '.$defType. ' defintion with concept code '.$cCode.' in database #'.$db_reg_id);
+            $this->system->addError(HEURIST_ERROR, 'Unable to get '.$defType. ' definition with concept code '.$cCode.' in database #'.$db_reg_id);
             return false; //see $system->getError
         }
         

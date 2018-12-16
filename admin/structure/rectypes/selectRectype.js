@@ -613,7 +613,7 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 
                 if(_arr_removed.length>0){
                     // verify whether term is in use in field that uses vocabulry
-                    // if yes it means it can not be moved into different vocabulary
+                    // if yes it means it cannot be moved into different vocabulary
                     var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
                         
                     var request = {method:'checkDtPtr', db:window.hWin.HAPI4.database,

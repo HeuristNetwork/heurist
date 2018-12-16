@@ -153,7 +153,7 @@ class DbUtils {
 
             // Create DELETED_DATABASES directory if needed
             if(!folderCreate($archiveFolder, true)){
-                    $system->addError(HEURIST_SYSTEM_CONFIG, 'Can not create folder for deleteted databases');                
+                    $system->addError(HEURIST_SYSTEM_CONFIG, 'Cannot create folder for deleteted databases');                
                     return false;
             }
             
@@ -232,7 +232,7 @@ class DbUtils {
             // dump will be created in database upload folder
             $directory = HEURIST_FILESTORE_ROOT.$database_name;
             /*if(!folderCreate($directory, true)){
-                self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Can not create folder for deleteted databases');                
+                self::$system->addError(HEURIST_SYSTEM_CONFIG, 'Cannot create folder for deleteted databases');                
                 if($verbose) echo 'Unable to create folder '.$directory;
                 return false;
             }*/
@@ -366,13 +366,13 @@ class DbUtils {
                     // echo_flush ('OK');
                     return true;
                 }else{
-                    self::$system->addError(HEURIST_DB_ERROR, 'Can not add procedures and triggers');
+                    self::$system->addError(HEURIST_DB_ERROR, 'Cannot add procedures and triggers');
                 }
             }else{
-                self::$system->addError(HEURIST_DB_ERROR, 'Can not add referential constraints');
+                self::$system->addError(HEURIST_DB_ERROR, 'Cannot add referential constraints');
             }
         }else{
-            self::$system->addError(HEURIST_DB_ERROR, 'Can not create database tables');
+            self::$system->addError(HEURIST_DB_ERROR, 'Cannot create database tables');
         }
         //fail
         mysql__drop_database($mysqli, $database_name_full);

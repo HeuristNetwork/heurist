@@ -46,8 +46,9 @@ if (!@$dbReadonlyPassword) $dbReadonlyPassword = ""; //required
 
 // [folders]
 
+// REQUIRED: defines URL of Heurist filestore (contains files associated with databases)
 if (!@$defaultRootFileUploadURL) $defaultRootFileUploadURL = "http://localhost/HEURIST/HEURIST_FILESTORE/";
-// REQUIRED: defines URL of Heurist filestore - location of files associated with databases
+// REQUIRED: defines internal location of Heurist filestore
 if (!@$defaultRootFileUploadPath) $defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";
 
 // [email]
@@ -70,6 +71,8 @@ if (!@$passwordForServerFunctions) $passwordForServerFunctions="";// if blank, n
 if (!@$dbHost) $dbHost= ""; //optional, blank = localhost
 if (!@$httpProxy) $httpProxy = ""; // blank = assumes direct internet access from server
 if (!@$httpProxyAuth) $httpProxyAuth = ""; // authorization for proxy server "username:password"
+
+//  set to IP address and port of Elastic search server, if used
 if (!@$indexServerAddress) $indexServerAddress = ""; 
 if (!@$indexServerPort) $indexServerPort = "9200";
 

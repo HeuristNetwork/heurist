@@ -874,7 +874,7 @@ private static function saveToDatabase($preproc){
 
     $session = ImportSession::save($session);
     if(!is_array($session)){
-        self::$system->addError(HEURIST_DB_ERROR, 'Can not save import session', $session);
+        self::$system->addError(HEURIST_DB_ERROR, 'Cannot save import session', $session);
         return false;
     }
     

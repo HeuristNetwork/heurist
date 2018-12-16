@@ -2425,7 +2425,7 @@ function EditTerms() {
                     if(vocab_id_Source != vocab_id_Target){
                         
                         // verify whether term is in use in field that uses vocabulry
-                        // if yes it means it can not be moved into different vocabulary
+                        // if yes it means it cannot be moved into different vocabulary
                         var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
                         
                         var request = {method:'checkTerm', 

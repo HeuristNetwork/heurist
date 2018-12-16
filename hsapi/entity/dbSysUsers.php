@@ -341,7 +341,7 @@ class DbSysUsers extends DbEntityBase
                         $rv = user_EmailApproval($this->system, $ugr_ID, $this->records[$idx]['tmp_password'], $is_approvement);
                     }
                     if(!$rv){
-                        //can not sent email 
+                        //cannot sent email 
                         //return false;
                     }
                 }

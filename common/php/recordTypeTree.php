@@ -42,7 +42,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
     $system = new System();
     if( !$system->init(@$_REQUEST['db']) ){
         header('Content-type: application/json;charset=UTF-8');
-        echo json_encode( array("error"=>'Can not connect to database') );
+        echo json_encode( array("error"=>'Cannot connect to database') );
         exit();
     }
     

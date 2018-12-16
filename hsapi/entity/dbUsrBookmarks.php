@@ -269,7 +269,7 @@ class DbUsrBookmarks extends DbEntityBase
                              
             }else{
                 $this->system->addError(HEURIST_NOT_FOUND, 
-                    'None of record is bookmarked. Nothing to unbookmark');
+                    'None of the record(s) is/are bookmarked. Nothing to unbookmark');
                 return false;
             }
             
@@ -290,7 +290,7 @@ class DbUsrBookmarks extends DbEntityBase
 
                 $res = $mysqli->query($query);
                 if(!$res){
-                    $this->system->addError(HEURIST_DB_ERROR, 'Can not set rating', $mysqli->error);
+                    $this->system->addError(HEURIST_DB_ERROR, 'Cannot set rating', $mysqli->error);
                     return false;
                 }
             

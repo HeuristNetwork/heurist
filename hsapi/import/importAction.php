@@ -441,7 +441,7 @@ public static function assignRecordIds($params){
     $imp_session = ImportSession::load($params['imp_ID']);
 
     if( is_bool($imp_session) && $imp_session==false ){
-        return false; //error - can not get import session
+        return false; //error - cannot get import session
     }
     
     $records = null;
@@ -648,7 +648,7 @@ public static function assignRecordIds($params){
     
     $res = ImportSession::save( $imp_session );
     if(!is_array($res)){
-        self::$system->addError(HEURIST_DB_ERROR, 'Can not save import session', $res);
+        self::$system->addError(HEURIST_DB_ERROR, 'Cannot save import session', $res);
         return false;
     }    
     
@@ -2553,7 +2553,7 @@ public static function performImport($params, $mode_output){
 
     $res = ImportSession::save( $imp_session );
     if(!is_array($res)){
-        self::$system->addError(HEURIST_DB_ERROR, 'Can not save import session', $res);
+        self::$system->addError(HEURIST_DB_ERROR, 'Cannot save import session', $res);
         return false;
     }    
     return $res;

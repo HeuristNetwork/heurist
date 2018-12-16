@@ -116,7 +116,7 @@ public static function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
         $imp_session['sequence'] = $sequence;
         $res = self::save($imp_session);    
         if(!is_array($res)){
-            self::$system->addError(HEURIST_DB_ERROR, 'Can not save import session #'.$imp_ID, $res);
+            self::$system->addError(HEURIST_DB_ERROR, 'Cannot save import session #'.$imp_ID, $res);
             return false;
         }
         

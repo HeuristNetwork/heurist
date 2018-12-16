@@ -35,7 +35,7 @@ require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
 
 $system = new System();
 if( !$system->init(@$_REQUEST['db']) ){
-    die("Can not connect to database");
+    die("Cannot connect to database");
 }
 
 $islist = array_key_exists("q", $_REQUEST);

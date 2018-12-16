@@ -262,12 +262,12 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                 ele2.editing_input('setValue', ext );
                                 
                                 if(ext=='bin'){
-                                    window.hWin.HEURIST4.msg.showMsgDlg('Can not retrieve content type for given url '
+                                    window.hWin.HEURIST4.msg.showMsgDlg('Cannot retrieve content type for given url '
                                     +' or mimetype is not found among allowed types.'
                                         +' Generic mimetype is selected. Please select or add mimetype manaully');
                                 }
                             }else{
-                                window.hWin.HEURIST4.msg.showMsgErr('Can not retrieve content type for given url.'
+                                window.hWin.HEURIST4.msg.showMsgErr('Cannot retrieve content type for given url.'
                                 +' Please enter it manaully');
                             }
                         });
