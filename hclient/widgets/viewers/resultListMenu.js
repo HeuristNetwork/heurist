@@ -677,7 +677,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
         if (Hul.isempty(recIDs_all)) {
             window.hWin.HEURIST4.msg.showMsgDlg('No results found. '
-            +'Please run a query with at least one result record. You can use selection to direct your change.');
+            +'Please modify search/filter to return at least one result record.');
             return true;
         }else{
             return false;

@@ -170,7 +170,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
             if(scope.length<1){
                 window.hWin.HEURIST4.msg.showMsgFlash('No results found. '
-                +'Please run a query with at least one result record. You can use selection to direct your change.', 2000);
+                +'Please modify search/filter to return at least one result record.', 2000);
                 return;
             }
             if(len<1){
