@@ -1902,16 +1902,18 @@ $.widget( "heurist.resultList", {
         if(this.options.groupByField){
             //Object.keys(html_groups);
             var hasRender = $.isFunction(this.options.rendererGroupHeader);
-            
+
             //
             if(this.options.groupOnlyOneVisible && 
                 $.isEmptyObject(this._grp_keep_status))
             { //initially expand first only
                 var isfirst = true;
                 for (var grp_val in html_groups){
-                    this._grp_keep_status[grp_val] = isfirst?1:0;
-                    isfirst = false;
-                }
+                    if(!window.hWin.HEURIST4.util.isempty(html_groups[grp_val])){
+                        this._grp_keep_status[grp_val] = isfirst?1:0;
+                        isfirst = false;
+                    }
+                }   
             }
 
             //
