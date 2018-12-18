@@ -821,7 +821,9 @@ copy_IconAndThumb_FromLibrary
 	**/
 
 	function createRectypeGroups($columnNames, $rt) {
-		global $mysqli, $rtgColumnNames;
+		global $system, $rtgColumnNames;
+        
+        $mysqli = $system->get_mysqli();
 
 		$rtg_Name = null;
 		$ret = array();
@@ -1330,6 +1332,9 @@ copy_IconAndThumb_FromLibrary
 	//================================
 	/**
 	* update terms
+    * 
+    * @todo - 1) check for parent id to avoid recursion
+    *         2) update without check since for definitions import  it is verified preliminary
 	*
 	* @param $coldNames - array of field names
 	* @param $trmID - term id, in case new term this is string
@@ -1339,10 +1344,10 @@ copy_IconAndThumb_FromLibrary
 	*/
 	function updateTerms( $colNames, $trmID, $values, $ext_db) {
 
-		global $mysqli, $trmColumnNames;
+		global $system, $trmColumnNames;
 
 		if($ext_db==null){
-			$ext_db = $mysqli;
+			$ext_db = $system->get_mysqli();
 		}
 
 		$ret = null;
@@ -1425,13 +1430,13 @@ copy_IconAndThumb_FromLibrary
                 }
                 $dupquery .= " and (";
                 if($ch_code && $ch_code!=''){
-                    $dupquery .= "(trm_Code = '".$mysqli->real_escape_string($ch_code)."')";
+                    $dupquery .= "(trm_Code = '".$ext_db->real_escape_string($ch_code)."')";
                 }
                 if($ch_label){
                     if($ch_code && $ch_code!=''){
                         $dupquery .= " or ";
                     }
-                    $dupquery .= "(trm_Label = '".$mysqli->real_escape_string($ch_label)."')";
+                    $dupquery .= "(trm_Label = '".$ext_db->real_escape_string($ch_label)."')";
                 }
                 $dupquery .= ")";
 

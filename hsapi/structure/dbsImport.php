@@ -239,6 +239,7 @@ class DbsImport {
         $mysqli = $this->system->get_mysqli();
         $mysqli->autocommit(FALSE);
 
+        
         // I. Add Terms (whole vocabulary)
         if(! ($this->_importVocabulary(null, "enum") && 
               $this->_importVocabulary(null, "relation")) ){
@@ -247,6 +248,7 @@ class DbsImport {
             $mysqli->close();
             return false;                
         }
+        
         
         $group_ft_ids = array();
         $group_rt_ids = array();
@@ -851,18 +853,22 @@ $mysqli->commit();
     //
     // import entire vocabulary
     //
-    private function _importVocabulary($term_id, $domain, $children=null){
+    private function _importVocabulary($term_id, $domain, $children=null, $parent_id=null, $same_level_labels=null){
+        
 
         if($term_id==null){
-            //import entire list of terms
+            //top level import vocabularies
+                
             foreach($this->imp_terms[$domain] as $term_id){
-                $this->_importVocabulary($term_id, $domain, @$this->source_defs['terms']['treesByDomain'][$domain][$term_id]);
+                $res = $this->_importVocabulary($term_id, $domain, 
+                            @$this->source_defs['terms']['treesByDomain'][$domain][$term_id]);
+                if(!$res) return false;
             }
+            
+            return true;
         }else{
 
-            $excludeDuplication = true;
             $terms = $this->source_defs['terms'];
-            $trg_terms = $this->target_defs['terms'];
         
             $columnNames = $terms['commonFieldNames'];
             $idx_ccode = intval($terms['fieldNamesToIndex']["trm_ConceptID"]);
@@ -876,35 +882,38 @@ $mysqli->commit();
             $term_import = $terms['termsByDomainLookup'][$domain][$term_id];
 
             //find term by concept code among local terms
-            if($excludeDuplication){
-                
-                $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
-                
-            }else{
-                $new_term_id = null;
-            }
+            $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
 
             if($new_term_id){
+                //such term already exists
                 //$terms_correspondence_existed[$term_id] = $new_term_id;
-
             }else{
 
                 //if not found add new term
 
-                //change trm_InverseTermID, trm_ParentTermID
-                $term_import[$idx_parentid] = @$this->terms_correspondence[$term_import[$idx_parentid]];
-                $term_import[$idx_inverseid] = @$this->terms_correspondence[$term_import[$idx_inverseid]]; //@todo - after all terms addition?
-
-                //get level - all terms of the same level - to search same name and codes
-                if(@$term_import[$idx_parentid] && @$trg_terms['treesByDomain'][$domain][$term_import[$idx_parentid]]){
-                    $lvl_src = $trg_terms['treesByDomain'][$domain][$term_import[$idx_parentid]];
-                }else{
-                    $lvl_src = $trg_terms['treesByDomain'][$domain];
+                if($term_id==5986){ // 5490 || $term_id==5492){
+                    error_log('check!!!');
                 }
 
+                //change trm_InverseTermID, trm_ParentTermID  to new id from target
+                $term_import[$idx_parentid] = $parent_id;//@$this->terms_correspondence[$term_import[$idx_parentid]];
+                $term_import[$idx_inverseid] = @$this->terms_correspondence[$term_import[$idx_inverseid]]; //@todo - after all terms addition?
+                
+                //get level - all terms of the same level - to search same name and codes
+                //$lvl_src = $this->targetTerms->findChildren($term_import[$idx_parentid], $domain);
+                
                 //verify that code and label is unique for the same level in target(local) db
-                $term_import[$idx_code] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_code], $lvl_src, $domain, $idx_code);
-                $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_label], $lvl_src, $domain, $idx_label);
+                if($parent_id==null){
+                    //for vocabularies
+                    $term_import[$idx_code] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_code], 
+                                                            null, $domain, $idx_code);
+                    $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_label],
+                                                            null, $domain, $idx_label);
+                }else{
+                    $term_import[$idx_code] = $this->targetTerms->doDisambiguateTerms2($term_import[$idx_code], $same_level_labels['code']);
+                    $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms2($term_import[$idx_label], $same_level_labels['label']);
+                }
+                
 
                 //fill original ids if missed
                 if($term_import[$idx_ccode] && (!$term_import[$idx_origin_dbid] || !$term_import[$idx_origin_id])){
@@ -915,11 +924,14 @@ $mysqli->commit();
                     }
                 }
 
-                $res = updateTerms($columnNames, null, $term_import, null); //see saveStructureLib
+                $res = updateTerms($columnNames, null, $term_import, $this->system->get_mysqli()); //see saveStructureLib
                 if(is_numeric($res)){
                     $new_term_id = $res;
+                    
+                    $this->targetTerms->addNewTerm($new_term_id, $term_import);
+                    
                 }else{
-                    $this->error_exit2("Can't add term ".print_r($term_import, true)."  ".$res);
+                    $this->system->addError(HEURIST_ERROR, "Can't add term ".$term_id.' '.print_r($term_import, true)."  ".$res);
                     return false;
                 }
             }
@@ -928,12 +940,24 @@ $mysqli->commit();
             $this->terms_correspondence[$term_id] = $new_term_id;
 
             if($children){
+                $lvl_src = array('code'=>array(),'label'=>array());
+                
                 foreach($children as $id=>$children2){
-                    $this->_importVocabulary($id, $domain, $children2);
+                    //($term_id, $domain, $children=null, $parent_id=null, $same_level_labels=null)
+                    $new_id = $this->_importVocabulary($id, $domain, $children2, $new_term_id, $lvl_src);
+                    if($new_id>0){
+                        
+                        $lvl_src['code'][] = $this->targetTerms->getTermCode($new_id);
+                        $lvl_src['label'][] = $this->targetTerms->getTermLabel($new_id);
+                    } else {
+                        return false;
+                    }
+                    
                 }
             }
+            
+            return $new_term_id;
         }
-        return true;
     }
 
     // @todo
