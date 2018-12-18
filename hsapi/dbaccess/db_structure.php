@@ -927,7 +927,8 @@ function dbs_GetRectypeConstraint($system) {
         return array("trm_ID", "trm_Label", "trm_InverseTermID", "trm_Description", "trm_Status", "trm_OriginatingDBID",
             //                    "trm_NameInOriginatingDB",
             "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount", 
-            "trm_ParentTermID", "trm_Depth", "trm_Modified", "trm_LocallyModified", "trm_Code", "trm_ConceptID");
+            "trm_ParentTermID", "trm_Depth", "trm_Modified", "trm_LocallyModified", "trm_Code", 
+            "trm_SemanticReferenceURL", "trm_ConceptID");
     }
 
     //

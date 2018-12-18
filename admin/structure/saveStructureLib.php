@@ -169,7 +169,8 @@ copy_IconAndThumb_FromLibrary
 		"trm_Depth"=>"i",
 		"trm_Modified"=>"s",
 		"trm_LocallyModified"=>"i",
-		"trm_Code"=>"s"
+		"trm_Code"=>"s",
+        "trm_SemanticReferenceURL"=>"s"
 	);
 
     //

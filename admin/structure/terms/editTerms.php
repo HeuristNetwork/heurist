@@ -249,11 +249,16 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                         </div>
 
 
-                        <div class="dtyField" style="display:none">
-                            <label class="dtyLabel">Definition URL(s)</label>
-                            <input id="edURL" style="width:350px; margin-top:5px;"/>
+                        <div class="dtyField" xstyle="display:none">
+                            <label class="dtyLabel">Semantic/Reference URI</label>
+                            <input id="trm_SemanticReferenceURL" style="width:350px; margin-top:5px;" 
+                                    onkeyup="editTerms.isChanged();"/>
                             <div style="padding-left:105;padding-top:3px;  font-size:smaller;">
-                                One or more comma-seperated URls to sources which provide an authorative definition<br/>of the term. By default the definition is asumming to resolve to an html page, but an <br/> alternative form, such as XML can be specified by preceding the URl with an appropraite<br/> term e.g XML htpp://somesite.org.terms/123
+                                The URI to a semantic definition or web page describing the term
+                                <!--
+                                One or more comma-seperated URls to sources which provide an authorative definition<br/>of the term. By default the definition is asumming to resolve to an html page, but an <br/> alternative form, such as XML can be specified by
+                                 preceding the URl with an appropraite<br/> term e.g XML htpp://somesite.org.terms/123
+                                --> 
                             </div>
                         </div>
 
