@@ -330,9 +330,9 @@
 
         $filesize = saveURLasFile($remote_path, $heurist_path);
 
-        if($filesize>0){
+        if($filesize>0 && file_exists($heurist_path)){
 
-            //check the dimension of returned thumbanil in case it less than 50 - consider it as error
+            //check the dimension of returned thumbanil in case it is less than 50 - consider it as error
             if(strpos($remote_path, substr(WEBSITE_THUMBNAIL_SERVICE,0,24))==0){
 
                 $image_info = getimagesize($heurist_path);
@@ -345,14 +345,15 @@
 
             $file = new \stdClass();
             $file->original_name = 'snapshot.jpg';
-            $file->name = pathinfo($heurist_path, PATHINFO_BASENAME); //name with ext
+            $file->name = $heurist_path; //pathinfo($heurist_path, PATHINFO_BASENAME); //name with ext
+            $file->fullpath = $heurist_path;
             $file->size = $filesize; //fix_integer_overflow
             $file->type = 'jpg';
                                 
             return $file;    
             
         }else{
-            return array('error'=>'Cannot download image from thumbnail generator service. '.$remote_path);
+            return array('error'=>'Cannot download image from thumbnail generator service. '.$remote_path.' to '.$heurist_path);
         }
         
     }    
