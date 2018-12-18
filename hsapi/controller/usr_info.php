@@ -150,6 +150,10 @@
                         $varname = 'passwordFor'.$action;
                         $res = (@$$varname==$password)?'ok':'wrong';
                     }
+
+            } else if ($action=="sys_info_count") { 
+                
+                $res = $system->getTotalRecordsAndDashboard();
                         
             } else if ($action=="usr_save") {
 

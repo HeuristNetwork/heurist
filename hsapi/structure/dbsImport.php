@@ -888,12 +888,7 @@ $mysqli->commit();
                 //such term already exists
                 //$terms_correspondence_existed[$term_id] = $new_term_id;
             }else{
-
                 //if not found add new term
-
-                if($term_id==5986){ // 5490 || $term_id==5492){
-                    error_log('check!!!');
-                }
 
                 //change trm_InverseTermID, trm_ParentTermID  to new id from target
                 $term_import[$idx_parentid] = $parent_id;//@$this->terms_correspondence[$term_import[$idx_parentid]];

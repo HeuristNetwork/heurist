@@ -82,8 +82,8 @@ $.widget( "heurist.mainMenu", {
         
         
         this.div_dbname = $( "<div>")
-            //.css({'position':'absolute', 'right':300, 'padding-right':'2em', 'padding-top':'1em' })
-            .css({'float':'right', 'margin-top':'1.2em', 'padding-right':'2em' })
+            //.css({'float':'right', 'margin-top':'1.2em', 'padding-right':'2em' })
+            .css({'float':'left', 'margin-top':'1.2em', 'margin-left':'6em'})
             .appendTo(this.element);
             
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.sysinfo.dbrecent)){
@@ -190,7 +190,20 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 }*/
             
 
-
+        //dashboard button                
+        this.btn_dashboward = $('<div>').button({label:'Open dashboard'})
+            .css({})
+            .addClass('ui-heurist-header2')
+            .appendTo( this.divMainMenu )
+            .click(
+                function(){
+                    that.btn_dashboward.hide();
+                    window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
+                        {onClose:function(){
+                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                        }  });}
+            ); 
+        
         // LISTENERS --------------------------------------------------
         $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
             function(e, data) {
@@ -330,6 +343,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             ele.css({'left': (ele.parent().width())+'px'});// (link.width()-16+'px !important')});
         }
         */
+        
+        
+        if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0){
+            this.btn_dashboward.show();  
+        }else{
+            this.btn_dashboward.hide();  
+        }
     },
 
 
@@ -713,7 +733,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else 
         if(action == "menu-manage-dashboards"){
             
-           window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard');
+           window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
+                        {onClose:function(){
+                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                        }  });
         
         }else
         if(action == "menu-help-bugreport"){

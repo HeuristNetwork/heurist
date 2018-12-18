@@ -374,6 +374,19 @@ function hAPI(_db, _oninit) { //, _currentUser
                     _callserver('usr_info', {a:'verify_credentials'}, __response_handler);
                 }
             }
+            
+            ,sys_info_count: function(callback){
+                _callserver('usr_info', {a:'sys_info_count'}, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            window.hWin.HAPI4.sysinfo['db_total_records'] = response.data[0];
+                            window.hWin.HAPI4.sysinfo['db_has_active_dashboard'] = response.data[1];
+                            if(callback) callback();
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response.message); 
+                        }
+                    });
+            }
 
             /**
             * Get current user if logged in, and global database settings

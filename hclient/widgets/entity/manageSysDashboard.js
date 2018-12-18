@@ -347,6 +347,18 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         this.getRecordSet().setRecord(recID, fieldvalues);    
         this.recordList.resultList('refreshPage');  
+        
+console.log('after save');        
+        //refresh count of active dashboards
+        window.hWin.HAPI4.SystemMgr.sys_info_count();
+    },
+    
+    _afterDeleteEvenHandler: function( recID ){
+        this._super( recID );
+        
+console.log('after delete');        
+        //refresh count of active dashboards
+        window.hWin.HAPI4.SystemMgr.sys_info_count();
     },
         
     //----------------------

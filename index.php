@@ -328,8 +328,18 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                    }else if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
                        //show dashboard (another place - after login in profle_login.js)
                        var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
-                       if(prefs.showonstartup==1)
-                                window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard');
+                       if(prefs.showonstartup==1){
+                           var _keep = window.hWin.HAPI4.sysinfo.db_has_active_dashboard;
+                           window.hWin.HAPI4.sysinfo.db_has_active_dashboard=0;
+                           $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE); //hide button
+                           
+                           window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
+                            {onClose:function(){
+                                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                            }});
+                            setTimeout(function(){window.hWin.HAPI4.sysinfo.db_has_active_dashboard = _keep;},1000);
+                       }
+                                
                    }
                }
                 
