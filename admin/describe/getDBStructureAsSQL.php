@@ -304,7 +304,7 @@ if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 print "\n\n\n-- Dashboard entries";print "\n";
 if($isHTML) print "<p>";
-include HEURIST_DIR.'admin/structure/crosswalk/sysDashboard.inc'; // sets value of $flds
+include HEURIST_DIR.'admin/structure/crosswalk/sysDashboardFields.inc'; // sets value of $flds
 print "-- $flds \n";
 $query = "select $flds from sysDashboard";
 $res = $mysqli->query($query);
