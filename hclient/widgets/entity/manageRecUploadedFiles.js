@@ -39,7 +39,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 640;
-        this.options.edit_width = 1290;
+        this.options.edit_width = 950;
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -136,6 +136,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         var i_file_upl = this.getEntityFieldIdx('ulf_FileUpload');   
         
+        //this._edit_dialog.off('paste');
         
         if(isLocal){ //local
             this.options.entity.fields[i_url].dtFields['rst_DefaultValue'] = window.hWin.HAPI4.baseURL
@@ -152,11 +153,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'readonly';
                 this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'hidden';
             }else{
+                //add new file
                 this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'visible';
                 this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden';
+                
+                this._edit_dialog.dialog('option','width',800);
             }
             
             
@@ -223,6 +227,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }else{
             //new record
             isLocal = this._isAdditionOfLocal;
+            
+            if(isLocal){
+                //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
+                var ele = this._edit_dialog.find('input[type=file]');
+                if(ele.length>0){
+                    ele.fileupload('option','pasteZone',this._edit_dialog);
+                }
+            }
         }
         
         if(!isLocal){ //remote

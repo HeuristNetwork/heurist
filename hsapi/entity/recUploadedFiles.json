@@ -66,11 +66,22 @@
                     }
                 },
                 {
+                    "dtID": "ulf_FileUpload",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Upload file:",
+                        "rst_FieldConfig":{"entity":"recUploadedFiles","hideclear":1},
+                        "dty_Role":"virtual",
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
                     "dtID": "ulf_Description",
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "rst_DisplayName":"Description:",
                         "dty_Size":65535,
+                        "rst_DisplayWidth":"70",
                         "rst_DisplayHelpText": "A user-entered textual description of the file or image contents."
                     }
                 },
@@ -137,16 +148,6 @@
                         "dty_Type":"freetext",
                         "dty_Role":"virtual",
                         "rst_Display":"readonly"
-                    }
-                },
-                {
-                    "dtID": "ulf_FileUpload",
-                    "dtFields":{
-                        "dty_Type":"file",
-                        "rst_DisplayName":"Upload file:",
-                        "rst_FieldConfig":{"entity":"recUploadedFiles","hideclear":1},
-                        "dty_Role":"virtual",
-                        "rst_RequirementType":"required"
                     }
                 }
      ]
