@@ -191,7 +191,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 var len = recordset.length();
                 //set height to fit number of entries   
                 var h = 100 + Math.ceil(len/3) * 100;
-                h = h>500?500:h;                                  
+                h = (h<300)?300:(h>500?500:h);                                  
             }
         }
         this._as_dialog.dialog('option', 'height', h);                                    
