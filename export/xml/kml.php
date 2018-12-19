@@ -102,7 +102,7 @@ if(!$islist){
 print "<?xml version='1.0' encoding='UTF-8'?>\n";
 print '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
 print '<Document>';
-print '<name>Export from Heurist2</name>';
+print '<name>Exported from Heurist</name>';
 
 /*
 2. create new KML output that contains placemarks created from WKT and links to heurist's uploaded kml files
