@@ -201,9 +201,9 @@ function outputXML($system, $data, $params){
                     if($constr_rt_id>0){
                         $rectypename_is_in_fieldname = (strpos(strtolower($field_name), 
                                             strtolower($rtStructs['names'][$constr_rt_id]))!==false);
-                        $field_name_title = $field_name.'('.
-                                                ($rectypename_is_in_fieldname?'':($rtStructs['names'][$constr_rt_id].' '))
-                                                .'Title)';
+                        $field_name_title = $field_name.' '
+                                                //.($rectypename_is_in_fieldname?'':($rtStructs['names'][$constr_rt_id].' '))
+                                                .'RecordTitle';
                         $field_name = $field_name.($rectypename_is_in_fieldname
                                             ?'':' ('.$rtStructs['names'][$constr_rt_id].')').' H-ID';
                     }
