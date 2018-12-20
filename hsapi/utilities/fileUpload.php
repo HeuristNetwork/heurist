@@ -22,6 +22,7 @@ require_once(dirname(__FILE__)."/../System.php");
 require_once(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
 require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
 require_once(dirname(__FILE__).'/../utilities/utils_file.php');
+require_once(dirname(__FILE__).'/../utilities/utils_image.php');
 
 $response = null;
 $system = new System();
@@ -134,6 +135,7 @@ if($response!=null){
                 //'print_response ' => false
         );
         
+        allowWebAccessForForlder(HEURIST_SCRATCH_DIR.'thumbs/');
     
     }else{
 
@@ -175,16 +177,27 @@ if($response!=null){
         if(@$file->error){
             $response = $system->addError(HEURIST_UNKNOWN_ERROR, "File cannot be processed ".$file->error, null);
             break;            
-        }else if($registerAtOnce==1 && $entity_name=="recUploadedFiles"){ //register at once
+        }else if($entity_name=="recUploadedFiles"){ //register at once
             
-            $entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
-            $ret = $entity->registerFile($file, null); //it returns ulf_ID
+            if($registerAtOnce==1){
             
-            if( is_bool($ret) && !$ret ){
-                $response = $system->getError();
-            }else{
-                $file->ulf_ID = $ret;
+                $entity = new DbRecUploadedFiles($system, array('entity'=>'recUploadedFiles'));
+                $ret = $entity->registerFile($file, null); //it returns ulf_ID
+                
+                if( is_bool($ret) && !$ret ){
+                    $response = $system->getError();
+                }else{
+                    $file->ulf_ID = $ret;
+                }
+            }else if(!$file->thumbnailUrl){ //if UploadHandler does not create thunb - creates it as image with extension
+                
+                $thumb_file = HEURIST_SCRATCH_DIR.'thumbs/'.@$_REQUEST['newfilename'];
+                $img = image_CreateFromString($file->type?$file->type:'XXX!');
+                imagepng($img, $thumb_file);//save into file
+                imagedestroy($img);
+                $res['files'][$idx] ->thumbnailUrl = HEURIST_FILESTORE_URL.'scratch/thumbs/'.@$_REQUEST['newfilename'];
             }
+                
         }else if($entity_name=="temp" && $is_autodect_csv) {
             
             

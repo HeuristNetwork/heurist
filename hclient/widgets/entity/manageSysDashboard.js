@@ -34,7 +34,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.options.use_cache = false;
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
-        this.options.edit_height = 700;
+        this.options.edit_height = 600;
         this.options.width = 1200;
 
         this.options.height = (isNaN(this.options.height) || this.options.height<815)?900:this.options.height;                    
@@ -176,6 +176,28 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         return true;
     },
 
+    updateRecordList: function( event, data ){    
+        this._super(event, data);
+        this._adjustHeight();
+    },
+    
+    _adjustHeight: function(){
+        
+
+        var h = 500;
+        if(this.options.isViewMode){
+            var recordset = this.recordList.resultList('getRecordSet');
+            if(recordset){
+                var len = recordset.length();
+                //set height to fit number of entries   
+                var h = 100 + Math.ceil(len/3) * 100;
+                h = (h<300)?300:(h>500?500:h);                                  
+            }
+        }
+        this._as_dialog.dialog('option', 'height', h);                                    
+        
+    },
+    
     //
     // add specific buttons to bottom dialog bar
     //
@@ -264,7 +286,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             this.searchForm.searchSysDashboard('startSearch');
         }
         
-        
         /*
         this.btn_set_mode
             .button('option','label',window.hWin.HR(this.options.isViewMode?'Close':'View'))
@@ -272,6 +293,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                         ?'The dashboard function can be turned back on by selecting Management > Dashboard'
                         :'Turn back to presentation mode');
         */
+        this._adjustHeight();
         
     },
 
@@ -347,6 +369,16 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         this.getRecordSet().setRecord(recID, fieldvalues);    
         this.recordList.resultList('refreshPage');  
+        
+        //refresh count of active dashboards
+        window.hWin.HAPI4.SystemMgr.sys_info_count();
+    },
+    
+    _afterDeleteEvenHandler: function( recID ){
+        this._super( recID );
+        
+        //refresh count of active dashboards
+        window.hWin.HAPI4.SystemMgr.sys_info_count();
     },
         
     //----------------------
@@ -385,7 +417,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         +'</div>';
 
         var html = '<div class="recordDiv landscape'+(this.options.isViewMode?' dashboard outline_suppress':'')
-        +'" id="rd'+recID+'" recid="'+recID+'">'
+        +'" id="rd'+recID+'" recid="'+recID+'" style="cursor:pointer">'
         + html_thumb;
         
         

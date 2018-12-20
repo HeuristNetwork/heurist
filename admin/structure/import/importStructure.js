@@ -101,7 +101,7 @@ $.widget( "heurist.importStructure", {
                             +'<div class="ent_header" style="padding:4px;">'
                                +'<div style="position:absolute;right:450px;left:0">'
                                     +'<h4  style="padding:4 0 0 4" id="h_source_rty"></h4>'     
-                                    +'<div id="btn_back_to_databases" style="position:absolute;right:4px;top:2px"/>'
+                                    +'<div id="btn_back_to_databases" style="position:absolute;right:104px;top:40px;z-index:10"/>'
                                +'</div>'
                                
                                +'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
@@ -119,7 +119,7 @@ $.widget( "heurist.importStructure", {
                             //structure of selected record type - popup
                             +'<div id="panel_rty_tree" '
                                 +'style="position:absolute; top:2.8em;bottom:0;right:225px; overflow:hidden;width:225px;">'
-                            +    '<div class="ent_header rtt-toolbar" style="text-align:right;height:3em;padding-top: 8px;">'
+                            +    '<div class="ent_header rtt-toolbar" style="text-align:center;height:3em;padding-top: 8px;">'
                                         +'<div id="btn_start_import"></div>'
                             +    '</div>'
                             
@@ -224,11 +224,11 @@ $.widget( "heurist.importStructure", {
                            rendererGroupHeader: function(grp_val){
                                if(grp_val==0){
                                    //width:100%;
-                                   return '<div style="padding:4px 0 4px 40px;border-bottom:1px solid lightgray">'
+                                   return '<div style="padding:24px 0 4px 40px;border-bottom:1px solid lightgray">'
                                    +'<h2>Curated templates</h2>'
                                    +'<div style="padding-top:4px;"><i>Databases curated by the Heurist team as a source of useful entity types for new databases</i></div></div>';
                                }else{
-                                   return '<div style="width:100%;padding:4px 0 4px 40px;border-bottom:1px solid lightgray">'
+                                   return '<div style="width:100%;padding:24px 0 4px 40px;border-bottom:1px solid lightgray">'
                                    +'<h2>User databases</h2>'
                                    +'<div style="padding-top:4px"><i>Databases registered by Heurist users - use with care, look for entity types with good internal documentation</i></div></div>';
                                }
@@ -491,7 +491,7 @@ $.widget( "heurist.importStructure", {
                             +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
                             +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
-                            +'<h2>'+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
+                            +'<h2>'+grp_val+'  '+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
                             +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
                     }
                 }

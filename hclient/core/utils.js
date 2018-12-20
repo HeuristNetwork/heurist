@@ -243,7 +243,7 @@ window.hWin.HEURIST4.util = {
 
             if(!window.hWin.HEURIST4.util.isempty(rules)){
               query_to_save.push('rules='+ (encode?encodeURIComponent(rules):rules));
-              if(rulesonly==1 || rulesonly==true){
+              if(params.rulesonly==1 || params.rulesonly==true){
                   query_to_save.push('rulesonly=1');
               }
             }

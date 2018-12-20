@@ -84,6 +84,7 @@ function fileRegister($system, $fullname){
     return $file_id;
 }
 
+//NOT USED
 /**
 * Get file IDs by Obfuscated ID
 *

@@ -249,6 +249,7 @@ function EditTerms() {
             
             ischanged =
             termName != _currentNode.data.label ||
+            $('#trm_SemanticReferenceURL').val().trim() != _currentNode.data.trm_SemanticReferenceURL ||
             $('#edDescription').val().trim() != _currentNode.data.description ||
             $('#edCode').val().trim() != _currentNode.data.termcode ||
             $('#trm_Status').val() != _currentNode.data.status ||
@@ -338,6 +339,7 @@ function EditTerms() {
                 }
                 $('#edDescription').val(node.data.description);
                 $('#edCode').val(node.data.termcode);
+                $('#trm_SemanticReferenceURL').val(node.data.trm_SemanticReferenceURL);
 
                 //image
                 if(node.data.id>0){
@@ -730,6 +732,9 @@ function EditTerms() {
         var sCode = document.getElementById ('edCode').value.trim().replace(/\s+/g,' ');
         document.getElementById ('edCode').value = sCode;
         var sStatus = document.getElementById ('trm_Status').value;
+        
+        var sRefURI = document.getElementById ('trm_SemanticReferenceURL').value;
+        document.getElementById ('trm_SemanticReferenceURL').value = sRefURI;
 
         var iInverseId = Number(document.getElementById ('edInverseTermId').value);
         iInverseId = (Number(iInverseId)>0) ?iInverseId:null;
@@ -745,6 +750,7 @@ function EditTerms() {
             (_currentNode.data.description !== sDesc) ||
             (_currentNode.data.termcode !== sCode) ||
             (_currentNode.data.status !== sStatus) ||
+            (_currentNode.data.trm_SemanticReferenceURL !== sRefURI) ||
             (iParentId_prev !== iParentId) ||
             (iInverseId_prev !== iInverseId));
 
@@ -821,6 +827,8 @@ function EditTerms() {
                     nodeForAction.data.title = _currentNode.data.description;
 
                     nodeForAction.data.parent_id = iParentId;
+                    
+                    nodeForAction.data.trm_SemanticReferenceURL = sRefURI;
                     
                     _updateTermsOnServer(nodeForAction, needReload, callback);
 
@@ -902,12 +910,14 @@ function EditTerms() {
 
         var needReload = _needReload;
         var oTerms = {terms:{
-            colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain','trm_ParentTermID','trm_Status','trm_Code'],
+            colNames:['trm_Label','trm_InverseTermId','trm_Description','trm_Domain',
+                        'trm_ParentTermID','trm_Status','trm_Code','trm_SemanticReferenceURL'],
             defs: {}
         }};
 
         //PLEASE NOTE use "node.label' for YUI TREE INSTEAD OF 'term.label'
-        oTerms.terms.defs[term.id] = [term.label, term.inverseid, term.description, term.domain, term.parent_id, term.status, term.termcode ];
+        oTerms.terms.defs[term.id] = [term.label, term.inverseid, term.description, term.domain, 
+                term.parent_id, term.status, term.termcode, term.trm_SemanticReferenceURL ];
 
         //var str = JSON.stringify(oTerms);
 
@@ -1291,6 +1301,7 @@ function EditTerms() {
                 label: value.label,
                 description:value.description,
                 termcode : value.termcode,
+                trm_SemanticReferenceURL: value.trm_SemanticReferenceURL,
                 inverseid: null,
                 folder:true,
                 title:value.label});
@@ -1314,6 +1325,7 @@ function EditTerms() {
                 label: value.label,
                 description:value.description,
                 termcode : value.termcode,
+                trm_SemanticReferenceURL: value.trm_SemanticReferenceURL,
                 inverseid: null,
                 folder:true,
                 title:value.label});
@@ -1462,6 +1474,7 @@ function EditTerms() {
                                 term.conceptid = null;
                                 term.description = arTerm[fi.trm_Description];
                                 term.termcode = "";
+                                term.trm_SemanticReferenceURL = '';
                                 term.parent_id = context.parent; //_currentNode.data.id;
                                 term.domain = _currentDomain;
                                 term.inverseid = null;
@@ -1880,6 +1893,7 @@ function EditTerms() {
                 term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
                 term.description = arTerm[fi.trm_Description];
                 term.termcode  = arTerm[fi.trm_Code];
+                term.trm_SemanticReferenceURL = arTerm[fi.trm_SemanticReferenceURL];
                 term.inverseid = arTerm[fi.trm_InverseTermID];
                 term.status = arTerm[fi.trm_Status];
                 term.original_db = arTerm[fi.trm_OriginatingDBID];
@@ -1908,6 +1922,7 @@ function EditTerms() {
                                 _term.label = Hul.isempty(_arTerm[fi.trm_Label])?'ERROR N/A':_arTerm[fi.trm_Label];
                                 _term.description =_arTerm[fi.trm_Description];
                                 _term.termcode  =  _arTerm[fi.trm_Code];
+                                _term.trm_SemanticReferenceURL = _arTerm[fi.trm_SemanticReferenceURL];
                                 _term.inverseid = _arTerm[fi.trm_InverseTermID];
                                 _term.status = _arTerm[fi.trm_Status];
                                 _term.original_db = _arTerm[fi.trm_OriginatingDBID];
@@ -1915,7 +1930,9 @@ function EditTerms() {
 
                                 // childNode = parentEntry.addNode(term);
 
-                                children.push({id:child,parent_id:parent_id,conceptid:_arTerm[fi.trm_ConceptID],domain:_currentDomain, label:_term.label, description:_arTerm[fi.trm_Description],termcode:_arTerm[fi.trm_Code],inverseid:_arTerm[fi.trm_InverseTermID],status:_arTerm[fi.trm_Status],original_db:_arTerm[fi.trm_OriginatingDBID], title:_term.label,folder:true,children: __createChildren(parentNode[child], _term.id)});
+                                children.push({id:child,parent_id:parent_id,conceptid:_arTerm[fi.trm_ConceptID],domain:_currentDomain, label:_term.label, description:_arTerm[fi.trm_Description],termcode:_arTerm[fi.trm_Code],
+                            trm_SemanticReferenceURL:_arTerm[fi.trm_SemanticReferenceURL],
+                            inverseid:_arTerm[fi.trm_InverseTermID],status:_arTerm[fi.trm_Status],original_db:_arTerm[fi.trm_OriginatingDBID], title:_term.label,folder:true,children: __createChildren(parentNode[child], _term.id)});
 
 
                             }
@@ -1928,7 +1945,9 @@ function EditTerms() {
 
                 var parentNode = treesByDomain[termid];
                 //all: { title: window.hWin.HR('My Searches'), folder: true,
-                treedata.push({id:termid,parent_id:term.parent_id,conceptid:term.conceptid,domain:term.domain, label:term.label, description:term.description,termcode:term.termcode,inverseid:term.inverseid,status:term.status,original_db:term.original_db,title:term.label,folder:true,children:__createChildren(parentNode, termid)});
+                treedata.push({id:termid,parent_id:term.parent_id,conceptid:term.conceptid,domain:term.domain, label:term.label, description:term.description,termcode:term.termcode,
+                trm_SemanticReferenceURL:term.trm_SemanticReferenceURL,
+                inverseid:term.inverseid,status:term.status,original_db:term.original_db,title:term.label,folder:true,children:__createChildren(parentNode, termid)});
 
 
 

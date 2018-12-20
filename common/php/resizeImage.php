@@ -337,7 +337,7 @@ if ($standard_thumb  &&  @$file) {
     $resized_file = tempnam(HEURIST_SCRATCHSPACE_DIR, 'resized');
 }
 
-imagepng($img_resized, $resized_file);
+imagepng($img_resized, $resized_file);//save into file
 imagedestroy($img);
 imagedestroy($img_resized);
 

@@ -28,7 +28,8 @@ require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
 class DbRecUploadedFiles extends DbEntityBase
 {
-
+    private $error_ext;
+    
     //
     // constructor - load configuration from json file
     //    
@@ -39,6 +40,11 @@ class DbRecUploadedFiles extends DbEntityBase
        } 
         
        parent::__construct( $system, $data );
+       
+       $this->error_ext = 'Error inserting file metadata or unable to recognise uploaded file format. '
+.'This generally means that the mime type for this file has not been defined for this database (common mime types are defined by default). '
+.'Please add mime type from Database > Administration > Structure > Define mime types. '
+.'Otherwise please contact your system administrator or the Heurist developers.';       
     }
     
     /**
@@ -275,11 +281,7 @@ class DbRecUploadedFiles extends DbEntityBase
                     'select fxm_Mimetype from defFileExtToMimetype where fxm_Extension="'.addslashes($mimetypeExt).'"');
 
             if(!$mimeType){
-                    $this->system->addError(HEURIST_INVALID_REQUEST, 
-'Error inserting file metadata or unable to recognise uploaded file format. '
-.'This generally means that the mime type for this file has not been defined for this database (common mime types are defined by default). '
-.'Please add mime type from Database > Administration > Structure > Define mime types. '
-.'Otherwise please contact your system administrator or the Heurist developers.');
+                    $this->system->addError(HEURIST_INVALID_REQUEST, $this->error_ext);
                     return false;
             }
             
@@ -332,7 +334,11 @@ class DbRecUploadedFiles extends DbEntityBase
             
             //change mimetype to extension
             $mimeType = strtolower($this->records[$idx]['ulf_MimeExt']);
-            if(strpos($mimeType,'/')>0){ //this is extension
+            if($mimeType==''){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, $this->error_ext);
+                    return false;
+            }else
+            if(strpos($mimeType,'/')>0){ //this is mimetype - find extension
                 $this->records[$idx]['ulf_MimeExt'] = mysql__select_value($this->system->get_mysqli(), 
                     'select fxm_Extension from defFileExtToMimetype where fxm_Mimetype="'.addslashes($mimeType).'"');
             }
@@ -547,7 +553,7 @@ class DbRecUploadedFiles extends DbEntityBase
             
             if(is_array($file)){
                 
-                $tmp_name  = $file[0]['name'];
+                $tmp_name  = $file[0]['name'];   //name only
                 $newname   = $file[0]['original_name'];
                 $tmp_thumb = @$file[0]['thumbnailName'];
 
@@ -557,7 +563,7 @@ class DbRecUploadedFiles extends DbEntityBase
             
             if(!file_exists($tmp_name)){
                 $fileinfo = pathinfo($tmp_name);
-                if($fileinfo['basename']==$tmp_name){
+                if($fileinfo['basename']==$tmp_name){ //only name - by default in scratch folder
                     $tmp_name = HEURIST_SCRATCH_DIR.$tmp_name;
                 }
             }
@@ -576,7 +582,11 @@ class DbRecUploadedFiles extends DbEntityBase
             
         }else{
             //uploaded via UploadHandler is in scratch
-            $tmp_name = HEURIST_SCRATCH_DIR.$file->name;
+            if($file->fullpath){
+                $tmp_name = $file->fullpath;
+            }else{
+                $tmp_name = HEURIST_SCRATCH_DIR.$file->name;
+            }
         }
         
         
@@ -591,7 +601,7 @@ class DbRecUploadedFiles extends DbEntityBase
                 $name = preg_replace('!.*/!', '', $name);
                 
                 $extension = null;
-                if($file->type=='application/octet-stream'){ 
+                if($file->type==null || $file->type=='application/octet-stream'){ 
                     //need to be more specific - try ro save extension
                     $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
                 }
@@ -611,14 +621,14 @@ class DbRecUploadedFiles extends DbEntityBase
                 
         }else{
         
-            if(is_a($file,'stdClass')){
+            /*if(is_a($file,'stdClass')){
                 $errorMsg = 'Cant find temporary uploaded file: '.$file->name
                             .' for db = ' . $this->system->dbname().' ('.HEURIST_SCRATCH_DIR
                             .')';
-            }else{ 
-               $errorMsg = 'Cant find file to be registred : '.$tmp_name
+            }else{ */
+            $errorMsg = 'Cant find file to be registred : '.$tmp_name
                            .' for db = ' . $this->system->dbname();
-            }
+            
             $errorMsg = $errorMsg
                     .'. Please ask your system administrator to correct the path and/or permissions for this directory';
                     
@@ -649,7 +659,7 @@ class DbRecUploadedFiles extends DbEntityBase
                     
        if($fields!==false){             
            
-                $tmp_name = $fields['ulf_TempFile'];
+                //$tmp_name = $fields['ulf_TempFile'];
                 //unset($fields['ulf_TempFile']);
            
                 $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
@@ -657,10 +667,13 @@ class DbRecUploadedFiles extends DbEntityBase
                 $this->setData($fileinfo);
                 $ret = $this->save();   //it returns ulf_ID
                 
-                unlink($tmp_name);
+                //unlink($tmp_name);
+                
+                return $ret;    
+       }else{
+           return false;
        }        
-            
-        return $ret;    
+       
     }
 }
 ?>

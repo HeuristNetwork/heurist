@@ -395,7 +395,7 @@
                 if(!$stmt->execute()){
                     $syserror = $mysqli->error;
                     $mysqli->rollback();if($keep_autocommit===true) $mysqli->autocommit(TRUE);
-                    return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
+                    return $system->addError(HEURIST_DB_ERROR, 'Cannot save details.', $syserror);
                 }
 
                 /*if($dtl_Geo){
@@ -438,7 +438,7 @@
             $syserror = $mysqli->error;
             $mysqli->rollback();
             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
-            return $system->addError(HEURIST_DB_ERROR, 'Cannot save details', $syserror);
+            return $system->addError(HEURIST_DB_ERROR, 'Cannot save details(3)', $syserror);
         }
 
         $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']);
@@ -1353,17 +1353,20 @@
                             
                             $tmp_file = generate_thumbnail($record['URL']);
                             
+
                             if(!is_a($tmp_file,'stdClass')){
                                 $err_msg = is_array($tmp_file) ?$tmp_file['error'] :'Unknown error '.$tmp_file;
                             }else{
                                 $entity = new DbRecUploadedFiles($system, null);
-                                
+
                                 $dtl_UploadedFileID = $entity->registerFile($tmp_file, null); //it returns ulf_ID
-                                
-                                if(!$dtl_UploadedFileID){
+
+                                if($dtl_UploadedFileID===false){
                                     $err_msg = $system->getError();
                                     $err_msg = $err_msg['message'];
                                     $system->clearError();  
+                                }else{
+                                    $dtl_UploadedFileID = $dtl_UploadedFileID[0];
                                 }
                             }
                             

@@ -124,7 +124,7 @@ class DbsTerms
             if($with_hierarchy){
                 $labels = '';
                 $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
-                $idx_term_doamin = $this->data['fieldNamesToIndex']['trm_Domain'];
+                $idx_term_domain = $this->data['fieldNamesToIndex']['trm_Domain'];
                 
                 
                 $labels = array();
@@ -175,6 +175,86 @@ class DbsTerms
         }
         return $term;
     }
+
+    //
+    //
+    //
+    public function getSiblings($term_id, $domain) {
+        
+        $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
+        $term = $this->getTerm($term_id, $domain);
+        
+        return $this->findChildren($term[$idx_term_parent], $domain);
+    }
+     
+    //
+    //
+    // 
+    public function findChildren($parent_id, $lvl) {
+
+        if($parent_id>0){
+           
+            if(!is_array($lvl)){
+                $lvl = $this->data['treesByDomain'][$lvl];
+            }
+            
+            foreach($lvl as $trmId=>$childs){
+                if($trmId==$parent_id){
+                    return $childs;
+                }else if(count($childs)>0){
+                    $res = $this->findChildren($parent_id, $childs);
+                    if(count($res)>0){
+                        return $res;
+                    }
+                }
+            }
+
+            return null;
+        }else{
+            return $this->data['treesByDomain'][$lvl];
+        }
+
+    }
+    
+    //
+    //
+    //
+    public function addNewTerm($new_term_id, $term_to_add){
+        
+        $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
+        $idx_term_domain = $this->data['fieldNamesToIndex']['trm_Domain'];
+        
+        $domain = $term_to_add[$idx_term_domain];
+        $parent_id = $term_to_add[$idx_term_parent];
+        
+        $this->data['termsByDomainLookup'][$domain][$new_term_id] = $term_to_add;
+        $this->addChild($this->data['treesByDomain'][$domain], $parent_id, $new_term_id);
+        
+    }
+    
+    public function addChild(&$lvl, $parent_id, $new_term_id) {
+
+        if($parent_id>0){
+           
+            foreach($lvl as $trmId=>$childs){
+                if($trmId==$parent_id){
+                    
+                    if(!is_array(@$lvl[$trmId])) $lvl[$trmId] = array();
+                    $lvl[$trmId][$new_term_id] = array();
+                    
+                    break;
+                    
+                }else if(count($childs)>0){
+                    $this->addChild($lvl[$trmId], $parent_id, $new_term_id);
+                }
+            }
+
+        }else{
+            //vocabulary
+            if(!is_array($lvl)) $lvl = array();
+            $lvl[$new_term_id] = array();
+        }
+    }    
     
     //
     //  Find vocabulary ID
@@ -212,26 +292,46 @@ class DbsTerms
 
         if(!$term_import || $term_import=="") return $term_import;
 
+        $lvl_values = array();
+        
+        if($lvl_src==null){
+            $lvl_src = $this->data['treesByDomain'][$domain];
+        }
+        
         if(is_array($lvl_src)){
-
-            $found = 0;
-            $name = removeLastNum($term_import);
-
             foreach($lvl_src as $trmId=>$childs){
-                $name1 = removeLastNum($this->data['termsByDomainLookup'][$domain][$trmId][$idx]);
+                $name1 = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]));
+                $lvl_values[] = $name1;
+            }
+        }
+
+        return $this->doDisambiguateTerms2($term_import, $lvl_values);
+    }
+
+    /**
+    * Avoid the same labels and codes on the same level
+    * 
+    * @param mixed $term_value - label or code 
+    * @param mixed $same_level_values - to compare with
+    */
+    public function doDisambiguateTerms2($term_value, $same_level_values){
+        
+        if(!$term_value || $term_value=="") return $term_value;
+        
+        $name = removeLastNum(trim($term_value));
+        $found = 0;
+        
+        if(count($same_level_values)>0)
+        foreach ($same_level_values as $value){
+                $name1 = removeLastNum(trim($value));
                 if($name == $name1){
                     $found++;
                 }
-            }
-            if($found>0){
-                $term_import = $name." ".($found+1);
-            }
-
         }
-
-        return $term_import;
+        if($found>0){
+                $term_value = $name." ".($found+1);
+        }
+        return $term_value;
     }
-    
-    
 }  
 ?>

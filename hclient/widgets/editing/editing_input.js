@@ -1853,7 +1853,9 @@ $.widget( "heurist.editing_input", {
             //hide progress bar
             $progress_dlg.dialog( "close" );
         
-            response = response.result;
+            if(response.result){//????
+                response = response.result;
+            }
             if(response.status==window.hWin.ResponseStatus.OK){
                 var data = response.data;
 
@@ -1870,10 +1872,11 @@ $.widget( "heurist.editing_input", {
                             //var urlThumb = window.hWin.HAPI4.getImageUrl(that.configMode.entity, 
                             //            newfilename+'.png', 'thumb', 1);
                                         
-                            var urlThumb = file.thumbnailUrl;
+                            var urlThumb = file.thumbnailUrl+'?'+(new Date()).getTime();
                             
                             // file.thumbnailUrl - is correct but inaccessible for heurist server
                             // we get image via fileGet.php
+                            $input_img.find('img').prop('src', '');
                             $input_img.find('img').prop('src', urlThumb);
                             
                             if(that.configMode.entity=='recUploadedFiles'){
