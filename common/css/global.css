@@ -544,7 +544,7 @@ a#dbSearch-link #dbname:hover {padding-right:10px; background-color:RGBA(100,100
 #q {background-color:transparent}
 
 
-#my-records-button, #all-records-button, #web-search-link, .button, button, #add-record-link, #new-entry-button, input[type="button"], input[type="submit"] {
+#my-records-button, #all-records-button, #web-search-link, .button, #add-record-link, #new-entry-button, input[type="button"], input[type="submit"] {
     text-transform: uppercase !important;
     display:inline-block !important;
     color: #666;

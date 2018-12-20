@@ -820,6 +820,8 @@ function EditRecStructure() {
                         //'<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition"</span>'+ // and then "Select Record Types"
                         '</div></div>'+
 
+                        '<div class="input-row" id="pointerDefValue'+rst_ID+'"></div>'+
+                        
                         '<div class="input-row"><div class="input-header-cell">Create new records as children:</div>'+
                         
                         '<div class="input-cell">'+
@@ -1370,6 +1372,7 @@ function EditRecStructure() {
             var dataupdate = oRecInfo.record.getData();
 
             var values = arrStrucuture[__rst_ID];
+            var dti = fieldnames.indexOf('dty_Type');
             
             var k;
             for(k=0; k<fieldnames.length; k++){
@@ -1380,8 +1383,13 @@ function EditRecStructure() {
                     //	dbg.value = dbg.value + (fieldnames[k]+'='+edt.value);
                     //}
                     
-                    if(fieldnames[k]=="rst_DefaultValue" && $('#incValue_'+__rst_ID+'_2').is(':checked')){
+                    if(fieldnames[k]=="rst_DefaultValue"){
+                         if ($('#incValue_'+__rst_ID+'_2').is(':checked')){
                             edt.value = 'increment_new_values_by_1';
+                            
+                         }else if(values[dti]=='resource') {
+                            edt.value = $('#pointerDefValue'+__rst_ID).editing_input('getValues');
+                         }
                     }else if(fieldnames[k]=="rst_CreateChildIfRecPtr"){
                             edt.value = $(edt).is(':checked')?1:0;
                     }
@@ -1416,7 +1424,7 @@ function EditRecStructure() {
 
             //special case for separator
             var k = fieldnames.indexOf('rst_RequirementType');
-            var dti = fieldnames.indexOf('dty_Type');
+            
             if(values[dti]=='separator') {
                 var ed_name = '#ed'+__rst_ID+'_rst_RequirementType_separator';   
                 if($(ed_name).length>0){
@@ -1608,10 +1616,46 @@ function EditRecStructure() {
                         recreateRecTypesPreview(rst_type,
                             window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs]);
 
-                        // IAN's request 2013-02-14
                         var edt_def = Dom.get('ed'+rst_ID+'_rst_DefaultValue');
                         edt_def.parentNode.parentNode.style.display = "none";
+                        
+                        if(rst_type === "resource") {
+                        
+                            var dtID = rst_ID;
+                            var dtFields = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[rst_ID]);
+                            var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+                            dtFields[fi['rst_DisplayName']] = 'Default Value:';
+                            dtFields[fi['rst_RequirementType']] = 'optional';
+                            dtFields[fi['rst_MaxValues']] = 1;
+                            dtFields[fi['rst_DisplayHelpText']] = '';
+                            dtFields[fi['rst_DisplayWidth']] = 25; //
+                      
+                            var ed_options = {
+                                recID: -1,
+                                dtID: dtID,
+                                //rectypeID: rectypeID,
+                                rectypes: window.hWin.HEURIST4.rectypes,
+                                values: [edt_def.value],
+                                readonly: false,
 
+                                showclear_button: true,
+                                //input_width: '350px',
+                                //detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
+                                dtFields:dtFields
+
+                            };
+                            
+                            var ele = $('#pointerDefValue'+rst_ID);
+
+                            ele.empty().editing_input(ed_options);
+                            
+                            ele.find('.input-div').css('font-size','0.8em');
+                            ele.find('.editint-inout-repeat-button').css('min-width',0);
+                            ele.find('.header').css({'width': '190px','text-align': 'right'});
+                        }
+
+                        
+                        
                     }else{
                         edt.parentNode.parentNode.style.display = "none";
                     }

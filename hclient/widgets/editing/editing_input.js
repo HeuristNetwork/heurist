@@ -223,8 +223,10 @@ $.widget( "heurist.editing_input", {
         
         if( !window.hWin.HEURIST4.util.isArray(this.options.values) ){
             var def_value = this.f('rst_DefaultValue');
+            
+            var isparententity = (this.f('rst_CreateChildIfRecPtr')==1);
 
-            if( !this.options.is_insert_mode || window.hWin.HEURIST4.util.isempty(def_value)){
+            if( !this.options.is_insert_mode || window.hWin.HEURIST4.util.isempty(def_value) || isparententity){
                 // reset default value - default value for new record only
                 // do not assign default values in edit mode                
                 values_to_set = [''];        
