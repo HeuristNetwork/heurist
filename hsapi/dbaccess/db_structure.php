@@ -478,10 +478,11 @@ function dbs_GetRectypeConstraint($system) {
             error_log('DATABASE: '.$system->dbname().'. Error retrieving terms '.$mysqli->error);
         }
         $terms['treesByDomain'] = array(
-                'relation' => __getTermTree($system->dbname(), $mysqli, "relation", "exact"), 
-                'enum' => __getTermTree($system->dbname(), $mysqli, "enum", "exact"));
+                'relation' => __getTermTree($system, "relation", "exact"), 
+                'enum' => __getTermTree($system, "enum", "exact"));
         //ARTEM setCachedData($cacheKey, $terms);
         return $terms;
+        
     }
 
     // to public method ------>
@@ -518,7 +519,8 @@ function dbs_GetRectypeConstraint($system) {
                             
                             sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$system->dbname()
                             .', owner '.@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'].' '.@$dbowner['ugr_eMail'],
-                            'User was unable to load the database due to a corrupted terms tree. '
+                            'db: '.$system->dbname().'\nOwner:'.@$dbowner['ugr_eMail']
+                            .'\nUser was unable to load the database due to a corrupted terms tree. '
                             .'Recursion in parent-term hierarchy '.$termID.'  '.$subTermID, null);
                         }
                     }
@@ -832,7 +834,7 @@ function dbs_GetRectypeConstraint($system) {
     * @param     array $parents of current branch to avoid recursion
     * @return    object $terms
     */
-    function __attachChild($dbname, $parentIndex, $childIndex, $terms, $parents) {
+    function __attachChild($system, $parentIndex, $childIndex, $terms, $parents) {
         
         /*if (!@count($terms[$childIndex]) || $parentIndex == $childIndex) {//recursion termination
             return $terms;
@@ -852,15 +854,19 @@ function dbs_GetRectypeConstraint($system) {
                 foreach ($terms[$childIndex] as $gChildID => $n) { //loop for his children
                     if ($gChildID != null) {
                         if(array_search($gChildID, $parents)===false){
-                            $terms = __attachChild($dbname, $childIndex, $gChildID, $terms, $parents);//depth first recursion
+                            $terms = __attachChild($system, $childIndex, $gChildID, $terms, $parents);//depth first recursion
                         }else{
+                            $dbname = $system->dbname();
                             $sMsg = 'Recursion in '.$dbname.'.defTerms! Tree '.implode('>',$parents)
                                     .'. Can\'t add term '.$gChildID;
                             error_log($sMsg);        
                             if(!$emailsent){
+                                $dbowner = user_getDbOwner($system->get_mysqli()); //info about user #2
                                 $emailsent = true;
+                                
                                 sendEmail(HEURIST_MAIL_TO_ADMIN, 'CORRUPTED DATABASE '.$dbname,
-                                    'User was unable to load the database due to a corrupted terms tree. '
+                                    'db: '.$dbname.'\nOwner:'.@$dbowner['ugr_eMail']
+                                    .'User was unable to load the database due to a corrupted terms tree. '
                                     .'Recursion in parent-term hierarchy. Parent:'.implode('>',$parents)
                                     .'  Child:'.$gChildID, null);
                             }
@@ -883,7 +889,9 @@ function dbs_GetRectypeConstraint($system) {
     * @return    mixed
     * @uses      __attachChild()
     */
-    function __getTermTree($dbname, $mysqli, $termDomain, $matching = 'exact') { // termDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in the trm_Domain enum
+    function __getTermTree($system, $termDomain, $matching = 'exact') { // termDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in the trm_Domain enum
+        $mysqli = $system->get_mysqli();
+
         $whereClause = "a.trm_Domain " . ($matching == 'prefix' ? " like '" . $termDomain . "%' " : ($matching == 'postfix' ? " like '%" . $termDomain . "' " : "='" . $termDomain . "'"));
         $query = "select a.trm_ID as pID, b.trm_ID as cID
         from defTerms a
@@ -909,7 +917,7 @@ function dbs_GetRectypeConstraint($system) {
                 //check that we have a child branch
                 if ($childID != null && array_key_exists($childID, $terms)) {
                     if (count($terms[$childID])) {//yes then attach it and it's children's branches
-                        $terms = __attachChild($dbname, $parentID, $childID, $terms, null);
+                        $terms = __attachChild($system, $parentID, $childID, $terms, null);
                     } else {//no then it's a leaf in a branch, remove this redundant node.
                         unset($terms[$childID]);
                     }

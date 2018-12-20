@@ -148,7 +148,7 @@ foreach ($dbs as $db){
     }else{
         $record_row[] = implode(' ', $owner);
         $record_row[] = $sysadmin;
-        $arr_databases[] = '"'.implode('","', $record_row).'"';
+        $arr_databases[] = '"'.implode('","',  str_replace('"','',$record_row)   ).'"';
     }
     
     }
