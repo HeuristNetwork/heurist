@@ -670,7 +670,7 @@ function EditRecStructure() {
                         // Terms - enums and relmarkers
                         '<div class="input-row" Xstyle="display:none"><div class="input-header-cell">Vocabulary (terms):</div>'+
                             '<div class="input-cell" title="The lsit of terms available for selection as values for this field">'+
-                                '<select id="selVocab" class="initially-dis"/>'+
+                                '<select id="selVocab" Xclass="initially-dis"/>'+
                                 '<input id="ed_dty_JsonTermIDTree" type="hidden"/>'+
                                 '<input id="ed_dty_TermIDTreeNonSelectableIDs" type="hidden"/>'+
                                 '<span>'+
@@ -1196,6 +1196,7 @@ function EditRecStructure() {
 //{'border-top':'2px solid blue', 'border-bottom': '2px solid blue'}
                             
                             window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), true);
+                            window.hWin.HEURIST4.util.setDisabled($('#selVocab'), true);
 
                             if(!_isStreamLinedAdditionAction){
                                 
@@ -3586,15 +3587,26 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
                     {datatype:datatype, termIDTree:allTerms, headerTermIDsList:disabledTerms,
                      defaultTermID:_defvalue, 
                      topOptions:isdefselector?[{key:'',title:'<blank value>'}]:null,
-                     needArray:false, useHtmlSelect:false});
+                     needArray:false, useHtmlSelect:true});
             el_sel = el_sel[0];
             
             el_sel.id = isdefselector?('ed'+rst_ID+'_rst_DefaultValue'):'termsPreview_select';
             el_sel.style.backgroundColor = bgcolor;
-            el_sel.onchange =  onchangehandler;
+            //el_sel.onchange =  onchangehandler;
             el_sel.className = "previewList"; //was for enum only?
             el_sel.style.display = 'block';
             parent.appendChild(el_sel);
+            
+            if($(el_sel).hSelect('instance')!==undefined) $(el_sel).hSelect('destroy');
+            var el_menu = window.hWin.HEURIST4.ui.initHSelect(el_sel, false);
+            el_menu.hSelect({change: function(event, data){
+                
+                   var selval = data.item.value;
+                   $(el_sel).val(selval);
+                   //onchangehandler();
+                
+            }});
+            el_menu.hSelect('menuWidget').css('max-height',100);
         }//end __recreate
 
         __recreate(parent1, _preventSel, "#cccccc", null, false);
@@ -3652,7 +3664,10 @@ function onFieldAddSuggestion(event, insertAfterRstID){
     
     var fields_list_div = $('.list_div');
     
-    window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), input_name.val().length<3 );
+    var setdis = input_name.val().length<3;
+    window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), setdis );
+    window.hWin.HEURIST4.util.setDisabled($('#selVocab'), setdis);
+
   
     if(input_name.val().length>2){
        
@@ -3818,7 +3833,15 @@ function _recreateTermsVocabSelector(datatype, toselect)  {
             document.getElementById("ed_dty_JsonTermIDTree").value =  el_sel.value;
         };
         el_sel.style.maxWidth = '120px';
-
+       
+        if($(el_sel).hSelect('instance')!==undefined) $(el_sel).hSelect('destroy');
+        var el_menu = window.hWin.HEURIST4.ui.initHSelect(el_sel, false);
+            el_menu.hSelect({change: function(event, data){
+                   var selval = data.item.value;
+                   document.getElementById("ed_dty_JsonTermIDTree").value =  selval;
+            }});
+        el_menu.hSelect('menuWidget').css('max-height',100);
+        el_menu.hSelect("refresh"); 
 }
 
 //
