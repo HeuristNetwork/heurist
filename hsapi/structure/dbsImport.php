@@ -67,8 +67,11 @@ class DbsImport {
     * 
     * array(
         defType - rectype,detailtype,term
-        conceptCode - array(dbid, defid, dbregid) or string dbid-defid
-                    dbregid - where to search definition - optional, if not defined take dbid
+
+        conceptCode - unique identifier
+        definitionID  - id in source database 
+        databaseID - database where to search definition if not defined take db from conceptCode
+        
         conceptName
       )
     * @return mixed
@@ -84,21 +87,49 @@ class DbsImport {
             return false;
         }
         
-        $cCode = $data['conceptCode'];
+        $db_reg_id = 0;
+        $local_id = 0;  //local id of defintion to be imported
+        $cCode = null;
         
-        if($cCode){
+        if(@$data['databaseID']>0){
+            $db_reg_id = $data['databaseID'];
+        }
+        if(@$data['definitionID']>0){
+            $local_id = $data['definitionID'];
+        }
+            
+        if(@$data['conceptCode']){
+            
+            $cCode = $data['conceptCode'];
+            
             if(is_array($cCode)){
-                $cCode = implode('-',$cCode);
+                if(count($cCode)>2){
+                    $db_reg_id = $cCode[2];
+                    $cCode = $cCode[0].'-'.$cCode[1];
+                }else{
+                    $cCode = implode('-',$cCode);    
+                }
             }            
-            list($db_reg_id, $def_id) = explode('-', $cCode);
+            list($db_id, $ent_id) = explode('-', $cCode);
+
+            if(!(is_numeric($db_id) && $db_id>0 && is_numeric($ent_id) && $ent_id>0)){
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Concept code ($cCode) has wrong format - should be two numbers separated by dash");
+                return false;
+            }
+            if(!($db_reg_id>0)){
+                $db_reg_id = $db_id; //take source database from concept code
+            }
         }
         
-        if(!($cCode && is_numeric($db_reg_id) && $db_reg_id>0 && is_numeric($def_id) && $def_id>0)){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Concept code ($cCode) has wrong format - should be two numbers separated by dash");
+        if(!($db_reg_id>0)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, "Not possible to determine an origin database id (source of import)");
+            return false;
+        }
+        if(!($local_id>0 || $cCode)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, "Neither concept code nor local id is defined");
             return false;
         }
         
-        $db_origin_id = $db_reg_id; //not used
         
         // 1. get database url by database id
         $database_url = $this->_getDatabaseURL($db_reg_id);
@@ -112,16 +143,30 @@ class DbsImport {
         if (!$this->source_defs) {
             return false; //see $system->getError
         }
+        
+        $def_id = 0;
 
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
         if($defType=='term'){
-            $def_id = $this->sourceTerms->findTermByConceptCode($cCode); 
+            if($local_id>0){
+                $rt = $this->sourceTerms->getTerm($def_id);        
+                if($rt!=null){
+                    $local_id = $def_id;
+                }
+            }else{
+                $def_id = $this->sourceTerms->findTermByConceptCode($cCode); 
+            }
         }else{
-            $def_id = $this->_getLocalCode($defType, $this->source_defs, $cCode); //get local id is source db
+            if($local_id>0){
+                $def_id = $this->_checkLocalCode($defType, $this->source_defs, $local_id);
+            }else{
+                $def_id = $this->_getLocalCode($defType, $this->source_defs, $cCode); //get local id is source db
+            }
         }
         
         if (!($def_id>0)) { //definition not found in source database
-            $this->system->addError(HEURIST_ERROR, 'Unable to get '.$defType. ' definition with concept code '.$cCode.' in database #'.$db_reg_id);
+            $smsg = ($local_id>0) ?'id#'.$local_id :'concept code '.$cCode;
+            $this->system->addError(HEURIST_ERROR, 'Unable to get '.$defType. ' definition with '.$smsg.' in database #'.$db_reg_id);
             return false; //see $system->getError
         }
         
@@ -672,6 +717,20 @@ $mysqli->commit();
         return $defs; 
     }
     
+    //
+    //
+    //
+    private function _checkLocalCode($defType, $database_defs, $localID){
+        
+        $defs = null;
+        if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
+            $defs = @$database_defs['rectypes']['typedefs'][$localID];
+        }else if($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
+            $defs = @$database_defs['detailtypes']['typedefs'][$localID];
+        }
+        
+        return ($defs!=null)?$localID:false;
+    }
     //
     // get local code by concept code
     //

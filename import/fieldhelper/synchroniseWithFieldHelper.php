@@ -39,6 +39,67 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
 require_once(dirname(__FILE__)."/../../hsapi/dbaccess/db_files.php");
 require_once(dirname(__FILE__)."/../../hsapi/utilities/utils_file.php");
+        
+$system->defineConstants();
+
+if(!defined('RT_MEDIA_RECORD')){
+    
+    $isOK = false;
+    
+    $importDef = new DbsImport( $system );
+    if($importDef->doPrepare(  array('defType'=>'rectype', 
+                'conceptCode'=>$rtDefines['RT_MEDIA_RECORD'] ) ))
+    {
+        $isOK = $importDef->doImport();
+    }
+    
+    if(!$isOK){
+            $system->addErrorMsg('Cannot download record type "Digital Media item" required by the function you have requested. ');
+            include ERROR_REDIR;
+            exit();
+    }
+    if(!$system->defineConstant('RT_MEDIA_RECORD', true)){
+        $system->addError(HEURIST_ERROR, 'Record type "Digital Media item"" id not defined');
+        include ERROR_REDIR;
+        exit();
+    }
+}
+
+
+
+
+$titleDT = (defined('DT_NAME')?DT_NAME:0);
+$geoDT = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
+$fileDT = (defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
+$startdateDT = (defined('DT_START_DATE')?DT_START_DATE:0);
+$enddateDT = (defined('DT_END_DATE')?DT_END_DATE:0);
+$descriptionDT = (defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:0);
+
+$fieldhelper_to_heurist_map = array(
+    "heurist_id" => "recordId",
+    "Name0" => $titleDT,
+    "Annotation" => $descriptionDT,
+    "DateTimeOriginal" => $startdateDT,
+    "filename" => "file",
+    "latitude" => "lat",
+    "longitude" => "lon",
+
+    "file_name" => (defined('DT_FILE_NAME')?DT_FILE_NAME:0),
+    "file_path" => (defined('DT_FILE_FOLDER')?DT_FILE_FOLDER:0),
+    "extension"  => (defined('DT_FILE_EXT')?DT_FILE_EXT:0),
+
+    "device"      => (defined('DT_FILE_DEVICE')?DT_FILE_DEVICE:0),
+    "duration"  => (defined('DT_FILE_DURATION')?DT_FILE_DURATION:0),
+    "filesize"  => (defined('DT_FILE_SIZE')?DT_FILE_SIZE:0),
+    "md5"          => (defined('DT_FILE_MD5')?DT_FILE_MD5:0)
+);
+
+$rep_counter = null;
+$rep_issues = null;
+$currfile = null;
+$mediaExts = null;
+$progress_divid = 0;
+$system_folders = $system->getSystemFolders();
 
 ?>
 <html>
@@ -64,44 +125,6 @@ require_once(dirname(__FILE__)."/../../hsapi/utilities/utils_file.php");
             }
         </script>
 
-        <?php
-        
-        $system->defineConstants();
-
-        $titleDT = (defined('DT_NAME')?DT_NAME:0);
-        $geoDT = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
-        $fileDT = (defined('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
-        $startdateDT = (defined('DT_START_DATE')?DT_START_DATE:0);
-        $enddateDT = (defined('DT_END_DATE')?DT_END_DATE:0);
-        $descriptionDT = (defined('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:0);
-
-        $fieldhelper_to_heurist_map = array(
-            "heurist_id" => "recordId",
-            "Name0" => $titleDT,
-            "Annotation" => $descriptionDT,
-            "DateTimeOriginal" => $startdateDT,
-            "filename" => "file",
-            "latitude" => "lat",
-            "longitude" => "lon",
-
-            "file_name" => (defined('DT_FILE_NAME')?DT_FILE_NAME:0),
-            "file_path" => (defined('DT_FILE_FOLDER')?DT_FILE_FOLDER:0),
-            "extension"  => (defined('DT_FILE_EXT')?DT_FILE_EXT:0),
-
-            "device"  	=> (defined('DT_FILE_DEVICE')?DT_FILE_DEVICE:0),
-            "duration"  => (defined('DT_FILE_DURATION')?DT_FILE_DURATION:0),
-            "filesize"  => (defined('DT_FILE_SIZE')?DT_FILE_SIZE:0),
-            "md5"  		=> (defined('DT_FILE_MD5')?DT_FILE_MD5:0)
-        );
-
-        $rep_counter = null;
-        $rep_issues = null;
-        $currfile = null;
-        $mediaExts = null;
-        $progress_divid = 0;
-        $system_folders = $system->getSystemFolders();
-        
-        ?>
         <h2>ADVANCED USERS</h2>
 
         <p style="font-weight:bold;font-size:larger;padding:10 0">This function is designed for the indexing of bulk uploaded files (often images)</p>

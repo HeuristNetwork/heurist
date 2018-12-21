@@ -89,7 +89,11 @@
 
             $importDef = new DbsImport( $system );
 
-            if($importDef->doPrepare(  array('defType'=>$_REQUEST["import"], 'conceptCode'=>$_REQUEST['code']) )){
+            if($importDef->doPrepare(  array('defType'=>$_REQUEST["import"], 
+                        'databaseID'=>@$_REQUEST["import"], 
+                        'definitionID'=>@$_REQUEST["import"], 
+                        'conceptCode'=>@$_REQUEST['conceptCode']) ))
+            {
                 $isOK = $importDef->doImport();
             }
 
