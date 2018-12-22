@@ -935,7 +935,7 @@ $.widget( "heurist.importStructure", {
         */
         
         var request = {databaseID:this._selectedDB, 
-                       definitionID:_selectedRtyID,
+                       definitionID:this._selectedRtyID,
                        db:window.hWin.HAPI4.database, import:'rectype'};
         
         var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/sys_structure.php';
