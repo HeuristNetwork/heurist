@@ -176,8 +176,8 @@ $.widget( "heurist.editing_input", {
                 // bind click events
                 this._on( this.btn_add, {
                     click: function(){
-                        
-                        if(that.is_disabled) return;
+
+                        if(this.is_disabled) return;
 
                         if( !(Number(this.f('rst_MaxValues'))>0)  || this.inputs.length < this.f('rst_MaxValues')){
                             this._addInput('');
@@ -644,7 +644,7 @@ $.widget( "heurist.editing_input", {
 
                 var $btn_termsel = $( '<span>', {title: 'Select Term By Picture'})
                 .addClass('smallicon ui-icon ui-icon-image')
-                .css({'margin-right': '24px'})
+                .css({'margin-top': '2px'})
                 .appendTo( $inputdiv );
 
                 function __showHideSelByImage(){
@@ -662,8 +662,8 @@ $.widget( "heurist.editing_input", {
                 
 
                 this._on( $btn_termsel, { click: function(){
-                    
-                    if(that.is_disabled) return;
+
+                    if(this.is_disabled) return;
                     
                     var all_term_ids = $.map($input.find('option'), function(e) { return e.value; });
                     
@@ -676,9 +676,8 @@ $.widget( "heurist.editing_input", {
                     request['withimages'] = 1;
                     
                     //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
-
-                    var that = this;                                                
-                    
+                    var that = this;   
+                                                                 
                     //select term by image
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){
@@ -691,6 +690,8 @@ $.widget( "heurist.editing_input", {
                                         onselect:function(event, data){
                                             if(data && data.selection && data.selection.length>0){
                                                 $input.val(data.selection[0]);
+                                                if($input.hSelect('instance')!==undefined) $input.hSelect('refresh');
+                                                that._onChange();
                                             }
                                         }
                                         });
@@ -714,7 +715,7 @@ $.widget( "heurist.editing_input", {
                 
                 this._on( $btn_termedit, { click: function(){
                     
-                if(that.is_disabled) return;
+                if(this.is_disabled) return;
                     
                 if(isVocabulary){
 

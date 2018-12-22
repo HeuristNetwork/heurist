@@ -138,9 +138,11 @@ if($response!=null){
         allowWebAccessForForlder(HEURIST_SCRATCH_DIR.'thumbs/');
     
     }else{
+        
+        $entityDir = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
 
         $options = array(
-                'upload_dir' => HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/',
+                'upload_dir' => $entityDir,
                 'upload_url' => HEURIST_FILESTORE_URL.'entity/'.$entity_name.'/',
                 'unique_filename' => false,
                 'newfilename' => @$_REQUEST['newfilename'],
@@ -161,6 +163,7 @@ if($response!=null){
                 //'print_response ' => false
         );
 
+        allowWebAccessForForlder($entityDir.'thumbnail/');    
     
     }
     

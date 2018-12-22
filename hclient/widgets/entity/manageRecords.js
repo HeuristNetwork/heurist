@@ -660,7 +660,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
 +'<h2 class="truncate rectypeHeader" style="float:left;max-width:400px;margin-right:8px;">'
                 + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right: 10px;background-image:url(\''
-                + top.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
+                + window.hWin.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
                 + window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h2>'
 +'<select class="rectypeSelect ui-corner-all ui-widget-content" '
 +'style="display:none;z-index: 20;position: absolute;border: 1px solid gray;'  //background:white;
@@ -767,7 +767,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                               
                                               selHd.html(
                         '<img src="'+ph_gif+'" style="vertical-align:top;margin-right: 10px;background-image:url(\''
-                        + top.HAPI4.iconBaseURL+selRt.val()+'\');"/>'
+                        + window.hWin.HAPI4.iconBaseURL+selRt.val()+'\');"/>'
                         + window.hWin.HEURIST4.rectypes.names[selRt.val()]                                      
                                               );
                                                                                       
@@ -2286,7 +2286,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         + '" width=21 height=21 style="padding:2px;'
                         + 'background-position:center;background-repeat:no-repeat;background-size: 21px 21px;'
                         + 'vertical-align:middle;margin-right: 10px;background-image:url(\''
-                        + top.HAPI4.iconBaseURL+this._currentEditRecTypeID
+                        + window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID
                         //+ 'm&color=rgb(255,255,255)\');"/>'
                         + 's&color=rgb(0,0,0)&circle=rgb(255,255,255)\');"/>'  //draw black on white
                     + '<span style="display:inline-block;vertical-align:middle">'

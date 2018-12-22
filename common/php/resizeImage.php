@@ -241,7 +241,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
                     break;
                 default:
                     $desc = '***' . strtoupper(preg_replace('/.*[.]/', '', $file['ulf_OrigFileName'])) . ' file';
-                    $img = make_file_image($desc); //from string
+                    $img = make_file_image2($desc); //from string
                     break;
             }
             
@@ -359,7 +359,7 @@ echo $resized;
 * @param mixed $desc - text to be inserted into resulted image
 * @return resource - image with the given text
 */
-function make_file_image($desc) {
+function make_file_image2($desc) {
     $desc = preg_replace('/\\s+/', ' ', $desc);
 
     $font = 3; $fw = imagefontwidth($font); $fh = imagefontheight($font);

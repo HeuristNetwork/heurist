@@ -1149,7 +1149,7 @@ $.widget( "heurist.resultList", {
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
         + '<div title="dbl-click to edit : '+recTitle_strip+'" class="recordTitle">'
         +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
-            + recTitle_strip + "</a>") :recTitle)
+            + recTitle_strip + "</a>") :recTitle_strip)
         + '</div>'
 
         // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
