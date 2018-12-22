@@ -3486,14 +3486,14 @@ if(response.data['childMiltiplied'].length>0){
 sMsg = sMsg
 +'<div>'+__getlink(response.data['childMiltiplied'])+' records</a> were pointed to as a child record by more than one parent</div>'
 +'<br><div>You will need to edit these records and choose which record is the parent (child records can only have one parent).</div>'
-+'<div>To find these records use Manage > Structure > Verify <new tab icon></div><br>'
++'<div>To find these records use Verify > Verify integrity <new tab icon></div><br>'
 }
 
 //sMsg = sMsg 
 sMsg = sMsg 
 +'<br>Notes<br><div>We STRONGLY recommend removing - from the record structure of the child record type(s) -  any existing field which points back to the parent record</div>'
 +'<br><div>You will also need to update the record title mask to use the new Parent Entity field to provide information (rather than existing fields which point back to the parent)</div>'
-+'<br><div>You can do both of these changes through Manage > Structure > Build <new tab icon> or the modify structure <new tab icon> link when editing a record.</div>';
++'<br><div>You can do both of these changes through Structure > Modify / Extend <new tab icon> or the Modify structure <new tab icon> link when editing a record.</div>';
                             
                                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
                                 

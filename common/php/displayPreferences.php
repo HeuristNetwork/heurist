@@ -83,7 +83,7 @@ $prefs = array(
     "showSelectedOnlyOnMapAndSmarty" => "all", //by default show all records
 
     
-    // Properties which can be set in the Profile > Preferences dialogue
+    // Properties which can be set in the Settings Preferences dialogue
     "userCompetencyLevel" => "beginner", // interface style eg. show advanced functions, help text etc. beginner|intermediate|advanced 
 
     "defaultSearch" => "", // was "tag:Favourites", then sortby:-m after:\"1 week ago\"
