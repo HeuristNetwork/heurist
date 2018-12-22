@@ -37,10 +37,28 @@ $system->defineConstants();
 
 $dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
 if($dt_SourceRecordID==0){
-    $system->addError(HEURIST_ERROR, 'Detail type "source record" id not defined');
-    include ERROR_REDIR;
-    exit();
+    
+    $isOK = false;
+    $importDef = new DbsImport( $system );
+    if($importDef->doPrepare(  array('defType'=>'detailtype', 
+                'conceptCode'=>$dtDefines['DT_ORIGINAL_RECORD_ID'] ) ))
+    {
+        $isOK = $importDef->doImport();
+    }
+    
+    if(!$isOK){
+            $system->addErrorMsg('Cannot download field "Source record" required by the function you have requested. ');
+            include ERROR_REDIR;
+            exit();
+    }
+    if(!$system->defineConstant('DT_ORIGINAL_RECORD_ID', true)){
+        $system->addError(HEURIST_ERROR, 'Detail type "source record" id not defined');
+        include ERROR_REDIR;
+        exit();
+    }
+    
 }
+
 $HEURIST_ZOTEROSYNC = $system->get_system('sys_SyncDefsWithDB');
 if($HEURIST_ZOTEROSYNC==''){
     $system->addError(HEURIST_ERROR, 'Library key for Zotero synchronisation is not defined. '

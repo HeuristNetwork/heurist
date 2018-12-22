@@ -27,6 +27,7 @@ require_once (dirname(__FILE__).'/consts.php');
 require_once (dirname(__FILE__).'/dbaccess/utils_db.php');
 require_once (dirname(__FILE__).'/dbaccess/db_users.php');
 require_once (dirname(__FILE__).'/utilities/utils_file.php');
+require_once (dirname(__FILE__).'/structure/dbsImport.php');
 
 /**
 *  Class that contains mysqli (dbconnection), current user and system settings
@@ -190,16 +191,17 @@ error_log(print_r($_REQUEST, true));
     //
     // init the only constant
     //
-    public function defineConstant($const_name) {
+    public function defineConstant($const_name, $reset=false) {
+        
         if(defined($const_name)){
             return true;
         }else{
             global $rtDefines;
             global $dtDefines;
             if(@$rtDefines[$const_name]){
-                $this->defineRTLocalMagic($const_name, $rtDefines[$const_name][1], $rtDefines[$const_name][0]);
+                $this->defineRTLocalMagic($const_name, $rtDefines[$const_name][1], $rtDefines[$const_name][0], $reset);
             }else if(@$dtDefines[$const_name]){
-                $this->defineDTLocalMagic($const_name, $dtDefines[$const_name][1], $dtDefines[$const_name][0]);
+                $this->defineDTLocalMagic($const_name, $dtDefines[$const_name][1], $dtDefines[$const_name][0], $reset);
             }
             return defined($const_name);
         }
@@ -238,9 +240,9 @@ error_log(print_r($_REQUEST, true));
     * @param    int [$rtID] origin rectype id
     * @param    int [$dbID] origin database id
     */
-    private function defineRTLocalMagic($defString, $rtID, $dbID) {
+    private function defineRTLocalMagic($defString, $rtID, $dbID, $reset=false) {
         
-        $id = $this->rectypeLocalIDLookup($rtID, $dbID);
+        $id = $this->rectypeLocalIDLookup($rtID, $dbID, $reset);
         
         if ($id) {
             //echo "\nRT DEFINING \"" . $defString . "\" AS " . $id;
@@ -260,14 +262,14 @@ error_log(print_r($_REQUEST, true));
     * @param     int [$dbID] origin database id (default to 2 which is reserved for coreDefinition)
     * @return    int local rectype ID or null if not found
     */
-    private function rectypeLocalIDLookup($rtID, $dbID = 2) {
+    private function rectypeLocalIDLookup($rtID, $dbID = 2, $reset=false) {
         global $talkToSysAdmin;
         static $RTIDs;
         
-        if($dbID==$this->get_system('sys_dbRegisteredID')){
+        /*if($dbID==$this->get_system('sys_dbRegisteredID')){
             return $rtID;
-        }else
-        if (!$RTIDs) {
+        }else*/
+        if (!$RTIDs || $reset) {
             $res = $this->mysqli->query('select rty_ID as localID,
             rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
             if (!$res) {
@@ -294,8 +296,8 @@ error_log(print_r($_REQUEST, true));
     * @param    int [$dtID] origin detailtype id
     * @param    int [$dbID] origin database id
     */
-    private function defineDTLocalMagic($defString, $dtID, $dbID) {
-        $id = $this->detailtypeLocalIDLookup($dtID, $dbID);
+    private function defineDTLocalMagic($defString, $dtID, $dbID, $reset=false) {
+        $id = $this->detailtypeLocalIDLookup($dtID, $dbID, $reset);
         if ($id) {
             //echo "\nDT DEFINING \"" . $defString . "\" AS " . $id;
             define($defString, $id);
@@ -314,14 +316,14 @@ error_log(print_r($_REQUEST, true));
     * @param     int [$dbID] origin database id (default to 2 which is reserved for coreDefinition)
     * @return    int local detailtype ID or null if not found
     */
-    private function detailtypeLocalIDLookup($dtID, $dbID = 2) {
+    private function detailtypeLocalIDLookup($dtID, $dbID = 2, $reset=false) {
         global $talkToSysAdmin;
         static $DTIDs;
         
-        if($dbID==$this->get_system('sys_dbRegisteredID')){
+        /*if($dbID==$this->get_system('sys_dbRegisteredID')){
             return $dtID;
-        }else
-        if (!$DTIDs) {
+        }else*/
+        if (!$DTIDs || $reset) {
             $res = $this->mysqli->query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
             if (!$res) {
                 echo "Unable to build internal field-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
@@ -637,6 +639,16 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         exit();
     }
     
+    //
+    // add prefix for error message
+    //
+    public function addErrorMsg($message) {
+        if($this->errors && @$this->errors['message']){
+            $this->errors['message']  = $message.$this->errors['message'];
+        }else{
+            $this->addError(HEURIST_ERROR, $message);
+        }
+    }
 
     /**
     * keep error message (for further use with getError)
@@ -1099,7 +1111,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
             
             $superuser = false;
             if(false
-             //|| $password=='Rerhsybrcs'
+            //|| $password=='Rerhsybrcs'
             )
             {
                 $user = user_getById($this->mysqli, 2);
