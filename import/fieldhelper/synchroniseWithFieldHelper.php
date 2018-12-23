@@ -130,7 +130,7 @@ $system_folders = $system->getSystemFolders();
         <p style="font-weight:bold;font-size:larger;padding:10 0">This function is designed for the indexing of bulk uploaded files (often images)</p>
         
         This function reads FieldHelper (http://fieldhelper.org) XML manifest files from the folders (and their descendants)
-        listed in Manage > Database > Properties and writes the metadata as records in the current database, 
+        listed in Database > Properties and writes the metadata as records in the current database, 
         with pointers back to the files described by the manifests.
         
          <p>
@@ -140,7 +140,7 @@ $system_folders = $system->getSystemFolders();
             Note: the folders to be indexed must be writeable by the PHP system - normally they should be owned by Apache or www-data (as appropriate).
          </p>   
          <p>
-            Files will need to be uploaded to the server via direct access to the server or through Add Data > Utilities > Multi-file upload.
+            Files will need to be uploaded to the server via direct access to the server or through Import > Upload media files.
          </p>
          <?php
         

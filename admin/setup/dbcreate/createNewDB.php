@@ -509,7 +509,7 @@ if($registrationRequired) //show registration dialog at once
             <p style="padding-left:6em">
                 After logging in to your new database, we suggest you import some additional entity types from one of the<br />
                 curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />
-                using Database &gt; Structure &gt; Acquire from Databases 
+                using Database &gt; Structure &gt; Browse templates 
                 <!--or Database &gt; Structure &gt; Acquire from Templates -->
             </p>
         </div>        

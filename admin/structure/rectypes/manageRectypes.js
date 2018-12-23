@@ -789,7 +789,7 @@ function RectypeManager() {
                 window.hWin.HEURIST4.msg.showDialog(sURL,{
                     "close-on-blur": false,
                     "no-resize": false,
-                    title: 'Acquire from templates',
+                    title: 'Browse templates',
                     height: dim.h*0.95,
                     width: dim.w*0.95,
                     //callback: _import_complete

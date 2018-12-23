@@ -1066,7 +1066,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         
         $wrong_records = self::getWrongRecords($query, $imp_session,
             "This field is required. It is recommended that a value must be supplied for every record. "
-            ."You can find and correct these values using Manage > Structure > Verify",
+            ."You can find and correct these values using Verify > Verify integrity",
             "Missing Values", $field, 'warning');
         if(is_array($wrong_records)) {
             

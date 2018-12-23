@@ -149,7 +149,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         <div id="divKmlIntro" style="padding:0 20 20 20;display:none">
 <h4>This function imports a KML file into a set of map-enabled Heurist records</h4><br><br>
 <p>Each spatial object in the KML file generates a Heurist record which also stores attached attributes.  You may select the type of record to be created in a following step.</p><br><br>
-<p>A KML file can also be mapped directly by uploading it as a file attached to a record or storing it as a KML snippet in a text field within a record - use the KML record type for this purpose (in Manage > Structure > Build > Spatial and Mapping tab). However, plotting KML in this way does not allow any additional information to be attached to the spatial objects, all you get is a single monolithic map layer.</<p><br><br>
+<p>A KML file can also be mapped directly by uploading it as a file attached to a record or storing it as a KML snippet in a text field within a record - use the KML record type for this purpose (standard in all databases). However, plotting KML in this way does not allow any additional information to be attached to the spatial objects, all you get is a single monolithic map layer.</<p><br><br>
 <p><a href="<?php echo HEURIST_BASE_URL;?>context_help/kml_import.html">More info</a></p>
         </div>      
         

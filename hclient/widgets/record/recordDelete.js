@@ -140,7 +140,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             msg = msg
             +' pointed to by '+cnt_source+' other records. If you delete '+(cnt_target==1?'it':'them')
             +' you will leave '+((cnt_source>1)?'these records':'this record')+' with invalid data.<br>'
-            +'Invalid records can be found through the Manage > Structure > Verify function.';
+            +'Invalid records can be found through the Verify > Verify integrity function.';
         
             ele.find('p').first().html(msg);
                         

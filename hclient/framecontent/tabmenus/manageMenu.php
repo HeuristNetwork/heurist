@@ -118,7 +118,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     <a href="admin/structure/import/annotatedTemplate.php" name="auto-popup" class="h3link"
                     onClick="{return false;}"
                     title="Browse documented record type templates on HeuristNetwork.org and selectively import into the current database">
-                    Acquire from templates</a>
+                    Browse templates</a>
                     </li>
                     -->
 

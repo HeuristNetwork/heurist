@@ -2856,7 +2856,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 window.hWin.HEURIST4.msg.showMsgErr((res['count_warning']==1?'There is one row':('There are '+res['count_warning']+' rows'))
                                 +' missing values for fields set to Required.<br><br> '
                                 +' You may continue to import required data with missing or invalid values.'
-                                +' After import, you can find and correct these values using Manage > Structure > Verify<br><br>'
+                                +' After import, you can find and correct these values using Verify > Verify integrity<br><br>'
                                 + 'Click "Show" button  for a list of rows with missing values');                            
                             }
                         }else{

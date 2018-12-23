@@ -223,13 +223,13 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             </div>
 
             <div class="detailRow">
-                <div class="detailType" style="width: 180px !important;">Database &gt; <u>Acquire from templates</u></div>
+                <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Browse templates</u></div>
                 <div class="detail">Browse and download record type definitions documented on the Heurist network web site. <br />
                     In addition to saving a great deal of time, the documentation helps you learn about the best ways of setting up Heurist structures.<br />
                     The record type definitions downloaded can later be modified to your requirements.</div>
             </div>
             <div class="detailRow">
-                <div class="detailType" style="width: 180px !important;">Database &gt; <u>Acquire from database</u></div>
+                <div class="detailType" style="width: 180px !important;">Structure &gt; <u>Browse templates</u></div>
                 <div class="detail">Find and download common record type definitions from any registered Heurist database, including the specially
                     curated databases set up by the Heurist developers. <br />The record type definitions downloaded can later be modified
                     to your requirements.</div>

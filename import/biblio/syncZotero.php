@@ -62,7 +62,7 @@ if($dt_SourceRecordID==0){
 $HEURIST_ZOTEROSYNC = $system->get_system('sys_SyncDefsWithDB');
 if($HEURIST_ZOTEROSYNC==''){
     $system->addError(HEURIST_ERROR, 'Library key for Zotero synchronisation is not defined. '
-                .'Please configure Zotero connection in Manage > Database > Properties');
+                .'Please configure Zotero connection in Database > Properties');
     include ERROR_REDIR;
     exit();
 }
@@ -131,7 +131,7 @@ if($fh_data==null || is_string($fh_data)){
         // TODO: we need a link here which opens the Properties form in the main interface, rather than the old form
         // $linkToAdvancedProperties = "<a target=\"_blank\" href=\"../../admin/adminMenuStandalone.php?db="
         // . HEURIST_DBNAME
-        // ."&mode=properties2\"Manage > Database > Prxoperties</a>";
+        // ."&mode=properties2\"Database > Prxoperties</a>";
 
 
         //print "<div>Orignal ID detail:".$dt_SourceRecordID."</div>";
@@ -258,7 +258,7 @@ if($is_verbose){
 
 if( ( is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
     print "<div class='ui-state-error'><br />Current Zotero access settings incomplete: ' ".$key.
-    " ' <p>Please configure Zotero connection in Manage > Database > Properties.</div></body></html>";
+    " ' <p>Please configure Zotero connection in Database > Properties.</div></body></html>";
     exit;
 }
 
@@ -303,10 +303,10 @@ if($step=="1"){  //first step - info about current status
     }else if($code>399){
         $msg = "<div class='ui-state-error'><br />Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
         if($code==400 || $code==401 || $code==403){
-            $msg = $msg."Please verify Zotero API key in Manage > Database > Properties - it may be incorrect or truncated.";
+            $msg = $msg."Please verify Zotero API key in Database > Properties - it may be incorrect or truncated.";
 
         }else if($code==404 ){
-            $msg = $msg."Please verify Zotero User and Group ID in Manage > Database > Properties - values may be incorrect.";
+            $msg = $msg."Please verify Zotero User and Group ID in Database > Properties - values may be incorrect.";
         }else if($code==407 ){
             $msg = $msg."Proxy Authentication Required, please ask system administrator to set it";
         }
