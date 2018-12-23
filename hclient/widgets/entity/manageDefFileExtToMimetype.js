@@ -54,10 +54,14 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         
         if(this.searchForm && this.searchForm.length>0){
             this.searchForm.searchDefFileExtToMimetype(this.options);   
-            if(this.options.edit_mode=='inline') this.searchForm.height('7.5em').css('border','none');    
+            if(this.options.edit_mode=='inline') this.searchForm.height('5.5em').css('border','none');    
         }
         
-        if(this.options.edit_mode=='inline') this.recordList.css('top','7.5em');
+        if(this.options.edit_mode=='inline') {
+            this.recordList.css('top','5.5em');   
+            this._toolbar = this._as_dialog.parent();
+        }
+        
         this.recordList.resultList('option', 'show_toolbar', false);
         this.recordList.resultList('option', 'view_mode', 'list');
 
@@ -151,7 +155,42 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
             this.options.entity.fields[0].dtFields['rst_Display'] = 'readonly';
         }
 
+console.log('1111');
+        if(this._toolbar){
+            this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
+        }
+        
         this._super(recID);
+    },
+    
+    _getEditDialogButtons: function(){
+                                    
+            var that = this;        
+            
+            var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+                click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
+                      
+                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add New File Type'),
+                      css:{'margin-right':'0.5em','float':'left'}, id:'btnPrev',
+                      click: function() { that._onActionListener(null, 'add'); }},
+                      
+                      
+                {text:window.hWin.HR('Close'), 
+                      css:{'margin-left':'3em','float':'right'},
+                      click: function() { 
+                          that.closeDialog(); 
+                      }},
+                {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
+                      css:{'margin-left':'0.5em','float':'right'},
+                      click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
+                {text:window.hWin.HR('Save'), id:'btnRecSave',
+                      accesskey:"S",
+                      css:{'font-weight':'bold','float':'right'},
+                      click: function() { that._saveEditAndClose( null, 'none' ); }},
+                      
+                      ];
+        
+            return btns;
     },
     
     
