@@ -127,15 +127,25 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
             }
 
             function onSubmit(event){
-                event.target.disabled = 'disabled';
+                
+                var ele = document.getElementById("targetdbname");
+                
+                if(ele.value.trim()==''){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Define name of new database');
+                    return false;
+                }else{
+                    ele = document.getElementById("submitBtn");
+                    ele.disabled = 'disabled';
 
-                var ele = document.getElementById("loading");
-                ele.style.display = "block";
-                ele = document.getElementById("mainform");
-                ele.style.display = "none";
+                    ele = document.getElementById("loading");
+                    ele.style.display = "block";
+                    ele = document.getElementById("mainform");
+                    ele.style.display = "none";
 
-                showProgress();
-                document.forms[0].submit();
+                    showProgress();
+                    return true;
+                    //document.forms[0].submit();
+                }
             }
 
             function showProgress(){
@@ -209,7 +219,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 if(@$_REQUEST['mode']!='2' || !@$_REQUEST['targetdbname']){
                     ?>
                     <div class="separator_row" style="margin:20px 0;"></div>
-                    <form name='selectdb' action='cloneDatabase.php' method='get'>
+                    <form name='selectdb' action='cloneDatabase.php' method='get' onsubmit="{return onSubmit(event);}">
                         <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
                         <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
                         <?php
@@ -224,9 +234,10 @@ if(@$_REQUEST['mode']!='2' || !@$_REQUEST['targetdbname']){
                         </p>
                         <h3>Enter a name for the cloned database:</h3>
                         <div style="margin-left: 40px;">
-                            <input type='text' name='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
-                            <input type='button' value='Clone "<?=($isCloneTemplate)?$_REQUEST['templatedb']:HEURIST_DBNAME?>"'
-                                class="h3button" onclick='onSubmit(event)'/>
+                            <input type='text' name='targetdbname' id='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
+                            <input type='submit' id='submitBtn' 
+                                value='Clone "<?=($isCloneTemplate)?$_REQUEST['templatedb']:HEURIST_DBNAME?>"'
+                                class="h3button"/>
                         </div>
 
                     </form>
