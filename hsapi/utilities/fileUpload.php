@@ -96,6 +96,8 @@ if($response!=null){
                     )
                 )
         );
+
+        allowWebAccessForForlder(HEURIST_FILESTORE_DIR.'term-images/');
     
     }else if($entity_name=="temp"){//redirect uploaded content back to client side after some processing
                                    // for example in term list import 

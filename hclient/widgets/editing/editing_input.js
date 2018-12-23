@@ -2098,6 +2098,8 @@ console.log('onpaste');
                     }else{
                         that._removeInput( input_id );
                     }
+                    
+                    that._onChange(); 
                 }
             });
 

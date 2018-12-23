@@ -141,7 +141,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
         <script type="text/javascript" src="editTerms.js"></script>
 
-        <div class="ent_wrapper" style="min-width:1050px"> <!-- style="top:0px"-->
+        <div id="mainDiv" class="ent_wrapper" style="min-width:1050px"> <!-- style="top:0px"-->
             <div class="ent_header" id="divBanner" style="height:3em;border:none;">
                 <h2 style="line-height:25px"></h2>
                 <label style="padding:14px 0px;font-size:14px;font-weight:bold">Vocabularies</label>
@@ -287,7 +287,9 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                             </div>
                             
                             <div style="vertical-align: middle;display:inline-block; padding-left:3px">
-                                <div id="termImage" style="min-height:100px;min-width:100px;border:gray; border-radius: 3px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);" >
+                                <div id="termImage" 
+style="height:100px;width:100px;border:gray;cursor: pointer; vertical-align: middle;display: table-cell;text-align: center;border:dashed blue 2px; box-shadow: 0 1px 3px RGBA(0,0,0,0.5);"  onclick="{return editTerms.showFileUploader();}">
+                                    <img id="imgThumb" style="max-width: 380px;"/>
                                 </div>
                             </div>
 
@@ -332,7 +334,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                                 onClick="{editTerms.doDelete()}" />
                             </span>
                             
-                            <input type="button" value="Save changes to this term" id="btnSave" class="btn_Save"
+                            <input type="button" value="Save changes to this term" id="btnSave" class="btn_Save save-disabled" 
                                 style="margin-left:80px;font-style: bold !important; color:black;"
                                 title=" "
                                 onClick="{editTerms.doSave()}"/>
