@@ -1136,16 +1136,25 @@ $.widget( "heurist.search_faceted_wiz", {
                         
                         if(dtid>0){
                         
-                        if(!window.hWin.HEURIST4.rectypes.typedefs[ rtid ].dtFields[dtid]){
-                            //field was removed - remove facet
-                            removeFacet = true;
-                            break;
-                        }
                             
                         if(linktype=='lt' || linktype=='rt'){
+                            
+                            if(!window.hWin.HEURIST4.rectypes.typedefs[ rtid ].dtFields[dtid]){
+                                //field was removed - remove facet
+                                removeFacet = true;
+                                break;
+                            }
+                            
                             harchy.push(' . '+window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]+' &gt ');
                         }else{
                             var from_rtid = codes[j+2];
+                            
+                            if(!window.hWin.HEURIST4.rectypes.typedefs[ from_rtid ].dtFields[dtid]){
+                                //field was removed - remove facet
+                                removeFacet = true;
+                                break;
+                            }
+                            
                             harchy.push(' &lt '+
                             (window.hWin.HEURIST4.rectypes.typedefs[from_rtid]
                                 ?window.hWin.HEURIST4.rectypes.typedefs[from_rtid].dtFields[dtid][dispname_idx]+' . '

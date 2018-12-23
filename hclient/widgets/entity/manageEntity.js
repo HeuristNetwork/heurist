@@ -154,7 +154,7 @@ $.widget( "heurist.manageEntity", {
         
         //init layout
         var layout = '';
-        if(this.options.layout_mode=='basic'){  //coomon tooolbar on top, list on left, edit form on right side
+        if(this.options.layout_mode=='basic'){  //common tooolbar on top, list on left, edit form on right side
             layout = 
                 '<div class="ent_wrapper">'
                     +'<div class="ent_header editForm-toolbar"/>'
@@ -173,9 +173,9 @@ $.widget( "heurist.manageEntity", {
                         +    '<div class="ent_header searchForm"/>'     
                         +    '<div class="ent_content_full recordList"/>'
                         +'</div>'
-                        +'<div class="ent_wrapper" style="left:321px">'
-                        +    '<div class="ent_header editForm-toolbar"/>'
-                        +    '<div class="ent_content_full editForm"/>'
+                        +'<div class="ent_wrapper editForm" style="left:321px">'
+                        //+    '<div class="ent_header editForm-toolbar"/>'
+                        //+    '<div class="ent_content_full editForm"/>'
                         +'</div>'
                 +'</div>';
 
@@ -692,7 +692,7 @@ $.widget( "heurist.manageEntity", {
                         click: function() { that._selectAndClose(); }}); 
             }
 
-            if(options.edit_mode == 'editonly'){
+            if(options.edit_mode == 'editonly' || options.edit_mode == 'inline'){
                 btn_array =  this._getEditDialogButtons();
                 if(!options.beforeClose){
                     options.beforeClose = function(){
@@ -785,7 +785,7 @@ $.widget( "heurist.manageEntity", {
             }); 
             this._as_dialog = $dlg; 
             
-            if(options.edit_mode == 'editonly'){
+            if(options.edit_mode == 'editonly' || options.edit_mode == 'online'){
                 this._toolbar = this._as_dialog.parent();
                 //assign unique identificator to get proper position of child edit dialogs
                 this._toolbar.attr('posid','edit'+this._entityName+'-'+(new Date()).getTime());

@@ -464,7 +464,7 @@ window.hWin.HEURIST4.dbs = {
                 var $details = $alldetails[$recTypeId];
                 
                 $details = $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
-                if(!$.isArray($details)) continue;
+                if(!$details) continue;
                 
                 for (var $dtID in $details) {
                     

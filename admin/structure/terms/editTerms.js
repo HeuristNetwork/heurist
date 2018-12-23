@@ -246,6 +246,7 @@ function EditTerms() {
             iInverseId = (Number(iInverseId)>0) ?iInverseId:null;
             var iInverseId_prev = Number(_currentNode.data.inverseid);
             iInverseId_prev = (iInverseId_prev>0)?iInverseId_prev:null;
+            if(Hul.isempty(_currentNode.data.trm_SemanticReferenceURL))_currentNode.data.trm_SemanticReferenceURL=='';
             
             ischanged =
             termName != _currentNode.data.label ||
@@ -257,7 +258,7 @@ function EditTerms() {
         }
 
         var ele = $('#btnSave');
-        if (ischanged && termName!='') {
+        if (ischanged) { // && termName!=''
             //ele.prop('disabled', 'disabled');
             //ele.css('color','lightgray');
             ele.removeProp('disabled');
@@ -344,14 +345,24 @@ function EditTerms() {
                 //image
                 if(node.data.id>0){
                     var curtimestamp = (new Date()).getMilliseconds();
-                    $('#termImage').html(
-                    '<a href="javascript:void(0)" onClick="{editTerms.showFileUploader()}" title="Click to change image">'+
+                    $('#termImage').find('img').prop('src', 
+                                window.hWin.HAPI4.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp);
+                    /*$('#termImage').html(
+                    //'<a href="javascript:void(0)" onClick="{editTerms.showFileUploader()}" title="Click to change image">'+
                     '<img id="imgThumb" style="max-width: 380px;" src="'+
                     window.hWin.HAPI4.iconBaseURL + node.data.id + "&ent=term&editmode=1&t=" + curtimestamp +
-                    '"></a>');
-                    $('#termImage').css({display:'inline-block'});
+                    '">'); */
+                    $('#termImage').css({display:'table-cell'});
                     $('#btnClearImage').css({display:'inline-block'});
                     $('#termImageForNew').hide();
+                    
+
+                    var $input = $('#new_term_image');
+                    $input.fileupload('option','formData',
+                        [ {name:'db', value: window.hWin.HAPI4.database},
+                          {name:'entity', value:'terms'},
+                          {name:'newfilename', value: node.data.id }]);
+                    
                 }else{
                     $('#termImage').hide();
                     $('#btnClearImage').hide();
@@ -419,6 +430,12 @@ function EditTerms() {
                 $("#trm_Status").val(status);
 
                 _toggleAll(disable_status || disable_fields, disable_status);
+                
+
+                var ele = $('#btnSave');
+                ele.prop('disabled', 'disabled');
+                $(ele).addClass('save-disabled');
+                
             }//node!=null
         }
 
@@ -733,8 +750,9 @@ function EditTerms() {
         document.getElementById ('edCode').value = sCode;
         var sStatus = document.getElementById ('trm_Status').value;
         
-        var sRefURI = document.getElementById ('trm_SemanticReferenceURL').value;
+        var sRefURI = document.getElementById ('trm_SemanticReferenceURL').value.trim();
         document.getElementById ('trm_SemanticReferenceURL').value = sRefURI;
+        if(Hul.isempty(_currentNode.data.trm_SemanticReferenceURL)) _currentNode.data.trm_SemanticReferenceURL='';
 
         var iInverseId = Number(document.getElementById ('edInverseTermId').value);
         iInverseId = (Number(iInverseId)>0) ?iInverseId:null;
@@ -1756,7 +1774,10 @@ function EditTerms() {
             autoUpload: true,
             sequentialUploads:true,
             dataType: 'json',
-            //dropZone: $input_img,
+            
+            pasteZone: $('#mainDiv'),
+            dropZone: $input_img,
+            
             add: function (e, data) {
                 $input_img.addClass('loading');
                 $input_img.find('img').hide();
@@ -2105,7 +2126,7 @@ function EditTerms() {
                     }else if(ele.hasClass('ui-icon-arrowthick-1-e')){
                         _export(false);
                     }else if(ele.hasClass('ui-icon-image')){
-                         that.showFileUploader();
+                         //that.showFileUploader();
                     }
                     },500);
                     //window.hWin.HEURIST4.util.stopEvent(event); 
@@ -2524,15 +2545,9 @@ function EditTerms() {
         },
 
         showFileUploader: function(){
-
             var $input = $('#new_term_image');
-            $input.fileupload('option','formData',
-                [ {name:'db', value: window.hWin.HAPI4.database},
-                    {name:'entity', value:'terms'},
-                    {name:'newfilename', value: document.getElementById ('edId').value }]);
-
             $input.click();
-
+            return false;
         },
 
         getClass: function () {

@@ -136,8 +136,6 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         var i_file_upl = this.getEntityFieldIdx('ulf_FileUpload');   
         
-        //this._edit_dialog.off('paste');
-        
         if(isLocal){ //local
             this.options.entity.fields[i_url].dtFields['rst_DefaultValue'] = window.hWin.HAPI4.baseURL
                                                     + '?db=' + window.hWin.HAPI4.database 

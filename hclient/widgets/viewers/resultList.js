@@ -913,7 +913,7 @@ $.widget( "heurist.resultList", {
                 .html('<h3 class="not-found" style="color:teal">No entites match the filter criteria</h3>')
                 .appendTo(this.div_content);
             
-        }else{
+        }else if(window.hWin.HAPI4.sysinfo.db_total_records>100) {
         
             var $emptyres = $('<div>')
             .css('padding','1em')
@@ -1149,7 +1149,7 @@ $.widget( "heurist.resultList", {
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
         + '<div title="dbl-click to edit : '+recTitle_strip+'" class="recordTitle">'
         +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
-            + recTitle_strip + "</a>") :recTitle)
+            + recTitle_strip + "</a>") :recTitle_strip)
         + '</div>'
 
         // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible

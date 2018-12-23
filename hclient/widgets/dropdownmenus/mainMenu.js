@@ -138,7 +138,7 @@ $.widget( "heurist.mainMenu", {
         // MAIN MENU-----------------------------------------------------
         var he = this.element.height();
         this.divMainMenu = $("<div>")
-            .css({'border-bottom':'lightgray solid 1px','position':'absolute',left:0,right:0,top:he/2})
+            .css({'position':'absolute',left:0,right:0,top:he/2}) //'border-bottom':'lightgray solid 1px',
             .appendTo(this.element);;
 
         this.divMainMenu = $( "<div>")
@@ -775,6 +775,26 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             showTipOfTheDay(false);
         }else
         if(!window.hWin.HEURIST4.util.isempty(href) && href!='#'){
+            
+            
+            if(href.indexOf('mailto:')==0){
+                  /*var t;
+                  $(window).blur(function() {
+                        // The browser apparently responded, so stop the timeout.
+                        clearTimeout(t);
+                  });
+
+                  t = setTimeout(function() {
+                        // The browser did not respond after 500ms, so open an alternative URL.
+                        window.hWin.HEURIST4.msg.showMsgErr('mailto_fail');
+                  }, 500);
+                  window.open( href );*/
+                  
+                  var win = window.open(href, 'emailWindow');
+                  if (win && win.open && !win.closed) win.close();                  
+                  return;
+            }
+            
     
             if(!(href.indexOf('http://')==0 || href.indexOf('https://')==0)){
                 href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?')>=0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        

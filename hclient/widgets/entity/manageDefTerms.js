@@ -251,7 +251,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         
         //var curtimestamp = (new Date()).getMilliseconds();
-        var thumb_url = top.HEURIST.iconBaseURL + recID + '&ent=term&editmode=0';//"&t=" + curtimestamp
+        var thumb_url = window.hWin.HAPI4.iconBaseURL + recID + '&ent=term&editmode=0';//"&t=" + curtimestamp
 
         var html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'
             + thumb_url + '&quot;);opacity:1"></div>';

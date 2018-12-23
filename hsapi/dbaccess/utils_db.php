@@ -459,6 +459,7 @@
     function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
 
         $ret = null;
+        $primary_field_type = 'integer';
 
         if(is_array($table_prefix)){
             
@@ -477,8 +478,6 @@
                 $table_prefix = $table_prefix.'_';
             }
             $primary_field = $table_prefix.'ID';
-            $primary_field_type = 'integer';
-            
         }
     
         //if integer it is assumed autoincrement
@@ -552,7 +551,7 @@
 
         $result = mysql__exec_param_query($mysqli, $query, $params);
         
-        if($result==true){ //&& $primary_field_type=='integer'
+        if($result==true && $primary_field_type=='integer'){
             $result = ($isinsert) ?$mysqli->insert_id :$rec_ID;
         }//for non-numeric it returns null
 
