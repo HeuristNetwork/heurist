@@ -945,9 +945,21 @@ function print_public_details($bib) {
                     else
                         $trim_url = $bd['val'];
                     $bd['val'] = '<a href="'.$bd['val'].'" target="_new">'.htmlspecialchars($trim_url).'</a>';
-                } else if ($bd['dtl_Geo'] && preg_match("/^POLYGON\s?[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $bd["bd_geo_envelope"], $poly)) {
-                    list($match, $minX, $minY, $maxX, $maxY) = $poly;
-                    if ($bd["val"] == "l"  &&  preg_match("/^LINESTRING\s?[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",$bd["dtl_Geo"],$matches)) {
+                } else if ($bd['dtl_Geo']){
+                    
+                    $minX = null;
+                    
+                    if (preg_match("/^POLYGON\s?[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", 
+                                $bd["bd_geo_envelope"], $poly))
+                    {
+                        list($match, $minX, $minY, $maxX, $maxY) = $poly;
+                        
+                    }else if (preg_match("/POINT\\((\\S+)\\s+(\\S+)\\)/i", $bd["bd_geo_envelope"], $matches)){
+                        $minX = floatval($matches[1]);
+                        $minY = floatval($matches[2]);
+                    }else if ($bd["val"] == "l"  &&  preg_match("/^LINESTRING\s?[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",
+                                $bd["dtl_Geo"],$matches)) 
+                    {
                         list($dummy, $minX, $minY, $maxX, $maxY) = $matches;
                     }
                     /*   redundant
@@ -968,10 +980,10 @@ function print_public_details($bib) {
                     }
 
                     if ($type == "Point")
-                        $bd["val"] = "<b>Point</b> ".round($minX,7).", ".round($minY,7);
+                        $bd["val"] = "<b>Point</b> ".($minX!=null?round($minX,7).", ".round($minY,7):'');
                     else
-                        $bd['val'] = "<b>$type</b> X ".round($minX,7).", ".round($maxX,7).
-                        " Y ".round($minY,7).", ".round($maxY,7);
+                        $bd['val'] = "<b>$type</b> X ".($minX!=null?round($minX,7).", ".round($maxX,7).
+                        " Y ".round($minY,7).", ".round($maxY,7):'');
 
                     $geoimage = "<img class='geo-image' src='".HEURIST_BASE_URL
                     ."common/images/geo.gif' onmouseout='{if(mapViewer){mapViewer.hide();}}' "
