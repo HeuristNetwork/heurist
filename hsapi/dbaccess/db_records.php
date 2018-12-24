@@ -395,6 +395,11 @@
                 if(!$stmt->execute()){
                     $syserror = $mysqli->error;
                     $mysqli->rollback();if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    
+                    sendEmail(HEURIST_MAIL_TO_ADMIN, 'DATABASE ERROR :'.$system->dbname()
+                            .' Cannot save details.',
+                            ($syserror?'. System message:'.$syserror:'').'\n'.print_r($values,true));
+                    
                     return $system->addError(HEURIST_DB_ERROR, 'Cannot save details.', $syserror);
                 }
 

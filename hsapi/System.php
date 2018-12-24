@@ -658,7 +658,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         if($status==HEURIST_REQUEST_DENIED && $sysmsg==null){
             $sysmsg = $this->get_user_id();
         }else if($status==HEURIST_DB_ERROR){
-            error_log('DATABASE ERROR :'.(defined('HEURIST_DBNAME')?HEURIST_DBNAME:'')
+            error_log('DATABASE ERROR :'.$this->dbname()
             .'  '.$message.($sysmsg?'. System message:'.$sysmsg:''));
             $message = 'Heurist was unable to process. '.$message;
             $sysmsg = 'reported in the server\'s PHP error log';
