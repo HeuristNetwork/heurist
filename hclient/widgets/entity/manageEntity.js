@@ -173,9 +173,9 @@ $.widget( "heurist.manageEntity", {
                         +    '<div class="ent_header searchForm"/>'     
                         +    '<div class="ent_content_full recordList"/>'
                         +'</div>'
-                        +'<div class="ent_wrapper editForm" style="left:321px">'
+                        +'<div class="ent_wrapper" style="left:321px">'
                         //+    '<div class="ent_header editForm-toolbar"/>'
-                        //+    '<div class="ent_content_full editForm"/>'
+                        +    '<div class="ent_content_full editForm" style="top:0"/>'
                         +'</div>'
                 +'</div>';
 
