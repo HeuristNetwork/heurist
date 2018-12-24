@@ -1437,6 +1437,8 @@ window.hWin.HEURIST4.ui = {
                 $context = $(window.hWin.document);
             }
         
+            /* since 2018-12=24 help is not related to competency level
+        
             if(exp_level>1){
                 //show beginner level
                 $context.find('.heurist-helper2').css('display','block');
@@ -1454,6 +1456,7 @@ window.hWin.HEURIST4.ui = {
                 $context.find('.heurist-table-helper1').css('display','none');
                 $context.find('.heurist-helper1').css('display','none');
             }
+            */
             
             
             $context.find('li[data-user-experience-level]').each(function(){
@@ -1488,6 +1491,7 @@ window.hWin.HEURIST4.ui = {
         
         //IJ 2018-12-04 hide it! 
         var hasContextHelp =  false && !window.hWin.HEURIST4.util.isempty(helpcontent_url);
+        var hideHelpButton = true;
         
         var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
         if(titlebar.length==0){

@@ -76,6 +76,8 @@ console.log('load google map api')
                     var initial_wkt = params['wkt'];
                     
                     mapping.loadWKT(initial_wkt);
+                }else{
+                    mapping.clearAll();
                 }
             }
 
