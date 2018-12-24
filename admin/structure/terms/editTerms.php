@@ -137,30 +137,32 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
         </style>
     </head>
 
-    <body class="popup">
+    <body class="popup" style="overflow:hidden;">
 
         <script type="text/javascript" src="editTerms.js"></script>
 
-        <div id="mainDiv" class="ent_wrapper" style="min-width:1050px"> <!-- style="top:0px"-->
-            <div class="ent_header" id="divBanner" style="height:3em;border:none;">
-                <h2 style="line-height:25px"></h2>
-                <label style="padding:14px 0px;font-size:14px;font-weight:bold">Vocabularies</label>
-            </div>
-            <div class="ent_content_full" style="overflow:hidden;top:5em">
+        <div id="mainDiv" class="ent_wrapper" style="min-width:850px;overflow:hidden;"> <!-- style="top:0px"-->
+            <div class="ent_content_full" style="overflow:hidden;width:350;top:0">
             
-            <div id="termTree" style="width:350;max-width:350;top:0;bottom:0;padding-right:5px;overflow:hidden;position:absolute;border:1px gray solid;">
+            <div class="ent_header" id="divBanner" style="height:2.5em;border:none;">
+                <label style="padding:14px 0px;font-size:14px;font-weight:bold">Vocabularies</label>
+                <input type="button" value="Add Vocabulary" id="btnAddRoot1" onClick="{editTerms.doAddChild(true)}" 
+                            style="float:right"/>
+            </div>
+            <div id="termTree" style="width:350;max-width:350;top:2.5em;bottom:0;padding-right:5px;overflow:hidden;position:absolute;">
+            </div>
             </div>
 
-            <div id="formContainer"style="top:0;bottom:0;left:350;right:0;padding-left:10px;position:absolute;vertical-align:top;overflow-y:auto;border:1px gray solid;">
+            <div id="formContainer"style="top:0;bottom:0;left:350;right:0;position:absolute;vertical-align:top;overflow-y:auto;overflow-x:hidden;">
             
                <div style="height:60px">
-               <div style="margin-left:2px; margin-top:15px;float:left">
+               <!-- div style="margin-left:2px; margin-top:15px;float:left">
                     <span class="ui-icon ui-icon-arrowthick-1-w" style="font-size:18px;color:gray"></span>
                     <input type="button" value="Add Vocabulary" id="btnAddRoot1" onClick="{editTerms.doAddChild(true)}"/>
                     <br><span style="margin-left:20px;font-size:0.9em"> (adds a new root to the tree)</span>
-                </div>
+                </div-->
                 <!-- Navigation: Search form to do partial match search on terms in the tree -->
-                <div id="formSearch" style="padding:15px;float:right">
+                <div id="formSearch" style="padding-left:155px">
                     <div class="dtyField" style="display: inline-block;">
                         <label class="dtyLabel" style="width:30px;">Find:</label>
                         <input id="edSearch" style="width:70px"  onkeyup="{doSearch(event)}"/>
@@ -187,13 +189,15 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" class="form_editor" style="display:none;padding:5px">
-                    <h2 style="margin-left:5px; margin-top:0px; margin-bottom:10px;border-style:none;display:inline-block">Edit selected term / vocabulary</h2>
-                    <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
-                        <b>term saved successfully!</b>
-                    </div>
-
-                    <div style="margin-left:5px; border: black; border-style: solid; border-width:thin; padding:10px;">
+                <div id="formEditor" class="form_editor" style="display:none;">
+                
+                    <div style="border: black; border-style: solid; border-width:thin; padding:10px;">
+                    
+                        <h2 style="margin-left:5px; margin-top:0px; margin-bottom:10px;border-style:none;display:inline-block">Edit selected term / vocabulary</h2>
+                        <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
+                            <b>term saved successfully!</b>
+                        </div>
+                        <br>
 
                         <div class="dtyField" style="display: inline-block;">
                             <label class="dtyLabel">ID:</label>
@@ -204,7 +208,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                             </div>
                         </div>
 
-                        <div id="divStatus" class="dtyField" style="float:right;width:130px;"><label>Status:</label>
+                        <div id="divStatus" class="dtyField" style="padding-left:65px;display: inline-block;width:130px;"><label>Status:</label>
                             <select class="dtyValue" id="trm_Status" onChange="editTerms.onChangeStatus(event)">
                                 <option selected="selected">open</option>
                                 <option>pending</option>
@@ -249,7 +253,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                         </div>
 
 
-                        <div class="dtyField" xstyle="display:none">
+                        <div class="dtyField">
                             <label class="dtyLabel">Semantic/Reference URI</label>
                             <input id="trm_SemanticReferenceURL" style="width:350px; margin-top:5px;" 
                                     onkeyup="editTerms.isChanged();"/>
@@ -315,7 +319,7 @@ style="height:100px;width:100px;border:gray;cursor: pointer; vertical-align: mid
                          Either this section of code will be removed or restored in next months
                         -->
                         <div style="display:inline-block; margin-top:15px;width:90%;">
-                            <span style="visibility:hidden;">
+                            <span style="visibility:hidden;display:none;">
                             <input type="button" value="Import" id="btnImport"
                                 title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"
                                 onClick="{editTerms.doImport(false)}"/>
@@ -335,7 +339,7 @@ style="height:100px;width:100px;border:gray;cursor: pointer; vertical-align: mid
                             </span>
                             
                             <input type="button" value="Save changes to this term" id="btnSave" class="btn_Save save-disabled" 
-                                style="margin-left:80px;font-style: bold !important; color:black;"
+                                style="margin-left:105px;font-style: bold !important; color:black;"
                                 title=" "
                                 onClick="{editTerms.doSave()}"/>
 
@@ -344,7 +348,7 @@ style="height:100px;width:100px;border:gray;cursor: pointer; vertical-align: mid
                                 title=" "/></span>
 
                             <div id='div_btnAddChild' style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
-                                    <input type="button" value="Add Child" id="btnAddChild"
+                                    <input type="button" value="+ Add Child" id="btnAddChild"
                                          title="Add a child term (a term hierarchichally below the current vocabulary or term)"
                                          value=""
                                          onClick="{editTerms.doAddChild(false)}"/>
@@ -362,7 +366,7 @@ style="height:100px;width:100px;border:gray;cursor: pointer; vertical-align: mid
 
                     </div>
 
-                    <div style="margin-left:10px; padding-top:15px; width:600px;; padding-left:30px">
+                    <div style="margin-left:10px; padding-top:15px; padding-left:30px">
                         <label>Relationship type:</label>
                         <input type="button" value="Change Vocabulary" id="btnChangeVocab" style="display:inline-block"/>
 
@@ -424,7 +428,6 @@ style="height:100px;width:100px;border:gray;cursor: pointer; vertical-align: mid
             </div>
 
             
-            </div> <!-- ent_content_full -->
         </div>
 
         <div id="divTermMergeConfirm" style="display:none;width:100%;padding:5px">
