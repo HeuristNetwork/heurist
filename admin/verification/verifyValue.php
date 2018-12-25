@@ -95,8 +95,9 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
             if (($cntTrm = count($terms)) > 0) {
 
                 if ($cntTrm == 1) {  //vocabulary
-                
-                    $terms = getTermOffspringList(self::$mysqli, $terms[0]); //db_structure
+                    $vocabId = $terms[0];
+                    $terms = getTermOffspringList(self::$mysqli, $vocabId); //db_structure
+                    array_push($terms, $vocabId);
                     
                 }else{
                     $nonTerms = getTermsFromFormat($defs_nonsel); //from db_structure

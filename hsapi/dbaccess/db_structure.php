@@ -500,7 +500,7 @@ function dbs_GetRectypeConstraint($system) {
         if ($termID) {
             $emailsent = false;
             
-            $res = $mysqli->query("select * from defTerms where trm_ParentTermID=$termID");
+            $res = $mysqli->query("select trm_ID from defTerms where trm_ParentTermID=$termID");
             if ($res && $res->num_rows>0 ) { //child nodes exist
                 while ($row = $res->fetch_assoc()) { // for each child node
                 

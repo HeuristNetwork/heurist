@@ -1289,12 +1289,12 @@
                     case "blocktext":
                     case "date":
                         $isValid = (strlen(trim($dtl_Value)) > 0); //preg_match("/\\S/", $dtl_Value);
-                        if(!$isValid ) $err_msg = 'It is empty';
+                        if(!$isValid ) $err_msg = 'Value is empty';
                         break;
                     case "float":
                         $isValid = preg_match("/^\\s*-?(?:\\d+[.]?|\\d*[.]\\d+(?:[eE]-?\\d+)?)\\s*$/", $dtl_Value);
                         //preg_match('/^0(?:[.]0*)?$/', $dtl_Value)
-                        if(!$isValid ) $err_msg = 'Not valid float value';
+                        if(!$isValid ) $err_msg = 'Not valid float value '.htmlspecialchars($dtl_Value);
                         break;
                     case "enum":
                     case "relationtype":
@@ -1313,10 +1313,11 @@
                                 $term_tocheck = getTermByLabel($dtl_Value, $term_domain);
                             }
                             $isValid = isValidTerm($system, $term_tocheck, $term_domain, $dtyID, $rectype);
+                            $isValid = false;
                             if($isValid){
                                 $dtl_Value = $term_tocheck;
                             }else{
-                                $err_msg = '';
+                                $err_msg = 'Term ID '.htmlspecialchars($dtl_Value).' is not in the list of values defined for this field';
                             }
                         }else{
                             $isValid = (intval($dtl_Value)>0);
@@ -1336,12 +1337,12 @@
                                     $err_msg = 'Record type '.$rectype_tocheck.' is not valid for specified constraints';
                                 }
                             }else{
-                                $err_msg = 'Record with specified id does not exist';
+                                $err_msg = 'Record with specified id '.htmlspecialchars($dtl_Value).' does not exist';
                             }
                         }else{
                             $isValid = (intval($dtl_Value)>0);
                             if(!$isValid){
-                                $err_msg = 'Record ID is valid integer';
+                                $err_msg = 'Record ID '.htmlspecialchars($dtl_Value).' is not valid integer';
                             }
                         }
                         //this is parent-child resource
@@ -1410,6 +1411,8 @@
                         if($res){
                             $dtl_Value = $geoType;
                             $isValid = true;
+                        }else{
+                            $err_msg = 'Geo WKT value '.substr(htmlspecialchars($dtl_Geo),0,15).'... is not valid';
                         }
                         /*
                         $res = $mysqli->query("select AsWKT(geomfromtext('".addslashes($dtl_Geo)."'))");
@@ -1424,6 +1427,9 @@
                         // retained for backward compatibility
                     case "year":
                         $isValid = preg_match("/^\\s*(?:(?:-|ad\\s*)?\\d+(?:\\s*bce?)?|in\\s+press)\\s*$/i", $dtl_Value);
+                        if(!$isValid){
+                            $err_msg = 'Value '.htmlspecialchars($dtl_Value).' is not valid Year';
+                        }
                         break;
                     case "boolean":
 
@@ -1433,10 +1439,15 @@
                                 $dtl_Value = "true";
                             else
                                 $dtl_Value = "false";
+                        }else{
+                            $err_msg = 'Value '.htmlspecialchars($dtl_Value).' is not valid boolean';
                         }
                         break;
                     case "integer":
                         $isValid = preg_match("/^\\s*-?\\d+\\s*$/", $dtl_Value);
+                        if(!$isValid){
+                            $err_msg = 'Value '.htmlspecialchars($dtl_Value).' is not valid integer';
+                        }
                         break;
 
                     case "separator":
@@ -1459,8 +1470,14 @@
                     $dval['dtl_Geo'] = $dtl_Geo;
                     array_push($insertValues, $dval);
                 }else{
+                    $query = 'SELECT IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
+                        .'FROM defRecStructure, defDetailTypes WHERE rst_RecTypeID='.$rectype
+                        .' and  dty_ID=rst_DetailTypeID and rst_DetailTypeID='.$dtyID;
+                    $field_name = mysql__select_value($mysqli, $query);
+                    
                     $dt_names = dbs_GetDtLookups();
-                    array_push($errorValues, $dtl_Value." is not valid. Field type ".@$dt_names[$det_types[$dtyID]]." (field id: $dtyID). ".$err_msg);
+                    array_push($errorValues, '<br>Field ID '.$dtyID.': "'.$field_name.'" ('.@$dt_names[$det_types[$dtyID]]
+                        .')<br>'.$err_msg);
                 }
 
             }//for values
@@ -1477,11 +1494,11 @@
 
             $ss = (count($errorValues)>1?'s':'');    
 array_push($errorValues,                                                        
-'<br><br>Please run Manage > Database > Verify to check for and fix data problems.<br>' 
+'<br>Please run Manage > Database > Verify to check for and fix data problems.<br>' 
 .'If the problem cannot be fixed, or re-occurs frequently, please email the Heurist development team (support at HeuristNetwork dor org)');
             
             $system->addError(HEURIST_ERROR, 'Encountered invalid value'.$ss
-                                                        .' for field'.$ss.' Record#'.$recID, $errorValues);
+                                                        .' for Record#'.$recID.'<br>'.implode('<br>',$errorValues), null);
 
         }else if (count($insertValues)<1) {
 
@@ -1733,7 +1750,8 @@ array_push($errorValues,
     }
 
     
-    // @todo REMOVE - all these functions are duplicated in VerifyValue and db_structure
+    // @todo use DbsTerms
+    // @todo REMOVE - all these functions are duplicated in DbsTerms and db_structure
     //
     // get terms from json string
     //
@@ -1858,7 +1876,9 @@ array_push($errorValues,
 
             if (($cntTrm = count($terms)) > 0) {
                 if ($cntTrm == 1) { //vocabulary
+                    $vocabId = $terms[0];
                     $terms = getTermsByParent($terms[0], $domain);
+                    array_push($terms, $vocabId);
                 }else{
                     $nonTerms = getTermsFromFormat2($terms_none, $domain);
                     if (count($nonTerms) > 0) {

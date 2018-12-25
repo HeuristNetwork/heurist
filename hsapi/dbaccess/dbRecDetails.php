@@ -191,7 +191,7 @@ class DbRecDetails
             .'WHERE d.dtl_RecID=parent.rec_ID and parent.rec_RecTypeID='
             .$this->data['rtyID'].' and d.dtl_DetailTypeID='.$this->data['dtyID'];
 
-error_log($query);
+//error_log($query);
             
         $res = $mysqli->query($query);
         if ($res){
