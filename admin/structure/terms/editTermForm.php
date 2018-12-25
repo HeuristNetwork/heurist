@@ -129,15 +129,17 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
 
             function showOtherTerms(event){
                 
+                var type = '<?=$_REQUEST['treetype'] ?>';
+                
                 var sURL = '<?=HEURIST_BASE_URL?>admin/structure/terms/editTerms.php?popup=1&vocabid=<?=$parent_id ?>'
-                    + '&treetype=<?=$_REQUEST['treetype'] ?>&db=<?=HEURIST_DBNAME?>';
+                    + '&treetype='+type+'&db=<?=HEURIST_DBNAME?>';
                     
                 window.hWin.HEURIST4.msg.showDialog(sURL, {
                         "close-on-blur": false,
                         "no-resize": false,
-                        title: 'Manage terms',
-                        height:750,     // height and width of term tree editing popup
-                        width: 1200,
+                        title: (type=='enum')?'Manage Terms':'Manage Relationship types',
+                        height: (type=='enum')?780:820,
+                        width: 950,
                         afterclose: function() {
                             if(!(context_return_res>0)){
                                 context_return_res = 'ok';

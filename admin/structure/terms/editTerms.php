@@ -144,25 +144,25 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
         <div id="mainDiv" class="ent_wrapper" style="min-width:850px;overflow:hidden;"> <!-- style="top:0px"-->
             <div class="ent_content_full" style="overflow:hidden;width:350;top:0">
             
-            <div class="ent_header" id="divBanner" style="height:2.5em;border:none;">
+            <div class="ent_header" id="divBanner" style="height:3.5em;padding:10px;border:none;">
                 <label style="padding:14px 0px;font-size:14px;font-weight:bold">Vocabularies</label>
                 <input type="button" value="Add Vocabulary" id="btnAddRoot1" onClick="{editTerms.doAddChild(true)}" 
                             style="float:right"/>
             </div>
-            <div id="termTree" style="width:350;max-width:350;top:2.5em;bottom:0;padding-right:5px;overflow:hidden;position:absolute;">
+            <div id="termTree" style="width:350;max-width:350;top:3.5em;bottom:0;padding-right:5px;overflow:hidden;position:absolute;">
             </div>
             </div>
 
             <div id="formContainer"style="top:0;bottom:0;left:350;right:0;position:absolute;vertical-align:top;overflow-y:auto;overflow-x:hidden;">
             
-               <div style="height:60px">
+               <div style="height:80px">
                <!-- div style="margin-left:2px; margin-top:15px;float:left">
                     <span class="ui-icon ui-icon-arrowthick-1-w" style="font-size:18px;color:gray"></span>
                     <input type="button" value="Add Vocabulary" id="btnAddRoot1" onClick="{editTerms.doAddChild(true)}"/>
                     <br><span style="margin-left:20px;font-size:0.9em"> (adds a new root to the tree)</span>
                 </div-->
                 <!-- Navigation: Search form to do partial match search on terms in the tree -->
-                <div id="formSearch" style="padding-left:155px">
+                <div id="formSearch" style="padding:10px 0 0 155px">
                     <div class="dtyField" style="display: inline-block;">
                         <label class="dtyLabel" style="width:30px;">Find:</label>
                         <input id="edSearch" style="width:70px"  onkeyup="{doSearch(event)}"/>

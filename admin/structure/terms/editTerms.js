@@ -89,7 +89,7 @@ function EditTerms() {
     */
     function _init (){
 
-        _isWindowMode = !Hul.isnull(window.hWin.HEURIST4.util.getUrlParameter('popup', location.search));
+        _isWindowMode = false; //!Hul.isnull(window.hWin.HEURIST4.util.getUrlParameter('popup', location.search));
 
         _vocabulary_toselect = window.hWin.HEURIST4.util.getUrlParameter('vocabid', location.search);
 
