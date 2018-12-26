@@ -138,7 +138,7 @@ $system->defineConstants();
             togglerContent_closed:  '<div class="ui-icon"></div>',
             onresize_end: function(){
                 //global 
-                //console.log('LAYOUT resize end');
+//console.log('LAYOUT resize end');
                 if(mapping) mapping.onWinResize();
             }
             
@@ -152,7 +152,7 @@ $system->defineConstants();
         var th = Math.floor($('#mapping').height*0.2);
         layout_opts.south__size = th>200?200:th;
         layout_opts.south__spacing_open = 7;
-        layout_opts.south__spacing_closed = 7;
+        layout_opts.south__spacing_closed = 12;
         layout_opts.south__onresize_end = function() {
             if(mapping) mapping.setTimelineMinheight();
             //console.log('timeline resize end');
@@ -257,7 +257,7 @@ $system->defineConstants();
             if (w < 400) {
                 $("#mapSelectorBtn").button({showLabel:false}).width(20);
             }else{
-                $("#mapSelectorBtn").button({showLabel:true}).width(100);
+                $("#mapSelectorBtn").button({showLabel:true}).width(w-360);
             }
             
             mapping.onWinResize();
@@ -405,15 +405,22 @@ $system->defineConstants();
     function _adjustLegendHeight() {
         
         setTimeout(function(){
-            var legend = document.getElementById('map_legend');
-            var ch = $("#map_legend .content").height()+50;
+            var legend = $('#map_legend');
+            var ch = $("#map_legend .content").height()+30;
 
             
-            var nt = parseInt($(legend).css('bottom'), 10);
-            nt = 30;
-            var mh = $('#map').height();
+            var nt = parseInt(legend.css('bottom'), 10);
+            nt = 30; //bottom
+            //var mh = $('#map').height();
+            var mh = $("#mapping").find('.ui-layout-center').height();
             
-            var is_collapsed = ($(legend).find('#collapse').text() == "+");
+            var is_collapsed = (legend.find('#collapse').text() == "+");
+            if(is_collapsed){
+                ch = 14;
+                legend.css('overflow-y','hidden');
+            } else {
+                legend.css('overflow-y','auto');
+            }
            
            /*
             if(is_collapsed===true){
@@ -430,13 +437,13 @@ $system->defineConstants();
             
 //console.log('legend h='+(mh-nt-ch)+'  maph='+mh+'  contetn h='+ch+' bottom '+nt);            
                          
-            $(legend).css('bottom', nt);
+            legend.css('bottom', nt);
             
-            if(mh-nt-ch<70){
-                ch = mh-nt-50;
+            if(mh-nt-ch<50){
+                ch = mh-nt-50; //reduce height
             }
             var top = mh-nt-ch;
-            $(legend).css('top',top).height(ch);
+            legend.css('top',top).height(ch);
             
 //console.log('legend h='+ch+' top '+top+' bottom '+nt);            
             
@@ -571,7 +578,7 @@ $system->defineConstants();
             
             <div id="mapSelector" class="map-inited" style="float:left;">
                 <label id="map-doc-select-lbl" style="padding: 4px;line-height: 2.2em;"><i>Map document:</i></label>
-                <button id="mapSelectorBtn" class="truncate" style="max-width: 200px;"></button> 
+                <button id="mapSelectorBtn" class="truncate" style="max-width:300px;text-align:left"></button> 
             </div>
             <div id="mapToolbar" class="map-inited" style="float:left;display:none">
                 <button id="btnMapRefresh" xxxdisabled="disabled" title="Refresh/reload current Map Document">Refresh current map</button>
@@ -599,7 +606,7 @@ $system->defineConstants();
 
             <!-- Legend overlay -->
             <div id="map_legend" 
-                style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px;overflow-y:auto; display:none;">
+                style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:4 8;overflow-y:auto; display:none;">
                 <div id="map_extents"  style="font-size: 0.9em;display:inline-block;visibility:hidden;padding-bottom:1em;">Zoom to:&nbsp;
                         <select id="selMapBookmarks" style="font-size:1.0em;"></select>
                 </div>

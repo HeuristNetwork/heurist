@@ -2197,9 +2197,9 @@ ed_html +
         onWinResize: function(){
 //console.log('onWinResize');            
             if(tmap && tmap.map){ //fix google map bug to force redraw on previously hidden area
-                    var ele = $("#mapping");
+                    var ele = $("#mapping").find('.ui-layout-center');
                     tmap.map.resizeTo(ele.width(),ele.height());
-//console.log('DONE!');            
+//console.log('DONE! ',ele.height());            
             }
             _onWinResize(); //adjust timeline and legend position
         },
