@@ -913,7 +913,7 @@ $.widget( "heurist.resultList", {
                 .html('<h3 class="not-found" style="color:teal">No entites match the filter criteria</h3>')
                 .appendTo(this.div_content);
             
-        }else if(window.hWin.HAPI4.sysinfo.db_total_records>100) {
+        }else{
         
             var $emptyres = $('<div>')
             .css('padding','1em')

@@ -358,9 +358,11 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                 }
                 else if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
                         || window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
-                            
+                    
                     var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
-                    if(!window.hWin.HEURIST4.util.isempty(init_search)){
+                    if(window.hWin.HAPI4.sysinfo.db_total_records>100 && 
+                       !window.hWin.HEURIST4.util.isempty(init_search))
+                    {
                         var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                         setTimeout(function(){
                             window.hWin.HAPI4.SearchMgr.doSearch(document, request);
