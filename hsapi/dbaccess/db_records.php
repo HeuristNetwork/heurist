@@ -396,9 +396,10 @@
                     $syserror = $mysqli->error;
                     $mysqli->rollback();if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                     
-                    sendEmail(HEURIST_MAIL_TO_ADMIN, 'DATABASE ERROR :'.$system->dbname()
-                            .' Cannot save details.',
-                            ($syserror?'. System message:'.$syserror:'').'\n'.print_r($values,true));
+                    //$email_to, $email_title, $email_text, $email_header
+                    sendEmail(HEURIST_MAIL_TO_ADMIN, 
+                            'DATABASE ERROR :'.$system->dbname().' Cannot save details.',
+                            ($syserror?'. System message:'.$syserror:'').'\n'.print_r($values,true), null);
                     
                     return $system->addError(HEURIST_DB_ERROR, 'Cannot save details.', $syserror);
                 }
@@ -1313,7 +1314,6 @@
                                 $term_tocheck = getTermByLabel($dtl_Value, $term_domain);
                             }
                             $isValid = isValidTerm($system, $term_tocheck, $term_domain, $dtyID, $rectype);
-                            $isValid = false;
                             if($isValid){
                                 $dtl_Value = $term_tocheck;
                             }else{

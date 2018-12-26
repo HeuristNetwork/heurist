@@ -410,7 +410,7 @@ class DbRecUploadedFiles extends DbEntityBase
             }
             
             //if there is file to be ccopied                        
-            if($this->records[$rec_idx]['ulf_TempFile']){ 
+            if(@$this->records[$rec_idx]['ulf_TempFile']){ 
                     
                     $ulf_ID = $this->records[$rec_idx]['ulf_ID'];
                     $ulf_ObfuscatedFileID = $this->records[$rec_idx]['ulf_ObfuscatedFileID'];
@@ -575,14 +575,14 @@ class DbRecUploadedFiles extends DbEntityBase
                 $file->original_name = $newname?$newname:$fileinfo['filename'];
                 $file->name = $file->original_name;
                 $file->size = filesize($tmp_name); //fix_integer_overflow
-                $file->type = $fileinfo['extension'];
+                $file->type = @$fileinfo['extension'];
                 
                 $file->thumbnailName = $tmp_thumb;
             }
             
         }else{
             //uploaded via UploadHandler is in scratch
-            if($file->fullpath){
+            if(@$file->fullpath){
                 $tmp_name = $file->fullpath;
             }else{
                 $tmp_name = HEURIST_SCRATCH_DIR.$file->name;
