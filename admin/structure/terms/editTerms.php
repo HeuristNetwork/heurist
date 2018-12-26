@@ -141,15 +141,15 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
         <script type="text/javascript" src="editTerms.js"></script>
 
-        <div id="mainDiv" class="ent_wrapper" style="min-width:850px;overflow:hidden;"> <!-- style="top:0px"-->
-            <div class="ent_content_full" style="overflow:hidden;width:350;top:0">
+        <div id="mainDiv" class="ent_wrapper" style="min-width:850px;overflow:hidden;border: thin solid black;"> <!-- style="top:0px"-->
+            <div class="ent_content_full" style="overflow:hidden;width:350;top:0;border-right: thin solid black;">
             
-            <div class="ent_header" id="divBanner" style="height:3.5em;padding:10px;border:none;">
+            <div class="ent_header" id="divBanner" style="height:2.5em;padding:10px;border-bottom: thin solid black;">
                 <label style="padding:14px 0px;font-size:14px;font-weight:bold">Vocabularies</label>
                 <input type="button" value="Add Vocabulary" id="btnAddRoot1" onClick="{editTerms.doAddChild(true)}" 
                             style="float:right"/>
             </div>
-            <div id="termTree" style="width:350;max-width:350;top:3.5em;bottom:0;padding-right:5px;overflow:hidden;position:absolute;">
+            <div id="termTree" style="width:350;max-width:350;top:4.5em;bottom:0;padding-right:5px;overflow:hidden;position:absolute;">
             </div>
             </div>
 
@@ -189,7 +189,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                 </div>
 
                 <!-- Edit form for modifying characteristics of terms, including insertion of child terms and deletion -->
-                <div id="formEditor" class="form_editor" style="display:none;">
+                <div id="formEditor" class="form_editor" style="display:none;margin:5px">
                 
                     <div style="border: black; border-style: solid; border-width:thin; padding:10px;">
                     
@@ -337,17 +337,17 @@ style="height:100px;width:100px;border:gray;cursor: pointer; vertical-align: mid
                                 title="Delete this term (if unused in database)"
                                 onClick="{editTerms.doDelete()}" />
                             </span>
-                            
-                            <input type="button" value="Save changes to this term" id="btnSave" class="btn_Save save-disabled" 
-                                style="margin-left:105px;font-style: bold !important; color:black;"
-                                title=" "
-                                onClick="{editTerms.doSave()}"/>
 
                             <span id = "Saved" style="display:none;"><input type="button" value="Saved..." id="btnSaved"
                                 style="border-radius: 6px; background-color:gray;margin-left:5px;font-style: bold !important;  color:black; display:none;"
                                 title=" "/></span>
 
-                            <div id='div_btnAddChild' style="text-align: right; float:right; margin-left:10px; font-style: bold; colour:black;">
+                            <input type="button" value="Save changes to this term" id="btnSave" class="btn_Save save-disabled" 
+                                style="margin-left:105px;font-style: bold !important; color:black;"
+                                title=" "
+                                onClick="{editTerms.doSave()}"/>
+
+                            <div id='div_btnAddChild' style="margin-left:20px;text-align: right; font-style: bold; colour:black;">
                                     <input type="button" value="+ Add Child" id="btnAddChild"
                                          title="Add a child term (a term hierarchichally below the current vocabulary or term)"
                                          value=""
