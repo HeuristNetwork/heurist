@@ -121,7 +121,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
         if (@$file['fullPath']){
             $filename = $file['fullPath'];
         }else
-        if ($file['ulf_FileName']) {
+        if (@$file['ulf_FileName']) {
             $filename = $file['ulf_FilePath'].$file['ulf_FileName']; // post 18/11/11 proper file path and name
         } else {
             $filename = HEURIST_FILESTORE_DIR . $file['ulf_ID']; // pre 18/11/11 - bare numbers as names, just use file ID
