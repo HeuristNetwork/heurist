@@ -26,8 +26,13 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         var that = this;
         
         this.input_search_type = this.element.find('#input_search_type');   //field type
-        var vals = {any:'any type'};
-        $.extend(vals, window.hWin.HEURIST4.detailtypes.lookups);
+        var vals = [{key:'any',title:'any type'}];
+        
+        for (var key in window.hWin.HEURIST4.detailtypes.lookups)
+        if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.detailtypes.lookups[key])){
+                vals.push({key:key,title:window.hWin.HEURIST4.detailtypes.lookups[key]});
+        }
+        //$.extend(vals, window.hWin.HEURIST4.detailtypes.lookups);
         window.hWin.HEURIST4.ui.createSelector(this.input_search_type[0], vals);
 
         this.input_search_group = this.element.find('#input_search_group');   //detail group

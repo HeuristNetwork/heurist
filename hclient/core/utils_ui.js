@@ -2254,6 +2254,7 @@ window.hWin.HEURIST4.ui = {
             if(!(entityName=='UsrBookmarks' || 
                  entityName=='SysIdentification' ||
                  entityName=='DefDetailTypeGroups' || 
+                 entityName=='DefRecTypeGroups' || 
                  entityName=='SysBugreport')){ 
                 scripts.push(path+'search'+entityName+'.js');
             }

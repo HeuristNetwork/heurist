@@ -16,6 +16,7 @@
         "fields": [
                 {
                     "dtID": "dty_ID",
+                    "keyField": true,
                     "dtFields":{
                         "dty_Type":"integer",
                         "dty_Role":"primary",
@@ -51,6 +52,7 @@
                         "dty_Type":"freetext",
                         "rst_DisplayName":"Default help text:",
                         "dty_Size":255,
+                        "rst_DisplayWidth":60,
                         "rst_DisplayHelpText": "A default generic help text which may be overridden with more specific help for each record type that uses this field type", 
                         "rst_RequirementType":"required"
                     }
@@ -60,6 +62,7 @@
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "dty_Size":5000,
+                        "rst_DisplayWidth":60,
                         "rst_DisplayName":"Extended description:",
                         "rst_DisplayHelpText": "An extended description of the content of this field type and references to any standards used"
                     }
@@ -70,7 +73,6 @@
                         "dty_Type":"enum",
                         "rst_DisplayName":"Data type:",
                         "rst_DisplayHelpText": "The type of data to be recorded in this field. Note: in most cases this cannot be changed once set", 
-                        "rst_DisplayWidth":40,
                         "rst_RequirementType":"required",
                         "rst_FieldConfig":[
                             {"key":"blocktext", "title":"Memo (multi-line)"},
@@ -171,7 +173,7 @@
                         "rst_DisplayName":"Status:",
                         "rst_DisplayHelpText": "'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress; 'Open' for freely modifiable/personal record types", 
                         "rst_DisplayExtendedDescription":"",
-                        "rst_DisplayWidth":60,
+                        "rst_DisplayWidth":25,
                         "rst_DefaultValue":"",
                         "rst_RequirementType":"optional",
                         "rst_MaxValues":1,
@@ -185,7 +187,7 @@
                         "rst_DisplayName":"Non-owner visibility:",
                         "rst_DisplayHelpText": "Hidden = visible only to owners, Viewable = any logged in user, Public = visible to non-logged in viewers", 
                         "rst_DisplayExtendedDescription":"",
-                        "rst_DisplayWidth":60,
+                        "rst_DisplayWidth":25,
                         "rst_DefaultValue":"",
                         "rst_RequirementType":"optional",
                         "rst_MaxValues":1,
@@ -202,6 +204,15 @@
                         "rst_DefaultValue":"",
                         "rst_RequirementType":"optional",
                         "rst_MaxValues":1
+                    }
+                },
+                {
+                    "dtID": "dty_Usage",
+                    "dtFields":{
+                        "rst_DisplayName": "Used in record types:",
+                        "rst_Display":"readonly",
+                        "dty_Type":"integer",
+                        "dty_Role":"virtual"
                     }
                 }
                 

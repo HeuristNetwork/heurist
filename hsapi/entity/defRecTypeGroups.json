@@ -48,7 +48,7 @@
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "dty_Size":255,
-                        "rst_DisplayWidth":60,
+                        "rst_DisplayWidth":40,
                         "rst_DisplayName":"Description:",
                         "rst_DisplayHelpText": "" 
                     }

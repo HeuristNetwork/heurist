@@ -112,7 +112,7 @@ class DbDefDetailTypes extends DbEntityBase
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = implode(',', $this->fields );
+            $this->data['details'] = implode(',', $this->fieldNames) ;
         }else{
             $needCheck = true;
         }

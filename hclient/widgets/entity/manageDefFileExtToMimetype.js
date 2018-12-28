@@ -76,7 +76,7 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         this._on( this.searchForm, {
                 "searchdeffileexttomimetypeonfilter": this.filterRecordList
                 });
-        this._on( this.searchForm, {
+        this._on( this.searchForm, { //not used
                 "searchdeffileexttomimetypeonaddrecord": function(){this._onActionListener(null, 'add');}
                 });
         
@@ -135,18 +135,6 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
        
     },
     
-    _selectAndEditFirstInRecordset:function(subset){
-        
-        if(subset && subset.length()>0 && this.options.edit_mode=='inline'){
-                
-                var rec_ID = subset.getOrder()[0];
-                
-                this.recordList.resultList('setSelected', [rec_ID]);
-                this.selectedRecords([rec_ID]);
-                this._onActionListener(null, {action:'edit'}); //default action of selection
-        }
-    },
-    
     _initEditForm_step3: function(recID){
         
         if(recID<0){
@@ -155,7 +143,6 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
             this.options.entity.fields[0].dtFields['rst_Display'] = 'readonly';
         }
 
-console.log('1111');
         if(this._toolbar){
             this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
         }
@@ -171,7 +158,7 @@ console.log('1111');
                 click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
                       
                 {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add New File Type'),
-                      css:{'margin-right':'0.5em','float':'left'}, id:'btnPrev',
+                      css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
                       
                       

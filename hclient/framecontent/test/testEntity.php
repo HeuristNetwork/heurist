@@ -127,7 +127,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         $btn_datepicker.on( { click: function(){$datepicker.datepicker( "show" ); }} );
                         $('#inputdiv').find('.ui-datepicker-trigger').hide();
                 
-                testEntity(false);
+                testEntity(true);
             }
 
             function testImportStruc(){
@@ -421,14 +421,14 @@ print $targetPath.'<br>';
                             <option value="SysUsers" >Users +</option>
                             <option value="SysGroups">Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
-                            <option value="RecUploadedFiles" selected>Uploaded Files +</option>
+                            <option value="RecUploadedFiles">Uploaded Files +</option>
                             <option value="UsrReminders" >Reminders</option>
                             <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
                             <option value="Records">Saved Searches</option>
                             <option value="DefRecTypes">Record Types</option>
-                            <option value="DefRecTypeGroups">Record Type Groups</option>
-                            <option value="DefDetailTypes">Field Types</option>
+                            <option value="DefRecTypeGroups">Record Type Groups+</option>
+                            <option value="DefDetailTypes" selected>Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
                             <option value="DefTerms">Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>
