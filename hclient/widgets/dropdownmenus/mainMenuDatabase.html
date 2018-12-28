@@ -50,7 +50,7 @@
 <li>
     <a href="admin/setup/dbproperties/registerDB.php"        
         id="menu-database-register"
-        data-user-admin-status="1" data-logaction="dbRegister"
+        data-user-admin-status="1" data-logaction="dbRegister" data-pwd-nonowner="ServerFunctions"
         title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
         Register</a>
 </li>
@@ -59,13 +59,13 @@
 <li data-user-admin-status="0" data-user-experience-level="1">-</li>
 
 <li><a href="admin/setup/dboperations/deleteCurrentDB.php"
-        data-user-admin-status="0" data-user-experience-level="1" data-pwd="DatabaseDeletion"
+        data-user-admin-status="0" data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"
         title="Delete the current database completely - cannot be undone, although data is copied to a backup which could be reloaded by a system administrator">
         Delete</a>
 </li>
 
 <li><a href="admin/setup/dboperations/clearCurrentDB.php"
-        data-user-admin-status="0"  data-user-experience-level="1" data-pwd="DatabaseDeletion"
+        data-user-admin-status="0"  data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"
         title="Clear all data (records, values, attached files) from the current database. Database structure - record types, fields, terms, constraints - is unaffected">
         Delete content</a>
 </li>

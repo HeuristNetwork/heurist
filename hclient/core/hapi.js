@@ -284,8 +284,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                 if(!window.hWin.HEURIST4.util.isempty(password_protected)){
                     
-                    if(!(password_protected=='DatabaseDeletion' && window.hWin.HAPI4.has_access(2))) //owner can delete without password
-                    {
+
                         if(window.hWin.HAPI4.sysinfo['pwd_'+password_protected]){ //password defined
                         
                             window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
@@ -308,7 +307,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                             window.hWin.HEURIST4.msg.showMsgDlg('This action is not allowed unless a challenge password is set - please consult system administrator');
                         }
                         return false;
-                    }
+                    
                 }                
                 
                 

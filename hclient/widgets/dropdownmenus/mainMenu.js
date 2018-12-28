@@ -602,6 +602,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var action_log = item.attr('data-logaction');
         var action_level = item.attr('data-user-admin-status');
         var action_passworded = item.attr('data-pwd');
+        if(!action_passworded && !window.hWin.HAPI4.has_access(2)) action_passworded = item.attr('data-pwd-nonowner');
         var href = item.attr('data-link');
         var target = item.attr('target');
 

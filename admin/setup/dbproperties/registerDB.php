@@ -25,11 +25,16 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-define('OWNER_REQUIRED', 1);   
+define('MANAGER_REQUIRED', 1);   
 define('PDIR','../../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
+
+if(!$system->is_dbowner() && $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
+    print $response = $system->getError()['message'];
+    exit();
+}
 
 if(strpos(HEURIST_BASE_URL, '//localhost')>0 ||  strpos(HEURIST_BASE_URL, '//127.0.0.1')>0){
 
