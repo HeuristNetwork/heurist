@@ -175,6 +175,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         var DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-1037;
         var DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
         
+        //make bounding box for map datasource transparent and unselectable
+        var disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
+                                    localIds['RT_GEOTIFF_SOURCE'],
+                                    localIds['RT_KML_SOURCE'],
+                                    localIds['RT_MAPABLE_QUERY'],
+                                    localIds['RT_SHP_SOURCE']];
         
             
         dataset_name = dataset_name || "main";
@@ -192,7 +198,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         iconColor = iconColor || 'rgb(255, 0, 0)'; 
         fillColor = fillColor || 'rgb(255, 0, 0)';
         lineColor = lineColor || 'rgb(255, 0, 0)'; 
-        fillOpacity = fillOpacity || 0.2;
+        fillOpacity = fillOpacity || 0.1;
 /*      
                                 fillOpacity:0.3,// 0.3,
                                 lineColor:lineColor,
@@ -414,6 +420,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             }
                         }
                         
+                        var is_disabled = (window.hWin.HEURIST4.util.findArrayIndex(recTypeID, disabled_selection)>=0);
+                        
                         item = {
                             title: recName,
                             start: (startDate || ''),
@@ -436,8 +444,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 //color on dataset level works once only - timemap bug
                                 color: pr_iconColor ?pr_iconColor:iconColor,
                                 fillColor: pr_fillColor ?pr_fillColor:fillColor,
-                                fillOpacity: fillOpacity_thisRec,
+                                fillOpacity: (is_disabled)?0.00001:fillOpacity_thisRec,
                                 lineColor: pr_iconColor ?pr_iconColor:lineColor,
+                                clickable:(!is_disabled),
+
                                 /* neither work
                                 strokeOpacity:0.3,
                                 strokeWeight:6,
