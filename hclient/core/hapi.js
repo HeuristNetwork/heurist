@@ -590,8 +590,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                         
                         if (is_message==true) {
-                            window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                                 'You may need to reload pages to see changes.');
+                            $dlg.parent('.ui-dialog').css({top:150,left:150});    
                         }      
                         
                         if($.isFunction(callback)) callback.call();
