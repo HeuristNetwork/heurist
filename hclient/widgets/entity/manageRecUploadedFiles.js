@@ -69,6 +69,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
 
         // init search header
+        this.editForm.css('padding-top',20);
         this.searchForm.searchRecUploadedFiles(this.options);
         var iheight = 7.4;
         
@@ -193,6 +194,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             this.mediaviewer = $('<div>').addClass('media-content').css({
                 'text-align': 'center',
                 padding: '20px',
+                'background-color': 'lightgray',
                 'border-top': '1px solid lightgray',
                 margin: '10px'});
             this.editForm.append( this.mediaviewer );
@@ -293,6 +295,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 }
                 that.onEditFormChange();
             });
+            
+            ele.editing_input('focus');
         }else{
             //this.onEditFormChange(false); 
             //force show save button

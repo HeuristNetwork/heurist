@@ -93,7 +93,7 @@ $.widget( "heurist.editing_input", {
             }
         }
         //by default
-        if((this.detailType=="resource" || this.detailType=='file') 
+        if((this.detailType=="resource" || this.detailType=='file')  // || this.detailType=='url'
             && window.hWin.HEURIST4.util.isempty(this.configMode))
         {
             this.configMode= {entity:'records'};
@@ -1399,8 +1399,6 @@ $.widget( "heurist.editing_input", {
                     }
                 
                     $input.focusout( __url_input_state ); 
-                    
-                    this.input_prompt.text('This is a special URL field which is hyperlinked in search results. Use where one primary URL applies to each record, eg. for internet bookmarks. These URLs can be auto-checked. Turn on/off in record attributes');
                     
                     __url_input_state();               
                 
