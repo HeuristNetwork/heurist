@@ -441,9 +441,9 @@ class DbSysUsers extends DbEntityBase
     // batch action for users
     // 1) import users from another db
     //
-    public function batch_action(){
+    public function batch_action($ignore_permissions=false){
 
-        if(!$this->system->is_admin()){ 
+        if(!$ignore_permissions && !$this->system->is_admin()){ 
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
                 'You are not admin and can\'t add/edit other users. Insufficient rights for this operation');
             return false;
