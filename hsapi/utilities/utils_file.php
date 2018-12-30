@@ -490,7 +490,7 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
 * @param mixed $source       Source folder or array of folders
 * @param mixed $destination  Destination file
 */
-function zip($source, $folders, $destination, $verbose=true) {
+function createZipArchive($source, $only_these_folders, $destination, $verbose=true) {
     if (!extension_loaded('zip')) {
         echo "<br/>PHP Zip extension is not accessible";
         return false;
@@ -510,9 +510,13 @@ function zip($source, $folders, $destination, $verbose=true) {
 
     $source = str_replace('\\', '/', realpath($source));
 
+error_log('ROOT '.$source);    
+    
     if (is_dir($source) === true) {
 
-
+        $parent_dir = '';
+        //$root_dir = $source;
+        
         $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
 
         foreach ($files as $file) {
@@ -527,10 +531,10 @@ function zip($source, $folders, $destination, $verbose=true) {
 
             //ignore files that are not in list of specifiede folders
             $is_filtered = true;
-            if( is_array($folders) ){
+            if( is_array($only_these_folders) ){
 
                 $is_filtered = false;
-                foreach ($folders as $folder) {
+                foreach ($only_these_folders as $folder) {
                     if( strpos($file, $source."/".$folder)===0 ){
                         $is_filtered = true;
                         break;
@@ -538,18 +542,25 @@ function zip($source, $folders, $destination, $verbose=true) {
                 }
             }
 
-            if(!$is_filtered) continue;
+            if(!$is_filtered) continue; //exclude not in $only_these_folders
 
+            $file2 = str_replace('\\', '/', $file);
+            
             if (is_dir($file) === true) { // Directory
-                $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+                //remove root path
+                $newdir = str_replace($source.'/', '', $file2.'/');
+//error_log($file2.'  '.$newdir);                
+                $zip->addEmptyDir( $newdir );
             }
             else if (is_file($file) === true) { // File
-                $zip->addFile($file);
+                $newfile = str_replace($source.'/', '', $file2);
+                $zip->addFile($file, $newfile);
                 //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
             }
-        }
+        }//recursion
+        
     } else if (is_file($source) === true) {
-        $zip->addFile($source);
+        $zip->addFile($source, basename($source));
         //$zip->addFromString(basename($source), file_get_contents($source));
     }
 
@@ -565,7 +576,7 @@ function zip($source, $folders, $destination, $verbose=true) {
     return true;
 }
 
-function unzip($zipfile, $destination, $entries=null){
+function unzipArchive($zipfile, $destination, $entries=null){
 
     if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
 

@@ -220,7 +220,7 @@ print "</Translations>";
 // sysDashboard
 
 print "\n\n<Dashboard>";
-include HEURIST_DIR.'admin/structure/crosswalk/sysDashboard.inc'; // sets value of $flds
+include HEURIST_DIR.'admin/structure/crosswalk/sysDashboardFields.inc'; // sets value of $flds
 $query = "select $flds from sysDashboard";
 $res = $mysqli->query($query);
 $fmt = 'sysDashboard';  // update format if fields added
