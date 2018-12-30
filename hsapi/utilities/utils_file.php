@@ -510,8 +510,6 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
 
     $source = str_replace('\\', '/', realpath($source));
 
-error_log('ROOT '.$source);    
-    
     if (is_dir($source) === true) {
 
         $parent_dir = '';

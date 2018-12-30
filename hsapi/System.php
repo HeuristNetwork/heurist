@@ -960,26 +960,21 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
             }
         }
         
-        //get session id from cookes    
-        /*
-        if (@$_COOKIE['heurist-sessionid']) {
-            session_id($_COOKIE['heurist-sessionid']);
-            session_cache_limiter('none');
-            @session_start();
-        } else {   //session does not exist - create new one
-            //session_id(sha1(rand()));
-            $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-            
-            @session_start();
-            $session_id = session_id();
-            setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https );//, HEURIST_SERVER_NAME);
-        }
-        */
-
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
         session_name('heurist-sessionid');
         session_set_cookie_params ( 0, '/', '', $is_https);
         session_cache_limiter('none');
+        
+        /*
+        if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes 
+            session_id($_COOKIE['heurist-sessionid']);
+            @session_start();
+        } else {   //session does not exist - create new one and save on cookies
+            @session_start();
+            $session_id = session_id();
+            setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https );
+        }
+        */
         
         @session_start();
 
@@ -1180,7 +1175,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
 
         //clear     
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-        $cres = setcookie('heurist-sessionid', "", time() - 3600, '/', '', $is_https);
+        //$cres = setcookie('heurist-sessionid', "", time() - 3600, '/', '', $is_https);
         $this->current_User = null;
         //session_destroy();
         
