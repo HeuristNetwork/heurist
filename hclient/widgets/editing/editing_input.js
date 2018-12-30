@@ -93,7 +93,7 @@ $.widget( "heurist.editing_input", {
             }
         }
         //by default
-        if((this.detailType=="resource" || this.detailType=='file')  // || this.detailType=='url'
+        if((this.detailType=="resource" || this.detailType=='file') 
             && window.hWin.HEURIST4.util.isempty(this.configMode))
         {
             this.configMode= {entity:'records'};

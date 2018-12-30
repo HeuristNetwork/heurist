@@ -887,8 +887,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
 
         $dlg.dialog(options);
-        //$dlg.dialog('option','buttons',buttons);
-
+        
         if(options.hideTitle){
             $dlg.parent().find('.ui-dialog-titlebar').hide();
         }else{

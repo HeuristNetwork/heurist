@@ -117,7 +117,7 @@ foreach ($dbs as $db){
 
     $record_row = array (substr($db, 4),
     mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
-    mysql__select_val("select count(*) from ".$db.".Records"),
+    mysql__select_val("select count(*) from ".$db.".Records where (not rec_FlagTemporary)"),
     0,//mysql__select_val("select count(*) from ".$db.".recDetails"),
     /* Removed Ian 10/12/16 to speed up - very slow on USyd server with very large # of DBs. See additional comment-outs below
     mysql__select_val("select count(*) from ".$db.".defRecTypes").",".

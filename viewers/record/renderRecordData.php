@@ -483,23 +483,38 @@ function print_header_line($bib) {
     ?>
 
     <div class=HeaderRow style="margin-bottom:15px;min-height:0px;">
+        <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
+                <?= $bib['rec_Title'] ?>
+        </h2>
     <?php 
     if(!$is_map_popup){ 
-        //position:absolute;right:17px;top:2px"
+
+        if($system->has_access()){ //is logged in
+            ?>
+
+            <div id=recID style="padding-right:10px;margin-top: -10px;">
+                 ID:<?= htmlspecialchars($bib['rec_ID']) ?>
+                <span class="link"><a id=edit-link class="normal"
+                            onClick="return sane_link_opener(this);"
+                            target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
+                            <img src="../../common/images/edit-pencil.png" title="Edit record"></a>
+                </span>
+            </div>
+            <?php
+        }else{
+            print '<div id=recID style="padding-right:10px">ID:'.htmlspecialchars($bib['rec_ID']).'</div>';
+        }
     ?>
-        <h3 style="float:right;padding:2px 10px 5px 2px;margin:0">
-            <div <?="style='padding-left:20px;height:10px;background-repeat: no-repeat;background-image:url("
+        <h3 style="padding:10px 10px 0px 2px;margin:0">
+            <div <?="style='padding-left:20px;height:20px;background-repeat: no-repeat;background-image:url("
                         .HEURIST_ICON_URL.$bib['rty_ID'].".png)' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
                 Type&nbsp;<?= $bib['rty_ID'].': '.htmlspecialchars($bib['rty_Name'])." " ?>
             </div>
         </h3>
-    <?php 
+    <?php                    
     } 
     ?>
     
-        <h2 style="float:left;text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
-                <?= $bib['rec_Title'] ?>
-        </h2>
     </div>       
     <?php 
 }
@@ -554,23 +569,6 @@ function print_private_details($bib) {
     print '">more ...</a></div>';
     print '<div class="detailRowHeader morePrivateInfo" style="float:left;padding-bottom:40px 0 20px;display:none;">';
         
-    if($system->has_access()){ //is logged in
-        ?>
-
-        <div id=recID>
-             ID:<?= htmlspecialchars($bib['rec_ID']) ?>
-            <span class="link"><a id=edit-link class="normal"
-                        onClick="return sane_link_opener(this);"
-                        target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
-                        <img src="../../common/images/edit-pencil.png" title="Edit record"></a>
-            </span>
-        </div>
-
-        <?php
-    }else{
-        print "<div id=recID>ID:".htmlspecialchars($bib['rec_ID'])."</div>";
-    }
-    
     ?>
     <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
         <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>">
