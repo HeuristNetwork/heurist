@@ -1400,7 +1400,20 @@ window.hWin.HEURIST4.ui = {
                 open: function(event, ui){
                     //console.log(menu.hSelect( "menuWidget" ).width());
                     //increase width of dropdown to avoid word wrap
-                    menu.hSelect( "menuWidget" ).width( menu.hSelect( "menuWidget" ).width()+20 );                    
+                    var wmenu = menu.hSelect( "menuWidget" );
+                    wmenu.width( wmenu.width()+20 ); 
+                    var wmenu_div = wmenu.parent('div.ui-selectmenu-menu');
+                    var pos = wmenu_div.position().top;
+                    if(wmenu.parents('body').height()>0 && pos+wmenu.height()>wmenu.parents('body').height()){
+                        var newtop = wmenu.parents('body').height()-wmenu.height()-5;
+                        if(newtop<0){
+                            newtop = 2;
+                            wmenu_div.height(wmenu.parents('body').height()-2);
+                        }
+                        wmenu_div.css('top', newtop);
+                    }
+                    //calculate position
+                    //console.log(pos.top+','+wmenu.height()+','+wmenu.parents('body').height());
                 }
               });
                 
