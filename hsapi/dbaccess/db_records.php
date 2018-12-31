@@ -1290,7 +1290,21 @@
                     case "blocktext":
                     case "date":
                         $isValid = (strlen(trim($dtl_Value)) > 0); //preg_match("/\\S/", $dtl_Value);
-                        if(!$isValid ) $err_msg = 'Value is empty';
+                        if(!$isValid ){
+                            $err_msg = 'Value is empty';  
+                        }else if($det_types[$dtyID]=='date'){
+                            //yesterday, today, tomorrow, now
+                            $sdate = strtolower(trim($dtl_Value));
+                            if($sdate=='today'){
+                                $dtl_Value = date('Y-m-d');
+                            }else if($sdate=='now'){
+                                $dtl_Value = date('Y-m-d H:i:s');
+                            }else if($sdate=='yesterday'){
+                                $dtl_Value = date('Y-m-d',strtotime("-1 days"));
+                            }else if($sdate=='tomorrow'){
+                                $dtl_Value = date('Y-m-d',strtotime("+1 days"));
+                            }
+                        }
                         break;
                     case "float":
                         $isValid = preg_match("/^\\s*-?(?:\\d+[.]?|\\d*[.]\\d+(?:[eE]-?\\d+)?)\\s*$/", $dtl_Value);
