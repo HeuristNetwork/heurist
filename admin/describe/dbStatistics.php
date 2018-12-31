@@ -154,7 +154,7 @@ foreach ($dbs as $db){
     }
     
     $i++;
-    if($i>2000) break;
+    if($i>200) break;
 }//foreach
 
 if($is_csv){
@@ -236,7 +236,7 @@ if($is_csv){
         
         <!-- Heurist CSS -->
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-        <link rel="stylesheet" type="text/css" href="<?echo $cssLink;?>">
+        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>">
 
         <!-- Heurist JS -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        
@@ -249,12 +249,12 @@ if($is_csv){
         <div id="titleBanner" class="banner"><h2>Databases statistics</h2></div>
         <div id="page-inner">
             <?php echo "System admin: <a class='dotted-link' href='mailto:" .HEURIST_MAIL_TO_ADMIN. "'>" .HEURIST_MAIL_TO_ADMIN. "</a>"; ?>
-            <?php if($is_delete_allowed && $sysadmin) { ?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button><br><br> <?php } ?>
+            <?php if($is_delete_allowed) { /*&& $sysadmin*/?> <button id="deleteDatabases" onclick="deleteDatabases()">Delete selected databases</button><br><br> <?php } ?>
             <div id="tabContainer"></div>
         </div>
 
         <?php
-         if($sysadmin) { 
+         if(true || $sysadmin) { 
          ?>
             <!-- Database verification dialog -->
             <div id="db-verification" title="Verification" style="display: none">
@@ -275,7 +275,7 @@ if($is_csv){
                 </div>
 
             </div>
-            <?php } ?>
+         <?php } ?>
 
         <!-- Table generation script -->
         <script type="text/javascript">
@@ -323,11 +323,11 @@ if($is_csv){
                 { key: "owner", label: "Owner", width:200, formatter: function(elLiner, oRecord, oColumn, oData){
                     elLiner.innerHTML = "<div style='max-width:100px' class='three-lines' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
                 }}
-                <?php if($sysadmin && $is_delete_allowed) { ?>
+                <?php if($is_delete_allowed) { /*$sysadmin && */?>
                     ,{ key: 'deleteable', label: 'Delete', className: 'right', formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<input type=\"checkbox\" value=\"'+oRecord.getData('dbname')+'\">';
                     }}
-                    <?php } ?>
+                <?php } ?>
             ];
 
             var dt = new YAHOO.widget.DataTable("tabContainer", myColumnDefs, myDataSource);
@@ -371,7 +371,7 @@ if($is_csv){
             });
         </script>
 
-        <?php if($sysadmin) { ?>
+        <?php if($is_delete_allowed) { ?>
             <!-- Delete databases scipt -->
             <script>
                 var databases = [];
@@ -407,13 +407,14 @@ if($is_csv){
                     }
 
                     // Verify user
-                    $("#db-verification").dialog({
+                    var $dlg = $("#db-verification").dialog({
                         autoOpen: false,
                         modal: true,
                         width: '550px'
                     })
                     .dialog("open");
 
+                    $dlg.parent('.ui-dialog').css({top:150,left:150});
 
                 }
 
@@ -445,7 +446,6 @@ if($is_csv){
                         }
                     );
                 }
-
                 /**
                 * Posts a delete request to the server for the database at the given index
                 */

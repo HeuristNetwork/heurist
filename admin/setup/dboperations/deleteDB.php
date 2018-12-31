@@ -37,8 +37,23 @@ if(!$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletio
 
         /** Db check */
         if($isSystemInited){
-            if($system->is_system_admin() || 
-                    ($_REQUEST['database']==$_REQUEST['db'] && $system->is_dbowner()) )
+
+            $allow_deletion = false;
+            $user = user_getById($system->get_mysqli(), $system->get_user_id()); //user in db
+            
+            if (defined('HEURIST_MAIL_TO_ADMIN') && (@$user['ugr_eMail']==HEURIST_MAIL_TO_ADMIN)){ //system admin
+                
+                $allow_deletion = true;
+            }else{
+                list($dbname_full, $dbname ) = mysql__get_names( $_REQUEST['database'] );
+                $usr = user_getByField($system->get_mysqli(), 'ugr_eMail', $user['ugr_eMail'], $dbname_full);
+                if(@$usr['ugr_ID']==2){
+                    $allow_deletion = true;   
+                }
+            }
+
+            
+            if($allow_deletion)
             {
                 $res = DbUtils::databaseDrop(false, $_REQUEST['database'], false);    
             }else{
