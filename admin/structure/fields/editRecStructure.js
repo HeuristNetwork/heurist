@@ -446,9 +446,35 @@ function EditRecStructure() {
                     } ),
                             
                     formatter: function(elLiner, oRecord, oColumn, oData){
-                        if(_hidevalueforseparator(elLiner, oRecord, oColumn, oData)){
+                        
+                        var type = oRecord.getData("dty_Type");
+                        if(type!=='separator'){
+                            elLiner.innerHTML = oData;
                             $(elLiner).addClass('yui-dt-liner-editable2');
                             if(oRecord.getData("rst_RequirementType")=='forbidden') $(elLiner).text('hidden');
+                        }else{
+                            if(oRecord.getData("rst_RequirementType")=='forbidden') {
+                                
+                                $('<span>hidden</span>').appendTo($(elLiner)).click(
+                                function(){
+                                    var __rst_ID = oRecord.getData("rst_ID");
+                                    _updateSingleField(__rst_ID, 'rst_RequirementType', 
+                                            'forbidden', 'recommended', null); //fnCallback(bSuccess,
+                                
+                                    var oRecInfo = _getRecordById(__rst_ID);
+                                    var row_index = oRecInfo.row_index;
+                                    var dataupdate = oRecInfo.record.getData();
+                                
+                                    dataupdate['rst_RequirementType'] = 'recommended';
+                                    _myDataTable.updateRow(row_index, dataupdate);
+                                    /*
+                                    var elLiner = _myDataTable.getTdLinerEl({record:oRecord, 
+                                            column:_myDataTable.getColumn('rst_RequirementType')});
+                                    elLiner.innerHTML = "";*/
+                                });                               
+                            }else{
+                                $(elLiner).text('');   
+                            }
                         }
                     }
                     /*function(elLiner, oRecord, oColumn, oData){
@@ -1374,7 +1400,7 @@ function EditRecStructure() {
 
             var values = arrStrucuture[__rst_ID];
             var dti = fieldnames.indexOf('dty_Type');
-            
+
             var k;
             for(k=0; k<fieldnames.length; k++){
                 var ed_name = 'ed'+__rst_ID+'_'+fieldnames[k];
@@ -2180,7 +2206,7 @@ function EditRecStructure() {
     */
     function _updateSingleField(dty_ID, fieldName, oOldValue, oNewValue, fnCallback){
          
-         fnCallback(true, oNewValue);
+         if(fnCallback) fnCallback(true, oNewValue);
           
          if(oOldValue!=oNewValue){
     
