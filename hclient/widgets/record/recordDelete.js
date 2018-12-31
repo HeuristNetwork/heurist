@@ -185,6 +185,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             return;
         }            
             
+        window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), true );
             
             var scope = [], 
             rec_RecTypeID = 0;
