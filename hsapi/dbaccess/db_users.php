@@ -47,11 +47,11 @@
     *
     * @param mixed $ugr_Name - user name
     */
-    function user_getByField($mysqli, $field, $value){
+    function user_getByField($mysqli, $field, $value, $database=null){
 
         $user = null;
         $ugr_Name = $mysqli->real_escape_string($value);
-        $query = 'select * from sysUGrps where '.$field.' = "'.$value.'"';
+        $query = 'select * from '.($database!=null?('`'.$database.'`.'):'').'sysUGrps where '.$field.' = "'.$value.'"';
         $res = $mysqli->query($query);
         if($res){
             $user =$res->fetch_assoc();
@@ -272,7 +272,8 @@
         'help_on' => true, 
         'optfields' => true,
         'mapcluster_on' => true,
-        'searchQueryInBrowser' => true
+        'searchQueryInBrowser' => true,
+        'defaultSearch' => 'sortby:-m'
         );
     }
 

@@ -1131,7 +1131,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                  help_on: true, 
                  optfields: true,
                  mapcluster_on: true,
-                 searchQueryInBrowser:true
+                 searchQueryInBrowser:true,
+                 defaultSearch:'sortby:-m'
                 };
             }
             if(window.hWin.HEURIST4.util.isempty(name)){
