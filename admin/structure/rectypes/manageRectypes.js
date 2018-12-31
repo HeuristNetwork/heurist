@@ -105,7 +105,7 @@ function RectypeManager() {
                         '<div class="input-row"><div class="input-header-cell">Group:</div><div class="input-cell"><select id="edGroupId" onchange="onGroupChange()"></select>'+
                         '<input id="btnGrpDelete" onclick="{rectypeManager.doGroupDelete()}" value="Delete selected group" type="submit" style="margin-left:20px"/></div></div>'+
                         '<div class="input-row required"><div class="input-header-cell">Name:</div><div class="input-cell"><input id="edName" style="width:150px"/></div></div>'+
-                        '<div class="input-row required"><div class="input-header-cell">Description:</div><div class="input-cell"><input id="edDescription" style="width:300px"/></div></div>'+
+                        '<div class="input-row required"><div class="input-header-cell">Description:</div><div class="input-cell"><textarea id="edDescription" style="width:600px" rows="2"></textarea></div></div>'+
                         '<div class="input-row"><div class="input-header-cell"></div>'+
                         '<div class="input-cell">'+
                         '<input id="btnGrpSave" style="display:inline-block" type="submit" value="Save" onclick="{rectypeManager.doGroupSave()}" />'+
@@ -466,15 +466,15 @@ function RectypeManager() {
                         elLiner.innerHTML = '<a href="#edit_rectype"><img src="../../../common/images/edit-recType.png" width="16" height="16" border="0" title="Edit record type" /><\/a>'; }
                 },
 
-                { key: "name", label: "Name", sortable:true, minWidth:160, maxAutoWidth:160, width:160, gutter:0,
+                { key: "name", label: "Name", sortable:true, minWidth:160, maxAutoWidth:160, width:'160', gutter:0,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var str = oRecord.getData("name");
                         var tit = "";
-                        if(str.length>30) { // limit maximum display length in chars and append elipsis
+                        /*if(str.length>28) { // limit maximum display length in chars and append elipsis
                             tit = str;
-                            str = str.substr(0,30)+"&#8230";
-                        }
-                        elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label style="cursor:pointer !important;" id="lblRecTitle'
+                            str = str.substr(0,28)+"&#8230";
+                        }*/
+                        elLiner.innerHTML = '<a href="#edit_sctructure" class="bare"><label class="truncate" style="cursor:pointer !important;max-width:150px" id="lblRecTitle'
                                     + oRecord.getData("id") +'" title="'
                                     +tit+'">'+str+'</label></a>';
                 }},
