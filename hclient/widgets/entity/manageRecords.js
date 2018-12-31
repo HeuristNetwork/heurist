@@ -225,9 +225,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             },
                          'Cancel':function(){ 
                                 $__dlg.dialog( "close" );
-                            }},
+                            }},  
                             {title:'Confirm'});
-                            
+                            //,{my:'top left', at:'-100 left+200', of:this._toolbar.find('#btnPrev')});
+                         var dlged = that._as_dialog.parent('.ui-dialog');   
+                         $__dlg.parent('.ui-dialog').css({
+                                top: dlged.position().top+dlged.height()-200,
+                                left:that._toolbar.find('#btnPrev').position().left});    
                     }else{
                         this._toolbar.find('#divNav').html( (idx+1)+'/'+order.length);
                         
@@ -301,11 +305,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
                         click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
                               
+                              
                         {showText:false, icons:{primary:'ui-icon-circle-triangle-w'},title:window.hWin.HR('Previous'),
-                              css:{'display':'none','margin-right':'0.5em','float':'left'}, id:'btnPrev',
+                              css:{'display':'none','margin-right':'0.5em',}, id:'btnPrev',
                               click: function() { that._navigateToRec(-1); }},
                         {showText:false, icons:{secondary:'ui-icon-circle-triangle-e'},title:window.hWin.HR('Next'),
-                              css:{'display':'none','margin-left':'0.5em','float':'left'}, id:'btnNext',
+                              css:{'display':'none','margin-left':'0.5em','margin-right':'1.5em'}, id:'btnNext',
                               click: function() { that._navigateToRec(1); }},
                               
                         {text:window.hWin.HR('Dupe'), id:'btnRecDuplicate',
@@ -519,11 +524,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 this._toolbar.find('#btnPrev').css({'display':'inline-block'});
                 this._toolbar.find('#btnNext').css({'display':'inline-block'});
                 if(this._toolbar.find('#divNav').length===0){
-                    $('<div id="divNav2" style="font-weight:bold;padding:0.8em 1em;float:left;text-align:right">Step through filtered subset</div>')
+                    $('<div id="divNav2" style="display:inline-block;font-weight:bold;padding:0.8em 1em;text-align:right">Step through filtered subset</div>')
                         .insertBefore(this._toolbar.find('#btnPrev'));
                         
-                    $('<div id="divNav" style="font-weight:bold;padding-top:0.8em;min-width:40px;float:left;text-align:center">')
-                        .insertAfter(this._toolbar.find('#btnPrev'));
+                    $('<div id="divNav" style="display:inline-block;font-weight:bold;padding-top:0.8em;min-width:40px;text-align:center">')
+                        .insertBefore(this._toolbar.find('#btnNext'));
                 }
                 this._navigateToRec(0); //reload
             }else{
