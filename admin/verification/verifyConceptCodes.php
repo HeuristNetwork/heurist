@@ -34,6 +34,12 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
     exit();
 }
 
+?>            
+<div style="font-family:Arial,Helvetica;font-size:12px">
+            <p>This list shows re-use of the same concept code within each database where this occurs. Re-use is an error, although it should have very little adverse effect on local operations.</p>
+<?php            
+
+
 $mysqli = $system->get_mysqli();
     
     //1. find all database
@@ -130,7 +136,7 @@ $mysqli = $system->get_mysqli();
         }
         
         if($is_found){
-            print '<h4>'.substr($db_name,4).'</h4><table>';    
+            print '<h4 style="margin:0;padding-top:20px">'.substr($db_name,4).'</h4><table style="font-size:12px">';    
             if(count($rec_types)>0){
                 print '<tr><td colspan=4><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
@@ -149,9 +155,9 @@ $mysqli = $system->get_mysqli();
                     print '<tr><td>'.implode('</td><td>',$row).'</td></tr>';
                 }
             }
-            print '</table><br><br>';
+            print '</table>';
         } 
         
     }//while  databases
-    print '[end report]';
+    print '[end report]</div>';
 ?>
