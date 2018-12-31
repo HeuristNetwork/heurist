@@ -2812,6 +2812,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                         var res = imp_session['validation'];
                         
+                        if(res['missed_required_fields_map'] && res['missed_required_fields_map'].length>0){
+                                window.hWin.HEURIST4.msg.showMsgDlg('The following fields are required fields. It is recommended to map them to incoming data before you can import new records:<br><br>'
+                                +res['missed_required_fields_map'].join(', '),null,{title:'Warning'});
+                        }
+                        
                         $('#mr_cnt_update').text(res['count_update']);                                 
                         $('#mr_cnt_insert').text(res['count_insert']);   
                                                       
@@ -3416,13 +3421,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     
                     if(fieldnames[i] == checked_field){
                         
-                        if(!recStruc || !recStruc[dt_id]){
-                            console.log('ERROR: field '+dt_id+' not found for '+rtyID);
+                        var dt_id2 = (dt_id>0) ?dt_id :dt_id.substr(0,dt_id.indexOf('_'));
+                        
+                        if(!recStruc || !recStruc[dt_id2]){
+                            console.log('ERROR: field '+dt_id2+' not found for '+rtyID);
                             console.log(recStruc);                            
                         }else
-                        if(recStruc[dt_id][idx_reqtype] == "required"){
+                        if(recStruc[dt_id2][idx_reqtype] == "required"){
                             colname = colname + "*";
                         }
+                        
+                        
                         /* @TODO generate term selector
                         if(is_enum){
                             $showlink = '&nbsp;<a href="#" onclick="{showTermListPreview('.$dt_id.')}">show list of terms</a>';
