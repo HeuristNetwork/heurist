@@ -531,16 +531,14 @@ function EditRecStructure() {
                                 if(reqtype>0){
                                     var term = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][reqtype];
                                     if(term){
-                                        reqtype = term[0].substring(0,15);
+                                        reqtype = term[0];//.substring(0,15);
                                     }
                                 }else{
                                     reqtype = '';
                                 }
-                            }else{
-                                reqtype = reqtype.substring(0,9);// Artem, why do we do this??
                             }
 
-                            elLiner.innerHTML = reqtype;
+                            elLiner.innerHTML = '<label class="truncate" style="max-width:44">'+reqtype+'</label>';
                         }else{
                             elLiner.innerHTML = '';
                         }
