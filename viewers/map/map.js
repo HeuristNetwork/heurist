@@ -1887,7 +1887,7 @@ console.log('tileloaded 2');
 
             
                 }else if(item.opts.info){
-                    if(item.opts.info.indexOf('http://')==0){
+                    if(item.opts.info.indexOf('http://')==0 || item.opts.info.indexOf('https://')==0){
                         popupURL =  item.opts.info; //load content from url
                     }else{
                         html =  item.opts.info; //3. content already defined

@@ -1478,7 +1478,7 @@ background: #8ea9b9
     float: right;
 }
 .detailType {
-    width: 80px;
+    width: 100px;
     display: table-cell;
     color: #999999;
     vertical-align: top;
@@ -1503,6 +1503,12 @@ background: #8ea9b9
     padding-right: 5px;
     text-transform: none;
     color: #333;
+}
+
+.map_popup .detail, .map_popup .detail > a{
+    min-width: 150px;
+    line-height: 16px;
+    vertical-align:top;    
 }
 .detailRowHeader{
     padding: 5px 0 5px 0;
