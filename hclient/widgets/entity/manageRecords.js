@@ -1350,6 +1350,31 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     //
+    editRecordTypeTitle: function(){
+        
+        var rty_ID = this._currentEditRecTypeID;
+        var typedef = window.hWin.HEURIST4.rectypes.typedefs[rty_ID];
+        var maskvalue = typedef.commonFields[ window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
+
+        var sURL = window.hWin.HAPI4.baseURL +
+            "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID
+            +"&mask="+encodeURIComponent(maskvalue)+"&db="+window.hWin.HAPI4.database;
+            
+        window.hWin.HEURIST4.msg.showDialog(sURL, {    
+                "no-resize": true,
+                title: 'Record Type Title Mask Edit',
+                height: 800,
+                width: 800,
+                callback: function(newvalue) {
+                    if(newvalue){
+                    }
+                }
+        });
+    },
+    
+    //
+    //
+    //
     editRecordType: function(){
 
         var that = this;
@@ -2229,8 +2254,13 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     +'<label><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
                 +'<span class="btn-config4-container" style="border: 1px #7D9AAA solid;padding: 4px;margin-left: 50px;">'
-                +'<span class="btn-config4" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">Modify structure</span>'
-                +'<span class="btn-config5 ui-icon ui-icon-gear smallicon"></span></span>'
+                +'<span class="btn-edit-rt" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">Modify structure</span>'
+                +'<span class="btn-edit-rt ui-icon ui-icon-gear smallicon" style="height:18px;margin-left:4px"></span></span>'
+
+                +'<span class="btn-config4-container" style="padding: 4px;margin-left: 10px;">'
+                +'<span class="btn-edit-rt-titlemask" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">edit title mask</span>'
+                +'<span class="btn-edit-rt-titlemask ui-icon ui-icon-pencil smallicon" style="height:18px;margin-left:4px"></span></span>'
+
                     +'<hr style="margin-top: 10px;width:230px">'
              +'</div>'
              +'<div style="display:table-cell;text-align:right;padding: 10px 40px 0px 0px;font-weight: bold;">'
@@ -2245,10 +2275,11 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             var that = this;    
             
             if(window.hWin.HAPI4.is_admin()){
-                this.element.find('.btn-config5')
-                        .css({height: '18px', 'margin-left':'4px'})
-                        .click(function(){that.editRecordType();});
-                this.element.find('.btn-config4').click(function(){that.editRecordType();});
+                this.element.find('.btn-edit-rt').click(function(){that.editRecordType();});
+                
+                //this.element.find('.btn-config5a').css({height: '18px', 'margin-left':'4px'})
+                
+                this.element.find('.btn-edit-rt-titlemask').click(function(){that.editRecordTypeTitle();});
             }else{
                 this.element.find('.btn-config4-container').hide();
                 //this.element.find('.btn-config5').hide();
