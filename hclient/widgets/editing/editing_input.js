@@ -1759,6 +1759,7 @@ $.widget( "heurist.editing_input", {
                             + '</div>').appendTo( $inputdiv );                
                        if(this.configMode.entity=='recUploadedFiles'){
                            $input_img.css({'min-height':'320px','min-width':'320px'});
+                           $input_img.find('img').css({'max-height':'320px','max-width':'320px'});
                        }
                          
                         window.hWin.HAPI4.checkImageUrl(this.configMode.entity, this.options.recID, 'thumb',
@@ -1872,8 +1873,11 @@ $.widget( "heurist.editing_input", {
                             
                             //var urlThumb = window.hWin.HAPI4.getImageUrl(that.configMode.entity, 
                             //            newfilename+'.png', 'thumb', 1);
-                                        
-                            var urlThumb = file.thumbnailUrl+'?'+(new Date()).getTime();
+                            var urlThumb =
+                            (that.configMode.entity=='recUploadedFiles'
+                                ?file.url
+                                :file.thumbnailUrl)
+                                +'?'+(new Date()).getTime();
                             
                             // file.thumbnailUrl - is correct but inaccessible for heurist server
                             // we get image via fileGet.php
