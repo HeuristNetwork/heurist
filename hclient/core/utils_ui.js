@@ -1022,7 +1022,6 @@ window.hWin.HEURIST4.ui = {
         var addLatLongForGeo = false;
         var requriedHighlight = false;
         var selectedValue = null;
-        var showLatLongForGeo = false;
         var show_parent_rt = false;
         var useHtmlSelect = true;
         var initial_indent = 0;
@@ -1171,8 +1170,8 @@ window.hWin.HEURIST4.ui = {
                         
                     }
                     if(addLatLongForGeo && details[dtyID][fit]=="geo"){
-                        arrterm.push([ dtyID+'_long', 'geo: Longitude', false ]);
-                        arrterm.push([ dtyID+'_lat', 'geo: Latitude', false ]);
+                        arrterm.push([ dtyID+'_long', details[dtyID][fi]+' [longitude]', false ]);
+                        arrterm.push([ dtyID+'_lat', details[dtyID][fi]+' [latitude]', false ]);
                     } 
                 }
             }
