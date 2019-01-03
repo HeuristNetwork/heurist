@@ -139,7 +139,11 @@ window.hWin.HEURIST4.geo = {
                     function __extractCoords2(shapes, coords, typeCode){
 
                         if(_isvalid_pnt(coords)){ //Marker
-                            shapes.push( {point:{lat:coords[1], lon:coords[0]}} );
+                        
+                            shapes.push( {point:{
+                                    lat: Math.round(coords[1] * 1000000) / 1000000,  
+                                    lon: Math.round(coords[0] * 1000000) / 1000000}} );
+                            
                         }else if(_isvalid_pnt(coords[0])){
                             //  !isNaN(Number(coords[0])) && !isNaN(Number(coords[1])) ){ //this is point
                             var shape = [], m;

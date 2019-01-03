@@ -758,7 +758,6 @@ function hAPI(_db, _oninit) { //, _currentUser
                         document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
                     }
 
-                            
                     callback = function(response)
                     {
                         var resdata = null;

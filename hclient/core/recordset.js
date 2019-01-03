@@ -161,6 +161,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     function _toTimemap(dataset_name, filter_rt, symbology, geoType){
 
         var aitems = [], titems = [];
+        var aitems_index = {}; //index recID=>index in aitems
         var item, titem, shape, idx, 
             min_date = Number.MAX_VALUE, 
             max_date = Number.MIN_VALUE;
@@ -225,7 +226,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
         }
         
-        var linkedPlaceRecId = [];
+        var linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)
         
         var tot = 0;
         
@@ -349,11 +350,16 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         }
                         timeenabled++;
                 }
-                
+
+
+                //a record may have several geofields/placemarks for example place of birth and death
+                //besides it may be linked (several times) to "place" record types
+                //we need to treat them as separate timemap item
+                //var geovalues = array(); 
                 var shapes = (recShape && geoType!=1)?recShape:[];
                 if(!$.isArray(shapes)){
-                    console.log(record);
-                    console.log(shapes);
+                    //console.log(record);
+                    //console.log(shapes);
                     shapes = [];
                 }
                 
@@ -380,20 +386,23 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                     }
                                         
                                 }
-                                
+                                //recID is place record ID
                                 if(geodata[m].recID>0){ //reference to linked place record
-                                    if(linkedPlaceRecId.indexOf(geodata[m].recID)<0){
-                                        linkedPlaceRecId.push(geodata[m].recID);
+                                    if(!linkedPlaceRecId[geodata[m].recID]){
+                                        linkedPlaceRecId[geodata[m].recID] = [];
                                     }else{
+                                        //to avoid dark fill for several polygones on the same spot
                                         fillOpacity_thisRec = 0.001;
                                     }
+                                
+                                    linkedPlaceRecId[geodata[m].recID].push(recID);
                                 }
                             }
                         }
                         
                     }
                 }else{
-                    recID = recID + "_link";
+                    recID = recID + "_link"; //for DH
                 }
                 
                         var iconImgEvt, iconImg;
@@ -411,12 +420,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             iconImg = iconMarker;    
                         }else{
                             //default icon of record type
-                            iconImgEvt = iconId + 's.png';
+                            iconImgEvt = iconId + '.png';
                             iconImg = window.hWin.HAPI4.iconBaseURL + iconId + 's.png&color='
                                         +encodeURIComponent(pr_iconColor ?pr_iconColor:iconColor);
                                         
                             if(pr_fillColor){
-                                iconImg = iconImg + '&circle='+encodeURIComponent(pr_fillColor);
+                                iconImg = iconImg + '&bg='+encodeURIComponent(pr_fillColor);
                             }
                         }
                         
@@ -458,12 +467,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 start: (startDate || ''),
                                 end: (endDate && endDate!=startDate)?endDate:'',
                                 
-                                URL:   _getFieldValue(record, 'rec_URL'),
+                                URL: _getFieldValue(record, 'rec_URL'),
                                 thumb: html_thumb,
                                 
-                                info: _getFieldValue(record, 'rec_Info'),  //prepared content for map bubble or URL to script
+                                info: _getFieldValue(record, 'rec_Info')  //prepared content for map bubble or URL to script
                                 
-                                places: null
+                                //was need for highlight selection on map places: null
                                 
                                 //,infoHTML: (infoHTML || ''),
                             }
@@ -477,16 +486,40 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 if(shapes.length>0){
                     if(mapenabled<=MAXITEMS){
                         item.placemarks = shapes;
-                        item.options.places = shapes;
+                        //was need for highlight selection on map item.options.places = shapes;
                     }
                     mapenabled++;
                 }
                 if(geoType!=2 || shapes.length>0){
+                    aitems_index[recID] = aitems.length;
                     aitems.push(item);
                 }
 
                 tot++;
-        }}
+        }}//for
+        
+        //loop for linkedPlaceRecId to change marker and assign reference to all records that has the same place
+        /*
+        if(aitems.length>0)
+        for(var placeID in linkedPlaceRecId){
+            if(placeID>0 && linkedPlaceRecId[placeID].length>1){
+                for(var idx=0; idx<linkedPlaceRecId[placeID].length; idx++){
+                    var recID = linkedPlaceRecId[placeID][idx];
+                    aitems[aitems_index[recID]].options.placeID = placeID;
+                    aitems[aitems_index[recID]].options.linkedRecIDs = linkedPlaceRecId[placeID];
+                    var iconId = aitems[aitems_index[recID]].options.iconId;
+
+                    if(typeof iconId=='string' && (iconId.indexOf('http:')==0 || iconId.indexOf('https:')==0)){
+                        //mapdata.options.items[i].options.icon = iconId;
+                    }else{
+                        var clr = encodeURIComponent(aitems[aitems_index[recID]].options.color);
+                        aitems[aitems_index[recID]].options.icon = 
+                            window.hWin.HAPI4.iconBaseURL + iconId
+                                + 's.png&color='+clr+'&circle='+clr;
+                    }
+                }
+            }
+        }*/
       
         
         var dataset = 

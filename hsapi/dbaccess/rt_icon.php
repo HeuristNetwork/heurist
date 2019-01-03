@@ -29,7 +29,7 @@ color - convert to given color
 checkmode - return json  {"res":"ok"} or {"res":"notfound"}
 
 id - record id    
-*/    
+*/ 
     require_once (dirname(__FILE__).'/../System.php');
 
     $system = new System();   
@@ -101,18 +101,20 @@ id - record id
     $filename = HEURIST_ICON_DIR . $rectype_id;
 
     $color_new = _parseColor(@$_REQUEST['color']);
-    $bg_circle_color = _parseColor(@$_REQUEST['circle']);
-    
+    $circle_color = _parseColor(@$_REQUEST['circle']);
+    $bg_circle_color = _parseColor(@$_REQUEST['bg']);
+   
     
 //print $filename;    
     if(file_exists($filename)){
         download_file($filename);
     }else{
-        create_rt_icon_with_bg( $rectype_id, $color_new, $bg_circle_color);
+        create_rt_icon_with_bg( $rectype_id, $color_new, $circle_color, $bg_circle_color);
     }
     
-    
-
+//
+//
+//     
 function _parseColor($param_color){
 
     if($param_color!=null){
@@ -186,7 +188,7 @@ function imagepalettetotruecolor(&$img)
 //
 //
 //    
-function create_rt_icon_with_bg( $rectype_id,  $color_new, $bg_circle_color ){ //}, $bg_color ) {
+function create_rt_icon_with_bg( $rectype_id,  $color_new, $circle_color, $bg_circle_color ){ //}, $bg_color ) {
 
     if(substr($rectype_id,0,4)=='term'){
         $rectype_id = substr($rectype_id, 4);
@@ -251,12 +253,18 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new, $bg_circle_color ){ /
         //draw transparent rectangle
         imagefilledrectangle($img, 0, 0, 25, 25, $bg); //fill bg rectangle
         
-        // draw circle
+        // draw filled circle
         if($bg_circle_color!=null){
-            //$col_ellipse = imagecolorallocatealpha($img, $bg_color[0], $bg_color[1], $bg_color[2], $alpha);
             $col_ellipse = imagecolorallocate($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2]);
             imagefilledellipse($img, 12, 12 , 24, 24, $col_ellipse);        
         }
+        // draw circle
+        if($circle_color!=null){
+            $col_ellipse = imagecolorallocate($img, $circle_color[0], $circle_color[1], $circle_color[2]);
+            imagearc($img, 12, 12 , 24, 24,  0, 360, $col_ellipse);
+            //imagearc($img, 12, 12 , 23, 23,  0, 360, $col_ellipse);
+        }
+        
         
         // load icon
         $img_icon = @imagecreatefrompng($filename);
@@ -283,7 +291,7 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new, $bg_circle_color ){ /
         if(is_array($imageInfo) && $imageInfo[0]==24  && $imageInfo[1]==24){
             imagecopymerge_alpha($img, $img_icon, 0, 0, 0, 0, 24, 24, 70);  //mix background to dark
         }else{
-            imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16,100);  //mix background to dark
+            imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 100);  //mix background to dark
             //imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 70);  //mix background to dark
         }
         
