@@ -361,6 +361,8 @@ style="height:100px;width:100px;border:gray;cursor: pointer; vertical-align: mid
 
                     </div>
 
+<!--
+@todo use formAffected and _showFieldUpdater                     
                     <div style="padding-top:20px; margin-left:10px">
                         Term(s) have been added to the term tree but this does not add them to the  individual trees for different fields, since these are individually selected from the complete term tree. Please update the lists for each field to which these terms should be added. <br/><br/> The fields most likely to be affected are
 
@@ -379,7 +381,7 @@ style="height:100px;width:100px;border:gray;cursor: pointer; vertical-align: mid
                             </select></span>
 
                     </div>
-
+-->
 
                     <div id="formAffected" style="display:none;padding:10px;width:480px;">
                         <p><h2>WARNING</h2> ADDING TERMS TO THE TREE DOES NOT ADD THEM TO ENUMERATED FIELDS

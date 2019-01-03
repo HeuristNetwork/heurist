@@ -1174,7 +1174,7 @@ $.widget( "heurist.editing_input", {
                                 window.hWin.HEURIST4.msg.showMsgFlash('Points to a child record; value cannot be changed (delete it or edit the child record itself)', 2500);
                                 return;
                             }
-                            __show_select_dialog(false); 
+                            //__show_select_dialog(false); 
                         }
                     }
                     
