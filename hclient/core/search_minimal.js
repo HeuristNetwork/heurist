@@ -168,7 +168,8 @@ function hSearchMinimal() {
         
         if(window.hWin.HAPI4.currentRecordset && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.currentRecordset.getMainSet())){
         
-            var request = { q: 'ids:'+window.hWin.HAPI4.currentRecordset.getMainSet().join(','),
+            var request = { apply_rules:true, //do not inlude search in browser and search input
+                            q: 'ids:'+window.hWin.HAPI4.currentRecordset.getMainSet().join(','),
                             rules: rules,
                             rulesonly: rulesonly,
                             w: _query_request?_query_request.w:'a'};
