@@ -110,7 +110,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                                 if(loading_mapdoc_list) return;
                                 current_map_document_id = ui.item.attr('mapdoc_id');
                                 $("#mapSelectorBtn").attr('mapdoc-selected',current_map_document_id).button({label: ui.item.find('a').text() });
-                                _loadMapDocumentById();
+                                _loadMapDocumentById(); //loads current_map_document_id
                                 menu_mapdocuments.hide();
                         }});
 
@@ -146,7 +146,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     }
 
     //
-    //
+    // loads current_map_document_id
     //
     function _loadMapDocumentById() {
 
@@ -183,7 +183,12 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                         map_data[0].bookmarks.push([window.hWin.HR('World'),-80,90,-30,50,1800,2050]); //default
                         _loadMapDocumentById_continue();
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr('Map document #'+current_map_document_id+' not found');
+                        window.hWin.HEURIST4.msg.showMsgErr(
+                        'Map document (ID '
+                        + current_map_document_id
+                        + ') does not exist in the database. '
+                        + 'Please email the database owner ('
+                        +window.hWin.HAPI4.sysinfo['dbowner_email']+') and ask them to correct the URL');
                     }
                 
                 }else{
@@ -196,6 +201,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
     }
 
+    //
+    //
+    //
     function _getMapDocumentDataById(mapdocument_id) {    
         
         if(typeof mapdocument_id==='undefined'){
@@ -213,6 +221,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         
     }
 
+    //
+    // loads current_map_document_id
+    //
     function _loadMapDocumentById_continue() {    
 
 //console.log('load documents continue');        
@@ -1916,6 +1927,9 @@ map.data.addListener('mouseover', function(event) {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
+        getCurrentMapdocumentId:function(){
+            return current_map_document_id;
+        },
         
         loadMapDocuments:function(startup_mapdocument){
             current_map_document_id = 0;

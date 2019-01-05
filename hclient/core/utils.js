@@ -171,6 +171,11 @@ window.hWin.HEURIST4.util = {
     //
     composeHeuristQueryFromRequest: function(query_request, encode){
             var query_string = 'db=' + window.hWin.HAPI4.database;
+            
+            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+            if(mapdocument>0){
+                query_string = query_string + '&mapdocument='+mapdocument;
+            }
         
             if(!window.hWin.HEURIST4.util.isnull(query_request)){
 
