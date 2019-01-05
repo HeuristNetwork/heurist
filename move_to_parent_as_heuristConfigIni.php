@@ -64,7 +64,8 @@ if (!@$bugEmail) $bugEmail = "info@HeuristNetwork.org";
 
 // A simple challenge password for creation of new databases. If left blank, any logged in user can create a new database
 if (!@$passwordForDatabaseCreation) $passwordForDatabaseCreation=""; // normally blank = any logged in user can create
-if (!@$passwordForDatabaseDeletion) $passwordForDatabaseDeletion=""; // if blank only db owner can delete
+if (!@$passwordForDatabaseDeletion) $passwordForDatabaseDeletion=""; // if blank only db owner can delete. 
+   // If set >14 characters, system adminstrator can delete up to 10 at a time (with password challenge) 
 if (!@$passwordForReservedChanges) $passwordForReservedChanges="";// if blank, no-one can modify reserved fields, otherwise challenge
 if (!@$passwordForServerFunctions) $passwordForServerFunctions="";// if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
 

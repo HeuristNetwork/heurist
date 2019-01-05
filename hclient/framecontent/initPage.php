@@ -111,6 +111,17 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 <!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
 <html>
 <head>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-131444459-1');
+</script>
+
 <title><?=(@$_REQUEST['db']?$_REQUEST['db']:'').'. '.HEURIST_TITLE ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
