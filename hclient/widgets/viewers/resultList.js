@@ -441,20 +441,6 @@ $.widget( "heurist.resultList", {
                     window.hWin.HAPI4.save_pref('rec_list_viewmode_'+this.options.entityName, view_mode);
         }});
 
-        
-
-        if(this.options.show_menu){
-            if($.isFunction($('body').resultListMenu)){
-                this.div_actions = $('<div>')
-                .css({display:'inline-block','padding-bottom':'4px'})
-                //.css({'position':'absolute','top':3,'left':2})
-                .resultListMenu({
-                        menu_class: this.options.header_class,
-                        resultList: this.element})
-                .appendTo(this.div_toolbar);
-            }
-        }    
-        
         this.span_pagination = $( "<div>")
         .css({'float':'right','padding': '3px 0.5em 0 0'})
         //'vertical-align':'top',
@@ -467,6 +453,22 @@ $.widget( "heurist.resultList", {
         //.css({'float':'right','padding':'0.6em 0.5em 0 0','font-style':'italic'})
         .appendTo( this.div_toolbar );
 
+        
+
+        if(this.options.show_menu){
+            if($.isFunction($('body').resultListMenu)){
+                this.div_actions = $('<div>')
+                .css({display:'inline-block','padding-bottom':'4px'})
+                //.css({'position':'absolute','top':3,'left':2})
+                .resultListMenu({
+                        menu_class: this.options.header_class,
+                        resultList: this.element})
+                .appendTo(this.div_toolbar);
+            }
+        }else{
+            
+        }    
+        
         //
         //
         if(this.options.show_savefilter){
@@ -651,22 +653,9 @@ $.widget( "heurist.resultList", {
             if(this.max_page>1) this.span_pagination.css({'display':'inline-block'});
             this.span_info.css({'display':'inline-block'});
             
-            /*NOT HIDE ANYMORE - we use wrap now
-            var w = this.element.width();
 
-            // pagination has LESS priority than reccount
-            if ( w > 440 && this.max_page>1) {
-                this.span_pagination.show();
-            }else{
-                this.span_pagination.hide();
-            }
-            if ( true || w > 340 ) {
-                this.span_info.show();
-            }else{
-                this.span_info.hide();
-            }
             this._updateInfo();
-            */
+
         }else{
             this.span_pagination.hide();
             this.span_info.hide();
@@ -1588,35 +1577,43 @@ $.widget( "heurist.resultList", {
 
         if(this.options.select_mode=='select_multi' && this._currentMultiSelection!=null && this._currentMultiSelection.length>0){
             sinfo = sinfo + " | Selected: "+this._currentMultiSelection.length;
-            if(w>400){
+            if(w>600){
                 sinfo = sinfo+' <a href="#">clear</a>';
             }
         }
+/*
+            var pv = false;
 
-        if(w<380){
+            // pagination has LESS priority than reccount
+            if ( w > 530 && this.max_page>1) {
+                this.span_pagination.show();
+                pv = true;
+            }else{
+                this.span_pagination.hide();
+            }
+            if ( w > (470 + (pv?60:0)) ) {
+                this.span_info.show();
+            }else{
+                this.span_info.hide();
+            }
+  */                  
+        /*
+        if(w<530){
             this.span_info.prop('title',sinfo);
-            if(w<320){
+            if(w<530){
                 this.span_info.hide();
             }else {
                 this.span_info.show();
 
                 //IJ wants just n=
                 this.span_info.html(w>340 || total_inquery<1000?('n = '+total_inquery):'i');
-
-                /* alternative  Records->Rec->n= ->i
-                if(w<340){
-                this.span_info.html(total_inquery<1000?('n='+total_inquery):'i');
-                }else if(w<360){
-                this.span_info.html('n='+total_inquery);
-                }else{
-                this.span_info.html('Rec:'+total_inquery);
-                }*/
             }
 
         }else{
-            this.span_info.prop('title','');
-            this.span_info.html(sinfo);
-        }
+        */
+        this.span_info.prop('title','');
+        this.span_info.html(sinfo);
+        
 
 
 
@@ -1698,7 +1695,7 @@ $.widget( "heurist.resultList", {
 
         var that = this;
 
-        var ismenu = that.options.navigator!='buttons' && (that.options.navigator=='menu' || (that.element.width()<620));
+        var ismenu = that.options.navigator!='buttons' && (that.options.navigator=='menu' || (that.element.width()<450));
 
         var smenu = '';
 
