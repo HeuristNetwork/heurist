@@ -586,7 +586,7 @@ $.widget( "heurist.editing_input", {
 
             $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
-                .css('width',dwidth?dwidth:'0px')
+                .css('width',(dwidth && dwidth!='0')?dwidth:'0px')
                 .val(value)
                 .appendTo( $inputdiv );
             
