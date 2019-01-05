@@ -2161,7 +2161,7 @@ this_id       : "term"
 
         $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
                 element: embed_dialog[0],
-                height: 400,
+                height: 430,
                 width: 600,
                 title: window.hWin.HR('Publish report')
         });        
