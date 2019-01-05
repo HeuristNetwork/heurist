@@ -598,7 +598,25 @@ $.widget( "heurist.svs_list", {
                 UGrpID: this.options.allowed_UGrpID},
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        that.allowed_svsIDs = response.data;
+                        that.allowed_svsIDs = response.data; //svs_id=>array()
+                        
+                        var svsID = Object.keys(that.allowed_svsIDs)
+                        var missed = [];
+                        //verify
+                        for(var i=0; i<that.options.allowed_svsIDs.length; i++){
+                            if(window.hWin.HEURIST4.util.findArrayIndex(that.options.allowed_svsIDs[i],svsID)<0){
+                                missed.push(that.options.allowed_svsIDs[i]);
+                            }
+                        }
+                        if(missed.length>0){
+                            window.hWin.HEURIST4.msg.showMsgErr(
+                            'Saved filter'+(missed.length>1?'s':'')+' (ID '
+                            + missed.join(', ')
+                            + ') specified in parameters '
+                            + (missed.length>1?'does':'do')+' not exist in the database. Please advise the database owner ('+
+                            + window.hWin.HAPI4.sysinfo['dbowner_email'] +')');
+                        }
+                        
                         that._updateAccordeonAsListOfButtons();
                     }
             });
