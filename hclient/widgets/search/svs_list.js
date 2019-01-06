@@ -1884,7 +1884,7 @@ $.widget( "heurist.svs_list", {
             return;
         }
         
-        var query = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&searchIDs='+svs_ID;
+        var query = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&views=list,map&searchIDs='+svs_ID;
         
         this.embed_dialog.find("#code-textbox3").val(query);
         

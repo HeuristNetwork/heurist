@@ -104,7 +104,6 @@ function hLayout(args) {
             $(ele.parent()).tabs( "option", "active", ele.index()-1 );
         }
     }
-
     
     //
     // action: close, open
@@ -1170,6 +1169,24 @@ function hLayout(args) {
         putAppOnTopById: function( widgetname ){
             _putAppOnTopById( widgetname );
         },
+        
+
+        visibilityAppById: function ( layout_id, show_or_hide ){
+            
+            if(Hul.isnull(layout_id)) return;
+            //var $container = $(_containerid);
+            var ele = $('div[layout_id="'+layout_id+'"]');
+            
+            if( ele.hasClass('ui-tabs-panel') ){
+                var ele2 = $(ele.parent()).find('ul li:eq('+(ele.index()-1)+')');
+                if(show_or_hide){
+                    ele2.show();
+                }else{
+                    ele2.hide();
+                }
+            }
+        },    
+        
         
         init: function(cfg_widgets, cfg_layouts){
             _init(cfg_widgets, cfg_layouts)

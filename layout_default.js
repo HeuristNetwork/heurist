@@ -169,12 +169,19 @@ var cfg_layouts = [
         west:{size:260, minsize:150, apps:[{appid:'ha_search_tree', hasheader:false,
                 options:{buttons_mode: true},
                 css:{border:'none','font-size':'14px'} }]},  //saved searches
-        center:{minsize:300, dropable:false, 
-                apps:[{appid:'h3_resultList', hasheader:false,
-                        dockable:false, dragable:false, 
+                
+        center:{minsize:300, dropable:false,
+            tabs:[{dockable:false, dragable:false, resizable:false,
+                apps:[
+                    {appid:'h3_resultList', hasheader:true, name: 'List', layout_id:'list',
                             css:{'background-color':'white','font-size':'14px'}, 
                             options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
-                            show_inner_header: true} }]}  //search result
+                            show_inner_header: true} },  //search result
+                    {appid:'ha51', layout_id:'map', options:{layout:['map','timeline']}, 
+                                    css:{'background-color':'white'} } //mapping
+                ]
+            }]
+        }
      },
 
     // 3 main tabs on top with accordion menu on each one - most of admin/import/export in iframes
