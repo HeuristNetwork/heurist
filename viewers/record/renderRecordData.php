@@ -428,7 +428,7 @@ else{
                         .'<div class="detailRow placeRow"'.($cnt>2?' style="display:none"':'').'>'
                             .'<div style="display:table-cell;width:28px;text-align: right;padding-right:4px">'
                                 .'<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bibInfo['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bibInfo['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif"></div>'
-                        .'<div style="display: table-cell;max-width: 250px" class="truncate"><a href="#" '
+                        .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a href="#" '   
 .'onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
@@ -437,10 +437,14 @@ else{
                     $cnt++;
                 }
                 
-                print '<div class=detailType style="font-size:0.8em;text-align:left;padding-top:8px">Linked</div><div style="font-size:0.8em" class="map_popup">'.$list;
+                print '<div class=detailType style="font-size:0.8em;text-align:left;line-height:21px;">Linked</div><div style="font-size:0.8em" class="map_popup">'.$list;
                 if($cnt>3){
                     ?>
-                    <div class="detailRow"><div class="detailType"><a href="#" onClick="$('.placeRow').show();$(event.target).hide()">more...</a></div><div class="detail"></div></div>';
+                    <div class="detailRow"><div class="detailType">
+                        <a href="#" onClick="$('.placeRow').show();$(event.target).hide
+                            ()" style="color:blue">more... (n = <?php echo ($cnt-3);?>)</a></div>
+                        <div class="detail"></div>
+                    </div>
                     <?php
                 }
                 print '</div>';
@@ -487,9 +491,12 @@ function print_details($bib) {
         
         $link_cnt = print_relation_details($bib);
         $link_cnt = print_linked_details($bib, $link_cnt); //links from
-        if($is_map_popup){ // && $link_cnt>3
-            print '<div class="map_popup"><div class="detailRow"><div class=detailType>'
-            .'<a href="#" onClick="$(\'.fieldRow\').css(\'display\',\'table-row\');$(event.target).hide()">more...</a></div><div class="detail"></div></div></div>';  //linkRow
+        if($is_map_popup){ // && $link_cnt>3 //linkRow
+        ?>
+        <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
+            <a href="#" onClick="$('.fieldRow').css('display','table-row');$('.moreRow').hide()" style="color:blue">more...</a>
+            </div><div class="detail"></div></div></div>
+        <?php
         }
 
         if(!$is_map_popup){
@@ -516,12 +523,11 @@ function print_header_line($bib) {
                     //(($is_production)?'':'padding-top:21px')
     ?>
 
-    <div class=HeaderRow style="margin-bottom:15px;min-height:0px;">
+    <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
         <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
                 <?= $bib['rec_Title'] ?>
         </h2>
     <?php 
-    if(!$is_map_popup){ 
 
         if($system->has_access()){ //is logged in
             ?>
@@ -531,13 +537,15 @@ function print_header_line($bib) {
                 <span class="link"><a id=edit-link class="normal"
                             onClick="return sane_link_opener(this);"
                             target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
-                            <img src="../../common/images/edit-pencil.png" title="Edit record"></a>
+                            <img src="../../common/images/edit-pencil.png" title="Edit record" style="vertical-align: bottom"></a>
                 </span>
             </div>
             <?php
         }else{
             print '<div id=recID style="padding-right:10px">ID:'.htmlspecialchars($bib['rec_ID']).'</div>';
         }
+        
+    if(!$is_map_popup){ 
     ?>
         <h3 style="padding:10px 10px 0px 2px;margin:0">
             <div <?="style='padding-left:20px;height:20px;background-repeat: no-repeat;background-image:url("
@@ -605,7 +613,7 @@ function print_private_details($bib) {
         
     ?>
     <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
-        <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>">
+        <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate" style="max-width:400px;"':'"');?>>
             <a target=_blank class="external-link" 
                 href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML</a>
             &nbsp;&nbsp;
@@ -1140,7 +1148,7 @@ function print_public_details($bib) {
     if (@$url) {
         print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
             .'<div class=detailType>URL</div>'
-            .'<div class="detail'.($is_map_popup?' truncate':'').'">'
+            .'<div class="detail'.($is_map_popup?' truncate style="max-width:400px;"':'"').'>'
             .'<span class="link">'
                 .'<a target="_new" class="external-link" href="http://web.archive.org/web/*/'.htmlspecialchars($url).'">page history</a>&nbsp;&nbsp;&nbsp;'
                 .'<a target="_new" class="external-link" href="'.htmlspecialchars($url).'">'.output_chunker($url).'</a>'
@@ -1463,7 +1471,7 @@ function print_linked_details($bib, $link_cnt) {
     if ($res==false || $res->num_rows <= 0) return $link_cnt;
     
     if($is_map_popup){
-       print '<div class="detailType fieldRow" style="display:none">Linked from</div>';
+       print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
        print '<div class="map_popup">';//
     }else{
        print '<div class="detailRowHeader" style="float:left">Linked from'; 
@@ -1484,10 +1492,11 @@ function print_linked_details($bib, $link_cnt) {
             print '<div class="detailRow fieldRow"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
             $link_cnt++;
             
-                print '<div style="display:table-cell;width:28px;text-align: right;padding-right:4px">'
+                print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
                         .'<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif"></div>';
                         
-                print '<div style="display: table-cell;" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a></div>';
+                print '<div style="display: table-cell;vertical-align:top;'
+                .($is_map_popup?'max-width:490px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a></div>';
                 
             print '</div>';
         }

@@ -1511,6 +1511,7 @@ background: #8ea9b9
 }
 .map_popup .detailType{
     text-align:left;
+    line-height:21px;
 }
 .map_popup .detail, .map_popup .detail > a{
     min-width: 150px;
