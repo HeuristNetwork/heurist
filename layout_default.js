@@ -173,7 +173,7 @@ var cfg_layouts = [
         center:{minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false,
                 apps:[
-                    {appid:'h3_resultList', hasheader:true, name: 'List', layout_id:'list',
+                    {appid:'h3_resultList', hasheader:true, name:'List', layout_id:'list',
                             css:{'background-color':'white','font-size':'14px'}, 
                             options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
                             show_inner_header: true} },  //search result

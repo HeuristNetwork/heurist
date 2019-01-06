@@ -153,6 +153,7 @@ $.widget( "heurist.resultList", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
                     that.span_pagination.hide();
+                    that.span_info.hide();
 
                     that.setSelected(null);
                     $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
@@ -810,6 +811,7 @@ $.widget( "heurist.resultList", {
                 $header.html('<h3>'+new_title+'</h3>');
                 $('a[href="#'+this.element.attr('id')+'"]').html(new_title);
             }
+            */
 
             if(this.div_header!=null) {
                 this.setHeaderText('<h3>'+new_title+'</h3>');

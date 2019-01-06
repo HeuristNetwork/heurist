@@ -626,6 +626,8 @@ $.widget( "heurist.svs_list", {
 
         this.accordeon.hide();
         this.accordeon.empty();
+        
+        $('<h4 style="padding:20px 0px;">Saved searches</h4>').appendTo(this.accordeon);
 
         var i, svsIDs = Object.keys(this.allowed_svsIDs);
 
@@ -680,11 +682,12 @@ $.widget( "heurist.svs_list", {
             $(this.accordeon).find('button[data-svs-id="'+svsIDs[0]+'"]').click();
         }
 
-        $(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
+        //$(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
+        $(this.accordeon).css({'overflow':'hidden',position:'unset','padding':'4px'});
 
-
-        var search_div = $('<div style="position:absolute;bottom:0px;height:2.5em;padding:4px;text-align:center;width:100%">'
-            +'<label>Search all fields:</label>'
+        //position:absolute;bottom:0px;
+        var search_div = $('<div style="height:2.5em;padding:4px;width:100%">'
+            +'<h4 style="padding:20px 0px;">Simple search</h4><label>Search all fields:</label>'
             +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
             +'&nbsp;<button id="search_button"/></div>')
         .insertAfter(this.accordeon);
