@@ -440,7 +440,7 @@ else{
                 print '<div class=detailType style="font-size:0.8em;text-align:left;padding-top:8px">Linked</div><div style="font-size:0.8em" class="map_popup">'.$list;
                 if($cnt>3){
                     ?>
-                    <div class="detailRow"><div class="detailType"><a href="#" onClick="$('.placeRow').show();$(event.target).hide()">more</a></div><div class="detail"></div></div>';
+                    <div class="detailRow"><div class="detailType"><a href="#" onClick="$('.placeRow').show();$(event.target).hide()">more...</a></div><div class="detail"></div></div>';
                     <?php
                 }
                 print '</div>';
@@ -489,7 +489,7 @@ function print_details($bib) {
         $link_cnt = print_linked_details($bib, $link_cnt); //links from
         if($is_map_popup){ // && $link_cnt>3
             print '<div class="map_popup"><div class="detailRow"><div class=detailType>'
-            .'<a href="#" onClick="$(\'.fieldRow\').css(\'display\',\'table-row\');$(event.target).hide()">more</a></div><div class="detail"></div></div></div>';  //linkRow
+            .'<a href="#" onClick="$(\'.fieldRow\').css(\'display\',\'table-row\');$(event.target).hide()">more...</a></div><div class="detail"></div></div></div>';  //linkRow
         }
 
         if(!$is_map_popup){
@@ -600,7 +600,7 @@ function print_private_details($bib) {
     print '<div class="detailRowHeader" style="float:left;padding-bottom:40px"><a href="#" ';
     print 'onClick="$(\'.morePrivateInfo\').show();$(event.target).parents(\'.detailRowHeader\').hide();';
     print 'setTimeout(function(){window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);},200);';
-    print '">more ...</a></div>';
+    print '">more...</a></div>';
     print '<div class="detailRowHeader morePrivateInfo" style="float:left;padding-bottom:40px 0 20px;display:none;">';
         
     ?>
