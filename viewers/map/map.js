@@ -1558,7 +1558,7 @@ console.log('tileloaded 2');
         //placemark_selected that was cliked - item may have several placemarks
         
         var res = _getPlaceMarkFromItem( this, selected_placemark );
-        if(res.placemark_type=='marker' && //this.opts.linkedRecIDs && 
+        if(res.placemark_type=='marker' && 
             !this.placemark.points && this.dataset.id=='main'){
         
             _selectItemsWithSameCoords( this, selected_placemark );
@@ -1613,13 +1613,23 @@ console.log('tileloaded 2');
                                 return false;
                         }
                     });
+                    if(lastSelectedItem==null){
+                        selected_placemark = selected_placemarks[0];
+                        lastSelectedItem = selected_placemark.item;
+                    }
+                    
                 }else{
 
                     tmap.each(function(dataset){
                         dataset.each(function(item){ //loop trough all items
 
-                            if(lastRecID==item.opts.recid){
+                        
+                        
+                            if(lastRecID==item.opts.recid || 
+                                (item.opts.linkedRecIDs &&                             
+                                 window.hWin.HEURIST4.util.findArrayIndex(lastRecID, item.opts.linkedRecIDs)>=0) ){
                                 lastSelectedItem = item;
+                                selected_placemark = item.placemark;
                                 return false;
                             }
                         });

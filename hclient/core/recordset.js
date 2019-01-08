@@ -156,12 +156,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * geoType 
         * 0, undefined - all
         * 1 - main geo only
-        * 2 - rec_Shape only
+        * 2 - rec_Shape only (coordinates defined in field rec_Shape)
     */
     function _toTimemap(dataset_name, filter_rt, symbology, geoType){
 
         var aitems = [], titems = [];
-        var aitems_index = {}; //index recID=>index in aitems
         var item, titem, shape, idx, 
             min_date = Number.MAX_VALUE, 
             max_date = Number.MIN_VALUE;
@@ -227,6 +226,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         }
         
         var linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)
+        //linkedRecs - records linked to this place
+        //shape - coordinates
+        //item - item object to be added to timemap 
+        var linkedPlaces = {};//placeID => {linkedRecIds, shape, item}
         
         var tot = 0;
         
@@ -363,7 +366,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     shapes = [];
                 }
                 
-                if(geoType!=2){
+                var has_linked_places = [];
+                
+                if(geoType!=2){ //get coordinates from geo fields
                     
                     var k, m, i, j;
                     for(k=0; k<geofields.length; k++){
@@ -374,28 +379,37 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[m].wkt, geodata[m].geotype, 'timemap' );
 
                                 if(shape){ //main shape
-                                    if($.isArray(shapes)){
-                                        if($.isArray(shape)){
-                                            shapes = shapes.concat(shape);                                            
-                                        }else{
-                                            shapes.push(shape);    
-                                        }
-                                    }else{
-                                        console.log(record);
-                                        console.log(shapes);
-                                    }
                                         
-                                }
-                                //recID is place record ID
-                                if(geodata[m].recID>0){ //reference to linked place record
-                                    if(!linkedPlaceRecId[geodata[m].recID]){
-                                        linkedPlaceRecId[geodata[m].recID] = [];
+                                    //recID is place record ID - add it as separate item
+                                    if(geodata[m].recID>0){ //reference to linked place record
+                                        if(!linkedPlaceRecId[geodata[m].recID]){
+                                            linkedPlaceRecId[geodata[m].recID] = [];
+                                        }else{
+                                            //to avoid dark fill for several polygones on the same spot
+                                            fillOpacity_thisRec = 0.001;
+                                        }
+                                        linkedPlaceRecId[geodata[m].recID].push(recID);
+                                        
+                                        if(linkedPlaces[geodata[m].recID]){
+                                            linkedPlaces[geodata[m].recID]['linkedRecs'].push(recID);
+                                        }else{
+                                            linkedPlaces[geodata[m].recID] = {linkedRecs:[recID],
+                                                                                shape:$.isArray(shape)?shape:[shape]}
+                                        }
+                                        has_linked_places.push(geodata[m].recID); //one person can be linked to several place
+                                        
                                     }else{
-                                        //to avoid dark fill for several polygones on the same spot
-                                        fillOpacity_thisRec = 0.001;
+                                        if($.isArray(shapes)){
+                                            if($.isArray(shape)){
+                                                shapes = shapes.concat(shape);                                            
+                                            }else{
+                                                shapes.push(shape);    
+                                            }
+                                        }else{
+                                            console.log(record);
+                                            console.log(shapes);
+                                        }
                                     }
-                                
-                                    linkedPlaceRecId[geodata[m].recID].push(recID);
                                 }
                             }
                         }
@@ -429,6 +443,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             }
                         }
                         
+                        //disable selection for map source databaset bboxes
                         var is_disabled = (window.hWin.HEURIST4.util.findArrayIndex(recTypeID, disabled_selection)>=0);
                         
                         item = {
@@ -482,6 +497,16 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         if(window.hWin.HAPI4.sysinfo['layout']!='Beyond1914'){ 
                             item.options.icon = iconImg; 
                         }*/
+                        
+                //keep item object for addition separate items for places
+                if(has_linked_places.length>0){
+                    for(var k=0; k<has_linked_places.length;k++){
+                        if(!linkedPlaces[ has_linked_places[k] ]['item']){
+                            linkedPlaces[ has_linked_places[k] ]['item'] = window.hWin.HEURIST4.util.cloneJSON(item);    
+                        }
+                    }
+                }
+                        
                                           
                 if(shapes.length>0){
                     if(mapenabled<=MAXITEMS){
@@ -491,13 +516,30 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     mapenabled++;
                 }
                 if(geoType!=2 || shapes.length>0){
-                    aitems_index[recID] = aitems.length;
-                    aitems.push(item);
+                        aitems.push(item);
                 }
 
                 tot++;
-        }}//for
+        }}//for records
+      
+console.log(linkedPlaces);      
         
+        for(var placeID in linkedPlaces){
+            if(placeID>0){
+                
+                var item = linkedPlaces[placeID]['item'];
+                item.placemarks = linkedPlaces[placeID]['shape'];
+                item.options.linkedRecIDs = linkedPlaces[placeID]['linkedRecs'];
+                if(item.options.linkedRecIDs.length>1 && item.options.icon.indexOf('s.png&color=')>0){
+                    var clr = encodeURIComponent(item.options.color);
+                    item.options.icon = item.options.icon +'&circle='+clr;
+                }
+                aitems.push(item);
+                mapenabled++;
+            } 
+        }
+            
+            
         //loop for linkedPlaceRecId to change marker and assign reference to all records that has the same place
         /*
         if(aitems.length>0)

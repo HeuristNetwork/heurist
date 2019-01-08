@@ -384,7 +384,9 @@ if(!$is_map_popup){
 } //$is_map_popup
 else{
 //    print '<div style="font-size:0.8em">';
-}        
+} 
+if ($bkm_ID>0 || $rec_id>0) {
+       
         if ($bkm_ID>0) {
             $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
             'select * from usrBookmarks left join Records on bkm_recID=rec_ID '
@@ -392,19 +394,16 @@ else{
             .$bkm_ID.' and bkm_UGrpID='.$system->get_user_id()
             .' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
             
-            print '<div style="font-size:0.8em">';
-            print_details($bibInfo);
-            print '</div>';
-            
         } else if ($rec_id>0) {
             $bibInfo = mysql__select_row_assoc($system->get_mysqli(), 
             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
             .$rec_id.' and not rec_FlagTemporary');
+        }
             
-	        print '<div data-recid="'.$rec_id.'" style="font-size:0.8em">';
+	        print '<div data-recid="'.$bibInfo['rec_ID'].'" style="font-size:0.8em">';
                 print_details($bibInfo);
 	        print '</div>';
-        
+            
             $opts = '';
             $list = '';
             if(count($sel_ids)>1){
