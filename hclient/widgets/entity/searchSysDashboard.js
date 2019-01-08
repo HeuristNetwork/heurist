@@ -61,6 +61,19 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                     that._trigger( "onclose" );
                 }); 
                 
+        this.btn_show_on_startup = this.element.find('#btn_show_on_startup2')
+                .css({'min-width':'9m'})
+                    .button({label: window.hWin.HR("Don't show again")})
+                .click(function(e) {
+                    
+                    var params = 
+                            {viewmode: 'thumbs',
+                             showonstartup: 0 };
+                    window.hWin.HAPI4.save_pref('prefs_sysDashboard', params);     
+                    
+                    that._trigger( "onclose" );
+                }); 
+                
                 
         this.input_search_inactive = this.element.find('#input_search_inactive');
         this._on(this.input_search_inactive,  { change:this.startSearch });
