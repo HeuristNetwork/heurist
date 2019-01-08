@@ -1959,6 +1959,19 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 this._keepYPos = 0;
             }
             
+            // special case  - show separator between parent record field and other fields
+            // in case there is no header
+            if(window.hWin.HEURIST4.util.findArrayIndex(DT_PARENT_ENTITY, field_in_recset)>=0){
+            //if(that.options.parententity>0){
+                var first_set = that.editForm.find('fieldset:first');
+                var next_ele = first_set.next();
+                if(!next_ele.hasClass('separator')){
+                    first_set.css('border-bottom','1px solid #A4B4CB');
+                }
+            }
+            
+            
+            
             //show rec_URL 
             var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
             var ele = that._editing.getFieldByName('rec_URL');

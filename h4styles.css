@@ -1306,7 +1306,7 @@ background: #8ea9b9
 }
 
 .ent_wrapper.editor fieldset > div{
-    border-bottom: 1px solid RGBA(255,255,255,0.5);
+    /*border-bottom: 1px solid RGBA(255,255,255,0.5);*/
     display: table;
     padding-top: 0.5em;
 }
@@ -1511,7 +1511,8 @@ background: #8ea9b9
 }
 .map_popup .detailType{
     text-align:left;
-    line-height:21px;
+    line-height:14px;
+    width:125px;
 }
 .map_popup .detail, .map_popup .detail > a{
     min-width: 150px;
