@@ -426,13 +426,13 @@ else{
                     
                     $list = $list  //$id==$rec_id || $cnt>3
                         .'<div class="detailRow placeRow"'.($cnt>2?' style="display:none"':'').'>'
-                            .'<div style="display:table-cell;width:28px;text-align: right;padding-right:4px">'
+                            .'<div style="display:table-cell;padding-right:4px">'
                                 .'<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bibInfo['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bibInfo['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif"></div>'
                         .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a href="#" '   
 .'onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
-.htmlspecialchars($bibInfo['rec_Title']).'</a></div></div>';
+.strip_tags($bibInfo['rec_Title'],'<i><b><u>').'</a></div></div>';  //htmlspecialchars
                    
                     $cnt++;
                 }
@@ -442,7 +442,7 @@ else{
                     ?>
                     <div class="detailRow"><div class="detailType">
                         <a href="#" onClick="$('.placeRow').show();$(event.target).hide
-                            ()" style="color:blue">more... (n = <?php echo ($cnt-3);?>)</a></div>
+                            ()" style="color:blue">more... (n = <?php echo $cnt;?>)</a></div>
                         <div class="detail"></div>
                     </div>
                     <?php
@@ -1177,9 +1177,11 @@ function print_public_details($bib) {
     // </div>  
     if($is_map_popup){
         //echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.fieldRow\').show();$(event.target).hide()">more</a></div><div class="detail"></div></div>';
+    }else{
+        echo '<div class="detailRow fieldRow">&nbsp;</div>';    
     }
     
-    echo '<div class=detailRow>&nbsp;</div>';
+    
 
     echo '</div></div>';            
 }
@@ -1393,7 +1395,7 @@ function print_relation_details($bib) {
                 }
                 print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
             } else {
-                print htmlspecialchars($bd['Title']);
+                print strip_tags($bd['rec_Title'],'<a><i><b><u>');
             }
             print '&nbsp;&nbsp;';
             if (@$bd['StartDate']) print htmlspecialchars(temporalToHumanReadableString($bd['StartDate']));
