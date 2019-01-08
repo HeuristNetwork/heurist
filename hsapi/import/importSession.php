@@ -149,7 +149,7 @@ public static function getRecordsFromImportTable1( $import_table, $imp_ids) {
 }
 
 //
-//
+// $output - csv, json
 //
 public static function getRecordsFromImportTable2( $import_table, $id_field, $mode, $mapping, $offset, $limit=100, $output ){
 
@@ -200,6 +200,7 @@ public static function getRecordsFromImportTable2( $import_table, $id_field, $mo
     if($limit>0){
         $query = $query." LIMIT $limit OFFSET $offset";
     }
+   
     
     $res = mysql__select_all($mysqli, $query, 0, ($output=='csv'?0:30) );
     return $res;

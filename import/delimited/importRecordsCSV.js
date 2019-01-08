@@ -3039,7 +3039,28 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         //var mapping_flds = imp_session[(currentStep==3)?'mapping_keys':'mapping_flds'][rtyID];
         if(!mapping_flds) mapping_flds = {};
         
-        if(!is_download){
+        var header_flds = null;
+        
+        if(is_download){
+            
+            var k;
+            header_flds = ['ID'];
+            for(k=0; k<imp_session['columns'].length; k++){
+                header_flds.push(imp_session['columns'][k]);
+            }
+                                                              
+            var rts = Object.keys(imp_session['indexes']);
+            for(k=0; k<rts.length; k++){
+                
+                var idx_id_fieldname = rts[k].substr(6); //'field_'
+                if(idx_id_fieldname>imp_session['columns'].length){
+                    var recTypeID = imp_session['indexes'][rts[k]];
+                    var sname = window.hWin.HEURIST4.rectypes.names[recTypeID] +' H-ID';
+                    header_flds.push(sname);
+                }
+            }
+            
+        }else{
         
             dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
             
@@ -3133,7 +3154,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                     var request = { action: 'records',
                                     id_field: id_field,
-                                    mapping: mapping_flds,
+                                    mapping: (is_download)?null:mapping_flds,
+                                    header_flds: header_flds,
                                     mode: mode,
                                     output: (is_download)?'csv':'json',
                                     offset: is_download?0:offset,
@@ -3146,6 +3168,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                        request['db'] = window.hWin.HAPI4.database;
                        request['mapping'] = JSON.stringify(request['mapping']);
+                       request['header_flds'] = encodeURIComponent(JSON.stringify(request['header_flds']));
                         
                        var keys = Object.keys(request) 
                        var params = [];
