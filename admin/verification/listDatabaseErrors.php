@@ -414,7 +414,7 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                                     <?= $row['dtl_RecID'] ?>
                                     <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                 </a></td>
-                            <td><?= $row['rec_Title'] ?></td>
+                            <td><?= htmlspecialchars($row['rec_Title']) ?></td>
                             <td><?= $row['dty_Name'] ?></td>
                         </tr>
                         <?php
@@ -471,7 +471,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                                     </a></td>
                                 <td><?= $row['dty_Name'] ?></td>
                                 <td>points to</td>
-                                <td><?= $row['rec_ID'] ?> (<?= $row['rty_Name'] ?>) - <?= substr($row['rec_Title'], 0, 50) ?></td>
+                                <td><?= $row['rec_ID'] ?> (<?= $row['rty_Name'] ?>) - <?= htmlspecialchars(substr($row['rec_Title'], 0, 50)) ?></td>
                             </tr>
                             <?php
                         }
@@ -770,7 +770,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                                 <?= $row['dtl_RecID'] ?>
                                 <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
-                        <td><?= substr($row['rec_Title'],0,50) ?></td>
+                        <td><?= htmlspecialchars(substr($row['rec_Title'],0,50)) ?></td>
                         <td><?= $row['dty_Name'] ?></td>
                     </tr>
                     <?php
@@ -871,7 +871,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                                 <?= $row['dtl_RecID'] ?>
                                 <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
-                        <td><?= substr($row['rec_Title'],0,50) ?></td>
+                        <td><?= htmlspecialchars(substr($row['rec_Title'],0,50)) ?></td>
                         <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
                         <td><?= $row['new_value']?('=>&nbsp;&nbsp;'.$row['new_value']):'' ?></td>
                     </tr>
@@ -958,7 +958,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                                 <?= $row['dtl_RecID'] ?>
                                 <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
-                        <td><?= substr($row['rec_Title'],0,50) ?></td>
+                        <td><?= htmlspecialchars(substr($row['rec_Title'],0,50)) ?></td>
                         <td><?= $row['dty_Name'] ?></td>
                     </tr>
                     <?php
@@ -1025,7 +1025,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                             <td style="width:15ex;padding-left:5px;"><?= $row['dty_Name'] ?></td>
                             <!-- >Artem TODO: Need to render the value as the term label, not the numeric value -->
                             <td style="width: 23ex;padding-left: 5px;"><?= $row['dtl_Value'].'&nbsp;'.$row['trm_Label'] ?></td>
-                            <td style="padding-left: 25px;"><?= substr($row['rec_Title'], 0, 500) ?></td>
+                            <td style="padding-left: 25px;"><?= htmlspecialchars(substr($row['rec_Title'], 0, 500)) ?></td>
                         </tr>
                     <?php
                     //array_push($bibs, $row);    // MEMORY EXHAUSTION happens here
@@ -1102,7 +1102,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                     <?= $row['dtl_RecID'] ?></a>
                                     <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                 </td>
-                                <td><?= $row['rec_Title'] ?>
+                                <td><?= htmlspecialchars($row['rec_Title']) ?>
                                 </td>
                                 <?php
                                 $rec_id = $row['dtl_RecID'];
@@ -1181,7 +1181,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                     </a>
                                 </td>
                                 <td>
-                                <?= $row['rec_Title'] ?></td>
+                                <?= htmlspecialchars($row['rec_Title']) ?></td>
                                 <?php
                                 $rec_id = $row['rec_ID'];
                             }else{
@@ -1248,10 +1248,11 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                         <?php
                         $rec_id = null;
                         foreach ($bibs as $row) {
-                            if($rec_id==null || $rec_id!=$row['rec_ID']) {
+                                if($rec_id==null || $rec_id!=$row['rec_ID']) {
                                 ?>
                                 <tr>
-                                    <td><input type=checkbox name="recCB4" value=<?= $row['rec_ID'] ?>>
+                                    <td>
+                                        <input type=checkbox name="recCB4" value=<?= $row['rec_ID'] ?>>
                                     </td>
                                     <td style="white-space: nowrap;">
                                         <a target=_new
@@ -1260,8 +1261,9 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                             <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                         </a>
                                     </td>
-                                    <!-- td><?= $row['rec_RecTypeID'] ?></td -->
-                                    <td width="400px"><?= substr($row['rec_Title'],0,100)?>
+                                    
+                                    <td width="400px" style="max-width:400px" class="truncate">
+                                        <?php echo htmlspecialchars($row['rec_Title']);?>
                                     </td>
                                     <?php
                                     $rec_id = $row['rec_ID'];
@@ -1272,7 +1274,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
 
                                 <td><?= $row['dty_ID'] ?></td>
                                 <td><?= $row['dty_Name'] ?></td>
-                                <td><?= $row['dtl_Value'] ?></td>
+                                <td><?= htmlspecialchars($row['dtl_Value']) ?></td>
                             </tr>
                             <?php
                         }
@@ -1291,8 +1293,8 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             <div>
                 <h3>The database structure is cross-checked against the core and bibliographic definitions curated by the Heurist team</h3>
                 <?php
-                    $_REQUEST['verbose'] = 1;
-                    $_REQUEST['filter_exact']  = HEURIST_DBNAME_FULL;
+                   // $_REQUEST['verbose'] = 1;
+                   // $_REQUEST['filter_exact']  = HEURIST_DBNAME_FULL;
                     //remove this remark along with html remarks include(dirname(__FILE__).'/verifyForOrigin.php');
                 ?>
             </div>
