@@ -413,7 +413,17 @@ var fin_time = new Date().getTime() / 1000;
             } //onInitCompleted_PerformSearch
 
         </script>
+        
+<!-- Global Site Tag (gtag.js) - Google Analytics
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131444459-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
+  gtag('config', 'UA-131444459-1');
+</script>        
+ -->
     </head>
     <body style="background-color:#c9c9c9">
 
