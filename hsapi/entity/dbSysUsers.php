@@ -441,9 +441,9 @@ class DbSysUsers extends DbEntityBase
     // batch action for users
     // 1) import users from another db
     //
-    public function batch_action(){
+    public function batch_action($ignore_permissions=false){
 
-        if(!$this->system->is_admin()){ 
+        if(!$ignore_permissions && !$this->system->is_admin()){ 
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
                 'You are not admin and can\'t add/edit other users. Insufficient rights for this operation');
             return false;
@@ -475,23 +475,26 @@ class DbSysUsers extends DbEntityBase
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Group roles for import users are not defined');
             return false;
         }
-
+        
+        $exit_if_exists = (@$this->data['exit_if_exists']!=0); //proceed even user already exists
         
         $mysqli = $this->system->get_mysqli();
         
         //find users that are already in this database
-        $query = 'SELECT distinct src.ugr_ID from '.$sytem_source->dbname_full().'.sysUGrps as src, sysUGrps as dest'
+        $query = 'SELECT distinct src.ugr_ID, dest.ugr_ID from '
+            .$sytem_source->dbname_full().'.sysUGrps as src, sysUGrps as dest'
             .' where src.ugr_ID in ('.implode(',',$userIDs)
             .') and ((src.ugr_eMail = dest.ugr_eMail) OR (src.ugr_Name=dest.ugr_Name))';       
         
-        $userIDs_already_exists = mysql__select_list2($mysqli, $query);
+        $userIDs_already_exists = mysql__select_assoc2($mysqli, $query);
         
-        if(count($userIDs_already_exists)==count($userIDs)){
+        if($exit_if_exists && count($userIDs_already_exists)==count($userIDs)){
             $this->system->addError(HEURIST_NOT_FOUND, 
                 'It appears that all users selected to import exist in current database.');
             return false;
         }
-        $userIDs = array_diff($userIDs, $userIDs_already_exists);
+        if(count($userIDs_already_exists)>0)
+            $userIDs = array_diff($userIDs, array_keys($userIDs_already_exists));
         
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
@@ -545,9 +548,28 @@ class DbSysUsers extends DbEntityBase
 
             foreach ($roles as $groupID=>$role){
                 $values = array();
+                $remove = null;
                 foreach ($newUserIDs as $usrID){
                     array_push($values, ' ('. $groupID .' , '. $usrID .', "'.$role.'")');
                 }    
+                if(count($userIDs_already_exists)>0){ //apply for user that already exists
+                    $remove = array_values($userIDs_already_exists);
+                    foreach ($userIDs_already_exists as $srcID=>$usrID){
+                        array_push($values, ' ('. $groupID .' , '. $usrID .', "'.$role.'")');
+                    }    
+                }
+                
+                if(count($remove)>0){
+                    $query = 'DELETE FROM sysUsrGrpLinks WHERE ugl_GroupID='.$groupID.' AND ugl_UserID in ('
+                            .implode(',',$remove).')';
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $ret = false;
+                        $this->system->addError(HEURIST_DB_ERROR, 'Can\'t remove roles for existing users in workgroup #'.$groupID, $mysqli->error );
+                        break;
+                    }                            
+                }
+                
                 $query = 'INSERT INTO sysUsrGrpLinks (ugl_GroupID, ugl_UserID, ugl_Role) VALUES '
                 .implode(',', $values);
 
@@ -557,6 +579,7 @@ class DbSysUsers extends DbEntityBase
                     $this->system->addError(HEURIST_DB_ERROR, 'Can\'t set role in workgroup #'.$groupID, $mysqli->error );
                     break;
                 }                            
+                
             }
         }
         

@@ -156,7 +156,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * geoType 
         * 0, undefined - all
         * 1 - main geo only
-        * 2 - rec_Shape only
+        * 2 - rec_Shape only (coordinates defined in field rec_Shape)
     */
     function _toTimemap(dataset_name, filter_rt, symbology, geoType){
 
@@ -175,6 +175,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         var DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-1037;
         var DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
         
+        //make bounding box for map datasource transparent and unselectable
+        var disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
+                                    localIds['RT_GEOTIFF_SOURCE'],
+                                    localIds['RT_KML_SOURCE'],
+                                    localIds['RT_MAPABLE_QUERY'],
+                                    localIds['RT_SHP_SOURCE']];
         
             
         dataset_name = dataset_name || "main";
@@ -192,7 +198,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         iconColor = iconColor || 'rgb(255, 0, 0)'; 
         fillColor = fillColor || 'rgb(255, 0, 0)';
         lineColor = lineColor || 'rgb(255, 0, 0)'; 
-        fillOpacity = fillOpacity || 0.2;
+        fillOpacity = fillOpacity || 0.1;
 /*      
                                 fillOpacity:0.3,// 0.3,
                                 lineColor:lineColor,
@@ -219,7 +225,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
         }
         
-        var linkedPlaceRecId = [];
+        var linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)
+        //linkedRecs - records linked to this place
+        //shape - coordinates
+        //item - item object to be added to timemap 
+        var linkedPlaces = {};//placeID => {linkedRecIds, shape, item}
         
         var tot = 0;
         
@@ -343,15 +353,22 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         }
                         timeenabled++;
                 }
-                
+
+
+                //a record may have several geofields/placemarks for example place of birth and death
+                //besides it may be linked (several times) to "place" record types
+                //we need to treat them as separate timemap item
+                //var geovalues = array(); 
                 var shapes = (recShape && geoType!=1)?recShape:[];
                 if(!$.isArray(shapes)){
-                    console.log(record);
-                    console.log(shapes);
+                    //console.log(record);
+                    //console.log(shapes);
                     shapes = [];
                 }
                 
-                if(geoType!=2){
+                var has_linked_places = [];
+                
+                if(geoType!=2){ //get coordinates from geo fields
                     
                     var k, m, i, j;
                     for(k=0; k<geofields.length; k++){
@@ -362,24 +379,36 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[m].wkt, geodata[m].geotype, 'timemap' );
 
                                 if(shape){ //main shape
-                                    if($.isArray(shapes)){
-                                        if($.isArray(shape)){
-                                            shapes = shapes.concat(shape);                                            
-                                        }else{
-                                            shapes.push(shape);    
-                                        }
-                                    }else{
-                                        console.log(record);
-                                        console.log(shapes);
-                                    }
                                         
-                                }
-                                
-                                if(geodata[m].recID>0){ //reference to linked place record
-                                    if(linkedPlaceRecId.indexOf(geodata[m].recID)<0){
-                                        linkedPlaceRecId.push(geodata[m].recID);
+                                    //recID is place record ID - add it as separate item
+                                    if(geodata[m].recID>0){ //reference to linked place record
+                                        if(!linkedPlaceRecId[geodata[m].recID]){
+                                            linkedPlaceRecId[geodata[m].recID] = [];
+                                        }else{
+                                            //to avoid dark fill for several polygones on the same spot
+                                            fillOpacity_thisRec = 0.001;
+                                        }
+                                        linkedPlaceRecId[geodata[m].recID].push(recID);
+                                        
+                                        if(linkedPlaces[geodata[m].recID]){
+                                            linkedPlaces[geodata[m].recID]['linkedRecs'].push(recID);
+                                        }else{
+                                            linkedPlaces[geodata[m].recID] = {linkedRecs:[recID],
+                                                                                shape:$.isArray(shape)?shape:[shape]}
+                                        }
+                                        has_linked_places.push(geodata[m].recID); //one person can be linked to several place
+                                        
                                     }else{
-                                        fillOpacity_thisRec = 0.001;
+                                        if($.isArray(shapes)){
+                                            if($.isArray(shape)){
+                                                shapes = shapes.concat(shape);                                            
+                                            }else{
+                                                shapes.push(shape);    
+                                            }
+                                        }else{
+                                            console.log(record);
+                                            console.log(shapes);
+                                        }
                                     }
                                 }
                             }
@@ -387,7 +416,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         
                     }
                 }else{
-                    recID = recID + "_link";
+                    recID = recID + "_link"; //for DH
                 }
                 
                         var iconImgEvt, iconImg;
@@ -405,14 +434,17 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             iconImg = iconMarker;    
                         }else{
                             //default icon of record type
-                            iconImgEvt = iconId + 's.png';
+                            iconImgEvt = iconId + '.png';
                             iconImg = window.hWin.HAPI4.iconBaseURL + iconId + 's.png&color='
                                         +encodeURIComponent(pr_iconColor ?pr_iconColor:iconColor);
                                         
                             if(pr_fillColor){
-                                iconImg = iconImg + '&circle='+encodeURIComponent(pr_fillColor);
+                                iconImg = iconImg + '&bg='+encodeURIComponent(pr_fillColor);
                             }
                         }
+                        
+                        //disable selection for map source databaset bboxes
+                        var is_disabled = (window.hWin.HEURIST4.util.findArrayIndex(recTypeID, disabled_selection)>=0);
                         
                         item = {
                             title: recName,
@@ -436,8 +468,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 //color on dataset level works once only - timemap bug
                                 color: pr_iconColor ?pr_iconColor:iconColor,
                                 fillColor: pr_fillColor ?pr_fillColor:fillColor,
-                                fillOpacity: fillOpacity_thisRec,
+                                fillOpacity: (is_disabled)?0.00001:fillOpacity_thisRec,
                                 lineColor: pr_iconColor ?pr_iconColor:lineColor,
+                                clickable:(!is_disabled),
+
                                 /* neither work
                                 strokeOpacity:0.3,
                                 strokeWeight:6,
@@ -448,12 +482,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 start: (startDate || ''),
                                 end: (endDate && endDate!=startDate)?endDate:'',
                                 
-                                URL:   _getFieldValue(record, 'rec_URL'),
+                                URL: _getFieldValue(record, 'rec_URL'),
                                 thumb: html_thumb,
                                 
-                                info: _getFieldValue(record, 'rec_Info'),  //prepared content for map bubble or URL to script
+                                info: _getFieldValue(record, 'rec_Info')  //prepared content for map bubble or URL to script
                                 
-                                places: null
+                                //was need for highlight selection on map places: null
                                 
                                 //,infoHTML: (infoHTML || ''),
                             }
@@ -463,20 +497,71 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         if(window.hWin.HAPI4.sysinfo['layout']!='Beyond1914'){ 
                             item.options.icon = iconImg; 
                         }*/
+                        
+                //keep item object for addition separate items for places
+                if(has_linked_places.length>0){
+                    for(var k=0; k<has_linked_places.length;k++){
+                        if(!linkedPlaces[ has_linked_places[k] ]['item']){
+                            linkedPlaces[ has_linked_places[k] ]['item'] = window.hWin.HEURIST4.util.cloneJSON(item);    
+                        }
+                    }
+                }
+                        
                                           
                 if(shapes.length>0){
                     if(mapenabled<=MAXITEMS){
                         item.placemarks = shapes;
-                        item.options.places = shapes;
+                        //was need for highlight selection on map item.options.places = shapes;
                     }
                     mapenabled++;
                 }
                 if(geoType!=2 || shapes.length>0){
-                    aitems.push(item);
+                        aitems.push(item);
                 }
 
                 tot++;
-        }}
+        }}//for records
+      
+console.log(linkedPlaces);      
+        
+        for(var placeID in linkedPlaces){
+            if(placeID>0){
+                
+                var item = linkedPlaces[placeID]['item'];
+                item.placemarks = linkedPlaces[placeID]['shape'];
+                item.options.linkedRecIDs = linkedPlaces[placeID]['linkedRecs'];
+                if(item.options.linkedRecIDs.length>1 && item.options.icon.indexOf('s.png&color=')>0){
+                    var clr = encodeURIComponent(item.options.color);
+                    item.options.icon = item.options.icon +'&circle='+clr;
+                }
+                aitems.push(item);
+                mapenabled++;
+            } 
+        }
+            
+            
+        //loop for linkedPlaceRecId to change marker and assign reference to all records that has the same place
+        /*
+        if(aitems.length>0)
+        for(var placeID in linkedPlaceRecId){
+            if(placeID>0 && linkedPlaceRecId[placeID].length>1){
+                for(var idx=0; idx<linkedPlaceRecId[placeID].length; idx++){
+                    var recID = linkedPlaceRecId[placeID][idx];
+                    aitems[aitems_index[recID]].options.placeID = placeID;
+                    aitems[aitems_index[recID]].options.linkedRecIDs = linkedPlaceRecId[placeID];
+                    var iconId = aitems[aitems_index[recID]].options.iconId;
+
+                    if(typeof iconId=='string' && (iconId.indexOf('http:')==0 || iconId.indexOf('https:')==0)){
+                        //mapdata.options.items[i].options.icon = iconId;
+                    }else{
+                        var clr = encodeURIComponent(aitems[aitems_index[recID]].options.color);
+                        aitems[aitems_index[recID]].options.icon = 
+                            window.hWin.HAPI4.iconBaseURL + iconId
+                                + 's.png&color='+clr+'&circle='+clr;
+                    }
+                }
+            }
+        }*/
       
         
         var dataset = 

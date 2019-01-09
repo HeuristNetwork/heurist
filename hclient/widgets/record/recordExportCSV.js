@@ -287,7 +287,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             this._selectedRtyID = rtyID;
             
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rtyID, ['header_ext','all'] );
+            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['header_ext','all'] );
             
             treedata[0].expanded = true; //first expanded
             
@@ -314,7 +314,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     var parentcode = node.data.code; 
                     var rectypes = node.data.rt_ids;
                     
-                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, 
+                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
                                         rectypes, ['header_ext','all'], parentcode );
                     if(res.length>1){
                         data.result = res;

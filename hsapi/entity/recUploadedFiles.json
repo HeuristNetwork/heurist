@@ -49,7 +49,7 @@
                     "dtFields":{
                         "dty_Type":"url",
                         "rst_DisplayName": "Download URL:",
-                        "rst_DisplayWidth":70,
+                        "rst_DisplayWidth":80,
                         "rst_DisplayHelpText": "Heusit URL to download file", 
                         "rst_Display":"hidden",
                         "dty_Role":"virtual"
@@ -61,6 +61,7 @@
                         "dty_Type":"url",
                         "rst_DisplayName": "External URL:",
                         "rst_DisplayHelpText": "URI of an external file, which may or may not be cached locally", 
+                        "rst_DisplayWidth":80,
                         "rst_Display":"visible",
                         "dty_Size":1000
                     }
@@ -76,16 +77,6 @@
                     }
                 },
                 {
-                    "dtID": "ulf_Description",
-                    "dtFields":{
-                        "dty_Type":"blocktext",
-                        "rst_DisplayName":"Description:",
-                        "dty_Size":65535,
-                        "rst_DisplayWidth":"70",
-                        "rst_DisplayHelpText": "A user-entered textual description of the file or image contents."
-                    }
-                },
-                {
                     "dtID": "ulf_MimeExt",
                     "dtFields":{
                         "dty_Type":"resource",
@@ -94,6 +85,16 @@
                         "rst_FieldConfig": {"entity":"defFileExtToMimetype"},
                         "rst_RequirementType":"required",
                         "rst_DisplayWidth":30
+                    }
+                },
+                {
+                    "dtID": "ulf_Description",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "rst_DisplayName":"Description:",
+                        "dty_Size":65535,
+                        "rst_DisplayWidth":"70",
+                        "rst_DisplayHelpText": "A user-entered textual description of the file or image contents."
                     }
                 },
                 {

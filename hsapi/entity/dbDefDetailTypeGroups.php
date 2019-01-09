@@ -87,10 +87,10 @@ class DbDefDetailTypeGroups extends DbEntityBase
             
         }else if(@$this->data['details']=='full'){
             
-            $fields2 = $this->fields;
-            unset($fields2['dtg_FieldCount']);
+            //$fields2 = array_keys($this->fields);
+            //unset($fields2['dtg_FieldCount']);
 
-            $this->data['details'] = implode(',', $fields2 )
+            $this->data['details'] = implode(',', $this->fieldNames )
              .'(select count(dty_ID) from defdetailtypes where dtg_ID=dty_DetailTypeGroupID) as dtg_FieldCount';
         }
         

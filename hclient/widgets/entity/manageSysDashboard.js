@@ -96,7 +96,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     
         //this.show_longer_description = this.searchForm.find('#show_longer_description');
         this.show_on_startup = this.searchForm.find('#show_on_startup');
-        this.show_on_startup2 = this.searchForm.find('#show_on_startup2');
+        //this.show_on_startup2 = this.searchForm.find('#show_on_startup2');
 
         /*this.show_longer_description
                 .attr('checked',(prefs.viewmode=='thumbs3'))
@@ -109,7 +109,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.i_show_on_startup = prefs.showonstartup;
         
         this._on(this.show_on_startup,{change:this.saveUiPreferences});
-        this._on(this.show_on_startup2,{change:this.saveUiPreferences});
+        //this._on(this.show_on_startup2,{change:this.saveUiPreferences});
         
         this._setMode(true)
         
@@ -250,7 +250,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             
             this.recordList.find('.div-result-list-content').css({'overflow-y':'auto'});
             
-            this.show_on_startup2.prop('checked',this.i_show_on_startup==1);
+            //this.show_on_startup2.prop('checked',this.i_show_on_startup==1);
                 //this.show_longer_description.is(':checked')?'thumbs3':'thumbs');
         }else{
             // edit mode
@@ -586,7 +586,8 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     //    
     saveUiPreferences:function(){
         
-       this.i_show_on_startup = (this.options.isViewMode? this.show_on_startup2.is(':checked') : this.show_on_startup.is(':checked'))?1:0;
+        //this.show_on_startup2.is(':checked')
+       this.i_show_on_startup = (this.options.isViewMode? true : this.show_on_startup.is(':checked'))?1:0;
         
        var params = 
             {viewmode: 'thumbs',  //this.show_longer_description.is(':checked')?'thumbs3':'thumbs',

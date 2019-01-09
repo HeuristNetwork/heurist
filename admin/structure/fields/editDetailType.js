@@ -543,9 +543,9 @@ function DetailTypeEditor() {
         window.hWin.HEURIST4.msg.showDialog(sURL, {
                 "close-on-blur": false,
                 "no-resize": false,
-                title: 'Edit Terms',
-                height: 750,
-                width: 1200,
+                title: (type=='relation')?'Manage Relationship types':'Manage Terms',
+                height: (type=='relation')?820:780,
+                width: 950,
                 afterclose: function() {
                     if(isvocab){
                         _recreateTermsVocabSelector(type, vocab_id);

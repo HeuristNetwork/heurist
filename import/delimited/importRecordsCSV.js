@@ -2812,6 +2812,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                         var res = imp_session['validation'];
                         
+                        if(res['missed_required_fields_map'] && res['missed_required_fields_map'].length>0){
+                                window.hWin.HEURIST4.msg.showMsgDlg('The following fields are required fields. It is recommended to map them to incoming data before you can import new records:<br><br>'
+                                +res['missed_required_fields_map'].join(', '),null,{title:'Warning'});
+                        }
+                        
                         $('#mr_cnt_update').text(res['count_update']);                                 
                         $('#mr_cnt_insert').text(res['count_insert']);   
                                                       
@@ -3034,7 +3039,28 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         //var mapping_flds = imp_session[(currentStep==3)?'mapping_keys':'mapping_flds'][rtyID];
         if(!mapping_flds) mapping_flds = {};
         
-        if(!is_download){
+        var header_flds = null;
+        
+        if(is_download){
+            
+            var k;
+            header_flds = ['ID'];
+            for(k=0; k<imp_session['columns'].length; k++){
+                header_flds.push(imp_session['columns'][k]);
+            }
+                                                              
+            var rts = Object.keys(imp_session['indexes']);
+            for(k=0; k<rts.length; k++){
+                
+                var idx_id_fieldname = rts[k].substr(6); //'field_'
+                if(idx_id_fieldname>imp_session['columns'].length){
+                    var recTypeID = imp_session['indexes'][rts[k]];
+                    var sname = window.hWin.HEURIST4.rectypes.names[recTypeID] +' H-ID';
+                    header_flds.push(sname);
+                }
+            }
+            
+        }else{
         
             dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
             
@@ -3128,7 +3154,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                     var request = { action: 'records',
                                     id_field: id_field,
-                                    mapping: mapping_flds,
+                                    mapping: (is_download)?null:mapping_flds,
+                                    header_flds: header_flds,
                                     mode: mode,
                                     output: (is_download)?'csv':'json',
                                     offset: is_download?0:offset,
@@ -3141,6 +3168,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                        request['db'] = window.hWin.HAPI4.database;
                        request['mapping'] = JSON.stringify(request['mapping']);
+                       request['header_flds'] = encodeURIComponent(JSON.stringify(request['header_flds']));
                         
                        var keys = Object.keys(request) 
                        var params = [];
@@ -3416,13 +3444,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     
                     if(fieldnames[i] == checked_field){
                         
-                        if(!recStruc || !recStruc[dt_id]){
-                            console.log('ERROR: field '+dt_id+' not found for '+rtyID);
+                        var dt_id2 = (dt_id>0) ?dt_id :dt_id.substr(0,dt_id.indexOf('_'));
+                        
+                        if(!recStruc || !recStruc[dt_id2]){
+                            console.log('ERROR: field '+dt_id2+' not found for '+rtyID);
                             console.log(recStruc);                            
                         }else
-                        if(recStruc[dt_id][idx_reqtype] == "required"){
+                        if(recStruc[dt_id2][idx_reqtype] == "required"){
                             colname = colname + "*";
                         }
+                        
+                        
                         /* @TODO generate term selector
                         if(is_enum){
                             $showlink = '&nbsp;<a href="#" onclick="{showTermListPreview('.$dt_id.')}">show list of terms</a>';

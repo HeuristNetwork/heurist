@@ -356,11 +356,12 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                             window.hWin.HAPI4.SearchMgr.doSearch(document, request);
                     }, 3000);
                 }
-                else if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
-                        || window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
-                            
+                else if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935')){
+                    
                     var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
-                    if(!window.hWin.HEURIST4.util.isempty(init_search)){
+                    if(window.hWin.HAPI4.sysinfo.db_total_records>100 && 
+                       !window.hWin.HEURIST4.util.isempty(init_search))
+                    {
                         var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                         setTimeout(function(){
                             window.hWin.HAPI4.SearchMgr.doSearch(document, request);
@@ -370,11 +371,28 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                         $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
                     }
                 }
-
                 //if database is empty show welcome screen
                 //if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
                 //    showTipOfTheDay(false);
                 //}
+                if(lt=='WebSearch'){
+                        var active_tab = '<?php echo str_replace("'","\'",@$_REQUEST['views']);?>';
+                        if(active_tab){
+                           
+                            active_tab = active_tab.split(',')
+                            if (!(active_tab.indexOf('map')<0 && active_tab.indexOf('list')<0)){
+                                if(active_tab.indexOf('map')<0)
+                                window.hWin.HAPI4.LayoutMgr.visibilityAppById('map', false);
+                                if(active_tab.indexOf('list')<0)
+                                window.hWin.HAPI4.LayoutMgr.visibilityAppById('list', false);
+                                window.hWin.HAPI4.LayoutMgr.putAppOnTopById(active_tab[0]); //by layout_id
+                            }
+                        }
+                }
+
+
+                
+                
  
 var fin_time = new Date().getTime() / 1000;
 //console.log('ipage finished '+( fin_time - _time_debug)+ '  total: '+(fin_time-_time_start));

@@ -297,7 +297,7 @@ $res->close();
 $WGN = mysql__select_assoc2($mysqli, 'SELECT grp.ugr_ID, grp.ugr_Name FROM sysUGrps grp WHERE ugr_Type = "workgroup"');
 $UGN = mysql__select_assoc2($mysqli, 'SELECT grp.ugr_ID, grp.ugr_Name FROM sysUGrps grp WHERE ugr_Type = "user"');
 
-$GEO_TYPES = array('r' => 'bounds', 'c' => 'circle', 'pl' => 'polygon', 'l' => 'path', 'p' => 'point');
+$GEO_TYPES = array('r' => 'bounds', 'c' => 'circle', 'pl' => 'polygon', 'l' => 'path', 'p' => 'point', 'm'=>'multi');
 
 // set parameter defaults
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true; //default to including reverse pointers

@@ -110,7 +110,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                                 if(loading_mapdoc_list) return;
                                 current_map_document_id = ui.item.attr('mapdoc_id');
                                 $("#mapSelectorBtn").attr('mapdoc-selected',current_map_document_id).button({label: ui.item.find('a').text() });
-                                _loadMapDocumentById();
+                                _loadMapDocumentById(); //loads current_map_document_id
                                 menu_mapdocuments.hide();
                         }});
 
@@ -121,6 +121,14 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     }else if($.isFunction(onload_callback)) {
                         onload_callback.call();
                     }
+                    
+                    var w = $(window).width();
+                    if (w < 400) {
+                        $("#mapSelectorBtn").button({showLabel:false}).width(20);
+                    }else{
+                        $("#mapSelectorBtn").button({showLabel:true}).width(w-360);
+                    }
+                    
                     
                     if(startup_mapdocument>=0){
                         if(startup_mapdocument>0){
@@ -138,7 +146,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
     }
 
     //
-    //
+    // loads current_map_document_id
     //
     function _loadMapDocumentById() {
 
@@ -175,7 +183,12 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                         map_data[0].bookmarks.push([window.hWin.HR('World'),-80,90,-30,50,1800,2050]); //default
                         _loadMapDocumentById_continue();
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr('Map document #'+current_map_document_id+' not found');
+                        window.hWin.HEURIST4.msg.showMsgErr(
+                        'Map document (ID '
+                        + current_map_document_id
+                        + ') does not exist in the database. '
+                        + 'Please email the database owner ('
+                        +window.hWin.HAPI4.sysinfo['dbowner_email']+') and ask them to correct the URL');
                     }
                 
                 }else{
@@ -188,6 +201,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
 
     }
 
+    //
+    //
+    //
     function _getMapDocumentDataById(mapdocument_id) {    
         
         if(typeof mapdocument_id==='undefined'){
@@ -205,6 +221,9 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         
     }
 
+    //
+    // loads current_map_document_id
+    //
     function _loadMapDocumentById_continue() {    
 
 //console.log('load documents continue');        
@@ -661,6 +680,17 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             source.color = layer.color;
             source.iconMarker = layer.iconMarker;
             
+            if(source.bounds){
+                var resdata = window.hWin.HEURIST4.geo.wktValueToShapes( source.bounds, 'p', 'google' );
+                if(resdata && resdata._extent){
+                
+                    var swBound = new google.maps.LatLng(resdata._extent.ymin, resdata._extent.xmin);
+                    var neBound = new google.maps.LatLng(resdata._extent.ymax, resdata._extent.xmax);
+                    bounds = new google.maps.LatLngBounds(swBound, neBound);
+                }
+            }            
+            
+            
             /** MAP IMAGE FILE (TILED) */
             if(source.rectypeID == RT_TILED_IMAGE_SOURCE) {
 //DEBUG console.log("MAP IMAGE FILE (tiled)");
@@ -717,8 +747,10 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         if(source.sourceURL !== undefined) {
 
             var tileUrlFunc = null; 
+            
+            var schema = source.tilingSchema.label.toLowerCase();
 
-            if(source.tilingSchema.label=='virtual earth'){
+            if(schema=='virtual earth'){
 
                 tileUrlFunc = function (a,b) {
 
@@ -740,8 +772,21 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                     return res;
                 };
 
-            }else{
+            }else if(schema=='osm' || schema=='gmapimage'){
 
+                tileUrlFunc = function(coord, zoom) {
+                    var tile_url = source.sourceURL + "/" + zoom + "/" + coord.x + "/" + coord.y
+                    + (source.mimeType.label == "image/png" ? ".png" : ".gif");
+                    //console.log("URL: " + tile_url);
+               
+                    return tile_url;
+                };
+                
+            }else {
+/*
+ function long2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
+ function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }                
+*/                
                 tileUrlFunc = function(coord, zoom) {
                     //console.log(coord);
                     //console.log(zoom);
@@ -844,7 +889,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             var fileURL = source.files[0];
 
             // note google refuses kml from localhost
-            console.log("KML file: " + fileURL);
+            console.log("KML file can not be loaded from localhost: " + fileURL);
             // Display on Google Maps
             kmlLayer = new google.maps.KmlLayer({
                 url: fileURL,
@@ -1836,6 +1881,9 @@ map.data.addListener('mouseover', function(event) {
             
             _adjustLegendHeight();
             
+            window.hWin.HEURIST4.util.stopEvent(e);
+            return false;
+            
         });
         
         
@@ -1854,6 +1902,7 @@ map.data.addListener('mouseover', function(event) {
                 $( document ).one( "click", function() { menu_mapdocuments.hide(); });
                 return false;
         });
+        $('#mapSelectorBtn').find('.ui-button-icon').css({position:'absolute',right:'2px'});
                 
 
         _loadMapDocuments(startup_mapdocument_id>0?startup_mapdocument_id:0, null);
@@ -1878,6 +1927,9 @@ map.data.addListener('mouseover', function(event) {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
+        getCurrentMapdocumentId:function(){
+            return current_map_document_id;
+        },
         
         loadMapDocuments:function(startup_mapdocument){
             current_map_document_id = 0;

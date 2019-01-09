@@ -852,32 +852,41 @@ $.widget( "heurist.search", {
 
             //data is search query request
             //topids not defined - this is not rules request
-            if(data!=null && window.hWin.HEURIST4.util.isempty(data.topids)){
+            if(data!=null && window.hWin.HEURIST4.util.isempty(data.topids) && data.apply_rules!==true){
 
                 //request is from some other widget (outside)
                 if(data.source!=that.element.attr('id')){
+                    var qs;
                     if($.isArray(data.q)){
-                        that.input_search.val(JSON.stringify(data.q));
+                        qs = JSON.stringify(data.q);
                     }else{
-                        that.input_search.val(data.q);
+                        qs = data.q;
                     }
-
-                    that.options.search_domain = data.w;
-                    that._refresh();
+                    if(qs.length<10000){
+                        that.input_search.val(qs);
+                        that.options.search_domain = data.w;
+                        that._refresh();
+                    }
                 }
 
                 var is_keep = window.hWin.HAPI4.get_prefs('searchQueryInBrowser');
                 is_keep = (is_keep==1 || is_keep==true || is_keep=='true');
                 
                 if(is_keep){
-                    window.history.pushState("object or string", "Title", location.pathname+'?'+
-                        window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true) );
+                    var qs = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true);
+                    if(qs.length<10000){
+                        window.history.pushState("object or string", "Title", location.pathname+'?'+
+                            window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true) );
+                    }
                 }
+                
+                that.input_search.change();
 
             }else if(data==null){
                 that.input_search.val('');
+                that.input_search.change();
             }
-            that.input_search.change();
+            
 
             //ART that.div_search.css('display','none');
 

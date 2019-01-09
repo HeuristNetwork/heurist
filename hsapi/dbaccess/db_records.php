@@ -395,6 +395,12 @@
                 if(!$stmt->execute()){
                     $syserror = $mysqli->error;
                     $mysqli->rollback();if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    
+                    //$email_to, $email_title, $email_text, $email_header
+                    sendEmail(HEURIST_MAIL_TO_ADMIN, 
+                            'DATABASE ERROR :'.$system->dbname().' Cannot save details.',
+                            ($syserror?'. System message:'.$syserror:'').'\n'.print_r($values,true), null);
+                    
                     return $system->addError(HEURIST_DB_ERROR, 'Cannot save details.', $syserror);
                 }
 
@@ -1284,12 +1290,26 @@
                     case "blocktext":
                     case "date":
                         $isValid = (strlen(trim($dtl_Value)) > 0); //preg_match("/\\S/", $dtl_Value);
-                        if(!$isValid ) $err_msg = 'It is empty';
+                        if(!$isValid ){
+                            $err_msg = 'Value is empty';  
+                        }else if($det_types[$dtyID]=='date'){
+                            //yesterday, today, tomorrow, now
+                            $sdate = strtolower(trim($dtl_Value));
+                            if($sdate=='today'){
+                                $dtl_Value = date('Y-m-d');
+                            }else if($sdate=='now'){
+                                $dtl_Value = date('Y-m-d H:i:s');
+                            }else if($sdate=='yesterday'){
+                                $dtl_Value = date('Y-m-d',strtotime("-1 days"));
+                            }else if($sdate=='tomorrow'){
+                                $dtl_Value = date('Y-m-d',strtotime("+1 days"));
+                            }
+                        }
                         break;
                     case "float":
                         $isValid = preg_match("/^\\s*-?(?:\\d+[.]?|\\d*[.]\\d+(?:[eE]-?\\d+)?)\\s*$/", $dtl_Value);
                         //preg_match('/^0(?:[.]0*)?$/', $dtl_Value)
-                        if(!$isValid ) $err_msg = 'Not valid float value';
+                        if(!$isValid ) $err_msg = 'Not valid float value '.htmlspecialchars($dtl_Value);
                         break;
                     case "enum":
                     case "relationtype":
@@ -1311,7 +1331,7 @@
                             if($isValid){
                                 $dtl_Value = $term_tocheck;
                             }else{
-                                $err_msg = '';
+                                $err_msg = 'Term ID '.htmlspecialchars($dtl_Value).' is not in the list of values defined for this field';
                             }
                         }else{
                             $isValid = (intval($dtl_Value)>0);
@@ -1331,12 +1351,12 @@
                                     $err_msg = 'Record type '.$rectype_tocheck.' is not valid for specified constraints';
                                 }
                             }else{
-                                $err_msg = 'Record with specified id does not exist';
+                                $err_msg = 'Record with specified id '.htmlspecialchars($dtl_Value).' does not exist';
                             }
                         }else{
                             $isValid = (intval($dtl_Value)>0);
                             if(!$isValid){
-                                $err_msg = 'Record ID is valid integer';
+                                $err_msg = 'Record ID '.htmlspecialchars($dtl_Value).' is not valid integer';
                             }
                         }
                         //this is parent-child resource
@@ -1405,6 +1425,8 @@
                         if($res){
                             $dtl_Value = $geoType;
                             $isValid = true;
+                        }else{
+                            $err_msg = 'Geo WKT value '.substr(htmlspecialchars($dtl_Geo),0,15).'... is not valid';
                         }
                         /*
                         $res = $mysqli->query("select AsWKT(geomfromtext('".addslashes($dtl_Geo)."'))");
@@ -1419,6 +1441,9 @@
                         // retained for backward compatibility
                     case "year":
                         $isValid = preg_match("/^\\s*(?:(?:-|ad\\s*)?\\d+(?:\\s*bce?)?|in\\s+press)\\s*$/i", $dtl_Value);
+                        if(!$isValid){
+                            $err_msg = 'Value '.htmlspecialchars($dtl_Value).' is not valid Year';
+                        }
                         break;
                     case "boolean":
 
@@ -1428,10 +1453,15 @@
                                 $dtl_Value = "true";
                             else
                                 $dtl_Value = "false";
+                        }else{
+                            $err_msg = 'Value '.htmlspecialchars($dtl_Value).' is not valid boolean';
                         }
                         break;
                     case "integer":
                         $isValid = preg_match("/^\\s*-?\\d+\\s*$/", $dtl_Value);
+                        if(!$isValid){
+                            $err_msg = 'Value '.htmlspecialchars($dtl_Value).' is not valid integer';
+                        }
                         break;
 
                     case "separator":
@@ -1454,8 +1484,14 @@
                     $dval['dtl_Geo'] = $dtl_Geo;
                     array_push($insertValues, $dval);
                 }else{
+                    $query = 'SELECT IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
+                        .'FROM defRecStructure, defDetailTypes WHERE rst_RecTypeID='.$rectype
+                        .' and  dty_ID=rst_DetailTypeID and rst_DetailTypeID='.$dtyID;
+                    $field_name = mysql__select_value($mysqli, $query);
+                    
                     $dt_names = dbs_GetDtLookups();
-                    array_push($errorValues, $dtl_Value." is not valid. Field type ".@$dt_names[$det_types[$dtyID]]." (field id: $dtyID). ".$err_msg);
+                    array_push($errorValues, '<br>Field ID '.$dtyID.': "'.$field_name.'" ('.@$dt_names[$det_types[$dtyID]]
+                        .')<br>'.$err_msg);
                 }
 
             }//for values
@@ -1471,12 +1507,12 @@
         }else if (count($errorValues)>0) {
 
             $ss = (count($errorValues)>1?'s':'');    
-array_push($errorValues,                                                        
-'<br><br>Please run Verify > Verify integrity to check for and fix data problems.<br>' 
-.'If the problem cannot be fixed, or re-occurs frequently, please email the Heurist development team (support at HeuristNetwork dor org)');
+            array_push($errorValues,                                                        
+            '<br><br>Please run Verify > Verify integrity to check for and fix data problems.<br>' 
+            .'If the problem cannot be fixed, or re-occurs frequently, please email the Heurist development team (support at HeuristNetwork dor org)');
             
             $system->addError(HEURIST_ERROR, 'Encountered invalid value'.$ss
-                                                        .' for field'.$ss.' Record#'.$recID, $errorValues);
+                                                        .' for Record#'.$recID.'<br>'.implode('<br>',$errorValues), null);
 
         }else if (count($insertValues)<1) {
 
@@ -1728,7 +1764,8 @@ array_push($errorValues,
     }
 
     
-    // @todo REMOVE - all these functions are duplicated in VerifyValue and db_structure
+    // @todo use DbsTerms
+    // @todo REMOVE - all these functions are duplicated in DbsTerms and db_structure
     //
     // get terms from json string
     //
@@ -1853,7 +1890,9 @@ array_push($errorValues,
 
             if (($cntTrm = count($terms)) > 0) {
                 if ($cntTrm == 1) { //vocabulary
+                    $vocabId = $terms[0];
                     $terms = getTermsByParent($terms[0], $domain);
+                    array_push($terms, $vocabId);
                 }else{
                     $nonTerms = getTermsFromFormat2($terms_none, $domain);
                     if (count($nonTerms) > 0) {

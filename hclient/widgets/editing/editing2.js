@@ -333,7 +333,7 @@ function hEditing(_options) {
             }
         }
         
-        var $div_hints = $('<div>').css({float: 'right'}).appendTo($container);
+        var $div_hints = $('<div>').css({float: 'left', 'padding-left': 180}).appendTo($container);
         if($container.find('.forbidden').length>0 && window.hWin.HAPI4.is_admin()){
             $('<div>').css({padding: '4px'})
                 .html('There are hidden fields in this form. <span class="btn-modify_structure"'

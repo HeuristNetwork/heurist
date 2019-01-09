@@ -89,7 +89,7 @@ function EditTerms() {
     */
     function _init (){
 
-        _isWindowMode = !Hul.isnull(window.hWin.HEURIST4.util.getUrlParameter('popup', location.search));
+        _isWindowMode = false; //!Hul.isnull(window.hWin.HEURIST4.util.getUrlParameter('popup', location.search));
 
         _vocabulary_toselect = window.hWin.HEURIST4.util.getUrlParameter('vocabid', location.search);
 
@@ -110,15 +110,17 @@ function EditTerms() {
             treetype = "terms";
         } 
         
+        
         if (treetype == "terms")
         {
                 _currentDomain = "enum";
-                $("#divBanner h2").text("Manage terms used by term-list (category/dropdown) fields");
+                //$("#divBanner h2").text("Manage terms used by term-list (category/dropdown) fields");
         }else if (treetype == "relationships")
         {
                 _currentDomain = "relation";
-                $("#divBanner h2").html("Manage terms used for relationship type in relationship records");
+                //$("#divBanner h2").html("Manage terms used for relationship type in relationship records");
         }
+        
 
         /*
         $('<div style="height:90%; max-width:'+TAB_WIDTH+'; overflow:hidden">'
@@ -371,8 +373,8 @@ function EditTerms() {
 
 
                 var node_invers = null;
-                if(node.data.inverseid>0){
-                    node_invers = _findNodeById(node.data.inverseid, false);
+                if(node.data.inverseid>0 && (!node.children || node.children.length==0)){//node.data.parent_id>0
+                        node_invers = _findNodeById(node.data.inverseid, false);
                 }
                 if(!Hul.isnull(node_invers)){ //inversed term found
                     $('#edInverseTermId').val(node_invers.data.id);
@@ -403,7 +405,8 @@ function EditTerms() {
                     $('#btnSave').val("Save term");
                 }
 
-                $('#divInverseType').css({display: (_currentDomain=="relation")?"block":"none"});
+                $('#divInverseType').css({display: (_currentDomain=="relation" 
+                        && (!node.children || node.children.length==0))?"block":"none"}); //node.data.parent_id>0
 
                 var dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
                 original_dbId = Number(node.data.original_db),
@@ -526,9 +529,10 @@ function EditTerms() {
                 {
                     if(!Hul.isnull(ind)){
                         var node = nodes[ind];
-
-                        var option = window.hWin.HEURIST4.ui.addoption(sel, node.data.id, getParentLabel(node));
-                        option.title = option.text;
+                        if(!node.children || node.children.length==0){
+                            var option = window.hWin.HEURIST4.ui.addoption(sel, node.data.id, getParentLabel(node));
+                            option.title = option.text;
+                        }
                     }
                 }//for
 
@@ -2098,7 +2102,7 @@ function EditTerms() {
 
                var actionspan = $('<div class="svs-contextmenu3">'
                    +'<span class="ui-icon ui-icon-plus" title="Add a child term (a term hierarchichally below the current vocabulary or term)"></span>'
-                   +((_currentDomain=="relation")
+                   +((_currentDomain=="relation" && !$(item).hasClass('fancytree-has-children'))
                       ?'<span class="ui-icon ui-icon-reload" title="Set the inverse term for this term"></span>' //for relations only
                       :'')
                    +'<span class="ui-icon ui-icon-close" title="Delete this term (if unused in database)"></span>'

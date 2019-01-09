@@ -1022,7 +1022,6 @@ window.hWin.HEURIST4.ui = {
         var addLatLongForGeo = false;
         var requriedHighlight = false;
         var selectedValue = null;
-        var showLatLongForGeo = false;
         var show_parent_rt = false;
         var useHtmlSelect = true;
         var initial_indent = 0;
@@ -1171,8 +1170,8 @@ window.hWin.HEURIST4.ui = {
                         
                     }
                     if(addLatLongForGeo && details[dtyID][fit]=="geo"){
-                        arrterm.push([ dtyID+'_long', 'geo: Longitude', false ]);
-                        arrterm.push([ dtyID+'_lat', 'geo: Latitude', false ]);
+                        arrterm.push([ dtyID+'_long', details[dtyID][fi]+' [longitude]', false ]);
+                        arrterm.push([ dtyID+'_lat', details[dtyID][fi]+' [latitude]', false ]);
                     } 
                 }
             }
@@ -1400,13 +1399,26 @@ window.hWin.HEURIST4.ui = {
                 open: function(event, ui){
                     //console.log(menu.hSelect( "menuWidget" ).width());
                     //increase width of dropdown to avoid word wrap
-                    menu.hSelect( "menuWidget" ).width( menu.hSelect( "menuWidget" ).width()+20 );                    
+                    var wmenu = menu.hSelect( "menuWidget" );
+                    wmenu.width( wmenu.width()+20 ); 
+                    var wmenu_div = wmenu.parent('div.ui-selectmenu-menu');
+                    var pos = wmenu_div.position().top;
+                    if(wmenu.parents('body').height()>0 && pos+wmenu.height()>wmenu.parents('body').height()){
+                        var newtop = wmenu.parents('body').height()-wmenu.height()-5;
+                        if(newtop<0){
+                            newtop = 2;
+                            wmenu_div.height(wmenu.parents('body').height()-2);
+                        }
+                        wmenu_div.css('top', newtop);
+                    }
+                    //calculate position
+                    //console.log(pos.top+','+wmenu.height()+','+wmenu.parents('body').height());
                 }
               });
                 
                 
             var dwidth = $(selObj).css('width');    
-            if(dwidth=='0px') dwidth = 'auto';
+            if(dwidth=='0px' || (dwidth.indexOf('px')>0 && parseFloat(dwidth)<21)) dwidth = 'auto';
             
             var dminwidth = $(selObj).css('min-width');    
             if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '10em';
@@ -1437,6 +1449,8 @@ window.hWin.HEURIST4.ui = {
                 $context = $(window.hWin.document);
             }
         
+            /* since 2018-12=24 help is not related to competency level
+        
             if(exp_level>1){
                 //show beginner level
                 $context.find('.heurist-helper2').css('display','block');
@@ -1454,6 +1468,7 @@ window.hWin.HEURIST4.ui = {
                 $context.find('.heurist-table-helper1').css('display','none');
                 $context.find('.heurist-helper1').css('display','none');
             }
+            */
             
             
             $context.find('li[data-user-experience-level]').each(function(){
@@ -1488,6 +1503,7 @@ window.hWin.HEURIST4.ui = {
         
         //IJ 2018-12-04 hide it! 
         var hasContextHelp =  false && !window.hWin.HEURIST4.util.isempty(helpcontent_url);
+        var hideHelpButton = true;
         
         var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
         if(titlebar.length==0){
@@ -2250,6 +2266,7 @@ window.hWin.HEURIST4.ui = {
             if(!(entityName=='UsrBookmarks' || 
                  entityName=='SysIdentification' ||
                  entityName=='DefDetailTypeGroups' || 
+                 entityName=='DefRecTypeGroups' || 
                  entityName=='SysBugreport')){ 
                 scripts.push(path+'search'+entityName+'.js');
             }

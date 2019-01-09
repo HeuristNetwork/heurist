@@ -131,8 +131,8 @@ if($mode=='2' && file_exists($folder.".zip") ){
                 </div>
 
                 <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:center">
-                    <input type="submit" value="Export" style="margin-right: 20px;padding-left:5px; padding-right:5px;"
-                        onClick="function(event){ event.target.style.visibility = 'hidden'; }">
+                    <input type="button" value="Export" style="margin-right: 20px;padding-left:5px; padding-right:5px;"
+onClick="{ document.getElementById('buttons').style.visibility = 'hidden';  document.forms[0].submit(); }">
 <?php if(@$_REQUEST['inframe']!=1) { ?>                    
                     <input type="button" value="Cancel"  style="padding-left:5px; padding-right:5px;" onClick="window.close();">
 <?php } ?>                    
@@ -176,7 +176,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
             ?>
             <div id="divProgress" style="cursor:wait;width:50%;height:100%;margin:0 auto;position:relative;z-index:999999;background:url(../../hclient/assets/loading-animation-white.gif)  no-repeat center center"></div>
-            <div style="position:absolute;top:30;left:10;right:20">
+            <div style="position:absolute;top:70;left:10;right:20">
             <?php
             
             $folders_to_copy = null;
@@ -290,7 +290,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             if(file_exists($destination)) unlink($destination);
             chdir($folder); 
             
-            $res = zip($folder, null, $destination, true);
+            $res = createZipArchive($folder, null, $destination, true);
             
             /* command line version
             $cmdline = "zip -r ".$folder.".zip *"; //archive everything within folder, keep folder strcuture

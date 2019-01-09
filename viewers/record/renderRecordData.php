@@ -312,6 +312,14 @@ if(!$is_map_popup){
             }
             
             //
+            //
+            //
+            function show_record(event, rec_id) 
+            {
+                $('div[data-recid]').hide();$('div[data-recid='+rec_id+']').show(); 
+                return false
+            }
+            //
             // catch click on a href and opens it in popup dialog
             //
             function link_open(link) {
@@ -376,7 +384,9 @@ if(!$is_map_popup){
 } //$is_map_popup
 else{
 //    print '<div style="font-size:0.8em">';
-}        
+} 
+if ($bkm_ID>0 || $rec_id>0) {
+       
         if ($bkm_ID>0) {
             $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
             'select * from usrBookmarks left join Records on bkm_recID=rec_ID '
@@ -384,45 +394,68 @@ else{
             .$bkm_ID.' and bkm_UGrpID='.$system->get_user_id()
             .' and (not rec_FlagTemporary or rec_FlagTemporary is null)');
             
-            print '<div style="font-size:0.8em">';
-            print_details($bibInfo);
-            print '</div>';
-            
         } else if ($rec_id>0) {
             $bibInfo = mysql__select_row_assoc($system->get_mysqli(), 
             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
             .$rec_id.' and not rec_FlagTemporary');
+        }
             
-	        print '<div data-recid="'.$rec_id.'" style="font-size:0.8em">';
+	        print '<div data-recid="'.$bibInfo['rec_ID'].'" style="font-size:0.8em">';
                 print_details($bibInfo);
 	        print '</div>';
-        
+            
             $opts = '';
+            $list = '';
             if(count($sel_ids)>1){
-                
-                $opts = $opts . '<option value="'.$rec_id.'">(#'.$rec_id.') '.$bibInfo['rec_Title'].'</option>';
-                
-                $cnt = 1;
+                    
+                $cnt = 0;
                 
                 foreach($sel_ids as $id){
-                if($id!=$rec_id){    
+                
                     $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
                             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID'
                             .' where rec_ID='.$id.' and not rec_FlagTemporary');
-                                
-                    print '<div data-recid="'.$id.'" style="font-size:0.8em;display:none">';
-                    print_details($bibInfo);
-                    print '</div>';
-                    
+                
+                    if($id!=$rec_id){                
+                        print '<div data-recid="'.$id.'" style="font-size:0.8em;display:none">';
+                        print_details($bibInfo);
+                        print '</div>';
+                    }
                     $opts = $opts . '<option value="'.$id.'">(#'.$id.') '.$bibInfo['rec_Title'].'</option>';
+                    
+                    $list = $list  //$id==$rec_id || $cnt>3
+                        .'<div class="detailRow placeRow"'.($cnt>2?' style="display:none"':'').'>'
+                            .'<div style="display:table-cell;padding-right:4px">'
+                                .'<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bibInfo['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bibInfo['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif"></div>'
+                        .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a href="#" '   
+.'onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
+.'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
+//.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
+.strip_tags($bibInfo['rec_Title'],'<i><b><u>').'</a></div></div>';  //htmlspecialchars
+                   
                     $cnt++;
                 }
-                }
                 
-                print '<div style="font-size:0.8em">Multiple entries here<br><br><select style="font-size:0.9em"'
+                print '<div class=detailType style="font-size:0.8em;text-align:left;line-height:21px;">Linked</div><div style="font-size:0.8em" class="map_popup">'.$list;
+                if($cnt>3){
+                    ?>
+                    <div class="detailRow"><div class="detailType">
+                        <a href="#" onClick="$('.placeRow').show();$(event.target).hide
+                            ()" style="color:blue">more... (n = <?php echo $cnt;?>)</a></div>
+                        <div class="detail"></div>
+                    </div>
+                    <?php
+                }
+                print '</div>';
+                
+                /*Multiple entries here<br><br>
+                print '<div style="font-size:0.8em"><select style="font-size:0.9em"'
                 .' onclick="$(\'div[data-recid]\').hide(); $(\'div[data-recid=\'+$(event.target).val()+\']\').show();" '  
                 .'>'.$opts;
-                print '</select></div>';
+                print '</select></div>';*/
+                
+                
+                
             }
         } else {
             print 'No details found';
@@ -455,8 +488,15 @@ function print_details($bib) {
     
         print_public_details($bib);
         
-        print_relation_details($bib);
-        print_linked_details($bib);
+        $link_cnt = print_relation_details($bib);
+        $link_cnt = print_linked_details($bib, $link_cnt); //links from
+        if($is_map_popup){ // && $link_cnt>3 //linkRow
+        ?>
+        <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
+            <a href="#" onClick="$('.fieldRow').css('display','table-row');$('.moreRow').hide()" style="color:blue">more...</a>
+            </div><div class="detail"></div></div></div>
+        <?php
+        }
 
         if(!$is_map_popup){
             print_private_details($bib);
@@ -482,24 +522,40 @@ function print_header_line($bib) {
                     //(($is_production)?'':'padding-top:21px')
     ?>
 
-    <div class=HeaderRow style="margin-bottom:15px;min-height:0px;">
+    <div class=HeaderRow style="margin-bottom:<?php echo $is_map_popup?5:15?>px;min-height:0px;">
+        <h2 style="text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
+                <?= $bib['rec_Title'] ?>
+        </h2>
     <?php 
-    if(!$is_map_popup){ 
-        //position:absolute;right:17px;top:2px"
+
+        if($system->has_access()){ //is logged in
+            ?>
+
+            <div id=recID style="padding-right:10px;margin-top: -10px;">
+                 ID:<?= htmlspecialchars($bib['rec_ID']) ?>
+                <span class="link"><a id=edit-link class="normal"
+                            onClick="return sane_link_opener(this);"
+                            target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
+                            <img src="../../common/images/edit-pencil.png" title="Edit record" style="vertical-align: bottom"></a>
+                </span>
+            </div>
+            <?php
+        }else{
+            print '<div id=recID style="padding-right:10px">ID:'.htmlspecialchars($bib['rec_ID']).'</div>';
+        }
+        
+    if(true){ 
     ?>
-        <h3 style="float:right;padding:2px 10px 5px 2px;margin:0">
-            <div <?="style='padding-left:20px;height:10px;background-repeat: no-repeat;background-image:url("
+        <h3 style="padding:10px 10px 0px 2px;margin:0;color: #DC8501;font-size:1.1em;">
+            <div <?="style='padding-left:20px;height:20px;background-repeat: no-repeat;background-image:url("
                         .HEURIST_ICON_URL.$bib['rty_ID'].".png)' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
                 Type&nbsp;<?= $bib['rty_ID'].': '.htmlspecialchars($bib['rty_Name'])." " ?>
             </div>
         </h3>
-    <?php 
+    <?php                    
     } 
     ?>
     
-        <h2 style="float:left;text-transform:none; line-height:16px;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
-                <?= $bib['rec_Title'] ?>
-        </h2>
     </div>       
     <?php 
 }
@@ -551,29 +607,12 @@ function print_private_details($bib) {
     print '<div class="detailRowHeader" style="float:left;padding-bottom:40px"><a href="#" ';
     print 'onClick="$(\'.morePrivateInfo\').show();$(event.target).parents(\'.detailRowHeader\').hide();';
     print 'setTimeout(function(){window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);},200);';
-    print '">more ...</a></div>';
+    print '">more...</a></div>';
     print '<div class="detailRowHeader morePrivateInfo" style="float:left;padding-bottom:40px 0 20px;display:none;">';
         
-    if($system->has_access()){ //is logged in
-        ?>
-
-        <div id=recID>
-             ID:<?= htmlspecialchars($bib['rec_ID']) ?>
-            <span class="link"><a id=edit-link class="normal"
-                        onClick="return sane_link_opener(this);"
-                        target=_new href="<?php echo HEURIST_BASE_URL?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
-                        <img src="../../common/images/edit-pencil.png" title="Edit record"></a>
-            </span>
-        </div>
-
-        <?php
-    }else{
-        print "<div id=recID>ID:".htmlspecialchars($bib['rec_ID'])."</div>";
-    }
-    
     ?>
-    <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
-        <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate':'');?>">
+    <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
+        <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate" style="max-width:400px;"':'"');?>>
             <a target=_blank class="external-link" 
                 href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML</a>
             &nbsp;&nbsp;
@@ -603,7 +642,7 @@ function print_private_details($bib) {
     }
     if($add_date){
         ?>
-        <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
+        <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
             <div class=detailType>Added</div><div class=detail>
                 <?php print $add_date.'  '
                 .' '.$add_date_local; ?>
@@ -613,7 +652,7 @@ function print_private_details($bib) {
     }
     if($mod_date){
         ?>
-        <div class=detailRow <?php echo $is_map_popup?'style="display:none"':''?>>
+        <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
             <div class=detailType>Updated</div><div class=detail>
                 <?php print $mod_date
                 .' '.$mod_date_local; ?>
@@ -945,9 +984,21 @@ function print_public_details($bib) {
                     else
                         $trim_url = $bd['val'];
                     $bd['val'] = '<a href="'.$bd['val'].'" target="_new">'.htmlspecialchars($trim_url).'</a>';
-                } else if ($bd['dtl_Geo'] && preg_match("/^POLYGON\s?[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", $bd["bd_geo_envelope"], $poly)) {
-                    list($match, $minX, $minY, $maxX, $maxY) = $poly;
-                    if ($bd["val"] == "l"  &&  preg_match("/^LINESTRING\s?[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",$bd["dtl_Geo"],$matches)) {
+                } else if ($bd['dtl_Geo']){
+                    
+                    $minX = null;
+                    
+                    if (preg_match("/^POLYGON\s?[(][(]([^ ]+) ([^ ]+),[^,]*,([^ ]+) ([^,]+)/", 
+                                $bd["bd_geo_envelope"], $poly))
+                    {
+                        list($match, $minX, $minY, $maxX, $maxY) = $poly;
+                        
+                    }else if (preg_match("/POINT\\((\\S+)\\s+(\\S+)\\)/i", $bd["bd_geo_envelope"], $matches)){
+                        $minX = floatval($matches[1]);
+                        $minY = floatval($matches[2]);
+                    }else if ($bd["val"] == "l"  &&  preg_match("/^LINESTRING\s?[(]([^ ]+) ([^ ]+),.*,([^ ]+) ([^ ]+)[)]$/",
+                                $bd["dtl_Geo"],$matches)) 
+                    {
                         list($dummy, $minX, $minY, $maxX, $maxY) = $matches;
                     }
                     /*   redundant
@@ -968,12 +1019,12 @@ function print_public_details($bib) {
                     }
 
                     if ($type == "Point")
-                        $bd["val"] = "<b>Point</b> ".round($minX,7).", ".round($minY,7);
+                        $bd["val"] = "<b>Point</b> ".($minX!=null?round($minX,7).", ".round($minY,7):'');
                     else
-                        $bd['val'] = "<b>$type</b> X ".round($minX,7).", ".round($maxX,7).
-                        " Y ".round($minY,7).", ".round($maxY,7);
+                        $bd['val'] = "<b>$type</b> X ".($minX!=null?round($minX,7).", ".round($maxX,7).
+                        " Y ".round($minY,7).", ".round($maxY,7):'');
 
-                    $geoimage = "<img class='geo-image' src='".HEURIST_BASE_URL
+                    $geoimage = "<img class='geo-image' style='vertical-align:top;' src='".HEURIST_BASE_URL
                     ."common/images/geo.gif' onmouseout='{if(mapViewer){mapViewer.hide();}}' "
                     ."onmouseover='{if(mapViewer){mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}}'>&nbsp;";
 
@@ -993,7 +1044,7 @@ function print_public_details($bib) {
     usort($bds, "__sortResourcesByDate");
 
     if($is_map_popup){
-        echo '<div>';  
+        echo '<div class="map_popup">';  
     }else{  
 
         //print info about parent record
@@ -1096,7 +1147,7 @@ function print_public_details($bib) {
     if (@$url) {
         print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
             .'<div class=detailType>URL</div>'
-            .'<div class="detail'.($is_map_popup?' truncate':'').'">'
+            .'<div class="detail'.($is_map_popup?' truncate style="max-width:400px;"':'"').'>'
             .'<span class="link">'
                 .'<a target="_new" class="external-link" href="http://web.archive.org/web/*/'.htmlspecialchars($url).'">page history</a>&nbsp;&nbsp;&nbsp;'
                 .'<a target="_new" class="external-link" href="'.htmlspecialchars($url).'">'.output_chunker($url).'</a>'
@@ -1113,7 +1164,7 @@ function print_public_details($bib) {
     foreach ($bds as $bd) {
         if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
         
-        print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;'
+        print '<div class="detailRow fieldRow" style="width:100%;border:none 1px #00ff00;'
             .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
             .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
         .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
@@ -1124,11 +1175,12 @@ function print_public_details($bib) {
 
     // </div>  
     if($is_map_popup){
-        echo '<div class=detailRow><a href="#" onClick="$(\'.detailRow\').show();$(event.target).hide()">more ...</a></div>';
-        echo '<div class=detailRow>&nbsp;</div>';
+        //echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.fieldRow\').show();$(event.target).hide()">more</a></div><div class="detail"></div></div>';
     }else{
-        echo '<div class=detailType>&nbsp;</div>';
+        echo '<div class="detailRow fieldRow">&nbsp;</div>';    
     }
+    
+    
 
     echo '</div></div>';            
 }
@@ -1272,6 +1324,9 @@ function reltype_inverse($relTermID) { //saw Enum change - find inverse as an id
     return $inverse;
 }
 
+//
+//
+//
 function print_relation_details($bib) {
 
         global $system, $relRT,$relSrcDT,$relTrgDT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
@@ -1295,11 +1350,13 @@ function print_relation_details($bib) {
 
         if (($from_res==false || $from_res->num_rows <= 0)  &&  
              ($to_res==false || $to_res->num_rows<=0)){
-               return;  
+               return 0;  
         } 
+        
+    $link_cnt = 0;    
 
     if($is_map_popup){
-       print '<div>';
+       print '<div class="map_popup">';
     }else{
        print '<div class="detailRowHeader" style="float:left">Related'; 
     }
@@ -1324,7 +1381,8 @@ function print_relation_details($bib) {
             continue;
         }
         
-        print '<div class=detailRow>';
+        print '<div class="detailRow fieldRow"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
+        $link_cnt++;
         //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
         if(array_key_exists('RelTerm',$bd)){
             print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>'; // fetch now returns the enum string also
@@ -1332,11 +1390,11 @@ function print_relation_details($bib) {
         print '<div class=detail>';
             if (@$bd['RelatedRecID']) {
                 if(true || $is_map_popup){  
-                    print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
+                    print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
                 }
                 print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($bd['RelatedRecID']['rec_Title']).'</a>';
             } else {
-                print htmlspecialchars($bd['Title']);
+                print strip_tags($bd['rec_Title'],'<a><i><b><u>');
             }
             print '&nbsp;&nbsp;';
             if (@$bd['StartDate']) print htmlspecialchars(temporalToHumanReadableString($bd['StartDate']));
@@ -1361,7 +1419,8 @@ function print_relation_details($bib) {
             continue;
         }
 
-        print '<div class=detailRow>';
+        print '<div class="detailRow fieldRow"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2linkRow
+        $link_cnt++;
         //		print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';	//saw Enum change
         if(array_key_exists('RelTerm',$bd)){
             print '<div class=detailType>' . htmlspecialchars($bd['RelTerm']) . '</div>';
@@ -1384,10 +1443,14 @@ function print_relation_details($bib) {
     }
     
     print '</div>';
+    
+    return $link_cnt;
 }
 
-
-function print_linked_details($bib) {
+//
+// print reverse link
+//
+function print_linked_details($bib, $link_cnt) {
     global $system, $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
     
     $query = 'select * '.
@@ -1406,10 +1469,11 @@ function print_linked_details($bib) {
     
     $res = $mysqli->query($query);
 
-    if ($res==false || $res->num_rows <= 0) return;
+    if ($res==false || $res->num_rows <= 0) return $link_cnt;
     
     if($is_map_popup){
-       print '<div>';
+       print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
+       print '<div class="map_popup">';//
     }else{
        print '<div class="detailRowHeader" style="float:left">Linked from'; 
        if(!$is_production){
@@ -1424,21 +1488,23 @@ function print_linked_details($bib) {
        }
     }
         
-        $lbl = 'Linked from';
-
         while ($row = $res->fetch_assoc()) {
 
-            print '<div class=detailRow>';
-                if(!$is_production) print '<div class=detailType>'.$lbl.'</div>';
-                print '<div class="detail'.($is_map_popup?' truncate':'').'" style="display: table-row;">';
-                    print '<div style="display: table-cell;width:28px;text-align: right;padding-right:4px"><img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif"></div>';
-                    print '<div style="display: table-cell;"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a></div>';
-                print '</div></div>';
-
-            $lbl = '';
+            print '<div class="detailRow fieldRow"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
+            $link_cnt++;
+            
+                print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
+                        .'<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif"></div>';
+                        
+                print '<div style="display: table-cell;vertical-align:top;'
+                .($is_map_popup?'max-width:490px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a></div>';
+                
+            print '</div>';
         }
         
     print '</div>';
+    return $link_cnt;
+    
 }
 
 //

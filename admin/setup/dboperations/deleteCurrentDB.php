@@ -66,7 +66,8 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 <?php
     //owner can delete without password
     if(!$system->is_dbowner() && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion) ){
-            print '<div class="ui-state-error">'.$response = $system->getError()['message'].'</div>';
+            $err = $system->getError();
+            print '<div class="ui-state-error">'.$err['message'].'</div>';
     }else{
 
             $dbname = $_REQUEST['db'];

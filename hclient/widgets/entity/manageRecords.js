@@ -225,9 +225,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             },
                          'Cancel':function(){ 
                                 $__dlg.dialog( "close" );
-                            }},
+                            }},  
                             {title:'Confirm'});
-                            
+                            //,{my:'top left', at:'-100 left+200', of:this._toolbar.find('#btnPrev')});
+                         var dlged = that._as_dialog.parent('.ui-dialog');   
+                         $__dlg.parent('.ui-dialog').css({
+                                top: dlged.position().top+dlged.height()-200,
+                                left:that._toolbar.find('#btnPrev').position().left});    
                     }else{
                         this._toolbar.find('#divNav').html( (idx+1)+'/'+order.length);
                         
@@ -301,11 +305,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
                         click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
                               
+                              
                         {showText:false, icons:{primary:'ui-icon-circle-triangle-w'},title:window.hWin.HR('Previous'),
-                              css:{'display':'none','margin-right':'0.5em','float':'left'}, id:'btnPrev',
+                              css:{'display':'none','margin-right':'0.5em',}, id:'btnPrev',
                               click: function() { that._navigateToRec(-1); }},
                         {showText:false, icons:{secondary:'ui-icon-circle-triangle-e'},title:window.hWin.HR('Next'),
-                              css:{'display':'none','margin-left':'0.5em','float':'left'}, id:'btnNext',
+                              css:{'display':'none','margin-left':'0.5em','margin-right':'1.5em'}, id:'btnNext',
                               click: function() { that._navigateToRec(1); }},
                               
                         {text:window.hWin.HR('Dupe'), id:'btnRecDuplicate',
@@ -519,11 +524,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 this._toolbar.find('#btnPrev').css({'display':'inline-block'});
                 this._toolbar.find('#btnNext').css({'display':'inline-block'});
                 if(this._toolbar.find('#divNav').length===0){
-                    $('<div id="divNav2" style="font-weight:bold;padding:0.8em 1em;float:left;text-align:right">Step through filtered subset</div>')
+                    $('<div id="divNav2" style="display:inline-block;font-weight:bold;padding:0.8em 1em;text-align:right">Step through filtered subset</div>')
                         .insertBefore(this._toolbar.find('#btnPrev'));
                         
-                    $('<div id="divNav" style="font-weight:bold;padding-top:0.8em;min-width:40px;float:left;text-align:center">')
-                        .insertAfter(this._toolbar.find('#btnPrev'));
+                    $('<div id="divNav" style="display:inline-block;font-weight:bold;padding-top:0.8em;min-width:40px;text-align:center">')
+                        .insertBefore(this._toolbar.find('#btnNext'));
                 }
                 this._navigateToRec(0); //reload
             }else{
@@ -1345,6 +1350,31 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     //
+    editRecordTypeTitle: function(){
+        
+        var rty_ID = this._currentEditRecTypeID;
+        var typedef = window.hWin.HEURIST4.rectypes.typedefs[rty_ID];
+        var maskvalue = typedef.commonFields[ window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
+
+        var sURL = window.hWin.HAPI4.baseURL +
+            "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID
+            +"&mask="+encodeURIComponent(maskvalue)+"&db="+window.hWin.HAPI4.database;
+            
+        window.hWin.HEURIST4.msg.showDialog(sURL, {    
+                "no-resize": true,
+                title: 'Record Type Title Mask Edit',
+                height: 800,
+                width: 800,
+                callback: function(newvalue) {
+                    if(newvalue){
+                    }
+                }
+        });
+    },
+    
+    //
+    //
+    //
     editRecordType: function(){
 
         var that = this;
@@ -1353,7 +1383,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
                 var sMsg = "Click YES to save changes and modify the record structure.<br><br>"
                             +"If you are unable to save changes, click Cancel and open<br>"
-                            +"structure modification in a new tab (button next to clicked one)";
+                            +"structure modification in main menu Structure > Modify / Extend";
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
                     
                         that._saveEditAndClose( null, function(){
@@ -1929,6 +1959,19 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 this._keepYPos = 0;
             }
             
+            // special case  - show separator between parent record field and other fields
+            // in case there is no header
+            if(window.hWin.HEURIST4.util.findArrayIndex(DT_PARENT_ENTITY, field_in_recset)>=0){
+            //if(that.options.parententity>0){
+                var first_set = that.editForm.find('fieldset:first');
+                var next_ele = first_set.next();
+                if(!next_ele.hasClass('separator')){
+                    first_set.css('border-bottom','1px solid #A4B4CB');
+                }
+            }
+            
+            
+            
             //show rec_URL 
             var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
             var ele = that._editing.getFieldByName('rec_URL');
@@ -2224,8 +2267,13 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     +'<label><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
                 +'<span class="btn-config4-container" style="border: 1px #7D9AAA solid;padding: 4px;margin-left: 50px;">'
-                +'<span class="btn-config4" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">Modify structure</span>'
-                +'<span class="btn-config5 ui-icon ui-icon-gear smallicon"></span></span>'
+                +'<span class="btn-edit-rt" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">Modify structure</span>'
+                +'<span class="btn-edit-rt ui-icon ui-icon-gear smallicon" style="height:18px;margin-left:4px"></span></span>'
+
+                +'<span class="btn-config4-container" style="padding: 4px;margin-left: 10px;">'
+                +'<span class="btn-edit-rt-titlemask" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">edit title mask</span>'
+                +'<span class="btn-edit-rt-titlemask ui-icon ui-icon-pencil smallicon" style="height:18px;margin-left:4px"></span></span>'
+
                     +'<hr style="margin-top: 10px;width:230px">'
              +'</div>'
              +'<div style="display:table-cell;text-align:right;padding: 10px 40px 0px 0px;font-weight: bold;">'
@@ -2240,10 +2288,11 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             var that = this;    
             
             if(window.hWin.HAPI4.is_admin()){
-                this.element.find('.btn-config5')
-                        .css({height: '18px', 'margin-left':'4px'})
-                        .click(function(){that.editRecordType();});
-                this.element.find('.btn-config4').click(function(){that.editRecordType();});
+                this.element.find('.btn-edit-rt').click(function(){that.editRecordType();});
+                
+                //this.element.find('.btn-config5a').css({height: '18px', 'margin-left':'4px'})
+                
+                this.element.find('.btn-edit-rt-titlemask').click(function(){that.editRecordTypeTitle();});
             }else{
                 this.element.find('.btn-config4-container').hide();
                 //this.element.find('.btn-config5').hide();

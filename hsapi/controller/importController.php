@@ -163,8 +163,23 @@ if(!$system->init(@$_REQUEST['db'])){
                 // Open a memory "file" for read/write...
                 $fp = fopen('php://temp', 'r+');
                 $sz = 0; 
+                $cnt = 0;
+                
+                //put header
+                $header_flds = @$_REQUEST['header_flds'];
+                if($header_flds!=null && !is_array($header_flds)){
+                    $header_flds = json_decode($header_flds, true);
+                    //$header_flds = explode(',',$header_flds);
+                }
+                if(count($header_flds)>0){
+                    $sz = $sz + fputcsv($fp, $header_flds, ',', '"');
+                }
+                
                 foreach ($res as $idx=>$row) {
                     $sz = $sz + fputcsv($fp, $row, ',', '"');
+                    $cnt++;
+                    
+                    if($cnt>2) break;
                 }
                 rewind($fp);
                 // read the entire line into a variable...

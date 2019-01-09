@@ -1306,7 +1306,7 @@ background: #8ea9b9
 }
 
 .ent_wrapper.editor fieldset > div{
-    border-bottom: 1px solid RGBA(255,255,255,0.5);
+    /*border-bottom: 1px solid RGBA(255,255,255,0.5);*/
     display: table;
     padding-top: 0.5em;
 }
@@ -1478,7 +1478,7 @@ background: #8ea9b9
     float: right;
 }
 .detailType {
-    width: 80px;
+    width: 100px;
     display: table-cell;
     color: #999999;
     vertical-align: top;
@@ -1503,6 +1503,21 @@ background: #8ea9b9
     padding-right: 5px;
     text-transform: none;
     color: #333;
+}
+
+.map_popup{
+    display:table;
+    width:100%;
+}
+.map_popup .detailType{
+    text-align:left;
+    line-height:14px;
+    width:125px;
+}
+.map_popup .detail, .map_popup .detail > a{
+    min-width: 150px;
+    line-height: 16px;
+    vertical-align:top;    
 }
 .detailRowHeader{
     padding: 5px 0 5px 0;

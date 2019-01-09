@@ -33,7 +33,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         //this.options.edit_mode = 'popup';
         
         //this.options.select_return_mode = 'recordset';
-        this.options.edit_need_load_fullrecord = true;
+        this.options.edit_need_load_fullrecord = false; //true;
         this.options.edit_height = 640;
         this.options.height = 640;
 
@@ -46,11 +46,26 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }else
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
-            this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                    
-            //this.options.edit_mode = 'none'
+            this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                           //this.options.edit_mode = 'none';
+        }
+        if(this.options.edit_mode == 'inline' && this.options.select_mode=='manager'){
+            this.options.width = 1290;
+        }
+
+        this._super();
+
+        if(this.options.edit_mode == 'inline'){
+            
+            if(this.options.select_mode!='manager'){
+                //hide form 
+                this.editForm.parent().hide();
+                this.recordList.parent().css('width','100%');
+            }else{
+                this.recordList.parent().css('width',380);
+                this.editForm.parent().css('left',381);
+            }
         }
     
-        this._super();
     },
         
     /*  
@@ -124,11 +139,19 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var iheight = 7;
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
+        }else{
+            this.searchForm.css({'min-width': '730px'});
+            this.recordList.css({'min-width': '730px'});
         }
-        this.searchForm.css({'height':iheight+'em',padding:'10px', 'min-width': '730px'});
-        this.recordList.css({'top':iheight+0.5+'em', 'min-width': '730px'});
         //init viewer 
         var that = this;
+        
+        this.searchForm.css({'height':iheight+'em',padding:'10px'});
+        this.recordList.css({'top':iheight+0.5+'em'});
+        
+        this.recordList.resultList('option', 'show_toolbar', false);
+        this.recordList.resultList('option', 'pagesize', 9999);
+        this.recordList.resultList('option', 'view_mode', 'list');
         
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
@@ -138,7 +161,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     function(){
                     var s = '<div style="width:10px"></div><div style="width:3em">ID</div>'
                                 +'<div style="width:13em">Name</div>'
-                                +'<div style="width:20em;border:none;">Description</div>';
+                                +(that.options.edit_mode!='inline'
+                                    ?'<div style="width:22em;">Description</div>':'')
+                                +'<div style="width:13em">Data Type</div>';    
                         
                         if (window.hWin.HAPI4.is_admin()){
                             s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
@@ -152,7 +177,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         
         if(this.options.use_cache){
-            
+
             if(this.options.use_structure){
                 //take recordset from HEURIST.detailtypes format     
                 this._cachedRecordset = this._getRecordsetFromStructure();
@@ -216,13 +241,225 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         return new hRecordSet(rdata);
     },
     
+    //----------------------
+    //
+    //
+    //
+    _recordListItemRenderer:function(recordset, record){
+        
+        function fld(fldname){
+            return recordset.fld(record, fldname);
+        }
+        function fld2(fldname, col_width){
+            swidth = '';
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
+                swidth = ' style="width:'+col_width+'"';
+            }
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
+        }
+        
+        var is_narrow = (this.options.edit_mode=='inline');
+        
+        var recID   = fld('dty_ID');
+        
+        var recTitle = fld2('dty_ID','4em')
+                + fld2('dty_Name','14em')
+                + (is_narrow?'':('<div class="item inlist" style="width:25em;">'+fld('dty_HelpText')+'</div>'))
+                + '<div class="item'+(is_narrow?'':' inlist')+'" style="width:10em;">'+window.hWin.HEURIST4.detailtypes.lookups[fld('dty_Type')]+'</div>';
+
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
+                    +'" style="height:'+(is_narrow?'1.3':'2.5')+'em">';
+                    
+        if(this.options.select_mode=='select_multi'){
+            html = html + '<div class="recordSelector"><input type="checkbox" /></div><div class="recordTitle" style="left:24px">';
+        }else{
+             html = html + '<div class="recordTitle" style="left:24px">' 
+        }
+                
+        html = html + recTitle + '</div>';
+        
+        // add edit/remove action buttons
+        //@todo we have _rendererActionButton and _defineActionButton - remove ?
+        //current user is admin of database managers
+        if(this.options.select_mode=='manager' && this.options.edit_mode=='popup' && window.hWin.HAPI4.is_admin()){
+             /*
+            html = html 
+                + '<div class="rec_view_link logged-in-only" style="width:60px">'
+                + '<div title="Click to edit field" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                + '</div>'
+                +'<div title="Click to delete reminder" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px">'
+                +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                + '</div></div>';
+              */  
+                
+            html = html + '<div class="rec_actions user-list" style="top:4px;width:60px;">'
+                    + '<div title="Click to edit field" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                    + '</div>&nbsp;&nbsp;';
+               if(true){ //not 
+                    html = html      
+                    + '<div title="Click to delete field" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+                    + '</div>';    
+               }   
+             html = html + '</div>'                   
+        }
+        
+        if(false && this.options.edit_mode=='popup'){
+                //+ (showActionInList?this._rendererActionButton('edit'):'');
+            html = html
+            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
+            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
+
+        }
+            
+        /* special case for show in list checkbox
+        html = html 
+            +  '<div title="Make type visible in user accessible lists" class="item inlist logged-in-only" '
+            + 'style="width:3em;padding-top:5px" role="button" aria-disabled="false" data-key="show-in-list">'
+            +     '<input type="checkbox" checked="'+(fld('dty_ShowInLists')==0?'':'checked')+'" />'
+            + '</div>';
+            
+            var group_selectoptions = this.searchForm.find('#sel_group').html();
+                        
+            html = html 
+                //  counter and link to rectype + this._rendererActionButton('duplicate')
+                //group selector
+            +  '<div title="Change group" class="item inlist logged-in-only"'
+            +  ' style="width:8em;padding-top:3px" data-key2="group-change">'
+            +     '<select style="max-width:7.5em;font-size:1em" data-grpid="'+fld('dty_DetailTypeGroupID')
+            + '">'+group_selectoptions+'</select>'
+            +  '</div>'
+                + this._rendererActionButton('delete');
+        */
+        
+        html = html + '</div>'; //close recordDiv
+        
+        /* 
+            html = html 
+        +'<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+        + '</div>&nbsp;&nbsp;'
+        + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
+        + '</div>'
+        + '</div>';*/
+
+
+        return html;
+        
+    },
     
+    updateRecordList: function( event, data ){
+        //this._super(event, data);
+        if (data){
+            if(this.options.use_cache){
+                this._cachedRecordset = data.recordset;
+                //there is no filter feature in this form - thus, show list directly
+            }
+            this.recordList.resultList('updateResultSet', data.recordset, data.request);
+            this._selectAndEditFirstInRecordset(data.recordset);
+        }
+    },
+        
+    //
+    // can remove group with assigned fields
+    //     
+    _deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this._super(); 
+        }else{
+            
+            var usage = window.hWin.HEURIST4.detailtypes.rectypeUsage[this._currentEditID];
+            if(usage && usage.length>0){ 
+                window.hWin.HEURIST4.msg.showMsgFlash('Field in use in '+usage.length+' record types. Can\'t remove it');  
+                return;                
+            }
+            
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this field type? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
+        
+    },
+    
+    //
+    // extend dialog button bar
+    //    
+    _initEditForm_step3: function(recID){
+        
+        if(this._toolbar){
+            var usage = window.hWin.HEURIST4.detailtypes.rectypeUsage[this._currentEditID];
+            
+            this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
+            this._toolbar.find('#btnRecDelete').css('display', 
+                    (recID>0 && !(usage && usage.length>0)) ?'block':'none');
+        }
+        
+        this._super(recID);
+    },
+    
+    onEditFormChange: function( changed_element ){
+        this._super(changed_element);
+            
+        if(this._toolbar){
+            var usage = window.hWin.HEURIST4.detailtypes.rectypeUsage[this._currentEditID];
+            
+            var isChanged = this._editing.isModified();
+            this._toolbar.find('#btnRecDelete').css('display', 
+                    (isChanged || (usage && usage.length>0))?'none':'block');
+        }
+            
+    },  
+      
+    _getEditDialogButtons: function(){
+                                    
+            var that = this;        
+            
+            var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+                click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
+                      
+                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Define New Field Type'),
+                      css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
+                      click: function() { that._onActionListener(null, 'add'); }},
+
+                {text:window.hWin.HR('Save Order'),
+                      css:{'float':'left',display:'none'}, id:'btnApplyOrder',
+                      click: function() { that._onActionListener(null, 'save-order'); }},
+                      
+                      
+                {text:window.hWin.HR('Close'), 
+                      css:{'margin-left':'3em','float':'right'},
+                      click: function() { 
+                          that.closeDialog(); 
+                      }},
+                {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
+                      css:{'margin-left':'0.5em','float':'right'},
+                      click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
+                {text:window.hWin.HR('Save'), id:'btnRecSave',
+                      accesskey:"S",
+                      css:{'font-weight':'bold','float':'right'},
+                      click: function() { that._saveEditAndClose( null, 'none' ); }},
+                {text:window.hWin.HR('Delete'), id:'btnRecDelete',
+                      css:{'float':'right',display:'none'},
+                      click: function() { that._onActionListener(null, 'delete'); }},
+                      
+                      ];
+        
+            return btns;
+    },    
+    
+            
+/*    
     //
     //
     //
     _initEditorOnly: function(){
         
-            //load user for given record id
+            //load detail type for given id
             if(this.options.dty_ID>0){
                     var request = {};
                     request['dty_ID']  = this.options.dty_ID;
@@ -257,81 +494,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 this.addEditRecord(-1);
             }
     },
-        
-    //----------------------
-    //
-    //
-    //
-    _recordListItemRenderer:function(recordset, record){
-        
-        function fld(fldname){
-            return recordset.fld(record, fldname);
-        }
-        function fld2(fldname, col_width){
-            swidth = '';
-            if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="width:'+col_width+'"';
-            }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
-        }
-        
-        var showActionInList = (window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)); 
-        //&& (this.options.select_mode=='manager')
-        
-        var recID   = fld('dty_ID');
-        
-        var recTitle = fld2('dty_ID','4em')
-                + fld2('dty_Name','14em')
-                + '<div class="item inlist" style="width:25em;">'+fld('dty_HelpText')+'</div>'
-                + '<div class="item inlist" style="width:10em;">'+window.hWin.HEURIST4.detailtypes.lookups[fld('dty_Type')]+'</div>'
-                + (showActionInList?this._rendererActionButton('edit'):'');
-
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="min-height: 2.6em;">'  
-        + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + '<div class="recordTitle" style="left:24px">'
-        +     recTitle;
-        
-        //actions
-        if(showActionInList){
-            
-            //special case for show in list checkbox
-            html = html 
-            +  '<div title="Make type visible in user accessible lists" class="item inlist logged-in-only" '
-            + 'style="width:3em;padding-top:5px" role="button" aria-disabled="false" data-key="show-in-list">'
-            +     '<input type="checkbox" checked="'+(fld('dty_ShowInLists')==0?'':'checked')+'" />'
-            + '</div>';
-            
-            var group_selectoptions = this.searchForm.find('#sel_group').html();
-                        
-            html = html 
-                //  counter and link to rectype + this._rendererActionButton('duplicate')
-                //group selector
-            +  '<div title="Change group" class="item inlist logged-in-only"'
-            +  ' style="width:8em;padding-top:3px" data-key2="group-change">'
-            +     '<select style="max-width:7.5em;font-size:1em" data-grpid="'+fld('dty_DetailTypeGroupID')
-            + '">'+group_selectoptions+'</select>'
-            +  '</div>'
-                + this._rendererActionButton('delete');
-        }
-        
-        html = html 
-                + '</div>' //close recordTitle
-                + '</div>'; //close recordDiv
-        
-        /* 
-            html = html 
-        +'<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-        + '</div>&nbsp;&nbsp;'
-        + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-        + '</div>'
-        + '</div>';*/
-
-
-        return html;
-        
-    },
     
     //overwritten    
     _recordListGetFullData:function(arr_ids, pageno, callback){
@@ -353,7 +515,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         request[this.options.entity.keyField] = arr_ids;
         window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
     },
-    
+*/    
     //-----
     //
     // adding group ID value for new field type
@@ -374,9 +536,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
         }else
         //hide after edit init btnRecRemove for status locked 
-        if(false){ //@todo
-            var ele = this._toolbar;
-            ele.find('#btnRecRemove').hide();
+        if(this._toolbar){ //@todo
+            this._toolbar.find('#btnRecDelete').hide();
         }
         
         //fill init values of virtual fields
@@ -429,18 +590,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
     },
 
-    _deleteAndClose: function(unconditionally){
-    
-        if(unconditionally===true){
-            this._super(); 
-        }else{
-            var that = this;
-            window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this field type? Proceed?', function(){ that._deleteAndClose(true) }, 
-                {title:'Warning',yes:'Proceed',no:'Cancel'});        
-        }
-    },
-    
     //  -----------------------------------------------------
     //
     // perform special action for virtual fields 

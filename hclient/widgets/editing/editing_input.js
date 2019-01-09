@@ -586,7 +586,7 @@ $.widget( "heurist.editing_input", {
 
             $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
-                .css('width',dwidth?dwidth:'0px')
+                .css('width',(dwidth && dwidth!='0')?dwidth:'0px')
                 .val(value)
                 .appendTo( $inputdiv );
             
@@ -1174,7 +1174,7 @@ $.widget( "heurist.editing_input", {
                                 window.hWin.HEURIST4.msg.showMsgFlash('Points to a child record; value cannot be changed (delete it or edit the child record itself)', 2500);
                                 return;
                             }
-                            __show_select_dialog(false); 
+                            //__show_select_dialog(false); 
                         }
                     }
                     
@@ -1399,8 +1399,6 @@ $.widget( "heurist.editing_input", {
                     }
                 
                     $input.focusout( __url_input_state ); 
-                    
-                    this.input_prompt.text('This is a special URL field which is hyperlinked in search results. Use where one primary URL applies to each record, eg. for internet bookmarks. These URLs can be auto-checked. Turn on/off in record attributes');
                     
                     __url_input_state();               
                 
@@ -1761,6 +1759,7 @@ $.widget( "heurist.editing_input", {
                             + '</div>').appendTo( $inputdiv );                
                        if(this.configMode.entity=='recUploadedFiles'){
                            $input_img.css({'min-height':'320px','min-width':'320px'});
+                           $input_img.find('img').css({'max-height':'320px','max-width':'320px'});
                        }
                          
                         window.hWin.HAPI4.checkImageUrl(this.configMode.entity, this.options.recID, 'thumb',
@@ -1874,8 +1873,11 @@ $.widget( "heurist.editing_input", {
                             
                             //var urlThumb = window.hWin.HAPI4.getImageUrl(that.configMode.entity, 
                             //            newfilename+'.png', 'thumb', 1);
-                                        
-                            var urlThumb = file.thumbnailUrl+'?'+(new Date()).getTime();
+                            var urlThumb =
+                            (that.configMode.entity=='recUploadedFiles'
+                                ?file.url
+                                :file.thumbnailUrl)
+                                +'?'+(new Date()).getTime();
                             
                             // file.thumbnailUrl - is correct but inaccessible for heurist server
                             // we get image via fileGet.php

@@ -66,9 +66,9 @@ function hMapping(_mapdiv_id, _timeline, _options, _mylayout) {
             "color": "#0000FF",  //for lines and polygones
             "lineColor": "#0000FF",
             //"icon": "assets/star-red.png",
-            "iconSize": [16,16], //[24,24],
+            "iconSize": [24,24],  //[16,16]
             "iconShadow": null,
-            "iconAnchor":[8,8] //[9,17]
+            "iconAnchor":[12,12]
     });
 
 
@@ -248,16 +248,20 @@ if(_mapdata.limit_warning){
             var mapdata = _getDataset( dataset_id );
 
             if(mapdata['color']!=new_color){
+                
+                new_color = encodeURIComponent(new_color);
 
                 for (var i=0; i<mapdata.options.items.length; i++){
                     
                     var iconId = mapdata.options.items[i].options.iconId;
-                    if(typeof iconId=='string' && iconId.indexOf('http:')==0){
+                    if(typeof iconId=='string' && (iconId.indexOf('http:')==0 || iconId.indexOf('https:')==0)){
                         mapdata.options.items[i].options.icon = iconId;
                     }else{
+                        
                         mapdata.options.items[i].options.icon =
                             window.hWin.HAPI4.iconBaseURL + iconId
-                                + 'm.png&color='+encodeURIComponent(new_color);
+                                + 's.png&color='+new_color
+                                + (mapdata.options.items[i].options.linkedRecIDs)?'&circle='+new_color:'';
                     }
                     
 
@@ -1237,6 +1241,9 @@ console.log('tileloaded 2');
                 if(lt=='Beyond1914' || lt=='UAdelaide'){
                     customTheme['iconSize']  = [24,24];
                     customTheme['iconAnchor']  = [12,12];
+                }else{
+                    customTheme['iconSize']  = [16,16];
+                    customTheme['iconAnchor']  = [8,8];
                 }
             }
 
@@ -1485,6 +1492,17 @@ console.log('tileloaded 2');
     //
     function _selectItemsWithSameCoords(main_item, selected_placemark){
 
+        //linkedRecIDs - recids that refers to same place id - see recordset.toTimemap            
+        if(main_item.opts.linkedRecIDs){
+            selection = main_item.opts.linkedRecIDs;
+         
+            _showSelection(true, false, [selected_placemark]);
+            //trigger selection - to highlight on other widgets
+            if(_onSelectEventListener)_onSelectEventListener.call(that, selection);
+            return; 
+        }
+
+        //find markers with the same coordinates 
         var res = _getPlaceMarkFromItem( main_item, selected_placemark );
         if(res.placemark_type=='marker'){
         
@@ -1540,7 +1558,7 @@ console.log('tileloaded 2');
         //placemark_selected that was cliked - item may have several placemarks
         
         var res = _getPlaceMarkFromItem( this, selected_placemark );
-        if(res.placemark_type=='marker' &&
+        if(res.placemark_type=='marker' && 
             !this.placemark.points && this.dataset.id=='main'){
         
             _selectItemsWithSameCoords( this, selected_placemark );
@@ -1595,13 +1613,23 @@ console.log('tileloaded 2');
                                 return false;
                         }
                     });
+                    if(lastSelectedItem==null){
+                        selected_placemark = selected_placemarks[0];
+                        lastSelectedItem = selected_placemark.item;
+                    }
+                    
                 }else{
 
                     tmap.each(function(dataset){
                         dataset.each(function(item){ //loop trough all items
 
-                            if(lastRecID==item.opts.recid){
+                        
+                        
+                            if(lastRecID==item.opts.recid || 
+                                (item.opts.linkedRecIDs &&                             
+                                 window.hWin.HEURIST4.util.findArrayIndex(lastRecID, item.opts.linkedRecIDs)>=0) ){
                                 lastSelectedItem = item;
+                                selected_placemark = item.placemark;
                                 return false;
                             }
                         });
@@ -1887,7 +1915,7 @@ console.log('tileloaded 2');
 
             
                 }else if(item.opts.info){
-                    if(item.opts.info.indexOf('http://')==0){
+                    if(item.opts.info.indexOf('http://')==0 || item.opts.info.indexOf('https://')==0){
                         popupURL =  item.opts.info; //load content from url
                     }else{
                         html =  item.opts.info; //3. content already defined
@@ -2197,9 +2225,9 @@ ed_html +
         onWinResize: function(){
 //console.log('onWinResize');            
             if(tmap && tmap.map){ //fix google map bug to force redraw on previously hidden area
-                    var ele = $("#mapping");
+                    var ele = $("#mapping").find('.ui-layout-center');
                     tmap.map.resizeTo(ele.width(),ele.height());
-//console.log('DONE!');            
+//console.log('DONE! ',ele.height());            
             }
             _onWinResize(); //adjust timeline and legend position
         },

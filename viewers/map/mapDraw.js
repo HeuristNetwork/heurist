@@ -1335,7 +1335,6 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
 
         buildColorPalette();
 
-
         if(!window.hWin.HEURIST4.util.isempty(initial_wkt)){
             setTimeout(function(){
                     _loadWKT(initial_wkt);
@@ -1636,6 +1635,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         loadWKT: function(wkt){
             _deleteAllShapes();
             _loadWKT(wkt);
+        },
+        clearAll:function(){
+            _deleteAllShapes();
         }
     }
 

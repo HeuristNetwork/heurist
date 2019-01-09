@@ -138,7 +138,7 @@ $system->defineConstants();
             togglerContent_closed:  '<div class="ui-icon"></div>',
             onresize_end: function(){
                 //global 
-                //console.log('LAYOUT resize end');
+//console.log('LAYOUT resize end');
                 if(mapping) mapping.onWinResize();
             }
             
@@ -152,7 +152,7 @@ $system->defineConstants();
         var th = Math.floor($('#mapping').height*0.2);
         layout_opts.south__size = th>200?200:th;
         layout_opts.south__spacing_open = 7;
-        layout_opts.south__spacing_closed = 7;
+        layout_opts.south__spacing_closed = 12;
         layout_opts.south__onresize_end = function() {
             if(mapping) mapping.setTimelineMinheight();
             //console.log('timeline resize end');
@@ -205,6 +205,11 @@ $system->defineConstants();
                 rules = null;
             }
             
+            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+            if(!(mapdocument>0)){
+                mapdocument = null;
+            }
+            
             window.hWin.HAPI4.RecordMgr.search({q: q, rules:rules, w: "a", detail:(rules?'detail':'timemap'), l:3000},
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -219,7 +224,7 @@ $system->defineConstants();
                         
                         mapping.load( null, //mapdataset,
                             null,  //array of record ids                                               
-                            null,    //map document on load
+                            mapdocument,    //map document on load
                             function(selected){  //callback if something selected on map
                             },
                             function(){ //callback function on native map init completion
@@ -235,7 +240,7 @@ $system->defineConstants();
                 }
             );
         } else {
-            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);
+            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
             if(mapdocument>0){
                 mapping.load(null, null, mapdocument);//load with map document
             }else{
@@ -257,7 +262,7 @@ $system->defineConstants();
             if (w < 400) {
                 $("#mapSelectorBtn").button({showLabel:false}).width(20);
             }else{
-                $("#mapSelectorBtn").button({showLabel:true}).width(100);
+                $("#mapSelectorBtn").button({showLabel:true}).width(w-360);
             }
             
             mapping.onWinResize();
@@ -405,15 +410,22 @@ $system->defineConstants();
     function _adjustLegendHeight() {
         
         setTimeout(function(){
-            var legend = document.getElementById('map_legend');
-            var ch = $("#map_legend .content").height()+50;
+            var legend = $('#map_legend');
+            var ch = $("#map_legend .content").height()+30;
 
             
-            var nt = parseInt($(legend).css('bottom'), 10);
-            nt = 30;
-            var mh = $('#map').height();
+            var nt = parseInt(legend.css('bottom'), 10);
+            nt = 30; //bottom
+            //var mh = $('#map').height();
+            var mh = $("#mapping").find('.ui-layout-center').height();
             
-            var is_collapsed = ($(legend).find('#collapse').text() == "+");
+            var is_collapsed = (legend.find('#collapse').text() == "+");
+            if(is_collapsed){
+                ch = 14;
+                legend.css('overflow-y','hidden');
+            } else {
+                legend.css('overflow-y','auto');
+            }
            
            /*
             if(is_collapsed===true){
@@ -430,13 +442,13 @@ $system->defineConstants();
             
 //console.log('legend h='+(mh-nt-ch)+'  maph='+mh+'  contetn h='+ch+' bottom '+nt);            
                          
-            $(legend).css('bottom', nt);
+            legend.css('bottom', nt);
             
-            if(mh-nt-ch<70){
-                ch = mh-nt-50;
+            if(mh-nt-ch<50){
+                ch = mh-nt-50; //reduce height
             }
             var top = mh-nt-ch;
-            $(legend).css('top',top).height(ch);
+            legend.css('top',top).height(ch);
             
 //console.log('legend h='+ch+' top '+top+' bottom '+nt);            
             
@@ -448,6 +460,10 @@ $system->defineConstants();
 
         var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
         query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
+        if(mapping.map_control.getCurrentMapdocumentId()>0){
+            query = query + '&mapdocument=' + mapping.map_control.getCurrentMapdocumentId();
+        }
+        
         var url = window.hWin.HAPI4.baseURL+'viewers/map/map.php' + query;
 
         //document.getElementById("linkTimeline").href = url;
@@ -464,6 +480,10 @@ $system->defineConstants();
         query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
         query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
         url = window.hWin.HAPI4.baseURL+'viewers/map/map.php' + query;
+        if(mapping.map_control.getCurrentMapdocumentId()>0){
+            url = url + '&mapdocument=' + mapping.map_control.getCurrentMapdocumentId();
+        }
+        
         document.getElementById("code-textbox2").value = '<iframe src=\'' + url +
         '\' width="800" height="650" frameborder="0"></iframe>';
         
@@ -571,7 +591,7 @@ $system->defineConstants();
             
             <div id="mapSelector" class="map-inited" style="float:left;">
                 <label id="map-doc-select-lbl" style="padding: 4px;line-height: 2.2em;"><i>Map document:</i></label>
-                <button id="mapSelectorBtn" class="truncate" style="max-width: 200px;"></button> 
+                <button id="mapSelectorBtn" class="truncate" style="max-width:300px;text-align:left"></button> 
             </div>
             <div id="mapToolbar" class="map-inited" style="float:left;display:none">
                 <button id="btnMapRefresh" xxxdisabled="disabled" title="Refresh/reload current Map Document">Refresh current map</button>
@@ -599,7 +619,7 @@ $system->defineConstants();
 
             <!-- Legend overlay -->
             <div id="map_legend" 
-                style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:8px;overflow-y:auto; display:none;">
+                style="background-color: rgba(200, 200, 200, 0.7); color:black; padding:4 8;overflow-y:auto; display:none;">
                 <div id="map_extents"  style="font-size: 0.9em;display:inline-block;visibility:hidden;padding-bottom:1em;">Zoom to:&nbsp;
                         <select id="selMapBookmarks" style="font-size:1.0em;"></select>
                 </div>
@@ -620,7 +640,7 @@ $system->defineConstants();
         </div>
     </div>
     <div id="map-embed-dialog" style="display:none">
-        <p>Embed this Google Map (plus timeline) in your own web page:</p>
+        <p>Embed this Google Map (plus timeline) in your own web page. Enclose within &lt;code&gt; &lt;/code&gt; for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).</p>
         <p style="padding:1em 0 1em 0;font-size:0.9em">Copy the following html code into your page where you want to place the map, or use the URL on its own. The map will be generated live from the database using the current search criteria whenever the map is loaded. Use the web-safe version if the readable version does not work</p>
         <label style="font-size:0.9em">Readable code:</label>
         <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>

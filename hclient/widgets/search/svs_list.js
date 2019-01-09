@@ -598,7 +598,25 @@ $.widget( "heurist.svs_list", {
                 UGrpID: this.options.allowed_UGrpID},
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        that.allowed_svsIDs = response.data;
+                        that.allowed_svsIDs = response.data; //svs_id=>array()
+                        
+                        var svsID = Object.keys(that.allowed_svsIDs)
+                        var missed = [];
+                        //verify
+                        for(var i=0; i<that.options.allowed_svsIDs.length; i++){
+                            if(window.hWin.HEURIST4.util.findArrayIndex(that.options.allowed_svsIDs[i],svsID)<0){
+                                missed.push(that.options.allowed_svsIDs[i]);
+                            }
+                        }
+                        if(missed.length>0){
+                            window.hWin.HEURIST4.msg.showMsgErr(
+                            'Saved filter'+(missed.length>1?'s':'')+' (ID '
+                            + missed.join(', ')
+                            + ') specified in parameters '
+                            + (missed.length>1?'does':'do')+' not exist in the database. Please advise the database owner ('+
+                            + window.hWin.HAPI4.sysinfo['dbowner_email'] +')');
+                        }
+                        
                         that._updateAccordeonAsListOfButtons();
                     }
             });
@@ -608,6 +626,8 @@ $.widget( "heurist.svs_list", {
 
         this.accordeon.hide();
         this.accordeon.empty();
+        
+        $('<h4 style="padding:20px 0px;">Saved searches</h4>').appendTo(this.accordeon);
 
         var i, svsIDs = Object.keys(this.allowed_svsIDs);
 
@@ -662,11 +682,12 @@ $.widget( "heurist.svs_list", {
             $(this.accordeon).find('button[data-svs-id="'+svsIDs[0]+'"]').click();
         }
 
-        $(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
+        //$(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
+        $(this.accordeon).css({'overflow':'hidden',position:'unset','padding':'4px'});
 
-
-        var search_div = $('<div style="position:absolute;bottom:0px;height:2.5em;padding:4px;text-align:center;width:100%">'
-            +'<label>Search all fields:</label>'
+        //position:absolute;bottom:0px;
+        var search_div = $('<div style="height:2.5em;padding:4px;width:100%">'
+            +'<h4 style="padding:20px 0px;">Simple search</h4><label>Search all fields:</label>'
             +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
             +'&nbsp;<button id="search_button"/></div>')
         .insertAfter(this.accordeon);
@@ -1866,7 +1887,7 @@ $.widget( "heurist.svs_list", {
             return;
         }
         
-        var query = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&searchIDs='+svs_ID;
+        var query = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&views=list,map&searchIDs='+svs_ID;
         
         this.embed_dialog.find("#code-textbox3").val(query);
         

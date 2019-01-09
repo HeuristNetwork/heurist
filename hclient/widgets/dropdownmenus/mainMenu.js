@@ -464,10 +464,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             }});
             
             that.menues['menu_'+name].find('a').each(function(idx,item){
-                var href = $(item).attr('href');
-                if(href!='#' && !window.hWin.HEURIST4.util.isempty(href)){
-                    $(item).attr('href','#')
-                    $(item).attr('data-link', href);
+                if($(item).attr('data-ext')!=1){
+                    var href = $(item).attr('href');
+                    if(href!='#' && !window.hWin.HEURIST4.util.isempty(href)){
+                        $(item).attr('href','#')
+                        $(item).attr('data-link', href);
+                    }
                 }
             });
             
@@ -591,10 +593,16 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         var that = this;
         
+        if($(item).attr('data-ext')==1){
+          console.log('EXIT')
+          return;  
+        } 
+        
         var action = item.attr('id');
         var action_log = item.attr('data-logaction');
         var action_level = item.attr('data-user-admin-status');
         var action_passworded = item.attr('data-pwd');
+        if(!action_passworded && !window.hWin.HAPI4.has_access(2)) action_passworded = item.attr('data-pwd-nonowner');
         var href = item.attr('data-link');
         var target = item.attr('target');
 
@@ -812,7 +820,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 var size_type = item.attr('data-size');
                 var dlg_title = item.attr('data-header');
                 var dlg_help = item.attr('data-help');
-                
+
+                var size_w = item.attr('data-dialog-width');
+                var size_h = item.attr('data-dialog-height');
+
+                if(size_w>0 && size_h>0){
+                    options = {width:size_w, height:size_h};
+                }else
                 if(size_type=='large'){
                     options = {width:1400, height:800};
                 }else if(size_type=='portrait'){

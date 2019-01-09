@@ -47,10 +47,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             var request_code = null;
             if(window.hWin.HEURIST4.util.isnull(response) || window.hWin.HEURIST4.util.isempty(response.message)){
                 msg = 'Error_Empty_Message';
-                if(response && response.status!=window.hWin.ResponseStatus.REQUEST_DENIED 
-                    && !window.hWin.HEURIST4.util.isempty(response.request_code)){
-                            
+                if(response){
+                    if(response.status==window.hWin.ResponseStatus.REQUEST_DENIED ){
+                        msg = '';
+                    }else if (!window.hWin.HEURIST4.util.isempty(response.request_code)){
                         request_code = response.request_code;    
+                    }
                 }
             }else{
                 msg = response.message;
@@ -86,7 +88,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 response.error_title = 'Access denied';
                 response.sysmsg = (window.hWin.HAPI4.currentUser['ugr_ID']==0)?0:1;
 
-                if(needlogin && response.sysmsg==0){
+                if(msg=='' || (needlogin && response.sysmsg==0)){
                     msg = msg + 'It appears you are not logged in or your session has been experied. You have to re-login';
                 }else if(response.sysmsg==0){
                     msg = msg + 'You must be logged in';    
@@ -885,8 +887,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
 
         $dlg.dialog(options);
-        //$dlg.dialog('option','buttons',buttons);
-
+        
         if(options.hideTitle){
             $dlg.parent().find('.ui-dialog-titlebar').hide();
         }else{

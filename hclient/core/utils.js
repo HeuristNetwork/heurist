@@ -171,6 +171,11 @@ window.hWin.HEURIST4.util = {
     //
     composeHeuristQueryFromRequest: function(query_request, encode){
             var query_string = 'db=' + window.hWin.HAPI4.database;
+            
+            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+            if(mapdocument>0){
+                query_string = query_string + '&mapdocument='+mapdocument;
+            }
         
             if(!window.hWin.HEURIST4.util.isnull(query_request)){
 
@@ -503,6 +508,9 @@ window.hWin.HEURIST4.util = {
     },
     */
     
+    //
+    // see php htmlspecialchars
+    //
     htmlEscape: function (text) {
       var map = {
         '&': '&amp;',
@@ -513,7 +521,38 @@ window.hWin.HEURIST4.util = {
       };
 
       return text? (''+text).replace(/[&<>"']/g, function(m) { return map[m]; }):'';
-    },    
+    },  
+    
+    //
+    // whitelist e.g. "p, img"
+    //
+    stripTags: function(text, whitelist){
+        
+        if(window.hWin.HEURIST4.util.isempty(whitelist)){
+            
+            return window.hWin.HEURIST4.util.htmlEscape(text);             
+        }else{
+            
+            var link = document.createElement("span");
+            link.style.display = "none";
+            link.innerHTML = text;
+            document.body.appendChild(link);
+            
+            //find('*')
+            $(link).find('*').not(whitelist).each(function() {
+                var content = $(this).contents();
+                $(this).replaceWith(content);
+            });   
+            
+            text =  $(link).html();    
+            
+            document.body.removeChild(link); 
+            link = null;
+            
+            return text;
+        }
+        
+    },
 
     isObject: function (a)
     {
@@ -785,6 +824,7 @@ window.hWin.HEURIST4.util = {
         }
         
     },    
+    
     
     isRecordSet: function(recordset){
         return !window.hWin.HEURIST4.util.isnull(recordset) && $.isFunction(recordset.isA) && recordset.isA("hRecordSet");   

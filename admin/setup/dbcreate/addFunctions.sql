@@ -108,7 +108,7 @@ DROP FUNCTION IF EXISTS NEW_LIPOSUCTION $$
 -- For simplicity we just regard anything <= ASCII 32 as space
 -- C ispunct(): any of ! " # % &  ' ( ) ; < = > ? [ \ ] * + , - . / : ^ _ { | } ~
 CREATE FUNCTION NEW_LIPOSUCTION(s VARCHAR(20480) CHARACTER SET utf8)
-  RETURNS VARCHAR(20480) CHARACTER SET utf8
+  RETURNS VARCHAR(31) CHARACTER SET utf8
   DETERMINISTIC
   BEGIN
     DECLARE i, len INT;
@@ -132,7 +132,7 @@ CREATE FUNCTION NEW_LIPOSUCTION(s VARCHAR(20480) CHARACTER SET utf8)
         SET i = i + 1;
     END WHILE;
 
-    RETURN (s2);
+    RETURN SUBSTRING(s2,0,31);
   END $$
 
 

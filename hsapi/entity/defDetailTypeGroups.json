@@ -2,6 +2,7 @@
         "entityName": "defDetailTypeGroups",
 
         "tableName": "defDetailTypeGroups",
+        
         "tablePrefix": "dtg",
         
         "helpContent": "defDetailTypes.html",
@@ -39,7 +40,8 @@
                         "dty_Size":63,
                         "rst_DisplayName": "Group name:",
                         "rst_DisplayHelpText": "Lorem ipsum....", 
-                        "rst_RequirementType":"required"
+                        "rst_RequirementType":"required",
+                        "rst_DisplayWidth":40 
                     }
                 },
                 {
@@ -48,7 +50,8 @@
                         "dty_Type":"blocktext",
                         "dty_Size":255,
                         "rst_DisplayName":"Description:",
-                        "rst_DisplayHelpText": "" 
+                        "rst_DisplayHelpText": "",
+                        "rst_DisplayWidth":40 
                     }
                 },
                 {

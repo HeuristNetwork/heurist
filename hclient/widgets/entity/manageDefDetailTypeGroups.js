@@ -20,10 +20,7 @@
 
 $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     
-    
     _entityName:'defDetailTypeGroups',
-    btnAddRecord:null,
-    btnApplyOrder:null,
     
     _init: function() {
 
@@ -33,7 +30,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             this.options.edit_mode = 'none';
             this.options.width = 300;
         }else{
-            this.options.edit_mode = 'inline';    
+            this.options.edit_mode = 'inline';   //force inline editor 
             this.options.width = 890;
         }
         
@@ -44,6 +41,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             this.editForm.parent().hide();
             this.recordList.parent().css('width','100%');
         }
+        this.recordList.css('top',0);
     },
     
     //  
@@ -55,49 +53,23 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             return false;
         }
 
+            
         var that = this;
         
         this.recordList.resultList('option', 'show_toolbar', false);
-        if(this.options.edit_mode = 'inline'){
+        if(this.options.edit_mode == 'inline'){
             this.recordList.resultList('option', 'sortable', true);
             this.recordList.resultList('option', 'onSortStop', function(){
-                if(that.btnApplyOrder) that.btnApplyOrder.show()
+                that._toolbar.find('#btnApplyOrder').show();
             });
         }
-
-       //---------    EDITOR PANEL - DEFINE ACTION BUTTONS
-       //if actions allowed - add div for edit form - it may be shown as right-hand panel or in modal popup
-       if(this.options.edit_mode!='none'){
-            
-               //define add button on left side
-               this.btnAddRecord = this._defineActionButton({key:'add', label:'Add New Group', title:'', icon:'ui-icon-plus'}, 
-                        this.searchForm, 'full', {float:'left'});
-
-               this.btnApplyOrder = this._defineActionButton({key:'save-order', label:'Save Order', title:'', icon:null}, 
-                        this.searchForm, 'full', {float:'right'});
-       
-               this.btnApplyOrder.hide();
-
-               /*if(this.options.edit_mode=='inline'){            
-                    //define delete on right side
-                    this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'},
-                        this.editFormToolbar,'full',{float:'right'});
-               }*/
-       }
 
         window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
             function(response){
                 that._cachedRecordset = response.getSubSetByRequest({'sort:dtg_Order':1}, null);
                 that.recordList.resultList('updateResultSet', that._cachedRecordset);
+                that._selectAndEditFirstInRecordset(response);
                 
-                
-                //init inline editor at once
-                if(that.options.edit_mode=='inline'){
-                    var new_recID = that._getField2(that.options.entity.keyField); 
-                    if(new_recID>0){
-                        that.addEditRecord(new_recID);
-                    }
-                }
             });
             
         return true;
@@ -161,21 +133,13 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                 //there is no filter feature in this form - thus, show list directly
             }
             this.recordList.resultList('updateResultSet', data.recordset, data.request);
+            this._selectAndEditFirstInRecordset(data.recordset);
         }
     },
     
-    onEditFormChange: function( changed_element ){
-        
-        this._super();
-        
-        if(this._currentEditID == -1){
-            this.btnAddRecord.hide();
-        }else{
-            this.btnAddRecord.show();
-        }
-        
-    },
-    
+    //
+    // can remove group with assigned fields
+    //     
     _deleteAndClose: function(){    
             if(this._getField('dtg_FieldCount')>0){
                 window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
@@ -185,6 +149,9 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             this._super();
     },
     
+    //
+    // extend for save order
+    //
     _onActionListener: function(event, action){
 
         this._super(event, action);
@@ -221,19 +188,80 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             //that._afterSaveEventHandler( recID, fields );
-                            that.btnApplyOrder.hide();
+                            that._toolbar.find('#btnApplyOrder').hide();
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                 });
 
             }else{
-                this.btnApplyOrder.hide();    
+                this._toolbar.find('#btnApplyOrder').hide();    
             }
 
         }
 
     },
     
+    //
+    // extend dialog button bar
+    //    
+    _initEditForm_step3: function(recID){
+        
+        if(this._toolbar){
+            this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
+            this._toolbar.find('#btnRecDelete').css('display', 
+                    (recID>0 && this._getField('dtg_FieldCount')==0) ?'block':'none');
+        }
+        
+        this._super(recID);
+    },
+    
+    onEditFormChange: function( changed_element ){
+        this._super(changed_element);
+            
+        if(this._toolbar){
+            var isChanged = this._editing.isModified();
+            this._toolbar.find('#btnRecDelete').css('display', 
+                    (isChanged || this._getField('dtg_FieldCount')>0)?'none':'block');
+        }
+            
+    },  
+      
+    _getEditDialogButtons: function(){
+                                    
+            var that = this;        
+            
+            var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+                click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
+                      
+                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add New Group'),
+                      css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
+                      click: function() { that._onActionListener(null, 'add'); }},
+
+                {text:window.hWin.HR('Save Order'),
+                      css:{'float':'left',display:'none'}, id:'btnApplyOrder',
+                      click: function() { that._onActionListener(null, 'save-order'); }},
+                      
+                      
+                {text:window.hWin.HR('Close'), 
+                      css:{'margin-left':'3em','float':'right'},
+                      click: function() { 
+                          that.closeDialog(); 
+                      }},
+                {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
+                      css:{'margin-left':'0.5em','float':'right'},
+                      click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
+                {text:window.hWin.HR('Save'), id:'btnRecSave',
+                      accesskey:"S",
+                      css:{'font-weight':'bold','float':'right'},
+                      click: function() { that._saveEditAndClose( null, 'none' ); }},
+                {text:window.hWin.HR('Delete'), id:'btnRecDelete',
+                      css:{'float':'right',display:'none'},
+                      click: function() { that._onActionListener(null, 'delete'); }},
+                      
+                      ];
+        
+            return btns;
+    },
     
 });

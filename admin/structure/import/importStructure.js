@@ -583,7 +583,7 @@ $.widget( "heurist.importStructure", {
             this._selectedRtyID = rtyID;
             
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 5, rtyID, ['all'] );
+            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 6, rtyID, ['all'] );
             
             treedata[0].expanded = true; //first expanded
             
@@ -611,7 +611,7 @@ $.widget( "heurist.importStructure", {
                     var rectypes = node.data.rt_ids;
                     
                     var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 
-                                        5, rectypes, ['all'], parentcode );
+                                        6, rectypes, ['all'], parentcode );
                     if(res.length>1){
                         data.result = res;
                     }else{

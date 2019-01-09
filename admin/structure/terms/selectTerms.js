@@ -794,8 +794,9 @@ END TREE REALTED ROUTINES ---------------------------------------
     window.hWin.HEURIST4.msg.showDialog(sURL, {
 		"close-on-blur": false,
 		"no-resize": false,
-        height: 750,     // height and width of term tree editing popup
-        width: 1200,
+        title: (_datatype=='enum')?'Manage Terms':'Manage Relationship types',
+        height: (_datatype=='enum')?780:820,
+        width: 950,
 		afterclose: function() {
 
                 var  _type = 'enum';

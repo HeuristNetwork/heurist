@@ -39,6 +39,8 @@ class DbEntityBase
         fields structure description from json (used in validataion and access)
     */
     protected $fields;  
+    
+    protected $fieldsNames; //non virtual field names
 
     /**
     * keeps several records for delete,update actions
@@ -362,7 +364,9 @@ class DbEntityBase
                 $this->_readFields($field['children']);
                 
             }else{
-                //if(@$field['dtFields']['dty_Role']=='virtual') continue;
+                if(@$field['dtFields']['dty_Role']!='virtual'){
+                    $this->fieldNames[] = $field['dtID'];
+                }
                 $this->fields[ $field['dtID'] ] = $field['dtFields'];
                 
                 if(@$field['dtFields']['dty_Role']=='primary'){

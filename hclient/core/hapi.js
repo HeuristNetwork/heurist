@@ -284,8 +284,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                 if(!window.hWin.HEURIST4.util.isempty(password_protected)){
                     
-                    if(!(password_protected=='DatabaseDeletion' && window.hWin.HAPI4.has_access(2))) //owner can delete without password
-                    {
+
                         if(window.hWin.HAPI4.sysinfo['pwd_'+password_protected]){ //password defined
                         
                             window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
@@ -308,7 +307,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                             window.hWin.HEURIST4.msg.showMsgDlg('This action is not allowed unless a challenge password is set - please consult system administrator');
                         }
                         return false;
-                    }
+                    
                 }                
                 
                 
@@ -591,8 +590,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                         
                         if (is_message==true) {
-                            window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                                 'You may need to reload pages to see changes.');
+                            $dlg.parent('.ui-dialog').css({top:150,left:150});    
                         }      
                         
                         if($.isFunction(callback)) callback.call();
@@ -758,7 +758,6 @@ function hAPI(_db, _oninit) { //, _currentUser
                         document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event
                     }
 
-                            
                     callback = function(response)
                     {
                         var resdata = null;
