@@ -90,7 +90,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     
                     <li>
                         <a href="admin/structure/fields/manageDetailTypes.php" name="auto-popup" class="h3link"
-                            onClick="{return false;}" data-logaction="stManage"
+                            onClick="{return false;}" data-logaction="st_DetailTypes"
                             title="Browse and edit the base field definitions referenced by record types (often shared by multiple record types)">
                             Manage base field types</a>
                     </li>

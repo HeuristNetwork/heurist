@@ -1670,6 +1670,8 @@ $.widget( "heurist.svs_list", {
                     }else{
                         this.search_faceted.search_faceted('option', noptions ); //assign new parameters
                     }
+                    
+                    window.hWin.HAPI4.SystemMgr.user_log('search_Record_faceted');
 
                 }else{
 
@@ -1695,6 +1697,8 @@ $.widget( "heurist.svs_list", {
                     if(! window.hWin.HAPI4.SearchMgr.doApplyRules( this, request.rules, request.rulesonly ) ){
                         window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('RuleSets require an initial search result as a starting point.'),
                             3000, window.hWin.HR('Warning'), ele);
+                    }else{
+                        window.hWin.HAPI4.SystemMgr.user_log('search_Record_applyrules');
                     }
 
                 }else{
@@ -1702,6 +1706,8 @@ $.widget( "heurist.svs_list", {
                     request.detail = 'detail';
                     request.source = this.element.attr('id');
                     request.qname = qname;
+                    
+                    window.hWin.HAPI4.SystemMgr.user_log('search_Record_savedfilter');
 
                     //get hapi and perform search
                     window.hWin.HAPI4.SearchMgr.doSearch( this, request );

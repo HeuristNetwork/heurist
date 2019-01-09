@@ -50,7 +50,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
                     <li class="list-menu-only">
                         <a href="#" id="menulink-add-record" name="auto-popup"
-                            data-logaction="addRec"
+                            data-logaction="add_Record"
                             title="Add new record of specified record type">
                             Add record</a>
                     </li>
@@ -77,14 +77,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
                     <li id="menu-import-csv">
                         <a href="#"
-                            data-logaction="impDelim"
+                            data-logaction="imp_Delimited"
                             title="Import data from delimited text file. Supports matching, record creation, record update.">
                             Delimited text (csv, tsv)</a>
                     </li>
 
                     <li>
                         <a href="import/biblio/syncZotero.php" name="auto-popup"  class="fixed h3link embed"
-                            data-logaction="syncZotero"
+                            data-logaction="sync_Zotero"
                             onClick="{return false;}"
                             title="Synchronise with a Zotero web library - new records are added to Heurist, existing records updated">
                             Zotero synchronisation</a>
@@ -92,7 +92,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
                     <li class="admin-only">
                         <a href="import/fieldhelper/synchroniseWithFieldHelper.php" name="auto-popup" class="fixed h3link embed"
-                            data-logaction="impMultimedia"
+                            data-logaction="imp_Multimedia"
                             onClick="{return false;}" target="_blank"
                             title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
                             Index multimedia</a>
@@ -100,7 +100,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
                     <!-- import/email/emailProcessingSetup.php -->
                     <li><a href="#" name="auto-popup" class="fixed h3link embed"
-                        data-logaction="impEmails"
+                        data-logaction="imp_Emails"
                         onClick="{return false;}"
                         style="text-decoration:line-through"
                         title="Harvest email from a designated IMAP email server (set in database administrtion > Databsae > Advanced Properties)">
@@ -108,7 +108,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     </li>
 
                     <li><a href="import/hyperlinks/importHyperlinks.php" name="auto-popup" class="h3link embed"
-                            data-logaction="impHyperlinks"
+                            data-logaction="imp_Hyperlinks"
                         onClick="{return false;}"
                         title="Import web links from a browser bookmarks file or html web page saved as a file - use bookmarklet for web pages online">
                         Import hyperlinks</a>
@@ -116,14 +116,14 @@ require_once(dirname(__FILE__)."/../initPage.php");
 
                     <li id="menu-import-kml">
                         <a href="#"
-                            data-logaction="impKML"
+                            data-logaction="imp_KML"
                             title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
                             Import KML</a>
                     </li>
                     
                      <!-- applications/faims/syncFAIMS.php -->
                     <li><a href="#" name="auto-popup" class="fixed h3link embed"
-                            data-logaction="syncFAIMS"
+                            data-logaction="sync_FAIMS"
                         onClick="{return false;}"
                         style="text-decoration:line-through"
                         title="Import structure and data into the current Heurist database from a FAIMS module tarball or direct from FAIMS server database">
@@ -141,7 +141,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 <ul>
 
                     <li class="admin-only"><a href="import/utilities/manageFilesUpload.php" name="auto-popup" 
-                            data-logaction="uplMultifile"
+                            data-logaction="upl_Files_Multi"
                         class="large h3link embed"
                         onClick="{return false;}" target="_blank"
                         title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
@@ -149,7 +149,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                     </li>
 
                     <li class="admin-only"><a href="admin/verification/listDatabaseErrorsInit.php?type=files" name="auto-popup" 
-                            data-logaction="uplVerifyfile" id="menulink-verify-files"
+                            data-logaction="verify_Files" id="menulink-verify-files"
                         class="large h3link embed"
                         onClick="{return false;}" target="_blank"
                         title="">

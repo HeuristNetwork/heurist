@@ -1005,6 +1005,8 @@ $.widget( "heurist.search", {
             }
             */
             
+            window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
+            
             var request = window.hWin.HEURIST4.util.parseHeuristQuery(qsearch);
 
             request.w  = this.options.search_domain;

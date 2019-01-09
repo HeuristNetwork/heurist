@@ -487,8 +487,74 @@ function hAPI(_db, _oninit) { //, _currentUser
             }
 
             ,user_log: function(activity, suplementary){
-                var request = {a:'usr_log', activity:activity, suplementary:suplementary};
-                _callserver('usr_info', request);
+                
+                if($.isFunction(gtag)){
+/*                    
+Category
+Action
+Label (optional, but recommended) is the string that will appear as the event label.
+Value (optional) is a non-negative integer that will appear as the event value.
+
+gtag('event', <action>, {
+  'event_category': <category>,
+  'event_label': <label>,
+  'value': <value>
+});
+*/                  
+/*
+[open]_structure_Terms  Structure - category, open - action, Terms - label
+add_Record   Record - category   "add" action
+open_Crosstabs
+db_Register
+
+actions:
+open - default
+add
+imp =import
+sync
+upl =upload
+verify
+refresh
+exp =export
+
+short categories
+db  =Database
+st  =Structure
+Rec =Rceord 
+admin
+hlp
+prof =Profile
+
+
+*/
+                    var parts = activity.split('_'); 
+                    //allowed actions
+                    var actions = ['open','add','imp','sync','upl','verify','refresh','exp','search','delete','edit'];
+
+                    var idx = 0;                    
+                    var k = actions.indexOf(parts[0].toLowerCase());
+                    var evt_action = 'open';
+                    if(k>=0){
+                        evt_action = actions[k];
+                        idx++;
+                    }
+                    
+                    //short names for cats
+                    var categories = {'db':'database','st':'structure','rec':'record','hlp':'help','prof':'profile'};
+                    
+                    var evt_category = parts[idx].toLowerCase();
+                    if(categories[evt_category]) evt_category = categories[evt_category];
+                    idx++;
+                    
+                    var evt_label = (idx<parts.length)?parts[idx].toLowerCase():null;
+                    
+                    
+                    gtag('event', evt_action, {'event_category': evt_category, 'event_label': evt_label});
+                }else{
+                    var request = {a:'usr_log', activity:activity, suplementary:suplementary};
+                    _callserver('usr_info', request);
+                }
+                
             }
 
             //

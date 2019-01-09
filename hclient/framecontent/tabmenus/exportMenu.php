@@ -51,7 +51,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <div id="menu-export-csv" style="padding-left:5px;">
             <button class="export-button">CSV</button>
             <a href="#"
-                data-logaction="expCSV"
+                data-logaction="exp_CSV"
                 data-action="menu-export-csv"
                 title="Export records as delimited text (comma/tab), applying record type">
                 Comma or tab-separated text file</a>
@@ -60,7 +60,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <div id="menu-export-hml-resultset" style="padding-left:5px;">
             <button class="export-button">HML</button>
             <a href="#"
-                data-logaction="expHML"
+                data-logaction="exp_HML"
                 data-action="menu-export-hml-resultset"
                 title="Generate HML (Heurist XML format) for current set of search results (current query + expansion)">
                 HML <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
@@ -69,7 +69,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <div id="menu-export-hml-multifile" style="padding-left:5px;">
             <button class="export-button">XML</button>
             <a href="#" 
-                data-logaction="expXMLHuNI"
+                data-logaction="exp_XMLHuNI"
                 data-action="menu-export-hml-multifile"
                 title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
                 HuNI harvestable (file-per-record) <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
@@ -78,7 +78,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <div id="menu-export-kml" style="padding-left:5px;">
             <button class="export-button">KML</button>
             <a href="#" 
-                data-logaction="expKML"
+                data-logaction="exp_KML"
                 data-action="menu-export-kml"
                 title="Generate KML for current set of search results (current query + expansion)">
                 KML <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>

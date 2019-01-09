@@ -215,21 +215,21 @@ var cfg_layouts = [
                 apps:[
                     {appid:'h3_recordListExt', name: 'Record View', 
                                 options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', 
-                                is_single_selection:true, 'data-logaction':'viewRecord'}},    // H3 record viewer
-                    {appid:'ha51', options:{'data-logaction':'viewMapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
+                                is_single_selection:true, 'data-logaction':'open_Record'}},    // H3 record viewer
+                    {appid:'ha51', options:{'data-logaction':'open_MapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
                     {appid:'h3_recordListExt', name: 'Custom Reports', options:{title:'Custom Reports', 
-                                    url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'viewReports'}},
+                                    url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports'}},
                     {appid:'h4_static', name: 'Export',
                         options:{url: 'hclient/framecontent/tabmenus/exportMenu.php?db=[dbname]',
-                                         isframe:true, 'data-logaction':'viewExport'}
+                                         isframe:true, 'data-logaction':'open_Export'}
                         ,css:{position:'absolute', top:0,left:0,bottom:0,right:0,'min-width':'75em'}},
                     
                     {appid:'h4_connections',   options:{title:'Network Diagram',
                                      url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]',
-                                     'data-logaction':'viewNetwork'}},
+                                     'data-logaction':'open_Network'}},
  
                     {appid:'h3_recordListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
-                                url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'viewCrosstabs'}}
+                                url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs'}}
                     
             ]}]
         }

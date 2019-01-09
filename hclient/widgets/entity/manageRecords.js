@@ -2380,6 +2380,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
         
         this.onEditFormChange();
+        
+        window.hWin.HAPI4.SystemMgr.user_log('edit_Record');
     },
 
     
