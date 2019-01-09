@@ -1383,7 +1383,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
                 var sMsg = "Click YES to save changes and modify the record structure.<br><br>"
                             +"If you are unable to save changes, click Cancel and open<br>"
-                            +"structure modification in a new tab (button next to clicked one)";
+                            +"structure modification in main menu Structure > Modify / Extend";
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
                     
                         that._saveEditAndClose( null, function(){

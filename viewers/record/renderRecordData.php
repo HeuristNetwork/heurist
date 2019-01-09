@@ -544,9 +544,9 @@ function print_header_line($bib) {
             print '<div id=recID style="padding-right:10px">ID:'.htmlspecialchars($bib['rec_ID']).'</div>';
         }
         
-    if(!$is_map_popup){ 
+    if(true){ 
     ?>
-        <h3 style="padding:10px 10px 0px 2px;margin:0">
+        <h3 style="padding:10px 10px 0px 2px;margin:0;color: #DC8501;font-size:1.1em;">
             <div <?="style='padding-left:20px;height:20px;background-repeat: no-repeat;background-image:url("
                         .HEURIST_ICON_URL.$bib['rty_ID'].".png)' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
                 Type&nbsp;<?= $bib['rty_ID'].': '.htmlspecialchars($bib['rty_Name'])." " ?>
