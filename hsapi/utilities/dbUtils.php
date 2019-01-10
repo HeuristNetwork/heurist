@@ -171,7 +171,7 @@ class DbUtils {
         $source = HEURIST_FILESTORE_ROOT.$database_name.'/'; //HEURIST_FILESTORE_DIR;  database upload folder
         $destination = $archiveFolder.$database_name."_".time().".zip";
             
-        if(!$createArchive || zip($source, null, $destination, $verbose)) {
+        if(!$createArchive || createZipArchive($source, null, $destination, $verbose)) {
             
                 // Delete database from MySQL server
                 if(!mysql__drop_database($mysqli, $database_name_full)){

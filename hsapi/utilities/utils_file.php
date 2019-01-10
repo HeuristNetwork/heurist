@@ -44,8 +44,8 @@
     folderRecurseCopy
     
     ===
-    zip
-    unzip
+    createZipArchive
+    unzipArchive
     
     ===
     loadRemoteURLContentSpecial tries to avoid curl if url on the same domain

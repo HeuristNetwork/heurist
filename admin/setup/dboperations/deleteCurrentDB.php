@@ -65,7 +65,8 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
     <body class="popup">
 <?php
     //owner can delete without password
-    if(!$system->is_dbowner() && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion) ){
+    $pwd = @$_REQUEST['pwd'];
+    if(!$system->is_dbowner() && $system->verifyActionPassword($pwd, $passwordForDatabaseDeletion) ){
             $err = $system->getError();
             print '<div class="ui-state-error">'.$err['message'].'</div>';
     }else{
@@ -91,7 +92,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <input type='button' class="h3button" value='OK to Delete' style='font-weight: bold;' 
                         onclick="$('#page-inner').hide(); forms[0].submit();">
-                    <input name="pwd" value"<?php echo @$_REQUEST['pwd'];?>" type="hidden">
+                    <input name="pwd" value="<?php echo $pwd;?>" type='hidden'>
                     <input name='mode' value='2' type='hidden'>
                     <input name='db' value='<?=$dbname?>' type='hidden'>
                 </form>
