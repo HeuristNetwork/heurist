@@ -576,33 +576,35 @@ function SelectRecordType(_isFilterMode, _isWindowMode) {
 	} //end init listener
 
 	function _onDefineNewType(){
-
-			var db = window.hWin.HAPI4.database;
-			var url = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/editRectype.html?supress=1&db="+db;
-            var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
             
-			popupSelect = Hul.popupURL(top, url,
-			{	"close-on-blur": false,
-				"no-resize": false,
+        var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+        var sURL = window.hWin.HAPI4.baseURL +
+            "admin/structure/rectypes/editRectype.html?supress=1&db="+window.hWin.HAPI4.database;
+            
+        window.hWin.HEURIST4.msg.showDialog(sURL, {    
+                "close-on-blur": false,
+                "no-resize": false,
+                title: 'Record Type Title Mask Edit',
                 height: maxh*0.9,
                 width: 800,
-				callback: function(context) {
+                callback: function(context) {
 
-					if(!Hul.isnull(context)){
-						//refresh the local heurist
-						window.hWin.HEURIST4.rectypes = context.rectypes;
+                    if(!Hul.isnull(context)){
+                        //refresh the local heurist
+                        window.hWin.HEURIST4.rectypes = context.rectypes;
 
 
-						var _rtyID = Number(context.result[0]);
-						if(!isNaN(_rtyID)){
-							_arr_selection.push(""+Math.abs(_rtyID));
-						}
+                        var _rtyID = Number(context.result[0]);
+                        if(!isNaN(_rtyID)){
+                            _arr_selection.push(""+Math.abs(_rtyID));
+                        }
 
-						//new field type to be added - refresh list
-						_reinit_table();
-					}
-				}
-			});
+                        //new field type to be added - refresh list
+                        _reinit_table();
+                    }
+                }
+        });            
+            
 	}
     
     function _verifyThatRemoved_RecTypes_AreNotInUse(){
