@@ -2386,7 +2386,7 @@ window.hWin.HEURIST4.ui = {
     },
     
     
-    validateName: function(name, lbl){
+    validateName: function(name, lbl, maxlen){
       
             var swarn = "";
             var regex = /[\[\].\$]+/;
@@ -2398,7 +2398,12 @@ window.hWin.HEURIST4.ui = {
                    swarn = lbl+" contains . [ ] { } ' \" restricted characters which are not permitted in this context. Please use alphanumeric characters.";
             }else if (name.indexOf('<')>=0 && name.indexOf('<')< name.indexOf('>') ) {
                    swarn = lbl+" contains '<>' characters which are not permitted in this context. Please use alphanumeric characters.";
+            }else
+            if(maxlen>0  && name.length>maxlen){
+                swarn = 'Sorry, '+lbl+' exceeds the maximum allowed length - '+maxlen+' characters - by '
+                    +(name.length-maxlen)+' characters. Please reduce length.';                
             }
+            
             return swarn;
     },
         

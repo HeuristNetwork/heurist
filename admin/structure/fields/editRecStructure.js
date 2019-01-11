@@ -346,7 +346,7 @@ function EditRecStructure() {
                                 if(oNewValue=='') {
                                     fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
                                 }else{
-                                    var swarn = window.hWin.HEURIST4.ui.validateName(oNewValue, "Prompt (display name)")
+                                    var swarn = window.hWin.HEURIST4.ui.validateName(oNewValue, "Prompt (display name)", 255)
                                     if(swarn!=""){
                                         alert(swarn);
                                         fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
@@ -626,7 +626,7 @@ function EditRecStructure() {
                         
                         '<div class="input-row"><div class="input-header-cell">Field name:</div>'+
                             '<div class="input-cell">'+
-                                '<input id="ed_dty_Name" style="width:200px;" onchange="_onDispNameChange(event)" '+
+                                '<input id="ed_dty_Name" style="width:200px;" maxlength="255" onchange="_onDispNameChange(event)" '+
                                     'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" '+
                                     //'onblur="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
                                     'onkeyup="onFieldAddSuggestion(event,'+_rst_ID+')" '+  //need id to detect index_toinsert 
@@ -636,7 +636,7 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                             '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                             '<div class="input-cell">'+
-                                '<textarea class="initially-dis" style="width:450px" cols="450" rows="2" id="ed_dty_HelpText" '+
+                                '<textarea class="initially-dis" style="width:450px" maxlength="255" cols="450" rows="2" id="ed_dty_HelpText" '+
                                 'onkeypress="removeErrorClass(this)"'+
                                 'onfocus="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
                                 'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
@@ -736,7 +736,7 @@ function EditRecStructure() {
                         '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div>'+
                             '<div class="input-cell">'+
                                 '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" onchange="_onDispNameChange(event)" '+
-                                    'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" '+
+                                    'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" maxlength="255" '+
                                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
                                 '<span>'+    
                                 // Field width
@@ -755,7 +755,7 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                         '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                         '<div class="input-cell">'+
-                        '<textarea style="width:450px" cols="450" rows="2" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
+                        '<textarea style="width:450px" cols="450" rows="2" maxlength="255" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
                         'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
                         //'<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
                         //                    'This text is optional.</div>'+
@@ -1423,7 +1423,7 @@ function EditRecStructure() {
                     if(values[k] !== edt.value){
 
                         if(fieldnames[k]=="rst_DisplayName"){
-                            if(edt.value=='' || window.hWin.HEURIST4.ui.validateName(edt.value, "Prompt (display name)")!=""){
+                            if(edt.value=='' || window.hWin.HEURIST4.ui.validateName(edt.value, "Prompt (display name)", 255)!=""){
                                 continue;
                             }
                         }
@@ -3952,7 +3952,7 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
         
         var swarn = "";
         var dt_name = document.getElementById("ed_dty_Name").value.toLowerCase().trim();
-        swarn = window.hWin.HEURIST4.ui.validateName(dt_name, "Field 'Name'");
+        swarn = window.hWin.HEURIST4.ui.validateName(dt_name, "Field 'Name'", 255);
         //check that already exists
         if(swarn==""){
             for (var dty_ID in window.hWin.HEURIST4.detailtypes.names){
@@ -4080,7 +4080,7 @@ function onCreateFieldTypeAndAdd( insertAfterRstID ){
 //
 function _onDispNameChange(event){
     var name = event.target.value;
-    var swarn = window.hWin.HEURIST4.ui.validateName(name, "Prompt (display name)");
+    var swarn = window.hWin.HEURIST4.ui.validateName(name, "Prompt (display name)", 255);
     if(swarn){
         alert(swarn);
     }

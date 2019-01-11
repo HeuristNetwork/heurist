@@ -806,11 +806,11 @@ function DetailTypeEditor() {
         if(dt_name==="") {
             swarn = "Name is mandatory field"
         }else{
-            swarn = window.hWin.HEURIST4.ui.validateName(dt_name, "Field 'Default field type name'");
+            swarn = window.hWin.HEURIST4.ui.validateName(dt_name, "Field 'Default field type name'", 255);
         }
         if(swarn!=""){
             if(isShowWarn){
-                window.hWin.HEURIST4.msg.showMsgErr(swarn);
+                window.hWin.HEURIST4.msg.showMsgFlash(swarn);
             }
             document.getElementById("dty_Name").focus();
             _updatedFields = [];
@@ -821,6 +821,15 @@ function DetailTypeEditor() {
             if(isShowWarn) {
                 window.hWin.HEURIST4.msg.showMsgErr('Help text is mandatory field');
             }
+            document.getElementById("dty_HelpText").focus();
+            _updatedFields = [];
+            return "mandatory";
+        }
+        
+        ll = document.getElementById("dty_HelpText").value.length;
+        if(ll>255) {
+            window.hWin.HEURIST4.msg.showMsgFlash('Sorry, help text exceeds the maximum allowed length - 255 characters - by '
+                    +(ll-255)+' characters. Please reduce length.');
             document.getElementById("dty_HelpText").focus();
             _updatedFields = [];
             return "mandatory";

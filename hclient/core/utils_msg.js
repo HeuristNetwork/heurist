@@ -79,7 +79,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             }else if(response.status==window.hWin.ResponseStatus.INVALID_REQUEST){
 
-                msg = msg + "<br><br>The number and/or set of request parameters is not valid. Please email the Heurist development team ( info at HeuristNetwork dot org)";
+                msg = msg + "<br><br>The value, number and/or set of request parameters is not valid. Please email the Heurist development team ( info at HeuristNetwork dot org)";
 
             }else if(response.status==window.hWin.ResponseStatus.REQUEST_DENIED){
                 
