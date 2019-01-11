@@ -129,8 +129,7 @@ class DbsImport {
             $this->system->addError(HEURIST_INVALID_REQUEST, "Neither concept code nor local id is defined");
             return false;
         }
-        
-        
+
         // 1. get database url by database id
         $database_url = $this->_getDatabaseURL($db_reg_id);
 
@@ -403,7 +402,7 @@ foreach ($this->imp_recordtypes as $rtyID){
     $grp_id = $def_rectype[$idx_rt_grp];
     $def_rectype[$idx_rt_grp] = $group_rt_ids[$grp_id];
 
-    //disambiguate name
+    //disambiguate rectype name
     $def_rectype[$idx_name] = $this->doDisambiguate($def_rectype[$idx_name], $trg_rectypes['names']);
 
     //assign canonical to title mask (since in DB we store only rty_TitleMask)
@@ -513,7 +512,7 @@ foreach ($this->imp_fieldtypes as $ftId){
     $grp_id = $def_field[$idx_dt_grp];
     $def_field[$idx_dt_grp] = $group_ft_ids[$grp_id];
 
-    //disambiguate name
+    //disambiguate field name
     $def_field[$idx_name] = $this->doDisambiguate($def_field[$idx_name], $trg_detailtypes['names']);
 
     if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype" || $def_field[$idx_type] == "relmarker"){
@@ -946,6 +945,8 @@ $mysqli->commit();
             if($new_term_id){
                 //such term already exists
                 //$terms_correspondence_existed[$term_id] = $new_term_id;
+                $new_term_id = -$new_term_id;
+                
             }else{
                 //if not found add new term
 
@@ -985,25 +986,30 @@ $mysqli->commit();
                     $this->targetTerms->addNewTerm($new_term_id, $term_import);
                     
                 }else{
-                    $this->system->addError(HEURIST_ERROR, "Can't add term ".$term_id.' '.print_r($term_import, true)."  ".$res);
+                    $this->system->addError(HEURIST_ERROR,
+                    "Can't add term ".$term_id.' '.print_r($term_import, true)."  ".$res);
                     return false;
                 }
             }
 
             //fill $terms_correspondence
-            $this->terms_correspondence[$term_id] = $new_term_id;
+            $this->terms_correspondence[$term_id] = abs($new_term_id);
 
             if($children){
-                $lvl_src = array('code'=>array(),'label'=>array());
+                
+                //find same level codes and labels
+                $lvl_src = $this->targetTerms->getSameLevelLabelsAndCodes(-$new_term_id, $domain);
                 
                 foreach($children as $id=>$children2){
                     //($term_id, $domain, $children=null, $parent_id=null, $same_level_labels=null)
-                    $new_id = $this->_importVocabulary($id, $domain, $children2, $new_term_id, $lvl_src);
+                    $new_id = $this->_importVocabulary($id, $domain, $children2, abs($new_term_id), $lvl_src);
                     if($new_id>0){
-                        
+                        //new term 
                         $lvl_src['code'][] = $this->targetTerms->getTermCode($new_id);
                         $lvl_src['label'][] = $this->targetTerms->getTermLabel($new_id);
-                    } else {
+                    } else if($new_id<0){ 
+                        //already exists
+                    }else {
                         return false;
                     }
                     

@@ -299,13 +299,38 @@ class DbsTerms
         }
         
         if(is_array($lvl_src)){
-            foreach($lvl_src as $trmId=>$childs){
+            foreach($lvl_src as $trmId=>$children){
                 $name1 = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]));
                 $lvl_values[] = $name1;
             }
         }
 
         return $this->doDisambiguateTerms2($term_import, $lvl_values);
+    }
+    
+    //
+    //
+    //
+    public function getSameLevelLabelsAndCodes($parent_id, $domain){
+        
+        $lvl_src = array('code'=>array(),'label'=>array());
+        
+        if($parent_id>0){
+            $children = $this->findChildren($parent_id, $domain);
+            if(count($children)>0){
+                $idx_code = intval($this->data['fieldNamesToIndex']["trm_Code"]);
+                $idx_label = intval($this->data['fieldNamesToIndex']["trm_Label"]);
+                
+                foreach($children as $trmId=>$children2){
+                    $code = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code]));
+                    $label = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label]));
+                    $lvl_src['code'][] = $code;
+                    $lvl_src['label'][] = $label;
+                }
+            }
+        }
+        
+        return $lvl_src;
     }
 
     /**
@@ -324,7 +349,7 @@ class DbsTerms
         if(count($same_level_values)>0)
         foreach ($same_level_values as $value){
                 $name1 = removeLastNum(trim($value));
-                if($name == $name1){
+                if(strcasecmp($name, $name1)==0){
                     $found++;
                 }
         }

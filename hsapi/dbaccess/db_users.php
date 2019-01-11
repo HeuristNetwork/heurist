@@ -312,7 +312,10 @@
                 }
             }
         }
-        return user_getDefaultPreferences();
+        $dbname = $system->dbname_full();
+        return(@$_SESSION[$dbname]['ugr_Preferences'])
+                    ?$_SESSION[$dbname]['ugr_Preferences']
+                    :user_getDefaultPreferences();
     }
     
     
