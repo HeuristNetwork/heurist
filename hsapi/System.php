@@ -665,6 +665,16 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
             //if(!$this->is_dbowner()){ //reset to null if not database owner
             //}
         }
+        
+        if(status!=HEURIST_NOT_FOUND && status!=HEURIST_REQUEST_DENIED && status!=HEURIST_ACTION_BLOCKED){
+                $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Heurist encounters error. DB: '.$this->dbname(),
+                 'Error type: '.status."\n"
+                .'Database: '.$this->dbname()."\n"
+                .'User: '.$this->get_user_id().' '.@$this->current_User['ugr_FullName' ]."\n"
+                .'Message: '.$message."\n"
+                .($sysmsg?'System message: '.$sysmsg."\n":'')
+                .'Request: '.print_r($_REQUEST, true), null);
+        }
 
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
         return $this->errors;
