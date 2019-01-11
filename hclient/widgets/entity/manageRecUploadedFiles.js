@@ -472,7 +472,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     
     _afterSaveEventHandler: function( recID, fieldvalues ){
     
-        if(this._currentEditID<0 || this._isAdditionOfLocal){
+        if(this._currentEditID>0 || this._isAdditionOfLocal){
             this._isAdditionOfLocal = false;
             if(this.options.select_mode=='select_single'){
                 this._selection = new hRecordSet();
