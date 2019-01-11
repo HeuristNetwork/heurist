@@ -700,6 +700,7 @@ CREATE TABLE sysUGrps (
   ugr_FlagJT int(1) unsigned NOT NULL default '0' COMMENT 'Flag to enable in Jobtrack/Worktrack application',
   ugr_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   ugr_NavigationTree TEXT default NULL COMMENT 'JSON array that describes treeview for filters',
+  ugr_Preferences TEXT default NULL COMMENT 'JSON array with user preferences',
   PRIMARY KEY  (ugr_ID),
   UNIQUE KEY ugr_Name (ugr_Name),
   UNIQUE KEY ugr_eMail (ugr_eMail)

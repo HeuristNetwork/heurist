@@ -280,13 +280,42 @@
     /**
     * Get set of properties from SESSION
     */
-    function user_setPreferences($dbname, $params){
+    function user_setPreferences($system, $params){
+        
+        $mysqli = $system->get_mysqli();
+        $ugrID = $system->get_user_id();        
+        $dbname = $system->dbname_full();
+        
+        $exclude = array('a','db','DBGSESSID');
         
         foreach ($params as $property => $value) {
-            @$_SESSION[$dbname]["ugr_Preferences"][$property] = $value;
+            if(!in_array($property, $exclude)){
+                @$_SESSION[$dbname]["ugr_Preferences"][$property] = $value;    
+            }
         }
+        if($ugrID>0)
+        $res = mysql__insertupdate( $mysqli, 'sysUGrps', 'ugr', array(
+                    'ugr_ID'=>$ugrID,
+                    'ugr_Preferences'=>json_encode($_SESSION[$dbname]["ugr_Preferences"]) ));
     }
 
+    function user_getPreferences( $system ){
+
+        $mysqli = $system->get_mysqli();
+        $ugrID = $system->get_user_id();        
+        if($ugrID>0){
+            $res = mysql__select_value( $mysqli, 'select ugr_Preferences from sysUGrps where ugr_ID='.$ugrID);
+            if($res!=null && $res!=''){
+                $res = json_decode($res, true);
+                if($res && count($res)>0){
+                    return $res;
+                }
+            }
+        }
+        return user_getDefaultPreferences();
+    }
+    
+    
     /**
     *  if user is not enabled and login count=0 - this is approvement operation
     */

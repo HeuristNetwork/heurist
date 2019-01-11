@@ -746,6 +746,20 @@ $query = 'CREATE TABLE sysDashboard ('
             }
         }
         
+        $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_Preferences'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if($res) $res->close();
+        if(!$row_cnt){
+            //alter table
+            $query = "ALTER TABLE `sysUGrps` ADD `ugr_Preferences` text COMMENT 'JSON array with user preferences'";
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_Preferences', $mysqli->error);
+                return false;
+            }
+        }
+        
         //verify that required column exists in sysUGrps
         $query = "SHOW COLUMNS FROM `usrBookmarks` LIKE 'bkm_Notes'";
         $res = $mysqli->query($query);

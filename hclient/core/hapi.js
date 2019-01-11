@@ -550,11 +550,16 @@ prof =Profile
                     
                     
                     gtag('event', evt_action, {'event_category': evt_category, 'event_label': evt_label});
-                }else{
-                    var request = {a:'usr_log', activity:activity, suplementary:suplementary};
-                    _callserver('usr_info', request);
                 }
                 
+                if(activity.indexOf('search')<0 && activity.indexOf('edit')<0){
+                
+                    activity = activity.replace('_','');
+                    
+                    var request = {a:'usr_log', activity:activity, suplementary:suplementary};
+                    _callserver('usr_info', request);
+                
+                }
             }
 
             //

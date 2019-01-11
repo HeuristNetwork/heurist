@@ -1070,8 +1070,8 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
                 
             }//$reload_user_from_db from db
             
-            if(!@$_SESSION[$this->dbname_full]['ugr_Preferences']){
-                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getDefaultPreferences();
+            if(true || !@$_SESSION[$this->dbname_full]['ugr_Preferences']){ //always restore from db
+                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
             }
 
             $this->current_User = array('ugr_ID'=>intval($userID),

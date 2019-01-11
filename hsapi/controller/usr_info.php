@@ -68,10 +68,10 @@
         }
         
         
-    } else if ($action == "save_prefs"){ //save preferences into session
+    } else if (false && $action == "save_prefs"){ //save preferences into session (without db)
 
         if($system->verify_credentials(@$_REQUEST['db'])>0){
-            user_setPreferences($system->dbname_full(), $_REQUEST);
+            user_setPreferences($system, $_REQUEST);
             $res = true;
         }
 
@@ -101,6 +101,13 @@
         if ($action=="sysinfo") { //it call once on hapi.init on client side - so it always need to reload sysinfo
 
             $res = $system->getCurrentUserAndSysInfo();
+            
+        }else if ($action == "save_prefs"){
+           
+            if($system->verify_credentials(@$_REQUEST['db'])>0){
+                user_setPreferences($system, $_REQUEST);
+                $res = true;
+            }
 
         }else if ($action=="sysimages") { //get list of system images
         
