@@ -590,7 +590,7 @@ $.widget( "heurist.svs_list", {
     //
     //
     _updateAccordeonAsListOfButtons: function(){
-
+        
         var that = this;
         if(!this.allowed_svsIDs){  //find all saved searches for current user
 
@@ -599,6 +599,10 @@ $.widget( "heurist.svs_list", {
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         that.allowed_svsIDs = response.data; //svs_id=>array()
+                        
+                        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
+                            window.hWin.HAPI4.currentUser.usr_SavedSearch = that.allowed_svsIDs
+                        }
                         
                         var svsID = Object.keys(that.allowed_svsIDs)
                         var missed = [];

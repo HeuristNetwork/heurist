@@ -522,8 +522,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 tot++;
         }}//for records
       
-console.log(linkedPlaces);      
-        
         for(var placeID in linkedPlaces){
             if(placeID>0){
                 
