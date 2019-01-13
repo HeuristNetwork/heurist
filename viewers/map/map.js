@@ -1089,7 +1089,7 @@ if(_mapdata.limit_warning){
 
 
     function _load(_mapdata, _selection, __startup_mapdocument, __onSelectEventListener, _callback){
-
+        
             function __onDataLoaded(_tmap){  //this function is called only once after map initialization
                 tmap = _tmap;
 
@@ -1151,7 +1151,7 @@ console.log('tileloaded 2');
                         var bounds = new google.maps.LatLngBounds(swBound, neBound);
                         nativemap.fitBounds(bounds);
                     }
-
+                    
                     // loading the list of map documents  see map_overlay.js
                     that.map_control = new hMappingControls(that, __startup_mapdocument);
 
@@ -1187,8 +1187,9 @@ console.log('tileloaded 2');
                     $( document ).bubble('closeAll');  //close all popups    
                 }
 
-                if(__startup_mapdocument>0)
+                if(__startup_mapdocument>0){
                     that.map_control.loadMapDocumentById(__startup_mapdocument);    //see map_overlay.js
+                }
 
                 if(_callback){
                     _callback.call();

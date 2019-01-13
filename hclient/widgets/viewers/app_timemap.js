@@ -125,7 +125,7 @@ $.widget( "heurist.app_timemap", {
                 load: function(){
                     //that.loadanimation(false);
                     this.recordset_changed = true;
-                    this._refresh();   // this._initmap
+                    this._refresh();
                 }
             }
         );
@@ -146,8 +146,14 @@ $.widget( "heurist.app_timemap", {
         if ( this.element.is(':visible') && this.recordset_changed) {  //to avoid reload if recordset is not changed
 
             if( this.mapframe.attr('src') ){  //frame already loaded
-                this._initmap()
+                this._initmap();
             }else {
+                
+                var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+                if(mapdocument>0){
+                    this.options.startup = mapdocument;    
+                }
+                
                 var url = window.hWin.HAPI4.baseURL + 'viewers/map/map.php?db='+window.hWin.HAPI4.database;
                 if(this.options.layout){
                     if( this.options.layout.indexOf('timeline')<0 )
@@ -155,6 +161,7 @@ $.widget( "heurist.app_timemap", {
                     if( this.options.layout.indexOf('header')<0 )
                         url = url + '&noheader=1';
                 }
+                url = url + '&noinit=1'; //to init map here
 
                 (this.mapframe).attr('src', url);
             }
@@ -172,7 +179,7 @@ $.widget( "heurist.app_timemap", {
         }
     },
 
-    _initmap: function(){
+    _initmap: function( cnt_call ){
 
         if( !window.hWin.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0 ){
 
@@ -182,10 +189,14 @@ $.widget( "heurist.app_timemap", {
             var that = this;
 
             if(!mapping){
-                setTimeout(function(){ that._initmap()}, 1000); //bad idea
+//console.log('map frame not yet loaded');                
+                cnt_call = (cnt_call>0) ?cnt_call+1 :1;
+                setTimeout(function(){ that._initmap(cnt_call)}, 1000); //bad idea
                 return;
             }
 
+//console.log('initmap '+cnt_call);            
+            
             mapping.load( null, //mapdataset,
                 this.options.selection,  //array of record ids
                 this.options.startup,    //map document on load

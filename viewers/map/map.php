@@ -185,69 +185,76 @@ $system->defineConstants();
         // Mapping data
         var mapdata = [];
         mapping = new hMapping("map", "timeline", _options, mylayout);
-
         
-        var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
-        
-        //t:26 f:85:3313  f:1:building
-        // Perform database query if possible (for standalone mode - when map.php is separate page)
-        if( !window.hWin.HEURIST4.util.isempty(q) )
-        {
-            var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
-            
-            if(!window.hWin.HEURIST4.util.isempty(rules)){
-                try{
-                    rules = JSON.parse(rules);
-                }catch(ex){
-                    rules = null;    
-                }
-            }else{
-                rules = null;
-            }
-            
-            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
-            if(!(mapdocument>0)){
-                mapdocument = null;
-            }
-            
-            window.hWin.HAPI4.RecordMgr.search({q: q, rules:rules, w: "a", detail:(rules?'detail':'timemap'), l:3000},
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        //console.log("onMapInit response");
-                        //console.log(response);
+        var noinit = window.hWin.HEURIST4.util.getUrlParameter('noinit', location.search);
+        //init performed in app_timemap
+        if(noinit!='1'){ 
+            //this case only for initialization of mapping when it is loaded independently 
+            //otherwise initialization is performed in app_timemap.js
 
-                        // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
-                        var recset = new hRecordSet(response.data);
-                       
-                        //var mapdataset = recset.toTimemap();
-                        //mapping.load([mapdataset]);
-                        
-                        mapping.load( null, //mapdataset,
-                            null,  //array of record ids                                               
-                            mapdocument,    //map document on load
-                            function(selected){  //callback if something selected on map
-                            },
-                            function(){ //callback function on native map init completion
-                                var params = {id:'main', recordset:recset, title:'Current query' };
-                                mapping.map_control.addRecordsetLayer(params);
-                            }
-                        );                        
-                                    
-
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
+            var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
+            
+            //t:26 f:85:3313  f:1:building
+            // Perform database query if possible (for standalone mode - when map.php is separate page)
+            if( !window.hWin.HEURIST4.util.isempty(q) )
+            {
+                var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
+                
+                if(!window.hWin.HEURIST4.util.isempty(rules)){
+                    try{
+                        rules = JSON.parse(rules);
+                    }catch(ex){
+                        rules = null;    
                     }
+                }else{
+                    rules = null;
                 }
-            );
-        } else {
-            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
-            if(mapdocument>0){
-                mapping.load(null, null, mapdocument);//load with map document
-            }else{
-                mapping.load();//load empty map    
+                
+                var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+                if(!(mapdocument>0)){
+                    mapdocument = null;
+                }
+                
+                window.hWin.HAPI4.RecordMgr.search({q: q, rules:rules, w: "a", detail:(rules?'detail':'timemap'), l:3000},
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            //console.log("onMapInit response");
+                            //console.log(response);
+
+                            // Show info on map    @todo reimplement as map init callback IMPORTANT!!!!
+                            var recset = new hRecordSet(response.data);
+                           
+                            //var mapdataset = recset.toTimemap();
+                            //mapping.load([mapdataset]);
+                            
+                            mapping.load( null, //mapdataset,
+                                null,  //array of record ids                                               
+                                mapdocument,    //map document on load
+                                function(selected){  //callback if something selected on map
+                                },
+                                function(){ //callback function on native map init completion
+                                    var params = {id:'main', recordset:recset, title:'Current query' };
+                                    mapping.map_control.addRecordsetLayer(params);
+                                }
+                            );                        
+                                        
+
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                );
+            } else {
+    
+                var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+                if(mapdocument>0){
+                    mapping.load(null, null, mapdocument);//load with map document
+                }else{
+                    mapping.load();//load empty map    
+                }
             }
-            
-        }
+        
+        }//noinit!='1'
 
         //init popup for timeline  ART14072015
         $( document ).bubble({
