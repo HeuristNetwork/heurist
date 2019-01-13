@@ -25,6 +25,7 @@ require_once('dbsTerms.php');
 require_once(dirname(__FILE__).'/../utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../../admin/structure/saveStructureLib.php');
 
+define('_DBG', false);
 
 class DbsImport {
 
@@ -142,7 +143,7 @@ class DbsImport {
         if (!$this->source_defs) {
             return false; //see $system->getError
         }
-        
+
         $def_id = 0;
 
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
@@ -283,6 +284,8 @@ class DbsImport {
         $mysqli = $this->system->get_mysqli();
         $mysqli->autocommit(FALSE);
 
+$time_debug = time();
+$time_debug2 = $time_debug;
         
         // I. Add Terms (whole vocabulary)
         if(! ($this->_importVocabulary(null, "enum") && 
@@ -293,6 +296,8 @@ class DbsImport {
             return false;                
         }
         
+if(_DBG) error_log('Terms '.(time()-$time_debug));        
+$time_debug = time();        
         
         $group_ft_ids = array();
         $group_rt_ids = array();
@@ -379,7 +384,6 @@ foreach ($this->imp_recordtypes as $recId){
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 
 // III. Add record types
@@ -418,7 +422,7 @@ foreach ($this->imp_recordtypes as $rtyID){
     }
 
     $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null);
-
+//if(_DBG) error_log('rt '.$rtyID);
     if(is_numeric($res)){
 
         $new_rtyID  = abs($res);
@@ -433,6 +437,8 @@ foreach ($this->imp_recordtypes as $rtyID){
 
     }
 }
+if(_DBG) error_log('Recordtypes '.(time()-$time_debug).'   '.count($this->imp_recordtypes));        
+$time_debug = time();        
 
 
 // ------------------------------------------------------------------------------------------------
@@ -487,7 +493,6 @@ foreach ($this->imp_fieldtypes as $ftId){
     }
 }
 
-
 // ------------------------------------------------------------------------------------------------
 
 // V. Add field types
@@ -514,7 +519,7 @@ foreach ($this->imp_fieldtypes as $ftId){
 
     //disambiguate field name
     $def_field[$idx_name] = $this->doDisambiguate($def_field[$idx_name], $trg_detailtypes['names']);
-
+    
     if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype" || $def_field[$idx_type] == "relmarker"){
         //change terms ids for enum and reltypes
         $def_field[$idx_terms_tree] = $this->replaceTermIds(@$def_field[$idx_terms_tree], $def_field[$idx_type] );
@@ -533,19 +538,21 @@ foreach ($this->imp_fieldtypes as $ftId){
             $def_field[$idx_origin_id] = $codes[1];
         }
     }
-
+    
     array_shift($def_field); //remove dty_ID
     $res = createDetailTypes($columnNames, array("common"=>$def_field));
 
     if(is_numeric($res)){
         $this->fields_correspondence[$ftId] = abs($res);
         $trg_detailtypes['names'][abs($res)] = $def_field[$idx_name-1]; //new name
+        
     }else{
         $this->error_exit2("Can't add field type for id#".$ftId.". ".$res);
         return false;
     }
 }
-
+if(_DBG) error_log('Fields '.(time()-$time_debug).'   '.count($this->imp_fieldtypes));        
+$time_debug = time();        
 
 // ------------------------------------------------------------------------------------------------
 
@@ -598,7 +605,8 @@ foreach ($this->imp_recordtypes as $rtyID){
         }
     }
 }
-
+if(_DBG) error_log('Structures '.(time()-$time_debug));        
+$time_debug = time();        
 
 // ------------------------------------------------------------------------------------------------
 
@@ -623,6 +631,7 @@ foreach ($this->imp_recordtypes as $rtyID){
 }
 
 TitleMask::set_fields_correspondence(null);
+if(_DBG) error_log('Total '.(time()-$time_debug2));           
 
 $mysqli->commit();        
             
@@ -1071,7 +1080,7 @@ $mysqli->commit();
 
         foreach($entities as $id=>$name1){
             $name1 = removeLastNum($name1);
-            if($name == $name1){
+            if(strcasecmp($name, $name1)==0){
                 $found++;
             }
         }

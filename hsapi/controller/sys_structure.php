@@ -86,7 +86,7 @@
             //concept code is unique for record type unfortunately it does not specify exactly what database is preferable as a source of donwloading
             
             $isOK = false;  
-
+ini_set('max_execution_time', 0);
             $importDef = new DbsImport( $system );
 
             if($importDef->doPrepare(  array('defType'=>$_REQUEST["import"], 
