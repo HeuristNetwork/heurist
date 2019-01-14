@@ -677,10 +677,11 @@ window.hWin.HEURIST4.util = {
                                         dt.setDay(1)
                                     }
                                     
-                                    var res = dt.toString('yyyy-MM-ddTHH:mm:ssz');
-                                    if(res.indexOf('-')==0){ //BCE
+                                    var res = dt.toString('yyyyyy-MM-ddTHH:mm:ssz');
+                                    if(false && res.indexOf('-')==0){ //BCE
                                         res = res.substring(1);
-                                        res = '-'+('000000'+res).substring(res.length);
+                                        //for proper parsing need 6 digit year
+                                        res = '-00'+res;//.substring(res.length));
                                     }
                                     return res;
                                 }else{

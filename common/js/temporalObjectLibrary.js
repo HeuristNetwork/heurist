@@ -721,7 +721,7 @@ var TDate = function (strDate) {
                 var neg = s<0;
                 if (neg) {
                     s = s.replace(/\-/,"");
-                    //if(fillLength==4) fillLength=6; //special case - required 5 digits for visjs timeline
+                    //if(fillLength==4) fillLength=6; //special case - required 6 digits for visjs timeline
                 }
                 while (s.toString().length < fillLength) {
                     s = "0" + s;
@@ -790,7 +790,7 @@ var TDate = function (strDate) {
                         case "yyy":
                         case "yy":
                         case "y":
-                            return _year ? frmPart(_year,format.length) : "";
+                            return _year ? frmPart(_year, format.length) : "";
                         case "dddd":
                             return _year && _month && _day ? TDate.getDayName(_year, _month, _day) : "";
                         case "ddd":
