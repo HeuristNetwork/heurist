@@ -62,7 +62,7 @@
         //$entity->$method();
 
         if(!$entity){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong entity parameter: $entity_name");
+            $this->system->addError(HEURIST_ERROR, "Wrong entity parameter: $entity_name");
         }
 
         if($entity && $entity->isvalid()){

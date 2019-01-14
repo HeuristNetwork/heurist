@@ -588,7 +588,7 @@ class DbSysUsers extends DbEntityBase
             
             $ret = 'Users imported: '.count($newUserIDs);
             if (count($userIDs_already_exists)>0){
-                $ret = $ret.'. Users already exsist: '.count($userIDs_already_exists);
+                $ret = $ret.'. Users already exists: '.count($userIDs_already_exists);
             }
         }else{
             $mysqli->rollback();
