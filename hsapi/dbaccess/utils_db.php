@@ -550,7 +550,7 @@
         }
 
         $result = mysql__exec_param_query($mysqli, $query, $params);
-        
+    
         if($result==true && $primary_field_type=='integer'){
             $result = ($isinsert) ?$mysqli->insert_id :$rec_ID;
         }//for non-numeric it returns null
@@ -738,7 +738,7 @@ $query = 'CREATE TABLE sysDashboard ('
         if($res) $res->close();
         if(!$row_cnt){
             //alter table
-            $query = "ALTER TABLE `sysUGrps` ADD `ugr_NavigationTree` text COMMENT 'JSON array that describes treeview for filters'";
+            $query = "ALTER TABLE `sysUGrps` ADD `ugr_NavigationTree` mediumtext COMMENT 'JSON array that describes treeview for filters'";
             $res = $mysqli->query($query);
             if(!$res){
                 $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_NavigationTree', $mysqli->error);
@@ -752,7 +752,7 @@ $query = 'CREATE TABLE sysDashboard ('
         if($res) $res->close();
         if(!$row_cnt){
             //alter table
-            $query = "ALTER TABLE `sysUGrps` ADD `ugr_Preferences` text COMMENT 'JSON array with user preferences'";
+            $query = "ALTER TABLE `sysUGrps` ADD `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences'";
             $res = $mysqli->query($query);
             if(!$res){
                 $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_Preferences', $mysqli->error);
@@ -767,7 +767,7 @@ $query = 'CREATE TABLE sysDashboard ('
         if($res) $res->close();
         if(!$row_cnt){
             //alter table
-            $query = "ALTER TABLE `usrBookmarks` ADD `bkm_Notes` text COMMENT 'Personal notes'";
+            $query = "ALTER TABLE `usrBookmarks` ADD `bkm_Notes` mediumtext COMMENT 'Personal notes'";
             $res = $mysqli->query($query);
             if(!$res){
                 $system->addError(HEURIST_DB_ERROR, 'Cannot modify usrBookmarks to add bkm_Notes', $mysqli->error);
