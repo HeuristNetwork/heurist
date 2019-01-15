@@ -34,6 +34,7 @@ $.widget( "heurist.app_timemap", {
     _events: null,
 
     recordset_changed: true,
+    map_inited: false,
 
     // the constructor
     _create: function() {
@@ -189,13 +190,15 @@ $.widget( "heurist.app_timemap", {
             var that = this;
 
             if(!mapping){
-//console.log('map frame not yet loaded');                
+                this.map_inited = false; 
                 cnt_call = (cnt_call>0) ?cnt_call+1 :1;
                 setTimeout(function(){ that._initmap(cnt_call)}, 1000); //bad idea
                 return;
             }
 
-//console.log('initmap '+cnt_call);            
+            if(this.map_inited && cnt_call>0) return;
+            
+            this.map_inited = true;
             
             mapping.load( null, //mapdataset,
                 this.options.selection,  //array of record ids

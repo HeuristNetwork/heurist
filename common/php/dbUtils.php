@@ -1049,8 +1049,6 @@ function mysql__insertupdate($database, $table_name, $table_prefix, $record){
     }else{
         $ret = $mysqli->error;
     }
-
-    
     return $ret;
 }
 
