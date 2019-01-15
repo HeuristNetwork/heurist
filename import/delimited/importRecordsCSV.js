@@ -1792,6 +1792,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     $item.hasClass('indexes')?topitems2:topitems,
                     {useHtmlSelect:false, 
                      show_dt_name:true, 
+                     show_parent_rt:true, 
                      show_latlong:(currentStep==4), 
                      show_required:(currentStep==4)});    
                     

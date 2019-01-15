@@ -498,11 +498,23 @@ public static function assignRecordIds($params){
         $is_existing_id_field = false;
 
         $id_field = "field_".$field_count;
-        $altquery = "alter table ".$import_table." add column ".$id_field." varchar(255) ";
-        if (!$mysqli->query($altquery)) {
-            self::$system->addError(HEURIST_DB_ERROR, 'Cannot alter import session table; cannot add new index field', $mysqli->error);
-            return false;
+        
+        
+        $query = "SHOW COLUMNS FROM `$import_table` LIKE '$id_field'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if($res) $res->close();
+        if(!$row_cnt){ //good name
+        
+            $altquery = "alter table ".$import_table." add column ".$id_field." varchar(255) ";
+            if (!$mysqli->query($altquery)) {
+                self::$system->addError(HEURIST_DB_ERROR, 'Cannot alter import session table; cannot add new index field', $mysqli->error);
+                return false;
+            }
+        }else{
+            $is_existing_id_field = true;
         }
+        
         /*
         $altquery = "update ".$import_table." set ".$id_field."=-1 where imp_id>0";
         if (!$mysqli->query($altquery)) {
@@ -512,6 +524,7 @@ public static function assignRecordIds($params){
         
         array_push($imp_session['columns'], $id_fieldname );
         array_push($imp_session['uniqcnt'], (is_array(@$pairs)&&count($pairs)>0)?count($pairs):$imp_session['reccount'] );
+
         if(@$params['idfield']){
             array_push($imp_session['multivals'], $field_count ); //!!!!
         }
@@ -647,10 +660,11 @@ public static function assignRecordIds($params){
     unset($imp_session['validation']);  //save session without validation info
     
     $res = ImportSession::save( $imp_session );
+
     if(!is_array($res)){
         self::$system->addError(HEURIST_DB_ERROR, 'Cannot save import session', $res);
         return false;
-    }    
+    }
     
     return $ret_session;
 }
@@ -2179,6 +2193,8 @@ public static function performImport($params, $mode_output){
                         }else if (substr($field_type, -strlen("_long")) === "_long"){ // || $field_type=="longitude"
                             $field_type = substr($field_type, 0, strlen($field_type)-5);
                             $fieldtype_type = "long";
+                        }else if(defined('DT_PARENT_ENTITY') && $field_type==DT_PARENT_ENTITY){
+                            $fieldtype_type = 'resource';
                         }else{
                             $ft_vals = $recordTypeStructure[$field_type]; //field type description
                             $fieldtype_type = $ft_vals[$idx_fieldtype];

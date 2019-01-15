@@ -223,7 +223,6 @@
     */
     function recordSave($system, $record){
 
-
         //check capture for newsletter subscription
         if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
             
@@ -287,6 +286,7 @@
         }
         
         $system->defineConstant('RT_RELATION');
+        $system->defineConstant('DT_PARENT_ENTITY');
             
         $is_insert = ($recID<1);
 
@@ -413,26 +413,45 @@
                 }*/
                 
                 //add reverce field "Parent Entity" (#247) in child resource record
-                if(@$values['dtl_ParentChild']==true){
-                    
-                    if($system->defineConstant('DT_PARENT_ENTITY')){
-                    
-                        // $dtl_Value  is id of child record 
-                        $res = addReverseChildToParentPointer($mysqli, $dtl_Value, $recID, $addedByImport, false);
+                if(defined('DT_PARENT_ENTITY')){
+                    if(@$values['dtl_ParentChild']==true){
                         
-                        if($res<0){
-                            $syserror = $mysqli->error;
-                            $mysqli->rollback();
-                            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
-                            return $system->addError(HEURIST_DB_ERROR, 
-                                'Cannot save details. Cannot insert reverse pointer for child record', $syserror);
-                        }else if($res!=0){ 
-                            //update record title for child record
-                            list($child_rectype, $child_title) = mysql__select_row($mysqli,
-                                'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
-                                .$dtl_Value);
-                            recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title);
-                        }
+                        
+                        
+                            // $dtl_Value  is id of child record 
+                            $res = addReverseChildToParentPointer($mysqli, $dtl_Value, $recID, $addedByImport, false);
+                            
+                            if($res<0){
+                                $syserror = $mysqli->error;
+                                $mysqli->rollback();
+                                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                                return $system->addError(HEURIST_DB_ERROR, 
+                                    'Cannot save details. Cannot insert reverse pointer for child record', $syserror);
+                            }else if($res!=0){ 
+                                //update record title for child record
+                                list($child_rectype, $child_title) = mysql__select_row($mysqli,
+                                    'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
+                                    .$dtl_Value);
+                                recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title);
+                            }
+                        
+                    }else if($dtyID == DT_PARENT_ENTITY){
+                        
+                            $res = addParentToChildPointer($mysqli, $recID, $rectype, $dtl_Value, null, $addedByImport);                                       
+                            if($res<0){
+                                $syserror = $mysqli->error;
+                                $mysqli->rollback();
+                                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                                return $system->addError(HEURIST_DB_ERROR, 
+                                    'Cannot save details. Cannot insert pointer for parent record', $syserror);
+                            }else if($res!=0){ 
+                                //update record title for parent record
+                                list($parent_rectype, $parent_title) = mysql__select_row($mysqli,
+                                    'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
+                                    .$dtl_Value);
+                                recordUpdateTitle($system, $dtl_Value, $parent_rectype, $parent_title);
+                            }
+                         
                     }
                 }
                 
@@ -951,6 +970,75 @@
            $mysqli->query($query);
        }
     }
+    
+    
+    //
+    // add/update pointer detail field TO child record 
+    // return -1 - error, 0 - nothing done, 1 - insert
+    //
+    // only ONE parent allowed
+    function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,  $detailTypeId=null, $addedByImport=0){
+
+        $res = 0; 
+
+        if(defined('DT_PARENT_ENTITY')){
+
+            $dtl_ID = -1;
+            
+            //find what field in parent record refers
+            if(!($detailTypeId>0)){
+                
+               $query = 
+               'SELECT rst_DetailTypeID, dty_PtrTargetRectypeIDs FROM defRecStructure, defDetailTypes, Records '
+               .'WHERE rec_ID='.$parent_id.' AND rec_RecTypeID=rst_RecTypeID AND rst_CreateChildIfRecPtr=1 '
+               .'AND rst_DetailTypeID=dty_ID';
+
+               $pointers = mysql__select_assoc2($mysqli, $query);
+               if(count($pointers)>0)
+               foreach($pointers as $dt_ID=>$ptr){
+                   if($ptr) $ptr = explode(',',$ptr);
+                   if(count($ptr)>0 && in_array($child_rectype, $ptr)){
+                        $detailTypeId = $dt_ID;
+                        break;                        
+                   }
+               }
+            }
+
+            if(!($detailTypeId>0)){
+                return 0; //appropriate pointer field in parent record type not found   
+            }
+
+//error_log($parent_id.'  > '.$child_id);            
+            
+            //check if already exists
+            $query = 'SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID='
+            .$parent_id.' AND dtl_DetailTypeID='.$detailTypeId;
+            $res = $mysqli->query($query);
+            if ($res){
+                $matches = array();
+                while ($row = $res->fetch_row()){
+                    if($child_id == $row[1]){
+//error_log('exists');                        
+                        return 0; //exactly the same already exists                           
+                    }
+                    $dtl_ID = $row[0];
+                }
+                $res->close();
+            }
+
+            $mysqli->query('INSERT INTO recDetails '.
+                    "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport) ".
+                    "VALUES ($parent_id, ".$detailTypeId.", $child_id, $addedByImport )");                    
+                    
+            $res = 1;
+            if(!($mysqli->insert_id>0)) $res=-1;
+//error_log('inserted '.$mysqli->insert_id.'   '.$mysqli->error);                        
+        }
+
+        return $res;
+
+    }
+    
 
     // verify ACCESS RIGHTS -------------
     //
