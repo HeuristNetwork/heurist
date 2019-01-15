@@ -1822,7 +1822,9 @@ copy_IconAndThumb_FromLibrary
                 }else{
                     $recCount = $res->num_rows;
                     if ($recCount>0) { // there are records existing of this rectype, need to return error and the recIDs
-                        $ret['error'] = "You cannot delete term $trmID. It or its child terms are referenced in $recCount record(s)";
+                    
+                        $labels = getTermLabels($mysqli, array($trmID));
+                        $ret['error'] = "You cannot delete term $trmID [{$labels[$trmID]}]. It or its child terms are referenced in $recCount record(s)";
                         $ret['error_title'] = 'Warning: Term in use';
                         $ret['recIDs'] = array();
                         $links = array();
