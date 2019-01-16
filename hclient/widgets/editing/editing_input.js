@@ -134,6 +134,8 @@ $.widget( "heurist.editing_input", {
 //(this.detailType=="blocktext" || (this.detailType=='file' && this.configMode.entity!='records')  )?'top':''            
         }
         
+        var is_sortable = false;
+       
         //repeat button        
         if(this.options.readonly || this.f('rst_Display')=='readonly') {
 
@@ -156,6 +158,9 @@ $.widget( "heurist.editing_input", {
                 .appendTo( this.element );
                 
             }else{ //multiplier button
+            
+                is_sortable = true; 
+            
                 this.btn_add = $( "<span>")
                 .addClass("smallbutton editint-inout-repeat-button ui-icon-circlesmall-plus")
                 .appendTo( this.element )
@@ -186,16 +191,26 @@ $.widget( "heurist.editing_input", {
                 });
             }
         }        
-        
 
 
         //input cell
         this.input_cell = $( "<div>")
         .addClass('input-cell')
         .appendTo( this.element );
-
+        if(is_sortable){
+                this.input_cell.sortable({
+                    containment: "parent",
+                    delay: 250,
+                    items: '.input-div',
+                    stop:function(event, ui){
+                        //reorganize
+                        that.isChanged(true);
+                        that._onChange();
+                    }});            
+        } 
+        
+        
         //add hidden error message div
-
         this.error_message = $( "<div>")
         .hide()
         .addClass('heurist-prompt ui-state-error')
@@ -577,7 +592,8 @@ $.widget( "heurist.editing_input", {
                 }
               
 
-        }else if(this.detailType=='enum' || this.detailType=='relationtype'){
+        }
+        else if(this.detailType=='enum' || this.detailType=='relationtype'){
 
             var dwidth = this.f('rst_DisplayWidth');
             if(parseFloat(dwidth)>0){
@@ -778,7 +794,8 @@ $.widget( "heurist.editing_input", {
             }//allow edit terms only for true defTerms enum
             
             
-        }else if(this.detailType=='boolean'){
+        }
+        else if(this.detailType=='boolean'){
 
             $input = $( '<input>',{type:'checkbox', value:'1'} )
             .uniqueId()
@@ -791,7 +808,8 @@ $.widget( "heurist.editing_input", {
                 $input.prop('checked','checked');
             }
 
-        }else if(this.detailType=='rectype'){  //@todo it seems not used need refer via resource type and entity mgr
+        }
+        else if(this.detailType=='rectype'){  //@todo it seems not used need refer via resource type and entity mgr
 
             $input = $( "<select>" )
             .uniqueId()
@@ -806,7 +824,8 @@ $.widget( "heurist.editing_input", {
             }
             $input.change(function(){that._onChange();})
 
-        }else if(this.detailType=="user"){ //special case - only groups of current user
+        }
+        else if(this.detailType=="user"){ //special case - only groups of current user
 
             $input = $( "<select>")
             .uniqueId()
@@ -2538,7 +2557,7 @@ console.log('onpaste');
     //
     setValue: function(values){
 
-        //clear previous inputs
+        //clear ALL previous inputs
         this.input_cell.find('.input-div').remove();
         this.inputs = [];
         this.newvalues = {};
@@ -2604,7 +2623,7 @@ console.log('onpaste');
     },
     
     //
-    //
+    // get all values (order is respected)
     //
     getValues: function(){
 
@@ -2612,15 +2631,29 @@ console.log('onpaste');
             return this.options.values;
         }else{
             var idx;
-            var ress = [];
+            var ress = {};
+            var ress2 = [];
+            
             for (idx in this.inputs) {
                 var res = this._getValue(this.inputs[idx]);
-                if(!window.hWin.HEURIST4.util.isempty( res ) || ress.length==0){ //provide the only empty value  || res.trim()!=''
-                    if(window.hWin.HEURIST4.util.isnull( res )) res = '';
-                    ress.push(res)
+                if(!window.hWin.HEURIST4.util.isempty( res )){ // || ress2.length==0 provide the only empty value  || res.trim()!=''
+                    //if(window.hWin.HEURIST4.util.isnull( res )) res = '';
+                    
+                    var ele = this.inputs[idx].parents('.input-div');
+                    var k = ele.index();
+                    
+                    ress[k] = res;
+                    //ress2.push(res);
                 }
             }
-            return ress;
+            
+            ress2 = [];
+            for(idx in ress){
+                ress2.push(ress[idx]);
+            }
+            if(ress2.length==0) ress2 = [''];//at least one empty value
+
+            return ress2;
         }
 
     },
