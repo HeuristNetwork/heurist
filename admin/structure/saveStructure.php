@@ -155,15 +155,18 @@ else
                 //actually client sends the definition only for one record type
                 foreach ($data['rectype']['defs'] as $rtyID => $rt) {
                     $res = updateRecStructure($dtFieldNames, $rtyID, $rt);
-                    if( is_array( $res ) ){
+                    if( $res!==false ){
                         array_push($rv['result'], $res);
                     }else{
-                        $system->error_exit( $res );   
+                        $rv = false;
+                        break;
                     }
                 }
-                $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
-                $rv['detailtypes'] = dbs_GetDetailTypes($system);
-                $rv['terms'] = dbs_GetTerms($system);
+                if($rv!==false){
+                    $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
+                    $rv['detailtypes'] = dbs_GetDetailTypes($system);
+                    $rv['terms'] = dbs_GetTerms($system);
+                }
                 break;
 
             case 'deleteRTS':
@@ -172,10 +175,10 @@ else
                 $dtyID = @$_REQUEST['dtyID'];
 
                 if (!$rtyID || !$dtyID) {
-                    $rv['error'] = "Error: No IDs or invalid IDs sent with deleteRecStructure method call to saveStructure.php";
+                    $system->error_exit( "Error: No IDs or invalid IDs sent with deleteRecStructure method call to saveStructure.php" );
                 }else{
                     $rv = deleteRecStructure($rtyID, $dtyID);
-                    if (!array_key_exists('error', $rv)) {
+                    if ($rv!==false) {
                         $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
                         $rv['detailtypes'] = dbs_GetDetailTypes($system);
                     }
@@ -190,7 +193,7 @@ else
 
                 if (!$srcID && !$trgID) {
 
-                    $rv['error'] = "Error: No record type IDs or invalid IDs sent with deleteRelConstraint method call to saveStructure.php";
+                    $system->error_exit('Error: No record type IDs or invalid IDs sent with deleteRelConstraint method call to saveStructure.php');
 
                 }else{
                     //$colNames = $data['colNames'];  //['defs']
@@ -216,7 +219,7 @@ else
                 $trmID = @$_REQUEST['trmID'];
 
                 if (!$srcID && !$trgID) {
-                    $rv['error'] = "Error: No record type IDs or invalid IDs sent with deleteRelConstraint method call to saveStructure.php";
+                    $system->error_exit('Error: No record type IDs or invalid IDs sent with deleteRelConstraint method call to saveStructure.php');
                 }else{
                     $rv = deleteRelConstraint($srcID, $trgID, $trmID);
                     if (!array_key_exists('error', $rv)) {
@@ -230,11 +233,11 @@ else
 
                 $rtyID = @$_REQUEST['rtyID'];
 
-                if (!$rtyID) {
-                    $rv['error'] = "Error: No IDs or invalid IDs sent with deleteRectype method call to saveStructure.php";
+                if (!($rtyID>0)) {
+                    $system->error_exit('Error: No IDs or invalid IDs sent with deleteRectype method call to saveStructure.php');
                 }else{
                     $rv = deleteRecType($rtyID);
-                    if (!array_key_exists('error',$rv)) {
+                    if ($rv!==false) {
                         $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
                     }
                 }
@@ -253,12 +256,18 @@ else
                 $rv['groups'] = array();
                 foreach ($data['rectypegroups']['defs'] as $rtgID => $rt) {
                     if ($rtgID == -1) {    // new rectype group
-                        array_push($rv['groups'], createRectypeGroups($colNames, $rt));
+                        $resp = createRectypeGroups($colNames, $rt);
                     }else{
-                        array_push($rv['groups'], updateRectypeGroup($colNames, $rtgID, $rt));
+                        $resp = updateRectypeGroup($colNames, $rtgID, $rt);
+                    }
+                    if($resp!==false){
+                        array_push($rv['groups'], $resp);    
+                    }else{
+                        $rv = false;
+                        break;
                     }
                 }
-                if (!array_key_exists('error',$rv)) {
+                if ($rv!==false) {
                     $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
                 }
                 break;
@@ -270,7 +279,7 @@ else
                     $system->error_exit("Invalid or no record type group ID sent with deleteRectypeGroup method call to saveStructure.php");
                 }
                 $rv = deleteRectypeGroup($rtgID);
-                if (!array_key_exists('error',$rv)) {
+                if ($rv!==false) {
                     $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
                 }
                 break;
@@ -291,10 +300,14 @@ else
                     }else{
                         $resp = updateDettypeGroup($colNames, $dtgID, $rt);
                     }
-                    
-                    array_push($rv['groups'], $resp);
+                    if($resp!==false){
+                        array_push($rv['groups'], $resp);    
+                    }else{
+                        $rv = false;
+                        break;
+                    }
                 }
-                if (!array_key_exists('error', $rv['groups'])) {
+                if ($rv!==false) {
                     $rv['detailtypes'] = dbs_GetDetailTypes($system);
                 }
                 break;
@@ -306,7 +319,7 @@ else
                     $system->error_exit("Invalid or no detail type group ID sent with deleteDetailType method call to saveStructure.php");
                 }
                 $rv = deleteDettypeGroup($dtgID);
-                if (!array_key_exists('error',$rv)) {
+                if ($rv!==false) {
                     $rv['detailtypes'] = dbs_GetDetailTypes($system);
                 }
                 break;
@@ -354,10 +367,10 @@ else
                 $dtyID = @$_REQUEST['dtyID'];
 
                 if (!$dtyID) {
-                    $rv['error'] = "Error: No IDs or invalid IDs sent with deleteDetailType method call to saveStructure.php";
+                    $system->error_exit('Error: No IDs or invalid IDs sent with deleteDetailType method call to saveStructure.php');
                 }else{
                     $rv = deleteDetailType($dtyID);
-                    if (!array_key_exists('error',$rv)) {
+                    if ($rv!==false) {
                         $rv['detailtypes'] = dbs_GetDetailTypes($system);
                     }
                 }
@@ -428,11 +441,11 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
 
                 $ret = mergeTerms($retain_id, $merge_id, $colNames, $dt);
 
-                if(is_array($ret) && @$ret['error']){
-                    $rv = $ret;
-                }else{
+                if($ret!==false){
                     $rv['result'] = $ret;
                     $rv['terms'] = dbs_GetTerms($system);
+                }else{
+                    $rv = false;
                 }
                 
 
@@ -449,14 +462,14 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
                 $trmID = @$_REQUEST['trmID'];
 
                 if (!$trmID) {
-                    $rv['error'] = "Error: No IDs or invalid IDs sent with deleteTerms method call to saveStructure.php";
+                    $system->error_exit('Error: No IDs or invalid IDs sent with deleteTerms method call to saveStructure.php');
                 }else{
                     $ret = deleteTerms($trmID);
-                    if(is_array($ret) && @$ret['error']){
-                        $rv = $ret;
-                    }else{
+                    if($ret!==false){
                         $rv['result'] = $ret;
                         $rv['terms'] = dbs_GetTerms($system);
+                    }else{
+                        $rv = false;
                     }
                 }
                 break;
@@ -471,7 +484,9 @@ error_log($trmID.'  '.$new_parent_ID.'  '.print_r($all_children, true));
 }//$method!=null
 
 
-if(@$rv['error']){
+if($rv===false){
+    $response = $system->getError();
+}else if(@$rv['error']){  //sql error
     $response = $system->addError(HEURIST_ERROR, $rv['error']);
 }else{
     $response = array("status"=>HEURIST_OK, "data"=>$rv);

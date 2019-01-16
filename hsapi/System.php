@@ -657,25 +657,24 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
 
         if($status==HEURIST_REQUEST_DENIED && $sysmsg==null){
             $sysmsg = $this->get_user_id();
-        }else if($status==HEURIST_DB_ERROR){
-            error_log('DATABASE ERROR :'.$this->dbname()
-            .'  '.$message.($sysmsg?'. System message:'.$sysmsg:''));
-            $message = 'Heurist was unable to process. '.$message;
-            $sysmsg = 'reported in the server\'s PHP error log';
-            //if(!$this->is_dbowner()){ //reset to null if not database owner
-            //}
         }
         
         if($status!=HEURIST_INVALID_REQUEST && $status!=HEURIST_NOT_FOUND && 
            $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
+               
+                $Title = 'Heurist Error type: '.$status
+                    .' User: '.$this->get_user_id().' '.@$this->current_User['ugr_FullName' ]
+                    .' Database: '.$this->dbname();
+               
                 $sMsg = 'Message: '.$message."\n"
                 .($sysmsg?'System message: '.$sysmsg."\n":'')
                 .'Request: '.print_r($_REQUEST, true);
-                $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Heurist Error type: '.$status
-                    .' User: '.$this->get_user_id().' '.@$this->current_User['ugr_FullName' ]
-                    .' Database: '.$this->dbname(),
+                $rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title,
                     $sMsg, null);
-           error_log($rv.'  '.$sMsg);     
+                    
+           error_log($Title.'  '.$sMsg);     
+           $message = 'Heurist was unable to process. '.$message;
+           $sysmsg = 'This error has been emailed to the Heurist team. We apologise for any inconvenience';
         }
 
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);

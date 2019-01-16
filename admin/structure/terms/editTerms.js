@@ -2485,6 +2485,7 @@ function EditTerms() {
                                     window.hWin.HEURIST4.msg.showMsgDlg(response.data.warning, function(){
                                         __proceed(true);
                                     },{title:response.data.error_title, yes:'Proceed'})
+                                    //
                                     
                                 }else{
                                     __proceed(true);

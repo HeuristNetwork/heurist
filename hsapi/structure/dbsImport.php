@@ -622,9 +622,12 @@ foreach ($this->imp_recordtypes as $rtyID){
         $mask = $def_rts[$rtyID]['commonFields'][$idx_titlemask_canonical];
 //echo $mask;
         // note we use special global array $this->fields_correspondence - for proper conversion of remote id to concept code
-        $res = updateTitleMask( $this->rectypes_correspondence[$rtyID], $mask);
+        $res = updateTitleMask( $this->rectypes_correspondence[$rtyID], $mask); //see saveStructureLib
         if(!is_numeric($res)){
-            $this->error_exit2($res);
+            //$this->error_exit2($res);
+            $mysqli = $this->system->get_mysqli();
+            $mysqli->rollback();
+            $mysqli->close();
             return true;
         }
     }
