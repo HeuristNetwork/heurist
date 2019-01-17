@@ -377,6 +377,9 @@ If you have missing data for Required fields, you may find it convenient to set 
                     list of field roles
                 </div>
                 <div  class="ent_footer">
+                    <label id="lblParseStep2" style="position:absolute;bottom:22px;right:320px;font-style:italic">
+                        If Continue is disabled, you need to select record types in the list above
+                    </label>
                     <div id="btnParseStep2" style="position:absolute;bottom:1em;right:80px"
                     title="Start upload your CSV data into temporary database table, converts it to UTF8, parses data and verifies ID columns for valid integer values"
                     >Continue</div>

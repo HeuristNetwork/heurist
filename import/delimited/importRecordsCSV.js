@@ -156,6 +156,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $('#divFieldRolesHeader').hide();
                             $('#divParsePreview').empty();
                             $('#divFieldRoles').empty();
+                            $('#lblParseStep2').hide();
                             
                             //_doParse(1);
                         }
@@ -221,6 +222,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     .click(function(e) {
                            _doParse(2); 
                         });
+        $('#lblParseStep2').hide();
         window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
         $('#divFieldRolesHeader').hide();
         
@@ -2054,10 +2056,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     window.hWin.HEURIST4.util.setDisabled($('#csv_encoding'), true);
                     _showStep(2);
                     
+                    
                     window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
                     $('#divFieldRolesHeader').hide();
                     $('#divParsePreview').empty();
                     $('#divFieldRoles').empty();
+                    $('#lblParseStep2').hide();
                     
                     //_doParse(1);
                     
@@ -2104,10 +2108,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     request['upload_file_name'] = upload_file_name; //filename only
                     
                     encoded_file_name = '';
+                    
                     window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
                     $('#divFieldRolesHeader').hide();
                     container.empty();
                     container2.empty();
+                    $('#lblParseStep2').hide();
                 }else{
                     request['encoded_filename'] = encoded_file_name; //full path
                     request['original_filename'] = upload_file_name; //filename only
@@ -2226,9 +2232,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             haveErrors = true;
                         }
 
+                        
                         window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), haveErrors);
                         if(haveErrors){
                                 $('#divFieldRolesHeader').hide();
+                                $('#lblParseStep2').hide();
                         }else{
                                 $('#divFieldRolesHeader').show();
                         }
@@ -2331,7 +2339,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $.each(select_rectype, function(idx, item){
                                 var sel = window.hWin.HEURIST4.ui.createRectypeSelect( item, null, 'select...', false);    
                                 sel.change(function(evt){
-                                    window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), __isAllRectypesSelectedForIdFields() );
+                                    var is_disabled = __isAllRectypesSelectedForIdFields();
+                                    if(is_disabled){ $('#lblParseStep2').show(); } else $('#lblParseStep2').hide();
+                                    window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), is_disabled );
                                 });                                
                             });
 
@@ -2344,7 +2354,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             $("input[id^='id_field']").change(function(evt){
                                 var cb = $(evt.target);
                                 cb.prop('checked',true);
-                                window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), false );
+
                                 $('#divFieldRolesHeader').show();
 
                                 window.hWin.HEURIST4.util.setDisabled( $('#d_field_'+cb.val()), cb.is(':checked') );
@@ -2356,7 +2366,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             
                                 if(is_visible){$('#lbl_ID_select').show();}else{$('#lbl_ID_select').hide();}
                             
-                                window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), __isAllRectypesSelectedForIdFields() );
+                                var is_disabled = __isAllRectypesSelectedForIdFields();
+                                if(is_disabled){ $('#lblParseStep2').show(); } else $('#lblParseStep2').hide();
+                                window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), is_disabled );
                             });
                             
                             for(i=0; i<id_suggestions.length; i++){
@@ -2373,6 +2385,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             }
                             window.hWin.HEURIST4.ui.addoption($('#selImportId').get(0), imp_ID, response.data.import_name);
                             session_selector.hSelect("refresh");
+                            window.hWin.HEURIST4.util.setDisabled($('#btnClearAllSessions'), false );
                             _loadSession();    
                         }
                         
@@ -3430,8 +3443,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                         ?tabs[k]['values_error'].length:0;
                         if(cnt>0){                 
                             s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;">'
-                            +'Adds '+cnt+' new terms to the field "'+
-                             detDefs[dt_id]['commonFields'][idx_dt_name]+'"</button>';
+                            +'Adds '+cnt+' new terms to this field</button>';
+                              //'"'+detDefs[dt_id]['commonFields'][idx_dt_name]+'"</button>';
                             
                             s = s + '&nbsp;<button class="add_all_terms" style="padding: 4px 8px !important;display:none">'
                                   +'Adds new terms to all fields</button>';
