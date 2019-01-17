@@ -33,21 +33,26 @@
 </div>
 <div style="display:block">
     <label style="padding-right:3em; font-weight: bold;">Include:</label>
-    <label style="padding-right:2em;" title="Field names will be output as the first row of the output file">
-        <input type="checkbox" checked id="cbNamesAsFirstRow"/>Field names</label>
+    <label style="padding-right:2em;display:none" title="Field names will be output as the first row of the output file">
+        <input style="display:none" type="checkbox" checked id="cbNamesAsFirstRow"/>Field names</label>
     
-    <label style="padding-right:2em;" 
+    <label
         title="Outputs a separate column with the record title as well as the record id for the record(s) pointed to by the field">
         <input type="checkbox" checked id="cbIncludeResourceTitles"/>Target title for pointers</label>
     
-    <label style="padding-right:2em;" 
-        title="Outputs a separate column containing the internal ID(s) for a term field as well as the column with the term label(s)">
-        <input type="checkbox" checked id="cbIncludeTermLabels"/>Term codes</label>
-        
-    <label
+    <label style="padding-right:2em;"
         title="Output the terms preceded by any hierarchically higher terms separated by 
     periods. If unchecked, only the lowest level (leaf) term label is output.">
         <input type="checkbox" checked id="cbIncludeTermHierarchy"/>Term hierarchy</label>
+
+    <label style="padding-right:2em;" 
+        title="Outputs a separate column containing the ID(s) for a term field">
+        <input type="checkbox" id="cbIncludeTermIDs"/>Term IDs</label>
+        
+    <label style="padding-right:2em;" 
+        title="Outputs a separate column containing the internal ID(s) for a term field">
+        <input type="checkbox" id="cbIncludeTermCodes"/>Term codes</label>
+        
         
 </div>
 </fieldset>

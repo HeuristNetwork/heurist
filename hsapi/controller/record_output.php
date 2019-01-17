@@ -146,7 +146,8 @@ function outputXML($system, $data, $params){
     }
     
     $include_term_label_and_code = true;
-    $include_term_code = (@$params['prefs']['include_term_label_and_code']==1);
+    $include_term_ids = (@$params['prefs']['include_term_ids']==1);
+    $include_term_codes = (@$params['prefs']['include_term_codes']==1);
     $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
     $include_term_hierarchy = (@$params['prefs']['include_term_hierarchy']==1);
     
@@ -228,12 +229,23 @@ function outputXML($system, $data, $params){
                     }
                 }
     
-                array_push($headers[$rt], $field_name);            
-                if($include_term_label_and_code && $field_type=='enum'){
-                    array_push($headers[$rt], $field_name.' (Label)');            
-                    if($include_term_code) array_push($headers[$rt], $field_name.' (Code)' );   
-                             
-                }else if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
+                if($field_type=='enum'){
+
+                    array_push($headers[$rt], $field_name);  //labels are always included           
+                    
+                    if($include_term_ids){
+                        array_push($headers[$rt], $field_name.' ID');            
+                    }
+                    
+                    if($include_term_codes){
+                        array_push($headers[$rt], $field_name.' StdCode' );   
+                    }    
+                    
+                }else{
+                    array_push($headers[$rt], $field_name);                
+                }
+                
+                if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
                     array_push($headers[$rt], $field_name_title);            
                 }
             }
@@ -426,7 +438,7 @@ function outputXML($system, $data, $params){
                                 foreach($values as $val){
                                      $vals[] = temporalToHumanReadableString(trim($val));
                                 }                        
-                        }else if($include_term_label_and_code && $dt_type=='enum'){
+                        }else if($dt_type=='enum'){
                             
                                 if(count($values)>0){
                                     foreach($values as $val){
@@ -451,9 +463,11 @@ function outputXML($system, $data, $params){
                     
                     //empty values
                     if($value == null){
-                        if($include_term_label_and_code && $dt_type=='enum'){
+                        if($dt_type=='enum'){
+                            
                             $enum_label[] = '';
                             $enum_code[] = ''; 
+                            
                         }else if($include_resource_titles && $dt_type=='resource'){
                             $resource_titles[] = '';
                         }
@@ -471,13 +485,17 @@ function outputXML($system, $data, $params){
             }
             if($value==null) $value = '';                       
             
-            $record_row[] = $value;
             
             if(count($enum_label)>0){
                 $record_row[] = implode($csv_mvsep,$enum_label);    
-                if($include_term_code) $record_row[] = implode($csv_mvsep,$enum_code);    
-            }else if (count($resource_titles)>0){
-                $record_row[] = implode($csv_mvsep,$resource_titles);    
+                if($include_term_ids) $record_row[] = $value;
+                if($include_term_codes) $record_row[] = implode($csv_mvsep,$enum_code);    
+            }else {
+                $record_row[] = $value;
+                
+                if (count($resource_titles)>0){
+                    $record_row[] = implode($csv_mvsep,$resource_titles);    
+                }
             }
             
         }//for fields
