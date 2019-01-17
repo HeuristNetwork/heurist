@@ -199,14 +199,25 @@ $.widget( "heurist.editing_input", {
         .appendTo( this.element );
         if(is_sortable){
                 this.input_cell.sortable({
-                    containment: "parent",
+                    //containment: "parent",
                     delay: 250,
                     items: '.input-div',
                     stop:function(event, ui){
                         //reorganize
                         that.isChanged(true);
                         that._onChange();
+                        that.btn_cancel_reorder.show();
                     }});            
+                    
+                    
+                $('<br>').appendTo( this.header );
+                this.btn_cancel_reorder = $("<div title='Cancel reorder'>")
+                    .appendTo( this.header ).hide()
+                    .css({'padding':'1px', 'margin-top':'4px', 'font-size':'0.7em', width: '40px', float: 'right'})
+                    .button({label:'Cancel'});
+                this._on( this.btn_cancel_reorder, {
+                    click: this._restoreOrder} );
+                    
         } 
         
         
@@ -2623,6 +2634,22 @@ console.log('onpaste');
     },
     
     //
+    //restore original order of repeatable elements
+    //    
+    _restoreOrder: function(){
+        
+        this.btn_cancel_reorder.hide();
+        
+        if(this.options.readonly || this.f('rst_Display')=='readonly') return;
+        var idx, ele_after = this.error_message;
+        for (idx in this.inputs) {
+            var ele = this.inputs[idx].parents('.input-div');
+            ele.insertAfter(ele_after);
+            ele_after = ele;
+        }
+    },
+    
+    //
     // get all values (order is respected)
     //
     getValues: function(){
@@ -2636,8 +2663,7 @@ console.log('onpaste');
             
             for (idx in this.inputs) {
                 var res = this._getValue(this.inputs[idx]);
-                if(!window.hWin.HEURIST4.util.isempty( res )){ // || ress2.length==0 provide the only empty value  || res.trim()!=''
-                    //if(window.hWin.HEURIST4.util.isnull( res )) res = '';
+                if(!window.hWin.HEURIST4.util.isempty( res )){ 
                     
                     var ele = this.inputs[idx].parents('.input-div');
                     var k = ele.index();
