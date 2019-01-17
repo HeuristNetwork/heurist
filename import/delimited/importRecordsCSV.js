@@ -510,18 +510,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     function _doSetPrimaryRecType(is_initial){
         
-            var $dlg, buttons = {};
+            var $dlg, buttons = {}, _is_CancelClose = true;
         
             if($('#sa_primary_rectype > option').length==0){
                 window.hWin.HEURIST4.ui.createRectypeSelect( $('#sa_primary_rectype').get(0), null, window.hWin.HR('select...'), false);
             }else{
                 $('#sa_primary_rectype').val(imp_session['primary_rectype']);
             }
-        
+            
             //apply selection of primary and dependent reccord types
             buttons[window.hWin.HR('OK')]  = function() {
-                    
-                $dlg.parent().find('#sa_primary_rectype').off('change');    
+                _is_CancelClose = false;    
                 $dlg.dialog( "close" );
 
                 //prepare sequence object - based on selected rectypes and field names
@@ -609,13 +608,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             });
                     }
                     
-                }; 
+            }; 
             buttons[window.hWin.HR('Cancel')]  = function() {
+                    $dlg.dialog( "close" );
+                /*
                     $dlg.parent().find('#sa_primary_rectype').off('change');
                     $dlg.dialog( "close" );
                     if(is_initial==true){
                          _showStep(1);
                     }
+                */    
             };
         
             var dlg_options = {
@@ -623,7 +625,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 height: 640,
                 width: 900,
                 element: document.getElementById('divSelectPrimaryRecType'),
-                buttons: buttons
+                buttons: buttons,
+                close: function(event, ui){
+                    $dlg.parent().find('#sa_primary_rectype').off('change');    
+                    if(_is_CancelClose){
+                        if(is_initial==true){
+                             _showStep(1);
+                        }
+                    }
+                }
                 };
             $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
             $dlg.addClass('ui-heurist-bg-light');
