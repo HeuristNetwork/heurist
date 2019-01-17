@@ -456,7 +456,7 @@
     * @param mixed $record   - array(fieldname=>value) - all values considered as String except when field ended with ID
     *                          fields that don't have specified prefix are ignored
     */
-    function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record){
+    function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record, $allow_insert_with_newid=false){
 
         $ret = null;
         $primary_field_type = 'integer';
@@ -520,7 +520,11 @@
 
             if($isinsert){
                 if($primary_field_type=='integer' && $fieldname==$primary_field){ //ignore primary field for update
-                   continue;
+                    if($allow_insert_with_newid){
+                        $value = abs($value);
+                    }else{
+                        continue;     
+                    }
                 }
                 $query = $query.$fieldname.', ';
                 $query2 = $query2.'?, ';

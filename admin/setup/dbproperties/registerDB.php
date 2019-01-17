@@ -31,8 +31,9 @@ define('PDIR','../../../');  //need for proper path to js and css
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 
-if(!$system->is_dbowner() && $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
-    print $response = $system->getError()['message'];
+if(!$system->is_dbowner() && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
+    $err = $response = $system->getError();
+    print @$err['message'];
     exit();
 }
 
@@ -71,14 +72,17 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
         }
         
         function onKeyUpDbDescription( event ){
-            var len = event.target.value.length;
-            var btn = document.getElementById('btnSubmit');
-            var lbl = document.getElementById('cntChars');
-            btn.disabled = (len<40); 
-            btn.style.color = (len<40)?'lightgray':'black';
+            var ele = document.getElementById('dbDescription');
+            if(ele){
+                var len = ele.value.length; //event.target
+                var btn = document.getElementById('btnSubmit');
+                var lbl = document.getElementById('cntChars');
+                btn.disabled = (len<40); 
+                btn.style.color = (len<40)?'lightgray':'black';
 
-            lbl.innerHTML = len+' characters';            
-            lbl.style.color = (len<40)?'red':'#6A7C99';
+                lbl.innerHTML = len+' characters';            
+                lbl.style.color = (len<40)?'red':'#6A7C99';
+            }
         }
     </script>
     <style>
@@ -94,9 +98,9 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 
     <!-- Database registration form -->
 
-    <body class="popup">
+    <body class="popup" onload="onKeyUpDbDescription()">
         <!-- <div class="banner"><h2>Register Database with Heurist Master Index</h2></div> -->
-        <div id="page-inner" style="overflow:auto;">
+        <div id="page-inner" style="overflow-y: auto;overflow-x: hidden;">
             <!-- <h3>Registration</h3> -->
 <?php
 
@@ -106,7 +110,9 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             $dbName = $sysinfo['sys_dbName'];
             $dbDescription = $sysinfo['sys_dbDescription'];
             $ownerGrpID = $sysinfo['sys_dbOwner'];
+            $dbNewID = @$_POST['dbNewID'];
 
+            $isAlreadyRegistred = isset($dbID) && ($dbID > 0);
             $isRegistrationInProgress = isset($_POST['dbDescription']);
             
             // Do the work of registering the database if a suitable title is set
@@ -121,18 +127,39 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
                     "of the content, of at least 40 characters (max 1000)</p>";
                     $isRegistrationInProgress = false;
                 }
+                
+                if($dbNewID!=null){
+                                            
+                    if($dbNewID>0 && $dbNewID<4294967295) {
+                        
+                        if($system->verifyActionPassword(@$_REQUEST['dbNewID_pwd'], $passwordForServerFunctions)){
+                            
+                            $err = $response = $system->getError();
+                            
+                            print "<p style='color:red;font-weight:bold'>Is is not possible to assign database ID. "
+                                .@$err['message']."</p>";
+                            $isRegistrationInProgress = false;
+                        }
+                        
+                    }else{
+                        echo "<p style='color:red;font-weight:bold'>The database ID must be positive number</p>";
+                        $isRegistrationInProgress = false;
+                    }
+                    
+                    
+                }
             }
 
 
             if($isRegistrationInProgress){
                 
-                registerDatabase(); // this does all the work of registration
+                $isRegistrationInProgress = registerDatabase(); // this does all the work of registration
                 
             // Check if database has already been registered
-            }else if (isset($dbID) && ($dbID > 0))
+            }else if ($isAlreadyRegistred)
             { // already registered, display info and link to Heurist_Master_Index edit
             
-            $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db=Heurist_Master_Index';
+            $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
 ?>
     <fieldset>
     
@@ -167,8 +194,19 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     </fieldset>
  <?php
             } // existing registration
-            else
+            
+            if(!$isRegistrationInProgress && !$isAlreadyRegistred)
             { // New registration, display registration form
+            
+            $cuser = $system->getCurrentUser();
+            
+            $is_SpecialAdminUseOnly = strlen(@$passwordForServerFunctions)>6 && 
+            @$cuser['ugr_Preferences']['userCompetencyLevel']==0 &&
+            HEURIST_INDEX_DATABASE=='Heurist_Master_Index' && 
+            (strpos(HEURIST_SERVER_URL, 'https://heuristplus.sydney.edu.au')===0 ||
+            strpos(HEURIST_SERVER_URL, 'http://heurist.sydney.edu.au')===0) &&
+            strpos(HEURIST_INDEX_BASE_URL, 'http://heurist.sydney.edu.au')===0;
+            
 ?>
 
             <div id="registerDBForm" class="input-row" style="margin-top: 20px;">
@@ -179,9 +217,9 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     
     <div>
         <div class="header" style="vertical-align:top;min-width:100px"><label>Database Description:</label></div>
-        <textarea  type="memo" maxlength="1000" cols="80" rows="3" name="dbDescription" class="text"
+        <textarea  type="memo" maxlength="1000" cols="80" rows="3" name="dbDescription" id="dbDescription" class="text"
         style="border:1px solid;padding:2px"
-                                onkeyup="onKeyUpDbDescription( event )"></textarea>
+                                onkeyup="onKeyUpDbDescription( event )"><?php echo $dbDescription;?></textarea>
 
         <div class="heurist-helper1">
             Enter a short but informative description (minimum 40 characters) of this database (displayed in search list)
@@ -198,11 +236,20 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
     <div  style="margin-top: 15px; margin-bottom: 20px;">
         <div class="header"></div>
         <div>
-        <br/>Note: After registering the database, you will be asked to log in to a Heurist database (Heurist_Master_Index).
+        <br/>Note: After registering the database, you will be asked to log in to a Heurist database (<?php echo HEURIST_INDEX_DATABASE;?>).
         <br/>You should log into this database using your email address and the same login as your current database
         <br/>(or the first database you registered, if different). This will allow you to edit the collection metadata
         <br/>describing your database.
         </div>
+<?php if($is_SpecialAdminUseOnly){?>
+        <div style="border:1px solid gray;margin-top:14px;padding:14px">
+            <label>SYSTEM ADMIN USE ONLY</label><br/><br/><label>ID </label>
+            <input name="dbNewID" pattern="[0-9]" type="number" size="7" style="width:70px" value="<?php echo htmlspecialchars($dbNewID);?>"/>
+            <label style="padding-left:50px">PASSWORD </label>
+            <input name="dbNewID_pwd" type="password"/>
+        </div>
+<?php }?>
+        
     </div>
     </div>
 </fieldset>    
@@ -259,7 +306,7 @@ function registerDatabase() {
     
     
     global $dbowner, $system,
-            $dbID, $dbName, $dbDescription, $ownerGrpID;
+            $dbID, $dbName, $dbDescription, $ownerGrpID, $dbNewID;
 
                 $heuristDBname = rawurlencode(HEURIST_DBNAME);
 
@@ -280,12 +327,15 @@ function registerDatabase() {
                                         .$system->get_system('sys_dbSubSubVersion');
 
                 $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" .
-                "?db=Heurist_Master_Index&dbReg=" . $heuristDBname . "&dbVer=" . $dbVersion .
+                "?db=".HEURIST_INDEX_DATABASE."&dbReg=" . $heuristDBname . "&dbVer=" . $dbVersion .
                 "&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
                 "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName .
                 "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail
                 ."&serverURL=" . rawurlencode($serverURL);
-
+                
+                if($dbNewID>0){
+                    $reg_url = $reg_url.'&newid='.$dbNewID;
+                }
                 
                 $data = loadRemoteURLContentSpecial($reg_url); //without proxy
 
@@ -294,15 +344,16 @@ function registerDatabase() {
                     echo '<p class="ui-state-error">'
                         .'Unable to contact Heurist master index, possibly due to timeout or proxy setting<br />'
                         ."URL requested: <a href='$reg_url'>$reg_url</a></p>";
-                    return;
+                    return false;
                 }
+                
+                $dbID = intval($data);
                 
                 $mysqli = $system->get_mysqli();
                 //restore connection
                 mysql__usedatabase($mysqli, HEURIST_DBNAME); 
-
                 
-                $dbID = intval($data); // correct return of data is just the registration number. we probably need a
+                 // correct return of data is just the registration number. we probably need a
 
                 if ($dbID == 0) { // Unable to allocate a new database identifier
                     $decodedData = explode(',', $data);
@@ -315,7 +366,7 @@ function registerDatabase() {
                         " ... \nPlease contact <a href=mailto:info@HeuristNetwork.org>Heurist developers</a> for advice";
                     }
                     echo '<p class="ui-state-error">'. $msg . "</p><br />";
-                    return;
+                    return false;
                 }
                 else if($dbID == -1)
                 { // old title update function, should no longer be called
@@ -323,6 +374,8 @@ function registerDatabase() {
                         "update sysIdentification set `sys_dbDescription`='".$mysqli->real_escape_string($dbDescription)."' where 1");
                     echo "<div class='input-row'><div class='header'>".
                     "Database description (updated):</div><div class='input-cell'>". $dbDescription."</div></div>";
+                    
+                    return true;
                 } else
                 { // We have got a new dbID, set the assigned dbID in sysIdentification
                 
@@ -332,7 +385,7 @@ function registerDatabase() {
                         
                     if($res) {
                         
-                        $edit_url = HEURIST_INDEX_BASE_URL."?fmt=edit&recID=".$dbID."&db=Heurist_Master_Index";
+                        $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
  ?>                  
  <fieldset>
                         <div><div class='header'>Database:</div>
@@ -379,9 +432,9 @@ function registerDatabase() {
                         'this database might be incorrectly set up<br />'.
                         'Please contact <a href=mailto:info@HeuristNetwork.org>Heurist developers</a> for advice</div></div>';
                         echo $msg;
-                        return;
                     } // unable to write db identification record
                 } // successful new DB ID
+                return true;
             } // registerDatabase()
 
 ?>

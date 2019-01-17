@@ -663,13 +663,16 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
            $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
                
                 $Title = 'Heurist Error type: '.$status
-                    .' User: '.$this->get_user_id().' '.@$this->current_User['ugr_FullName' ]
+                    .' User: '.$this->get_user_id().' '.@$this->current_User['ugr_FullName']
                     .' Database: '.$this->dbname();
                
                 $sMsg = 'Message: '.$message."\n"
                 .($sysmsg?'System message: '.$sysmsg."\n":'')
-                .'Request: '.print_r($_REQUEST, true);
-                $rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title,
+                .'Request: '.print_r($_REQUEST, true)."\n"
+                .'Script: '.@$_SERVER['REQUEST_URI']."\n";
+                //.'User: '.$this->get_user_id().' '.@$this->current_User['ugr_FullName']."\n"
+                //.'Database: '.$this->dbname();
+                $rv = sendEmail(HEURIST_MAIL_TO_BUG.',osmakov@gmail.com', $Title,
                     $sMsg, null);
                     
            error_log($Title.'  '.$sMsg);     
@@ -1335,7 +1338,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
             if(strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===0){ //same domain
        
                 $mysql_indexdb = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
-                if ( !is_array($mysql_indexdb) && mysql__usedatabase($mysql_indexdb, 'Heurist_Master_Index')){
+                if ( !is_array($mysql_indexdb) && mysql__usedatabase($mysql_indexdb, HEURIST_INDEX_DATABASE)){
                     
                     $system_settings = getSysValues($mysql_indexdb);
                     if(is_array($system_settings)){
@@ -1350,7 +1353,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
                 }
        
             }else{
-                $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=Heurist_Master_Index&check=1";
+                $url = HEURIST_INDEX_BASE_URL . "admin/setup/dbproperties/getCurrentVersion.php?db=".HEURIST_INDEX_DATABASE."&check=1";
                 $rawdata = loadRemoteURLContentSpecial($url); //it returns HEURIST_VERSION."|".HEURIST_DBVERSION
             }
             
@@ -1373,13 +1376,15 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         return $version_last_check; 
     }
 
-    
+    //
+    // return true is password is wrong
+    //
     public function verifyActionPassword($password_entered, $password_to_compare, $min_length=6)   
     {
         
         $is_NOT_allowed = true;
         
-        if(isset($password_entered)) {
+        if(isset($password_entered) && $password_entered!=null) {
             $pw = $password_entered;
 
             // Password in configIni.php must be at least $min_length characters

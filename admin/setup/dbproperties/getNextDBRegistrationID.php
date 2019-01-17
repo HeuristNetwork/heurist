@@ -84,6 +84,7 @@ $usrPassword = $_REQUEST["usrPassword"];
 $usrName = $_REQUEST["usrName"];
 $usrFirstName = $_REQUEST["usrFirstName"];
 $usrLastName = $_REQUEST["usrLastName"];
+$newid = @$_REQUEST["newid"];
 
 // $var is null, blank, 0 or false --> false
 if (!$serverURL || !$dbReg || !$dbTitle || !$usrEmail || !$usrName || !$usrFirstName || !$usrLastName || !$usrPassword) { // error in one or more parameters
@@ -101,6 +102,26 @@ if(strpos($serverURL, '//localhost')>0 ||  strpos($serverURL, '//127.0.0.1')>0){
     return;
 }
 
+define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (collection) descriptor records - fixed for Master database
+
+if($newid>0){ 
+
+    if(!(strpos($serverURL, 'http://heuristplus.sydney.edu.au')===0
+        || strpos($serverURL, 'http://heurist.sydney.edu.au')==0)){ 
+    
+        echo '0,It is possible to assign arbitrary ID for databases on heursit servers only';
+        return;
+    }
+    
+    $rec_id = mysql__select_value($mysqli, 'select rec_ID from Records where rec_ID='.$newid);
+    
+    if($rec_id>0){
+        echo '0,Database ID '.$newid.' is already allocated. Please choose different number';
+        return;
+    }
+}
+
+
 // was used for random password, no longer needed
 function genRandomString() {
     $length = 8;
@@ -114,7 +135,6 @@ function genRandomString() {
 $callingServer = $_SERVER['REMOTE_ADDR'];
 // TO DO: we need to check that the script is not being called repeatedly from the same server
 
-define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (collection) descriptor records - fixed for Master database
 
 // allocate a new user for this database unless the user's email address is recognised
 // If a new user, log the user in and assign the record ownership to that user
@@ -179,6 +199,7 @@ if($dbID>0) {
 
     $dbID = mysql__insertupdate($mysqli, 'Records', 'rec_', 
         array(
+            'rec_ID'=>($newid>0)?-$newid:0,
             'rec_URL'=>$mysqli->real_escape_string($serverURL),
             'rec_Added'=>date('Y-m-d H:i:s'),
             'rec_Title'=>$mysqli->real_escape_string($dbTitle),
@@ -187,7 +208,7 @@ if($dbID>0) {
             'rec_OwnerUGrpID'=>$indexdb_user_id,
             'rec_NonOwnerVisibility'=>'public',
             'rec_Popularity'=>99,
-        )
+        ), true
     );
     
     if($dbID>0){
