@@ -493,6 +493,7 @@ window.hWin.HEURIST4.ui = {
             needArray  =  (options.needArray===true),
             supressTermCode = options.supressTermCode,
             useHtmlSelect  = (options.useHtmlSelect===true);
+            useIds  = (options.useIds===true);
 
 
         if(needArray){
@@ -516,11 +517,17 @@ window.hWin.HEURIST4.ui = {
 
         //prepare header
         //
-        var temp = ( window.hWin.HEURIST4.util.isArray(headerTermIDsList)   //instanceof(Array)
+        var temp;
+        try{
+           temp = ( window.hWin.HEURIST4.util.isArray(headerTermIDsList)   //instanceof(Array)
             ? headerTermIDsList
             : (( typeof(headerTermIDsList) === "string" && !window.hWin.HEURIST4.util.isempty(headerTermIDsList) )
                 ? $.parseJSON(headerTermIDsList)  //headerTermIDsList.split(",")
                 : [] ));
+        }catch(ex2){
+           temp = [];
+        }
+                
 
         var headerTerms = {};
         for (var id in temp) {
@@ -619,9 +626,12 @@ window.hWin.HEURIST4.ui = {
                         var opt = new Option(termName+termCode, termID);
                         opt.className = "depth" + (depth<7)?depth:7;
                         //opt.depth = depth;
-                        $(opt).attr('depth', depth);
                         opt.disabled = isDisabled;
-                        $(opt).attr('term-img', hasImage?1:0);
+                        $(opt).attr('depth', depth)
+                              .attr('term-img', hasImage?1:0);
+                        if(useIds && termID>0){
+                            $(opt).attr('entity-id', termID);
+                        }
                         
                         
                         if(termParents!=''){
@@ -698,9 +708,12 @@ window.hWin.HEURIST4.ui = {
                     var tree = terms.treesByDomain[datatype];
                     termTree = (termTree>0)?tree[termTree]:tree;
                 }else{
-                    termTree = (typeof termTree == "string") ? $.parseJSON(termTree) : null;
-                    if(termTree==null){
-                        termTree = terms.treesByDomain[datatype];
+                    try{
+                        termTree = (typeof termTree == "string") ? $.parseJSON(termTree) : null;
+                        if(termTree==null){
+                            termTree = terms.treesByDomain[datatype];
+                        }
+                    }catch(ex2){
                     }
                 }
 
@@ -800,6 +813,7 @@ window.hWin.HEURIST4.ui = {
         var useIcons = !useHtmlSelect && (options.useIcons===true);
         var useCounts = (options.useCounts===true && window.hWin.HEURIST4.rectypes.counts);
         var useGroups = (options.useGroups!==false);
+        var useIds = (options.useIds!==false);
 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
@@ -839,6 +853,7 @@ window.hWin.HEURIST4.ui = {
                     {
                         if(useCounts && window.hWin.HEURIST4.rectypes.counts[rectypeID]<1) continue;
                         
+                       
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                         
                         if(useIcons){
@@ -847,6 +862,9 @@ window.hWin.HEURIST4.ui = {
                         }
                         if(useCounts){
                             $(opt).attr('rt-count', window.hWin.HEURIST4.rectypes.counts[rectypeID]);
+                        }
+                        if(useIds){
+                            $(opt).attr('entity-id', rectypeID);
                         }
                     }
                 }
@@ -891,7 +909,6 @@ window.hWin.HEURIST4.ui = {
                     if(!window.hWin.HEURIST4.util.isnull(name) && 
                         (rectypeList.length==0 || rectypeList.indexOf(rectypeID)>=0) )
                     {
-                        
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                         $(opt).attr('depth', 1);
                         
@@ -906,6 +923,10 @@ window.hWin.HEURIST4.ui = {
                         if(useCounts){
                             $(opt).attr('rt-count', window.hWin.HEURIST4.rectypes.counts[rectypeID]);
                         }
+                        if(useIds){
+                            $(opt).attr('entity-id', rectypeID);
+                        }
+                        
                         
                     }
                 }
@@ -1024,6 +1045,7 @@ window.hWin.HEURIST4.ui = {
         var selectedValue = null;
         var show_parent_rt = false;
         var useHtmlSelect = true;
+        var useIds = false;
         var initial_indent = 0;
         if(options){  //at the moment it is implemented for single rectype only
             showDetailType    = options['show_dt_name']==true;
@@ -1033,6 +1055,7 @@ window.hWin.HEURIST4.ui = {
             show_parent_rt    = options['show_parent_rt']==true;
             initial_indent    = options['initial_indent']>0?options['initial_indent']:0;
             useHtmlSelect     = options['useHtmlSelect']!==false;
+            useIds            = options['useIds']==true;
         }
         
         var dtyID, details;
@@ -1084,8 +1107,12 @@ window.hWin.HEURIST4.ui = {
                   dtyName = dtyNames[i];
                   var dtyID = dtyNameToID[dtyName];
                   
-                  window.hWin.HEURIST4.ui.addoption(selObj, dtyID, dtyName); //dtyNameToRty[dtyID]+'-'+
-
+                  opt = window.hWin.HEURIST4.ui.addoption(selObj, dtyID, dtyName); //dtyNameToRty[dtyID]+'-'+
+                    
+                  if(useIds){
+                    $(opt).attr('entity-id', dtyID);
+                  }
+                  
                   //sort RectypeName.FieldName
                   dtys[dtyName].sort();
                   
@@ -1096,7 +1123,6 @@ window.hWin.HEURIST4.ui = {
                     $(opt).attr('depth',1);
                     //opt.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+fieldName;
                     opt.disabled = "disabled";
-
                   }
                 }
             }else{
@@ -1167,7 +1193,6 @@ window.hWin.HEURIST4.ui = {
                         if(!window.hWin.HEURIST4.util.isnull(name)){
                                 arrterm.push([dtyID, name, (details[dtyID][fir]=="required") ]);    
                         }
-                        
                     }
                     if(addLatLongForGeo && details[dtyID][fit]=="geo"){
                         arrterm.push([ dtyID+'_long', details[dtyID][fi]+' [longitude]', false ]);
@@ -1186,6 +1211,9 @@ window.hWin.HEURIST4.ui = {
                     opt.className = "required";
                 }
                 $(opt).attr('depth',initial_indent);
+                if(useIds){
+                    $(opt).attr('entity-id', arrterm[i][0]);
+                }
             }
 
         }
@@ -1230,6 +1258,9 @@ window.hWin.HEURIST4.ui = {
                     for(;i<cnt;i++) {
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, arrterm[i][0], arrterm[i][1]);
                         $(opt).attr('depth',1);
+                        if(useIds){
+                            $(opt).attr('entity-id', arrterm[i][0]);
+                        }
                     }
                 }
 
@@ -2522,7 +2553,12 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         $('<span style="float:right;padding-right:2px">'+rt_count+'</span>')
           .appendTo( wrapper );    
     }
-    
+
+    var entity_id = item.element.attr( 'entity-id' );
+    if(entity_id>0){
+        $('<span style="font-size:smaller;color:lightgreen">['+entity_id+']</span>')
+          .appendTo( wrapper );    
+    }
     
 /*    
     if($(item.element).attr('depth')>0){

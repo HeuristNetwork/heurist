@@ -682,7 +682,7 @@ $.widget( "heurist.search", {
                         !this.options.rectype_set, false);
                         
         }
-        if(!this.select_rectype_addrec){
+        if(!this.select_rectype_addrec){ //add record selctor
 
             this.select_rectype_addrec = window.hWin.HEURIST4.ui.createRectypeSelect();
             if(this.select_rectype_addrec.hSelect("instance")!=undefined){
@@ -756,8 +756,10 @@ $.widget( "heurist.search", {
     _recreateSelectRectypeFilter: function(){
             var that = this;
 
+            var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+            
             this.select_rectype_filter = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, 
-                                                                {useIcons: true, useCounts:true, useGroups:false});
+                        {useIcons: true, useCounts:true, useGroups:false, useIds: (exp_level<2), });
             if(this.select_rectype_filter.hSelect("instance")!=undefined){
                 this.select_rectype_filter.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
             }
@@ -1129,9 +1131,12 @@ $.widget( "heurist.search", {
             var select_terms = $("#sa_termvalue");
             var sortasc =  $('#sa_sortasc');
             $dlg.find("#fld_enum").hide();
+            
+            var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
 
-            select_rectype = window.hWin.HEURIST4.ui.createRectypeSelect( select_rectype.get(0), 
-                        null, window.hWin.HR('Any record type'), false);
+            select_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew(select_rectype.get(0), 
+                        {useIcons: false, useCounts:true, useGroups:true, useIds: (exp_level<2), 
+                            topOptions:window.hWin.HR('Any record type')});
 
             var allowed = Object.keys(window.hWin.HEURIST4.detailtypes.lookups);
             allowed.splice(allowed.indexOf("separator"),1);
@@ -1164,10 +1169,12 @@ $.widget( "heurist.search", {
                         bottomOptions = [{key:'latitude',title:window.hWin.HR('geo: Latitude')},
                                          {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
                     }
+                    var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
                     
                     select_fieldtype = window.hWin.HEURIST4.ui.createRectypeDetailSelect($("#sa_fieldtype").get(0), 
                                 rectype, allowed, topOptions2, 
-                                {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, useHtmlSelect:false});
+                                {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
+                                    useIds: (exp_level<2), useHtmlSelect:false});
 
                     var topOptions = [{key:'t', title:window.hWin.HR("record title")},
                         {key:'id', title:window.hWin.HR("record id")},
@@ -1243,7 +1250,8 @@ $.widget( "heurist.search", {
                             var select_terms = $("#sa_termvalue");
 
                             window.hWin.HEURIST4.ui.createTermSelectExt2(select_terms.get(0),
-                            {datatype:detailType, termIDTree:allTerms, headerTermIDsList:disabledTerms, defaultTermID:null, 
+                            {datatype:detailType, termIDTree:allTerms, headerTermIDsList:disabledTerms, defaultTermID:null,
+                                useIds: true, 
                                 topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:'  '}], //window.hWin.HR('<blank>')
                                 needArray:false, useHtmlSelect:false});
                                                  
