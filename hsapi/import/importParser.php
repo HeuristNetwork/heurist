@@ -729,9 +729,14 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
             foreach ($child->childNodes as $data) {
               if ($data->nodeName != '#text') {
                 if ($data->nodeName == 'data') {
-                  $value = $data->getElementsByTagName('value');
-                  $value = $value[0];
-                  $properties[$data->getAttribute('name')] = preg_replace('/\n\s+/',' ',trim($value->textContent));
+                  $items = $data->getElementsByTagName('value'); //DOMNodeList 
+                  if($items->length>0){
+                        $items->item(0);
+                        $value = preg_replace('/\n\s+/',' ',trim($value->textContent));
+                  }else{
+                        $value = ''; 
+                  }
+                  $properties[$data->getAttribute('name')] = $value;
                 }
                 elseif ($data->nodeName == 'schemadata')
                 {
