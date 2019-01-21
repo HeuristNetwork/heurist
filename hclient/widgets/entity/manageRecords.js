@@ -2193,7 +2193,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
     //
     onEditFormChange:function(changed_element){
         
-        var force_hide = (changed_element===true);
+        var force_hide = (changed_element===true); //hide save buttons
         
         var mode = 'hidden';
         if(force_hide!==true){

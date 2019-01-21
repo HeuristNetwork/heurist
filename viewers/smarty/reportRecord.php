@@ -92,47 +92,48 @@ class ReportRecord {
 
                 // get rel records where current record is target
                 $to_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID='.$rec_ID);
+                if($from_res && $to_res){
+                    if ($from_res->num_rows() > 0  ||  $to_res->num_rows() > 0) {
 
-                if ($from_res->num_rows() > 0  ||  $to_res->num_rows() > 0) {
-
-                    //load relationship record details
-                    while ($reln = $from_res->fetch_assoc()) {
-                        $bd = fetch_relation_details($reln['dtl_RecID'], true);
-                        array_push($rel_records, $bd);
-                    }
-                    while ($reln = $to_res->fetch_assoc()) {
-                        $bd = fetch_relation_details($reln['dtl_RecID'], false);
-                        array_push($rel_records, $bd);
-                    }
-                    
-                    foreach ($rel_records as $key => $value){
-                        if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
-                            
-                            $record = $this->getRecord($value['RelatedRecID']['rec_ID']);
-                                                        
-                            
-                            //add relationship specific variables
-                            $record["recRelationType"] = $value['RelTerm'];
-
-                            if(array_key_exists('Notes', $value)){
-                                $record["recRelationNotes"] = $value['Notes'];
-                            }
-                            if(array_key_exists('StartDate', $value)){
-                                $record["recRelationStartDate"] = temporalToHumanReadableString($value['StartDate']);
-                            }
-                            if(array_key_exists('EndDate', $value)){
-                                $record["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
-                            }
-                            
-                            
-                            array_push($res, $record);
+                        //load relationship record details
+                        while ($reln = $from_res->fetch_assoc()) {
+                            $bd = fetch_relation_details($reln['dtl_RecID'], true);
+                            array_push($rel_records, $bd);
                         }
+                        while ($reln = $to_res->fetch_assoc()) {
+                            $bd = fetch_relation_details($reln['dtl_RecID'], false);
+                            array_push($rel_records, $bd);
+                        }
+                        
+                        foreach ($rel_records as $key => $value){
+                            if(array_key_exists('RelatedRecID',$value) && array_key_exists('RelTerm',$value)){
+                                
+                                $record = $this->getRecord($value['RelatedRecID']['rec_ID']);
+                                                            
+                                
+                                //add relationship specific variables
+                                $record["recRelationType"] = $value['RelTerm'];
+
+                                if(array_key_exists('Notes', $value)){
+                                    $record["recRelationNotes"] = $value['Notes'];
+                                }
+                                if(array_key_exists('StartDate', $value)){
+                                    $record["recRelationStartDate"] = temporalToHumanReadableString($value['StartDate']);
+                                }
+                                if(array_key_exists('EndDate', $value)){
+                                    $record["recRelationEndDate"] = temporalToHumanReadableString($value['EndDate']);
+                                }
+                                
+                                
+                                array_push($res, $record);
+                            }
+                        }
+                        
                     }
                     
+                    $from_res->close();
+                    $to_res->close();
                 }
-                
-                $from_res->close();
-                $to_res->close();
             }
             return $res;
     }
