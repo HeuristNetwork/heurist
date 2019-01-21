@@ -1745,7 +1745,9 @@ if(!detailtypes[dtID]){
         } 
 
         var f_link = $("<option>",{facet_index:facet_index, facet_value:cterm.value, facet_label:lbl, step:step})
-                            .css('padding-left', ((indent-1)*2)+'em' ).text(lbl).addClass("facet_link")
+                            //.css('padding-left', ((indent-1)*2)+'em' )
+                            .text(lbl).addClass("facet_link")
+        f_link.attr('depth',indent-1);
         
         return f_link;
     }
