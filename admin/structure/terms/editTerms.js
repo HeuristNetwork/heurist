@@ -1575,12 +1575,18 @@ function EditTerms() {
 
                     var fldTerms = deftype[fi["dty_JsonTermIDTree"]]; //Hul.expandJsonStructure(
                     //check if one these terms are child of affected vocab
-                    fldTerms = (typeof fldTerms == "string" && !Hul.isempty(fldTerms)) ? $.parseJSON(fldTerms) : null;
-                    if(!Hul.isnull(fldTerms)) {
+                    if(!Hul.isempty(fldTerms)){
+                        try{
+                            fldTerms = (typeof fldTerms == "string") ? $.parseJSON(fldTerms) : null;
+                            if(!Hul.isnull(fldTerms)) {
 
-                        if(__loopForFieldTerms(fldTerms)){
-                            arrRes.push(dty_ID);
-                        }
+                                if(__loopForFieldTerms(fldTerms)){
+                                    arrRes.push(dty_ID);
+                                }
+                            }
+                        }catch (ex2){
+                            console.log('Cannot parse "'+fldTerms+'" for field '+dty_ID);
+                       }
                     }
                 }
             }
