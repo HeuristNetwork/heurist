@@ -48,7 +48,8 @@ if(@$_REQUEST['data']){
 }else{
     $lists = getInvalidFieldTypes(@$_REQUEST['rt']); //in getFieldTypeDefinitionErrors.php
     if(!@$_REQUEST['show']){
-        if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0 && count($lists["rt_contraints"])==0){
+        if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0
+         && count($lists["rt_contraints"])==0  && count($lists["rt_defvalues"])==0){
             $lists = array();
         }
     }
@@ -58,6 +59,7 @@ $dtysWithInvalidTerms = @$lists["terms"];
 $dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
 $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
+$rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
 ?>
 <html>
     <head>
@@ -125,6 +127,26 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
                 });
             }
             
+            function onEditRtStructure(rty_ID){
+
+                var url = window.hWin.HAPI4.baseURL + 'admin/structure/fields/editRecStructure.html?db='
+                    + window.hWin.HAPI4.database
+                    + '&rty_ID='+rty_ID;
+
+                var body = $(window.hWin.document).find('body');
+                    
+                window.hWin.HEURIST4.msg.showDialog(url, {
+                    height: body.innerHeight()*0.9,
+                    width: 860,
+                    padding: '0px',
+                    title: window.hWin.HR('Edit record structure'),
+                    callback: function(context){
+                    }
+                });        
+                
+            }
+
+
             
             $(document).ready(function() {
                 $('button').button();
@@ -337,10 +359,30 @@ $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
             }else{
                 print "<br/><h3>All field type definitions are valid</h3>";
             }
+
+            if(count(@$rtysWithInvalidRectypeConstraint)>0){
             ?>
+                <br/><p><br/></p><h3>Warning: Wrong field default values for record type structures</h3><br/>&nbsp;<br/>
 
+                The following field's default values in record types structures have inconsistent data (unknown codes for terms and). This is nothing to be concerned about, unless it reoccurs, in which case please advise Heurist developers.
+                <br/><br/>
+                You can also look at therecord type structureby clicking on the name in the list below<br />&nbsp;<br/>
+                
+                <?php 
+                foreach ($rtysWithInvalidRectypeConstraint as $row) {
+                    ?>
+                    <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'><?= $row['rst_DisplayName'] ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid
+                        <?= ($row['dty_ID']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>
+                    </div>
+                    <?php
+                }//for
+            
+            }else{
+                print "<br/><h3>All default values in record type structures are valid</h3>";
+            }            
+            ?>
             <!-- CHECK DATA CONSISTENCY -->
-
+            <br/>
             <hr />
 
             <!-- Record pointers which point to non-existant records -->

@@ -15,7 +15,7 @@
 */
 
 /**
-* Verify dty_JsonTermIDTree dty_TermIDTreeNonSelectableIDs dty_PtrTargetRectypeIDs
+* Verify rst_DefaultValue, dty_JsonTermIDTree dty_TermIDTreeNonSelectableIDs dty_PtrTargetRectypeIDs
 * for terms and rectype existance
 * 
 * see listDatabaseErrors.php
@@ -117,11 +117,51 @@ function getInvalidFieldTypes($rectype_id){
                 $dtysWithInvalidRectypeConstraint[$dtyID]['validRectypeConstraint'] = $validRectypes;
             }
         }
+        
     }//for   
+    
+    
+    $query = "SELECT dty_ID,".
+    "dty_Type,".
+    "rst_RecTypeID,".
+    "rst_DisplayName, rty_Name,".
+    "rst_DefaultValue".
+    " FROM defDetailTypes, defRecStructure, defRecTypes WHERE rst_RecTypeID=rty_ID ".
+    " AND rst_DetailTypeID=dty_ID and rst_DefaultValue is not null and ".
+    "dty_Type in ('enum','relationtype') ";  //,'resource'
+    if($rectype_id>0) {
+        $query = $query.' and rst_RecTypeID='.$rectype_id;
+    }
+    $query = $query.' ORDER BY rst_RecTypeID, dty_ID';
+    $res = $mysqli->query($query);
+    
+    $rtysWithInvalidDefaultValues = array();
+    if($res){
+        while ($row = $res->fetch_assoc()) {
+
+            $dtyID = $row['dty_ID'];
+            $rtyID = $row['rst_RecTypeID'];
+            
+            if($row['dty_Type']=='resource'){
+                
+                $res2 = getInvalidRectypes($row['rst_DefaultValue']);
+                if (count($res2[0])){
+                    $rtysWithInvalidDefaultValues[] = $row;
+                }
+                
+            }else{
+                $res2 = getInvalidTerms($row['rst_DefaultValue'], false);
+                if (count($res2[0])){
+                    $rtysWithInvalidDefaultValues[] = $row;
+                }
+            }
+        }
+    }
 
     return array("terms"=>$dtysWithInvalidTerms, 
                  "terms_nonselectable"=>$dtysWithInvalidNonSelectableTerms, 
-                 "rt_contraints"=>$dtysWithInvalidRectypeConstraint);
+                 "rt_contraints"=>$dtysWithInvalidRectypeConstraint,
+                 "rt_defvalues"=>$rtysWithInvalidDefaultValues);
 }
 
 //
