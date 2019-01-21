@@ -868,7 +868,7 @@ class AndLimb {
 
 
     function cleanQuotedValue($val) {
-        if ($val[0] == '"') {
+        if (strlen($val)>0 && $val[0] == '"') {
             if ($val[strlen($val)-1] == '"')
                 $val = substr($val, 1, -1);
             else
@@ -1351,7 +1351,7 @@ class FieldPredicate extends Predicate {
         $this->field_type = $type;
         parent::Predicate($parent, $value);
 
-        if ($value[0] == '-') {    // DWIM: user wants a negate, we'll let them put it here
+        if (strlen($value)>0 && $value[0] == '-') {    // DWIM: user wants a negate, we'll let them put it here
             $parent->negate = true;
             $value = substr($value, 1);
         }
