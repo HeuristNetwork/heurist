@@ -655,13 +655,7 @@
         $query = 'DROP TRIGGER IF EXISTS update_sys_index_trigger';
         $res = $mysqli->query($query);
 
-        
-        $sysValues = $system->get_system();
-        //add new field into sysIdentification
-        if(!array_key_exists('sys_TreatAsPlaceRefForMapping', $sysValues)){
-            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
-            $res = $mysqli->query($query);
-        }
+        $report = array();
         
         //create new tables
         $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
@@ -680,6 +674,7 @@
                 $system->addError(HEURIST_DB_ERROR, 'Cannot create usrRecPermissions', $mysqli->error);
                 return false;
             }
+            $report[] = 'usrRecPermissions created';
         }else{
             $query = 'DROP INDEX rcp_composite_key ON usrRecPermissions';
             $res = $mysqli->query($query);
@@ -706,16 +701,16 @@ $query = 'CREATE TABLE sysDashboard ('
                 $system->addError(HEURIST_DB_ERROR, 'Cannot create sysDashboard', $mysqli->error);
                 return false;
             }
+            $report[] = 'sysDashboard created';
         }
 
         
-        $query = 'DROP TRIGGER IF EXISTS update_sys_index_trigger';
-        $res = $mysqli->query($query);
-        
-        if(!array_key_exists('sys_TreatAsPlaceRefForMapping', $system->get_system())){
-            //add new field into table
+        $sysValues = $system->get_system();
+        //add new field into sysIdentification
+        if(!array_key_exists('sys_TreatAsPlaceRefForMapping', $sysValues)){
             $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
             $res = $mysqli->query($query);
+            $report[] = 'sysIdentification: sys_TreatAsPlaceRefForMapping added';
         }
         
         //verify that required column exists in sysUGrps
@@ -732,6 +727,7 @@ $query = 'CREATE TABLE sysDashboard ('
                 $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_CreateChildIfRecPtr', $mysqli->error);
                 return false;
             }
+            $report[] = 'defRecStructure: rst_CreateChildIfRecPtr added';
         }
         
 
@@ -740,29 +736,32 @@ $query = 'CREATE TABLE sysDashboard ('
         $res = $mysqli->query($query);
         $row_cnt = $res->num_rows;
         if($res) $res->close();
-        if(!$row_cnt){
+        
             //alter table
-            $query = "ALTER TABLE `sysUGrps` ADD `ugr_NavigationTree` mediumtext COMMENT 'JSON array that describes treeview for filters'";
+            $query = "ALTER TABLE `sysUGrps` ".(!$row_cnt?'ADD':'MODIFY')
+                ." `ugr_NavigationTree` mediumtext COMMENT 'JSON array that describes treeview for filters'";
+                
             $res = $mysqli->query($query);
             if(!$res){
                 $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_NavigationTree', $mysqli->error);
                 return false;
             }
-        }
+        if(!$row_cnt) $report[] = 'sysUGrps: ugr_NavigationTree added';
         
         $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_Preferences'";
         $res = $mysqli->query($query);
         $row_cnt = $res->num_rows;
         if($res) $res->close();
-        if(!$row_cnt){
-            //alter table
-            $query = "ALTER TABLE `sysUGrps` ADD `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences'";
+        
+            $query = "ALTER TABLE `sysUGrps` ".(!$row_cnt?'ADD':'MODIFY')
+                ." `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences'";
             $res = $mysqli->query($query);
             if(!$res){
                 $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_Preferences', $mysqli->error);
                 return false;
             }
-        }
+            if(!$row_cnt) $report[] = 'sysUGrps: ugr_Preferences added';
+        
         
         //verify that required column exists in sysUGrps
         $query = "SHOW COLUMNS FROM `usrBookmarks` LIKE 'bkm_Notes'";
@@ -777,23 +776,29 @@ $query = 'CREATE TABLE sysDashboard ('
                 $system->addError(HEURIST_DB_ERROR, 'Cannot modify usrBookmarks to add bkm_Notes', $mysqli->error);
                 return false;
             }
+            $report[] = 'usrBookmarks: bkm_Notes added';
         }
 
         
         //insert special field type - reference to parent record
         $dty_ID = mysql__select_value($mysqli,  
-            "SELECT dty_ID FROM `defDetailTypes` WHERE dty_OriginatingDBID=2  dty_IDInOriginatingDB=247");
+            "SELECT dty_ID FROM `defDetailTypes` WHERE dty_OriginatingDBID=2 AND dty_IDInOriginatingDB=247");
 
         if($dty_ID==null || !($dty_ID>0)){
             
-            $mysqli->query("INSERT INTO `defDetailTypes`
+            $res = $mysqli->query("INSERT INTO `defDetailTypes`
 (`dty_Name`, `dty_Documentation`, `dty_Type`, `dty_HelpText`, `dty_ExtendedDescription`, `dty_EntryMask`, `dty_Status`, `dty_OriginatingDBID`, `dty_NameInOriginatingDB`, `dty_IDInOriginatingDB`, `dty_DetailTypeGroupID`, `dty_OrderInGroup`, `dty_JsonTermIDTree`, `dty_TermIDTreeNonSelectableIDs`, `dty_PtrTargetRectypeIDs`, `dty_FieldSetRecTypeID`, `dty_ShowInLists`, `dty_NonOwnerVisibility` ,`dty_LocallyModified`) VALUES
 ('Parent entity','Please document the nature of this detail type (field)) ...','resource','The parent of a child record (a record which is specifically linked to one and only one parent record by a pointer field in each direction)', '','','approved','2', '','247','99', '0','','', '','0','1','viewable','0')");
 
+           if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defDetailTypes parent entity field (2-247)', $mysqli->error);
+                return false;
+           }else{
+                $report[] = 'defDetailTypes: parent entity field (2-247) added';
+           }
         }
         
-        
-        return true;
+        return $report;
     }
 
 

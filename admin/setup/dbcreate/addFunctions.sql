@@ -8,7 +8,7 @@
 -- Contains
 -- NEW_LEVENSHSTEIN(VARCHAR(255),VARCHAR(255)) RETURNS INT NOT NULL
 -- LIMITED_LEVENSHSTEIN obsoleted (modified calling code)
--- NEW_LIPOSUCTION(VARCHAR(20480)) RETURNS VARCHAR(20480)
+-- NEW_LIPOSUCTION(VARCHAR(20480)) RETURNS VARCHAR(31)
 
 -- Changelog
 -- 2013-05-08 by Arjen Lentz (arjen@archefact.com.au) initial

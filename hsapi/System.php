@@ -59,6 +59,7 @@ class System {
     //private $guest_User = array('ugr_ID'=>0,'ugr_FullName'=>'Guest');
     private $current_User = null;
     private $system_settings = null;
+    private $send_email_on_error = 0;
     
     /*
     
@@ -649,6 +650,10 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
             $this->addError(HEURIST_ERROR, $message);
         }
     }
+    
+    public function setErrorEmail($val){
+        $this->send_email_on_error = $val;
+    }
 
     /**
     * keep error message (for further use with getError)
@@ -668,16 +673,18 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
                
                 $sMsg = 'Message: '.$message."\n"
                 .($sysmsg?'System message: '.$sysmsg."\n":'')
-                .'Request: '.print_r($_REQUEST, true)."\n"
+                .'Request: '.substr(print_r($_REQUEST, true),0,2000)."\n"
                 .'Script: '.@$_SERVER['REQUEST_URI']."\n";
                 //.'User: '.$this->get_user_id().' '.@$this->current_User['ugr_FullName']."\n"
                 //.'Database: '.$this->dbname();
-                $rv = sendEmail(HEURIST_MAIL_TO_BUG.',osmakov@gmail.com', $Title,
-                    $sMsg, null);
+                if($this->send_email_on_error==1){
+                    $rv = sendEmail(HEURIST_MAIL_TO_BUG.',osmakov@gmail.com', $Title,
+                                $sMsg, null);
+                    $message = 'Heurist was unable to process. '.$message;
+                    $sysmsg = 'This error has been emailed to the Heurist team. We apologise for any inconvenience';
+                }
                     
-           error_log($Title.'  '.$sMsg);     
-           $message = 'Heurist was unable to process. '.$message;
-           $sysmsg = 'This error has been emailed to the Heurist team. We apologise for any inconvenience';
+                error_log($Title.'  '.$sMsg);     
         }
 
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
@@ -1084,15 +1091,15 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
                 
             }//$reload_user_from_db from db
             
-            if(true || !@$_SESSION[$this->dbname_full]['ugr_Preferences']){ //always restore from db
-                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
-            }
-
             $this->current_User = array('ugr_ID'=>intval($userID),
                             'ugr_Name'        => @$_SESSION[$this->dbname_full]['ugr_Name'],
                             'ugr_FullName'    => $_SESSION[$this->dbname_full]['ugr_FullName'],
-                            'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups'],
-                            'ugr_Preferences' => $_SESSION[$this->dbname_full]['ugr_Preferences']);
+                            'ugr_Groups'      => $_SESSION[$this->dbname_full]['ugr_Groups']);
+
+            if(true || !@$_SESSION[$this->dbname_full]['ugr_Preferences']){ //always restore from db
+                $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
+            }
+            $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
                 
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
@@ -1254,11 +1261,12 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
                 $this->addError(HEURIST_SYSTEM_FATAL, "Unable to read sysIdentification", $mysqli->error);
                 return null;
             }
-            //verify and add newest db changes
-            if(!updateDatabseToLatest($this)){
-                return null;    
-            }
-
+            
+            /*
+            $rep = updateDatabseToLatest($this);
+            if($rep===false){
+            }*/
+            
             // it is required for main page only - so call this request on index.php
             //$this->system_settings['sys_RecordCount'] = mysql__select_value($mysqli, 'select count(*) from Records');
         }
