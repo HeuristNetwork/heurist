@@ -203,10 +203,21 @@ $.widget( "heurist.editing_input", {
                     delay: 250,
                     items: '.input-div',
                     stop:function(event, ui){
+                        
+                        var isparententity = (that.f('rst_CreateChildIfRecPtr')==1);
+                        if(isparententity){ //remove parent entity flag to avoid autosave
+                            that.fset('rst_CreateChildIfRecPtr', 0);
+                        }
+                        
                         //reorganize
                         that.isChanged(true);
                         that._onChange();
                         that.btn_cancel_reorder.show();
+                        
+                        if(isparententity){//restore parent entity flag
+                            that.fset('rst_CreateChildIfRecPtr', 1);
+                        }
+                        
                     }});            
                     
                     
@@ -390,7 +401,7 @@ $.widget( "heurist.editing_input", {
         var val = this.options['dtFields'][fieldname]; //try get by name
         if(window.hWin.HEURIST4.util.isnull(val) && this.options.rectypes){ //try get by index
             var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
-            val = this.options['dtFields'][fi[fieldname]];
+            if(fi) val = this.options['dtFields'][fi[fieldname]];
         }
         if(window.hWin.HEURIST4.util.isempty(val)){ //some default values
             if(fieldname=='rst_RequirementType') val = 'optional'
@@ -413,7 +424,18 @@ $.widget( "heurist.editing_input", {
         return rfrs[fi[fieldname]];
         }*/
     },
+    
+    fset: function(fieldname, value){
 
+        if(this.options['dtFields'][fieldname]){
+            this.options['dtFields'][fieldname] = value;
+        }
+        if(this.options.rectypes){ //try get by index
+            var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
+            if(fi) this.options['dtFields'][fi[fieldname]] = value;
+        }
+        
+    },
 
     //
     //
