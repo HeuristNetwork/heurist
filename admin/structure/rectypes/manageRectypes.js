@@ -772,6 +772,9 @@ function RectypeManager() {
                 onClose:function(){
                     //refresh
                     _cloneHEU = null;
+                    //update groups/tabs
+                    _refreshGroups();
+                    
                     _clearGroupAndVisibilityChanges(true);
                 }});
                 
@@ -1403,6 +1406,37 @@ function RectypeManager() {
         }
 
 
+    }
+    
+    //
+    // add new tabs after import structure
+    //
+    function _refreshGroups(){
+        
+        var was_added = false;
+        //
+        // init tabview with names of group
+        for (index in window.hWin.HEURIST4.rectypes.groups) {
+            if( !isNaN(Number(index)) ) {
+                var grpID = window.hWin.HEURIST4.rectypes.groups[index].id;
+                
+                if(_getIndexByGroupId(grpID)<0){
+                    was_added = true;
+                    _addNewTab(0,
+                        window.hWin.HEURIST4.rectypes.groups[index].id,
+                        window.hWin.HEURIST4.rectypes.groups[index].name,
+                        window.hWin.HEURIST4.rectypes.groups[index].description
+                        );
+                }
+            }
+        }//for groups        
+        
+        if(was_added){
+            _updateOrderAfterDrag();
+            dragDropEnable();
+            tabView.set("activeIndex", 0);
+            _refreshAllTables();
+        }
     }
 
     //
