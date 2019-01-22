@@ -1071,6 +1071,11 @@ $.widget( "heurist.manageEntity", {
     //
     _saveEditAndClose: function( fields, afterAction ){
 
+            if(window.hWin.HAPI4.is_callserver_in_progress()) {
+                //console.log('prevent repeatative call')
+                return;   
+            }
+        
             if(!fields){
                 fields = this._getValidatedValues(); 
             }

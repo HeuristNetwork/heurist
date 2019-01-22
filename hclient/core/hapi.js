@@ -30,6 +30,7 @@ function hAPI(_db, _oninit) { //, _currentUser
     _regional = null, //localization resources
     _guestUser = {ugr_ID:0, ugr_FullName:'Guest' },
     _listeners = [];
+    _is_callserver_in_progress = false;
 
     /**
     * initialization of hAPI object
@@ -94,7 +95,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         }
 
     }
-
+    
     /*
     * internal function see hSystemMgr, hRecordMgr - ajax request to server
     *
@@ -105,6 +106,8 @@ function hAPI(_db, _oninit) { //, _currentUser
     *       message - ajax response or error message
     */
     function _callserver(action, request, callback){
+        
+        _is_callserver_in_progress = true;
 
         if(!request.db){
             request.db = _database;
@@ -132,6 +135,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                   withCredentials: true
             },            
             error: function( jqXHR, textStatus, errorThrown ) {
+                
+                _is_callserver_in_progress = false;
 
                 err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
                                             ?'Error_Connection_Reset':jqXHR.responseText;
@@ -146,6 +151,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                 //message:'Error connecting server '+textStatus});
             },
             success: function( response, textStatus, jqXHR ){
+
+                _is_callserver_in_progress = false;
                 
                 if(callback){
                     if($.isPlainObject(response)){
@@ -166,6 +173,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                 
             },
             fail: function(  jqXHR, textStatus, errorThrown ){
+                
+                _is_callserver_in_progress = false;
+                
                 err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))?'Error_Connection_Reset':jqXHR.responseText;
                 var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
                             message: err_message,
@@ -1415,6 +1425,15 @@ prof =Profile
             _callserver('importController', request, callback);
         }
 
+        
+    
+        /**
+        * returns true if _callserver ajax request is in progress
+        */
+        ,is_callserver_in_progress: function (){
+            return _is_callserver_in_progress;
+        }
+        
 
     }
 

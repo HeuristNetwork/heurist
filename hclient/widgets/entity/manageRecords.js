@@ -2081,6 +2081,11 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
     _saveEditAndClose: function( fields, afterAction ){
 
             if(!(this._currentEditID>0)) return;
+            
+            if(window.hWin.HAPI4.is_callserver_in_progress()) {
+                //console.log('prevent repeatative call')
+                return;   
+            }
         
             if(!fields){
                 try{
