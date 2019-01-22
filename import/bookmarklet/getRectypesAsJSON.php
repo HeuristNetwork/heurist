@@ -70,7 +70,7 @@ $names = mysql__select_assoc2($mysqli, 'select rty_ID, rty_Plural from defRecTyp
 print "top.HEURIST_rectypes.pluralNames = " . json_encode($names) . ";\n\n";
 
 //print "top.HEURIST_rectypes.groupNamesInDisplayOrder = " . json_format(getRectypeGroups()) . ";\n\n";
-print "top.HEURIST_rectypes.groups = " . json_encode(dbs_GetRectypeGroups($mysqli)) . ";\n\n";
+print "top.HEURIST_rectypes.groups = " . json_encode(dbs_GetRectypeGroups($mysqli, true)) . ";\n\n";
 
 print "if (window.HEURIST_rectypesOnload) HEURIST_rectypesOnload();\n\n";
 

@@ -407,13 +407,20 @@ renderrectypeSelect: function(sel) {
 	sel.options[0].disabled = true;
 
 	for (grpID in HEURIST_rectypes.groups){
-	var grp = document.createElement("optgroup");
-		grp.label = HEURIST_rectypes.groups[grpID].name;
-	sel.appendChild(grp);
-		for (i in HEURIST_rectypes.groups[grpID].types) {
-			var name = HEURIST_rectypes.names[i];
-			sel.appendChild( new Option(name, i));
-	}
+	    var grp = document.createElement("optgroup");
+		    grp.label = HEURIST_rectypes.groups[grpID].name;
+	    sel.appendChild(grp);
+        
+		for (i in HEURIST_rectypes.groups[grpID].showTypes) {
+            if(i>=0){
+                var recID = HEURIST_rectypes.groups[grpID].showTypes[i];
+			    var name = HEURIST_rectypes.names[recID];
+                var opt = new Option(name, recID);
+                opt.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;'+name;
+			    sel.appendChild( opt );
+                
+            }
+	    }
 	}
 	return sel;
 }

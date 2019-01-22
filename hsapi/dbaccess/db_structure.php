@@ -214,7 +214,7 @@
         $querywhere.
         " order by rtg_Order, rtg_Name, rty_OrderInGroup, rty_Name";
 
-
+        
         $res = $mysqli->query($query);
         if($res){
             while ($row = $res->fetch_row()) {
@@ -285,15 +285,39 @@
     *           index:{propName:val,...},...}
     * @return    array recTypeGroup definitions as array of prop:val pairs
     */
-    function dbs_GetRectypeGroups($mysqli) {
+    function dbs_GetRectypeGroups($mysqli, $load_rectypes=false) {
         $rtGroups = array('groupIDToIndex' => array());
         $index = 0;
         $res = $mysqli->query("select * from defRecTypeGroups order by rtg_Order, rtg_Name");
         while ($row = $res->fetch_assoc()) {
+            
             array_push($rtGroups, array('id' => $row["rtg_ID"], 'name' => $row["rtg_Name"], 'order' => $row["rtg_Order"], 'description' => $row["rtg_Description"], 'allTypes' => array(), 'showTypes' => array()));
             $rtGroups['groupIDToIndex'][$row["rtg_ID"]] = $index++;
         }
         $res->close();
+        
+            
+        if($load_rectypes){
+            $query = 'select rty_ID, rty_RecTypeGroupID, rty_ShowInLists from defRecTypes order by rty_OrderInGroup, rty_Name';
+
+            $res = $mysqli->query($query);
+            if($res){
+                while ($row = $res->fetch_row()) {
+                    
+                    $rtg_ID = $row[1];
+                    
+                    if(@$rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]){
+                        $rtyID = $row[0];
+                        
+                        array_push($rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]['allTypes'], $rtyID);
+                        if ($row[2]) { //rty_ShowInList
+                            array_push($rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]['showTypes'], $rtyID);
+                        }
+                    }
+                }
+            }
+        }
+        
         return $rtGroups;
     }
 
