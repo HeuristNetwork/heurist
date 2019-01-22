@@ -937,7 +937,7 @@ $.widget( "heurist.expertnation_nav", {
                                             res.push('<a href="'
                                                 + window.hWin.HAPI4.baseURL+'tertiary-study/'
                                                 + term_id +'/a" onclick="{window.hWin.enResolver(event);}">'
-                                                + window.hWin.HEURIST4.ui.getTermDesc( term_id )+'</a>');
+                                                + window.hWin.HEURIST4.ui.getTermValue( term_id )+'</a>'); //was getTermDesc
                                         }
                                     }
                                 }//for
@@ -1366,7 +1366,7 @@ $.widget( "heurist.expertnation_nav", {
                         var sDegree = '<a href="'
                             + window.hWin.HAPI4.baseURL+'tertiary-study/'
                             + term_id +'/a" onclick="{window.hWin.enResolver(event);}">'
-                            + window.hWin.HEURIST4.ui.getTermDesc( term_id )+'</a>';
+                            + window.hWin.HEURIST4.ui.getTermValue( term_id )+'</a>'; //getTermDesc
 
                         var is_awarded = (that.recset.fld(record, 120)==532); //flag gegree awarded    
                         
@@ -1574,7 +1574,7 @@ $.widget( "heurist.expertnation_nav", {
                         var termID = that.recset.fld(record, 258);
                         var sOrg = that.__getTerm(termID);
                         html = html + '<li>'+sOrg+'</li>'; 
-                    }
+                    }s
                 }//for
             }
             leftside['p_association'] = html;
@@ -1595,7 +1595,7 @@ $.widget( "heurist.expertnation_nav", {
                         
                         //name of award
                         var awardID = that.recset.fld(record, 98);
-                        var sAward = window.hWin.HEURIST4.ui.getTermDesc( awardID );
+                        var sAward = window.hWin.HEURIST4.ui.getTermValue( awardID ); //was getTermDesc
                         
                         sAward = '<a href="'
                                 + window.hWin.HAPI4.baseURL+'military-award/'

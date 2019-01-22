@@ -813,7 +813,7 @@ window.hWin.HEURIST4.ui = {
         var useIcons = !useHtmlSelect && (options.useIcons===true);
         var useCounts = (options.useCounts===true && window.hWin.HEURIST4.rectypes.counts);
         var useGroups = (options.useGroups!==false);
-        var useIds = (options.useIds!==false);
+        var useIds = (options.useIds===true);
 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
@@ -1055,7 +1055,7 @@ window.hWin.HEURIST4.ui = {
             show_parent_rt    = options['show_parent_rt']==true;
             initial_indent    = options['initial_indent']>0?options['initial_indent']:0;
             useHtmlSelect     = options['useHtmlSelect']!==false;
-            useIds            = options['useIds']==true;
+            useIds            = options['useIds']===true;
         }
         
         var dtyID, details;
