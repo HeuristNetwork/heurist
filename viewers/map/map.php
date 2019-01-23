@@ -185,6 +185,17 @@ $system->defineConstants();
         // Mapping data
         var mapdata = [];
         mapping = new hMapping("map", "timeline", _options, mylayout);
+
+        //take from frame
+        var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);
+        //take from top most
+        if(!(mapdocument>0)){
+            mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+            if(!(mapdocument>0)){
+                mapdocument = null;
+            }
+        }
+        
         
         var noinit = window.hWin.HEURIST4.util.getUrlParameter('noinit', location.search);
         //init performed in app_timemap
@@ -208,11 +219,6 @@ $system->defineConstants();
                     }
                 }else{
                     rules = null;
-                }
-                
-                var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
-                if(!(mapdocument>0)){
-                    mapdocument = null;
                 }
                 
                 window.hWin.HAPI4.RecordMgr.search({q: q, rules:rules, w: "a", detail:(rules?'detail':'timemap'), l:3000},
@@ -246,7 +252,6 @@ $system->defineConstants();
                 );
             } else {
     
-                var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
                 if(mapdocument>0){
                     mapping.load(null, null, mapdocument);//load with map document
                 }else{
