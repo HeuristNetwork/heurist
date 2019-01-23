@@ -194,7 +194,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     this.recordList.resultList('resetGroups');
                     
                     window.hWin.HAPI4.SystemMgr.get_defs(
-                            {rectypes:'all', mode:2, remote:this.options.import_structure.database_url}, function(response){
+                            {rectypes:'all', detailtypes:'all', mode:2, remote:this.options.import_structure.database_url}, function(response){
                     
                             window.hWin.HEURIST4.msg.sendCoverallToBack();
                             
@@ -202,10 +202,22 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 
                                 window.hWin.HEURIST4.remote = {};
                                 window.hWin.HEURIST4.remote.rectypes = response.data.rectypes;
-                                //window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
+                                window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
                                 //window.hWin.HEURIST4.remote.terms = response.data.terms;
                                 
                                 that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, true );
+                                /*
+                                if(that.options.import_structure.load_detailstypes){
+                                    window.hWin.HAPI4.SystemMgr.get_defs(
+                                        {detailtypes:'all', mode:0, remote:that.options.import_structure.database_url},
+                                        function(response){
+console.log(response);                                            
+                                            if(response.status == window.hWin.ResponseStatus.OK){
+                                                window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
+                                            }
+                                        });
+                                }*/
+                                
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
@@ -377,7 +389,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         var recID   = fld('rty_ID');
         
-        //var recTitle = fld2('ugr_ID','3em')+fld2('ugr_Name','10em')+fld('ugr_FirstName')+' '+fld('ugr_LastName');
         var recTitleHint = fld('ugr_Organisation');
         
         var recTitle = ''

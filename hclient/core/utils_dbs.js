@@ -763,8 +763,106 @@ window.hWin.HEURIST4.dbs = {
             }
         }
         return (sall)?res:0;
-    }
+    },
 
+    //
+    // returns array of record types that are resources for given record type
+    //
+    getLinkedRecordTypes: function ($rt_ID, db_structure){
+        
+        if(!db_structure){
+            db_structure = window.hWin.HEURIST4;
+        }
+        
+        var $dbs_rtStructs = db_structure.rectypes;
+        //find all DIREreverse links (pointers and relation that point to selected rt_ID)
+        var $alldetails = $dbs_rtStructs['typedefs'];
+        var $fi_type = $alldetails['dtFieldNamesToIndex']['dty_Type'];
+        var $fi_rectypes = $alldetails['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+        
+        var $arr_rectypes = [];
+        
+        var $details = $dbs_rtStructs['typedefs'][$rt_ID]['dtFields'];
+        if($details) {
+            for (var $dtID in $details) {
+                
+                var $dtValue = $details[$dtID];
+        
+                if(($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')){
+
+                        //find constraints
+                        var $constraints = $dtValue[$fi_rectypes];
+                        $constraints = $constraints.split(",");
+                        //verify record type exists
+                        if($constraints.length>0){
+                            for (var i=0; i<$constraints.length; i++) {
+                                var $recTypeId = $constraints[i];
+                                if( !$arr_rectypes[$recTypeId] && 
+                                    $dbs_rtStructs['typedefs'][$recTypeId]){
+                                        
+                                        $arr_rectypes.push( $recTypeId );
+                                }
+                            }                            
+                        } 
+                        
+                }
+            }
+        }
+        
+        return  $arr_rectypes;
+        
+    },
+
+    //
+    // returns array of record types that points to given record type
+    //
+    getLinkedRecordTypesReverse: function($rt_ID, db_structure){
+        
+        if(!db_structure){
+            db_structure = window.hWin.HEURIST4;
+        }
+        
+        var $dbs_rtStructs = db_structure.rectypes;
+        //find all DIREreverse links (pointers and relation that point to selected rt_ID)
+        var $alldetails = $dbs_rtStructs['typedefs'];
+        var $fi_type = $alldetails['dtFieldNamesToIndex']['dty_Type'];
+        var $fi_rectypes = $alldetails['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+        
+        var $arr_rectypes = {};
+        
+        for (var $recTypeId in $alldetails) {
+        
+            if($recTypeId>0 && $recTypeId!=$rt_ID){ //not itself
+            
+                var $details = $alldetails[$recTypeId];
+                
+                $details = $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
+                if(!$details) continue;
+                
+                for (var $dtID in $details) {
+                    
+                    var $dtValue = $details[$dtID];
+            
+                    if(($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')){
+
+                            //find constraints
+                            var $constraints = $dtValue[$fi_rectypes];
+                            $constraints = $constraints.split(",");
+                            //verify that selected record type is in this constaint
+                            if($constraints.length>0 && 
+                                window.hWin.HEURIST4.util.findArrayIndex($rt_ID, $constraints)>=0 &&
+                                !$arr_rectypes[$recTypeId] )
+                            {
+                                $arr_rectypes[$recTypeId] = $dtID;
+                            }
+                    }
+                }
+            }
+        }
+        
+        return  $arr_rectypes;
+        
+    }
     
 }//end dbs
 

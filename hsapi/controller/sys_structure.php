@@ -50,6 +50,7 @@
                    
                 $remoteURL = $splittedURL[0].'hsapi/controller/sys_structure.php?db='.$match[1];
                 if (@$_REQUEST['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$_REQUEST['rectypes'];
+                if (@$_REQUEST['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$_REQUEST['detailtypes'];
                 if (@$_REQUEST['mode']) $remoteURL = $remoteURL.'&mode='.$_REQUEST['mode'];
                                                                     
                 $data = loadRemoteURLContent($remoteURL);            

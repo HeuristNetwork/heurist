@@ -422,6 +422,7 @@ $.widget( "heurist.manageEntity", {
              return true;
         } else {
              var recID = 0;
+             var keep_action = action;
              if(action && action.action){
                  recID =  action.recID;
                  action = action.action;
@@ -431,7 +432,8 @@ $.widget( "heurist.manageEntity", {
                     return true;
              }else if(action=='delete'){
                     if(recID>0) this._currentEditID = recID;
-                    this._deleteAndClose(); 
+                    this._deleteAndClose();
+                    return true; 
              }
             
              var s = 'User clicked action "'+action+'" for ';
@@ -459,6 +461,7 @@ $.widget( "heurist.manageEntity", {
                     return true;
              }else{
                     //window.hWin.HEURIST4.msg.showMsgFlash(s);  
+                    this._trigger( "onaction", null, keep_action );
              }
         }
         return false;
@@ -971,6 +974,10 @@ $.widget( "heurist.manageEntity", {
                 this.options.selection_on_init = null;
             }
         }
+    },
+    
+    refreshRecordList: function(){
+        this.recordList.resultList('refreshPage');  
     },
     
     _selectAndEditFirstInRecordset:function(subset){

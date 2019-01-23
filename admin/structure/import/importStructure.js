@@ -99,26 +99,26 @@ $.widget( "heurist.importStructure", {
                         +'<div class="ent_wrapper" id="panel_rty" style="display:none">'
                         
                             +'<div class="ent_header" style="padding:4px;">'
-                               +'<div style="position:absolute;right:450px;left:0">'
+                               +'<div style="position:absolute;right:225px;left:0">' //450px
                                     +'<h4  style="padding:4 0 0 4" id="h_source_rty"></h4>'     
                                     +'<div id="btn_back_to_databases" style="position:absolute;right:104px;top:40px;z-index:10"/>'
                                +'</div>'
                                
-                               +'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
-                                    +'<h4 style="padding:4 0 0 4">Entity to be imported</h4>'
-                               +'</div>'
+                               //+'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
+                               //     +'<h4 style="padding:4 0 0 4">Entity to be imported</h4>'
+                               //+'</div>'
                                +'<div style="border-left:1px solid lightgray;position:absolute;right:0px;width:223px;height:2.8em;">'
                                     +'<h4 style="padding:4 0 0 4">Current entities in database</h4>'
                                +'</div>'
                             +'</div>'
 
                             //left - source                                
-                            +'<div class="ent_wrapper" id="panel_rty_list" style="top:2.8em;right:450px;border-right:1px solid lightgray">'
+                            +'<div class="ent_wrapper" id="panel_rty_list" style="top:2.8em;right:225px;border-right:1px solid lightgray;">' //450px
                             +'</div>'
 
                             //structure of selected record type - popup
                             +'<div id="panel_rty_tree" '
-                                +'style="position:absolute; top:2.8em;bottom:0;right:225px; overflow:hidden;width:225px;">'
+                                +'style="display:none;position:absolute; top:2.8em;bottom:0;right:225px; overflow:hidden;width:225px;">'
                             +    '<div class="ent_header rtt-toolbar" style="text-align:center;height:3em;padding-top: 8px;">'
                                         +'<div id="btn_start_import"></div>'
                             +    '</div>'
@@ -446,6 +446,7 @@ $.widget( "heurist.importStructure", {
                 sURL = 'http://heurist.sydney.edu.au/h5-ao/'    
             }
             
+            
             this.element.find('#h_source_rty').text('Entities available in '+sDB_ID+':'+sDB);
             
             var options = {
@@ -458,7 +459,8 @@ $.widget( "heurist.importStructure", {
                 import_structure:{
                        database: sDB,      //database name
                        databaseURL: sURL,
-                       database_url:  (sURL+'?db='+sDB)
+                       database_url:  (sURL+'?db='+sDB),
+                       load_detailstypes: true
                 },
                 
                 onselect:function(event, data){
@@ -466,10 +468,32 @@ $.widget( "heurist.importStructure", {
                     //show treeview
                     if(data && data.selection && data.selection.length>0){
                         that._loadRecordTypesTreeView(data.selection[0]);
+                        
+                        //that._loadRecordTypeDetails(data.selection[0]);
+                        
                     }
                     
                     
                     
+                },
+                onaction:function(event, action){
+
+                     var recID;     
+                     if(action && action.action){
+                         recID =  action.recID;
+                         action = action.action;
+                     }
+                     if(recID>0){
+                         if(action=='expand'){
+                            window.hWin.HEURIST4.remote._selectedRtyID
+                                 = (window.hWin.HEURIST4.remote._selectedRtyID == recID)?null:recID;
+                            that.panel_rty_list.manageDefRecTypes('refreshRecordList');                     
+                         }else if(action=='import'){
+                            that._selectedRtyID = recID;
+                            that.startImport();   
+                         }
+                     }
+                  
                 },
                 
                 recordList:{
@@ -493,7 +517,8 @@ $.widget( "heurist.importStructure", {
                             +'<div style="display:inline-block;width:70%">'
                             +'<h2>'+grp_val+'  '+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
                             +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
-                    }
+                    },
+                    renderer: this._recordtypeListItemRenderer
                 }
             };
             
@@ -1012,6 +1037,105 @@ $.widget( "heurist.importStructure", {
             
         });
         
-    }
+    },
+    
+    _recordtypeListItemRenderer: function( recordset, record ){
+      
+        function fld(fldname){
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+        }
+        function fld2(fldname, col_width){
+            swidth = '';
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
+                swidth = ' style="width:'+col_width+'"';
+            }
+            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+        }
+        
+        var dbs = window.hWin.HEURIST4.remote;
+        //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
+        
+        var recID   = fld('rty_ID');
+        
+        var btn_actions = '<div style="width:60px;">'
+                    + '<div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
+                    + ' style="display:inline-block;height:16px;">'
+                    +     '<span style="padding-top: 6px;" class="ui-button-icon-primary ui-icon ui-icon-carat-'
+                    + ((dbs._selectedRtyID==recID)?'d':'r')+'"></span><span class="ui-button-text"></span>'
+                    + '</div>'
+                    + '<div title="Click to import this record type" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="import" '
+                    + ' style="display:inline-block;height:16px;vertical-align:bottom;font-size:1.4em;padding-left:20px">'
+                    +     '<span class="ui-button-icon-primary ui-icon-arrowthick-1-s"></span><span class="ui-button-text"></span>'
+                    + '</div></div>';
+        
+        var info = '';
+        if(dbs._selectedRtyID==recID){
+            var rts = dbs.rectypes.typedefs[recID];
+            
+            info = '<div style="border:2px solid blue;padding:10px 4px;margin-top:10px"><i>' + fld('rty_Description') + "</i><br><br>";   //description
+            info += '<table style="text-align: left;font-size:0.9em; font-color:darkgray;width:100%"><tr>';
+            info += '<th  style="padding-left:10px;" class=\"status\"><b>Already in DB?</b></th>';
+            info += '<th style="padding-left:10px;"><b>Field name (used for this record type)</b></th>';
+            info += '<th style="padding-left:10px;"><b>Base field name (shared across record types)</b></th>';
+            info += '<th style="width:100px; padding-left:10px;"><b>Field data type</b></th></tr>';
+
+                                
+            var idx_rst_Name  = dbs.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
+            var idx_rst_Type  = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
+            var idx_rst_ccode = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_ConceptID;
+            
+            var idx_dty_ConceptID = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
+            
+            var dty;
+            for (dty in rts.dtFields) {
+                
+                //var det = dbs.detailtypes.typedefs[dty].commonFields;
+                var rst_fld = rts.dtFields[dty];
+                
+                //find in local defintions by concpt code - if found - it is already imported
+                var local_id = window.hWin.HEURIST4.dbs.findByConceptCode(rst_fld[idx_rst_ccode], 
+                        window.hWin.HEURIST4.detailtypes.typedefs, idx_dty_ConceptID);
+                
+                info += "<tr"+ (local_id>0? ' style="background-color:#CCCCCC;"' : "") +
+                "</td><td style='padding-left:20px;'>" + (local_id>0 == 1? "yes" : "NEW") +
+                "<td style='padding-left:10px; font-weight:bold'>" + rst_fld[idx_rst_Name] +
+                "</td><td style='padding-left:10px;'>" + 
+                ((dbs.detailtypes)?dbs.detailtypes.names[dty]:'') +
+                "</td><td style='padding-left:10px;'>" + window.hWin.HEURIST4.detailtypes.lookups[rst_fld[idx_rst_Type]] +
+                "</td></tr>";
+            }//for
+            info += "</table></div>";    
+        }    
+            
+        var recTitle = fld2('rty_Name','15em');
+        
+//           + ' X <div class="item" style="font-style:italic;width:45em">'
+// + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rty_Description'))+'</div>'
+
+        //find all dependent record types on first level
+        var linked_rts = window.hWin.HEURIST4.dbs.getLinkedRecordTypes(recID, dbs);
+//console.log(linked_rts);        
+        var name_rts = [];
+        for(var i=0;i<linked_rts.length;i++){
+            name_rts.push(dbs.rectypes.names[linked_rts[i]]);
+        }
+        recTitle = recTitle + '<div class="item" style="font-style:italic;width:45em" title="Linked record types">'
+                 + window.hWin.HEURIST4.util.htmlEscape(name_rts.join(','))+'</div>';
+        
+        
+        var html = '<div class="recordDiv" style="min-height:16px"'
+        +' id="rd'+recID+'" recid="'+recID+'">'
+        + btn_actions
+        + '<div class="recordTitle recordTitle2" title="'+fld('rty_Description')
+                        +'" style="right:10px;left:94px">'
+        +     recTitle
+        + '</div>'
+        + info
+        + '</div>';
+
+        return html;
+        
+        
+    },
     
 });
