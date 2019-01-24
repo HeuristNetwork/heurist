@@ -1151,10 +1151,17 @@ span.fancytree-checkbox{
 {
     background-position: -64px -48px;
 }
-.tree-facets .fancytree-expander{
+
+.tree-csv .fancytree-has-children span.fancytree-icon {
+    margin-left: 3px;
+    background-position: 0px -176px;
+    display: inline-block;
+}
+
+.tree-csv .fancytree-expander, .tree-facets .fancytree-expander{
     display:none;
 }
-.tree-facets .graytext{
+.tree-csv .graytext, .tree-facets .graytext{
     color: #AAA;
 }
 

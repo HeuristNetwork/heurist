@@ -298,7 +298,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 treediv.fancytree("destroy");
             }
             
-            treediv.addClass('tree-facets').fancytree({
+            treediv.addClass('tree-csv').fancytree({
                 //extensions: ["filter"],
                 //            extensions: ["select"],
                 checkbox: true,
@@ -307,6 +307,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 beforeSelect: function(event, data){
                     // A node is about to be selected: prevent this, for folder-nodes:
                     if( data.node.hasChildren() ){
+                        
+                        if(data.node.isExpanded()){
+                            for(var i=0; i<data.node.children.length; i++){
+                                var node = data.node.children[i];
+                                if(node.key=='rec_ID' || node.key=='rec_Title'){
+                                    node.setSelected(true);
+                                }
+                            }
+                        }
                         return false;
                     }
                 },
