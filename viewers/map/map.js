@@ -1128,14 +1128,43 @@ console.log('tileloaded 2');
                         //gestureHandling: 'cooperative',
                         
                         mapTypeControlOptions: {
-                            mapTypeIds: ["terrain","roadmap","hybrid","satellite","tile"]
+                            mapTypeIds: ["terrain","roadmap","hybrid","satellite","tile"],
                         }
                     };
-
+                    
                     var nativemap = tmap.getNativeMap();
                     nativemap.setOptions(mapOptions);
 
-                    //return;
+                    // MapTypeStyleFeatureType 
+                    var styledMapType = new google.maps.StyledMapType(
+                            [{
+                                "featureType": "poi",
+                                //"elementType": "labels",
+                                "stylers": [
+                                    { "visibility": "off" }
+                                ]
+                            },
+                            {
+                                "featureType": "road",
+                                "elementType": "labels.icon",
+                                "stylers": [
+                                    {
+                                        "visibility": "off"
+                                    }
+                                ]
+                            },
+                            {
+                                "featureType": "transit",
+                                "stylers": [
+                                    {
+                                        "visibility": "off"
+                                    }
+                                ]
+                            }]);
+                    //Associate the styled map with the MapTypeId and set it to display.
+                    nativemap.mapTypes.set('no_poi', styledMapType);
+                    nativemap.setMapTypeId('no_poi');
+
 
                     if(window.hWin.HAPI4.get_prefs_def('mapSelectTools', 1)==1){
                         _initDrawListeners();    
@@ -1224,6 +1253,7 @@ console.log('tileloaded 2');
                     if(params.length>2 && params[2]>0 && params[2]<17){
                         markerClustererOpts['maxZoom'] = parseInt(params[2]);
                     }
+                    markerClustererOpts['zoomOnClick'] = false;
                 }
                 
             }else{
@@ -1231,9 +1261,13 @@ console.log('tileloaded 2');
                 useMarkerClusterer = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)==1);
                 markerClustererOpts = 
                     { gridSize: parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 25)), //The grid size of a cluster in pixels.
+                      zoomOnClick: false,  
                       minimumClusterSize: parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_count', 2)), //The minimum number of markers to be in a cluster before the markers are hidden and a count is shown.
                       maxZoom: parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 15))};   //The maximum zoom level that a marker can be part of a cluster.
             }
+            
+                    //return;
+
             
             var lt = window.hWin.HAPI4.sysinfo['layout'];  
             if(lt && (lt.indexOf('DigitalHarlem')==0 || lt=='Beyond1914' || lt=='UAdelaide') ){
