@@ -253,6 +253,7 @@ function hLayout(args) {
             },
             onresize_end: function(){
                 $(document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
+                onLayoutResize( $container );
             }
             /*,
             onopen_end: function(pane_name, pane_element){
@@ -345,6 +346,8 @@ function hLayout(args) {
 
         initDragDropListener();
 
+        onLayoutResize( $container );
+        
      /* to remove
         // listener for drag-n-droop
         // move tab to layout and create new tabcontrol
@@ -528,11 +531,25 @@ function hLayout(args) {
                     }}
                 );
                 
+                
+                
                 appInitFeatures(containment_sel);
                 
             }
     } //end layoutInitPane
 
+    //
+    // adjust absolute position of tab pane according to ul height
+    //
+    function onLayoutResize( $container ){
+        var $tabs = $container.find('.tab_ctrl_adjust' );
+        
+        $tabs.each(function(idx, tabctrl){
+            var h = $(tabctrl).find('ul[role="tablist"]').height();
+            $(tabctrl).find('div[role="tabpanel"]').css({'top':h+4,'bottom':0,'width':'100%','position':'absolute'});
+        });
+    }
+    
     function initDragDropListener(){
         
         // listener for drag-n-droop
@@ -793,6 +810,10 @@ function hLayout(args) {
         if(tabcfg.sortable){
             $ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
         }
+        if(tabcfg.adjust_positions){
+            $tab_ctrl.addClass('tab_ctrl_adjust');
+        }
+        
         /*
         if(tabcfg.css){
             $ul.css(tabcfg.css);
@@ -839,7 +860,7 @@ function hLayout(args) {
                 //$(tab_ctrl).find('ul').css('background',tabb.style['background-header']+' !important');    
             }
         }
-
+        
         return $tab_ctrl;
     }
 

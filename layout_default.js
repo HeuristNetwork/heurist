@@ -211,14 +211,16 @@ var cfg_layouts = [
                      dockable:false, dragable:false, css:{'background-color':'white'}, 
                      options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true, header_class:'ui-heurist-header2'} }]},  //search result
         east:{size:'50%', minsize:300, dropable:false,
-            tabs:[{dockable:true, dragable:false, resizable:false, //css:{'font-size':'0.95em'},
+            tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, //css:{'font-size':'0.95em'},
                 apps:[
                     {appid:'h3_recordListExt', name: 'Record View', 
                                 options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', 
-                                is_single_selection:true, 'data-logaction':'open_Record'}},    // H3 record viewer
+                                is_single_selection:true, 'data-logaction':'open_Record'}
+                    },    // H3 record viewer
                     {appid:'ha51', options:{'data-logaction':'open_MapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
                     {appid:'h3_recordListExt', name: 'Custom Reports', options:{title:'Custom Reports', 
-                                    url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports'}},
+                                    url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports'}
+                    },
                     {appid:'h4_static', name: 'Export',
                         options:{url: 'hclient/framecontent/tabmenus/exportMenu.php?db=[dbname]',
                                          isframe:true, 'data-logaction':'open_Export'}

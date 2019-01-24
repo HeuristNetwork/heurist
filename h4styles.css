@@ -178,10 +178,13 @@ H2 {
 }
 
 .frame_container{
-    bottom: 0;
     padding: 0.2em !important;
+    /*
+    height:100%;
+    z-index:2;*/
+    bottom: 0;
     position: absolute;
-    top: 30px;
+    top: 0;
     width: 99%;
 }
 
