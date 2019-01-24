@@ -711,6 +711,8 @@ $.widget( "heurist.search", {
                    return false;
                 }
             });
+            this.select_rectype_addrec.hSelect('hideOnMouseLeave', this.btn_select_rt);
+
         }
         if(!this.select_rectype_filter){
             
