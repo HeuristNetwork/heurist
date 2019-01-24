@@ -181,16 +181,17 @@ if(!$is_map_popup){
                                         
                                         var w_img = $(img).width();
                                         var w_win = window.innerWidth;
- //       console.log(w_win, w_img);                                
+ 
                                         if(w_win-w_img<600){
                                             //draw image above data
                                             player.parentNode.parentNode.style.float = 'none';
-                                            $('#div_public_data').css('max-width', w_win-40);    
+                                            //$('#div_public_data').css('max-width', w_win-40);    
                                         }else{
                                             //draw on the right and reduce max width for data
                                             player.parentNode.parentNode.style.float = 'right';
-                                            $('#div_public_data').css('max-width', w_win-w_img-200);
+                                            //$('#div_public_data').css('max-width', w_win-w_img-200);
                                         }
+                                        
                                     }
                                     
                                     if(img.complete){
@@ -257,9 +258,10 @@ if(!$is_map_popup){
                 //restore
                 if($(elem.parentNode.parentNode).hasClass('production')){
                     $(elem.parentNode.parentNode).css({'float':'right'});
-                    
+                    /* Remarked 2019-01-24
                     var w_win = window.innerWidth;
                     $('#div_public_data').css('max-width', w_win-250);    
+                    */
                 }
                 
             }
@@ -1062,6 +1064,8 @@ function print_public_details($bib) {
         //echo '<div class=detailRowHeader>Shared';
     }
     
+    print '<div id="div_public_data">';
+    
     $hasAudioVideo = '';
     if($is_production){
         $hasNoAudioVideo = 'style="float:right"';
@@ -1130,7 +1134,9 @@ function print_public_details($bib) {
         }//for
         ?>
     </div>
-    <div id="div_public_data" style="float:left;<?php echo (($has_thumbs)?'max-width:900px':'')?>">
+
+
+<!--    <div id="div_public_data" style="float:left;<?php echo (($has_thumbs)?'max-width:900px':'')?>"> -->
     <?php
 
     //print url first
@@ -1145,7 +1151,7 @@ function print_public_details($bib) {
     if ($webIcon) print "<img id=website-icon src='" . $webIcon . "'>";
    */                 
     if (@$url) {
-        print '<div class="detailRow" style="width:100%;border:none 1px #00ff00;">'
+        print '<div class="detailRow" style="border:none 1px #00ff00;">' //width:100%;
             .'<div class=detailType>URL</div>'
             .'<div class="detail'.($is_map_popup?' truncate style="max-width:400px;"':'"').'>'
             .'<span class="link">'
@@ -1164,7 +1170,7 @@ function print_public_details($bib) {
     foreach ($bds as $bd) {
         if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) continue;
         
-        print '<div class="detailRow fieldRow" style="width:100%;border:none 1px #00ff00;'
+        print '<div class="detailRow fieldRow" style="border:none 1px #00ff00;'   //width:100%;
             .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?'display:none':'')
             .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
         .'</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').'">'
