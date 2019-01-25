@@ -76,6 +76,16 @@
                     }
                 },
                 {
+                    "dtID": "trm_SemanticReferenceURL",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":250,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName":"Semantic/Reference URI:",
+                        "rst_DisplayHelpText": "The URI to a semantic definition or web page describing the term"
+                    }
+                },
+                {
                     "dtID": "trm_Status",
                     "dtFields":{
                         "dty_Type":"enum",

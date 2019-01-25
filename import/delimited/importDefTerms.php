@@ -65,10 +65,10 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
     <div class="ent_header" style="height:5em;">
         <h2>Step 1</h2>
         <h2 style="padding-top:0.4em">Paste content in area below</h2>
-        <h2 style="position:absolute;bottom:6px;">or</h2>
+        <h2 style="position:absolute;bottom:3px;">or</h2>
         <input type="file" id="uploadFile" style="display:none">
-        <div id="btnUploadFile" style="position:absolute;bottom:6px;left:3em">Upload File</div>
-        <div style="position:absolute;bottom:6px;left:13em;">encoding: 
+        <div id="btnUploadFile" style="position:absolute;bottom:0px;left:3em">Upload File</div>
+        <div style="position:absolute;bottom:0px;left:13em;">encoding: 
 <select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;font-size:0.9em">
 <option>UTF-8</option>
 <option>UTF-16</option>
@@ -213,6 +213,11 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
             <div>
                 <label>Description</label><br>
                 <select id="field_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;">
+                </select>
+            </div>
+            <div>
+                <label>Semantic/Reference URI</label><br>
+                <select id="field_uri" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;">
                 </select>
             </div>
             

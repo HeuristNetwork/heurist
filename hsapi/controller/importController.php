@@ -132,7 +132,7 @@ if(!$system->init(@$_REQUEST['db'])){
         
         }else if(@$_REQUEST['content']){ //for import terms    
             
-            $res = ImportParser::simpleCsvParser(); 
+            $res = ImportParser::simpleCsvParser($_REQUEST); 
             
         }else if($action=='set_primary_rectype'){
             

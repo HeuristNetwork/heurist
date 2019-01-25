@@ -263,6 +263,7 @@ function hImportDefTerms(_trm_ParentTermID) {
                 opt.appendTo($('#field_term'));
                 opt.clone().appendTo($('#field_code'));
                 opt.clone().appendTo($('#field_desc'));
+                opt.clone().appendTo($('#field_uri'));
             }
             if(maxcol>0){
                 $('#field_term').val(0);
@@ -270,12 +271,15 @@ function hImportDefTerms(_trm_ParentTermID) {
                 //AUTODETECT COLUMN ROLES by name
                 for(j=0;j<maxcol;j++){
                     var s = headers[j].toLowerCase();
-                    if(s=='term' || s=='label'){
+                    if(s.indexOf('term')>=0 || s.indexOf('label')>=0){
                         $('#field_term').val(j);
-                    }else if(s=='code' || s=='standard code'){
+                    }else if(s.indexOf('code')>=0){
                         $('#field_code').val(j);
                     }else if(s=='description'){
                         $('#field_desc').val(j);
+                    }else if(s.indexOf('uri')>=0 || s.indexOf('url')>=0 || 
+                        s.indexOf('reference')>=0 || s.indexOf('semantic')>=0 ){
+                        $('#field_uri').val(j);
                     }
                 }
                 
@@ -363,6 +367,7 @@ function hImportDefTerms(_trm_ParentTermID) {
             
                 var field_code = $('#field_code').val();
                 var field_desc = $('#field_desc').val();
+                var field_uri = $('#field_uri').val();
                 var i, record, skip_na = 0, skip_dup = 0, skip_long = 0, labels = [];
                         
                 var hasHeader = $('#csv_header').is(':checked');
@@ -402,6 +407,9 @@ function hImportDefTerms(_trm_ParentTermID) {
                             }
                             if(field_code>-1 && field_code<_parseddata[i].length){
                                 record['trm_Code'] = _parseddata[i][field_code];
+                            }
+                            if(field_uri>-1 && field_uri<_parseddata[i].length){
+                                record['trm_SemanticReferenceURL'] = _parseddata[i][field_uri];
                             }
                            
                             _prepareddata.push(record);
