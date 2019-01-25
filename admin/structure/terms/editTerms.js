@@ -1451,7 +1451,7 @@ function EditTerms() {
                 title: 'Import Terms for '+term_label,
                 //height: 200,
                 //width: 500,
-                height: 460,
+                height: 600,
                 width: 800,
                 'context_help':window.hWin.HAPI4.baseURL+'context_help/defTerms.html #import',
                 callback: _import_complete
@@ -1496,7 +1496,7 @@ function EditTerms() {
                                 term.conceptid = null;
                                 term.description = arTerm[fi.trm_Description];
                                 term.termcode = "";
-                                term.trm_SemanticReferenceURL = '';
+                                term.trm_SemanticReferenceURL = arTerm[fi.trm_SemanticReferenceURL];
                                 term.parent_id = context.parent; //_currentNode.data.id;
                                 term.domain = _currentDomain;
                                 term.inverseid = null;
