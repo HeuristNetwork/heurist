@@ -986,7 +986,6 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         session_set_cookie_params ( 0, '/', '', $is_https);
         session_cache_limiter('none');
         
-        /*
         if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes 
             session_id($_COOKIE['heurist-sessionid']);
             @session_start();
@@ -995,9 +994,8 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
             $session_id = session_id();
             setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https );
         }
-        */
         
-        @session_start();
+//        @session_start();
 
         return true;
     }
@@ -1104,7 +1102,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
                 $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-                $cres = setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/', '', $is_https );
+                $cres = setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/', '', $is_https ); 
             }
             
             session_write_close();
@@ -1160,6 +1158,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
                     $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
                     $cres = setcookie('heurist-sessionid', session_id(), $time, '/', '', $is_https );
                     if(!$cres){
+                        
                     }
 
                     $_SESSION[$this->dbname_full]['ugr_ID'] = $user['ugr_ID'];
@@ -1196,9 +1195,9 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
 
         //clear     
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-        //$cres = setcookie('heurist-sessionid', "", time() - 3600, '/', '', $is_https);
+        $cres = setcookie('heurist-sessionid', "", time() - 3600, '/', '', $is_https);
         $this->current_User = null;
-        //session_destroy();
+        session_destroy();
         
         unset($_SESSION[$this->dbname_full]['ugr_ID']);
         unset($_SESSION[$this->dbname_full]['ugr_Name']);
