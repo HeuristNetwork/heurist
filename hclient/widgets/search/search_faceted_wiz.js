@@ -1059,12 +1059,14 @@ $.widget( "heurist.search_faceted_wiz", {
                         }
                 }
             });//visit
-            if(!isfound){ //assume that they not loaded with lazt load
+            if(!isfound){ //assume that they not loaded with last load
                 facets.push(old_facets[k]); 
             }
         }
 
         if(len>0 || facets.length>0){
+            
+            var order_for_new  = old_facets?old_facets.length:0;
 
             for (k=0;k<len;k++){
                 var node =  fieldIds[k];      //FancytreeNode
@@ -1087,9 +1089,11 @@ $.widget( "heurist.search_faceted_wiz", {
                             isfacet: old_facet.isfacet,
                             groupby: old_facet.groupby,
                             type: node.data.type,
-                            order: old_facet.order>=0?old_facet.order:0
+                            order: old_facet.order>=0?old_facet.order:order_for_new
                         } );
 
+                        if(!(old_facet.order>=0)) order_for_new++;
+                        
                     }else{
 
                         facets.push( {
@@ -1098,15 +1102,17 @@ $.widget( "heurist.search_faceted_wiz", {
                             title:(node.data.name?node.data.name:node.title),
                             groupby: null,
                             type:node.data.type,
-                            order: 0
+                            order: order_for_new
                         } );
+                        
+                        order_for_new++;
                     }
                 }
             }
             
             
             facets.sort(function(a,b){
-                return a.order<=b.order?-1:1;
+                return a.order<b.order?-1:1;
             });
 
             if(len>0){
