@@ -475,13 +475,15 @@ window.hWin.HEURIST4.dbs = {
 
                             //find constraints
                             var $constraints = $dtValue[$fi_rectypes];
-                            $constraints = $constraints.split(",");
-                            //verify that selected record type is in this constaint
-                            if($constraints.length>0 && 
-                                window.hWin.HEURIST4.util.findArrayIndex($rt_ID, $constraints)>=0 &&
-                                !$arr_rectypes[$recTypeId] )
-                            {
-                                $arr_rectypes[$recTypeId] = $dtID;
+                            if(!window.hWin.HEURIST4.util.isempty($constraints)){
+                                $constraints = $constraints.split(",");
+                                //verify that selected record type is in this constaint
+                                if($constraints.length>0 && 
+                                    window.hWin.HEURIST4.util.findArrayIndex($rt_ID, $constraints)>=0 &&
+                                    !$arr_rectypes[$recTypeId] )
+                                {
+                                    $arr_rectypes[$recTypeId] = $dtID;
+                                }
                             }
                     }
                 }
@@ -792,19 +794,20 @@ window.hWin.HEURIST4.dbs = {
 
                         //find constraints
                         var $constraints = $dtValue[$fi_rectypes];
-                        $constraints = $constraints.split(",");
-                        //verify record type exists
-                        if($constraints.length>0){
-                            for (var i=0; i<$constraints.length; i++) {
-                                var $recTypeId = $constraints[i];
-                                if( !$arr_rectypes[$recTypeId] && 
-                                    $dbs_rtStructs['typedefs'][$recTypeId]){
-                                        
-                                        $arr_rectypes.push( $recTypeId );
-                                }
-                            }                            
-                        } 
-                        
+                        if(!window.hWin.HEURIST4.util.isempty($constraints)){
+                            $constraints = $constraints.split(",");
+                            //verify record type exists
+                            if($constraints.length>0){
+                                for (var i=0; i<$constraints.length; i++) {
+                                    var $recTypeId = $constraints[i];
+                                    if( !$arr_rectypes[$recTypeId] && 
+                                        $dbs_rtStructs['typedefs'][$recTypeId]){
+                                            
+                                            $arr_rectypes.push( $recTypeId );
+                                    }
+                                }                            
+                            } 
+                        }
                 }
             }
         }
