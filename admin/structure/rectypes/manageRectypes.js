@@ -751,7 +751,7 @@ function RectypeManager() {
                 +'<br><br>'
 +'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are ' 
 +'optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.'                
-                +'<br><br>Use:  Manage tab > Structure > Browse templates'                
+                +'<br><br>Use main menu:  Structure > Browse templates'                
                 , function(){
                     var currentTabIndex = tabView.get('activeIndex');
                     var grpID = tabView.getTab(currentTabIndex).get('id');
