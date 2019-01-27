@@ -62,7 +62,7 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.0.5"; // sets current program version number, determined by Heurist development lead
+$version = "5.1.0"; // sets current program version number, determined by Heurist development lead
 
 // h5.0.5 Drag/drop & paste images, expose semantic reference fields, expose parent record fields in facet search tree, improved startup help, improved map view info popup, clustering and zooming, KML and map tile handling, mapdocument and views parameters for embedded searches, lots of small fixes and cosmetics
 // h5.0.4 Minor fixes, CSV output, dashboard creation, icon directories etc.
