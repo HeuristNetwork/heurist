@@ -675,7 +675,7 @@ $mysqli->commit();
 
         //TEMP
         if(strpos($database_url, 'http://heurist.sydney.edu.au/')===0){
-            $remote_url = 'http://heurist.sydney.edu.au/h5-ao/';
+            $remote_url = 'https://heuristplus.sydney.edu.au/heurist/';
         }
 
 
