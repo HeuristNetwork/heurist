@@ -12,6 +12,7 @@ getWootText  - returns text related with given record ID
 require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
 //require_once(dirname(__FILE__).'/../../records/woot/woot.php');
@@ -93,7 +94,7 @@ class ReportRecord {
                 // get rel records where current record is target
                 $to_res = $mysqli->query('SELECT rl_RelationID as dtl_RecID FROM recLinks WHERE rl_RelationID IS NOT NULL AND rl_TargetID='.$rec_ID);
                 if($from_res && $to_res){
-                    if ($from_res->num_rows() > 0  ||  $to_res->num_rows() > 0) {
+                    if ($from_res->num_rows > 0  ||  $to_res->num_rows > 0) {
 
                         //load relationship record details
                         while ($reln = $from_res->fetch_assoc()) {

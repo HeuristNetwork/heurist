@@ -144,7 +144,7 @@ function ShowReps() {
         iframe.contentWindow.document.close();
         //div_rep.innerHTML = context;
 
-        _needSelection = (context.indexOf("Select records to see template output")>0);
+        _needSelection = (context && context.indexOf("Select records to see template output")>0);
     }
 
 
@@ -304,7 +304,12 @@ function ShowReps() {
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response){
                 _hideProgress();
                 if(response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    window.hWin.HEURIST4.msg.showMsgErr(response);                   
+                    if(response.message){ //error in php code
+                        _updateReps( response.message );    
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);                       
+                    }
+                    
                 }else{
                     _updateReps( response );
                 }

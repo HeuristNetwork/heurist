@@ -269,7 +269,6 @@ function executeSmartyTemplate($system, $params){
 
     if($template_body)
     {	//execute template from string - modified template in editor
-
         //error report level: 1 notices, 2 all, 3 debug mode
         $replevel = (array_key_exists('replevel',$params) ?$params['replevel']:0);
 
@@ -304,9 +303,12 @@ function executeSmartyTemplate($system, $params){
             $template_file = 'test01.tpl';
         }
         
+        //$smarty->debugging = true;
+        //$smarty->error_reporting = E_ALL & ~E_STRICT & ~E_NOTICE;
+
         $smarty->debugging = false;
         $smarty->error_reporting = 0;
-
+        
         if($outputfile!=null){
             $smarty->registerFilter('output', 'smarty_output_filter');  //to preform output into file
         }else if($isJSout){
@@ -786,7 +788,6 @@ function smarty_error_output($system, $error_msg){
     }else{
         echo $error_msg;    
     }
-        
 }
 
 //-----------------------------------------------------------------------
