@@ -27,8 +27,8 @@
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.2.0"); //minimal version of db for current version of code
-define('HEURIST_HELP', "http://heurist.sydney.edu.au/help");
-define('HEURIST_INDEX_BASE_URL', "http://heurist.sydney.edu.au/h5-ao/");  //central index database url
+define('HEURIST_HELP', "https://heuristplus.sydney.edu.au/heurist/help");
+define('HEURIST_INDEX_BASE_URL', "https://heuristplus.sydney.edu.au/heurist/"); //central index database url
 define('HEURIST_INDEX_DATABASE', 'Heurist_Master_Index');
 //define('HEURIST_INDEX_BASE_URL', "http://127.0.0.1/h4-ao");
 

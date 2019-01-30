@@ -442,8 +442,8 @@ $.widget( "heurist.importStructure", {
             this._selectedDB = sDB_ID;
             
             //TEMP replace all folders to h5-ao to get correct output
-            if(sURL.indexOf('http://heurist.sydney.edu.au/')==0){
-                sURL = 'http://heurist.sydney.edu.au/h5-ao/'    
+            if(sURL.indexOf('http://heurist.sydney.edu.au/')==0 || sURL.indexOf('https://heuristplus.sydney.edu.au/')==0){
+                sURL = 'https://heuristplus.sydney.edu.au/heurist/h5-ao/'    
             }
             
             

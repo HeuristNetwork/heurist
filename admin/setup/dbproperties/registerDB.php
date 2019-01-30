@@ -205,7 +205,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             HEURIST_INDEX_DATABASE=='Heurist_Master_Index' && 
             (strpos(HEURIST_SERVER_URL, 'https://heuristplus.sydney.edu.au')===0 ||
             strpos(HEURIST_SERVER_URL, 'http://heurist.sydney.edu.au')===0) &&
-            strpos(HEURIST_INDEX_BASE_URL, 'http://heurist.sydney.edu.au')===0;
+            strpos(HEURIST_INDEX_BASE_URL, 'https://heuristplus.sydney.edu.au')===0;
             
 ?>
 
