@@ -1089,7 +1089,9 @@ $.widget( "heurist.resultList", {
         }
 
         function __getOwnerName(ugr_id){ //we may use SystemMgr.usr_names however it calls server
-            if(ugr_id== window.hWin.HAPI4.currentUser.ugr_ID){
+            if(ugr_id==0){
+                return 'Everyone';
+            }else if(ugr_id== window.hWin.HAPI4.currentUser.ugr_ID){
                 return window.hWin.HAPI4.currentUser.ugr_FullName;
             }else if(window.hWin.HAPI4.sysinfo.db_usergroups[ugr_id]){
                 return window.hWin.HAPI4.sysinfo.db_usergroups[ugr_id];    
@@ -1101,12 +1103,13 @@ $.widget( "heurist.resultList", {
         // Show owner group and accessibility to others as colour code
         var html_owner = '';
         var owner_id = fld('rec_OwnerUGrpID');
-        if(owner_id && owner_id!='0'){
+        if(owner_id){  // && owner_id!='0'
             // 0 owner group is 'everyone' which is treated as automatically making it public (although this is not logical)
             // TODO: I think 0 should be treated like any other owner group in terms of public visibility
             var visibility = fld('rec_NonOwnerVisibility');
             // gray - hidden, green = viewable (logged in user) = default, orange = pending, red = public = most 'dangerous'
             var clr  = 'blue';
+            
             if(visibility=='hidden'){
                 clr = 'red';
                 visibility = 'private - hidden from non-owners';
@@ -1124,7 +1127,16 @@ $.widget( "heurist.resultList", {
             var hint = __getOwnerName(owner_id)+', '+visibility;
 
             // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
-            html_owner =  '<span class="rec_owner" style="color:' + clr + '" title="' + hint + '">&nbsp;&nbsp;<b>' + owner_id + '</b></span>';
+            html_owner =  '<span class="rec_owner" style="width:20px;padding-top:6;display:inline-block;color:'
+                     + clr + '" title="' + hint + '"><b>' + (owner_id==0?'E':owner_id) + '</b></span>';
+            
+            if(clr != 'blue')         
+            html_owner =  html_owner + '<span class="ui-icon ui-icon-cancel" '
+            +'style="color:darkgray;display:inline;font-size: 2em;vertical-align: -2px"></span>'
+                +'<span class="ui-icon ui-icon-eye" style="color:darkgray;display:inline;vertical-align:0px" title="'
+                + 'This record is not publicly visible - user must be logged in to see it'
+                + '" ></span>';
+                     
 
         }
 
@@ -1135,10 +1147,11 @@ $.widget( "heurist.resultList", {
         + '<div class="recordIcons logged-in-only">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/> '
-        +     '<span class="ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline;left:0px">&nbsp;&nbsp;</span>'
+        +     '<span class="ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline-block;"></span>'
         +     html_owner
         +     html_pwdrem
         + '</div>'
+
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
         + '<div title="dbl-click to edit : '+recTitle_strip_all+'" class="recordTitle">'
