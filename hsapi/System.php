@@ -272,14 +272,22 @@ error_log(print_r($_REQUEST, true));
         }else*/
         if (!$RTIDs || $reset) {
             $res = $this->mysqli->query('select rty_ID as localID,
-            rty_OriginatingDBID as dbID,rty_IDInOriginatingDB as id from defRecTypes order by dbID');
+            rty_OriginatingDBID as dbID, rty_IDInOriginatingDB as id from defRecTypes order by dbID');
             if (!$res) {
                 echo "Unable to build internal record-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
                 exit();
             }
+            
+            $regID = $this->get_system('sys_dbRegisteredID');
 
             $RTIDs = array();
             while ($row = $res->fetch_assoc()) {
+                
+                if( !($row['dbID']>0) && $regID>0){
+                    $row['dbID'] = $regID;
+                    $row['id'] = $row['localID'];
+                }
+                
                 if (!@$RTIDs[$row['dbID']]) {
                     $RTIDs[$row['dbID']] = array();
                 }
@@ -330,9 +338,18 @@ error_log(print_r($_REQUEST, true));
                 echo "Unable to build internal field-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
                 exit();
             }
+                
+                
+            $regID = $this->get_system('sys_dbRegisteredID');
 
             $DTIDs = array();
             while ($row = $res->fetch_assoc()) {
+                
+                if( !($row['dbID']>0) && $regID>0){
+                    $row['dbID'] = $regID;
+                    $row['id'] = $row['localID'];
+                }
+                
                 if (!@$DTIDs[$row['dbID']]) {
                     $DTIDs[$row['dbID']] = array();
                 }
@@ -480,6 +497,9 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         define('HEURIST_TERM_ICON_URL', HEURIST_FILESTORE_URL . 'term-icons/');
 
 
+        folderCreate(HEURIST_THUMB_DIR, true);
+        folderCreate(HEURIST_FILESTORE_DIR, true);
+        
         define('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_FILESTORE_DIR . 'smarty-templates/');
         folderCreate(HEURIST_SMARTY_TEMPLATES_DIR, true);
         
