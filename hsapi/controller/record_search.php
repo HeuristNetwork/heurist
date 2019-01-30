@@ -118,8 +118,13 @@
                         .(is_array($_REQUEST['detail'])?json_encode($_REQUEST['detail']):$_REQUEST['detail']);
                 }
                 $data = loadRemoteURLContent($reg_url);            
-            
-                $response = json_decode($data, true);
+                if($data==false){
+                    $system->addError(HEURIST_SYSTEM_CONFIG, "Cannot access Master Index database on ".HEURIST_INDEX_BASE_URL);
+                    $response = $system->getError();
+                }else{
+                    $response = json_decode($data, true);    
+                }
+                
             
         }else{
 

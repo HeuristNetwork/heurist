@@ -55,6 +55,12 @@
                                                                     
                 $data = loadRemoteURLContent($remoteURL);            
             
+                $data = loadRemoteURLContent($reg_url);            
+                if($data==false){
+                    //$system->addError(HEURIST_ERROR,  );
+                    $data = array("status"=>HEURIST_ERROR, "message"=>'Cannot access database structure for database '
+                                            .$match[1].' on '.$splittedURL[0], "sysmsg"=>null);
+                }
                 //$response = json_decode($data, true);
                 //$is_remote = true;
                 
