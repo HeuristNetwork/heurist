@@ -587,7 +587,7 @@ function unzipArchive($zipfile, $destination, $entries=null){
             error_log( $entry );
             }*/
             if($entries==null){
-                $zip->extractTo($destination, array());
+                $zip->extractTo($destination);//, array()
             }else{
                 $zip->extractTo($destination, $entries);
             }

@@ -71,6 +71,8 @@ define ('TESTMODE', false);           // Set to true to process the file without
 // Database configuration
 function db_script($db_name, $filename, $verbose = false){
     
+$verbose = true;
+    
 $db_server   = HEURIST_DBSERVER_NAME;
 $db_username = ADMIN_DBUSERNAME;
 $db_password = ADMIN_DBUSERPSWD;
@@ -85,7 +87,7 @@ $db_connection_charset = 'utf8';
 
 //$filename           = '';     // Specify the dump filename to suppress the file selection dialog
 $ajax               = true;   // AJAX mode: import will be done without refreshing the website
-$linespersession    = 3000;   // Lines to be executed per one import session
+$linespersession    = 3000000;   // Lines to be executed per one import session
 $delaypersession    = 0;      // You can specify a sleep time in milliseconds after each session
                               // Works only if JavaScript is activated. Use to reduce server overrun
 
@@ -454,20 +456,29 @@ if (!$error && isset($_REQUEST["start"]) && isset($_REQUEST["foffset"]) && preg_
 
         $query = substr(trim($query),0,-1*strlen($delimiter));
 
-// DIAGNOSTIC
-// echo ("<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n");
-
+// DIAGNOSTIC "<p>Query: ".."</p>\n"
+/*
+if($linenumber>2999){
+    echo '<p>'.substr(trim(nl2br(htmlentities($query))),0,50).'</p>';
+    error_log (substr(trim(nl2br(htmlentities($query))),0,50));
+}
+*/
         if (!TESTMODE && !$mysqli->query($query))
         { 
             $errorMsg = $mysqli->error;
-            error_echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline)."</p>\n"
-            ."<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n"
-            ."<p>MySQL: ".$errorMsg."</p>\n");
-            $error = false;
-            if(strpos($errorMsg,'Duplicate column')===false){
-                $error = true;
+            
+            if(strpos($errorMsg,'Cannot get geometry object')!==false){
+                error_log( $linenumber.'   '. trim($dumpline) );                
+            }else{
+                error_echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline)."</p>\n"
+                ."<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n"
+                ."<p>MySQL: ".$errorMsg."</p>\n");
+                $error = false;
+                if(strpos($errorMsg,'Duplicate column')===false){
+                    $error = true;
+                }
+                break;
             }
-            break;
         }
         $totalqueries++;
         $queries++;
