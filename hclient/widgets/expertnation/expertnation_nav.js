@@ -1574,7 +1574,7 @@ $.widget( "heurist.expertnation_nav", {
                         var termID = that.recset.fld(record, 258);
                         var sOrg = that.__getTerm(termID);
                         html = html + '<li>'+sOrg+'</li>'; 
-                    }s
+                    }
                 }//for
             }
             leftside['p_association'] = html;

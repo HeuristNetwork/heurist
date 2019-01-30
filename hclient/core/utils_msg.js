@@ -552,10 +552,14 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         }
                         
                         var content = $dosframe[0].contentWindow;
+                        try{
                         content.alert = function(txt){
                             $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
                             $dlg_alert.dialog('open');
                             return true;
+                        }
+                        }catch(e){
+                            console.log(e);
                         }
                         
                         if(!options["title"]){
