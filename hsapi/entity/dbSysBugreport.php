@@ -19,14 +19,17 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
-require_once(dirname(__FILE__).'/../../external/php/geekMail-1.0.php');
+//require_once(dirname(__FILE__).'/../../external/php/geekMail-1.0.php');
+require dirname(__FILE__).'/../../vendor/autoload.php';
+//require_once dirname(__FILE__).'/../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+//require_once dirname(__FILE__).'/../../vendor/phpmailer/phpmailer/src/Exception.php';
 
-
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class DbSysBugreport extends DbEntityBase
 {
@@ -87,7 +90,7 @@ class DbSysBugreport extends DbEntityBase
         
         $record = $this->records[0];
 
-        $toEmailAddress = HEURIST_MAIL_TO_BUG;
+        $toEmailAddress = 'osmakov@gmail.com';//HEURIST_MAIL_TO_BUG;
 
         if(!(isset($toEmailAddress) && $toEmailAddress)){
              $this->system->addError(HEURIST_SYSTEM_CONFIG, 
@@ -95,20 +98,12 @@ class DbSysBugreport extends DbEntityBase
              return false;
         }
         
-        //send an email with attachment
-        $geekMail = new geekMail();
-        $geekMail->setMailType('html');
-        $geekMail->to($toEmailAddress);
-        
         $message = array();
         $message["rectype"] = '2-253';
         
-        $bug_title = $record['2-1'];
+        $bug_title = 'Bug report or feature request: '.$record['2-1'];
         $message['type:2-1'] = $record['2-1'];
     
-        $geekMail->from('bugs@HeuristNetwork.org', 'Bug reporter'); //'noreply@HeuristNetwork.org', 'Bug Report');
-        $geekMail->subject('Bug report or feature request: '.$bug_title);
-
         //keep new line
         $bug_descr = $record['2-3'];
         
@@ -140,7 +135,7 @@ class DbSysBugreport extends DbEntityBase
         }
         $message['type:2-51'] = $ext_info;  //DT_BUG_REPORT_EXTRA_INFO;
         
-        
+        $filename = null;
         $attachment_temp_name = @$record['2-38'];
         if($attachment_temp_name){
             
@@ -150,26 +145,47 @@ class DbSysBugreport extends DbEntityBase
                 $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
                 //$extension = $info->getExtension(); since 5.3.6 
                 $filename = $info->getPathname();
-                $geekMail->attach($filename);
+                
                 $message['type:2-38'] = array($info->getFilename(), $extension);
             }
         }
         
         $message =  json_encode($message);
-        $geekMail->message($message);
-        
-        if (!$geekMail->send())
-        {
+       
+        //send an email with attachment
+        $email = new PHPMailer();
+        $email->isHTML(true); 
+        $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter');
+        $email->Subject   = $bug_title;
+        $email->Body      = $message;
+        $email->AddAddress( $toEmailAddress );        
+        if($filename!=null){
+            $email->addAttachment($filename);// , 'new.jpg'); 
+        }
+       
+        /*
+        $email = new geekMail();
+        $email->setMailType('html');
+        $email->to($toEmailAddress);
+        $email->from('bugs@HeuristNetwork.org', 'Bug reporter'); //'noreply@HeuristNetwork.org', 'Bug Report');
+        $email->subject($bug_title);
+        if($filename!=null){
+            $email->attach($filename);
+        }
+        $email->message($message);
+        if (!$email->send())
             //$errors = $geekMail->getDebugger();
             //print_r($errors);
-            
-             $this->system->addError(HEURIST_SYSTEM_CONFIG, 
-                    'Cannot send email. Please ask system administrator to verify that mailing is enabled on your server');
-            return false;
-        }else{
-            //@todo - remove temp files
-            
+        }
+        */
+        try{
+            $email->send();
             return array(1); //fake rec id
+        } catch (Exception $e) {
+            $this->system->addError(HEURIST_SYSTEM_CONFIG, 
+                    'Cannot send email. Please ask system administrator to verify that mailing is enabled on your server'
+                    , $email->ErrorInfo);
+            return false;
         }
     }  
             
