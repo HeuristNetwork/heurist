@@ -125,8 +125,20 @@
         
         $swarn = '';
         
-        if (folderCreate($folder, true)){
+        $check = folderExists($folder, true);
         
+        if($check==-2){
+            $swarn = 'Cannot access folder (it is not writeable) '. $folder .'  '.$message.'<br>';
+        }else if($check==-1){
+            if (!mkdir($folder, 0777, true)) {
+                $swarn = 'Unable to create folder '. $folder .'  '.$message.'<br>';
+            }else{
+                $check=1;
+            }
+        }
+        
+        if ($check>0){
+            
             folderAddIndexHTML( $folder );
             
             if($allowWebAccess){
@@ -136,9 +148,6 @@
                     $swarn = "Cannot copy htaccess file for folder $folder<br>";
                 }
             }
-            
-        }else{
-            $swarn = 'Unable to create folder '. $folder .'  '.$message.'<br>';
         }
         return $swarn;
     }   

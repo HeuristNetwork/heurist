@@ -108,14 +108,8 @@ class System {
                             define('HEURIST_DBNAME', $this->dbname);
                             define('HEURIST_DBNAME_FULL', $this->dbname_full);
                         }
-                        
 
-                        //@todo  - test upload and thumb folder exist and writeable
                         if(!$this->initPathConstants()){
-                            $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
-                                "</b><br/>Either the directory does not exist (check setting in heuristConfigIni.php file), or it is not writeable by PHP (check permissions).<br>".
-                                "On a multi-tier service, the file server may not have restarted correctly or may not have been mounted on the web server.</p>");
-
                             return false;
                         }
 
@@ -449,20 +443,9 @@ error_log(print_r($_REQUEST, true));
                 define('HEURIST_FILESTORE_DIR', $upload_root . $dbname . '/');
             }
 
-            if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
-                return false;
-            }
-
-            if(defined('HEURIST_FILESTORE_URL')){
-error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTORE_URL. ' script '.$_SERVER["SCRIPT_FILENAME"]);                
-                return true;
-            }else{
-                define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
-            }
-
         }
         else{
-            //path has default name
+            //path is not configured in ini - set dafault values
             
             $install_path = 'HEURIST/'; //$this->getInstallPath();
             $dir_Filestore = "HEURIST_FILESTORE/";
@@ -474,42 +457,64 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
             if(!defined('HEURIST_FILESTORE_DIR')){
                 define('HEURIST_FILESTORE_DIR', $upload_root . $dbname . '/');
             }
-            if(folderExists(HEURIST_FILESTORE_DIR, true)<0){
+            
+            $defaultRootFileUploadURL = HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore;
+        }
+
+        $check = folderExists(HEURIST_FILESTORE_DIR, true);
+        if($check<0){
+                $this->addError(HEURIST_SYSTEM_FATAL, "Cannot access filestore directory for this database: <b>". HEURIST_FILESTORE_DIR .
+                                '</b><br/>The directory '
+                                .(($check==-1)
+                                ?'does not exist (check setting in heuristConfigIni.php file)'
+                                :'is not writeable by PHP (check permissions)')
+                                .'<br>On a multi-tier service, the file server may not have restarted correctly or '
+                                .'may not have been mounted on the web server.</p>');
                 return false;
-            }
-
-            define('HEURIST_FILESTORE_URL', HEURIST_SERVER_URL . '/' . $install_path . $dir_Filestore . $dbname . '/');
         }
-
-        if(!defined('HEURIST_THUMB_DIR')){
-            define('HEURIST_THUMB_DIR', HEURIST_FILESTORE_DIR . 'filethumbs/');
+       
+        define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
+        
+        $folders = array();
+        $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', true);
+        $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
+        $folders['scratch']      = array('SCRATCH','used to store temporary files');
+        $folders['hml-output']   = array('HML','used to write published records as hml files', true);
+        $folders['html-output']  = array('HTML','used to write published records as generic html files', true);
+        $folders['generated-reports'] = array(null,'used to write generated reports');
+        $folders['xsl-templates']     = array('XSL_TEMPLATES','');
+        $folders['smarty-templates']  = array('SMARTY_TEMPLATES','');
+        $folders['entity']        = array(null,'used to store icons and images for users,groups,terms');
+        $folders['backup']        = array(null,'used to write files for user data dump');
+        $folders['term-icons']    = array('TERM_ICON','used for images illustrating terms'); //todo move to entity
+        $folders['rectype-icons'] = array('ICON','used for record type icons and thumbnails'); //todo move to entity
+        $folders['settings']      = array('SETTING','');
+        $warnings = array();
+        
+        foreach ($folders as $folder_name=>$folder){
+            
+                $allowWebAccess = (@$folder[2]===true);
+            
+                $dir = HEURIST_FILESTORE_DIR.$folder_name.'/';
+                
+                $warn = folderCreate2($dir, $folder[1], $allowWebAccess);
+                if($warn!=''){ //can't creat or not writeable
+                    $warnings[] = $warn;
+                }else{
+                    if($folder[0]!=null){
+                        define('HEURIST_'.$const_name.'_DIR', $dir);
+                        define('HEURIST_'.$const_name.'_URL', HEURIST_FILESTORE_URL.$folder_name.'/');
+                    }
+                }
+            
         }
-        define('HEURIST_THUMB_URL', HEURIST_FILESTORE_URL . 'filethumbs/');
-        define('HEURIST_FILES_DIR', HEURIST_FILESTORE_DIR . 'file_uploads/');
-        define('HEURIST_FILES_URL', HEURIST_FILESTORE_URL . 'file_uploads/');
-
-        define('HEURIST_ICON_DIR', HEURIST_FILESTORE_DIR . 'rectype-icons/');
-        define('HEURIST_ICON_URL', HEURIST_FILESTORE_URL . 'rectype-icons/');
+        if(count($warnings)>0){
+            $this->addError(HEURIST_SYSTEM_FATAL, implode('',$warnings));
+            return false;            
+        }
+            
 
         define('HEURIST_ICON_SCRIPT', HEURIST_BASE_URL.'hsapi/dbaccess/rt_icon.php?db='.$dbname.'&id=');
-        
-        define('HEURIST_TERM_ICON_DIR', HEURIST_FILESTORE_DIR . 'term-icons/');
-        define('HEURIST_TERM_ICON_URL', HEURIST_FILESTORE_URL . 'term-icons/');
-
-
-        folderCreate(HEURIST_THUMB_DIR, true);
-        folderCreate(HEURIST_FILESTORE_DIR, true);
-        
-        define('HEURIST_SMARTY_TEMPLATES_DIR', HEURIST_FILESTORE_DIR . 'smarty-templates/');
-        folderCreate(HEURIST_SMARTY_TEMPLATES_DIR, true);
-        
-        define('HEURIST_SCRATCH_DIR', HEURIST_FILESTORE_DIR . 'scratch/');
-        folderCreate(HEURIST_SCRATCH_DIR, true);
-
-        $folder = HEURIST_FILESTORE_DIR . 'settings/';
-        if(folderCreate($folder, true)){
-            define('HEURIST_SETTING_DIR', $folder);
-        }
         
         return true;
     }
@@ -1003,7 +1008,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
         session_name('heurist-sessionid');
-        session_set_cookie_params ( 0, '/', '', $is_https);
+        //session_set_cookie_params ( 0, '/', '', $is_https);
         session_cache_limiter('none');
         
         if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes 
@@ -1012,7 +1017,7 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
         } else {   //session does not exist - create new one and save on cookies
             @session_start();
             $session_id = session_id();
-            setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https );
+            setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https ); //create new session
         }
         
 //        @session_start();
@@ -1122,7 +1127,9 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
                 $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-                $cres = setcookie('heurist-sessionid', session_id(), time() + 30*24*60*60, '/', '', $is_https ); 
+                $time = time() + 30*24*60*60;
+                $session_id = session_id();
+                $cres = setcookie('heurist-sessionid', session_id(), $time, '/', '', $is_https ); 
             }
             
             session_write_close();
@@ -1176,7 +1183,9 @@ error_log('Duplicate initialization for '.$dbname.'.  Current: '.HEURIST_FILESTO
                 
                     //update cookie expire time
                     $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-                    $cres = setcookie('heurist-sessionid', session_id(), $time, '/', '', $is_https );
+                    $session_id = session_id();
+                    $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );
+                    
                     if(!$cres){
                         
                     }

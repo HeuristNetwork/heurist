@@ -458,7 +458,6 @@ class DbUtils {
             $warnings[] = "Unable to create/copy documentation folder to $database_folder";
         }
 
-        
         // Create all the other standard folders required for the database
         // index.html files are added by createFolder to block index browsing
         $warnings[] = folderCreate2($database_folder. '/filethumbs', 'used to store thumbnails for uploaded files', true);
