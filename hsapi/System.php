@@ -502,8 +502,8 @@ error_log(print_r($_REQUEST, true));
                     $warnings[] = $warn;
                 }else{
                     if($folder[0]!=null){
-                        define('HEURIST_'.$const_name.'_DIR', $dir);
-                        define('HEURIST_'.$const_name.'_URL', HEURIST_FILESTORE_URL.$folder_name.'/');
+                        define('HEURIST_'.$folder[0].'_DIR', $dir);
+                        define('HEURIST_'.$folder[0].'_URL', HEURIST_FILESTORE_URL.$folder_name.'/');
                     }
                 }
             

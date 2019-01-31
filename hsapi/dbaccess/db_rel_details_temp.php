@@ -2,18 +2,6 @@
 //legacy of h3 - used in reportRecord and renderRecordData
 //@todo urgent 1) use recLinks  2) move to db_recsearch use recordGetRelationship?
 
-
-$relRT = (defined('RT_RELATION') ? RT_RELATION : 0);
-$relTypDT = (defined('DT_RELATION_TYPE') ? DT_RELATION_TYPE : 0);
-$relSrcDT = (defined('DT_PRIMARY_RESOURCE') ? DT_PRIMARY_RESOURCE : 0);
-$relTrgDT = (defined('DT_TARGET_RESOURCE') ? DT_TARGET_RESOURCE : 0);
-$intrpDT = (defined('DT_INTERPRETATION_REFERENCE') ? DT_INTERPRETATION_REFERENCE : 0);
-$notesDT = (defined('DT_SHORT_SUMMARY') ? DT_SHORT_SUMMARY : 0);
-$startDT = (defined('DT_START_DATE') ? DT_START_DATE : 0);
-$endDT = (defined('DT_END_DATE') ? DT_END_DATE : 0);
-$titleDT = (defined('DT_NAME') ? DT_NAME : 0);
-
-
 /**
 * get related record structure for a give relationship record
 * related = { "recID" => recID,
@@ -41,8 +29,19 @@ $titleDT = (defined('DT_NAME') ? DT_NAME : 0);
 * @todo      change $i_am_primary to useInverseRelation
 */
 function fetch_relation_details($recID, $i_am_primary) {
+    global $system;
     
-    global $system, $relTypDT, $relSrcDT, $relTrgDT, $intrpDT, $notesDT, $startDT, $endDT, $titleDT;
+    $relRT = ($system->defineConstant('RT_RELATION')?RT_RELATION:0);
+    $relTypDT = ($system->defineConstant('DT_RELATION_TYPE')?DT_RELATION_TYPE:0);
+    $relSrcDT = ($system->defineConstant('DT_PRIMARY_RESOURCE')?DT_PRIMARY_RESOURCE:0);
+    $relTrgDT = ($system->defineConstant('DT_TARGET_RESOURCE')?DT_TARGET_RESOURCE:0);
+    $intrpDT = ($system->defineConstant('DT_INTERPRETATION_REFERENCE')?DT_INTERPRETATION_REFERENCE:0);
+    $notesDT = ($system->defineConstant('DT_SHORT_SUMMARY')?DT_SHORT_SUMMARY:0);
+    $startDT = ($system->defineConstant('DT_START_DATE')?DT_START_DATE:0);
+    $endDT = ($system->defineConstant('DT_END_DATE')?DT_END_DATE:0);
+    $titleDT = ($system->defineConstant('DT_NAME')?DT_NAME:0);
+
+    //global $system, $relTypDT, $relSrcDT, $relTrgDT, $intrpDT, $notesDT, $startDT, $endDT, $titleDT;
     
     /* get recDetails for the given linked resource and extract all the necessary values */
     $mysqli = $system->get_mysqli();
@@ -109,5 +108,30 @@ function fetch_relation_details($recID, $i_am_primary) {
     }
     
     return $bd;
+}
+
+/**
+* determine the inverse of a relationship term
+* @global    array llokup of term inverses by trmID to inverseTrmID
+* @param     int $relTermID reltionship trmID
+* @return    int inverse trmID
+* @todo      modify to retrun -1 in case not inverse defined
+*/
+function reltype_inverse($relTermID) { //saw Enum change - find inverse as an id instead of a string
+
+    global $system, $inverses;
+    
+    $mysqli = $system->get_mysqli();
+
+    if (!$relTermID) return;
+    if (!$inverses) {
+        $inverses = mysql__select_assoc2($mysqli, 
+                "SELECT A.trm_ID, B.trm_ID FROM defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID"
+                ." WHERE A.trm_Label is not null and B.trm_Label is not null");
+    }
+    $inverse = @$inverses[$relTermID];
+    if (!$inverse) $inverse = array_search($relTermID, $inverses);//do an inverse search and return key.
+    if (!$inverse) $inverse = $relTermID; //'Inverse of ' . FIXME: This should be -1 indicating no inverse found.
+    return $inverse;
 }
 ?>

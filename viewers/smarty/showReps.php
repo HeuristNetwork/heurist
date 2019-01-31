@@ -53,7 +53,6 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
 
 require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
-require_once(dirname(__FILE__).'/reportRecord.php');
 
 $outputfile = null;
 $isJSout = false;
@@ -72,7 +71,13 @@ $execution_total_counter = 0;
 $system = new System(); 
 $system->init(@$_REQUEST['db']);
 
+if(!defined('HEURIST_SMARTY_TEMPLATES_DIR')){
+    error_log('HEURIST_SMARTY_TEMPLATES_DIR NOT DEFINMED');
+    exit();
+}
+
 require_once(dirname(__FILE__).'/libs.inc.php');
+require_once(dirname(__FILE__).'/reportRecord.php');
 
 if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 (array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))

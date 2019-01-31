@@ -1208,31 +1208,6 @@ function print_other_tags($bib) {
         <?php
 }
 
-/**
-* determine the inverse of a relationship term
-* @global    array llokup of term inverses by trmID to inverseTrmID
-* @param     int $relTermID reltionship trmID
-* @return    int inverse trmID
-* @todo      modify to retrun -1 in case not inverse defined
-*/
-function reltype_inverse($relTermID) { //saw Enum change - find inverse as an id instead of a string
-
-    global $system, $inverses;
-    
-    $mysqli = $system->get_mysqli();
-
-    if (!$relTermID) return;
-    if (!$inverses) {
-        $inverses = mysql__select_assoc2($mysqli, 
-                "SELECT A.trm_ID, B.trm_ID FROM defTerms A left join defTerms B on B.trm_ID=A.trm_InverseTermID"
-                ." WHERE A.trm_Label is not null and B.trm_Label is not null");
-    }
-    $inverse = @$inverses[$relTermID];
-    if (!$inverse) $inverse = array_search($relTermID, $inverses);//do an inverse search and return key.
-    if (!$inverse) $inverse = $relTermID; //'Inverse of ' . FIXME: This should be -1 indicating no inverse found.
-    return $inverse;
-}
-
 //
 //
 //

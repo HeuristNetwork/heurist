@@ -65,7 +65,7 @@ class ReportRecord {
     }
     
     //
-    //
+    // retuns array of all relationship records + related record
     //
     public function getRelatedRecords($rec, $smarty_obj=null){
         
