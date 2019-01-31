@@ -229,7 +229,7 @@ function outputXML($system, $data, $params){
                     }
                 }
     
-                if($field_type=='enum'){
+                if($field_type=='enum' || $field_type=='relationtype'){
 
                     array_push($headers[$rt], $field_name);  //labels are always included           
                     
@@ -438,7 +438,7 @@ function outputXML($system, $data, $params){
                                 foreach($values as $val){
                                      $vals[] = temporalToHumanReadableString(trim($val));
                                 }                        
-                        }else if($dt_type=='enum'){
+                        }else if($dt_type=='enum' || $dt_type=='relationtype'){
                             
                                 if(count($values)>0){
                                     foreach($values as $val){
@@ -463,7 +463,7 @@ function outputXML($system, $data, $params){
                     
                     //empty values
                     if($value == null){
-                        if($dt_type=='enum'){
+                        if($dt_type=='enum' || $dt_type=='relationtype'){
                             
                             $enum_label[] = '';
                             $enum_code[] = ''; 
