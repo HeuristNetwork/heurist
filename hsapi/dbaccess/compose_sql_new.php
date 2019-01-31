@@ -38,13 +38,14 @@ plain            query in old plain text format
 url, u:          url
 notes, n:        record heder notes (scratchpad)
 title:           title contains
-addedby:         added by specified user
 added:           creation date
-date, modified:  edition date
+date, modified:  edition date  (rec_Modified
 after, since:
 before:
 
-workgroup,wg,owner:
+addedby:         added by specified user (rec_AddedByUGrpID
+owner:  - owned by  (rec_OwnerUGrpID
+access:  visibility outiside owner group (rec_NonOwnerVisibility
 
 user, usr:   user id  - bookmarked by user
 tag, keyword, kwd:   tag
@@ -623,19 +624,21 @@ class HPredicate {
     var $greaterthan = false;
 
     var $allowed = array('title','t','modified','url','notes','type','ids','id','count','cnt',
-            'f','field','linked_to','linkedfrom','related_to','relatedfrom','links','plain');
+            'f','field','linked_to','linkedfrom','related_to','relatedfrom','links','plain',
+            'addedby','owner','access');
     /*
     notes, n:        record heder notes (scratchpad)
     title:           title contains
     url              record header url (rec_URL)
-    addedby:         added by specified user
     added:           creation date
     date, modified:  edition date
     after, since:
     before:
     plain            query in old plain text format
 
-    workgroup,wg,owner:
+    addedby:         added by specified user (rec_AddedByUGrpID)
+    owner:  - owned by  (rec_OwnerUGrpID)
+    access:  visibility outiside owner group (rec_NonOwnerVisibility)
 
     user, usr:   user id  - bookmarked by user
     tag, keyword, kwd:   tag
@@ -748,6 +751,9 @@ class HPredicate {
             case 'modified':
             case 'url':
             case 'notes':
+            case 'addedby':
+            case 'owner':
+            case 'access':
             
                 $this->pred_type = strtolower($this->pred_type);
                 return $this->predicateField();
@@ -839,6 +845,18 @@ class HPredicate {
             
             $sHeaderField = 'rec_ScratchPad';
             $ignoreApostrophe = (strpos($val, 'LIKE')==1);
+            
+        }else if($this->pred_type=='addedby'){
+            
+            $sHeaderField = 'rec_AddedByUGrpID';
+            
+        }else if($this->pred_type=='owner'){
+            
+            $sHeaderField = 'rec_OwnerUGrpID';
+            
+        }else if($this->pred_type=='access'){
+            
+            $sHeaderField = "rec_NonOwnerVisibility";
         }
             
           
@@ -1394,6 +1412,26 @@ class HPredicate {
             $this->field_list = true;
         }
         else {
+            
+            
+            if($this->pred_type=='addedby' || $this->pred_type=='owner')
+            {
+                //if value is not numeric (user id), find user id by user login name
+                $values = explode(',',$this->value);
+                $userids = array();
+                foreach($values as $username){
+                    if(is_numeric($username)){
+                        $userids[] = $username;        
+                    }else{
+                         $username = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where ugr_Name = "'
+                                .$mysqli->real_escape_string($username).'" limit 1');
+                         if($username!=null) $userids[] = $username;
+                    }
+                }
+                $this->value = implode(',', $userids);
+                $this->exact = true;
+            }       
+            
             
             if($this->pred_type=='title' || $this->pred_type=='url' || $this->pred_type=='notes'
                 || $this->field_type =='date'){
