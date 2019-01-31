@@ -100,6 +100,11 @@ function doLogin(isforsed){
                     var username = $dlg.find('#username');
                     var password = $dlg.find('#password');
                     var session_type = $dlg.find('input[name="session_type"]');
+                    if(session_type.is("input[type=checkbox]")){
+                        session_type = 'remember';
+                    }else{
+                        session_type = session_type.val();
+                    }
 
                     var bValid = window.hWin.HEURIST4.msg.checkLength( username, "username", message, 1 )
                     && window.hWin.HEURIST4.msg.checkLength( password, "password", message, 1 );         //3,63
@@ -107,7 +112,8 @@ function doLogin(isforsed){
                     if ( bValid ) {
 
                         //get hapi and perform login
-                        window.hWin.HAPI4.SystemMgr.login({username: username.val(), password:password.val(), session_type:session_type.val()},
+                        window.hWin.HAPI4.SystemMgr.login({username: username.val(), password:password.val(), 
+                                                session_type:session_type},
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
 
