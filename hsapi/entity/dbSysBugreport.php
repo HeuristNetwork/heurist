@@ -25,8 +25,6 @@ require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
 //require_once(dirname(__FILE__).'/../../external/php/geekMail-1.0.php');
 require dirname(__FILE__).'/../../vendor/autoload.php';
-//require_once dirname(__FILE__).'/../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-//require_once dirname(__FILE__).'/../../vendor/phpmailer/phpmailer/src/Exception.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -90,7 +88,7 @@ class DbSysBugreport extends DbEntityBase
         
         $record = $this->records[0];
 
-        $toEmailAddress = 'osmakov@gmail.com';//HEURIST_MAIL_TO_BUG;
+        $toEmailAddress = HEURIST_MAIL_TO_BUG;
 
         if(!(isset($toEmailAddress) && $toEmailAddress)){
              $this->system->addError(HEURIST_SYSTEM_CONFIG, 

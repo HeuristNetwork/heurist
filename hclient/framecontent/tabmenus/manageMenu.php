@@ -57,7 +57,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         New</a>
                     </li>
 
-                    <li><a href="#" id="menulink-database-properties"
+                    <li><a href="#" id="menulink-database-properties" oncontextmenu="return false;" 
                         data-nologin="1" data-logaction="db_Properties"
                         title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
                         Properties</a>

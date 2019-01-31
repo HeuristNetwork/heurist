@@ -220,7 +220,7 @@ $mysqli = $system->get_mysqli();
                 //$path_parts['filename'] )); - does not work for nonlatin names
                 $name = substr($filename, 0, -4);
                 print '<div style="display:inline-block;padding:4px;width:40px;">';
-                print '<a href="#" onclick="onLibIconSelect(\''.$filename.'\')"><img height="'.$dim.'" width="'.$dim.'" src="'.HEURIST_BASE_URL.'admin/'.$lib_path.$filename.'"/></a></div>';
+                print '<a href="#" oncontextmenu="return false;"  onclick="onLibIconSelect(\''.$filename.'\')"><img height="'.$dim.'" width="'.$dim.'" src="'.HEURIST_BASE_URL.'admin/'.$lib_path.$filename.'"/></a></div>';
                 //array_push($results, array( 'filename'=>$filename, 'name'=>$name));
             }
         }

@@ -431,7 +431,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                             .'<div style="display:table-cell;padding-right:4px">'
                                 .'<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bibInfo['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bibInfo['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif"></div>'
                         .'<div style="display: table-cell;vertical-align:top;max-width:490px;" class="truncate"><a href="#" '   
-.'onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
+.'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
 .strip_tags($bibInfo['rec_Title'],'<i><b><u>').'</a></div></div>';  //htmlspecialchars
@@ -443,7 +443,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                 if($cnt>3){
                     ?>
                     <div class="detailRow"><div class="detailType">
-                        <a href="#" onClick="$('.placeRow').show();$(event.target).hide
+                        <a href="#" oncontextmenu="return false;" onClick="$('.placeRow').show();$(event.target).hide
                             ()" style="color:blue">more... (n = <?php echo $cnt;?>)</a></div>
                         <div class="detail"></div>
                     </div>
@@ -496,7 +496,7 @@ function print_details($bib) {
         if($is_map_popup){ // && $link_cnt>3 //linkRow
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
-            <a href="#" onClick="$('.fieldRow').css('display','table-row');$('.moreRow').hide()" style="color:blue">more...</a>
+            <a href="#" oncontextmenu="return false;" onClick="$('.fieldRow').css('display','table-row');$('.moreRow').hide()" style="color:blue">more...</a>
             </div><div class="detail"></div></div></div>
         <?php
         }
@@ -607,7 +607,7 @@ function print_private_details($bib) {
         .$system->get_user_id().' where rtl_RecID='.$bib['rec_ID']
         .' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order',0,0);
 
-    print '<div class="detailRowHeader" style="float:left;padding-bottom:40px"><a href="#" ';
+    print '<div class="detailRowHeader" style="float:left;padding-bottom:40px"><a href="#" oncontextmenu="return false;" ';
     print 'onClick="$(\'.morePrivateInfo\').show();$(event.target).parents(\'.detailRowHeader\').hide();';
     print 'setTimeout(function(){window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);},200);';
     print '">more...</a></div>';
@@ -861,7 +861,7 @@ function print_public_details($bib) {
                         
                     }else{
                         
-                        $bd['val'] = '<a href="#" onclick="return no_access_message(this);">'
+                        $bd['val'] = '<a href="#" oncontextmenu="return false;" onclick="return no_access_message(this);">'
                             .htmlspecialchars($rec_title).'</a>';
                         
                     }
@@ -1122,7 +1122,7 @@ function print_public_details($bib) {
             }
             print '<br/><div class="download_link">';
             if($thumb['player'] && !$is_map_popup){
-                print '<a id="lnk'.$thumb['id'].'" href="#" style="display:none;padding-right:20px" onclick="hidePlayer('.$thumb['id'].')">SHOW THUMBNAIL</a>';
+                print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px" onclick="hidePlayer('.$thumb['id'].')">SHOW THUMBNAIL</a>';
             }
             
             print '<a href="' . htmlspecialchars($url) 

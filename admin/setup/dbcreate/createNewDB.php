@@ -503,7 +503,7 @@ if($registrationRequired) //show registration dialog at once
             </div>
             <div class="ui-state-error" id="div_warnings" style="display:none;padding:10px"></div>
             <p style="padding-left:10px">Log into your new database with the following link:</p>
-            <p style="padding-left:6em"><b><a id="newdblink" href="#"
+            <p style="padding-left:6em"><b><a id="newdblink" href="#" oncontextmenu="return false;" 
                         title="" onclick="{closeDialog()}" target="blank"></a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>
 
             <p style="padding-left:6em">
