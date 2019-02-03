@@ -427,11 +427,11 @@ $system_folders = $system->getSystemFolders();
 
                         foreach ($f_gen->children() as $f_item){
 
-                            $recordId	 = null;
+                            $recordIds	 = array();
                             $recordType  = RT_MEDIA_RECORD; //media by default
                             $recordURL   = null;
                             $recordNotes = null;
-                            $el_heuristid = null;
+                            $el_heuristid = array();
                             $lat = null;
                             $lon = null;
                             $filename = null;
@@ -480,8 +480,8 @@ $system_folders = $system->getSystemFolders();
                                         $lon = floatval($value);
 
                                     }else if($key2=="recordId"){
-                                        $recordId = $value;
-                                        $el_heuristid = $el;
+                                        $recordIds[] = $value;
+                                        $el_heuristid[$value] = $el;
                                     }else if(intval($key2)>0) {
                                         //add to details
                                         $details["t:".$key2] = array("1"=>$value);
@@ -499,13 +499,27 @@ $system_folders = $system->getSystemFolders();
                                 }
                             }
 
-                            if($recordId!=null){ //veify that this record exists
-                                $res = mysql__select_value($system->get_mysqli(),'SELECT rec_ID FROM Records WHERE rec_ID='.$recordId);
-                                if (!(is_array($res) && count($res)>0)){
-                                    print  "<div>File: <i>$filename_base</i> was indexed as rec# $recordId. ".
-                                    "This record was not found. File will be reindexed</div>";
-                                    $recordId = null;
-                                }
+                            $recordId = null;
+                            $notFoundMessage = null;
+                            if(count($recordIds)>0){ //veify that this record exists
+                                foreach($recordIds as $recId){
+                                    $query2 = 'SELECT rec_ID FROM Records WHERE rec_ID='.$recId;
+                                    $res = mysql__select_value($system->get_mysqli(),$query2);
+                                    if (!($res>0)) {
+                                        /*print "<div>File: <i>$filename_base</i> Remove entry $recId</div>";
+                                        unset($el_heuristid[$recId]);
+                                        print 'ok';*/
+                                        $notFoundMessage = "<div>File: <i>$filename_base</i> was indexed as rec# $recId. ".
+                                            "This record was not found. File will be reindexed</div>";
+                                    }else{
+                                        $notFoundMessage = null;
+                                        $recordId = $res;
+                                        break;
+                                    }
+                                }//for
+                            }
+                            if($notFoundMessage){
+                                print $notFoundMessage;
                             }
 
                             if($recordId==null){ //import only new
