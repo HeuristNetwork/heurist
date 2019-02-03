@@ -275,7 +275,6 @@ function ShowReps() {
         var session_id = Math.round((new Date()).getTime()/1000);
 
         if(_currentRecordset!=null){
-
             //new approach to support h4
             if(window.hWin.HEURIST4.util.isnull(template_file)){
                 template_file = _getSelectedTemplate();
@@ -283,8 +282,9 @@ function ShowReps() {
             if(window.hWin.HEURIST4.util.isnull(template_file)){
                 return;
             }
+            //if(_currentRecordset['recIDs']) _currentRecordset = _currentRecordset['recIDs'];
 
-            request = {db:window.hWin.HAPI4.database, template:template_file, recordset:_currentRecordset, session:session_id};
+            request = {db:window.hWin.HAPI4.database, template:template_file, recordset:JSON.stringify(_currentRecordset), session:session_id};
 
         }else{
             return; //use global recordset only
@@ -853,7 +853,8 @@ function ShowReps() {
             var request = {};
 
             if(_currentRecordset!=null){
-                request['recordset'] = _currentRecordset;
+                //if(_currentRecordset['recIDs']) _currentRecordset = _currentRecordset['recIDs'];
+                request['recordset'] = JSON.stringify(_currentRecordset);
             }else{
                 request = window.hWin.HEURIST4.util.cloneJSON(_currentQuery);
             }
