@@ -156,9 +156,6 @@ function imagecopymerge_alpha($dst_im, $src_im, $dst_x, $dst_y, $src_x, $src_y, 
     // copying relevant section from background to the cut resource 
     imagecopy($cut, $dst_im, 0, 0, $dst_x, $dst_y, $src_w, $src_h); 
 
-    // copying relevant section from watermark to the cut resource 
-    imagecopy($cut, $src_im, 0, 0, $src_x, $src_y, $src_w, $src_h); 
-    
     // insert cut resource to destination image 
     imagecopymerge($dst_im, $cut, $dst_x, $dst_y, 0, 0, $src_w, $src_h, $pct); 
 }  
@@ -241,30 +238,6 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new, $circle_color, $bg_ci
             download_file($filename);
         }*/
        
-        $img = imagecreatetruecolor(25, 25);      //truecolor
-        //imagealphablending($img, false);
-        //imagesavealpha($img, false);
-        
-        // fill the background color
-        $bg = imagecolorallocate($img, 200, 200, 200);
-        // make the background transparent
-        imagecolortransparent($img, $bg);
-        
-        //draw transparent rectangle
-        imagefilledrectangle($img, 0, 0, 25, 25, $bg); //fill bg rectangle
-        
-        // draw filled circle
-        if($bg_circle_color!=null){
-            $col_ellipse = imagecolorallocate($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2]);
-            imagefilledellipse($img, 12, 12 , 24, 24, $col_ellipse);        
-        }
-        // draw circle
-        if($circle_color!=null){
-            $col_ellipse = imagecolorallocate($img, $circle_color[0], $circle_color[1], $circle_color[2]);
-            imagearc($img, 12, 12 , 24, 24,  0, 360, $col_ellipse);
-            //imagearc($img, 12, 12 , 23, 23,  0, 360, $col_ellipse);
-        }
-        
         
         // load icon
         $img_icon = @imagecreatefrompng($filename);
@@ -279,52 +252,82 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new, $circle_color, $bg_ci
         imagefilter($img_icon, IMG_FILTER_NEGATE); 
         imagefilter($img_icon, IMG_FILTER_COLORIZE, $rgb[0], $rgb[1], $rgb[2]); 
         imagefilter($img_icon, IMG_FILTER_NEGATE); 
-        //imagealphablending( $im, false );
-        //imagesavealpha( $im, true );
+        imagealphablending( $img_icon, false );
+        imagesavealpha( $img_icon, true );
 
+        if(true && ($bg_circle_color!=null || $circle_color!=null)){
+            
+            $img = imagecreatetruecolor(25, 25);      //truecolor image 25x25 pix
+            //imagealphablending($img, false);
+            //imagesavealpha($img, false);
+            // fill the background color
+            $bg = imagecolorallocate($img, 200, 200, 200);
+            // make the background transparent
+            imagecolortransparent($img, $bg);
+            
+            //draw transparent rectangle
+            imagefilledrectangle($img, 0, 0, 25, 25, $bg); //fill bg rectangle
+            
+            // draw filled circle
+            if($bg_circle_color!=null){
+                $col_ellipse = imagecolorallocate($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2]);
+                imagefilledellipse($img, 12, 12 , 24, 24, $col_ellipse);        
+            }
+            // draw circle
+            if($circle_color!=null){
+                $col_ellipse = imagecolorallocate($img, $circle_color[0], $circle_color[1], $circle_color[2]);
+                imagearc($img, 12, 12 , 24, 24,  0, 360, $col_ellipse);
+                //imagearc($img, 12, 12 , 23, 23,  0, 360, $col_ellipse);
+            }        
+            
         
-        /*if($alpha==127){
-            imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16); //keep bg of icon - transparent hole
-        }*/
-        // merge icon and background
-        $imageInfo = getimagesize($filename); 
-        if(is_array($imageInfo) && $imageInfo[0]==24  && $imageInfo[1]==24){
-            imagecopymerge_alpha($img, $img_icon, 0, 0, 0, 0, 24, 24, 70);  //mix background to dark
+            /*if($alpha==127){
+                imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16); //keep bg of icon - transparent hole
+            }*/
+            // merge icon and background
+            /*
+            $imageInfo = getimagesize($filename); 
+            if(is_array($imageInfo) && $imageInfo[0]==24  && $imageInfo[1]==24){
+                imagecopymerge_alpha($img, $img_icon, 1, 1, 0, 0, 24, 24, 70);  //mix background to dark
+            }else{
+                //imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 100);  //mix background to dark
+                imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 70);  //mix background to dark
+            }
+            */
+            
+            /*$bg = imagecolorallocate($img_icon, 255, 255, 255);
+            // make the background transparent
+            imagecolortransparent($img_icon, $bg);*/
+            
+            
+            /*$cut = imagecreatetruecolor(16, 16);  //imagecreatetruecolor
+            imagealphablending($cut, false);
+            //imagesavealpha($cut, true);
+            imagecopy($cut, $img_icon, 0, 0, 0, 0, 16, 16); 
+            imagecopymerge($img, $cut, 4, 4, 0, 0, 16, 16, 70);*/
+            
+            //imagealphablending($img_icon, true);
+            //imagesavealpha($img_icon, true);
+            $imageInfo = getimagesize($filename);
+            if(is_array($imageInfo) && $imageInfo[0]==24  && $imageInfo[1]==24){
+                imagecopy($img, $img_icon, 1, 1, 0, 0, 24, 24); 
+            }else{
+                imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16); 
+            }
+            //imagecopymerge($img, $img_icon, 4, 4, 0, 0, 16, 16, 70); 
+            
+            // output
+            header("Content-type: image/png");        
+            imagepng($img);        
+            imagedestroy($img);
+            //imagepng($img, $filename2);   //save to file     
+            //readfile($filename2);
         }else{
-            imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 100);  //mix background to dark
-            //imagecopymerge_alpha($img, $img_icon, 4, 4, 0, 0, 16, 16, 70);  //mix background to dark
+            // output
+            header("Content-type: image/png");        
+            imagepng($img_icon);        
         }
-        
-        /*$bg = imagecolorallocate($img_icon, 255, 255, 255);
-        // make the background transparent
-        imagecolortransparent($img_icon, $bg);*/
-        
-        
-        /*$cut = imagecreatetruecolor(16, 16);  //imagecreatetruecolor
-        imagealphablending($cut, false);
-        //imagesavealpha($cut, true);
-        imagecopy($cut, $img_icon, 0, 0, 0, 0, 16, 16); 
-        imagecopymerge($img, $cut, 4, 4, 0, 0, 16, 16, 70);*/
-        
-        //imagealphablending($img_icon, true);
-        //imagesavealpha($img_icon, true);
-        //imagecopy($img, $img_icon, 4, 4, 0, 0, 16, 16); 
-        //imagecopymerge($img, $img_icon, 4, 4, 0, 0, 16, 16, 70); 
-        
-    //imagealphablending(, false);
     
-        
-        
-        // output
-        header("Content-type: image/png");
-        
-        imagepng($img);        
-        //imagepng($img, $filename2);   //save to file     
-        
-        //readfile($filename2);
-    
-    
-        imagedestroy($img);
         imagedestroy($img_icon);    
     }
     
