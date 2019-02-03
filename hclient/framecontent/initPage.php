@@ -271,7 +271,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
             if(!window.hWin.HEURIST4.rectypes){
 
                 if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
-                    onAboutInit();
+                    if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
+                            onAboutInit();
                 }
 
                 window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){

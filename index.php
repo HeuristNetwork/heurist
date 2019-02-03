@@ -162,7 +162,7 @@ $(document).on('focusin', function(e) {
                 window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, cfg_layouts);
 
                 
-                if($( "#heurist-about" ).dialog){
+                if($( "#heurist-about" ).dialog('instance')){
                     $( "#heurist-about" ).dialog("close");
                 }
                 
