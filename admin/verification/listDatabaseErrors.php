@@ -73,8 +73,8 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
         
         <script type=text/javascript>
-
-            function open_selected_by_name(sname) {
+            
+            function get_selected_by_name(sname) {
                 var cbs = document.getElementsByName(sname);
                 if (!cbs  ||  ! cbs instanceof Array)
                     return false;
@@ -83,9 +83,16 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
                     if (cbs[i].checked)
                         ids = ids + cbs[i].value + ',';
                 }
+                return ids;
+            }
+
+            function open_selected_by_name(sname) {
+                var ids = get_selected_by_name();
                 //var link = document.getElementById('selected_link');
                 //if (link) return false;
-                window.open('<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids, '_blank');
+                if(ids){
+                    window.open('<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:' + ids, '_blank');
+                }
                 return false;
             }
 
@@ -400,6 +407,7 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
                 $res = $mysqli->query( $query );
                 if(! $res )
                 {
+                    //$mysqli->error
                     print "<div class='error'>Cannot delete invalid pointers from Records.</div>";
                 }else{
                     $wasdeleted = $mysqli->affected_rows;
@@ -574,16 +582,17 @@ $bibs1 = array();
 $prec_ids1 = array();
 while ($row = $res->fetch_assoc()){
     
+    $child_ID = $row['dtl_Value'];
+    
     if(@$_REQUEST['fixparents']=="1"){ 
         //new way: add missed reverse link to alleged children
-        $mysqli->query('insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
-                                    .$child_ID . ','. DT_PARENT_ENTITY  .', '.$row['rec_ID'] . ')');
+        $query2 = 'insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value) VALUES(' 
+                                    .$child_ID . ','. DT_PARENT_ENTITY  .', '.$row['rec_ID'] . ')';
+        $mysqli->query($query2);
         $wasadded1++;
     }else{
-        
         $bibs1[] = $row;
         $prec_ids1[] = $row['rec_ID'];
-        $child_ID = $row['dtl_Value'];
     }
     
 }
@@ -842,6 +851,10 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             $bibs = array();
             $ids  = array();
             $dtl_ids = array();
+            $recids = @$_REQUEST['recids'];
+            if($recids!=null){
+                $recids = explode(',', $recids);
+            }
             while ($row = $res->fetch_assoc()){
 
                 if(!($row['dtl_Value']==null || $row['dtl_Value']=='')){ //empty dates are not allowed
@@ -857,12 +870,12 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                 }
 
                 //remove wrong dates
-                if(@$_REQUEST['fixdates']=="1"){
+                if(@$_REQUEST['fixdates']=="1" && count($recids)>0 && in_array($row['dtl_RecID'], $recids)){
 
-                    if($row['new_value']){
+                    if($row['new_value']!=null && $row['new_value']!=''){
                         $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
                     }else{
-                        $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
+                        //$mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
                     }
 
                     $wascorrected++;
@@ -894,7 +907,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                     </span>
                     <div>To fix faulty date values as suggested, mark desired records and please click here:
                         <button
-onclick="{document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1','_self')}">
+onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&recids='+ids,'_self')}}">
                             Correct</button>
                     </div>
                 </div>
