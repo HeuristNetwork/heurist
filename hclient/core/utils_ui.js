@@ -2087,7 +2087,11 @@ window.hWin.HEURIST4.ui = {
                                     if(recordset.length()>0){
                                         var record = recordset.getFirstRecord();
                                         var term_ID = recordset.fld(record,DT_RELATION_TYPE);
-                                        ele.find('.detailType').text(window.hWin.HEURIST4.ui.getTermValue(term_ID)); //update relation type
+                                        //update relation type !!!!
+                                        if(info['is_inward']){
+                                            term_ID = window.hWin.HEURIST4.ui.getInverseTermById(term_ID);
+                                        }
+                                        ele.find('.detailType').text(window.hWin.HEURIST4.ui.getTermValue(term_ID)); 
                                         var related_ID = recordset.fld(record, DT_RELATED_REC_ID);  
 
                                         // e - search for temp also

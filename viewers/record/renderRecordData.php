@@ -1363,7 +1363,7 @@ function print_linked_details($bib, $link_cnt) {
        if(!$is_production){
     ?>
         <div class=detailRow>
-            <div class=detailType>Referencing records</div>
+            <div class=detailType>Referenced by</div>
             <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkedto:<?=$bib['rec_ID']?>" onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
                 <!--  <br> <i>Search = linkedto:<?=$bib['rec_ID']?> <br>(returns records pointing TO this record)</i> -->
             </div>

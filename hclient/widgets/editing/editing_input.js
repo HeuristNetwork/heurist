@@ -889,10 +889,14 @@ $.widget( "heurist.editing_input", {
                 
                 
                     function __onRelRemove(){
-                        if( that.element.find('.link-div').length==0){ //hide this button if there are links
-                            that.element.find('.rel_link').show()
+                        var tot_links = that.element.find('.link-div').length;
+                        var rev_links = that.element.find('.reverse-relation').length; 
+                        if( tot_links-rev_links==0){ //hide this button if there are links
+                            that.element.find('.rel_link').show();
+                        }else{
+                            that.element.find('.rel_link').hide();
                         }
-                        if( that.element.find('.reverse-relation').length==0){
+                        if( rev_links==0){
                             that.element.find('.reverse-relation-header').remove();
                         }
                     }
@@ -1038,7 +1042,7 @@ $.widget( "heurist.editing_input", {
                                         {
                                             if(!isSubHeaderAdded){
                                                 isSubHeaderAdded = true;
-                                                $('<div>Reverse relationships</div>')
+                                                $('<div>Referenced by</div>') //Reverse relationships
                                                         .css('padding-top','4px')
                                                         .addClass('header reverse-relation-header')
                                                         .appendTo($inputdiv);
@@ -1084,14 +1088,22 @@ $.widget( "heurist.editing_input", {
                    //define explicit add relationship button
                    var $btn_add_rel_dialog = $( "<button>", {title: "Click to add new relationship"})
                         .addClass("rel_link") //.css({display:'block'})
-                        .button({icons:{primary: "ui-icon-circle-plus"},label:'&nbsp;&nbsp;&nbsp;Add Relationship'})
-                        .appendTo( $inputdiv );
+                        .button({icons:{primary: "ui-icon-circle-plus"},label:'&nbsp;&nbsp;&nbsp;Add Relationship'});
+                       
+                   var rheader = that.element.find('.reverse-relation-header');     
+                   if(rheader.length>0){
+                        $btn_add_rel_dialog.insertBefore( rheader );
+                   }else{
+                        $btn_add_rel_dialog.appendTo( $inputdiv );   
+                   }
+                        
                 
                    $btn_add_rel_dialog.click(function(){__show_addlink_dialog()});
                    
-                   if( this.element.find('.link-div').length>0){ //hide this button if there are links
+                   __onRelRemove();                   
+                   /*if( this.element.find('.link-div').length>0){ //hide this button if there are links
                         $btn_add_rel_dialog.hide();
-                   }
+                   }*/
 
                 
                 }else{
