@@ -866,7 +866,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                         continue;
                     }
                 }else{
-                    $row['new_value'] = null;
+                    $row['new_value'] = 'remove';
                 }
 
                 //remove wrong dates
@@ -874,8 +874,8 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
 
                     if($row['new_value']!=null && $row['new_value']!=''){
                         $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
-                    }else{
-                        //$mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
+                    }else if($row['new_value']=='remove'){
+                        $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
                     }
 
                     $wascorrected++;
@@ -928,7 +928,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
                             </a></td>
                         <td><?= htmlspecialchars(substr($row['rec_Title'],0,50)) ?></td>
                         <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
-                        <td><?= $row['new_value']?('=>&nbsp;&nbsp;'.$row['new_value']):'' ?></td>
+                        <td><?= $row['new_value']?('=>&nbsp;&nbsp;'.$row['new_value']):'<no auto fix>' ?></td>
                     </tr>
                     <?php
                 }
