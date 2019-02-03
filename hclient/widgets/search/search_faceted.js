@@ -563,7 +563,8 @@ $.widget( "heurist.search_faceted", {
                                 detailtype: field['type'],  //overwrite detail type from db (for example freetext instead of memo)
                                 showclear_button: false,
                                 suppress_prompts: true,  //supress help, error and required features
-                                suppress_repeat: true
+                                suppress_repeat: true,
+                                is_faceted_search: true
                         };
                         
                    if(isNaN(Number(field['id']))){

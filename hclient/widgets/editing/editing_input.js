@@ -47,6 +47,7 @@ $.widget( "heurist.editing_input", {
         
         change: null,  //onchange callback
         is_insert_mode:false,
+        is_faceted_search:false //is input used in faceted search
     },
 
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
@@ -1131,11 +1132,24 @@ $.widget( "heurist.editing_input", {
             $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
                             .uniqueId().appendTo( $inputdiv );
             
+            var ptrset = that.f('rst_PtrFilteredIDs');
+            if(!$.isArray(ptrset)){
+                if(ptrset) ptrset = ptrset.split(',')
+                else ptrset = [];
+            }            
+            var rts = [];
+            for (var k=0; k<ptrset.length; k++) {
+                if(window.hWin.HEURIST4.rectypes.names[ptrset[k]]){
+                    rts.push(window.hWin.HEURIST4.rectypes.names[ptrset[k]]);
+                }
+            }
+            rts = (rts.length>0)?rts.join(', '):'record';
+            
             //define explicit add relationship button
             $( "<button>", {title: "Select record to be linked"})
                         .button({icon:"ui-icon-triangle-1-e",
-                               label:('&nbsp;&nbsp;&nbsp;select'+(isparententity?' child':'')+' record')})
-                        .addClass('sel_link2')
+                               label:('&nbsp;&nbsp;&nbsp;select'+(isparententity?' child':'')+' '+rts)})
+                        .addClass('sel_link2 truncate').css('max-width','300px')
                         .appendTo( $inputdiv );
             
             
@@ -1507,8 +1521,7 @@ $.widget( "heurist.editing_input", {
             }else
             if(this.detailType=='date'){
                 
-                $input.css('width','20ex');
-                
+                $input.css('width', this.options.is_faceted_search?'13ex':'20ex');
 
                 function __onDateChange(){
                             var value = $input.val();
@@ -1600,11 +1613,15 @@ $.widget( "heurist.editing_input", {
 
                 if(this.options.dtID>0){ //this is details of records
                 
-                    var $btn_temporal = $( '<span>', 
-                        {title: 'Pop up widget to enter compound date information (uncertain, fuzzy, radiometric etc.)'})
-                    .addClass('smallicon ui-icon ui-icon-clock')
-                    .appendTo( $inputdiv );
-                    //.button({icons:{primary: 'ui-icon-clock'}, text:false});
+                    if(this.options.is_faceted_search){
+                        $input.css({'max-width':'13ex','min-width':'13ex'});
+                    }else{
+                        var $btn_temporal = $( '<span>', 
+                            {title: 'Pop up widget to enter compound date information (uncertain, fuzzy, radiometric etc.)'})
+                        .addClass('smallicon ui-icon ui-icon-clock')
+                        .appendTo( $inputdiv );
+                        //.button({icons:{primary: 'ui-icon-clock'}, text:false});
+                    }
                     
                     this._on( $btn_temporal, { click: function(){
                         
