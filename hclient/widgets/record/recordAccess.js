@@ -267,7 +267,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             
             var request = {
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'ids'  : scope,
+                'ids'  : scope.join(','),
                 'OwnerUGrpID': this.options.currentOwner,
                 'NonOwnerVisibility': this.options.currentAccess,
                 'NonOwnerVisibilityGroups':this.options.currentAccessGroups,

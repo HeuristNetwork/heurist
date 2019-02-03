@@ -86,7 +86,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         if($parent.length==0) $parent = this.recordList.parents('body');
       
         this.list_div = $('<div class="list_div">')
-            .addClass('ui-heurist-header2')
+            .addClass('ui-heurist-header')
             .css({'z-index':999999999, height:'auto', 'max-height':'200px', 'padding':'4px',
                   cursor:'pointer'})
             .appendTo($parent).hide();

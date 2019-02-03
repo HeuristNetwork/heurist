@@ -463,13 +463,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         var scope_type = selectRecordScope.val();
 
         if(scope_type=="Selected"){
-            request['recIDs'] = window.hWin.HAPI4.currentRecordsetSelection;
+            scope = window.hWin.HAPI4.currentRecordsetSelection;
         }else{
-            request['recIDs'] = window.hWin.HAPI4.currentRecordset.getIds();
+            scope = window.hWin.HAPI4.currentRecordset.getIds();
             if(scope_type!="Current"){
                 request['rtyID'] = scope_type;
             }
         }
+        request['recIDs'] = scope.join(',');
 
         if(action_type=='rectype_change'){
             

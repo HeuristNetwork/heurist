@@ -921,7 +921,7 @@ function hRecordAddLink() {
                 for(idx in targetIDs){
                    if(idx>=0){ 
                         requests.push({a: 'add',
-                            recIDs: sourceIDs,
+                            recIDs: sourceIDs.join(','),
                             dtyID:  dtyID,
                             val:    targetIDs[idx]});
                    }

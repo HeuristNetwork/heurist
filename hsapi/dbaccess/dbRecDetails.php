@@ -116,10 +116,7 @@ class DbRecDetails
         $mysqli = $this->system->get_mysqli();
 
         //normalize recIDs to an array for code below
-        $recIDs = $this->data['recIDs'];
-        if ($recIDs && ! is_array($recIDs)){
-            $recIDs = array($recIDs);
-        }
+        $recIDs = prepareIds($this->data['recIDs']);
         
         $rtyID = @$this->data['rtyID'];
         

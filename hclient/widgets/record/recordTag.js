@@ -157,7 +157,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'mode'       : mode,
                 'tagIDs'  : this._tags_selection,
-                'recIDs'  : scope
+                'recIDs'  : scope.join(',')
                 };
                 
             if(rec_RecTypeID>0){
@@ -165,7 +165,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
             }
                 
             var that = this;                                                
-            
+console.log(request);            
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){

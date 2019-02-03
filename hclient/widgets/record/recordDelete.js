@@ -201,7 +201,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         
             var request = {
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'ids'  : scope
+                'ids'  : scope.join(',')
                 };
                 
             if(rec_RecTypeID>0){
