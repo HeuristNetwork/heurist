@@ -249,7 +249,7 @@ if(_mapdata.limit_warning){
 
             if(mapdata['color']!=new_color){
                 
-                new_color = encodeURIComponent(new_color);
+                var new_color2 = encodeURIComponent(new_color);
 
                 for (var i=0; i<mapdata.options.items.length; i++){
                     
@@ -260,8 +260,8 @@ if(_mapdata.limit_warning){
                         
                         mapdata.options.items[i].options.icon =
                             window.hWin.HAPI4.iconBaseURL + iconId
-                                + 's.png&color='+new_color
-                                + (mapdata.options.items[i].options.linkedRecIDs)?'&circle='+new_color:'';
+                                + 's.png&color='+new_color2
+                                + ((mapdata.options.items[i].options.linkedRecIDs)?'&circle='+new_color2:'');
                     }
                     
 
