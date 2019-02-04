@@ -39,7 +39,7 @@ if(@$_REQUEST['u']){
 //      (that's double precaution - it is already checked in bookmarkletPopup)    
 
     //  fix url to be complete with protocol and remove any trailing slash
-    if (! preg_match('!^[a-z]+:!i', $url)) $url = 'http://' . $url;       
+    if (! preg_match('!^[a-z]+:!i', $url)) $url = 'https://' . $url;       
     if (substr($url, -1) == '/') $url = substr($url, 0, strlen($url)-1);
 
     // look up the user's bookmark (usrBookmarks) table, see if they've already got this URL bookmarked -- if so, just edit it 
@@ -165,6 +165,9 @@ else{
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/media_viewer.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>common/js/temporalObjectLibrary.js"></script>
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
         
         
         <script type="text/javascript">
