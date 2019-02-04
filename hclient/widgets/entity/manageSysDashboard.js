@@ -479,6 +479,11 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 var params = this._selection.fld(record, 'dsh_Parameters');
     
                 if(command.indexOf('menu-')==0){ //main menu action
+                
+                    //temporal fix (error in coreDefinition.txt)
+                    if(command=='menu-export-csv' && this._selection.fld(record, 'dsh_ID')==10){
+                        command = 'menu-import-csv';
+                    }
 
                     var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('mainMenu');
                     if(app && app.widget){
