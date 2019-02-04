@@ -1407,7 +1407,7 @@ class HPredicate {
             }else if($this->field_type == "link"){
                 $res = " $eq ".intval($this->value);  //no quotes
             }else{
-                $res = " $eq '".($this->field_type=='float'?floatval($this->value):intval($this->value))."'";
+                $res = " $eq ".($this->field_type=='float'?floatval($this->value):intval($this->value));//."'";
             }
             $this->field_list = true;
         }

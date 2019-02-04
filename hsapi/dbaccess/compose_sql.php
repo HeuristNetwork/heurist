@@ -1755,7 +1755,12 @@ class FieldPredicate extends Predicate {
             $match_pred = ' between '.$vals[0].' and '.$vals[1].' ';
 
         }else {
-            $cs_ids = getCommaSepIds($this->value);
+            
+            $cs_ids =null;
+            if(!($this->field_type_value=='float' || $this->field_type_value=='integer')){
+                $cs_ids = getCommaSepIds($this->value);    
+            }
+            
             if ($cs_ids) {  
             //  if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {  not work for >500 entries
                 // comma-separated list of ids
@@ -1765,17 +1770,17 @@ class FieldPredicate extends Predicate {
                 
                 $isnumericvalue = is_numeric($this->value);
 
-                $match_value = '"' . ( $isnumericvalue? floatval($this->value) : $mysqli->real_escape_string($this->value) ) . '"';
+                $match_value = ( $isnumericvalue? floatval($this->value) : $mysqli->real_escape_string($this->value) );//'"' .  . '"';
 
                 if ($this->parent->exact  ||  $this->value === "") {    // SC100
-                    $match_pred = ' = '.$match_value; //for unknown reason comparison with numeric takes ages
+                    $match_pred = ' = "'.$match_value.'"'; //for unknown reason comparison with numeric takes ages
                 } else if ($this->parent->lessthan) {
                     $match_pred = " < $match_value";
                 } else if ($this->parent->greaterthan) {
                     $match_pred = " > $match_value";
                 } else {
                     if(($this->field_type_value=='float' || $this->field_type_value=='inbteger') && $isnumericvalue){
-                        $match_pred = " = $match_value";
+                        $match_pred = ' = "'.$match_value.'"';
                     }else if(strpos($this->value,"%")===false){
                         $match_pred = " like '%".$mysqli->real_escape_string($this->value)."%'";
                     }else{
