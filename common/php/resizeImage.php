@@ -37,8 +37,6 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-header('Content-type: image/png');
-
 require_once (dirname(__FILE__)."/../../hsapi/System.php");
 require_once (dirname(__FILE__)."/../../hsapi/utilities/utils_mail.php");
 require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
@@ -80,6 +78,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
     }*/
     
     if ($standard_thumb  &&  file_exists($thumbnail_file)) {
+       header('Content-type: image/png');
        echo readfile($thumbnail_file);
        return;
     }  
@@ -97,8 +96,8 @@ if (array_key_exists('ulf_ID', $_REQUEST))
         //save as file - recreate from thumb blob from database
         $img = @imagecreatefromstring($file['ulf_Thumbnail']);
         if($img){
+            header('Content-type: image/png');
             imagepng($img, $thumbnail_file);
-
             // thumbnail exists
             echo $file['ulf_Thumbnail'];
         }
@@ -303,13 +302,13 @@ else if (array_key_exists('file_url', $_REQUEST))   //get thumbnail for any URL
 
 }
 
-
 if (!$img) {
-    //return image placeholder
+    // image placeholder
     header('Location: ../images/100x100-check.gif');
     return;
 }
 
+header('Content-type: image/png');
 
 // calculate image size
 // note - we never change the aspect ratio of the image!
