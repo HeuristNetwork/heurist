@@ -55,6 +55,7 @@ $.widget( "heurist.expertnation_nav", {
     DT_INITIALS: 72,
     DT_HONOR: 19,
     DT_EXTENDED_DESCRIPTION: 4, //window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
+    DT_QUALIFYING_TEXT: 3,
     DT_DATE: 9, //window.hWin.HAPI4.sysinfo['dbconst']['DT_DATE'],     //9
     //DT_YEAR: window.hWin.HAPI4.sysinfo['dbconst']['DT_YEAR'],     //73
     DT_START_DATE: 10, //window.hWin.HAPI4.sysinfo['dbconst']['DT_START_DATE'], //10
@@ -193,7 +194,7 @@ $.widget( "heurist.expertnation_nav", {
         if($('#'+this.options.menu_div).length==1){
             var that = this;
             //seach for web content records - content for webpage is stored in special record type
-            var details = [this.DT_NAME, this.DT_ORDER, this.DT_EXTENDED_DESCRIPTION];
+            var details = [this.DT_NAME, this.DT_ORDER, this.DT_QUALIFYING_TEXT, this.DT_EXTENDED_DESCRIPTION];
 
             var request = request = {q: 't:'+window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']
                      +' f:196:'+this.options.uni_ID+' sortby:f:'+this.DT_ORDER,
@@ -282,6 +283,12 @@ $.widget( "heurist.expertnation_nav", {
                             var ele_gal = $(".gallery_slideshow_container");
                             ele_gal.css({"min-height": '430px', 'max-height': '430px !important'});
                             that.__initGalleryContainer(ele_gal);
+                            
+                            var qualifying_text =recordset.fld(content_rec, this.DT_QUALIFYING_TEXT);
+                            if(qualifying_text){
+                                $('<p>'+qualifying_text+'</p>').appendTo( section );
+                            }
+                            
                             
                         }
                     }
