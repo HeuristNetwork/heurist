@@ -97,7 +97,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         var sh = 7;
         if(hasSearchForm){
             sh = (this.options.parententity>0)?9:7;
-            this.searchForm.height((sh+2.5)+'em').css('border','none');    
+            this.searchForm.height((sh+4.5)+'em').css('border','none');    
         }
         this.recordList.css('top', sh+'em');
 
@@ -1328,7 +1328,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
 
     //
-    // Open Edit record structure on new tab
+    // Open Edit record structure on new tab - NOT USED
     //
     editRecordTypeOnNewTab: function(){
 

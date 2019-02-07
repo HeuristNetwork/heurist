@@ -1420,9 +1420,10 @@ background: #8ea9b9
     padding:0 0.5em;
 }
 .id_fieldname{
-   font-size: 0.8em;
+   font-size: 0.9em;
+   font-style:italic;
    font-weight: normal;
-   color:olive;
+   color:brown;
    padding-left:2em;
 }
 .rename{
