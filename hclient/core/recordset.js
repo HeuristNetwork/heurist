@@ -155,7 +155,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     * 
         * geoType 
         * 0, undefined - all
-        * 1 - main geo only
+        * 1 - main geo only (no links)
         * 2 - rec_Shape only (coordinates defined in field rec_Shape)
     */
     function _toTimemap(dataset_name, filter_rt, symbology, geoType){
@@ -396,7 +396,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                             linkedPlaces[geodata[m].recID] = {linkedRecs:[recID],
                                                                                 shape:$.isArray(shape)?shape:[shape]}
                                         }
-                                        has_linked_places.push(geodata[m].recID); //one person can be linked to several place
+                                        has_linked_places.push(geodata[m].recID); //one person can be linked to several places
                                         
                                     }else{
                                         if($.isArray(shapes)){
@@ -514,18 +514,24 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         //was need for highlight selection on map item.options.places = shapes;
                     }
                     mapenabled++;
-                }
-                if(geoType!=2 || shapes.length>0){
-                        aitems.push(item);
+                /*}
+                if(geoType!=2 || shapes.length>0){*/
+                    aitems.push(item);
                 }
 
                 tot++;
         }}//for records
       
+        //add linked places as separate items 
+        //if place was found separetely consider is as one of linked records
         for(var placeID in linkedPlaces){
             if(placeID>0){
                 
-                var item = linkedPlaces[placeID]['item'];
+                if(records[placeID]){
+                    linkedPlaces[placeID]['linkedRecs'].push(placeID);
+                }
+                
+                var item = linkedPlaces[placeID]['item']; //item that linked to this place
                 item.placemarks = linkedPlaces[placeID]['shape'];
                 item.options.linkedRecIDs = linkedPlaces[placeID]['linkedRecs'];
                 if(item.options.linkedRecIDs.length>1 && item.options.icon.indexOf('s.png&color=')>0){
