@@ -23,31 +23,12 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');    
 
 require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
+require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_file.php');
 
-$post_max_size = get_config_bytes(ini_get('post_max_size'));
-$file_max_size = get_config_bytes(ini_get('upload_max_filesize'));
+$post_max_size = get_php_bytes('post_max_size');
+$file_max_size = get_php_bytes('upload_max_filesize');
 $format = @$_REQUEST['format'];
 if(!$format) $format='csv';
-
-function fix_integer_overflow($size) {
-        if ($size < 0) {
-            $size += 2.0 * (PHP_INT_MAX + 1);
-        }
-        return $size;
-}
-function get_config_bytes($val) {
-    $val = trim($val);
-    $last = strtolower($val[strlen($val)-1]);
-    switch($last) {
-        case 'g':
-            $val *= 1024;
-        case 'm':
-            $val *= 1024;
-        case 'k':
-            $val *= 1024;
-    }
-    return fix_integer_overflow($val);
-}
 ?>
         <script type="text/javascript" src="importRecordsCSV.js"></script>
 
