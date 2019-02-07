@@ -859,8 +859,17 @@ $query = 'CREATE TABLE sysDashboard ('
     //
     //
     function trim_item(&$item, $key, $len){
-        if($item!=''){
+        if($item!='' && $item!=null){
             $item = substr(trim($item),0,$len);
+        }
+    }
+    
+    //
+    //
+    //
+    function repalce_nulls(&$item, $key){
+        if($item==null){
+            $item = '';
         }
     }
 

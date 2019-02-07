@@ -23,6 +23,8 @@
     */
     
     /*
+    get_php_bytes
+    
     folderExists
     folderCreate
     folderDelete  
@@ -61,6 +63,34 @@
     autoDetectSeparators
     */
 
+    //
+    // 
+    //
+    function get_php_bytes( $php_var ){
+        
+        $val = ini_get($php_var);
+        $val = trim($val);
+        $last = strtolower($val[strlen($val)-1]);
+
+        if($last){
+            $val = intval(substr($val,0,strlen($val)-1));
+        }
+            
+        switch($last) {
+            case 'g':
+                $val *= 1024;
+            case 'm':
+                $val *= 1024;
+            case 'k':
+                $val *= 1024;
+        }
+        //_fix_integer_overflow
+        if ($val < 0) {
+            $val += 2.0 * (PHP_INT_MAX + 1);
+        }
+        return $val;
+    }
+    
     // 1 - OK
     // -1  not exists
     // -2  not writable

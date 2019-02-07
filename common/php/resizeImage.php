@@ -179,7 +179,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             case 'png':
                 $is_image = true;
             
-                $mem_limit = $system->get_php_bytes('memory_limit');
+                $mem_limit = get_php_bytes('memory_limit');
                 
                 $imageInfo = getimagesize($filename); 
                 if(is_array($imageInfo)){

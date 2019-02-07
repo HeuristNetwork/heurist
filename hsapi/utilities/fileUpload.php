@@ -29,7 +29,7 @@ $system = new System();
 
 $content_length = (int)@$_SERVER['CONTENT_LENGTH'];
             
-$post_max_size = $system->get_php_bytes('post_max_size');
+$post_max_size = get_php_bytes('post_max_size');
 if ($post_max_size && ($content_length > $post_max_size)) {
     $error = 'The uploaded file exceeds the post_max_size directive in php.ini';
     $response = $system->addError(HEURIST_INVALID_REQUEST, $error);                
@@ -269,7 +269,7 @@ function postmode_file_selection() {
             
             $content_length = fix_integer_overflow((int)@$_SERVER['CONTENT_LENGTH']);
             
-            $post_max_size = get_config_bytes(ini_get('post_max_size'));
+            $post_max_size = get_php_bytes('post_max_size');
             if ($post_max_size && ($content_length > $post_max_size)) {
                 $error = 'The uploaded file exceeds the post_max_size directive in php.ini';
             }else{
@@ -278,7 +278,7 @@ function postmode_file_selection() {
                 } else {
                     $file_size = $content_length;
                 }
-                $file_max_size = get_config_bytes(ini_get('upload_max_filesize'));
+                $file_max_size = get_php_bytes('upload_max_filesize');
                 if ($file_max_size && ($content_length > $file_max_size)) {
                     $error = 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
                 }

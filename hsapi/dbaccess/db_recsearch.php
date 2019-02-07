@@ -37,7 +37,7 @@
 
     //require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/db_users.php');
-    require_once (dirname(__FILE__).'/db_files.php');
+    require_once (dirname(__FILE__).'/db_files.php');  //it includes utils_file.php
     require_once (dirname(__FILE__).'/compose_sql.php');
     require_once (dirname(__FILE__).'/compose_sql_new.php');
     require_once (dirname(__FILE__).'/db_structure.php');
@@ -734,7 +734,7 @@
     function recordSearch($system, $params)
     {
 
-        $memory_limit = $system->get_php_bytes('memory_limit');
+        $memory_limit = get_php_bytes('memory_limit');
         
         //for error message
         $savedSearchName = @$params['qname']?"Saved search: ".$params['qname']."<br>":"";
@@ -1203,7 +1203,7 @@
             $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 
         }
-        
+  
 //error_log($query);
 
         $res = $mysqli->query($query);

