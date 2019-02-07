@@ -589,15 +589,16 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
        var idx, panel = this.recordList, pnl_picked;
        
-       panel.empty().css({'font-size': '0.9em'});
+       panel.empty();//.css({'font-size': '0.9em'});
        
        if(that.options.show_top_n_recent){
-            $('<div class="header header-label"><label>Tags to assign:</label></div>')
-                .css({display:'inline-block', 'vertical-align': 'top', 'padding-top': '3px',
-                            width: '98px', 'text-align': 'right'}).hide()
+            $('<div class="header header-label"><label><b>Tags to assign:</b></label></div>')
+                .css({display:'inline-block', 'vertical-align': 'top', 'padding': '3 16px',
+                            width: '159px', 'text-align': 'right'}).hide()   //was 98px
                 .appendTo(panel);
             pnl_picked = $('<div></div>').css({display:'inline-block'}).appendTo(panel);
             $('<br>').appendTo(panel);
+            $('<hr style="margin:5px 10px;margin-top:20px">').appendTo(panel);
        }else{
             pnl_picked = panel;
        }
@@ -606,7 +607,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
        if(window.hWin.HEURIST4.util.findArrayIndex(window.hWin.HAPI4.user_id(), this.options.groups)>=0){ 
             //1. selected tags by group
             $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>') //width:110px;text-align:right;
-                .css({'padding':'3px 4px'})
+                .css({'padding':'3px 0px'})
                 .attr('data-id', window.hWin.HAPI4.user_id())
                 .hide().appendTo(pnl_picked);
        }
@@ -622,7 +623,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 if(!window.hWin.HEURIST4.util.isnull(name))
                 {   
                     $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>') //width:110px;text-align:right;
-                        .css({'padding':'3px 4px'})
+                        .css({'padding':'3px 0px'})
                         .attr('data-id', groupID).hide().appendTo(pnl_picked);
                 }
             }
@@ -652,9 +653,9 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }  
         
         //2. add group selector and search/add input     
-        var mdiv = $('<div class="tagDiv" style="text-decoration:none;padding:10px 0px">'
+        var mdiv = $('<div class="tagDiv" style="text-decoration:none;">'
                 + (that.options.show_top_n_recent
-                    ?('<div class="header" style="display: inline-block;text-align:right;width:95px">'
+                    ?('<div class="header" style="display: inline-block;text-align:right;width:158px;padding:10px 12px">'  //was 95px
                         +'<label>Find/assign:</label></div>'):'') //Add </label>'
                 + ' <input type="text" style="width:15ex;margin-right:10px" size="60"/>&nbsp;in&nbsp;&nbsp;'
                 + '<select style="max-width:280px"></select>&nbsp;'
@@ -700,12 +701,12 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     if(event) that._showAutoTags = $(event.target).is(':checked'); 
                     top_n_recent.empty();
                     
-                    $('<div style="padding:10px 0; width:98px; text-align:right" class="header"><label>or select below:</label></div>').appendTo(top_n_recent);
+                    $('<div style="padding:10px 6px;width:98px;font-style:italic;font-size:0.9em" class="header"><label>or select below:</label></div>').appendTo(top_n_recent);
                     that._getTagList(groupid,'Top', 10).appendTo(top_n_recent);
                     that._getTagList(groupid,'Recent', 10).appendTo(top_n_recent);
                     
-                    $('<div style="padding:10px 0;" class="header">'
-                        +'<label for="cbShowAutoTags">Show automatically-added tags </label>'
+                    $('<div style="padding:10px 6px;" class="header">'
+                        +'<label for="cbShowAutoTags" style="font-style:italic;font-size:0.9em">Show automatically-added tags </label>'
                         +'<input id="cbShowAutoTags" type="checkbox" '+(that._showAutoTags?'checked':'')
                         +'/></div>').appendTo(top_n_recent);
                     top_n_recent.find('#cbShowAutoTags').click( __renderTags );    
@@ -830,7 +831,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         var records = recordset.getRecords();
         var order = recordset.getOrder();
         var recID, label, record;
-        var list_div = $('<div><span style="font-weight:bold">'+top.HR(sort_mode)+': </span></div>')
+        var list_div = $('<div><span">'+top.HR(sort_mode)+': </span></div>')   // style="font-weight:bold
             .css({'padding':'4px'}); //,'line-height':'22px'
         var that = this;
         
