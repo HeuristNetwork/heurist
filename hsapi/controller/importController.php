@@ -176,10 +176,11 @@ if(!$system->init(@$_REQUEST['db'])){
                 }
                 
                 foreach ($res as $idx=>$row) {
+
                     $sz = $sz + fputcsv($fp, $row, ',', '"');
                     $cnt++;
                     
-                    if($cnt>2) break;
+                    //if($cnt>2) break;
                 }
                 rewind($fp);
                 // read the entire line into a variable...
@@ -187,6 +188,7 @@ if(!$system->init(@$_REQUEST['db'])){
                 fclose($fp);
             
                 $res = $data;
+                
             }
             
         }else{

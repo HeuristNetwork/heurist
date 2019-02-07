@@ -183,6 +183,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             for (k=0;k<len;k++){
                 var node =  fieldIds[k];
                 
+                if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
+                
                 var ids = node.data.code.split(":");
                 
                 __addSelectedField(ids, 1, 0);
