@@ -241,7 +241,7 @@ if(_mapdata.limit_warning){
     }
 
     //
-    // chnage color and reload dataset 
+    // change color and reload dataset 
     //
     function _changeDatasetColor( dataset_id, new_color, updateOnMap ){
 
