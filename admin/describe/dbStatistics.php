@@ -101,7 +101,7 @@ if($is_csv){
     if (false === $fd) {
         die('Failed to create temporary file');
     } 
-    $record_row = array('Name','Reg ID','Records','Values','DB Vsn','Modified','Access','Owner','eMail','Institution');
+    $record_row = array('Name','Reg ID','Records','Values','DB Vsn','Data updated','Last modified','Owner','eMail','Institution');
     fputcsv($fd, $record_row, ',', '"');
 }else{
     $arr_databases = array();
@@ -111,7 +111,7 @@ $i = 0;
 foreach ($dbs as $db){
 
     //ID  Records     Values    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
-    if(true || $i>1000){
+    
         
 //error_log(substr($db, 4));        
 
@@ -134,8 +134,8 @@ foreach ($dbs as $db){
     round( (dirsize(HEURIST_FILESTORE_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
     */
     mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
-    mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps") );
-    
+    //mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps") );
+    mysql__select_val("select max(tlu_DateStamp) from ".$db.".sysTableLastUpdated") );
 
     $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
         "FROM ".$db.".sysUGrps where ugr_id=2");
@@ -151,10 +151,7 @@ foreach ($dbs as $db){
         $arr_databases[] = '"'.implode('","',  str_replace('"','',$record_row)   ).'"';
     }
     
-    }
-    
     $i++;
-    if($i>200) break;
 }//foreach
 
 if($is_csv){
@@ -318,8 +315,8 @@ if($is_csv){
                 { key: "size_db", label: "DB (MB)", sortable:true, className:'right'},
                 { key: "size_file", label: "Files (MB)", sortable:true, className:'right'},
                 */
-                { key: "date_mod", label: "Modified", sortable:true},
-                { key: "date_login", label: "Access", sortable:true},
+                { key: "date_mod", label: "Data updated", sortable:true},
+                { key: "date_login", label: "Last modified", sortable:true},
                 { key: "owner", label: "Owner", width:200, formatter: function(elLiner, oRecord, oColumn, oData){
                     elLiner.innerHTML = "<div style='max-width:100px' class='three-lines' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
                 }}
