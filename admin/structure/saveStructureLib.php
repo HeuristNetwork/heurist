@@ -927,7 +927,7 @@ copy_IconAndThumb_FromLibrary
 
 			if($rtg_Name){
                 $rtg_ID = mysql__select_value($mysqli, "select rtg_ID from defRecTypeGroups where rtg_Name = '$rtg_Name' and rtg_ID != $rtgID");
-				if (rtg_ID>0){
+				if ($rtg_ID>0){
                     $system->addError(HEURIST_ACTION_BLOCKED, "There is already group with name '$rtg_Name'");
 					return false;
 				}

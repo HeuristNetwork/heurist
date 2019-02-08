@@ -3276,7 +3276,6 @@ function onReqtypeChange(evt){
                     $(el).attr('data-original', new_value); //reset - to show this warning once only
                     el.value = new_value;
                     ___onReqtypeChange_continue();
-                    $_dialogbox.dialog($_dialogbox).dialog("close");
                     
                     $__dlg.dialog( "close" );
                 },
@@ -3367,15 +3366,17 @@ function onRepeatChange(evt){
             $("#reqText").text("This is a reserved field which may be required by a specific function such as Zotero import or mapping."
             +" Please think carefully before changing between a single value and repeating value field for a reserved field, "
             +"as this could affect the way that the field");
+            
+            var $_dialogbox;
 
             $("#change_Btn").click(function(){
                 el.value = new_value;
                 $(el).attr('data-original',''); //reset
                 ___onRepeatChange_continue();
-                $_dialogbox.dialog($_dialogbox).dialog("close");
+                $_dialogbox.dialog("close");
             });
             $("#cancel_Btn").click(function(){
-                $_dialogbox.dialog($_dialogbox).dialog("close");
+                $_dialogbox.dialog("close");
             });
             //show confirmation dialog
             $_dialogbox = Hul.popupElement(top, ele,

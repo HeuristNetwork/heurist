@@ -25,6 +25,7 @@ require_once(dirname(__FILE__)."/../../../hsapi/dbaccess/db_recsearch.php");
 
 $statistics = "";
 $system = new System();
+$is_inited = false;
 // connect to given database
 if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
     //include('dh_stats.php');
@@ -37,6 +38,7 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
         $appcode = 0;
     }  
     $system->defineConstants();
+    $is_inited = true;
 }
 ?>
 <html>
@@ -69,7 +71,7 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
 
                 <div class="menubutton"><a class="menuitem" href="javascript:void(0)" onClick="{location.reload(true);}">HOME</a></div>
                 <?php
-                if(true){
+                if($is_inited){
                     // Building query  - search for "Web Content" records (id 25)
                     $query = 'SELECT rec_ID id, rec_Title as title, d1.dtl_Value as content, d2.dtl_Value as ord, '
                     .' d3.dtl_Value as btn_title'
@@ -144,6 +146,12 @@ if(@$_REQUEST['db'] && $system->init(@$_REQUEST['db'])){
                             <?php
                         }//while
                     }
+                }else{
+                    ?>
+                    <script>
+                        window.hWin.HEURIST4.msg.showMsgDlg('Sorry, web site not initialized properly. Please try later', null,'');
+                    </script>
+                    <?php
                 }
                 switch ($appcode) {
                     case 4799: ?> 

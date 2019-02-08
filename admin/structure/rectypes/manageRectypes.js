@@ -445,6 +445,10 @@ function RectypeManager() {
                     }
                 },
                 
+                { key: "grp_id", label: "Group", sortable:false, minWidth:120, maxAutoWidth:120, width:120, className:'center',
+                    formatter: YAHOO.widget.DataTable.formatDropdown,
+                    dropdownOptions: _groups },
+                
                 { key: "icon", label: "Icon", className:'center', sortable:false,   width:30,
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         var id = oRecord.getData("id");
@@ -508,9 +512,6 @@ function RectypeManager() {
                         'style="cursor:pointer;" onclick="rectypeManager.showInfo('+rectypeID+', event)" onmouseout="rectypeManager.hideInfo()"/>'; }
                 },
                 { key: "usage", label: "Usage", hidden:true },
-                { key: "grp_id", label: "Group", sortable:false, minWidth:120, maxAutoWidth:120, width:120, className:'center',
-                    formatter: YAHOO.widget.DataTable.formatDropdown,
-                    dropdownOptions: _groups },
                 /*{ key: null, label: "Del", sortable:false, className:'center', minWidth:40, maxAutoWidth:40, width:40, formatter: function(elLiner, oRecord, oColumn, oData) {
                 elLiner.innerHTML = '<a href="#delete"><img src="../../../../common/images/cross.png" border="0" title="Delete" /><\/a>'; }
                 },*/
