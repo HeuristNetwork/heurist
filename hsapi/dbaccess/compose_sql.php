@@ -219,11 +219,20 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
             $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="hidden")';
             $where2_conj = ' and ';
         }else if($currUserID!=2){ //not database owner
-            $where2 = '(not TOPBIBLIO.rec_NonOwnerVisibility="hidden")';
+        
+            $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility in ("public","pending"))';
+            if ($currUserID>0){ //logged in
+            
+                $query->from_clause = $query->from_clause.' LEFT JOIN usrRecPermissions ON rcp_RecID=TOPBIBLIO.rec_ID ';
+                //if there is entry for record in usrRecPermissions current user must be member of allowed groups
+                $where2 = $where2.' or (TOPBIBLIO.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in ('
+                        .join(',', $wg_ids).')))';
+            }
+            
             $where2_conj = ' or ';
         }
 
-        if(count($wg_ids)>0){
+        if(count($wg_ids)>0 && $currUserID>0){
             $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
         }
     }
