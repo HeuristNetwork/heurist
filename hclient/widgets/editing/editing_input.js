@@ -404,18 +404,17 @@ $.widget( "heurist.editing_input", {
             var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
             if(fi) val = this.options['dtFields'][fi[fieldname]];
         }
+        
         if(window.hWin.HEURIST4.util.isempty(val)){ //some default values
             if(fieldname=='rst_RequirementType') val = 'optional'
             else if(fieldname=='rst_MaxValues') val = 1
                 else if(fieldname=='dty_Type') val = 'freetext'
-                    else if(fieldname=='rst_DisplayHeight'
-                        && this.f('dty_Type')=='blocktext') {
-                          val = 8; //height in rows
-                        }else if(fieldname=='rst_DisplayWidth'
+                    else if(fieldname=='rst_DisplayHeight' && this.f('dty_Type')=='blocktext') 
+                          val = 8 //height in rows
+                       else if(fieldname=='rst_DisplayWidth'
                             && (this.f('dty_Type')=='freetext' || this.f('dty_Type')=='url' || 
-                                this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource')) {
-                            val = '100';  //default width for input fields
-                        }
+                                this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource'))   
+                                    val = this.f('dty_Type')=='freetext'?20:80;  //default minimum width for input fields in ex
         }
         return val;
 
@@ -482,6 +481,24 @@ $.widget( "heurist.editing_input", {
         
     },
     
+    _setAutoWidth: function(){
+
+        //auto width
+        if ( this.detailType=='freetext' || this.detailType=='integer' || 
+             this.detailType=='float' || this.detailType=='url' || this.detailType=='file'){
+            $.each(this.inputs, function(index, input){ 
+                var ow = $(input).width();
+                if(ow<580){
+                    var nw = ($(input).val().length+4)+'ex';
+                    $(input).css('width', nw);
+                    if($(input).width()<ow) $(input).width(ow) //we can only increase - restore
+                    else if($(input).width()>600) $(input).width(600); //max width
+                }
+            });
+        }
+        
+    },
+    
     
     _onChange: function(event){
         
@@ -492,6 +509,8 @@ $.widget( "heurist.editing_input", {
            }
            
         });
+        
+        this._setAutoWidth();
         
         if($.isFunction(this.options.change)){
             this.options.change.call( this );    
@@ -2138,12 +2157,13 @@ console.log('onpaste');
             
             $input.css('width', dwidth);
             
-        }else if (parseFloat( dwidth ) > 0 
-            &&  this.detailType!='boolean' && this.detailType!='date' && this.detailType!='resource' ) {  
+        }else if ( this.detailType!='boolean' && this.detailType!='date' && this.detailType!='resource' ) {  
               //if the size is greater than zero
-                $input.css('width', Math.round(2 + Math.min(120, Number(dwidth))) + "ex"); //was *4/3
+              if (parseFloat( dwidth ) > 0) 
+                  $input.css('width', Math.round(2 + Math.min(120, Number(dwidth))) + "ex"); //was *4/3
+              
         }
-
+        $input.css('max-width', '600px');
 
         this.inputs.push($input);
 
@@ -2644,6 +2664,8 @@ console.log('onpaste');
         if(values.length>1 && !repeatable){
             this.error_message.text('Repeated value for a single value field - please correct').show();
         }
+        
+        this._setAutoWidth();
     },
     
     //
