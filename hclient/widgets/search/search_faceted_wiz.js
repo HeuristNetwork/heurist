@@ -1099,7 +1099,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         facets.push( {
                             'var': __getRandomInt(),
                             code:node.data.code,
-                            title:(node.data.name?node.data.name:node.title),
+                            title:'{NEW}', //(node.data.name?node.data.name:node.title),
                             groupby: null,
                             type:node.data.type,
                             order: order_for_new
@@ -1138,6 +1138,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 //type of facet (radio group)
                 var removeFacet = false;
                 var harchy = [];
+                var harchy_fields = []; //for facet.title
                 var codes = facets[k]['code'].split(':');
                 var j = 0;
                 while(j<codes.length){
@@ -1151,6 +1152,13 @@ $.widget( "heurist.search_faceted_wiz", {
                     }
                     
                     harchy.push('<b>'+window.hWin.HEURIST4.rectypes.names[ rtid ]+'</b>');
+                    
+                    if(j==0 && dtid=='title'){
+                       harchy_fields.push(window.hWin.HEURIST4.rectypes.names[ rtid ]);  
+                    }else
+                    if(dtid=='modified'){
+                       harchy_fields.push("Modified"); 
+                    }
                     
                     var linktype = dtid.substr(0,2);                                
                     if(isNaN(Number(linktype))){
@@ -1168,6 +1176,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             }
                             
                             harchy.push(' . '+window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]+' &gt ');
+                            harchy_fields.push(window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]);
                         }else{
                             var from_rtid = codes[j+2];
                             
@@ -1195,6 +1204,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         
                         //harchy.push(window.hWin.HEURIST4.detailtypes.names[ dtid ]);    
                         harchy.push(' . '+window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]);
+                        harchy_fields.push(window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]);
                     }
                     j = j+2;
                 }//while codes
@@ -1324,6 +1334,13 @@ $.widget( "heurist.search_faceted_wiz", {
 
 
                 //assign values
+                if(facets[k].title=='{NEW}'){
+                    var l = harchy_fields.length;
+                    if(l==1)
+                        facets[k].title = harchy_fields[0]
+                    else
+                        facets[k].title = harchy_fields[l-2]+'>'+harchy_fields[l-1]; 
+                }
                 listdiv.find('#facet_Title'+idd).val(facets[k].title);
                 listdiv.find('#facet_Help'+idd).val(facets[k].help);
                 
