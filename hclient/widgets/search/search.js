@@ -439,12 +439,25 @@ $.widget( "heurist.search", {
             .appendTo( this.div_add_record )
             //.addClass('ui-heurist-btn-header1 heurist-bookmark-search')
             .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
+            
+            this.btn_add_record_dialog = $( "<button>")
+            .css({'font-size':'0.765em'})
+            .appendTo( this.div_add_record )
+            .button({label: '<div style="text-align:left;display:inline-block">'
+                            +window.hWin.HR('Define Parameters') +'<br>'+window.hWin.HR('Add Record')+'</div>', 
+                     icon: "ui-icon-carat-1-s", iconPosition:'end',
+                     title:'Click to define parameters and add new record'})
+            .click( function(){ 
+                    window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd');            
+            });
+            
+            this.btn_add_record_dialog.find('.ui-button-icon').css('vertical-align','baseline');
 
             this.btn_select_owner = $( "<button>")
             .css({'font-size':'0.765em'})
             .appendTo( this.div_add_record )
             .button({label:'owner', icon: "ui-icon-carat-1-s", iconPosition:'end',
-                     title:'Ownership and access rights for new record'});
+                     title:'Ownership and access rights for new record'}).hide();
             //.addClass('truncate');
             this.btn_select_owner.find('.ui-button-icon').css('vertical-align','baseline');
             
