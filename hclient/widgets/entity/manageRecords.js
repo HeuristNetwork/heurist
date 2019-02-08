@@ -1386,7 +1386,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             +"structure modification in main menu Structure > Modify / Extend";
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
                     
-                        that._saveEditAndClose( null, function(){
+                        var fields = that._editing.getValues(false);
+                        fields['no_validation'] = 1; //do not validate required fields
+                        that._saveEditAndClose( fields, function(){ //save without validation
                             that._editing.initEditForm(null, null); //clear edit form
                             that._initEditForm_step3(that._currentEditID); //reload edit form                       
                             that.editRecordType();
@@ -2213,7 +2215,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     var fields = this._editing.getValues(false);
                     var that = this;
                     fields['no_validation'] = 1; //do not validate required fields
-                    this._saveEditAndClose( fields, function(){
+                    this._saveEditAndClose( fields, function(){ //save without validation
                         that._editing.setModified(true); //restore flag after autosave
                         that.onEditFormChange();
                     });
