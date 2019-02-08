@@ -417,7 +417,11 @@ function get_remote_image($remote_url){
 
     $data = loadRemoteURLContent($remote_url, false); //from fileUtils.php
     if($data){
-        $img = imagecreatefromstring($data);
+        try{    
+            $img = imagecreatefromstring($data);
+        }catch(Exception  $e){
+            $img = false;
+        }
     }
 
     return $img;
