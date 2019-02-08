@@ -21,6 +21,10 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+require_once (dirname(__FILE__).'/../../configIni.php'); // read in the configuration file
+require_once (dirname(__FILE__).'/../../hsapi/consts.php');
+require_once (dirname(__FILE__).'/../../hsapi/dbaccess/utils_db.php');
+
 ?>
 <html>
 
@@ -79,7 +83,7 @@
             <hr><br />
 
             <?php
-            if (extension_loaded("memcache")) {print "memcache ok<br />";} else {print "memcache MISSING<br />";}
+            //if (extension_loaded("memcache")) {print "memcache ok<br />";} else {print "memcache MISSING<br />";}
             if (extension_loaded("gd")) {print "gd ok<br />";} else {print "gd MISSING<br />";}
             if (extension_loaded("pdo")) {print "pdo ok<br />";} else {print "pdo MISSING<br />";}
             if (extension_loaded("mbstring")) {print "php-mbstring ok<br />";} else {print "php-mbstring MISSING<br />";}
@@ -107,8 +111,22 @@
             print "<br><br><h3>All loaded extensions:</h3><br />";
             // TODO: write lsit of loaded extensions out neatly rather than dumping the array
             print_r(get_loaded_extensions());
+            
+            
+            print "<br><hr><br><h3>MySQL database server</h3><br />";
+            $mysqli = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD);
+            if ( is_array($mysqli) ){
+                //connection to server failed
+                print '<p style="color:red">'.$mysqli[1].'</p><br />';
+            }else{
+                $version = $mysqli->server_info;
+                $vers = explode('.',$version);
+                $vers = ($vers[0]>=5 && ($vers[0]>5 || $vers[1]>=5))?' OK'
+                    :'<span style="color:red"> it must be at least 5.5</span>';
+                printf("<br>Connection OK. Server version: %s\n", $version.$vers);
+            }
             ?>
-
+            
             <br /><br><hr><br />
             Verification complete. Please note any errors listed above.
         </div>
