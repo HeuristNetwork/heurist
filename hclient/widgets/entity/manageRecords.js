@@ -1408,14 +1408,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             width: 860,
             padding: '0px',
             title: window.hWin.HR('Edit record structure'),
-            callback: function(context){
-                    if(!window.hWin.HEURIST4.util.isnull(context) && context) {
-                        //reload structure definitions w/o message
-                        window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, function(){
-                            that._initEditForm_step3(that._currentEditID); //reload form    
-                        } );
-                        
-                    }
+            afterclose: function(){
+                that._initEditForm_step3(that._currentEditID); //reload form    
+                /*reload structure definitions w/o message
+                window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, function(){
+                    that._initEditForm_step3(that._currentEditID); //reload form    
+                } );*/
             }
         });        
         
