@@ -772,15 +772,8 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['chi
             and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');
 
             
-            $fres = $mysqli->query('select found_rows()');
-            if($fres){
-                $total_count_rows = $res->fetch_assoc();
-                if(count($total_count_rows)>0){
-                    $total_count_rows = $total_count_rows[0];    
-                }
-            }
-            
-            
+            $total_count_rows = mysql__select_value($mysqli, 'select found_rows()');
+           
             print '<a name="empty_fields"/>';
             if($total_count_rows<1){
                  print '<div><h3>All records don\'t have empty fields</h3></div>';

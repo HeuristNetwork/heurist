@@ -49,7 +49,7 @@
 
     foreach ($rtStructs['typedefs'] as $rt_id=>$rt) {
 
-        if(!is_numeric($rt_id)) continue;   // ??? what does this do ???
+        if(!@$rt['dtFields']) continue;
 
         $details = array();
         $rt_cnt = 0;
