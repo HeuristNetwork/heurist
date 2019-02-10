@@ -78,7 +78,12 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
                 }
         });
         
-        return this._super();
+        res = this._super();
+        
+        //'width':106,'min-width':96,
+        this.element.find('fieldset > div > .header').css({'padding':'0 16 0 0'});
+        
+        return res;
     },
     
     _destroy: function() {

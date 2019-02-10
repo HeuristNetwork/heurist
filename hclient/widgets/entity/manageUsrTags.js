@@ -593,10 +593,10 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
        
        if(that.options.show_top_n_recent){
             $('<div class="header header-label"><label><b>Tags to assign:</b></label></div>')
-                .css({display:'inline-block', 'vertical-align': 'top', 'padding': '3 16px',
-                            width: '159px', 'text-align': 'right'}).hide()   //was 98px
+                .css({display:'inline-block', 'vertical-align': 'top', 'padding-right': '16px',
+                            width: '157px', 'text-align': 'right'}).hide()   //was 98px
                 .appendTo(panel);
-            pnl_picked = $('<div></div>').css({display:'inline-block'}).appendTo(panel);
+            pnl_picked = $('<div>').appendTo(panel); //A91 .css({display:'inline-block'})
             $('<br>').appendTo(panel);
             $('<hr style="margin:5px 10px;margin-top:20px">').appendTo(panel);
        }else{
@@ -606,10 +606,25 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
 
        if(window.hWin.HEURIST4.util.findArrayIndex(window.hWin.HAPI4.user_id(), this.options.groups)>=0){ 
             //1. selected tags by group
-            $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>') //width:110px;text-align:right;
-                .css({'padding':'3px 0px'})
-                .attr('data-id', window.hWin.HAPI4.user_id())
-                .hide().appendTo(pnl_picked);
+            if(that.options.show_top_n_recent){
+                var dele = $('<div>').css({display:'table-row','line-height':'20px'})
+                    .appendTo(pnl_picked).hide();
+                $('<div class="header header-label">Personal</div>')
+                    .css({display:'table-cell', 'vertical-align': 'top', 'padding-right': '16px',
+                            'max-width': '157px', 'width': '157px', 'text-align': 'right', 'font-style':'italic'})
+                    .attr('data-id-header', window.hWin.HAPI4.user_id())
+                    .addClass('truncate')
+                    .appendTo(dele);        
+                $('<div>')
+                    .css({display:'table-cell'})
+                    .attr('data-id', window.hWin.HAPI4.user_id())
+                    .appendTo(dele);        
+            }else{
+                $('<div><i style="display:inline-block;">Personal:&nbsp;</i></div>') //width:110px;text-align:right;
+                    .css({'padding':'3px 0px'})
+                    .attr('data-id', window.hWin.HAPI4.user_id())
+                    .hide().appendTo(pnl_picked);
+            }
        }
 
             
@@ -622,9 +637,26 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                 if(!window.hWin.HEURIST4.util.isnull(name))
                 {   
-                    $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>') //width:110px;text-align:right;
-                        .css({'padding':'3px 0px'})
-                        .attr('data-id', groupID).hide().appendTo(pnl_picked);
+                    if(that.options.show_top_n_recent){
+                        var dele = $('<div>').css({'display':'table-row','line-height':'20px'})
+                                .appendTo(pnl_picked).hide();         
+                        $('<div class="header header-label">'+name+'</div>')
+                            .css({display:'table-cell', 'vertical-align': 'top', 'padding-right': '16px',
+                                    'max-width': '157px', 'width': '157px', 'text-align': 'right', 'font-style':'italic'})
+                            .attr('data-id-header',groupID)
+                            .addClass('truncate')
+                            .appendTo(dele);        
+                        $('<div>')
+                            .css({display:'table-cell'})
+                            .attr('data-id', groupID)
+                            .appendTo(dele);        
+                    }else{
+                        $('<div><i style="display:inline-block;">'+name+':&nbsp;</i></div>') //width:110px;text-align:right;
+                            .css({'padding':'3px 0px'})
+                            .attr('data-id', groupID).hide().appendTo(pnl_picked);
+                    }
+                    
+                    
                 }
             }
         }
@@ -655,8 +687,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         //2. add group selector and search/add input     
         var mdiv = $('<div class="tagDiv" style="text-decoration:none;">'
                 + (that.options.show_top_n_recent
-                    ?('<div class="header" style="display: inline-block;text-align:right;width:158px;padding:10px 12px">'  //was 95px
-                        +'<label>Find/assign:</label></div>'):'') //Add </label>'
+                    ?('<div class="header" style="display: inline-block;text-align:right;padding:0 16px 0 0">'
+                        +'<label>Find/assign:</label></div>'):'')
                 + ' <input type="text" style="width:15ex;margin-right:10px" size="60"/>&nbsp;in&nbsp;&nbsp;'
                 + '<select style="max-width:280px"></select>&nbsp;'
                 + '<div class="rec_action_link" data-key="add" style="margin-left:10px;visibility:visible !important"/>'
@@ -701,7 +733,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     if(event) that._showAutoTags = $(event.target).is(':checked'); 
                     top_n_recent.empty();
                     
-                    $('<div style="padding:10px 6px;width:98px;font-style:italic;font-size:0.9em" class="header"><label>or select below:</label></div>').appendTo(top_n_recent);
+                    $('<div style="padding-left:5px;font-style:italic;font-size:0.9em" class="header"><label>or select below:</label></div>').appendTo(top_n_recent);
                     that._getTagList(groupid,'Top', 10).appendTo(top_n_recent);
                     that._getTagList(groupid,'Recent', 10).appendTo(top_n_recent);
                     
@@ -901,6 +933,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             var label = recordset.fld(record,'tag_Text');
             var groupid = recordset.fld(record,'tag_UGrpID');
                  
+                      this.recordList.find('div[data-id-header='+groupid+']').parent().show();
             var grp = this.recordList.find('div[data-id='+groupid+']').show();
             var ele = $('<div class="tagDiv2" style="display:inline-block;padding-right:4px">'
                          + '<a href="' + window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
