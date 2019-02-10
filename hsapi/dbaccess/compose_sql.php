@@ -1779,17 +1779,21 @@ class FieldPredicate extends Predicate {
                 
                 $isnumericvalue = is_numeric($this->value);
 
-                $match_value = ( $isnumericvalue? floatval($this->value) : $mysqli->real_escape_string($this->value) );//'"' .  . '"';
+                if($isnumericvalue && $this->value!==''){
+                    $match_value = floatval($this->value);
+                }else{
+                    $match_value = '"'.$mysqli->real_escape_string($this->value).'"';
+                }
 
                 if ($this->parent->exact  ||  $this->value === "") {    // SC100
-                    $match_pred = ' = "'.$match_value.'"'; //for unknown reason comparison with numeric takes ages
+                    $match_pred = ' = '.$match_value; //for unknown reason comparison with numeric takes ages
                 } else if ($this->parent->lessthan) {
                     $match_pred = " < $match_value";
                 } else if ($this->parent->greaterthan) {
                     $match_pred = " > $match_value";
                 } else {
-                    if(($this->field_type_value=='float' || $this->field_type_value=='inbteger') && $isnumericvalue){
-                        $match_pred = ' = "'.$match_value.'"';
+                    if(($this->field_type_value=='float' || $this->field_type_value=='integer') && $isnumericvalue){
+                        $match_pred = ' = "'.floatval($this->value).'"';
                     }else if(strpos($this->value,"%")===false){
                         $match_pred = " like '%".$mysqli->real_escape_string($this->value)."%'";
                     }else{
