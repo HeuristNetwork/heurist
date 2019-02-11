@@ -49,9 +49,9 @@ if($db){
             header("Location: ".$thumb_url);
             exit();
         }
-    }else if(@$_REQUEST['file']) {
+    }else if(@$_REQUEST['file'] || @$_REQUEST['ulf_ID']) { //ulf_ID need for backward support of old downloadFile.php
 
-        $fileid = @$_REQUEST['file'];
+        $fileid = @$_REQUEST['file']? $_REQUEST['file'] :@$_REQUEST['ulf_ID'];
         $size = @$_REQUEST['size'];
         
         if(is_numeric($fileid)){
