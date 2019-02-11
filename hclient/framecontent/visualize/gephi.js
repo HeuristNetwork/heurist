@@ -64,7 +64,8 @@ gexf += ' version="1.2">';
     gexf += '<attributes class="node">';
     gexf +=     '<attribute id="0" title="name" type="string"/>';
     gexf +=     '<attribute id="1" title="image" type="string"/>';
-    gexf +=     '<attribute id="2" title="count" type="float"/>';
+    gexf +=     '<attribute id="2" title="rectype" type="string"/>';
+    gexf +=     '<attribute id="3" title="count" type="float"/>';
     gexf += '</attributes>';
     
     // EDGE ATTRIBUTES
@@ -81,13 +82,19 @@ gexf += ' version="1.2">';
         var node = data.nodes[key];
         
         var name = (node.name?node.name.replace(/&/g,'&amp;').replace(/"/g, '&quot;'):'')
+        var rectype = '';
+        if(node.image && node.image.indexOf('&id=')){
+             rectype = node.image.substring(node.image.indexOf('&id=')+4);
+        }
+        
         
         gexf += '<node id="'+node.id+'" label="'+name+'">';
         gexf +=     '<attvalues>';
         gexf +=         '<attvalue for="0" value="'+name+'"/>';
         gexf +=         '<attvalue for="1" value="'+(node.image?node.image.replace(/&/g,'&amp;'):'')+'"/>';
+        gexf +=         '<attvalue for="2" value="'+rectype+'"/>';
         if(node.count>0){
-        gexf +=         '<attvalue for="2" value="'+node.count+'"/>';
+        gexf +=         '<attvalue for="3" value="'+node.count+'"/>';
         }
         gexf +=     '</attvalues>'; 
         gexf += '</node>';
