@@ -899,16 +899,16 @@ $.widget( "heurist.expertnation_nav", {
                     var html_thumb = '';
                     if(thumb){
                         html_thumb = 
-                            '<a href="'+profileLink+'" class="bor-stop-image ab-light" data-ab-yaq="233" style="background-color: rgb(223, 223, 223);" onclick="{window.hWin.enResolver(event);}">'
+                            '<a href="'+profileLink+'" class="bor-stop-image ab-light" data-ab-yaq="233" style="background-color: rgb(223, 223, 223);" onclick="{return window.hWin.enResolver(event);}">'
                             +'<img src="'+thumb+'" height="36" alt="Photograph of '+fullName
                             +'" data-adaptive-background="1" data-ab-color="rgb(19,19,19)"></a>';
                     }else{
                         html_thumb = '<a href="'+profileLink
-                            +'" class="bor-stop-image bor-stop-image-placeholder" onclick="{window.hWin.enResolver(event);}"></a>';
+                            +'" class="bor-stop-image bor-stop-image-placeholder" onclick="{return window.hWin.enResolver(event);}"></a>';
                     }
                     
                     html = html + html_thumb + '<div class="bor-stop-description">'
-                                + '<a href="'+profileLink+'" onclick="{window.hWin.enResolver(event);}">'+fullName+'</a>';
+                                + '<a href="'+profileLink+'" onclick="{return window.hWin.enResolver(event);}">'+fullName+'</a>';
                         
                     //-----------------
                     var story = '';
@@ -955,7 +955,7 @@ $.widget( "heurist.expertnation_nav", {
                                         if(term_id>0){
                                             res.push('<a href="'
                                                 + window.hWin.HAPI4.baseURL+'tertiary-study/'
-                                                + term_id +'/a" onclick="{window.hWin.enResolver(event);}">'
+                                                + term_id +'/a" onclick="{return window.hWin.enResolver(event);}">'
                                                 + window.hWin.HEURIST4.ui.getTermValue( term_id )+'</a>'); //was getTermDesc
                                         }
                                     }
@@ -1201,7 +1201,7 @@ $.widget( "heurist.expertnation_nav", {
                     var thumb = that.recset.fld(person, 'rec_ThumbnailURL');
 
                     html = html + 
-                    '<a class="bor-emblem-portrait" href="'+profileLink+'" onclick="{window.hWin.enResolver(event);}">';
+                    '<a class="bor-emblem-portrait" href="'+profileLink+'" onclick="{return window.hWin.enResolver(event);}">';
 
                     if(thumb){
                         html = html 
@@ -1320,7 +1320,7 @@ $.widget( "heurist.expertnation_nav", {
             //@todo facet link
             termID = that.recset.fld(person, 20);
             leftside['p_gender'] = '<li><a href="gender/'+termID
-                    +'/a" onclick="{window.hWin.enResolver(event);}">'+that.__getTerm( termID )+'</a></li>';
+                    +'/a" onclick="{return window.hWin.enResolver(event);}">'+that.__getTerm( termID )+'</a></li>';
                     
             //Early education -------------------------------
             var early = that.recset.values(person, that.DT_SCHOOLING);
@@ -1384,7 +1384,7 @@ $.widget( "heurist.expertnation_nav", {
                         var term_id = that.recset.fld(record, that.DT_DEGREE);
                         var sDegree = '<a href="'
                             + window.hWin.HAPI4.baseURL+'tertiary-study/'
-                            + term_id +'/a" onclick="{window.hWin.enResolver(event);}">'
+                            + term_id +'/a" onclick="{return window.hWin.enResolver(event);}">'
                             + window.hWin.HEURIST4.ui.getTermValue( term_id )+'</a>'; //getTermDesc
 
                         var is_awarded = (that.recset.fld(record, 120)==532); //flag gegree awarded    
@@ -1618,7 +1618,7 @@ $.widget( "heurist.expertnation_nav", {
                         
                         sAward = '<a href="'
                                 + window.hWin.HAPI4.baseURL+'military-award/'
-                                + awardID + '/a" onclick="{window.hWin.enResolver(event);}">'
+                                + awardID + '/a" onclick="{return window.hWin.enResolver(event);}">'
                                 + sAward+'</a>';
                         
                         html = html + '<li>'+sAward
@@ -1672,13 +1672,13 @@ $.widget( "heurist.expertnation_nav", {
                     if(sRank){
                         sRank = '<a href="'
                             + window.hWin.HAPI4.baseURL+'military-service/'
-                            + rankID + ',' +  (sUnit?unitID:0) + '/a" onclick="{window.hWin.enResolver(event);}">'
+                            + rankID + ',' +  (sUnit?unitID:0) + '/a" onclick="{return window.hWin.enResolver(event);}">'
                             + sRank+'</a>';
                     }
                     if(sUnit){
                         sUnit = '<a href="'
                             + window.hWin.HAPI4.baseURL+'military-service/0,'
-                            + unitID +'/a" onclick="{window.hWin.enResolver(event);}">'
+                            + unitID +'/a" onclick="{return window.hWin.enResolver(event);}">'
                             + sUnit+'</a>';
                     }
 
@@ -2046,12 +2046,12 @@ $.widget( "heurist.expertnation_nav", {
                     html = html + '<p class="help-block">'
                     + 'Unless otherwise noted, these photographs, War Service Records, letters, diaries and cards were sent to the'      
                     + ' University by family and friends during and after World War One. If you have any material to add, please see our '
-                    + '<a href="/contribute" onclick="{window.hWin.enResolver(event);}">contribute page</a>.</p>';
+                    + '<a href="/contribute" onclick="{return window.hWin.enResolver(event);}">contribute page</a>.</p>';
                 }else{
                     html = html + '<p class="help-block">'
                     //+ 'Unless otherwise noted, these records are from the University of Adelaide Archives. '
                     + 'If you have any material to add, please see our '
-                    + '<a href="/contribute" onclick="{window.hWin.enResolver(event);}">contribute page</a>.</p>';
+                    + '<a href="/contribute" onclick="{return window.hWin.enResolver(event);}">contribute page</a>.</p>';
                 }
                
                 
@@ -2307,7 +2307,7 @@ $.widget( "heurist.expertnation_nav", {
             var sEduName = this.recset.fld(edu_record, this.DT_NAME);
             return '<a href="'
                         + window.hWin.HAPI4.baseURL+'institution/'
-                        + edu_rec_id +'/a" onclick="{window.hWin.enResolver(event);}">'
+                        + edu_rec_id +'/a" onclick="{return window.hWin.enResolver(event);}">'
                         + sEduName+'</a>';
         }else{
             return '';
@@ -2379,7 +2379,7 @@ $.widget( "heurist.expertnation_nav", {
                                 place_names.push(fullName);
                            
                                 aRes.push('<a href="'+window.hWin.enLink('place', placeID)
-                                    + '" onclick="{window.hWin.enResolver(event);}">'
+                                    + '" onclick="{return window.hWin.enResolver(event);}">'
                                     + fullName + '</a>');
                         }
                     }
@@ -2754,7 +2754,7 @@ function enResolver(event){
         }   
     }
     
-    return res;
+    return false;
 }
 
 window.onload = function () {

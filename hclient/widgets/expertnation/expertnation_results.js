@@ -126,7 +126,7 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
         fullName = fullName + ' ' + fld(DT_NAME);
         
         var profileLink = 'href="'+window.hWin.enLink('profile', fld('rec_ID'))
-                                  +'" onclick="{window.hWin.enResolver(event);}"';
+                                  +'" onclick="{return window.hWin.enResolver(event);}"';
    
         //get thumbnail if available for this record, or generic thumbnail for record type
         var html_thumb = '';
