@@ -207,25 +207,25 @@ if($is_csv){
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Database statistics for this server</title>
 
-        <link rel="icon" href="../../favicon.ico" type="image/x-icon">
-        <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+        <link rel="icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
         <!-- YUI -->
-        <link rel="stylesheet" type="text/css" href="../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/element/element-min.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/yui/2.8.2r1/build/fonts/fonts-min.css" />
+        <script type="text/javascript" src="<?php echo PDIR;?>external/yui/2.8.2r1/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/yui/2.8.2r1/build/element/element-min.js"></script>
 
         <!-- DATATABLE DEFS -->
-        <link type="text/css" rel="stylesheet" href="../../external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
+        <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/yui/2.8.2r1/build/datatable/assets/skins/sam/datatable.css">
         <!-- datatable Dependencies -->
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/yui/2.8.2r1/build/datasource/datasource-min.js"></script>
         <!-- Source files -->
-        <script type="text/javascript" src="../../external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/yui/2.8.2r1/build/datatable/datatable-min.js"></script>
         <!-- END DATATABLE DEFS-->
 
         <!-- TOOLTIP -->
         <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css">
-        <script src="../../external/yui/2.8.2r1/build/container/container-min.js"></script>
+        <script src="<?php echo PDIR;?>external/yui/2.8.2r1/build/container/container-min.js"></script>
 
         <!-- jQuery UI -->
         <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
