@@ -840,7 +840,7 @@ $.widget( "heurist.expertnation_nav", {
             if(entType=='place'){
                 var place = that.recset.getById(recID);
                 place = that.__getPlace(place, 2); 
-                if(place.link){
+                if(place && place.link){
                     title = place['names'][0]; //full place name  
                     
                     if(place.hasGeo){
@@ -850,18 +850,19 @@ $.widget( "heurist.expertnation_nav", {
                 
             }else if (entType=='institution'){
                 var edu_inst = that.recset.getById(recID);
-                title = that.recset.fld(edu_inst, that.DT_NAME);
-                
-                var place = that.__getPlace(edu_inst, 0);
-                if(place.link){
-                    if(place.hasGeo){
-                        mapids = place.ids;
-                    }                    
-                }
-                
-                //detect what type of institution we have- school or uni
-                isTertiary = (that.recset.getRectypes().indexOf(that.RT_SCHOOLING)<0);
+                if(edu_inst){
+                    title = that.recset.fld(edu_inst, that.DT_NAME);
                     
+                    var place = that.__getPlace(edu_inst, 0);
+                    if(place.link){
+                        if(place.hasGeo){
+                            mapids = place.ids;
+                        }                    
+                    }
+                    
+                    //detect what type of institution we have- school or uni
+                    isTertiary = (that.recset.getRectypes().indexOf(that.RT_SCHOOLING)<0);
+                }
             }else if (entType=='military-service'){
                 title = [];
                 if(rankID>0) title.push(that.__getTerm( rankID ));
@@ -1341,7 +1342,7 @@ $.widget( "heurist.expertnation_nav", {
                             var edu_record = that.recset.getById( that.recset.fld(record, that.DT_INSTITUTION) ); 
                             
                             var place = that.__getPlace(edu_record, 1);
-                            if(place.hasGeo){
+                            if(place && place.hasGeo){
                                 mapids = mapids.concat(place.ids); 
                             }
                             
@@ -1394,10 +1395,11 @@ $.widget( "heurist.expertnation_nav", {
 
                         if(sEduInst!=''){
                             var edu_record = that.recset.getById( that.recset.fld(record, that.DT_INSTITUTION) ); 
-
-                            place = that.__getPlace(edu_record, 1);
-                            if(place && place.hasGeo){
-                                mapids = mapids.concat(place.ids); 
+                            if(edu_record){
+                                place = that.__getPlace(edu_record, 1);
+                                if(place && place.hasGeo){
+                                    mapids = mapids.concat(place.ids); 
+                                }
                             }
                         }
 
@@ -1912,6 +1914,8 @@ $.widget( "heurist.expertnation_nav", {
                 for (idx in fval)
                 if(!that.isempty(fval)){
                     var record = that.recset.getById(fval[idx]);
+                    //media record not found - check that it is public
+                    if(window.hWin.HEURIST4.util.isempty(record)) continue; 
                     
                     var nonce = that.recset.fld(record, that.DT_MEDIAFILE);
                     if(nonce) nonce = nonce[0];
@@ -1967,6 +1971,8 @@ $.widget( "heurist.expertnation_nav", {
                 for (idx in fval)
                 if(!that.isempty(fval)){
                     var record = that.recset.getById(fval[idx]);
+                    //media record not found - check that it is public
+                    if(window.hWin.HEURIST4.util.isempty(record)) continue; 
                     var filename = that.recset.fld(record, 62);
                     var obf = that.recset.fld(record, that.DT_MEDIAFILE);
                     var img_title = that.recset.fld(record, 'rec_Title');
