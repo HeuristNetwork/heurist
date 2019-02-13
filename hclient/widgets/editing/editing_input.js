@@ -2163,7 +2163,8 @@ console.log('onpaste');
                   $input.css('width', Math.round(2 + Math.min(120, Number(dwidth))) + "ex"); //was *4/3
               
         }
-        $input.css('max-width', '600px');
+        if(this.detailType!='blocktext')
+            $input.css('max-width', '600px');
 
         this.inputs.push($input);
 
