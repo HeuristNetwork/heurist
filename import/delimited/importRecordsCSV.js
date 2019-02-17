@@ -824,7 +824,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
              var field = fields[selected_fields[i]];
              
              if(!field){
-                 console.log(i+'  '+selected_fields[i]);
+                 //console.log(i+'  '+selected_fields[i]);
                  continue;
              }
              
