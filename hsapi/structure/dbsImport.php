@@ -73,7 +73,6 @@ class DbsImport {
         definitionID  - id in source database 
         databaseID - database where to search definition if not defined take db from conceptCode
         
-        conceptName
       )
     * @return mixed
     */
@@ -92,14 +91,14 @@ class DbsImport {
         $local_id = 0;  //local id of defintion to be imported
         $cCode = null;
         
-        if(@$data['databaseID']>0){
+        if(@$data['databaseID']>0){  //source database id
             $db_reg_id = $data['databaseID'];
         }
-        if(@$data['definitionID']>0){
+        if(@$data['definitionID']>0){  //id in source database
             $local_id = $data['definitionID'];
         }
             
-        if(@$data['conceptCode']){
+        if(@$data['conceptCode']){  //take db id and def id from concept code
             
             $cCode = $data['conceptCode'];
             

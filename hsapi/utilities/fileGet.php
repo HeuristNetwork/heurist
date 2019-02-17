@@ -43,7 +43,7 @@ if($path){
 id - record id
 entity - by default recordtypes
 def - if file not found return empty gif (0) or add image gif (1) or default icon/thumb for entity (2)
-version - thumb|icon|full (thumb is default)
+version - thumb or thumbnail|icon|full (thumb is default)
 
 */
 

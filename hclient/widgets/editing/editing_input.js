@@ -1843,9 +1843,12 @@ $.widget( "heurist.editing_input", {
                 
                 
                         this.options.showclear_button = (this.configMode.hideclear!=1);
+                        
+                        if(!this.configMode.version) this.configMode.version = 'thumb';
                 
                         //url for thumb
-                        var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, this.options.recID, 'thumb', 1);
+                        var urlThumb = window.hWin.HAPI4.getImageUrl(this.configMode.entity, 
+                                                        this.options.recID, this.configMode.version, 1);
                         var dt = new Date();
                         urlThumb = urlThumb+'&ts='+dt.getTime();
                         
@@ -1862,12 +1865,18 @@ $.widget( "heurist.editing_input", {
                            $input_img.find('img').css({'max-height':'320px','max-width':'320px'});
                        }
                          
-                        window.hWin.HAPI4.checkImageUrl(this.configMode.entity, this.options.recID, 'thumb',
+                        window.hWin.HAPI4.checkImageUrl(this.configMode.entity, this.options.recID, 
+                            this.configMode.version,
                             function(response){
                                   if(response.data=='ok'){
                                       that.entity_image_already_uploaded = true;
                                   }
                         });
+                        
+                        //change parent div style - to allow special style for image selector
+                        if(that.configMode.css){
+                            that.element.css(that.configMode.css);
+                        }
                         
                         //library browser and explicit file upload buttons
                         if(that.configMode.use_assets){
@@ -1878,7 +1887,7 @@ $.widget( "heurist.editing_input", {
                                 .click(function(){ $input.click() }).appendTo( ele );                            
                             $('<br/>').appendTo( ele );                            
                             
-                            $('<a href="#"><span class="ui-icon ui-icon-grid"/>Or select from library</a>')
+                            $('<a href="#" title="Or select from library"><span class="ui-icon ui-icon-grid"/>Library</a>')
                                 .click(function(){                                 
                                     $select_imagelib_dlg.select_imagelib({onselect:function(res){
                                         if(res){
@@ -1886,7 +1895,7 @@ $.widget( "heurist.editing_input", {
                                             that.newvalues[$input.attr('id')] = res.path; 
                                             that._onChange(); 
                                         }
-                                    }, assets:that.configMode.use_assets});
+                                    }, assets:that.configMode.use_assets, size:that.configMode.size});
                                 }).appendTo( ele );                            
                         }
                             
@@ -1928,6 +1937,8 @@ $.widget( "heurist.editing_input", {
     //url: 'templateOperations.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},
+                {name:'version', value:this.configMode.version},
+                {name:'maxsize', value:this.configMode.size},
                 {name:'registerAtOnce', value:this.configMode.registerAtOnce},
                 {name:'recID', value:that.options.recID}, //need to verify permissions
                 //{name:'DBGSESSID', value:'425944380594800002;d=1,p=0,c=07'},
@@ -1976,7 +1987,7 @@ $.widget( "heurist.editing_input", {
                             var urlThumb =
                             (that.configMode.entity=='recUploadedFiles'
                                 ?file.url
-                                :file.thumbnailUrl)
+                                :file[(that.configMode.version=='icon')?'iconUrl':'thumbnailUrl'])
                                 +'?'+(new Date()).getTime();
                             
                             // file.thumbnailUrl - is correct but inaccessible for heurist server

@@ -382,11 +382,15 @@ class DbEntityBase
     // $tempfile - file to be either 
     // 1) renamed to recID (if it is temp file started with ~)
     // 2) copied 
-    protected function renameEntityImage($tempfile, $recID){
+    protected function renameEntityImage($tempfile, $recID, $version=null){
 
         $isSuccess = false;
         
         $entity_name = $this->config['entityName'];
+        if($version==null){  //if version is defined we copy only it (icon or thumbnail)
+            $version = '';
+        }
+        $lv = strlen($version);
         
         $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'; //destination
         
@@ -402,20 +406,33 @@ class DbEntityBase
                   $filename = $info->getFilename();
                   $extension = pathinfo($info->getFilename(), PATHINFO_EXTENSION);
                   //$extension = $info->getExtension(); since 5.3.6 
+                  
 
                   if ($filename==$tempfile.'.'.$extension) {
                       $pathname = $info->getPath();
-                      $new_name = $pathname.'/'.$recID.'.'.$extension;
-                      $isSuccess = rename ($info->getPathname(), $new_name);
+                      $tempfile_ = $info->getPathname();
+                      if($lv==0 || substr($pathname, -$lv) === $version){
+                            $new_name = $pathname.'/'.$recID.'.'.$extension;
+                            $isSuccess = rename ($tempfile_, $new_name);
+                      }
+                      if(file_exists($tempfile_)){
+                            unlink( $tempfile_ );
+                      }
                   }
             }
             
         }else if(file_exists($tempfile)){
             $path_parts = pathinfo($tempfile);
             $ext = strtolower($path_parts['extension']);
-            $new_name = $path.$recID.'.'.$ext;
-            $new_name_thumb = $path.'thumbnail/'.$recID.'.'.$ext;
-            $isSuccess = fileCopy($tempfile, $new_name) &&  fileCopy($tempfile, $new_name_thumb);
+            
+            if($version!=''){ //copy only icon or thumb
+                $new_name = $path.$version.$recID.'.'.$ext;
+                $isSuccess = fileCopy($tempfile, $new_name);
+            }else{
+                $new_name = $path.$recID.'.'.$ext;
+                $new_name_thumb = $path.'thumbnail/'.$recID.'.'.$ext;
+                $isSuccess = fileCopy($tempfile, $new_name) &&  fileCopy($tempfile, $new_name_thumb);
+            }
         }
         
         if(!$isSuccess){

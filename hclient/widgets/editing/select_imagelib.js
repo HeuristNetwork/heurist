@@ -26,7 +26,9 @@ $.widget( "heurist.select_imagelib", {
 
         onselect: null,
         
-        assets:null //array of directories with images
+        assets:null, //array of directories with images
+        
+        size: 64
     },
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
@@ -91,11 +93,13 @@ $.widget( "heurist.select_imagelib", {
                                             + recordset.fld(record, 'file_name');
                            }
         
-                           var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
+                           var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+                            +recThumb+'&quot;);opacity:1;height:'+that.options.size+' !important">'
                             +'</div>';
 
                             var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
-                                    +'" style="width:80 !important;height:80 !important">'
+                                    + '" style="width:'+(that.options.size+4)+' !important;height:'
+                                    + (that.options.size+4)+' !important">'
                                     + html_thumb + '</div>';
                            
                            return html;  

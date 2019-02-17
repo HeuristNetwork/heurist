@@ -35,6 +35,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/select_imagelib.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/media_viewer.js"></script>
@@ -426,9 +427,9 @@ print $targetPath.'<br>';
                             <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
                             <option value="Records">Saved Searches</option>
-                            <option value="DefRecTypes">Record Types</option>
+                            <option value="DefRecTypes" selected>Record Types</option>
                             <option value="DefRecTypeGroups">Record Type Groups+</option>
-                            <option value="DefDetailTypes" selected>Field Types</option>
+                            <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
                             <option value="DefTerms">Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>

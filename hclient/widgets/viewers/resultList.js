@@ -50,6 +50,7 @@ $.widget( "heurist.resultList", {
         empty_remark:'No entries match the filter criteria',
         pagesize: -1,
         
+        groupByMode: null, //[null|'none','tab','accordion'],
         groupByField:null,
         groupOnlyOneVisible:false,
         groupByCss:null, //css for group content
@@ -1935,7 +1936,7 @@ $.widget( "heurist.resultList", {
             for (var grp_val in html_groups){
                 var gheader = (hasRender)
                     ?this.options.rendererGroupHeader.call(this, grp_val, this._grp_keep_status)
-                    :'<div style="width:100%"> Group '+grp_val+'</div>';
+                    :'<div style="width:100%">'+grp_val+'</div>';
                 
                 var is_expanded = ($.isEmptyObject(this._grp_keep_status) || this._grp_keep_status[grp_val]==1);
                 html += (gheader+'<div data-grp-content="'+grp_val

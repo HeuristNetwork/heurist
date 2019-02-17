@@ -26,6 +26,8 @@ we may take data from
 $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
    
     _entityName:'defRecTypes',
+    
+    is_new_icons: true,
 
     //
     //                                                  
@@ -47,6 +49,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 640;
+        this.options.edit_width = 950;
         this.options.height = 640;
 
         if(this.options.edit_mode=='editonly'){
@@ -127,7 +130,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
             
             
-            this.recordList.resultList('option','rendererHeader',
+            this.recordList.resultList({rendererHeader:
                     function(){
                     var s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
                                 +'<div style="width:13em">Name</div>'
@@ -138,8 +141,26 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         }
                         
                         return s;
-                    }
-                );
+                    }/*,
+                    groupMode:['none','tab','groups'],
+                    groupByField:'rty_RecTypeGroupID',
+                    //groupOnlyOneVisible: true,
+                    groupByCss:'0 1.5em',
+                    rendererGroupHeader: function(grp_val, grp_keep_status){
+
+                        var rectypes = window.hWin.HEURIST4.rectypes;
+                        var idx = rectypes.groups.groupIDToIndex[grp_val];
+
+                        var is_expanded = (grp_keep_status[grp_val]!=0);
+
+                        return rectypes.groups[idx]?('<div data-grp="'+grp_val
+                            +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
+                            +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
+                            +'<div style="display:inline-block;width:70%">'
+                            +'<h2>'+grp_val+'  '+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
+                            +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
+                    }*/
+            });
             //this.recordList.resultList('applyViewMode');
         }
         
@@ -163,7 +184,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }else{
             this._on( this.searchForm, {
                 "searchdefrectypesonresult": this.updateRecordList,
-                "searchdefrectypesonadd": function() { this.addEditRecord(-1); }
+                "searchdefrectypesonadd": function() { this.addEditRecord(-1); },
+                "searchdefrectypesonuichange": this.changeUI,  //grouping, visible columns
                 });
         }
         
@@ -401,10 +423,13 @@ console.log(response);
             + ' : <div class="item" style="font-style:italic;width:45em">'
             + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rty_Description'))+'</div>'
         
-        var rtIcon = window.hWin.HAPI4.iconBaseURL+recID;// window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
-        //var rtThumb = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'thumb');
-        var recThumb = window.hWin.HAPI4.iconBaseURL+'thumb/th_'+recID; //window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb', 2, this.options.database);
-
+        var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon');
+        var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
+        if(this.is_new_icons){
+            rtIcon = window.hWin.HAPI4.iconBaseURL+recID; 
+            recThumb = window.hWin.HAPI4.iconBaseURL+'thumb/th_'+recID; 
+        }
+        
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);">'
         +'</div>';
         

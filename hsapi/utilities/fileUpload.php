@@ -142,6 +142,9 @@ if($response!=null){
     }else{
         
         $entityDir = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/';
+        
+        $version = @$_REQUEST['version']!='icon'?'thumbnail':'icon';
+        $maxsize = @$_REQUEST['maxsize']>0?$_REQUEST['maxsize']:120;
 
         $options = array(
                 'upload_dir' => $entityDir,
@@ -153,10 +156,10 @@ if($response!=null){
                     ''=>array(
                         'auto_orient' => true,
                         ),
-                    'thumbnail'=>array(
+                    $version=>array(
                         'auto_orient' => true,
-                        'max_width' => 120,
-                        'max_height' => 120,
+                        'max_width' => $maxsize,
+                        'max_height' => $maxsize,
                         'scale_to_png' => true    
                     )
                 )
@@ -165,7 +168,7 @@ if($response!=null){
                 //'print_response ' => false
         );
 
-        allowWebAccessForForlder($entityDir.'thumbnail/');    
+        allowWebAccessForForlder($entityDir.$version.'/');    
     
     }
     

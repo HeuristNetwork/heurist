@@ -222,14 +222,14 @@ class DbDefRecTypes extends DbEntityBase
                     $thumb_file_name = @$record['rty_Thumb'];
                     //rename it to recID.png
                     if($thumb_file_name){
-                        //@todo parent::renameEntityImage($thumb_file_name, $rty_ID);
+                        parent::renameEntityImage($thumb_file_name, $rty_ID, 'thumbnail');
                     }
                     
-                    //treat thumbnail
+                    //treat icon
                     $icon_file_name = @$record['rty_Icon'];
                     //rename it to recID.png
                     if($icon_file_name){
-                        //@todo parent::renameEntityImage($icon_file_name, $rty_ID);
+                        parent::renameEntityImage($icon_file_name, $rty_ID, 'icon');
                     }
                     
                 }
