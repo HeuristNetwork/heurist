@@ -105,8 +105,11 @@ if (array_key_exists('ulf_ID', $_REQUEST))
     }
     
     $type_source = null;
-
-    list($type_media, $ext) = explode('/',$file['fxm_MimeType']);
+    $type_media = null;
+    $ext = null;
+    if(@$file['fxm_MimeType'] && strpos($file['fxm_MimeType'], '/')!=false){
+        list($type_media, $ext) = explode('/',$file['fxm_MimeType']);
+    }
     
     if(@$file['ulf_ExternalFileReference']==null || @$file['ulf_ExternalFileReference']==''){
         $type_source = 'heurist';    
