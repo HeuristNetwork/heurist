@@ -850,7 +850,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         if(window.hWin.HEURIST4.util.isempty(source.files) || window.hWin.HEURIST4.util.isempty(source.files[0])){
             msg = 'Image file is not defined';
         }else if(!source.bounds){        
-            msg = 'Image\'s extent is not defined';
+            msg = 'Image\'s extent is not defined. Please add values in the bounding box field for this layer.';
         }else if(source.files[0].endsWith('.tiff')||source.files[0].endsWith('.tif')){
             msg = 'At this time the GMaps mapping component used does not support GeoTIFF.';
         }
@@ -867,7 +867,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             overlays[index] = _getStubOverlay();
 
             window.hWin.HEURIST4.msg.showMsgErr('Map layer: '+source.title
-                +'<br>Unable to process this dataset. '+msg);
+                +'<br>Unable to add image layer. '+msg);
             //Please check that the file or service specified is in one of the supported formats. 
         }
     }
