@@ -64,7 +64,24 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
         <link rel="stylesheet" href="../../ext/jquery-file-upload/css/jquery.fileupload.css">
         <link rel="stylesheet" href="../../ext/jquery-file-upload/css/jquery.fileupload-ui.css">
-
+        
+        <script>
+            function setUploadEntireFolder(){
+                
+                var ele = $('.fileinput-button > input');
+                if(ele.prop('webkitdirectory')){
+                    ele.removeProp('webkitdirectory');
+                    ele.prop('onchage',null);                    
+                }else{
+                    ele.prop('webkitdirectory',true);
+                    ele.onchange = function(e) {
+                          var files = e.target.files; // FileList
+                          for (var i = 0, f; f = files[i]; ++i)
+                            console.log(files[i].webkitRelativePath);
+                    }
+                }
+            }
+        </script>
     </head>
 
 
@@ -206,6 +223,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 <?php              
             } // Visit #1
 
+            // keep all thumbnails in one special folder outside upload foldee otherwise
+            // indexing will be interfered with these thumbs
+            
 
         ?>
 
@@ -230,9 +250,11 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 </select>
                 <br><br>
             </div>
-
             <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
             <div class="fileupload-buttonbar" style="display:<?php print $is_dir_found?'block':'none';?>">
+                <label><input type="checkbox" onchange="setUploadEntireFolder()">
+                    Upload directory and keep its structure on server side
+                </label><br><br>
                 <div class="fileupload-buttons">
                     <!-- The fileinput-button span is used to style the file input field as button -->
                     <span class="fileinput-button">
@@ -283,6 +305,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 </td>
                 <td>
                 <p class="name">{%=file.name%}</p>
+                <p class="folder">{%=file.webkitRelativePath%}</p>
                 <strong class="error"></strong>
                 </td>
                 <td>
