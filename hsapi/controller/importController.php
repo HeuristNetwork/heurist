@@ -63,8 +63,8 @@
         assignRecordIds -  Assign record ids to field in import table (negative if not found)
                 findRecordIds - find exisiting /matching records in heurist db by provided mapping 
                 
-    5) step4 
-        validateImport - verify mapping parameter for valid detail values (numeric,date,enum,pointers)
+    5) step4
+        ImportAction::validateImport - verify mapping parameter for valid detail values (numeric,date,enum,pointers)
         
             getWrongRecords
             validateEnumerations
@@ -73,7 +73,7 @@
             validateDateField
         
     5) step5
-        doImport - do import - add/update records in heurist database
+        ImportAction::performImport - do import - add/update records in heurist database
     
 
     */
@@ -110,6 +110,7 @@ if(!$system->init(@$_REQUEST['db'])){
             $res = ImportParser::saveToTempFile( @$_REQUEST['data'] );  //save csv data in temp file
             
         }else if($action=='step1'){   
+            //file is uploaded with help fileupload widget and utilities/fileUpload.php
             
             //encode and invoke parse_prepare with limit
             $res = ImportParser::encodeAndGetPreview( @$_REQUEST["upload_file_name"], $_REQUEST);  

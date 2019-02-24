@@ -62,15 +62,15 @@ class DbsImport {
 // 5. Perform database action - add rectypes, structure, fields and terms into our database
     
     /**
-    * Find all defintions to be imported
+    * Finds all defintions to be imported
     * 
     * @param mixed $data
     * 
     * array(
         defType - rectype,detailtype,term
 
-        conceptCode - unique identifier
-        definitionID  - id in source database 
+        conceptCode - unique identifier (optional if definitionID is set)
+        definitionID  - id in source database or arrayo of ids
         databaseID - database where to search definition if not defined take db from conceptCode
         
       )
@@ -88,14 +88,15 @@ class DbsImport {
         }
         
         $db_reg_id = 0;
-        $local_id = 0;  //local id of defintion to be imported
+        $local_ids = array();  //local id of defintion to be imported
         $cCode = null;
         
         if(@$data['databaseID']>0){  //source database id
             $db_reg_id = $data['databaseID'];
         }
         if(@$data['definitionID']>0){  //id in source database
-            $local_id = $data['definitionID'];
+            $local_ids = $data['definitionID'];
+            if(!is_array($local_ids)) $local_ids = array($local_ids);
         }
             
         if(@$data['conceptCode']){  //take db id and def id from concept code
@@ -125,7 +126,7 @@ class DbsImport {
             $this->system->addError(HEURIST_INVALID_REQUEST, "Not possible to determine an origin database id (source of import)");
             return false;
         }
-        if(!($local_id>0 || $cCode)){
+        if(!(count($local_ids)>0 || $cCode)){
             $this->system->addError(HEURIST_INVALID_REQUEST, "Neither concept code nor local id is defined");
             return false;
         }
@@ -143,28 +144,43 @@ class DbsImport {
             return false; //see $system->getError
         }
 
-        $def_id = 0;
+        //find source id by conceptcodes or verify local_ids     
+        $def_ids = array();
+        $wrong_id = 0;
 
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
         if($defType=='term'){
-            if($local_id>0){
-                $rt = $this->sourceTerms->getTerm($def_id);        
-                if($rt!=null){
-                    $local_id = $def_id;
+            if(count($local_ids)>0){
+                foreach($local_ids as $local_id){
+                    $rt = $this->sourceTerms->getTerm($local_id);        
+                    if($rt!=null){
+                        $def_ids[] = $local_id;
+                    }else{
+                        $wrong_id = $local_id;
+                        break;
+                    }
                 }
             }else{
-                $def_id = $this->sourceTerms->findTermByConceptCode($cCode); 
+                $def_ids[] = $this->sourceTerms->findTermByConceptCode($cCode); 
             }
         }else{
-            if($local_id>0){
-                $def_id = $this->_checkLocalCode($defType, $this->source_defs, $local_id);
+            if(count($local_ids)>0){
+                foreach($local_ids as $local_id){
+                    if($this->_checkLocalCode($defType, $this->source_defs, $local_id)>0){
+                        $def_ids[] = $local_id;
+                    }else{
+                        $wrong_id = $local_id;
+                        break;
+                    }
+                }
+                
             }else{
-                $def_id = $this->_getLocalCode($defType, $this->source_defs, $cCode); //get local id is source db
+                $def_ids[] = $this->_getLocalCode($defType, $this->source_defs, $cCode); //get local id in source db
             }
         }
         
-        if (!($def_id>0)) { //definition not found in source database
-            $smsg = ($local_id>0) ?'id#'.$local_id :'concept code '.$cCode;
+        if (count($def_ids)==0 || $wrong_id>0) { //definition not found in source database
+            $smsg = ($wrong_id>0) ?'id#'.$wrong_id :'concept code '.$cCode;
             $this->system->addError(HEURIST_ERROR, 'Unable to get '.$defType. ' definition with '.$smsg.' in database #'.$db_reg_id);
             return false; //see $system->getError
         }
@@ -195,15 +211,19 @@ class DbsImport {
         // 3. Find what defintions will be imported
         if($defType=='term'){
             
-            $this->_getTopMostVocabulary($def_id, 'enum');
-            if(count($this->imp_terms['enum'])==0)
+            foreach($def_ids as $def_id){
+                $this->_getTopMostVocabulary($def_id, 'enum');
+                //if(count($this->imp_terms['enum'])==0)
                 $this->_getTopMostVocabulary($def_id, 'relation');
+            }
             
         }else{
             
             if($defType=='rectype'){
                 //find record types
-                $this->_findDependentRecordTypes($def_id, null, 0);
+                foreach($def_ids as $def_id){
+                    $this->_findDependentRecordTypes($def_id, null, 0);
+                }
                 
                 if(count($this->imp_recordtypes)==0){
                     $this->system->addError(HEURIST_NOT_FOUND, 'No one record type to be imported found');
@@ -213,7 +233,9 @@ class DbsImport {
                 
             } else if($defType=='detailtype'){
                 
-                $this->_findDependentRecordTypesByFieldId($def_id);
+                foreach($def_ids as $def_id){
+                    $this->_findDependentRecordTypesByFieldId($def_id);
+                }
                 
                 if(count($this->imp_fieldtypes)==0){
                     $this->system->addError(HEURIST_NOT_FOUND, 'No one field to be imported found');
@@ -526,7 +548,7 @@ foreach ($this->imp_fieldtypes as $ftId){
     }
     if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
         //change record ids for pointers
-        $def_field[$idx_constraints] = $this->replaceRecIds(@$def_field[$idx_constraints]);
+        $def_field[$idx_constraints] = $this->replaceRectypeIds(@$def_field[$idx_constraints]);
     }
 
     //fill original ids if missed
@@ -579,7 +601,7 @@ foreach ($this->imp_recordtypes as $rtyID){
             }
             if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
                 //change record ids for pointers
-                $def_field[$idx_constraints] = ""; //$this->replaceRecIds(@$def_field[$idx_constraints]);
+                $def_field[$idx_constraints] = ""; //$this->replaceRectypeIds(@$def_field[$idx_constraints]);
             }
 
             $fields[ $this->fields_correspondence[$ftId] ] = $def_field;
@@ -745,7 +767,12 @@ $mysqli->commit();
     // get local code by concept code
     //
     private function _getLocalCode($defType, $database_defs, $conceptCode, $sall=false){
+        return DbsImport::getLocalCode($defType, $database_defs, $conceptCode, $sall);
+    }
 
+    //
+    // 
+    public static function getLocalCode($defType, $database_defs, $conceptCode, $sall=false){
         $res = array();
 
         if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
@@ -777,6 +804,7 @@ $mysqli->commit();
         
     }
     
+    // 
     // Find vocabularies to be imported
     // Fill global $this->imp_terms with the top most vocabulary
     // $terms_ids - list of terms (json or csv) from field definition
@@ -799,7 +827,7 @@ $mysqli->commit();
         }
     }    
 
-    //
+    // @todo move to dbsRectypes
     //
     //
     private function _findDependentRecordTypesByFieldId($field_id){
@@ -853,6 +881,7 @@ $mysqli->commit();
         return $res; 
     }
     
+    // @todo move to dbsRectypes
     //
     // search source defintions
     // find all dependend record types in pointer constraints
@@ -1099,9 +1128,9 @@ $mysqli->commit();
 
     
     //
-    // replace recid in constraint string to local id
+    // replace rectype ids in constraint string to local id
     //
-    private function replaceRecIds($constraints){
+    private function replaceRectypeIds($constraints){
         
         if($constraints){
             $recids = explode(",", $constraints);

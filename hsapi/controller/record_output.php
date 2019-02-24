@@ -6,7 +6,7 @@
     * 
     * parameters
     * db - heurist database
-    * format = json|csv|kml|hml
+    * format = json|csv|kml|xml|hml|gephi
     * prefs:{ format specific parameters }, }
     * 
     * prefs for csv
@@ -17,6 +17,10 @@
                 csv_header    :true
     *           fields        : {rtid:[dtid1, dtid3, dtid2]}
     * 
+    * prefs for json,xml
+    *           zip  : 0|1  compress
+    *           file : 0|1  output as file or ptintout
+    *           defs : 0|1  include database definitions
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -46,6 +50,7 @@
     $system = new System();
     
     if(@$_REQUEST['postdata']){
+        //in export csv all parameters send as json array in postdata 
         $params = json_decode($_REQUEST['postdata'], true);
     }else{
         $params = $_REQUEST;
@@ -103,14 +108,110 @@
     $response = recordSearch($system, $search_params);
 
     if($is_csv){
-        outputXML($system, $response, $params);
+        output_CSV($system, $response, $params);
     }else{
-        // By default json
-        // Return the response object as JSON
-        header('Content-type: application/json;charset=UTF-8');
-        print json_encode($response);
+        
+        //header('Content-type: application/json;charset=UTF-8');
+        //echo json_encode($out);
+        
+        output_Records($system, $response, $params);
+        
+        //output_Data($stream, $params);
     }
 exit();
+
+
+//
+// output data as 
+//           zip  : 0|1  compress
+//           file : 0|1  output as file or ptintout
+//           db   : database name for file name
+//
+function output_Data($params, $stream=null, $tmpfile=null){
+    
+    $error_log = array();
+    $mimetype = 'application/'.$params['format'];
+/*
+    $out = false;
+
+    if($stream==null){
+        array_push($error_log, "Output stream is not defined");
+    }else{
+        rewind($stream);
+        $out = stream_get_contents($stream);
+        fclose($stream);
+    }
+
+    if($out===false || strlen($out)==0){
+        array_push($error_log, "Output stream is empty");
+        $out = array('error'=>$error_log );
+    }
+    $error_log = array();
+*/
+ 
+    if(@$params['file']!=1){
+        //printout
+        if(@$params['zip']==1){
+            ob_start(); 
+            echo $out;
+            $output = gzencode(ob_get_contents(),6); 
+            ob_end_clean(); 
+            header('Content-Encoding: gzip');
+            header('Content-type: '.$mimetype.';charset=UTF-8');
+            echo $output; 
+            unset($output);   
+        }else{
+            header('Content-type: '.$mimetype.';charset=UTF-8');
+            echo $out;
+        }
+        unset($out);
+        
+    }else{ 
+        //as file
+        $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.$params['format'];
+        
+        if(@$params['zip']==1){
+            //as zip file
+            $zipname = 'Export_'.$system->dbname().'_'.date("YmdHis").'.zip';
+            $destination = tempnam("tmp", "zip");
+            
+            $zip = new ZipArchive();
+            if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
+                array_push($error_log, "Cannot create zip $destination");    
+            }else{
+                // add the in-memory file to the archive, giving a name
+                $zip->addFromString($filename,  $out);
+                $zip->close();
+                if(@file_exists($destination)>0){
+                    header('Content-Type: application/zip');
+                    header('Content-disposition: attachment; filename='.$zipname);
+                    header('Content-Length: ' . filesize($destination));
+                    readfile($destination);
+                    // remove the zip archive
+                    unlink($destination);    
+                }else{
+                    array_push($error_log, "Zip archive ".$destination." doesn't exist");
+                }
+            }
+            if(count($error_log)>0){
+               //can't create zip archive 
+               $out = implode(PHP_EOL, $error_log);
+               header('Content-Type: text/csv');
+               header('Content-disposition: attachment; filename=log.txt');
+               header('Content-Length: ' . strlen($out));
+               exit($out);
+            }
+            
+        }else{
+            //without compress
+            header('Content-Type: '.$mimetype);
+            header('Content-disposition: attachment; filename='.$filename);
+            header('Content-Length: ' . strlen($out));
+            exit($out);        
+        }
+    }
+    
+}
 
 /*
 $data    array('status'=>HEURIST_OK,
@@ -131,7 +232,7 @@ for constrained resourse fields we use "dt#:rt#"
                                
 NOTE: fastest way it simple concatenation in comparison to fputcsv and implode. We use fputcsv
 */
-function outputXML($system, $data, $params){
+function output_CSV($system, $data, $params){
     
     if (!($data && @$data['status']==HEURIST_OK)){
         print print_r($data, true); //print out error array
@@ -626,5 +727,182 @@ function outputXML($system, $data, $params){
 
 }
 
+//
+// output records as json or xml 
+//
+// $parmas 
+//    format - json|xml
+//    defs  0|1  include database definitions
+//    file  0|1
+//    zip   0|1
+//
+// @todo if output if file and zip - output datatabase,defintions and records as separate files
+//      split records by 1000 entries chunks
+//
+function output_Records($system, $data, $params){
     
+    if (!($data && @$data['status']==HEURIST_OK)){
+        print print_r($data, true); //print out error array
+        return;
+    }
+
+    $data = $data['data'];
+    
+    if(!(@$data['reccount']>0)){
+        $records = array();
+    }else{
+        $records = $data['records'];
+    }
+    
+    $records_out = array(); //ids already out
+    $rt_counts = array(); //counts of records by record type
+    
+    $error_log = array();
+    $error_log[] = 'Total rec count '.count($records);
+
+    $tmp_destination = tempnam("tmp", "exp");    
+    //$fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
+    $fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
+    if (false === $fd) {
+        die('Failed to create temporary file');
+    }   
+    
+    if($params['format']=='json'){
+        fwrite($fd, '{"heurist":[{"records":[');         
+    }else{
+        fwrite($fd, '<?xml version="1.0" encoding="UTF-8"?><heurist><records>');     
+    }
+    
+    $comma = '';
+    
+    $idx = 0;
+    while ($idx<count($records)){ //replace to WHILE
+    
+        $recID = $records[$idx];
+        $idx++;
+        $record = recordSearchByID($system, $recID, true);
+        
+        $rty_ID = $record['rec_RecTypeID'];
+        
+        if(!@$rt_counts[$rty_ID]){
+            $rt_counts[$rty_ID] = 1;
+        }else{
+            $rt_counts[$rty_ID]++;
+        }
+        
+        if($params['format']=='json'){
+            fwrite($fd, $comma.json_encode($record));
+            $comma = ',';
+        }else{
+            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><record/>');
+            array_to_xml($record, $xml);
+            //array_walk_recursive($record, array ($xml , 'addChild'));
+            fwrite($fd, substr($xml->asXML(),38));
+        }
+    }//while records
+    
+    if($params['format']=='json'){
+        fwrite($fd, ']}');     
+    }else{
+        fwrite($fd, '</records>');     
+    }
+    
+    // include defintions
+    if(@$params['defs']==1){
+        
+        $rectypes = dbs_GetRectypeStructures($system, null, 2);
+        $detailtypes = dbs_GetDetailTypes($system, null, 2);
+        $terms = dbs_GetTerms($system);
+        
+        unset($rectypes['names']);
+        unset($rectypes['pluralNames']);
+        unset($rectypes['groups']);
+        unset($rectypes['dtDisplayOrder']);
+        
+        unset($detailtypes['names']);
+        unset($detailtypes['groups']);
+        unset($detailtypes['rectypeUsage']);
+
+        $rectypes = array('rectypes'=>$rectypes);
+        $detailtypes = array('detailtypes'=>$detailtypes);
+        $terms = array('terms'=>$terms);
+        
+        if($params['format']=='json'){
+            fwrite($fd, ',{"definitions":['); 
+            fwrite($fd, json_encode($rectypes).',');
+            fwrite($fd, json_encode($detailtypes).',');
+            fwrite($fd, json_encode($terms));
+            fwrite($fd, ']}'); 
+        }else{
+            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><definitions/>');
+            array_to_xml($rectypes, $xml);
+            array_to_xml($detailtypes, $xml);
+            array_to_xml($terms, $xml);
+            fwrite($fd, substr($xml->asXML(),38));
+        }
+    }
+    
+    //add database information to be able to load definitions later
+    $dbID = $system->get_system('sys_dbRegisteredID');
+    $database_info = array('id'=>$dbID, 
+                                        'url'=>HEURIST_BASE_URL, 
+                                        'db'=>$system->dbname());
+        
+    $query = 'select rty_ID,rty_Name,'
+    ."if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID"
+    .' from defRecTypes where rty_ID in ('.implode(',',array_keys($rt_counts)).')';    
+    $rectypes = mysql__select_all($system->get_mysqli(),$query,1);    
+        
+    foreach($rt_counts as $rtid => $cnt){
+        $rt_counts[$rtid] = array('name'=>$rectypes[$rtid][0],'code'=>$rectypes[$rtid][1],'count'=>$cnt);
+    }
+    $database_info['rectypes'] = $rt_counts;
+    
+    if($params['format']=='json'){
+        fwrite($fd, ',{"database":'.json_encode($database_info));
+        fwrite($fd, ']}');     
+    }else{
+        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
+        array_to_xml($database_info, $xml);
+        fwrite($fd, substr($xml->asXML(),38));
+        fwrite($fd, '</heurist>');     
+    }
+ 
+    if($params['zip']==1){
+        
+    }else{
+ 
+        //rewind($fd);   
+        //@todo read and output chunk
+        //$content = stream_get_contents($fd);
+        $content = file_get_contents($tmp_destination);
+        fclose($fd);
+        
+        if($params['format']=='json'){
+            header( 'Content-Type: application/json');    
+        }else{
+            header( 'Content-Type: text/xml');
+        }
+        exit($content);
+    }
+    unlink($tmp_destination);
+    
+}
+
+//
+//
+//
+function array_to_xml( $data, &$xml_data ) {
+    foreach( $data as $key => $value ) {
+        if( is_numeric($key) ){
+            $key = 'item'.$key; //dealing with <0/>..<n/> issues
+        }
+        if( is_array($value) ) {
+            $subnode = $xml_data->addChild($key);
+            array_to_xml($value, $subnode);
+        } else {
+            $xml_data->addChild("$key",htmlspecialchars("$value"));
+        }
+     }
+}
 ?>

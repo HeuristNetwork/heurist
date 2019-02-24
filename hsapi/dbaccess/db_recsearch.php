@@ -1151,7 +1151,7 @@
             $fin_result['data']['mainset'] = $flat_rules[0]['results'];
 
             return $fin_result;
-        }//END RULES
+        }//END RULES ------------------------------------------
 
         $search_detail_limit = PHP_INT_MAX;
 
@@ -1204,7 +1204,8 @@
 
         }
   
-//error_log($query);
+//
+//if($is_ids_only && $system->dbname()=='ExpertNation') error_log($query);
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -1754,6 +1755,18 @@ $loop_cnt++;
     //
     // load details for given record plus id,type and title for linked records
     //    
+    /*
+    
+    details
+        dty_ID 
+            dtl_ID=>value
+            
+       value 
+       for file  file=>ulf_ID, fileid=>ulf_ObfuscatedFileID   
+       for resource id=>rec_ID, type=>rec_RecTypeID, title=>rec_Title
+       for geo   geo => array(type=> , wkt=> )
+    
+    */
     function recordSearchDetails($system, &$record, $need_details) {
 
         $recID = $record["rec_ID"];

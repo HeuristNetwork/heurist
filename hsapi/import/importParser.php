@@ -48,7 +48,7 @@ private static function initialize()
 *
 *  returns  array( "filename"=> temp file name );
 */
-public static function saveToTempFile($content){
+public static function saveToTempFile($content, $extension='csv'){
     
     self::initialize();
 
@@ -77,7 +77,7 @@ public static function saveToTempFile($content){
         return false;
     }
 
-    $upload_file_name = tempnam(HEURIST_SCRATCH_DIR, 'csv');
+    $upload_file_name = tempnam(HEURIST_SCRATCH_DIR, $extension);
 
     $res = file_put_contents($upload_file_name, trim($content));
     unset($content);
@@ -90,7 +90,7 @@ public static function saveToTempFile($content){
     //$extension = strtolower(pathinfo($upload_file_name, PATHINFO_EXTENSION));
     //, 'isKML'=>($extension=='kml') 
     
-    return array( 'filename'=>$path_parts['basename']);
+    return array( 'filename'=>$path_parts['basename'], 'fullpath'=>$upload_file_name);
 }
 
 //--------------------------------------

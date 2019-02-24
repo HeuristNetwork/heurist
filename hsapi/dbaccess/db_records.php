@@ -76,12 +76,20 @@
                 $userDefaultAccessGroups = $addRecDefaults[4];
             }
         }
-
-
+        
         $mysqli = $system->get_mysqli();
         $sysvals = $system->get_system();
 
         if($record){
+            
+            //it is allowed with prefix rec_ and without
+            foreach ($record as $key=>$val){
+                if(strpos($key,'rec_')===0){
+                    $record[substr($key,4)] = $val;
+                    unset($record[$key]);
+                }
+            }
+            
             $rectype = @$record['RecTypeID'];
             $access = @$record['NonOwnerVisibility'];
             $access_grps = @$record['NonOwnerVisibilityGroups'];
@@ -258,6 +266,14 @@
         }
 
         $mysqli = $system->get_mysqli();
+        
+        //it is allowed with prefix rec_ and without
+        foreach ($record as $key=>$val){
+            if(strpos($key,'rec_')===0){
+                $record[substr($key,4)] = $val;
+                unset($record[$key]);
+            }
+        }        
 
         //0 normal, 1 import, 2 - faims or zotero import (add without recstructure check)
         $modeImport = @$record['AddedByImport']?intval($record['AddedByImport']):0;
@@ -288,7 +304,7 @@
         $system->defineConstant('RT_RELATION');
         $system->defineConstant('DT_PARENT_ENTITY');
             
-        $is_insert = ($recID<1);
+        $is_insert = ($recID<1);   
 
         if($is_insert){   // ADD NEW RECORD
 
