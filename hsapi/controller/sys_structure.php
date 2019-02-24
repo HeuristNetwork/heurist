@@ -52,10 +52,9 @@
                 if (@$_REQUEST['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$_REQUEST['rectypes'];
                 if (@$_REQUEST['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$_REQUEST['detailtypes'];
                 if (@$_REQUEST['mode']) $remoteURL = $remoteURL.'&mode='.$_REQUEST['mode'];
-                                                                    
+
                 $data = loadRemoteURLContent($remoteURL);            
             
-                $data = loadRemoteURLContent($reg_url);            
                 if($data==false){
                     //$system->addError(HEURIST_ERROR,  );
                     $data = array("status"=>HEURIST_ERROR, "message"=>'Cannot access database structure for database '

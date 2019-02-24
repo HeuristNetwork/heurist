@@ -443,7 +443,7 @@ $.widget( "heurist.importStructure", {
             
             //TEMP replace all folders to h5-ao to get correct output
             if(sURL.indexOf('http://heurist.sydney.edu.au/')==0 || sURL.indexOf('https://heuristplus.sydney.edu.au/')==0){
-                sURL = 'https://heuristplus.sydney.edu.au/heurist/h5-ao/'    
+                sURL = 'https://heuristplus.sydney.edu.au/heurist/'    
             }
             
             
