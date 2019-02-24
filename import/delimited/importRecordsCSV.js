@@ -520,7 +520,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 $('#sa_primary_rectype').val(imp_session['primary_rectype']);
             }
             
-            //apply selection of primary and dependent reccord types
+            //apply selection of primary and dependent record types
             buttons[window.hWin.HR('OK')]  = function() {
                 _is_CancelClose = false;    
                 $dlg.dialog( "close" );
@@ -556,7 +556,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             }
                         }
                     }else{
-                        var fname = _getColumnNameForPresetIndex(recTypeID);
+                        var fname = _getColumnNameForPresetIndex(recTypeID);//AAA
                         sequence.push({field: fname, rectype:recTypeID, 
                                 hierarchy:$(rectypes[i]).attr('data-tree') });    
                     }
@@ -570,7 +570,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     sequence.push({field:fname, rectype:recTypeID, hierarchy:recTypeID});    
                 }
                          
-                //comapre  current and new sequences
+                //compare current and new sequences
                 var isSomethingChanged = ($('#sa_primary_rectype').val()!=imp_session['primary_rectype'])
                             || (!imp_session['sequence'] || imp_session['sequence'].length!=sequence.length);
                 

@@ -24,6 +24,9 @@
     
     /*
     get_php_bytes
+    redirectToRemoteServer - redirect request to remove heurist server
+    
+    ----
     
     folderExists
     folderCreate
@@ -89,6 +92,16 @@
             $val += 2.0 * (PHP_INT_MAX + 1);
         }
         return $val;
+    }
+    
+    // @todo
+    // redirect request to remote heurist server 
+    //
+    function redirectToRemoteServer( $request ){
+       /* 
+       preg_match("/db=([^&]*).*$/", $url, $match);
+       return $match[1]         
+       */
     }
     
     // 1 - OK

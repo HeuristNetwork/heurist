@@ -36,7 +36,7 @@ require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
 $system->defineConstants();
 
 $dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
-if($dt_SourceRecordID==0){
+if($dt_SourceRecordID==0){ //this field is critical - need to download it from heurist core defintions database
     
     $isOK = false;
     $importDef = new DbsImport( $system );
