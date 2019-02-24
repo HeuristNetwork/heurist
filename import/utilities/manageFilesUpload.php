@@ -71,14 +71,14 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 var ele = $('.fileinput-button > input');
                 if(ele.prop('webkitdirectory')){
                     ele.removeProp('webkitdirectory');
-                    ele.prop('onchage',null);                    
+                    //ele.prop('onchage',null);                    
                 }else{
                     ele.prop('webkitdirectory',true);
-                    ele.onchange = function(e) {
+                    /*ele.onchange = function(e) {
                           var files = e.target.files; // FileList
                           for (var i = 0, f; f = files[i]; ++i)
                             console.log(files[i].webkitRelativePath);
-                    }
+                    }*/
                 }
             }
         </script>
@@ -254,7 +254,10 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
             <div class="fileupload-buttonbar" style="display:<?php print $is_dir_found?'block':'none';?>">
                 <label><input type="checkbox" onchange="setUploadEntireFolder()">
                     Upload directory and keep its structure on server side
-                </label><br><br>
+                </label>
+                <label style="font-size:smaller;font-style:italic"> (If you want to maintain the directory structure, you must use Chrome or FireFox browser)</label>
+                <br>
+                <br>
                 <div class="fileupload-buttons">
                     <!-- The fileinput-button span is used to style the file input field as button -->
                     <span class="fileinput-button">
@@ -305,7 +308,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 </td>
                 <td>
                 <p class="name">{%=file.name%}</p>
-                <p class="folder">{%=file.webkitRelativePath%}</p>
+                <!-- p class="folder">{%=file.webkitRelativePath%}</p -->
                 <strong class="error"></strong>
                 </td>
                 <td>

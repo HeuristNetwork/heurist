@@ -119,8 +119,10 @@ if(!$system->init(@$_REQUEST['db'])){
                     //record type will be replaced with new correspondent record type
                     $defs_correspondence = $importDef->getCorrespondences();
                     
+                    $imp_rectypes = @$data['heurist']['database']['rectypes'];
+                    
                     // replace recordtypes and terms with new ids 
-                    $response = recordSave($system, $_REQUEST);
+                    $response = recordSave($system, $record);
                     
                 }
             }
