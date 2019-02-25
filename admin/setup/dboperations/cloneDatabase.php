@@ -396,7 +396,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     //print "<p>".$sourceRegID."</p>";
     // RESET register db ID and zotero credentials
-    $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders='', sys_eMailImapProtocol='', sys_eMailImapUsername='', sys_dbRights='', sys_NewRecOwnerGrpID=0 where 1";
+    $query1 = "update sysIdentification set sys_dbRegisteredID=0, sys_hmlOutputDirectory=null, sys_htmlOutputDirectory=null, sys_SyncDefsWithDB=null, sys_MediaFolders='uploaded_files', sys_eMailImapProtocol='', sys_eMailImapUsername='', sys_dbRights='', sys_NewRecOwnerGrpID=0 where 1";
     $res1 = $mysqli->query($query1);
     if ($mysqli->error)  { //(mysql_num_rows($res1) == 0)
         print "<p><h4>Warning</h4><b>Unable to reset sys_dbRegisteredID in sysIdentification table. (".$mysqli->error.

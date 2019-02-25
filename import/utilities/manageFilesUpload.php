@@ -107,8 +107,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 // Find out which folders are allowable - the default scratch space plus any
                 // specified for FieldHelper indexing in Advanced Properties
                 $mediaFolders = $system->get_system('sys_MediaFolders');
-                if(!$mediaFolders){
-                    $mediaFolders = '';
+                if($mediaFolders==null || $mediaFolders == ''){
+                    $mediaFolders = HEURIST_FILESTORE_DIR.'uploaded_files/';
+                    folderCreate( $mediaFolders, true );
                 }
                 $mediaExts = $system->get_system('sys_MediaExtensions');
                 if(!$mediaExts) $mediaExts = '';

@@ -21,8 +21,9 @@ function getMediaFolders($mysqli) {
     // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories
     $mediaFolders = $row1[0];
     
-    if($mediaFolders==null || $mediaFolders==''){
-        $mediaFolders = HEURIST_FILESTORE_DIR;
+    if($mediaFolders==null || $mediaFolders == ''){
+        $mediaFolders = HEURIST_FILESTORE_DIR.'uploaded_files/';
+        folderCreate( $mediaFolders, true );
     }
     $dirs = explode(';', $mediaFolders); // get an array of folders
 

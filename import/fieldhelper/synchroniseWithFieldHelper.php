@@ -179,7 +179,8 @@ $system_folders = $system->getSystemFolders();
                 $mediaExts = $system->get_system('sys_MediaExtensions');
                 
                 if($mediaFolders==null || $mediaFolders==''){
-                    $mediaFolders = HEURIST_FILESTORE_DIR;
+                    $mediaFolders = HEURIST_FILESTORE_DIR.'uploaded_files/';
+                    folderCreate( $mediaFolders, true );
                 }
                 $dirs = explode(';', $mediaFolders); // get an array of folders
 
