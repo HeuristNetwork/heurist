@@ -1,7 +1,7 @@
 #! /bin/sh
 
 # If you get 'file not found' when you try to run this script, it is due to the file being converted to DoS format (ctrl-M line endings)
-# Use dos2unix copy_distribution_files.sh to fix
+# Use dos2unix copy_distribution_files.sh to fix.
 
 # copy_distribution_files.sh: Creates a distribution package in h4-build from a Heurist working directory
 # This file is intended for internal use of the development team and should normally be deleted from the install package.
@@ -32,7 +32,7 @@ if [ -z $1 ]
 # Make sure the current directory is the up-to-date version you want to package.
 # The script is set up for the HeuristScholar server and may require modification for other directory layouts
 
-# RUN THIS FILE FROM AN h4-xx DIRECTORY CONTAINING DESIRED HEURIST CODE
+# RUN THIS FILE FROM AN h5-xx DIRECTORY CONTAINING DESIRED HEURIST CODE
 
 # Creates h4-build directory in /var/www/html/HEURIST
 
@@ -113,10 +113,11 @@ dos2unix update_heurist.sh
 zip -j /var/www/html/HEURIST/DISTRIBUTION/verifyInstallation.zip admin/verification/verifyInstallation.php
 
 echo
-echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external, external_h4, and help
+echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external, external_h4, vendor, and help
  cd /var/www/html/HEURIST/HEURIST_SUPPORT
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h4/
+tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ vendor/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
 
 chown -R apache:apache /var/www/html/HEURIST/DISTRIBUTION
