@@ -7,7 +7,7 @@
 # @copyright   (C) 2005-2019 University of Sydney
 # @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-# @version     4.0
+# @version     5.0
 
 # Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
@@ -72,10 +72,19 @@ $2 curl -O# http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/ex
 $2 tar -xjf external_h4.tar.bz2
 $2 rm -f external_h4.tar.bz2
 
+$2 rm -f vendor.tar.bz2
+$2 curl -O# http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
+$2 tar -xjf vendor.tar.bz2
+$2 rm -f vendor.tar.bz2
+
 $2 rm -f help.tar.bz2
 $2 curl -O# http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
 $2 tar -xjf help.tar.bz2
 $2 rm -f help.tar.bz2
+
+# Add vendor directory which is new in 5.1.x
+cd /var/www/html/HEURIST/$1
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/vendor
 
 # No longer used
 $2 rm -f exemplars.tar.bz2

@@ -26,11 +26,11 @@ echo
 if [ -z $1 ]
    then
       echo -e "\n\n"
-      echo "Please supply version eg. h4.x.x.alpha (this MUST exist as a tar.bz2 file "
+      echo "Please supply version eg. h5.x.x.alpha (this MUST exist as a tar.bz2 file "
       echo "on Heurist.sydney.edu.au/HEURIST/DISTRIBUTION or script will not download the Heurist code package)."
       echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
       echo
-      echo "       ./install_heurist.sh h4.0.0.beta sudo"
+      echo "       ./install_heurist.sh h5.0.0.beta sudo"
       exit
    fi
 
@@ -43,7 +43,7 @@ if [ $rc -ne 0 ]
         echo -e "\n\n"
         echo "The version parameter you supplied does not point to a Heurist installation package"
         echo "Please check for the latest version at http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION"
-        echo "The parameter should be eg. h4.2.1.beta as given - DO NOT include the url path or .tar.bz2"
+        echo "The parameter should be eg. h5.2.1.beta as given - DO NOT include the url path or .tar.bz2"
         exit
      fi
 
@@ -79,7 +79,7 @@ $2 wget http://heurist.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
 $2 rm -f $1.tar.bz2
 
-# this will fail if h4.x.x.xxx already exists, use update script in this case
+# this will fail if hx.x.x.xxx already exists, use update script in this case
 $2 mkdir /var/www/html/HEURIST/$1
 $2 cp -R $1/* /var/www/html/HEURIST/$1/
 $2 rm -rf $1
@@ -104,7 +104,7 @@ $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/vendor vendor
 
-# simlink in web root to this version of h4
+# simlink in web root to this version of heurist
 cd /var/www/html
 $2 ln -s /var/www/html/HEURIST/$1 $1
 
@@ -130,29 +130,36 @@ $2 chown -R www-data:www-data /var/www/html/HEURIST/
 $2 chmod -R 775  /var/www/html/HEURIST/
 $2 chmod -R 775  /var/www/html/HEURIST/HEURIST_FILESTORE/
 
-# Simlink codebase as both heurist and h4 from the root web directory
-# h4 goes to index.php, heurist goes to the index.html switchboard
+# Simlink codebase as heurist from the root web directory
+# heurist goes to index.php, nothing goes to the index.html switchboard
+
 cd /var/www/html
 $2 rm h4
+$2 rm h5
 $2 rm heurist
-$2 ln -s /var/www/html/HEURIST/$1 h4
-$2 ln -s /var/www/html/HEURIST/index.html heurist
+$2 rm heurist_switchboard
+$2 ln -s /var/www/html/HEURIST/$1 heurist
+$2 ln -s /var/www/html/HEURIST/$1 heurist_switchboard
 
 cd /var/www/html/HEURIST
-$2 ln -s /var/www/html/HEURIST/$1 h4
+$2 rm h4
+$2 rm h5
+$2 rm heurist
+$2 ln -s /var/www/html/HEURIST/$1 heurist
 
 # ------------------------------------------------------------------------------------------
 
 echo -e "\n\n\n\n\n\n"
 
-echo "---- Heurist Vsn 4 installed in /var/www/html/HEURIST/h4 -------------------------------------------"
+echo "---- Heurist installed in /var/www/html/HEURIST/heurist -------------------------------------------"
 echo
 echo "There is normally limited space on /var/www, so you may wish to move HEURIST_FILESTORE from"
 echo "its current location - /var/www/html/HEURIST/HEURIST_FILESTORE - to a location with plenty "
 echo "of space allocated, such as /srv or /data, and add a simlink to this location in /var/www/html/HEURIST "
 echo
-echo "Heurist switchboard will be accessible at http://serveraddress/heurist or http://serveraddress/HEURIST/index.html"
-echo "Heurist Vsn 4 will be accessible at http://serveraddress/h4 or http://serveraddress/HEURIST/h4"
+echo "Heurist program is accessible at http://serveraddress/heurist"
+echo "Heurist switchboard is accessible at http://serveraddress/HEURIST or http://serveraddress/heurist_switchboard"
+echo "Replace http with https where appropriate"
 echo
 echo "CONFIGURATION:"
 echo
@@ -162,5 +169,5 @@ echo "You can do this by pasting the following at the command line - you may nee
 echo
 echo "           sudo nano /var/www/html/HEURIST/heuristConfigIni.php"
 echo
-echo "Then run Heurist by navigating to Heurist on your web site at http://serveraddress/heurist for switchboard or http://serveraddress/heurist for direct access to databases"
+echo "Then run Heurist by navigating to Heurist on your web site at http://serveraddress/heurist_switchboard for switchboard or http://serveraddress/heurist for direct access to databases"
 echo
