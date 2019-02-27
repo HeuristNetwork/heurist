@@ -109,7 +109,7 @@ if($newid>0){
     if(!(strpos($serverURL, 'https://heuristplus.sydney.edu.au')===0
         || strpos($serverURL, 'http://heurist.sydney.edu.au')===0)){ 
     
-        echo '0,It is possible to assign arbitrary ID for databases on heursit servers only';
+        echo '0,It is possible to assign arbitrary ID for databases on heurist servers only';
         return;
     }
     

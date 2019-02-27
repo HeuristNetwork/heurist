@@ -277,7 +277,7 @@ function makeNewTimeoutFunction(center, zoomIn) {
 function load() {
 	if (! HCurrentUser.isLoggedIn()) {
 		alert("You are not logged in to Heurist.\nRedirecting you now ...");
-		location.replace("http://Heurist.sydney.edu.au/heurist/php/login.php?last_uri=" + encodeURIComponent(location.href));
+		location.replace("https://heuristplus.sydney.edu.au/heurist/php/login.php?last_uri=" + encodeURIComponent(location.href));
 	}
 	else if (! HCurrentUser.isInWorkgroup(HWorkgroupManager.getWorkgroupById(19))) {
 		alert("You are not in the EUProject workgroup.\nSome records may not be visible to you.");
@@ -377,8 +377,8 @@ function chooseRecord(record, dontAlterStack) {
 	document.getElementById("loading-div").style.display = "block";
 
 	crt.appendChild(document.createTextNode(record.getTitle()));
-	crl.href = "http://Heurist.sydney.edu.au/heurist-test/edit?bib_id=" + record.getID();
-	cri.src = "http://Heurist.sydney.edu.au/heurist-test/img/reftype/" + (record.getRecordType().getID() || "questionmark") + ".gif";
+	crl.href = "https://heuristplus.sydney.edu.au/heurist-test/edit?bib_id=" + record.getID();
+	cri.src = "https://heuristplus.sydney.edu.au/heurist-test/img/reftype/" + (record.getRecordType().getID() || "questionmark") + ".gif";
 	cri.style.display = "";
 	cri.style.verticalAlign = "baseline";
 
@@ -511,10 +511,10 @@ function addRelatedRecordLink(rrList, record) {
 
 	var newA1 = newTd1.appendChild(document.createElement("a"));
 	newA1.title = "View resource details";
-	newA1.href = "http://Heurist.sydney.edu.au/heurist-test/legacy/view.php?bib_id=" + record.getID();
+	newA1.href = "https://heuristplus.sydney.edu.au/heurist-test/legacy/view.php?bib_id=" + record.getID();
 
 	var newImg = newA1.appendChild(document.createElement("img"));
-	newImg.src = "http://Heurist.sydney.edu.au/heurist-test/img/reftype/" + (record.getRecordType().getID() || "questionmark") + ".gif";
+	newImg.src = "https://heuristplus.sydney.edu.au/heurist-test/img/reftype/" + (record.getRecordType().getID() || "questionmark") + ".gif";
 	newImg.className = "icon";
 
 	var newA2 = newTd2.appendChild(document.createElement("a"));
@@ -551,8 +551,8 @@ var markers = [];
 var lines = [];
 var iconsByRecordType = {};
 var baseIcon = new GIcon();
-    baseIcon.image = "http://Heurist.sydney.edu.au/heurist/img/circle.png";
-    baseIcon.shadow = "http://Heurist.sydney.edu.au/heurist/img/circle-shadow.png";
+    baseIcon.image = "https://heuristplus.sydney.edu.au/heurist/img/circle.png";
+    baseIcon.shadow = "https://heuristplus.sydney.edu.au/heurist/img/circle-shadow.png";
     baseIcon.iconAnchor = new GPoint(13, 13);
     baseIcon.infoWindowAnchor = new GPoint(13, 13);
     baseIcon.iconSize = new GSize(26, 26);
@@ -605,7 +605,7 @@ function plotMap() {
 		recordType = records[j].getRecordType().getID();
 		if (! iconsByRecordType[recordType]) {
 			iconsByRecordType[recordType] = new GIcon(baseIcon);
-			iconsByRecordType[recordType].image = "http://Heurist.sydney.edu.au/heurist/img/reftype-png/" + recordType + ".png";
+			iconsByRecordType[recordType].image = "https://heuristplus.sydney.edu.au/heurist/img/reftype-png/" + recordType + ".png";
 		}
 		if (! records[j].locations) { continue; }
 		for (k=0; k < records[j].locations.length; ++k) {
@@ -619,7 +619,7 @@ function plotMap() {
 	recordType = chosenRecord.getRecordType().getID();
 	if (! iconsByRecordType[recordType]) {
 		iconsByRecordType[recordType] = new GIcon(baseIcon);
-		iconsByRecordType[recordType].image = "http://Heurist.sydney.edu.au/heurist/img/reftype-png/" + recordType + ".png";
+		iconsByRecordType[recordType].image = "https://heuristplus.sydney.edu.au/heurist/img/reftype-png/" + recordType + ".png";
 	}
 
 	for (i=0; i < chosenRecord.locations.length; ++i) {

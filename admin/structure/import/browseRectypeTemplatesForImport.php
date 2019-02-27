@@ -55,7 +55,7 @@
             function receiveMessage(event)
             {
                 var message;
-                if (event.origin !== "http://Heurist.sydney.edu.au"){
+                if (event.origin !== "https://Heuristplus.sydney.edu.au"){
                 //if (false) {
                     message = 'Your server ("' + event.origin + '") is not authorised';
                 } else {

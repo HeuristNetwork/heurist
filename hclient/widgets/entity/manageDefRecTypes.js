@@ -35,7 +35,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     _init: function() {
         
         //define it to load recordtypes from other server/database - if defined it allows selection only
-        if(this.options.import_structure){ //for example http://heurist.sydney.edu.au/heurist/?db=Heurist_Reference_Set
+        if(this.options.import_structure){ //for example https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Reference_Set
             if(this.options.select_mode=='manager') this.options.select_mode='select_single';
             this.options.use_cache = true;
             this.options.use_structure = true;    

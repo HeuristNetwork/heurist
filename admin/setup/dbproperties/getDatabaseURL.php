@@ -26,85 +26,82 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-    require_once(dirname(__FILE__)."/../../../hsapi/System.php");
+require_once(dirname(__FILE__)."/../../../hsapi/System.php");
 
-    $isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false);
-    if($isOutSideRequest){ //this is request from outside - redirect to master index    
+$isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false);
+if($isOutSideRequest){ //this is request from outside - redirect to master index    
 
-        $reg_url =   HEURIST_INDEX_BASE_URL 
-                .'admin/setup/dbproperties/getDatabaseURL.php?db='.HEURIST_INDEX_DATABASE
-                .'&remote=1&id='.$database_id;
+    $reg_url =   HEURIST_INDEX_BASE_URL 
+    .'admin/setup/dbproperties/getDatabaseURL.php?db='.HEURIST_INDEX_DATABASE
+    .'&remote=1&id='.$database_id;
 
-        $data = loadRemoteURLContentSpecial($reg_url);
+    $data = loadRemoteURLContentSpecial($reg_url);
 
-        if (!$data) {
-            $error_msg = "Unable to contact Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".
-                "URL requested: ".$reg_url;
-        }else{
-
-            $data = json_decode($data, true);
-
-            // Artem TODO: What circumstance would give rise to this? Explain how the data is 'wrong'/'incorrect'
-            // Artem: cannot connect to Heurist_Master_Index, Records table is corrupted, $database_id is not found 
-            if(@$data['error_msg']){
-                $error_msg = $data['error_msg'];
-            }else if(!@$data['rec_URL']){
-                $error_msg = "Heurist Master Index returns incorrect data for registered database # ".$database_id.
-                    " The page may contain an invalid database reference (0 indicates no reference has been set)";
-            }else{
-                $database_url = __replaceToLastServe($data['rec_URL']);
-            }
-        }
-       
+    if (!$data) {
+        $error_msg = "Unable to contact Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".
+        "URL requested: ".$reg_url;
     }else{
-        //on this server
-        
-        $system2 = new System();
-        $system2->init('hdb_Heurist_Master_Index', true, false); //init without paths and consts
 
-        if(@$_REQUEST['remote']){ 
-            $database_id = @$_REQUEST["id"];   
-        }
-        $rec = array();
-        if($database_id>0){
+        $data = json_decode($data, true);
 
-            $rec = mysql__select_row_assoc($system2->get_mysqli(),
-                                        'select rec_Title, rec_URL from Records where rec_RecTypeID=22 and rec_ID='
-                                        .$database_id);
-            if ($rec!=null){
-                $database_url = __replaceToLastServe(@$rec['rec_URL']);
-                if($database_url==null || $database_url==''){
-                    $error_msg = 'Database URL is not set Heurist Master Index for database ID#'.$database_id;
-                }
-            }else{
-                $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Master Index';
-            }
+        // Artem TODO: What circumstance would give rise to this? Explain how the data is 'wrong'/'incorrect'
+        // Artem: cannot connect to Heurist_Master_Index, Records table is corrupted, $database_id is not found 
+        if(@$data['error_msg']){
+            $error_msg = $data['error_msg'];
+        }else if(!@$data['rec_URL']){
+            $error_msg = "Heurist Master Index returns incorrect data for registered database # ".$database_id.
+            " The page may contain an invalid database reference (0 indicates no reference has been set)";
         }else{
-            $error_msg = 'Database ID is not set or invalid. It must be an interger positive value.';    
-        }
-        
-        if(@$_REQUEST['remote']) {
-            header('Content-type: text/javascript');
-            
-            if(isset($error_msg)){
-                $res = array('error_msg'=>$error_msg);    
-            }else{
-                $res = array('rec_URL'=>$database_url);    
-            }
-            print json_encode($res);
+            $database_url = __replaceToLastServe($data['rec_URL']);
         }
     }
 
-// Artem: FOR heurist.sydney.edu.au change to latest h4-ao. 14/4/18 Ian changed to "heurist" since the changes requiring this URL redirect are long since past. Almost certainly no longer necessary.
+}else{
+    //on this server
+
+    $system2 = new System();
+    $system2->init('hdb_Heurist_Master_Index', true, false); //init without paths and consts
+
+    if(@$_REQUEST['remote']){ 
+        $database_id = @$_REQUEST["id"];   
+    }
+    $rec = array();
+    if($database_id>0){
+
+        $rec = mysql__select_row_assoc($system2->get_mysqli(),
+            'select rec_Title, rec_URL from Records where rec_RecTypeID=22 and rec_ID='
+            .$database_id);
+        if ($rec!=null){
+            $database_url = __replaceToLastServe(@$rec['rec_URL']);
+            if($database_url==null || $database_url==''){
+                $error_msg = 'Database URL is not set Heurist Master Index for database ID#'.$database_id;
+            }
+        }else{
+            $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Master Index';
+        }
+    }else{
+        $error_msg = 'Database ID is not set or invalid. It must be an interger positive value.';    
+    }
+
+    if(@$_REQUEST['remote']) {
+        header('Content-type: text/javascript');
+
+        if(isset($error_msg)){
+            $res = array('error_msg'=>$error_msg);    
+        }else{
+            $res = array('rec_URL'=>$database_url);    
+        }
+        print json_encode($res);
+    }
+}
+
+// Feb 2019: Redirect old calls to new server/address.
 function __replaceToLastServe($url){
     if($url!=null){
-    if(strpos($url, 'heurist.sydney.edu.au/h3/')>0){
-        $url = str_replace( 'heurist.sydney.edu.au/h3/', 'heurist.sydney.edu.au/heurist/', $url);
-    }
-    if(strpos($url, 'http://heurist.sydney.edu.au/heurist/')!==false){
-        $url = str_replace( 'http://heurist.sydney.edu.au/heurist/', 'https://heuristplus.sydney.edu.au/heurist/', $url);
-    }
-    }
+        if(strpos($url, 'http://heurist.sydney.edu.au')>0){
+            $url = str_replace( 'http://heurist.sydney.edu.au', 'https://heuristplus.sydney.edu.au', $url);
+        }
+     }
     return $url;
 }
 ?>

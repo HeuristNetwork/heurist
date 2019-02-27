@@ -36,7 +36,7 @@ function getInstallationDirectory2($scriptName){
     // a pipe delimited list of the top level directories in the heurist code base root. Only change if new ones are added.
     $topDirs = "admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external";
 
-    // calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
+    // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
     $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", $scriptName); // remove "/top level dir" and everything that follows it.
     
     if ($installDir == $scriptName) { // no top directories in this URI must be a root level script file or blank
@@ -65,7 +65,7 @@ function loadRemoteURLContentSpecial($url){
         $parsed = parse_url($url);
         $installDir = getInstallationDirectory2($parsed['path']);
         
-        //replace http://heurist.sydney.edu.au/h4/ to script path in current installation folder
+        //replace https://heuristplus.sydney.edu.au/h5/ to script path in current installation folder
         $path = str_replace(HEURIST_SERVER_URL.$installDir, HEURIST_DIR, $url);
 
         //$documentRoot = @$_SERVER["DOCUMENT_ROOT"];

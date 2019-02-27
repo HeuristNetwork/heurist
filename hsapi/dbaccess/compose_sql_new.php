@@ -202,12 +202,12 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
 }
 
-//http://heurist.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"t":3}
-//http://heurist.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"f:1":"girls"}
-//http://heurist.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"all":[{"f:1":"girl"},{"t":"5"}]}
+//https://heuristplus.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"t":3}
+//https://heuristplus.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"f:1":"girls"}
+//https://heuristplus.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"all":[{"f:1":"girl"},{"t":"5"}]}
 
-//http://heurist.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"linked_to:15":{"t":"10"}}
-//http://heurist.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q=[{"t":3},{"linked_to:15":{"t":"10"}}]
+//https://heuristplus.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q={"linked_to:15":{"t":"10"}}
+//https://heuristplus.sydney.edu.au/HEURIST/h4/hsapi/controller/record_search.php?db=artem_clone1&q=[{"t":3},{"linked_to:15":{"t":"10"}}]
 
 
 // [{"t":3},{"f:1":"?"},{"linked_to:15":[{"t":"10"},{"f:1":"?"}   ] } ]

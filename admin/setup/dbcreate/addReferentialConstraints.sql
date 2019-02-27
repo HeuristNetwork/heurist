@@ -7,7 +7,7 @@
 -- Named all constraints explicitely to aid diff-ing with reference database
 
 -- Can be run from PHPMyAdmin or command line logged in as root with
--- mysql -u root -ppassword hdb_databasename < /var/www/html/h4/admin/setup/dbcreate/addReferentialConstraints.sql
+-- mysql -u root -ppassword hdb_databasename < /var/www/html/heurist/admin/setup/dbcreate/addReferentialConstraints.sql
 
 -- Additions of CASCADE ON UPDATE 19/9/11
 -- These should not restrict any existing actions but allow more flexibility in updating database

@@ -663,7 +663,7 @@ function loadRemoteURLContentSpecial($url){
 
     if(strpos($url, HEURIST_SERVER_URL)===0){
         
-        //replace http://heurist.sydney.edu.au/h4/ to script path in current installation folder
+        //replace https://heuristplus.sydney.edu.au/h5/ to script path in current installation folder
         $path = str_replace(HEURIST_BASE_URL, HEURIST_DIR, $url);
 
         $path = substr($path,0,strpos($path,'?'));

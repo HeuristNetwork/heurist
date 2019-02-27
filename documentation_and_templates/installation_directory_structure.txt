@@ -16,7 +16,7 @@ Heurist directory:    /var/www/html/HEURIST  (HEURIST may be installed in any we
 
 ---------------------------------------------------------------------------------------------------------
 
-VERSION 4 (June  2015 onwards)
+VERSION 4 (June  2015 onwards) and version 5 (early 2018 onwards - replace h4 with h5 or just heurist)
 
 SUMMARY:
 
@@ -40,16 +40,19 @@ SUMMARY:
                         help                Simlink to ../HEURIST_SUPPORT/help
                         external            Simlink to ../HEURIST_SUPPORT/external (3rd party code for older code (pre vsn 4))
                         ext                 Simlink to ../HEURIST_SUPPORT/external-h4 (3rd party code for newer code (vsn 4 on))
+                        vendor              Simlink to ../HEURIST_SUPPORT/vendor (3rd party code using composer (vsn 5 on))
 
                     h4-xx                  Alpha, beta, etc. instances
                         help                Simlink to ../HEURIST_SUPPORT/help
                         external            Simlink to ../HEURIST_SUPPORT/external
                         ext                 Simlink to ../HEURIST_SUPPORT/external-h4
+                        vendor              Simlink to ../HEURIST_SUPPORT/vendor
 
                     HEURIST_SUPPORT         Download from link on Google Code site
                         help                directory
                         external            directory
                         external-h4         directory
+                        vendor         directory
 
                     HEURIST_FILESTORE       Simlink to actual location of file store
                                             eg. /srv/HEURIST_FILESTORE

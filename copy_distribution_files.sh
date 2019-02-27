@@ -42,7 +42,7 @@ echo ---------------------------------------------------------------------------
 echo
 echo "Heurist distribution builder - run from /var/www/html/HEURIST/hx-xx program directory"
 
-# File paths specified with explicit h4-build to ensure it will only remove from this specific directory
+# File paths specified with explicit heurist-build to ensure it will only remove from this specific directory
 # and files in the subdirectory of this directory specified by the parameter
 
 # no effect if already exists

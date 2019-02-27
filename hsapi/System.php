@@ -562,7 +562,7 @@ error_log(print_r($_REQUEST, true));
             }
         }else {
 
-            $install_dir = $installDir; //  /html/h4/
+            $install_dir = $installDir; 
             if($install_dir){
                 if( substr($install_dir, -1, 1) == '/' ) $install_dir = substr($install_dir,0,-1); //remove last slash
                 if($install_dir!=""){
@@ -1071,7 +1071,7 @@ if($cres==false){
             
             $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
             
-            if(!$userID){ //in h4 session user not found
+            if(!$userID){ //in h4 or h5 session user not found
                 // vsn 3 backward capability  - restore user id from old session
                 $userID = @$_SESSION[$h3session]['user_id'];
                 if($userID){
