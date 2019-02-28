@@ -56,7 +56,7 @@ function sendMessage(message){
     if (win === null || !window['postMessage'])
         alert("postMessage is not supported");
     else
-        win.postMessage(message, "*"); // "http://Heurist.sydney.edu.au");
+        win.postMessage(message, "*"); 
 }
 
 //
@@ -175,7 +175,7 @@ window.attachEvent("onmessage", receiveMessage);
 function receiveMessage(event)
 {
 var message;
-//if (event.origin !== "http://Heurist.sydney.edu.au"){
+//if (event.origin !== "https://Heuristplus.sydney.edu.au"){
 if (false) {
 message = 'Response: ("' + event.origin + '"), but not from Heurist.sydney.edu.au';
 } else {
@@ -220,7 +220,7 @@ var win = window.parent; //contentWindow;
 if (win === null || !window['postMessage'])
 alert("postMessage is not supported");
 else
-win.postMessage("heurist:"+rectypeid, "*"); // "http://Heurist.sydney.edu.au");
+win.postMessage("heurist:"+rectypeid, "*"); 
 
 }
 */

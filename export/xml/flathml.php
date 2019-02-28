@@ -1779,11 +1779,11 @@ if($intofile){ // flags HuNI manifest + separate files per record
 
     //makeTag('raw',null, $response2 );
 
-    /*
+    /*  TODO: The schema locations are clearly rubbish
     openTag('hml', array(
-    'xmlns' => 'http://Heurist.sydney.edu.au/heurist/hml',
+    'xmlns' => 'https://Heuristplus.sydney.edu.au/heurist/hml',
     'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-    'xsi:schemaLocation' => 'http://Heurist.sydney.edu.au/heurist/hml httpHeurist.sydney.edu.auorg/heurist/schemas/hml.xsd')
+    'xsi:schemaLocation' => 'https://Heuristplus.sydney.edu.au/heurist/hml https://Heuristplus.sydney.edu.au/heurist/schemas/hml.xsd')
     );
     */
     makeTag('database', array('id' => $dbID ), HEURIST_DBNAME);

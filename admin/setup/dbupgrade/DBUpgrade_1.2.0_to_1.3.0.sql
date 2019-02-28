@@ -59,7 +59,7 @@
     ADD rst_UseInUniqueIndex TINYINT NOT NULL DEFAULT 0
     COMMENT 'Indicates whether field is to be used in the composite index which controls record uniqueness by record type';
 
--- Store user profile information for use in H4 framework
+-- Store user profile information for use in H4 and greater framework
     ALTER TABLE  `sysUGrps`
     ADD  `ugr_UsrPreferences` TEXT NULL
     COMMENT 'JSon array containing user profile available across machines. If blank, profile is specific to local session';

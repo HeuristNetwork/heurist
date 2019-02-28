@@ -171,7 +171,7 @@ function makePhotoThumbnail(record) {
 	titleSpan.onclick = function() { editTitle(record, titleSpan); };
 
 	faveImg.className = "fave";
-	faveImg.src = "http://Heurist.sydney.edu.au/heurist/img/" + (record.isPersonalised()? "star-yellow.gif" : "star-white.gif");
+	faveImg.src = "https://heuristplus.sydney.edu.au/heurist/img/" + (record.isPersonalised()? "star-yellow.gif" : "star-white.gif");
 	faveImg.onclick = function() { toggleFavourite(record, faveImg); };
 
 	return table;
@@ -261,7 +261,7 @@ var currentUserAsRecord;
 function init() {
 	if (! HCurrentUser.isLoggedIn()) {
 		alert("You are not currently logged in to Heurist");
-		location.replace("http://Heurist.sydney.edu.au/heurist/php/login.php");
+		location.replace("https://heuristplus.sydney.edu.au/heurist/php/login.php");
 		return;
 	}
 
@@ -338,7 +338,7 @@ function toggleFavourite(record, faveImg) {
 	else { record.addToPersonalised(); }
 
 	var saveCallback = function() {
-		faveImg.src = "http://Heurist.sydney.edu.au/heurist-test/img/" + (record.isPersonalised()? "star-yellow.gif" : "star-white.gif");
+		faveImg.src = "https://heuristplus.sydney.edu.au/heurist-test/img/" + (record.isPersonalised()? "star-yellow.gif" : "star-white.gif");
 	};
 	HeuristScholarDB.saveRecord(record, new HSaver(saveCallback));
 }

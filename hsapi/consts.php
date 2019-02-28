@@ -30,7 +30,6 @@ define('HEURIST_MIN_DBVERSION', "1.2.0"); //minimal version of db for current ve
 define('HEURIST_HELP', "https://heuristplus.sydney.edu.au/heurist/help");
 define('HEURIST_INDEX_BASE_URL', "https://heuristplus.sydney.edu.au/heurist/"); //central index database url
 define('HEURIST_INDEX_DATABASE', 'Heurist_Master_Index');
-//define('HEURIST_INDEX_BASE_URL', "http://127.0.0.1/h4-ao");
 
 if (@$httpProxy != '') {
     define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
@@ -61,7 +60,7 @@ $REQUEST_PROTOCOL = $isSecure ? 'https' : 'http';
 
 $serverBaseURL = $REQUEST_PROTOCOL . "://" . $serverName;
 
-// calculate the dir where the Heurist code is installed, for example /h4 or /h4-ij
+// calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
 $topdirs = "admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
 
 $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
@@ -79,7 +78,7 @@ define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
 define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. Heurist.sydney.edu.au
 if(!defined('HEURIST_DIR')) define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
 define('HEURIST_SERVER_URL', $serverBaseURL);
-define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); // eg. http://heurist.sydney.edu.au/h5/
+define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); // eg. https://heuristplus.sydney.edu.au/h5/
 
 define('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir());
 

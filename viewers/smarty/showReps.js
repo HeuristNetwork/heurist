@@ -275,7 +275,7 @@ function ShowReps() {
         var session_id = Math.round((new Date()).getTime()/1000);
 
         if(_currentRecordset!=null){
-            //new approach to support h4
+            //new approach to support H4
             if(window.hWin.HEURIST4.util.isnull(template_file)){
                 template_file = _getSelectedTemplate();
             }

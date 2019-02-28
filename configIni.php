@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.1.0"; // sets current program version number, determined by Heurist development lead
+$version = "5.1.1"; // sets current program version number, determined by Heurist development lead
 
-// h5.0.5 Drag/drop & paste images, expose semantic reference fields, expose parent record fields in facet search tree, improved startup help, improved map view info popup, clustering and zooming, KML and map tile handling, mapdocument and views parameters for embedded searches, lots of small fixes and cosmetics
-// h5.0.4 Minor fixes, CSV output, dashboard creation, icon directories etc.
+// h5.1.1 26 Feb 2019 Render simple html & hyperlinsk in record titles, better handling of map zooms, add Google analytics detail, imprt child records, better error reporting, drag and drop reordering of values in edit form, instant preview of search in facet search builder, clear marker of non-public records, import multimedia with dirctory structure, output Gephi node types, 
+// h5.0.5 Feb 2019 Drag/drop & paste images, expose semantic reference fields, expose parent record fields in facet search tree, improved startup help, improved map view info popup, clustering and zooming, KML and map tile handling, mapdocument and views parameters for embedded searches, lots of small fixes and cosmetics
+// h5.0.4 Jan 2019 Minor fixes, CSV output, dashboard creation, icon directories etc.
 // 5.0.3 11 Dec 2018 WYSIWYG edito for memos, extract text from PDFs, improve verification and child record conversion, fix thumbnail and bookmarklet services, manually sorted result sets, improved ViewRecord, entity types with counts shortcut, filtering menus by user level, fixes to CSV export, finalise Beyond 1914 and Adelaide websites
 // 5.0.2 10 Nov 2018 Really working h5. Dashboard, streamlined field definition, read-only groups, revised import templates, conversion to child records, U of Adelaide website from Expert nation, finalise Beyond1914.
 // 5.0.1 25 Jul 18  1)php7 conformity 2)got rid h3 client libs 3)got rid mysql__ functions
