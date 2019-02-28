@@ -1839,6 +1839,26 @@ $.widget( "heurist.editing_input", {
                 
             }
             else
+            if( this.detailType=='folder' ){
+                
+                $input.css({'padding-left':'30px'});
+                
+                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                    .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
+                    .insertBefore($input);
+                var $select_folder_dlg = $('<div/>').hide().appendTo( $inputdiv )
+                    
+                this._on( $gicon, { click: function(){                                 
+                        $select_folder_dlg.select_folders({onselect:function(res){
+                            if(res){
+                                /*$input_img.find('img').prop('src', res.url);
+                                that.newvalues[$input.attr('id')] = res.path; 
+                                that._onChange(); */
+                            }
+                        }, multiselect: that.configMode && that.configMode.multiselect});
+                    }} );
+            }
+            else
             if( this.detailType=='file' ){
                 
                 

@@ -389,30 +389,49 @@ error_log(print_r($_REQUEST, true));
         }
     }
     
+    //
+    //
+    //
+    public function getArrayOfSystemFolders(){
+        
+        //const name, description, allow webaccess, for backup
+        $folders = array();
+        $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', true, true);
+        $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
+        $folders['scratch']      = array('SCRATCH','used to store temporary files');
+        $folders['hml-output']   = array('HML','used to write published records as hml files', true);
+        $folders['html-output']  = array('HTML','used to write published records as generic html files', true);
+        $folders['generated-reports'] = array(null,'used to write generated reports');
+        $folders['xsl-templates']     = array('XSL_TEMPLATES','', false, true);
+        $folders['smarty-templates']  = array('SMARTY_TEMPLATES','', false, true);
+        $folders['entity']        = array(null,'used to store icons and images for users,groups,terms');
+        $folders['backup']        = array(null,'used to write files for user data dump');
+        $folders['term-icons']    = array('TERM_ICON','used for images illustrating terms', true, true); //todo move to entity
+        $folders['rectype-icons'] = array('ICON','used for record type icons and thumbnails', true, true); //todo move to entity
+        $folders['settings']      = array('SETTING','', false, true);
+        
+        // do not create
+        $folders['documentation_and_templates'] = array('','', false, true);
+        $folders['term-images']    = array('','', false, true); //for digital harlem
+        $folders['faims']    = array('',''); 
+        
+        return $folders;
+    }        
+    
     public function getSystemFolders($is_for_backup=false){
         
-        $system_folders = array(HEURIST_THUMB_DIR,
-            HEURIST_ICON_DIR,
-            HEURIST_FILESTORE_DIR.'documentation_and_templates/',
-            HEURIST_FILESTORE_DIR."settings/",
-            HEURIST_FILESTORE_DIR.'term-icons/',
-            HEURIST_FILESTORE_DIR.'term-images/',
-            HEURIST_SMARTY_TEMPLATES_DIR,
-            HEURIST_FILESTORE_DIR.'xsl-templates/');
-            
+        $folders = $this->getArrayOfSystemFolders();
+        
+        $system_folders = array();
+        
+        foreach ($folders as $folder_name=>$folder){        
+            if(!$is_for_backup || $folder[3]){
+                array_push($system_folders, HEURIST_FILESTORE_DIR.$folder_name.'/');
+            }
+        }
+
+        //special case - these folders can be defined in sysIdentification and be outisde database folder            
         if(!$is_for_backup){
-            
-            $system_folders = array_merge($system_folders,
-                array(                
-                HEURIST_FILES_DIR,
-                HEURIST_FILESTORE_DIR."backup/",
-                HEURIST_FILESTORE_DIR.'entity/',
-                HEURIST_FILESTORE_DIR."faims/",
-                HEURIST_FILESTORE_DIR."generated-reports/",
-                HEURIST_FILESTORE_DIR."scratch/",
-                HEURIST_FILESTORE_DIR.'hml-output/',
-                HEURIST_FILESTORE_DIR.'html-output/'
-                )); 
             if(defined('HEURIST_XSL_TEMPLATES_DIR')) array_push($system_folders, HEURIST_XSL_TEMPLATES_DIR);
             if(defined('HEURIST_HTML_DIR')) array_push($system_folders, HEURIST_HTML_DIR);
             if(defined('HEURIST_HML_DIR')) array_push($system_folders, HEURIST_HML_DIR);
@@ -475,23 +494,12 @@ error_log(print_r($_REQUEST, true));
        
         define('HEURIST_FILESTORE_URL', $defaultRootFileUploadURL . $dbname . '/');
         
-        $folders = array();
-        $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', true);
-        $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
-        $folders['scratch']      = array('SCRATCH','used to store temporary files');
-        $folders['hml-output']   = array('HML','used to write published records as hml files', true);
-        $folders['html-output']  = array('HTML','used to write published records as generic html files', true);
-        $folders['generated-reports'] = array(null,'used to write generated reports');
-        $folders['xsl-templates']     = array('XSL_TEMPLATES','');
-        $folders['smarty-templates']  = array('SMARTY_TEMPLATES','');
-        $folders['entity']        = array(null,'used to store icons and images for users,groups,terms');
-        $folders['backup']        = array(null,'used to write files for user data dump');
-        $folders['term-icons']    = array('TERM_ICON','used for images illustrating terms'); //todo move to entity
-        $folders['rectype-icons'] = array('ICON','used for record type icons and thumbnails'); //todo move to entity
-        $folders['settings']      = array('SETTING','');
+        $folders = $this->getArrayOfSystemFolders();
         $warnings = array();
         
         foreach ($folders as $folder_name=>$folder){
+            
+                if($folder[0]=='') continue;
             
                 $allowWebAccess = (@$folder[2]===true);
             

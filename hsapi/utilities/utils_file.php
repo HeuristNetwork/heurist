@@ -325,8 +325,113 @@
         return $response;
         
     }
-   
     
+    
+    /**
+     * Creates a tree-structured array of directories and files from a given root folder.
+     *
+     * @param string $dir
+     * @param string $params
+     *                  withFiles: false
+     *                  refex: file filter
+     *                  ignoreEmtpty: not include emoty folder
+     *                  systemFolders: 
+     *                  format: fancy (for fancyTree)
+     * @param boolean $ignoreEmpty Do not add empty directories to the tree
+     * @return array
+     */
+    function folderTree($dir, $params)
+    {
+        if($dir==null){
+            $dir = HEURIST_FILESTORE_DIR;
+        }
+        
+        if (!$dir instanceof DirectoryIterator) {
+            $dir = new DirectoryIterator((string)$dir);
+        }
+        $dirs  = array();
+        $files = array();
+        $file_count = 0;
+        
+        $withFiles = (@$params['withFiles']==true);
+        $regex = @$params['regex'];
+        $ignoreEmpty = (@$params['ignoreEmtpty']==true);
+        $systemFolders = @$params['systemFolders'];
+        $isFancy = (@$params['format']=='fancy');
+        if(is_array($params)) {$params['systemFolders'] = null;}
+        if($regex==null) $regex = '';
+        
+        $fancytree = array();
+        
+        foreach ($dir as $node) {
+            if ($node->isDir() && !$node->isDot()) {
+                $tree = folderTree($node->getPathname(), $params);
+                if (!$ignoreEmpty || count($tree)) {
+                    $folder_name = $node->getFilename();
+                    
+                    if($isFancy){
+                        $fancytree[] = array( 'key'=>$folder_name, 'title'=>$folder_name, 
+                            'folder'=>true, 'issystem'=>(@$sysfolders[$folder_name]!=null),
+                            'children'=>$tree['children'], 'files_count'=>$tree['count'] );
+                    }else{
+                        $dirs[$folder_name] = $tree;    
+                    }            
+                }
+                
+            } else if ($node->isFile()) {
+                if($withFiles){
+                    $name = $node->getFilename();
+                    if ('' == $regex || preg_match($regex, $name)) { //file filter
+                        $files[] = $name;
+                        $fancytree[] = array( 'key'=>$name, 'title'=>$name);
+                    }
+                }
+                $file_count++;
+            }
+        }
+        
+        if($isFancy){
+            usort($fancytree, "cmp");
+            return array('children'=>$fancytree, 'count'=>$file_count);
+        }else{
+            asort($dirs);
+            sort($files);
+            return array_merge($dirs, $files);
+        }
+    }    
+    
+    
+    function cmp($a, $b)
+    {
+        if ($a['title'] == $b['title']) {
+            return 0;
+        }
+        return ( strtolower($a['title']) < strtolower($b['title'])) ? -1 : 1;
+    }  
+      
+    //
+    //
+    //
+    function folderTreeToFancyTree($data, $lvl=0, $sysfolders=null){
+        //for fancytree
+        $fancytree = array();
+        foreach($data as $folder => $children){
+            
+            $item = array( 'key'=>$folder, 'title'=>$folder, 
+                        'folder'=>($folder>=0), 'issystem'=>(@$sysfolders[$folder]!=null) );
+            
+            if($children && count($children)>0){
+                $item['children'] = folderTreeToFancyTree($children, $lvl+1);
+            }   
+            $fancytree[] = $item;
+        }
+        usort($fancytree, "cmp");
+        return $fancytree; 
+        
+    }
+    
+    
+        
     //
     //
     //
@@ -533,7 +638,9 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
     }
 
     return $res;
-}        
+}   
+
+   
     
 //------------------------------------------    
 /**

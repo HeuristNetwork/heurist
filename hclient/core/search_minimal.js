@@ -40,7 +40,9 @@ function hSearchMinimal() {
     function _init( ) {
     }
     
-    // search with callback
+    //
+    // search with callback (without event trigger)
+    //
     function _doSearchWithCallback( request, callback ){
         
         window.hWin.HAPI4.RecordMgr.search(request,
