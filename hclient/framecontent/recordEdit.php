@@ -27,7 +27,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
     require_once(dirname(__FILE__)."/initPage.php");
-    require_once(dirname(__FILE__)."/../../records/disambig/testSimilarURLs.php");
+    require_once(dirname(__FILE__)."/../../hsapi/utilities/testSimilarURLs.php");
    
    
 //this is an addition/bookmark of URL - at the moment from bookmarklet only
@@ -164,7 +164,7 @@ else{
         <!--script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script-->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/media_viewer.js"></script>
         
-        <script type="text/javascript" src="<?php echo PDIR;?>common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>

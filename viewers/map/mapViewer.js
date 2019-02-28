@@ -16,7 +16,7 @@
 * Creates popup div with Gmap to view given coordinates  
 * 
 * requires
-* common/js/hintDiv.js (popup div)
+* hclient/core/hintDiv.js (popup div)
 * need to define baseURL!!!
 *
 * used in rendereRecordData.php

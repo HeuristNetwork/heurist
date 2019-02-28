@@ -105,7 +105,7 @@ if(!$is_map_popup){
 
         <!-- script type="text/javascript" src="../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js"></script>
         <script type="text/javascript" src="../../records/files/initViewer.js"></script -->
-        <script type="text/javascript" src="../../common/js/hintDiv.js"></script> <!-- for mapviewer roolover -->
+        <script type="text/javascript" src="../../hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
 
         <script type="text/javascript">
@@ -1195,19 +1195,9 @@ function print_public_details($bib) {
 }
 
 
+//@todo implement popup that lists all record's tags 
 function print_other_tags($bib) {
     return;
-    //@todo implement
-        ?>
-        <div class="detailRow">
-            <div class="detailType">Tags</div>
-            <div class="detail">
-                <a target="_new" 
-                    href="<?=HEURIST_BASE_URL?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&recID=<?=$bib['rec_ID']?>" 
-                    target=_top onclick="return link_open(this);">[Other users' tags]</a>
-            </div>
-        </div>
-        <?php
 }
 
 //

@@ -37,7 +37,7 @@ $system->defineConstants();
 <script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
 <!-- script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
 
-<script type="text/javascript" src="<?php echo PDIR;?>common/js/temporalObjectLibrary.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <!-- timeline -->
 
 <!--

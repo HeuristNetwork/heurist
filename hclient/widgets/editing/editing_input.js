@@ -1659,7 +1659,7 @@ $.widget( "heurist.editing_input", {
                                 if(that.is_disabled) return;
 
                                 var url = window.hWin.HAPI4.baseURL 
-                                    + 'common/html/editTemporalObject.html?'
+                                    + 'hclient/widgets/editing/editTemporalObject.html?'
                                     + encodeURIComponent(that.newvalues[$input.attr('id')]
                                                 ?that.newvalues[$input.attr('id')]:$input.val());
                                 

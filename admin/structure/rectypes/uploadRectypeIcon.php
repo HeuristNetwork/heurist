@@ -74,12 +74,6 @@ $mysqli = $system->get_mysqli();
     $success_msg = null;
     $failure_msg = null;
 
-    /* TODO: ???????
-    require_once(dirname(__FILE__).'/../../../common/php/dbMySqlWrappers.php');
-    mysql_connection_select(DATABASE);
-    $res = mysql_query('select * from defRecTypes where rty_ID = ' . $rt_id);
-    $rt = mysql_fetch_assoc($res);
-    */
 
     if(@$_REQUEST['libicon']){
         //take from  library

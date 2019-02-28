@@ -54,8 +54,6 @@ $mysqli = $system->get_mysqli();
     </head>
     <body class="popup" width=700 height=500 style="overflow: hidden;">
 
-        <!-- script type="text/javascript" src="../common/js/utilsUI.js"></script -->
-
         <div class="advanced-search-row" style="border-bottom: 1px solid #7f9db9;padding-bottom:10px;">
 
             <b>Search&nbsp;string: &nbsp;</b>

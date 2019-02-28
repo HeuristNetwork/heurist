@@ -96,8 +96,8 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
 	<body class="popup yui-skin-sam">
 
-		<script type="text/javascript" src="../../../common/js/hintDiv.js"></script>
-        <script type="text/javascript" src="../../../common/js/tabDragDrop.js"></script>
+		<script type="text/javascript" src="../../../hclient/core/hintDiv.js"></script>
+        <script type="text/javascript" src="../tabDragDrop.js"></script>
 
 	<div id="delete-message" style="display:none;">
 		<div id="delete-message-text" style="position:absolute;left:0;right:0;top:26;bottom:0;padding:15px;overflow:auto;"></div>

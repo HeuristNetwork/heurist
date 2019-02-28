@@ -1,4 +1,8 @@
 <?php
+/* 
+THIS IS Heurist v.3. 
+It is not used anywhere. This code either should be removed or re-implemented wiht new libraries
+*/
 
 /**
 *

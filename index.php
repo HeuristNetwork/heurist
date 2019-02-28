@@ -71,11 +71,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <!-- array of possible layouts -->
         <script type="text/javascript" src="layout_default.js"></script>
 
-        <!-- script type="text/javascript" src="js/hintDiv.js"></script -->
-
         <script type="text/javascript" src="hclient/widgets/dropdownmenus/help_tips.js"></script>
 
-        <script type="text/javascript" src="common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="hclient/core/temporalObjectLibrary.js"></script>
 
         <script type="text/javascript" src="hclient/widgets/record/recordAction.js"></script>
         <script type="text/javascript" src="hclient/widgets/record/recordAccess.js"></script>
