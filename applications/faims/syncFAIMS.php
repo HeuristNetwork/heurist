@@ -1823,7 +1823,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
                 $use_Spatialite = true;
 
-                if($use_Spatialite){              //TEMP
+                if($use_Spatialite){ 
 
                     # loading SpatiaLite as an extension
                     $dbfaims->loadExtension('libspatialite.so');

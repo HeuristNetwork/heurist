@@ -680,7 +680,7 @@ $.widget( "heurist.dh_search", {
 
         var params = {id:"dhs"+window.hWin.HEURIST4.util.random(), title:this.res_name.val(), query: {qa:this._currentquery, rules:rules} };
 
-        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
+        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_Map');
         if(app && app.widget){
             $(app.widget).app_timemap('addQueryLayer', params);
         }

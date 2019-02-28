@@ -92,6 +92,7 @@ if ($rec_id>0 && !@$_REQUEST['bkmk_id'])
 $sel_ids = array();
 if(@$_REQUEST['ids']){
 	$sel_ids = explode(',',$_REQUEST['ids']);
+    $sel_ids = array_unique($sel_ids);
 }
 if(!$is_map_popup){
 ?>
@@ -409,17 +410,18 @@ if ($bkm_ID>0 || $rec_id>0) {
             
             $opts = '';
             $list = '';
+            
             if(count($sel_ids)>1){
                     
                 $cnt = 0;
                 
                 foreach($sel_ids as $id){
-                
+                    
                     $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
                             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID'
                             .' where rec_ID='.$id.' and not rec_FlagTemporary');
                 
-                    if($id!=$rec_id){                
+                    if($id!=$rec_id){  //print details for linked records - hidden
                         print '<div data-recid="'.$id.'" style="font-size:0.8em;display:none">';
                         print_details($bibInfo);
                         print '</div>';

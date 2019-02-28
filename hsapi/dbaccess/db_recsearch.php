@@ -312,20 +312,6 @@
                     }
 
                 }else{ //count for related  if($params['needcount']==2)
-                
-                    /*temp solution for single level linkage only
-                    if(strpos($qclauses["where"],'recLinks rl0_')===false){
-                        if (strpos($qclauses["where"],'rl0x1.rl_SourceID IN')>0){
-                            $select_clause = "SELECT $select_field as rng, count(DISTINCT rl0x1.rl_SourceID) as cnt ";
-                        }else if (strpos($qclauses["where"],'rl0x1.rl_TargetID IN')>0){
-                            $select_clause = "SELECT $select_field as rng, count(DISTINCT rl0x1.rl_TargetID) as cnt ";   
-                        }
-                    }else{
-                        // it counts linked records, thus
-                        // it returns wrong value if there is more than one linked record per target record type
-                        $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
-                    }
-                    */
                     
                     $tab = 'r0';
                     while(strpos($qclauses["from"], 'Records '.$tab.'_0')>0){

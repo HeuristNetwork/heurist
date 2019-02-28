@@ -156,7 +156,7 @@ $.widget( "heurist.dh_search", {
                             }
 
     /*    
-                            var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
+                            var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_Map');
                             if(app && app.widget){
                                 //switch to Map Tab
                                 window.hWin.HAPI4.LayoutMgr.putAppOnTop('app_timemap');

@@ -186,7 +186,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             $cookie_file =  $folder."/cookies";
             //first of all try tp connect to tDAR server and keep cookie session id
 
-            if(!$no_registration){ //TEMP
+            if(!$no_registration){
 
                 $resp = post_request($protocol.$host."/login/process", $fusername, $fpwd, array("loginUsername"=>$fusername, "loginPassword"=>$fpwd), $cookie_file, true);
 
