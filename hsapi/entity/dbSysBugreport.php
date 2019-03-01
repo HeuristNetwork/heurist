@@ -23,8 +23,7 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/dbEntityBase.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_files.php');
 
-//require_once(dirname(__FILE__).'/../../external/php/geekMail-1.0.php');
-require dirname(__FILE__).'/../../vendor/autoload.php';
+require_once (dirname(__FILE__).'/../../vendor/autoload.php');
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -161,21 +160,6 @@ class DbSysBugreport extends DbEntityBase
             $email->addAttachment($filename);// , 'new.jpg'); 
         }
        
-        /*
-        $email = new geekMail();
-        $email->setMailType('html');
-        $email->to($toEmailAddress);
-        $email->from('bugs@HeuristNetwork.org', 'Bug reporter'); //'noreply@HeuristNetwork.org', 'Bug Report');
-        $email->subject($bug_title);
-        if($filename!=null){
-            $email->attach($filename);
-        }
-        $email->message($message);
-        if (!$email->send())
-            //$errors = $geekMail->getDebugger();
-            //print_r($errors);
-        }
-        */
         try{
             $email->send();
             return array(1); //fake rec id

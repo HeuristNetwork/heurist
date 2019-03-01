@@ -31,7 +31,6 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 
 require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
-//require_once dirname(__FILE__).'/../../external/libZotero/build/libZoteroSingle.php';
 
 $system->defineConstants();
 
@@ -93,8 +92,8 @@ if($fh_data==null || is_string($fh_data)){
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Zotero synchronization</title>
 <!--
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
 -->        
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
         <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->

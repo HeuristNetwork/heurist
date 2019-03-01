@@ -256,7 +256,7 @@ window.hWin.HEURIST4.geo = {
             return null;
         }
         
-        var gjson =  parseWKT(wkt);    //wkt to json
+        var gjson =  parseWKT(wkt);    //wkt to json see wellknown.js
         
         var bounds = null, southWest, northEast,
         shape  = null,
@@ -614,7 +614,7 @@ window.hWin.HEURIST4.geo = {
             }
         }   
         
-        var gjson =  parseWKT(wkt);    //wkt to json     
+        var gjson =  parseWKT(wkt);    //wkt to json see  wellknown.js  
       
         var resdata;
         
@@ -668,7 +668,7 @@ window.hWin.HEURIST4.geo = {
             wkt = matches[1];
         }
                
-        var gjson =  parseWKT(wkt); 
+        var gjson =  parseWKT(wkt);  //see wellknown.js
         var resdata = window.hWin.HEURIST4.geo.prepareGeoJSON(gjson, null, 'google');
 
         if(resdata.Point.length==1 && resdata.Polyline.length==0 && resdata.Polygon.length==0){

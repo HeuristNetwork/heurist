@@ -25,7 +25,6 @@
 */
 
 require_once(dirname(__FILE__)."/../System.php");
-//require_once(dirname(__FILE__).'/../../ext/jquery-file-upload/server/php/UploadHandler.php');
 
 //secondary purpose - check file existance in code
 $path = @$_REQUEST['check'];

@@ -1531,7 +1531,7 @@ function showSearchFacetedWizard( params ){
 
     if(!$.isFunction($('body').fancytree)){
 
-        $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/jquery.fancytree-all.min.js', 
+        $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/jquery.fancytree-all.min.js', 
                 function(){ showSearchFacetedWizard(params); } );
 
     }else{

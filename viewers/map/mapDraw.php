@@ -22,19 +22,19 @@
 define('PDIR','../../');  //need for proper path to js and css    
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/layout/jquery.layout-latest.js"></script>
 
         <!-- script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE&libraries=drawing,geometry"></script -->
 
         <script type="text/javascript" src="mapDraw.js"></script>
         <script type="text/javascript" src="mapLayer.js"></script>
         
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/vector3d.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/latlon-ellipsoidal.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/utm.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/geodesy-master/dms.js"></script>        
+        <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/vector3d.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/latlon-ellipsoidal.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/utm.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/dms.js"></script>        
         
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/js/wellknown.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
 
         <!-- Initializing -->
 

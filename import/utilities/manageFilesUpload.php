@@ -40,8 +40,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>File upload manager</title>
         
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
         <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
@@ -49,9 +49,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         
 
         <!-- Demo styles -->
-        <link rel="stylesheet" href="../../ext/jquery-file-upload/css/demo.css">
+        <link rel="stylesheet" href="../../external/jquery-file-upload/css/demo.css">
         <!--[if lte IE 8]>
-        <link rel="stylesheet" href="../../ext/jquery-file-upload/css/demo-ie8.css">
+        <link rel="stylesheet" href="../../external/jquery-file-upload/css/demo-ie8.css">
         <![endif]-->
         <style>
             /* Adjust the jQuery UI widget font-size: */
@@ -62,8 +62,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         <!-- blueimp Gallery styles -->
         <link rel="stylesheet" href="https://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
         <!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-        <link rel="stylesheet" href="../../ext/jquery-file-upload/css/jquery.fileupload.css">
-        <link rel="stylesheet" href="../../ext/jquery-file-upload/css/jquery.fileupload-ui.css">
+        <link rel="stylesheet" href="../../external/jquery-file-upload/css/jquery.fileupload.css">
+        <link rel="stylesheet" href="../../external/jquery-file-upload/css/jquery.fileupload-ui.css">
         
         <script>
             function setUploadEntireFolder(){
@@ -375,23 +375,23 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         <!-- blueimp Gallery script -->
         <script src="https://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
         <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-        <script src="../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
         <!-- The basic File Upload plugin -->
-        <script src="../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.fileupload.js"></script>
         <!-- The File Upload processing plugin -->
-        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-process.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.fileupload-process.js"></script>
         <!-- The File Upload image preview & resize plugin -->
-        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-image.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.fileupload-image.js"></script>
         <!-- The File Upload audio preview plugin -->
-        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-audio.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.fileupload-audio.js"></script>
         <!-- The File Upload video preview plugin -->
-        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-video.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.fileupload-video.js"></script>
         <!-- The File Upload validation plugin -->
-        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-validate.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.fileupload-validate.js"></script>
         <!-- The File Upload user interface plugin -->
-        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-ui.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.fileupload-ui.js"></script>
         <!-- The File Upload jQuery UI plugin -->
-        <script src="../../ext/jquery-file-upload/js/jquery.fileupload-jquery-ui.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.fileupload-jquery-ui.js"></script>
 
         <script type="text/javascript">
             $(function () {
@@ -402,7 +402,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
                     upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
-                    url: '<?=HEURIST_BASE_URL?>ext/jquery-file-upload/server/php/'
+                    url: '<?=HEURIST_BASE_URL?>external/jquery-file-upload/server/php/'
                 });
                 
                 $('#btnFinished')
@@ -419,7 +419,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     'redirect',
                     window.location.href.replace(
                         /\/[^\/]*$/,
-                        '<?=HEURIST_BASE_URL?>ext/jquery-file-upload/cors/result.html?%s'
+                        '<?=HEURIST_BASE_URL?>external/jquery-file-upload/cors/result.html?%s'
                     )
                 );
 

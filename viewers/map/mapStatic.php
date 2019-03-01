@@ -35,7 +35,8 @@
     require_once (dirname(__FILE__).'/../../hsapi/System.php');
     require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
     
-    require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
+    require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
+
     require_once(dirname(__FILE__)."/encodePolyline.php");
     require_once(dirname(__FILE__)."/Simplify.php");
 
@@ -128,9 +129,10 @@
                                        foreach($json['coordinates'] as $points){
                                            array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$points));
                                        }
+                                   }else if ($json['type']=='MultiPoint'){
+                                        array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$json['coordinates']));
                                    }else if ($json['type']=='MultiPolygon' 
-                                                || $json['type']=='MultiLineString' 
-                                                || $json['type']=='MultiPoint'){
+                                                || $json['type']=='MultiLineString'){
                                        foreach($json['coordinates'] as $shape){
                                            foreach($shape as $points){
                                                 array_push($mapobjects, array('type'=>$geo_type, 'geo'=>$points));
@@ -363,7 +365,7 @@
                         
                     }else{
                         $shapes_cnt++;
-                        if(count($points2)>0){
+                        if(is_array($points2) && count($points2)>0){
                             $verties_cnt = $verties_cnt + count($points2);
                             foreach ($points2 as $point) {
                                 $points_to_encode[] = $point[0];

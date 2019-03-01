@@ -33,7 +33,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
     <title>Clear Records from Current Heurist Database</title>
     <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
     <style>
     p {
         display: block;

@@ -32,12 +32,12 @@ require_once(dirname(__FILE__)."/../initPage.php");
         </style>
 
         <!-- D3 -->
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/d3/d3.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/d3/fisheye.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/d3/d3.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/d3/fisheye.js"></script>
 
         <!-- Colpick -->
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/colpick/colpick.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/colpick/colpick.css">
+        <script type="text/javascript" src="<?php echo PDIR;?>external/colpick/colpick.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/colpick/colpick.css">
 
         <!-- Visualize plugin -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/settings.js"></script>

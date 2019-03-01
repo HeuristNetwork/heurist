@@ -228,8 +228,8 @@ if($is_csv){
         <script src="<?php echo PDIR;?>external/yui/2.8.2r1/build/container/container-min.js"></script>
 
         <!-- jQuery UI -->
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <!-- Heurist CSS -->
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />

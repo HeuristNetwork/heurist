@@ -52,7 +52,7 @@ require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
 
-require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
+require_once(dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 
 $outputfile = null;
 $isJSout = false;
@@ -71,7 +71,7 @@ $execution_total_counter = 0;
 $system = new System(); 
 if($system->init(@$_REQUEST['db'])){
 
-    require_once(dirname(__FILE__).'/libs.inc.php');
+    require_once(dirname(__FILE__).'/smartyInit.php');
     require_once(dirname(__FILE__).'/reportRecord.php');
 
     if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
@@ -96,7 +96,7 @@ save_report_output2  - save report output as file (if there is parameter output)
 */
 function executeSmartyTemplate($system, $params){
 
-    //$smarty is definedd in libs.inc.php
+    //$smarty is inited in smartyInit.php
     global $smarty, $outputfile, $isJSout, $gparams, $max_allowed_depth, $publishmode,
            $execution_counter, $execution_total_counter;
 
@@ -293,7 +293,9 @@ function executeSmartyTemplate($system, $params){
         $user = $system->getCurrentUser();
         
         $template_file = "_".$user['ugr_Name'].".tpl";
-        $file = fopen ($smarty->template_dir.$template_file, "w");
+        $template_folder = $smarty->getTemplateDir();
+        if(is_array($template_folder)) $template_folder = $template_folder[0];
+        $file = fopen ($template_folder.$template_file, "w");
         fwrite($file, $template_body);
         fclose ($file);
 

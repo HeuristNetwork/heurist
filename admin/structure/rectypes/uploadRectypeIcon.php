@@ -102,8 +102,8 @@ $mysqli = $system->get_mysqli();
         <title>Choose record type icon<?=(($mode==3)?"":" for ".$rt_id." : ".htmlspecialchars($rt_name))?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
         <link rel="stylesheet" type="text/css" href="<?echo $cssLink;?>">
 

@@ -62,8 +62,8 @@ if(isset($_POST['data'])) {
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <title>Bulk email sender</title>
 
-  <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-  <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/heurist/jquery-ui.css" />
+  <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+  <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-themes-1.12.1/themes/heurist/jquery-ui.css" />
   <link rel="stylesheet" type="text/css" href="../../h4styles.css">
 
   <style>

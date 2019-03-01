@@ -27,15 +27,15 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 
 $system->defineConstants();
 ?>
-<script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/jquery.layout/jquery.layout-latest.js"></script>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk&libraries=drawing,geometry"></script>
 <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 <!-- Timemap -->
 <!-- <script type="text/javascript">Timeline_urlPrefix = RelBrowser.baseURL+"js/timemap.js/2.0.1/lib/";</script -->
   
-<script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
-<!-- script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
+<script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/lib/mxn/mxn.js?(googlev3)"></script>
+<!-- script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/lib/timeline-2.3.0.js"></script -->
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 <!-- timeline -->
@@ -49,22 +49,22 @@ $system->defineConstants();
 // line: 13594 catch exception of datetime convertation
 //
 -->
-<script type="text/javascript" src="<?php echo PDIR;?>ext/vis/dist/vis.js"></script>
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/vis/dist/vis.css" />
+<script type="text/javascript" src="<?php echo PDIR;?>external/vis/dist/vis.js"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/vis/dist/vis.css" />
 
-<script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/src/timemap2.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/src/param.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/src/loaders/xml.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/src/loaders/kml.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>ext/timemap.js/2.0.1/src/manipulation2.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/src/timemap2.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/src/param.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/src/loaders/xml.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/src/loaders/kml.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/timemap.js/2.0.1/src/manipulation2.js"></script>
 
 <!-- Shape file converting -->
-<script type="text/javascript" src="<?php echo PDIR;?>ext/shapefile/stream.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>ext/shapefile/shapefile.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>ext/shapefile/dbf.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/shapefile/stream.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/shapefile/shapefile.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/shapefile/dbf.js"></script>
 
-<script type="text/javascript" src="<?php echo PDIR;?>ext/js/evol.colorpicker.js" charset="utf-8"></script>
-<link href="<?php echo PDIR;?>ext/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
+<link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
 <!-- Mapping -->
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/map.js"></script>
