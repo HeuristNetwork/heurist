@@ -68,14 +68,12 @@ cp -r common /var/www/html/HEURIST/heurist-build/$1
 cp -r context_help /var/www/html/HEURIST/heurist-build/$1
 cp -r documentation_and_templates /var/www/html/HEURIST/heurist-build/$1
 cp -r export /var/www/html/HEURIST/heurist-build/$1
-cp -r hapi /var/www/html/HEURIST/heurist-build/$1
 cp -r hclient /var/www/html/HEURIST/heurist-build/$1
 cp -r hsapi /var/www/html/HEURIST/heurist-build/$1
 cp -r import /var/www/html/HEURIST/heurist-build/$1
 cp -r installers  /var/www/html/HEURIST/heurist-build/$1
 cp -r records  /var/www/html/HEURIST/heurist-build/$1
 cp -r redirects /var/www/html/HEURIST/heurist-build/$1
-cp -r search  /var/www/html/HEURIST/heurist-build/$1
 cp -r viewers /var/www/html/HEURIST/heurist-build/$1
 
 echo
