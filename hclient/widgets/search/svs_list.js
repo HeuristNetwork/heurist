@@ -1650,7 +1650,7 @@ $.widget( "heurist.svs_list", {
                 }
                 if(!facet_params || !Hul.isArray(facet_params.facets)){
                     // Do something about the exception here
-                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise this faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");
+                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise this faceted search due to corrupted parameters. Please remove and re-create this search.'), null, window.hWin.HR('Warning'));
                     return;
                 }
 
@@ -1704,7 +1704,11 @@ $.widget( "heurist.svs_list", {
                     }else{
                         window.hWin.HAPI4.SystemMgr.user_log('search_Record_applyrules');
                     }
+                    
+                }else if(Hul.isempty(request.q)){
 
+                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise this search due to corrupted parameters. Please redefine filter parameters.'), null, window.hWin.HR('Warning'));                    
+                    
                 }else{
                     //additional params
                     request.detail = 'detail';
