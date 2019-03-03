@@ -97,9 +97,12 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
         }
     }
 
-    function _deleteAllShapes() {
+    function _deleteAllShapes( leaveOne ) {
         clearSelection();
         while(overlays[0]){
+            if(leaveOne===true && overlays.length==1){
+                break;
+            }
             overlays.pop().setMap(null);
         }          
     }
@@ -336,6 +339,9 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     //
     function _onMarkerAdded(newShape){
+        
+        if(!$('#cbAllowMulti').is(':checked')) _deleteAllShapes();
+        
         overlays.push(newShape);
         google.maps.event.addListener(newShape, 'rightclick', function(e) {
             deleteMenu.open(gmap, newShape, newShape.getPosition());
@@ -351,6 +357,8 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //
     //
     function _onNonMarkerAdded(newShape){
+        if(!$('#cbAllowMulti').is(':checked')) _deleteAllShapes();
+        
         overlays.push(newShape);
         drawingManager.setDrawingMode(null);
         setSelection(newShape);
@@ -1212,8 +1220,25 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
             _saveExtentOnExit();  
         }
         */ 
-
+        
         $('#save-button').button().click(function(){
+            
+            if(!$('#cbAllowMulti').is(':checked') && overlays.length>1){
+                
+                var $ddlg, buttons = {};
+                buttons['Continue'] = function(){ 
+                    _deleteAllShapes( true );  
+                    $ddlg.dialog('close'); 
+                    $('#save-button').click();
+                }; 
+                buttons['Cancel'] = function(){ $ddlg.dialog('close'); };
+                
+                $ddlg = window.hWin.HEURIST4.msg.showMsgDlg( 
+    'There are '+overlays.length+' objects on map. Either check "Allow multiple objects" or only one shape will be saved',
+                buttons, 'Notice');
+                
+                return;
+            } 
             
             var gjson = _getGeoJSON();
             if($.isEmptyObject(gjson)){

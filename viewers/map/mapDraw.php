@@ -195,12 +195,13 @@ console.log('load google map api')
                 <div style="width:auto !important;display:inline-block;height: 14px" id="color-palette"></div>
 
                 
-                <div style="padding-top:25px">
+                <div style="padding-top:20px">
                     <label>Select shape to draw</label><br>
                     <label>Click to add points</label><br><br>
+                    <label><input type="checkbox" id="cbAllowMulti">Allow multiple objects</label><br><br>
                     <button id="save-button" style="font-weight:bold">Save</button>
                 </div> 
-                <div style="padding-top:40px">
+                <div style="padding-top:20px">
                     <button id="delete-all-button">Clear all</button>
                 </div> 
                 <div>
