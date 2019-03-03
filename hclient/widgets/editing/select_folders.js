@@ -175,7 +175,7 @@ console.log('edit not enabled');
                     if(node.data.files_count>0)
                         $span.html(node.title+' <span style="font-weight:normal">('+node.data.files_count+')</span>');
                     if(node.data.issystem){
-                        $span.addClass('graytext');//css({color:'gray !important'});
+                        $span.addClass('graytext');//.css({color:'red !important'});
                     }
             },            
             extensions: ["edit"],

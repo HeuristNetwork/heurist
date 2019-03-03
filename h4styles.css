@@ -1123,8 +1123,9 @@ Allow use of icon-large to be properly aligned
     margin-top: -0.75em;
 }
 
-.fancytree-active{
-    border: 1px lightblue solid;
+
+.fancytree-active > .fancytree-title{
+    background: #95A7B7 !important;
 }
 
 .fancytree-container{

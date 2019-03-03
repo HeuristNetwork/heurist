@@ -302,7 +302,7 @@ if(!$is_map_popup){
             //
             //
             function no_access_message(ele){                        
-                var sMsg = 'Sorry, your user profile does not allow you to view the content of this record'
+                var sMsg = 'Sorry, your group membership does not allow you to view the content of this record'
                 if(window.hWin && window.hWin.HEURIST4){
                     //,null,ele position not work properly 1) long message 2) within iframe
                     window.hWin.HEURIST4.msg.showMsgFlash(sMsg,1000);                        
@@ -510,7 +510,7 @@ function print_details($bib) {
     
     }else{
         
-        print 'Sorry, your user profile does not allow you to view the content of this record';
+        print 'Sorry, your group membership does not allow you to view the content of this record';
     }
     
 }

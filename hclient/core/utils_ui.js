@@ -2560,7 +2560,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
     var entity_id = item.element.attr( 'entity-id' );
     if(entity_id>0){
-        $('<span style="font-size:xx-small;font-style:italic;padding-left:1em">'+entity_id+'</span>')
+        $('<span style="font-size:0.7em;font-style:italic;padding-left:1em">id'+entity_id+'</span>')
           .appendTo( wrapper );    
     }
     

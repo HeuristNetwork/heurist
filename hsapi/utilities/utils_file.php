@@ -371,7 +371,7 @@
                     
                     if($isFancy){
                         $fancytree[] = array( 'key'=>$folder_name, 'title'=>$folder_name, 
-                            'folder'=>true, 'issystem'=>(@$sysfolders[$folder_name]!=null),
+                            'folder'=>true, 'issystem'=>(@$systemFolders[$folder_name]!=null),
                             'children'=>$tree['children'], 'files_count'=>$tree['count'] );
                     }else{
                         $dirs[$folder_name] = $tree;    
