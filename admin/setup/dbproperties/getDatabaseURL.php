@@ -99,7 +99,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
 function __replaceToLastServe($url){
     if($url!=null){
         if(strpos($url, 'http://heurist.sydney.edu.au')>0){
-            $url = str_replace( 'http://heurist.sydney.edu.au', 'https://heuristplus.sydney.edu.au', $url);
+            $url = str_replace( 'http://heurist.sydney.edu.au', HEURIST_MAIN_SERVER, $url);
         }
      }
     return $url;

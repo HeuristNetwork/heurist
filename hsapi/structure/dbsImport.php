@@ -696,7 +696,7 @@ $mysqli->commit();
 
         // Feb 2018 - catch references to old server and convert to new
         if(strpos($database_url, 'http://heurist.sydney.edu.au/')===0){
-            $remote_url = 'https://heuristplus.sydney.edu.au/';
+            $remote_url = HEURIST_MAIN_SERVER.'/';
         }
 
 

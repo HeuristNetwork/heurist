@@ -106,7 +106,7 @@ define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (co
 
 if($newid>0){ 
 
-    if(!(strpos($serverURL, 'https://heuristplus.sydney.edu.au')===0
+    if(!(strpos($serverURL, HEURIST_MAIN_SERVER)===0
         || strpos($serverURL, 'http://heurist.sydney.edu.au')===0)){ 
     
         echo '0,It is possible to assign arbitrary ID for databases on heurist servers only';
