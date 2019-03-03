@@ -86,13 +86,9 @@ $2 rm -rf $1
 
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
-$2 wget https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
-$2 tar -xjf external.tar.bz2
-$2 rm -f external.tar.bz2
-
-$2 wget https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
-$2 tar -xjf external_h4.tar.bz2
-$2 rm -f external_h4.tar.bz2
+$2 wget https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
+$2 tar -xjf external_h5.tar.bz2
+$2 rm -f external_h5.tar.bz2
 
 $2 wget https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
 $2 tar -xjf vendor.tar.bz2
@@ -103,8 +99,7 @@ $2 tar -xjf help.tar.bz2
 $2 rm -f help.tar.bz2
 
 cd /var/www/html/HEURIST/$1
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5 external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/vendor vendor
 

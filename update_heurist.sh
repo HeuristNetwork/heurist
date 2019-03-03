@@ -64,15 +64,10 @@ echo Obtaining updated support files - external and help files
 echo
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
-$2 rm -f external.tar.bz2
-$2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
-$2 tar -xjf external.tar.bz2
-$2 rm -f external.tar.bz2
-
-$2 rm -f external_h4.tar.bz2
-$2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
-$2 tar -xjf external_h4.tar.bz2
-$2 rm -f external_h4.tar.bz2
+$2 rm -f external_h5.tar.bz2
+$2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
+$2 tar -xjf external_h5.tar.bz2
+$2 rm -f external_h5.tar.bz2
 
 $2 rm -f vendor.tar.bz2
 $2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
@@ -97,8 +92,7 @@ $2 ln -s HEURIST/$1 $1
 
 # Place simlinks in instance directory
 cd /var/www/html/HEURIST/$1
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5 external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/vendor vendor
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 

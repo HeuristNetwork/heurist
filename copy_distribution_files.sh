@@ -111,10 +111,9 @@ cp installers/*.sh /var/www/html/HEURIST/DISTRIBUTION
 zip -j /var/www/html/HEURIST/DISTRIBUTION/verifyInstallation.zip admin/verification/verifyInstallation.php
 
 echo
-echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external, external_h4, vendor, and help
+echo creating tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5, vendor, and help
  cd /var/www/html/HEURIST/HEURIST_SUPPORT
-tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external/
-tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h4/
+tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h5/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ vendor/
 tar -cjf /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
 
