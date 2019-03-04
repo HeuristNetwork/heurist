@@ -173,7 +173,7 @@ function output_Data($params, $stream=null, $tmpfile=null){
         if(@$params['zip']==1){
             //as zip file
             $zipname = 'Export_'.$system->dbname().'_'.date("YmdHis").'.zip';
-            $destination = tempnam("tmp", "zip");
+            $destination = tempnam(HEURIST_SCRATCH_DIR, "zip");
             
             $zip = new ZipArchive();
             if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
@@ -657,7 +657,7 @@ function output_CSV($system, $data, $params){
     }else{
     
         $zipname = 'Export_'.$system->dbname().'_'.date("YmdHis").'.zip';
-        $destination = tempnam("tmp", "zip");
+        $destination = tempnam(HEURIST_SCRATCH_DIR, "zip");
         
         $zip = new ZipArchive();
         if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
@@ -760,7 +760,7 @@ function output_Records($system, $data, $params){
     $error_log = array();
     $error_log[] = 'Total rec count '.count($records);
 
-    $tmp_destination = tempnam("tmp", "exp");    
+    $tmp_destination = tempnam(HEURIST_SCRATCH_DIR, "exp");    
     //$fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
     $fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
     if (false === $fd) {

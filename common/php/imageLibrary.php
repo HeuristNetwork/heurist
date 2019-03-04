@@ -16,7 +16,7 @@
 
 /**
 * Operations with rectype icons and thumnail images
-
+* used in saveStructureLib.php and uploadRectypeIcon.php
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson

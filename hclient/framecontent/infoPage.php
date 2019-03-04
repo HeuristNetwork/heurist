@@ -60,7 +60,7 @@ if(!isset($layout_theme)) $layout_theme = 'heurist';
 
 if($layout_theme=="heurist" || $layout_theme=="base"){
     //default BASE or HEURIST theme
-    $cssLink = PDIR.'ext/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
+    $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
 }else{
     //load one of standard themes from jquery web resource
     $cssLink = 'https://code.jquery.com/ui/1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
@@ -77,7 +77,7 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 
         <link rel="stylesheet" href="<?php echo $cssLink;?>" />
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css">
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
     </head>
     <body style="padding:44px;" class="ui-heurist-header1">
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">

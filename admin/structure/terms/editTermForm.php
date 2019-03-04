@@ -102,8 +102,8 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Add <?=($parent_id==0?"vocabulary":"term for: ".$parent_name)?></title>
 
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
         <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->

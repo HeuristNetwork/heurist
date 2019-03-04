@@ -265,8 +265,9 @@ $.widget( "heurist.expertnation_nav", {
                 //add section on page for database content
                 var ele = that._addClearPageDiv(recID);                
 
-                //for map.php witnin iframe
-                content = content.replace('https://heuristplus.sydney.edu.au/heurist/',window.hWin.HAPI4.baseURL);
+                //precautionary trap, that is in case of old html web content referencing it.
+                //replace reference in webcontent (for map.php witnin iframe) to new server
+                content = content.replace('http://heurist.sydney.edu.au/h5-ao/',window.hWin.HAPI4.baseURL);
 
                 //add page content from database  
                 ele.html( content );    

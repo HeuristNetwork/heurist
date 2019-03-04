@@ -260,7 +260,7 @@
                 {
                     "dtID": "sys_MediaFolders",
                     "dtFields":{
-                        "dty_Type":"freetext",
+                        "dty_Type":"folder",
                         "dty_Size":10000,
                         "rst_DisplayWidth":100,
                         "rst_DisplayName": "Path(s) which contain files to be indexed as multimedia records for Picasa/FieldHelper compatibility",

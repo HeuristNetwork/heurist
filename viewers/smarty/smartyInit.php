@@ -1,8 +1,7 @@
 <?php
-//inlucde this file after system init
-
     /**
-    * libs.inc.php: additional Smarty functions
+    * smartyInit.php: additional Smarty functions
+    * this file should be included after system init
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -21,9 +20,9 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
-    define('SMARTY_DIR', HEURIST_DIR.'external/Smarty-3.0.7/libs/'); //was dirname(__FILE__)
-
-    require_once(SMARTY_DIR.'Smarty.class.php');
+    //smarty is already included via composer autoload in showReps.php    
+    //define('SMARTY_DIR', HEURIST_DIR.'external/Smarty-3.0.7/libs/'); 
+    //require_once(SMARTY_DIR.'Smarty.class.php');
 
     $smarty = new Smarty();
 
@@ -41,12 +40,11 @@
         die('Failed to create cache folder for smarty templates');
     }
 
-    $smarty->template_dir = HEURIST_SMARTY_TEMPLATES_DIR;
-    $smarty->config_dir   = HEURIST_SMARTY_TEMPLATES_DIR."configs/";
-    $smarty->compile_dir  = HEURIST_SMARTY_TEMPLATES_DIR.'templates_c/';
-    $smarty->cache_dir    = HEURIST_SMARTY_TEMPLATES_DIR.'cache/';
-
-
+    $smarty->setTemplateDir(HEURIST_SMARTY_TEMPLATES_DIR);
+    $smarty->setCompileDir(HEURIST_SMARTY_TEMPLATES_DIR.'templates_c');
+    $smarty->setCacheDir(HEURIST_SMARTY_TEMPLATES_DIR.'cache');
+    $smarty->setConfigDir(HEURIST_SMARTY_TEMPLATES_DIR.'configs');    
+    
     $smarty->registerResource("string", array("str_get_template",
         "str_get_timestamp",
         "str_get_secure",

@@ -559,7 +559,8 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
             . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
 
         }else{
-            $player = HEURIST_BASE_URL."ext/mediaelement/flashmediaelement.swf";
+            //last resort however flash is blocked nearly everywhere this time
+            $player = HEURIST_BASE_URL."external/mediaelement/flashmediaelement.swf";
 
             //preload="none"
             $result = '<video '.$size.' controls="controls">'

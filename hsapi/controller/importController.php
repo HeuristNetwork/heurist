@@ -86,7 +86,7 @@ require_once (dirname(__FILE__).'/../import/importParser.php'); //parse CSV, KML
 require_once (dirname(__FILE__).'/../import/importSession.php'); //work work with import session 
 require_once (dirname(__FILE__).'/../import/importAction.php'); //work with import tbale: matching, assign id, performs validation and import
 
-require_once(dirname(__FILE__).'/../../external/geoPHP/geoPHP.inc');
+require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 
 set_time_limit(0);
     

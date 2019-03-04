@@ -21,7 +21,6 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    //@todo use geekMail class instead
     function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8=false){
 
         $res = "ok";

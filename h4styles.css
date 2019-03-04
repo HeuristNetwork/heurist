@@ -1123,6 +1123,11 @@ Allow use of icon-large to be properly aligned
     margin-top: -0.75em;
 }
 
+
+.fancytree-active > .fancytree-title{
+    background: #95A7B7 !important;
+}
+
 .fancytree-container{
     overflow:hidden !important;
 }
@@ -1161,7 +1166,8 @@ span.fancytree-checkbox{
 .tree-csv .fancytree-expander, .tree-facets .fancytree-expander{
     display:none;
 }
-.tree-csv .graytext, .tree-facets .graytext{
+/*.tree-csv .graytext, .tree-facets .graytext*/
+.graytext{
     color: #AAA;
 }
 

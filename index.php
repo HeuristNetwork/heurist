@@ -46,21 +46,21 @@ define('PDIR','');
 require_once(dirname(__FILE__)."/hclient/framecontent/initPage.php");
 
 if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
-        print '<script type="text/javascript" src="ext/fancytree/jquery.fancytree-all.min.js"></script>';
+        print '<script type="text/javascript" src="external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';
 }else{
         print '<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>';
 }   
 ?>
 
         <!-- it is needed in preference dialog -->
-        <link rel="stylesheet" type="text/css" href="ext/fancytree/skin-themeroller/ui.fancytree.css" />
+        <link rel="stylesheet" type="text/css" href="external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
-        <script type="text/javascript" src="ext/layout/jquery.layout-latest.js"></script>
+        <script type="text/javascript" src="external/jquery.layout/jquery.layout-latest.js"></script>
 
         <!-- Gridster layout is an alternative similar to Windows tiles, not useful except with small
         number of widgets. Currently it is commented out of the code in layout_default.js -->
 
-        <script type="text/javascript" src="ext/js/jquery.ui-contextmenu.js"></script>
+        <script type="text/javascript" src="external/js/jquery.ui-contextmenu.js"></script>
         
         <!-- script type="text/javascript" src="ext/js/moment.min.js"></script
         <script type="text/javascript" src="ext/js/date.format.js"></script>
@@ -71,11 +71,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <!-- array of possible layouts -->
         <script type="text/javascript" src="layout_default.js"></script>
 
-        <!-- script type="text/javascript" src="js/hintDiv.js"></script -->
-
         <script type="text/javascript" src="hclient/widgets/dropdownmenus/help_tips.js"></script>
 
-        <script type="text/javascript" src="common/js/temporalObjectLibrary.js"></script>
+        <script type="text/javascript" src="hclient/core/temporalObjectLibrary.js"></script>
 
         <script type="text/javascript" src="hclient/widgets/record/recordAction.js"></script>
         <script type="text/javascript" src="hclient/widgets/record/recordAccess.js"></script>
@@ -114,10 +112,11 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         -->
 
         <!-- move to profile.js dynamic load -->
-        <script type="text/javascript" src="ext/js/themeswitchertool.js"></script>
+        <script type="text/javascript" src="external/js/themeswitchertool.js"></script>
 
         <!-- edit entity (load dynamically?) -->        
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/select_imagelib.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/select_folders.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
 
@@ -132,14 +131,14 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         
         <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="ext/fancybox/jquery.fancybox.css" />
-        <script type="text/javascript" src="ext/fancybox/jquery.fancybox.js"></script>
+        <link rel="stylesheet" type="text/css" href="external/jquery.fancybox/jquery.fancybox.css" />
+        <script type="text/javascript" src="external/jquery.fancybox/jquery.fancybox.js"></script>
         
-        <script src="ext/tinymce/tinymce.min.js"></script>
-        <script src="ext/tinymce/jquery.tinymce.min.js"></script>
+        <script src="external/tinymce/tinymce.min.js"></script>
+        <script src="external/tinymce/jquery.tinymce.min.js"></script>
         
         <!-- os, browser detector -->
-        <script type="text/javascript" src="ext/js/platform.js"></script>
+        <script type="text/javascript" src="external/js/platform.js"></script>
         
         
         <script type="text/javascript">

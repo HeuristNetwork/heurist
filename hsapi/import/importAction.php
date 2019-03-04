@@ -274,7 +274,6 @@ private static function findRecordIds($imp_session, $params){
                     
                     $fc = $a_tobind;
                     array_shift($fc); //remove ssssss
-                    //ART TEMP  array_walk($fc, 'trim_lower_accent2');
                     
                     //merge all values - to create unuque key for combination of values
                     if($imp_session['csv_mvsep']=='none'){

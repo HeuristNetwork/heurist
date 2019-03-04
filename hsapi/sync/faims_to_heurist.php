@@ -39,7 +39,7 @@ if(! $system->init(@$_REQUEST['db'], true) ){
         <title><?=HEURIST_TITLE ?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
         
         <link rel="stylesheet" type="text/css" href="../../style.css">
     </head>

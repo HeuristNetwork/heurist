@@ -581,12 +581,6 @@ window.hWin.HEURIST4.dbs = {
                             var $rectype_ids = $pointerRecTypeId.split(",");
                              
                             if($mode==4 || $mode==5 || $mode==6){
-                                /*
-                                if($pointerRecTypeId=="" || count($rectype_ids)==0){ //TEMP
-                                     $dt_title .= ' unconst';
-                                }
-                                */
-                                
                                 $dt_title = " <span style='font-style:italic'>" + $dt_title + "</span>";
                             }
                             

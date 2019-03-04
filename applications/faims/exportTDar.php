@@ -1,4 +1,8 @@
 <?php
+/* 
+THIS IS Heurist v.3. 
+It is not used anywhere. This code either should be removed or re-implemented wiht new libraries
+*/
 
 /**
 *
@@ -59,7 +63,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
         <link rel=stylesheet href="../../common/css/admin.css" media="all">
 
         <script type="text/javascript" src="../../common/js/utilsUI.js"></script>
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="selectRectype.js"></script>
         <style>
             .err_message {
@@ -186,7 +190,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             $cookie_file =  $folder."/cookies";
             //first of all try tp connect to tDAR server and keep cookie session id
 
-            if(!$no_registration){ //TEMP
+            if(!$no_registration){
 
                 $resp = post_request($protocol.$host."/login/process", $fusername, $fpwd, array("loginUsername"=>$fusername, "loginPassword"=>$fpwd), $cookie_file, true);
 

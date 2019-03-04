@@ -3411,16 +3411,11 @@ function onRepeatChange(evt){
 
         if(el.value === "single"){
             el_max.value = 1;
-            //Dom.setStyle(span_min, "visibility", "hidden");
-            //Dom.setStyle(span_max, "visibility", "hidden");
         } else if(el.value === "repeatable"){
             el_max.value = 0;
-            //Dom.setStyle(span_min, "visibility", "hidden");
-            //Dom.setStyle(span_max, "visibility", "hidden");
         } else if(el.value === "limited"){
             if(el_max.value<2) el_max.value = 2;
             Dom.setStyle(span_max, "visibility", "visible");
-            //TEMP Dom.setStyle(span_max, "visibility", "visible");
         }
 
     }

@@ -76,7 +76,15 @@ sortby,sort,s - sort phrases must be on top level array - all others will be ign
 
 sort values:
 
-
+set, fixed     as defined in ids:            
+r, rating      by bkm_Rating
+p, popularity  by rec_Popularity
+u, url         rec_URL
+m, modified    bkm_Modified, rec_Modified
+a, added       bkm_Added, rec_Added
+t, title       rec_Title
+rt, type       rec_RecTypeID
+f, field       by dty_ID  "sortby":"f:25"
 
 -----
 VALUE
@@ -389,7 +397,7 @@ class HQuery {
             if(strpos($subtext,':')>0){
                 list($subtext,$dty_ID) = explode(':',$subtext);
             }
-            
+      
             switch (strtolower($subtext)) {
                 case 'set': case 'fixed': //no sort - returns as is
                 

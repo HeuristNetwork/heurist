@@ -118,7 +118,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
 
         //remove remark to debug 
-        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.baseURL+"hsapi/controller/"+action+".php"; //+(new Date().getTime());
@@ -692,7 +692,16 @@ prof =Profile
             get_sysimages: function(folders, callback){
                 var request = {a:'sysimages', folders: folders};
                 _callserver('usr_info', request, callback);
+            },
+            
+            //manipulation with folders in database folder
+            get_sysfolders: function(request, callback){
+                if(!request) request = {};
+                if(!request['a']) request['a'] = 'folders';
+                if(!request['operation']) request['operation'] = 'list';
+                _callserver('usr_info', request, callback);
             }
+            
 
             /*
             ,databases: function(request, callback){

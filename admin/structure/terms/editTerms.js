@@ -1880,7 +1880,7 @@ function EditTerms() {
     {
         //verify that all required libraries have been loaded
         if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js
-            $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/jquery.fancytree-all.min.js');
+            $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/jquery.fancytree-all.min.js');
             return;
         }
         else if(!$.ui.fancytree._extensions["dnd"]){

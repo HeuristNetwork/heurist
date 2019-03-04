@@ -30,16 +30,16 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <title>Manage terms for term list fields and relationship type</title>
 
-        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-        <link rel="stylesheet" type="text/css" href="../../../ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="../../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+        <link rel="stylesheet" type="text/css" href="../../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
         
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
-        <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
-        <script type="text/javascript" src="../../../ext/jquery-file-upload/js/jquery.fileupload.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-file-upload/js/jquery.fileupload.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="../../../ext/fancytree/skin-themeroller/ui.fancytree.css" />
-        <script type="text/javascript" src="../../../ext/fancytree/jquery.fancytree-all.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../../../external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
+        <script type="text/javascript" src="../../../external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
         <!-- <script type="text/javascript" src="https://github.com/mar10/fancytree/src/jquery.fancytree.wide.js"></script> -->
 <!--
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">

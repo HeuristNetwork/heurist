@@ -25,13 +25,13 @@ define('PDIR','../../../');
     
 require_once(dirname(__FILE__)."/../initPage.php");
 ?>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/fancytree/skin-themeroller/ui.fancytree.css" />
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/fancytree/jquery.fancytree-all.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/fancybox/jquery.fancybox.css" />
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/fancybox/jquery.fancybox.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.css" />
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.js"></script>
         
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/layout/jquery.layout-latest.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.layout/jquery.layout-latest.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>

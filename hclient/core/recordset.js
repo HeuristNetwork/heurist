@@ -139,7 +139,7 @@ function hRecordSet(initdata) {
 Life cycle for geodata in record
 
 DB - mysql.asWKT ->
-recordset.toTimemap - util.parseWKTCoordinates (wellknown.js parseWKT -> GeoJSON) -> timemap.js (DISPLAY on MAP) 
+recordset.toTimemap - utils_geo.parseWKTCoordinates (wellknown.js parseWKT -> GeoJSON) -> timemap.js (DISPLAY on MAP) 
 @todo use google.maps.Data and get rid timemap.js
 
 EDIT   

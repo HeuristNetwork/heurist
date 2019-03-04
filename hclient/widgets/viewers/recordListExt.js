@@ -147,7 +147,7 @@ $.widget( "heurist.recordListExt", {
 
         if(this.options.is_single_selection){
 
-            var newurl = "common/html/msgNoRecordsSelected.html";
+            var newurl = null;
 
             if (window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.selection)) {
 
@@ -158,12 +158,15 @@ $.widget( "heurist.recordListExt", {
                     newurl = this.options.url.replace("[recID]", recID).replace("[dbname]",  window.hWin.HAPI4.database);
                 }
             }
+            if(newurl==null){
+                this.dosframe.attr('src', null);
+            }else{
+                newurl = window.hWin.HAPI4.baseURL +  newurl;
 
-            newurl = window.hWin.HAPI4.baseURL +  newurl;
-
-            if(this.dosframe.attr('src')!==newurl){
-                this.loadanimation(true);
-                this.dosframe.attr('src', newurl);
+                if(this.dosframe.attr('src')!==newurl){
+                    this.loadanimation(true);
+                    this.dosframe.attr('src', newurl);
+                }
             }
 
         }else if(this.dosframe.attr('src')!==this.options.url){

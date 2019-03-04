@@ -1659,7 +1659,7 @@ $.widget( "heurist.editing_input", {
                                 if(that.is_disabled) return;
 
                                 var url = window.hWin.HAPI4.baseURL 
-                                    + 'common/html/editTemporalObject.html?'
+                                    + 'hclient/widgets/editing/editTemporalObject.html?'
                                     + encodeURIComponent(that.newvalues[$input.attr('id')]
                                                 ?that.newvalues[$input.attr('id')]:$input.val());
                                 
@@ -1839,6 +1839,26 @@ $.widget( "heurist.editing_input", {
                 
             }
             else
+            if( this.detailType=='folder' ){
+                
+                $input.css({'padding-left':'30px'});
+                
+                var $gicon = $('<span>').addClass('ui-icon ui-icon-gear')
+                    .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
+                    .insertBefore($input);
+                var $select_folder_dlg = $('<div/>').hide().appendTo( $inputdiv )
+                    
+                this._on( $gicon, { click: function(){                                 
+                        $select_folder_dlg.select_folders({onselect:function(res){
+                            if(res){
+                                /*$input_img.find('img').prop('src', res.url);
+                                that.newvalues[$input.attr('id')] = res.path; 
+                                that._onChange(); */
+                            }
+                        }, multiselect: that.configMode && that.configMode.multiselect});
+                    }} );
+            }
+            else
             if( this.detailType=='file' ){
                 
                 
@@ -1933,7 +1953,7 @@ $.widget( "heurist.editing_input", {
          
                         //init upload widget
                         $input.fileupload({
-    url: window.hWin.HAPI4.baseURL +  'hsapi/utilities/fileUpload.php',  //'ext/jquery-file-upload/server/php/',
+    url: window.hWin.HAPI4.baseURL +  'hsapi/utilities/fileUpload.php',  //'external/jquery-file-upload/server/php/',
     //url: 'templateOperations.php',
     formData: [ {name:'db', value: window.hWin.HAPI4.database}, 
                 {name:'entity', value:this.configMode.entity},

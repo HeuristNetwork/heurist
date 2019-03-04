@@ -1,4 +1,8 @@
 <?php
+/* 
+THIS IS Heurist v.3. 
+It is not used anywhere. This code either should be removed or re-implemented wiht new libraries
+*/
 
     /**
     * annotatedTemplate.php: Import record types via annotated templates  - load external descripton (from heuristnetwork.org) into frame
@@ -37,7 +41,7 @@
         <link rel="icon" href="../../../favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="../../../favicon.ico" type="image/x-icon">
 
-        <script type="text/javascript" src="../../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
 
         <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
         <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">

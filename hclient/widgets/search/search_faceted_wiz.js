@@ -1,7 +1,7 @@
 /**
 *  Wizard to define new faceted search
 *    1. Options
-*    2. Select record types (uses rectype_manager)
+*    2. [removed]
 *    3. Select fields for facets (recTitle, numeric, date, terms, pointers, relationships)
 *    4. Define ranges for date and numeric fields
 *    5. Preview
@@ -98,7 +98,6 @@ $.widget( "heurist.search_faceted_wiz", {
     isversion:2,
     //params:
     // domain
-    // isadvanced
     // rectype_as_facets
     // fieldtypes:[] //allowed field types besides enum amd resource
     //  rectypes:[]                                                                                                                                     //for enums     //for other
@@ -106,7 +105,7 @@ $.widget( "heurist.search_faceted_wiz", {
     //                                    currentvalue:{text:label, query:value, termid:termid}, history:[currentvalue] }, ]
 
     /*
-    {"isadvanced":false,
+    {
     "rectype_as_facets":false,
     "fieldtypes":["enum","freetext","year","date","integer","float"],
     "rectypes":["11"],
@@ -193,14 +192,10 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step_panels.push(this.step0);
 
 
-        //select rectypes
+        //select rectypes  - this step is always hidden @todo remove it 
         this.step1 = $("<div>")
         .css({'display':'none'})
         .appendTo(this.element);
-        $("<div>").css({'padding':'1em 0'}).append($("<h4>").html(window.hWin.HR("Select record types that will be used in search"))).appendTo(this.step1);
-        //.css({overflow: 'hidden !important', width:'100% !important'})
-        this.step1.rectype_manager({ isdialog:false, list_top:'8em', isselector:true });
-
         this.step_panels.push(this.step1);
         
         //select field types
@@ -424,39 +419,19 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
 
 
-                if(this.isversion==2){
-                    this.step = 1;
-                    newstep = 2; //skip step
-                }else{
-                    //ART20150810 - to remove
-
-                    this.options.params.isadvanced = this.step0.find("#opt_mode_advanced").is(":checked");
-                    this.options.params.rectype_as_facets = this.step0.find("#opt_rectype_as_facets").is(":checked");
-
-                    if(this.options.params.isadvanced){
-
-                        this.step1.rectype_manager({selection:this.options.params.rectypes});
-
-                    }else{
-                        this.step = 1;
-                        newstep = 2; //skip step
-                    }
-                }
+                this.step = 1;
+                newstep = 2; //skip step
             }
 
             if(this.step==1 && newstep==2){ //select field types
 
-                var rectypeIds = null;
-                if(this.options.params.isadvanced){
-                    rectypeIds = this.step1.rectype_manager("option","selection");
-                }else{
-                    rectypeIds = [this.step0.find("#opt_rectypes").val()];
-                }
+                var rectypeIds = [this.step0.find("#opt_rectypes").val()];
+                
                 //mandatory
                 if(!window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds)){
                     window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Select record type"));
 
-                    this.step = (this.options.params.isadvanced)?1:0;
+                    this.step = 0;
                     return;
                 }else{
                     this.step0.hide();
@@ -491,7 +466,7 @@ $.widget( "heurist.search_faceted_wiz", {
             }
 
             //skip step
-            if(this.step==2 && newstep==1 && !this.options.params.isadvanced){
+            if(this.step==2 && newstep==1){
                 newstep = 0;
             }else if(this.step==4 && newstep==3){
                 //newstep=2;
@@ -655,93 +630,6 @@ $.widget( "heurist.search_faceted_wiz", {
                 $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
             }
         
-
-            
-            
-            /* ART20150810
-            var svs_id = $dlg.find('#svs_ID');
-            var svs_name = $dlg.find('#svs_Name');
-            var svs_ugrid = $dlg.find('#svs_UGrpID');
-
-            var opt_numeric = $dlg.find('#opt_use_numeric');
-            var opt_date = $dlg.find('#opt_use_date');
-            var opt_text = $dlg.find('#opt_use_freetext');
-            var opt_rectypes = $dlg.find("#opt_rectypes").get(0);
-            var opt_mode = $dlg.find("input[name='opt_mode']");
-
-            var opt_mode_simple = $dlg.find("#opt_mode_simple");
-            var opt_mode_advanced = $dlg.find("#opt_mode_advanced");
-
-            if($(opt_rectypes).is(':empty')){
-            window.hWin.HEURIST4.ui.createRectypeSelect( opt_rectypes, null, null, false);
-            }
-
-            this._on( opt_mode, {
-            click: function(e){
-            if($(e.target).val()=="true"){
-            $dlg.find('.simple-mode').hide();
-            $dlg.find('.advanced-mode').show();
-            }else{
-            $dlg.find('.simple-mode').show();
-            $dlg.find('.advanced-mode').hide();
-            if(this.options.params.rectypes) $(opt_rectypes).val(this.options.params.rectypes[0]);
-            }
-            }
-            });
-
-            }
-
-
-            var svsID = this.options.svsID;
-
-            var isEdit = (parseInt(svsID)>0);
-
-            if(isEdit){
-            var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
-            svs_id.val(svsID);
-            svs_name.val(svs[0]);
-            this.options.params = $.parseJSON(svs[1]);
-            this.options.domain = this.options.params.domain;
-
-            svs_ugrid.val(svs[2]==window.hWin.HAPI4.currentUser.ugr_ID ?this.options.domain:svs[2]);
-            svs_ugrid.parent().hide();
-
-            var ft = this.options.params.fieldtypes;
-            opt_numeric.attr( "checked", ft.indexOf('integer') );
-            opt_date.attr( "checked", ft.indexOf('date') );
-            opt_text.attr( "checked", ft.indexOf('freetext') );
-
-            this.step0.find("#opt_mode_simple").attr("checked", !this.options.params.isadvanced );
-            if(!this.options.params.isadvanced) this.step0.find("#opt_mode_simple").click();
-            opt_mode_advanced.attr("checked", this.options.params.isadvanced );
-            if(this.options.params.isadvanced) opt_mode_advanced.click();
-
-            this.step0.find("#opt_rectype_as_facets").attr('checked', this.options.params.rectype_as_facets);
-
-            }else{ //add new saved search
-
-            svs_id.val('');
-            svs_name.val('');
-
-
-            //fill with list of Workgroups in case non bookmark search
-            var selObj = svs_ugrid.get(0); //select element
-            window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, null,
-            [{key:'bookmark', title:window.hWin.HR('My Bookmarks')}, {key:'all', title:window.hWin.HR('All Records')}],
-            function(){
-            svs_ugrid.val(window.hWin.HAPI4.currentUser.ugr_ID);
-            });
-            svs_ugrid.val(this.options.domain);
-            svs_ugrid.parent().show();
-
-            opt_numeric.attr( "checked", true );
-            opt_date.attr( "checked", true );
-            opt_text.attr( "checked", true );
-
-            opt_mode_simple.attr("checked", (this.options.params.isadvanced) );
-            opt_mode_simple.click();
-            }
-            */
         }
     }
 
@@ -932,16 +820,6 @@ $.widget( "heurist.search_faceted_wiz", {
 
                             that._assignSelectedFacets();
 
-                            //change default checkbox for branch root
-                            var cb = treediv.find("span.fancytree-checkbox");
-                            if(cb.length>0){
-                                /* temp
-                                $(cb[0]).removeClass("fancytree-checkbox");
-                                var stit = treediv.find("span.fancytree-title"); // :first
-                                $(stit[0]).css({'font-size':'1.2em', 'font-weight':'bold'});
-                                */
-                            }
-                            
                             //hide all folder triangles
                             //treediv.find('.fancytree-expander').hide();
 
@@ -1651,12 +1529,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
 function showSearchFacetedWizard( params ){
 
-    if(!$.isFunction($('body').rectype_manager)){ //@todo - replace to new entity/rectypes as soon as it will be implemented
-        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/structure/rectype_manager.js', 
-                function(){ showSearchFacetedWizard(params); } );
-    }else if(!$.isFunction($('body').fancytree)){
+    if(!$.isFunction($('body').fancytree)){
 
-        $.getScript(window.hWin.HAPI4.baseURL+'ext/fancytree/jquery.fancytree-all.min.js', 
+        $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/jquery.fancytree-all.min.js', 
                 function(){ showSearchFacetedWizard(params); } );
 
     }else{

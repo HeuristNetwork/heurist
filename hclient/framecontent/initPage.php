@@ -94,7 +94,7 @@ if(!$layout_theme) $layout_theme = 'heurist';
 
 if($layout_theme=="heurist" || $layout_theme=="base"){
     //default BASE or HEURIST theme
-    $cssLink = PDIR.'ext/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
+    $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
 }else{
     //load one of standard themes from jquery web resource
     $cssLink = 'https://code.jquery.com/ui/1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
@@ -145,11 +145,11 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 <?php
 if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     ?>
-    <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
     
-    <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-file-upload/js/jquery.iframe-transport.js"></script>
-    <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-file-upload/js/jquery.fileupload.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-file-upload/js/jquery.fileupload.js"></script>
     <?php
 }else{
     ?>
@@ -162,10 +162,10 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 }
 ?>
 
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>ext/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
 
-<script type="text/javascript" src="<?php echo PDIR;?>ext/js/wellknown.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
 
 <!-- for debug  remark it and use getMultiScripts for production -->

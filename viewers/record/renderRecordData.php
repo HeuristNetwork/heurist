@@ -92,6 +92,7 @@ if ($rec_id>0 && !@$_REQUEST['bkmk_id'])
 $sel_ids = array();
 if(@$_REQUEST['ids']){
 	$sel_ids = explode(',',$_REQUEST['ids']);
+    $sel_ids = array_unique($sel_ids);
 }
 if(!$is_map_popup){
 ?>
@@ -99,12 +100,9 @@ if(!$is_map_popup){
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <!-- <script src="../../external/jquery/jquery-1.6.min.js"></script> -->
+        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
 
-        <!-- script type="text/javascript" src="../../external/js/simple_js_viewer/script/core/Simple_Viewer_beta_1.1.js"></script>
-        <script type="text/javascript" src="../../records/files/initViewer.js"></script -->
-        <script type="text/javascript" src="../../common/js/hintDiv.js"></script> <!-- for mapviewer roolover -->
+        <script type="text/javascript" src="../../hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
 
         <script type="text/javascript">
@@ -304,7 +302,7 @@ if(!$is_map_popup){
             //
             //
             function no_access_message(ele){                        
-                var sMsg = 'Sorry, your user profile does not allow you to view the content of this record'
+                var sMsg = 'Sorry, your group membership does not allow you to view the content of this record'
                 if(window.hWin && window.hWin.HEURIST4){
                     //,null,ele position not work properly 1) long message 2) within iframe
                     window.hWin.HEURIST4.msg.showMsgFlash(sMsg,1000);                        
@@ -409,17 +407,18 @@ if ($bkm_ID>0 || $rec_id>0) {
             
             $opts = '';
             $list = '';
+            
             if(count($sel_ids)>1){
                     
                 $cnt = 0;
                 
                 foreach($sel_ids as $id){
-                
+                    
                     $bibInfo = mysql__select_row_assoc($system->get_mysqli(),
                             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID'
                             .' where rec_ID='.$id.' and not rec_FlagTemporary');
                 
-                    if($id!=$rec_id){                
+                    if($id!=$rec_id){  //print details for linked records - hidden
                         print '<div data-recid="'.$id.'" style="font-size:0.8em;display:none">';
                         print_details($bibInfo);
                         print '</div>';
@@ -511,7 +510,7 @@ function print_details($bib) {
     
     }else{
         
-        print 'Sorry, your user profile does not allow you to view the content of this record';
+        print 'Sorry, your group membership does not allow you to view the content of this record';
     }
     
 }
@@ -1193,19 +1192,9 @@ function print_public_details($bib) {
 }
 
 
+//@todo implement popup that lists all record's tags 
 function print_other_tags($bib) {
     return;
-    //@todo implement
-        ?>
-        <div class="detailRow">
-            <div class="detailType">Tags</div>
-            <div class="detail">
-                <a target="_new" 
-                    href="<?=HEURIST_BASE_URL?>records/view/viewRecordTags.php?db=<?=HEURIST_DBNAME?>&recID=<?=$bib['rec_ID']?>" 
-                    target=_top onclick="return link_open(this);">[Other users' tags]</a>
-            </div>
-        </div>
-        <?php
 }
 
 //

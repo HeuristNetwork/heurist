@@ -79,8 +79,8 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
         <!-- jQuery UI -->
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <!-- Heurist CSS -->
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />

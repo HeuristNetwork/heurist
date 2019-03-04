@@ -44,10 +44,10 @@ if(! $system->init(@$_REQUEST['db'], true) ){
 
         <link rel="stylesheet" type="text/css" href="../../style.css">
 
-        <link rel="stylesheet" type="text/css" href="../../ext/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
+        <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css" />
         
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <script type="text/javascript" src="../../core/recordset.js"></script>
         <script type="text/javascript" src="../../core/hapi.js"></script>

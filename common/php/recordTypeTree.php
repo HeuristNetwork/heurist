@@ -1,6 +1,6 @@
 <?php
-//@TODO  1) similat method in db_structure 2) compose tree data on client side
-
+//@TODO  1) similar method in db_structure 2) compose tree data on client side
+//used in: smarty editor, edit rectype title
 /*
 * Copyright (C) 2005-2019 University of Sydney
 *

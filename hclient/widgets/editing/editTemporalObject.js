@@ -487,7 +487,7 @@ var TemporalPopup = (function () {
             var name = $(this).val();
             if(!name) return;
             //var loadName = (name == 'julian' ? '' : '.'+name);
-            //$.localise('../../external/js/jquery.calendars-1.2.1/jquery.calendars' + (loadName ? '.' : '') + loadName, 'en');
+            //$.localise('../../external/jquery.calendars-1.2.1/jquery.calendars' + (loadName ? '.' : '') + loadName, 'en');
 
             calendar = $.calendars.instance(name);
             if(!calendar) return;

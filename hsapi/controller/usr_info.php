@@ -118,7 +118,67 @@
         
               $res = folderContent($lib_path, array('png'));
               
- 
+        }else if ($action=="folders") { //get list of system images
+
+              $folders = $system->getArrayOfSystemFolders();
+               
+              $op = @$_REQUEST['operation'];
+              if(!$op || $op=='list'){
+                
+                $res = folderTree(@$_REQUEST['root_dir'], array('systemFolders'=>$folders,'format'=>'fancy') );
+                $res = $res['children'];
+                //$res = folderTreeToFancyTree($res, 0, $folders);
+              }else{
+                  
+                  $res = false;
+                  
+                  $dir_name = @$_REQUEST['name'];
+                  
+                  $folder_name = HEURIST_FILESTORE_DIR.$dir_name;
+                  
+                  if($folders[strtolower($dir_name)]){
+                      $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Cannot modify system folder');
+                  }else
+                  if($op=='rename'){
+                      
+                      $new_name = @$_REQUEST['newname'];
+                      if($folders[strtolower($new_name)]){
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Name "'.$new_name.'" is reserved for system folder');
+                      }else if(file_exists(HEURIST_FILESTORE_DIR.$new_name)){
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$new_name.'" already exists');
+                      }else if(!file_exists($folder_name)){
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$dir_name.'" does not exist');
+                      }else{
+                          $res = rename($folder_name, HEURIST_FILESTORE_DIR.$new_name);    
+                          if(!$res){
+                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Can not rename folder "'
+                                    .$dir_name.'" to name "'.$new_name.'"');
+                          }
+                      }
+     
+                  }else if($op=='delete'){
+                      //if (is_dir($dir))
+                      
+                      if(!file_exists($folder_name)){
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with name "'.$dir_name.'" does not exist');                          }else if (count(scandir($folder_name))>2){
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Non empty folder "'.$dir_name.'" can not be removed');                      }else{
+                          $res = folderDelete2($folder_name, true);        
+                          if(!$res){
+                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$dir_name.'" can not be removed');
+                          }
+                      }
+                      
+                  }else if($op=='create'){
+                      if(file_exists($folder_name)){
+                          $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder with such name already exists');
+                      }else{
+                         $res = folderCreate($folder_name, true);
+                         if(!$res){
+                              $response = $system->addError(HEURIST_ACTION_BLOCKED, 'Folder "'.$dir_name.'" can not be created');
+                         }
+                      }
+                  }
+              }
         }else        
         if ( $system->get_user_id()<1 &&  !in_array($action,$quest_allowed)) {
 

@@ -20,7 +20,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 // Include Composer autoloader if not already done.
-include dirname(__FILE__).'/../../vendor/autoload.php';
+require_once (dirname(__FILE__).'/../../vendor/autoload.php');
 
 require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_records.php');

@@ -46,7 +46,7 @@
     <head>
         <title><?php echo $sTitle; ?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <script type="text/javascript" src="../../ext/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <link rel="stylesheet" type="text/css" href="../../common/css/global.css">
         
         <script type="text/javascript">

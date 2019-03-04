@@ -34,7 +34,7 @@ define('LOGIN_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once (dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
-require_once (dirname(__FILE__).'/../../records/disambig/testSimilarURLs.php');
+require_once (dirname(__FILE__).'/../../hsapi/utilities/testSimilarURLs.php');
 require_once (dirname(__FILE__).'/../../hsapi/entity/dbUsrTags.php');
 require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
 

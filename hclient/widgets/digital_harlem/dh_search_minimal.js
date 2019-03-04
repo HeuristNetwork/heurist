@@ -183,7 +183,7 @@ function hSearchMinimalDigitalHarlem() {
 
                 var recordset = new hRecordSet(response.data);
 
-                var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha51');
+                var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_Map');
                 if(app && app.widget){
                     $(app.widget).dh_search('updateResultSet', recordset, keepRequest);
                 }

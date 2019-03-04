@@ -879,7 +879,8 @@ $.widget( "heurist.search", {
                     }else{
                         qs = data.q;
                     }
-                    if(qs.length<10000){
+
+                    if(!window.hWin.HEURIST4.util.isempty(qs) && qs.length<10000){
                         that.input_search.val(qs);
                         that.options.search_domain = data.w;
                         that._refresh();
@@ -891,9 +892,8 @@ $.widget( "heurist.search", {
                 
                 if(is_keep){
                     var qs = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true);
-                    if(qs.length<10000){
-                        window.history.pushState("object or string", "Title", location.pathname+'?'+
-                            window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true) );
+                    if(qs && qs.length<2000){
+                        window.history.pushState("object or string", "Title", location.pathname+'?'+qs );
                     }
                 }
                 
