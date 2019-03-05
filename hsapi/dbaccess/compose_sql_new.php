@@ -1360,6 +1360,11 @@ class HPredicate {
         //
         if (strpos($this->value,"<>")===false) {
             
+            if(strpos($this->value, '==')===0){
+                $this->case_sensitive = true;
+                $this->value = substr($this->value, 2);
+            }
+            
             if(strpos($this->value, '-')===0){
                 $this->negate = true;
                 $this->value = substr($this->value, 1);
@@ -1373,6 +1378,8 @@ class HPredicate {
                 $this->greaterthan = true;
                 $this->value = substr($this->value, 1);
             }
+            
+            
         }
         $this->value = $this->cleanQuotedValue($this->value);
 
@@ -1473,11 +1480,14 @@ class HPredicate {
                 }else{
 
                     if($eq=='=' && !$this->exact){
-                        $eq = 'LIKE';
-                        $k = strpos($this->value,"%");
-                        if($k===false || ($k>0 && $k+1<strlen($this->value))){
-                            $this->value = '%'.$this->value.'%';
-                        }
+                            $eq = 'LIKE';
+                            $k = strpos($this->value,"%");
+                            if($k===false || ($k>0 && $k+1<strlen($this->value))){
+                                $this->value = '%'.$this->value.'%';
+                            }
+                    }
+                    if($this->case_sensitive){
+                            $eq = 'COLLATE utf8_bin '.$eq;
                     }
 
                     $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
