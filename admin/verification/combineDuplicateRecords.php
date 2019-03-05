@@ -547,6 +547,7 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
     foreach($detail as $rg){
         $detail_id = $rg['dtl_ID'];
         $detail_type = $rg['dtl_DetailTypeID'];
+        $detail_val = '';
         
         if ($rg['dtl_Value']) {
             
@@ -561,7 +562,7 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
             
             
         }elseif ($rg['dtl_UploadedFileID']) {
-            $rd_temp = mysql__select_value($mysqli,
+            $detail_val = mysql__select_value($mysqli,
                     'select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']);
         }
        
