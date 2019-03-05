@@ -203,9 +203,9 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             $is_SpecialAdminUseOnly = strlen(@$passwordForServerFunctions)>6 && 
             @$cuser['ugr_Preferences']['userCompetencyLevel']==0 &&
             HEURIST_INDEX_DATABASE=='Heurist_Master_Index' && 
-            (strpos(HEURIST_SERVER_URL, 'https://heuristplus.sydney.edu.au')===0 ||
+            (strpos(HEURIST_SERVER_URL, HEURIST_MAIN_SERVER)===0 ||
             strpos(HEURIST_SERVER_URL, 'http://heurist.sydney.edu.au')===0) &&
-            strpos(HEURIST_INDEX_BASE_URL, 'https://heuristplus.sydney.edu.au')===0;
+            strpos(HEURIST_INDEX_BASE_URL, HEURIST_MAIN_SERVER)===0;
             
 ?>
 
