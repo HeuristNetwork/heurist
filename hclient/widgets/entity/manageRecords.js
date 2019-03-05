@@ -96,8 +96,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //-----------------
         var sh = 7;
         if(hasSearchForm){
-            sh = (this.options.parententity>0)?9:7;
-            this.searchForm.height((sh+4.5)+'em').css('border','none');    
+            if(this.options.parententity){
+                sh = 10;  
+                this.searchForm.height((sh+2.5)+'em').css('border','none');    
+            }else{
+                this.searchForm.height((sh+4.5)+'em').css('border','none');    
+            }
         }
         this.recordList.css('top', sh+'em');
 

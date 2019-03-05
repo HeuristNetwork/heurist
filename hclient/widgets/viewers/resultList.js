@@ -126,6 +126,7 @@ $.widget( "heurist.resultList", {
                 if(e.type == window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE){
 
                     that._showHideOnWidth();
+                    that._adjustHeadersPos();
 
                 }else  if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS)
                 {
@@ -622,7 +623,7 @@ $.widget( "heurist.resultList", {
             this.div_header.hide();
         }
 
-        this.div_toolbar.css({'top':top+'px', height:this.options.show_savefilter?'4.9em':'2.5em'});
+        this.div_toolbar.css({'top':top+'px', height:'auto'});//this.options.show_savefilter?'4.9em':'2.5em'});
         if(this.options.show_toolbar){
             this.div_toolbar.show();
             top = top + this.div_toolbar.height();
@@ -637,7 +638,7 @@ $.widget( "heurist.resultList", {
             top = top + this.div_content_header.height()-2;
         }
 
-        this.div_content.css({'top': top+4+'px'});
+        this.div_content.css({'top': top+'px'}); //'110px'});
         
         if(has_content_header){ //table_header
             this.div_content_header
