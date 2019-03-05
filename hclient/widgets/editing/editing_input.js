@@ -1847,15 +1847,21 @@ $.widget( "heurist.editing_input", {
                     .css({position:'absolute',margin:'2px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
                 var $select_folder_dlg = $('<div/>').hide().appendTo( $inputdiv )
+                
+                that.newvalues[$input.attr('id')] = value;
                     
                 this._on( $gicon, { click: function(){                                 
-                        $select_folder_dlg.select_folders({onselect:function(res){
-                            if(res){
-                                /*$input_img.find('img').prop('src', res.url);
-                                that.newvalues[$input.attr('id')] = res.path; 
-                                that._onChange(); */
+                        $select_folder_dlg.select_folders({
+                       onselect:function(newsel){
+                            if(newsel){
+                                var newsel = newsel.join(';');
+                                that.newvalues[$input.attr('id')] = newsel;
+                                $input.val(newsel);
+                                that._onChange();
                             }
-                        }, multiselect: that.configMode && that.configMode.multiselect});
+                        }, 
+                       selectedFolders: that.newvalues[$input.attr('id')], 
+                       multiselect: that.configMode && that.configMode.multiselect});
                     }} );
             }
             else

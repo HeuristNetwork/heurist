@@ -25,42 +25,64 @@ $.widget( "heurist.select_folders", {
 
         multiselect: true, 
         
-        onselect: null
+        onselect: null,
+        
+        selectedFolders: [] //array or semicolon separated list
         
     },
     
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
+    
+    _show_system_folders:false,
 
     // the constructor
     _init: function() {
 
         var that = this;
         
+        this.element.empty();
+        
         this.element.addClass('ui-heurist-bg-light');
 
         $('<div class="ent_wrapper">'
-                +'<div class="ent_content_full recordList" style="top:0"/>'
+                +'<div class="ent_header"/>'
+                +'<div class="ent_content_full recordList"/>'
                 +'</div>').appendTo( this.element );
+                
+                
+        var ent_header = this.element.find('.ent_header');        
+        
+        $('<div>').button({label:window.hWin.HR('New folder')}).click(
+            function() {
+                var node = that._treeview.fancytree('getRootNode');
+                node.editCreateNode("child", "new folder");                    
+            }        
+        ).appendTo(ent_header);
 
-
-        if(this.options.isdialog){
-            
-            var buttons = {};
-            buttons[window.hWin.HR('New folder')]  = function() {
+        $('<div>').button({label:window.hWin.HR('New subfolder')}).click(
+            function() {
                     
                     var node = that._treeview.fancytree("getActiveNode");
-                    if(node.data.issystem) return;
                     if( !node ) {
-                        node = this._treeview.getRootNode();
+                        window.hWin.HEURIST4.msg.showMsgFlash('Select parent folder');
+                        return;
+                    }
+                    if(node.data.issystem){
+                        window.hWin.HEURIST4.msg.showMsgFlash('System folder cannot be modified');
+                        return;
                     }
                     node.editCreateNode("child", "new folder");                    
-            }; 
-            buttons[window.hWin.HR('Delete')]  = function() {
-                    
+            }        
+        ).appendTo(ent_header);
+
+        $('<div>').button({label:window.hWin.HR('Delete')}).click(
+            function() {
+                
                     var node = that._treeview.fancytree("getActiveNode");
-console.log(node);                                       
-                    if(node && !node.data.issystem){
-                        if(node.countChildren()>0 || node.data.files_count>0){
+                    if(node){
+                        if(node.data.issystem){
+                            window.hWin.HEURIST4.msg.showMsgFlash('System folder cannot be deleted');
+                        }else if(node.countChildren()>0 || node.data.files_count>0){
                             window.hWin.HEURIST4.msg.showMsgFlash('Cannot delete non-empty folder');
                         }else{
                             
@@ -78,12 +100,55 @@ console.log(node);
                             });
                         }
                     }
+            }
+        ).appendTo(ent_header);
+
+        /*
+        $('<label><input type="checkbox">Show system folders</label>').css({'margin-left':'20px'}).appendTo(ent_header);
+        ent_header.find('input').click(
+        function(event){
+            that._show_system_folders = $(event.target).is(':checked');
+            
+            var wtrr = that._treeview.fancytree("getTree");
+            wtrr.filterBranches(function(node){
+                return that._show_system_folders || !node.data.issystem;
+            }, {mode: "hide"});
+            //that._treeview.fancytree('render')  
+        });
+        */
+        
+                
+
+        if(this.options.isdialog){
+            
+            var buttons = {};
+            buttons[window.hWin.HR('Select')]  = function() {
+                
+                var wtrr = that._treeview.fancytree("getTree");
+                // Get a list of all selected TOP nodes
+                var snodes = wtrr.getSelectedNodes(true);
+                // ... and convert to a key array:
+                var res = [];
+                var selRootKeys = $.map(snodes, function(node){
+                    var currname = node.getKeyPath()
+                    if(currname[0]=='/') currname = currname.substring(1);
+                    
+                    res.push(currname);
+                });
+                
+                if($.isFunction(that.options.onselect)){
+                    that.options.onselect.call(that, res);           
+                }
+                that._as_dialog.dialog('close');
+            }; 
+            buttons[window.hWin.HR('Cancel')]  = function() {
+                that._as_dialog.dialog('close');
             }; 
 
             var $dlg = this.element.dialog({
                 autoOpen: true,
                 height: 640,
-                width: 840,
+                width: 480,
                 modal: true,
                 title: "Select Folders",
                 resizeStop: function( event, ui ) {
@@ -121,6 +186,11 @@ console.log(node);
                         });        
          */
 
+        $( "<div>" )
+        .css({ 'width': '50%', 'height': '50%', 'top': '25%', 'margin': '0 auto', 'position': 'relative',
+            'z-index':'99999999', 'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
+        .appendTo( this.recordList );
+         
             //search for images in given array of folder
             var that = this;                                                
        
@@ -154,7 +224,7 @@ console.log(node);
     _initTreeView: function( treeData ){
       
         if(!$.ui.fancytree._extensions["edit"]){
-console.log('edit not enabled');
+            console.log('edit not enabled');
         }
         
         var that = this;
@@ -171,14 +241,15 @@ console.log('edit not enabled');
             renderNode: function(event, data) {
                     // Optionally tweak data.node.span
                     var node = data.node;
-                    var $span = $(node.span).find("> span.fancytree-title");
+                    var $span = $(node.span).find("> span.fancytree-title").css({'font-weight':'normal'});
                     if(node.data.files_count>0)
                         $span.html(node.title+' <span style="font-weight:normal">('+node.data.files_count+')</span>');
                     if(node.data.issystem){
                         $span.addClass('graytext');//.css({color:'red !important'});
                     }
             },            
-            extensions: ["edit"],
+            extensions: ['edit'], //'filter'],
+            //filter: { highlight:false, mode: "hide" },
             edit: {
             triggerStart: ["clickActive", "dblclick", "f2", "mac+enter", "shift+click"],
             beforeEdit: function(event, data){
@@ -230,24 +301,14 @@ console.log('edit not enabled');
             }        
             },
             select: function(event, data) {
-            
-                //var snodes = data.tree.getSelectedNodes();
-                
+                /* debug
+                var wtrr = that._treeview.fancytree("getTree");
                 // Get a list of all selected TOP nodes
-                var snodes = data.tree.getSelectedNodes(true);
-                // ... and convert to a key array:
+                var snodes = wtrr.getSelectedNodes(true);
                 var selRootKeys = $.map(snodes, function(node){
                     console.log(node.getKeyPath());
-                    return node.key;
                 });
-                /*
-                for(var i=0; i<snodes.length; i++){
-                    if(!snodes[i].partsel()){
-                        if(snodes[i].getLevel()<2 || snodes[i].getParent().isPartsel()){
-                            console.log(snodes[i].getKeyPath());
-                        }
-                    }
-                }*/
+                */
             },
             activate: function(event, data) {
                 
@@ -256,7 +317,39 @@ console.log('edit not enabled');
             }
         };
 
+        this.recordList.empty();
+        
         this._treeview = this.recordList.fancytree(fancytree_options);
+        
+        if(window.hWin.HEURIST4.util.isempty(this.options.selectedFolders)){
+            this.options.selectedFolders = [];
+        }else if(!window.hWin.HEURIST4.util.isArray(this.options.selectedFolders)){
+            this.options.selectedFolders = this.options.selectedFolders.split(';');
+        }
+        
+        if(this.options.selectedFolders.length>0){
+            var wtrr = that._treeview.fancytree("getTree");
+            
+            wtrr.visit(function(node){
+                    if(!node.data.issystem){
+                        
+                        /*var path = node.getParent().getKeyPath();
+                        path = (path=='/')?'':(path+'/');
+                        var currname = path+node.title;*/
+                        var currname = node.getKeyPath();
+                        //remove leading slash
+                        if(currname[0]=='/') currname = currname.substring(1);
+                        
+                        if(that.options.selectedFolders.indexOf(currname)>=0){
+                            node.setSelected(true);    
+                        }
+                        
+                        
+                    }
+            });
+        }
+        
+        
     },
 
 
