@@ -54,6 +54,8 @@ $2 rm -f $1.tar.bz2
 $2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2
 $2 tar -xjf $1.tar.bz2
 $2 rm -f $1.tar.bz2
+# remove existing directroy if present then make directory and copy over Heurist
+$2 rm -Rf /var/www/html/HEURIST/$1
 $2 mkdir /var/www/html/HEURIST/$1
 $2 cp -R $1/* /var/www/html/HEURIST/$1
 
@@ -62,15 +64,10 @@ echo Obtaining updated support files - external and help files
 echo
 cd /var/www/html/HEURIST/HEURIST_SUPPORT
 
-$2 rm -f external.tar.bz2
-$2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external.tar.bz2
-$2 tar -xjf external.tar.bz2
-$2 rm -f external.tar.bz2
-
-$2 rm -f external_h4.tar.bz2
-$2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h4.tar.bz2
-$2 tar -xjf external_h4.tar.bz2
-$2 rm -f external_h4.tar.bz2
+$2 rm -f external_h5.tar.bz2
+$2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
+$2 tar -xjf external_h5.tar.bz2
+$2 rm -f external_h5.tar.bz2
 
 $2 rm -f vendor.tar.bz2
 $2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
@@ -82,26 +79,26 @@ $2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPO
 $2 tar -xjf help.tar.bz2
 $2 rm -f help.tar.bz2
 
-# Add vendor directory which is new in 5.1.x
+# Add simlink to vendor directory which is new in 5.1.x
 cd /var/www/html/HEURIST/$1
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/vendor
 
 # No longer used
 $2 rm -f exemplars.tar.bz2
 
+# Simlink to this version in the root html directory
 cd /var/www/html
 $2 ln -s HEURIST/$1 $1
 
 # Place simlinks in instance directory
 cd /var/www/html/HEURIST/$1
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h4 ext
-$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external external
+$2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/external_h5 external
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/vendor vendor
 $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/help help
 
 echo "Heurist unpacked"
 
-# This installation of elaastic search generated a number of security holes rated HIGH RISK
+# This installation of elastic search generated a number of security holes rated HIGH RISK
 # We are therefore removing it pending investigation. Sept 2014
 # $2 mkdir /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
 # cd /var/www/html/HEURIST/HEURIST_SUPPORT/external/elasticsearch
@@ -113,19 +110,24 @@ echo "Heurist unpacked"
 
 # ------------------------------------------------------------------------------------------
 
-echo "\n\n\n\n\n\n"
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 
 
 echo "---- Heurist update installed in /var/www/html/HEURIST/$1 -------------------------------------------"
 echo
-echo "You may need to edit the configIni.php file in the /var/www/html/HEURIST/$1 directory"
-echo "if you do not have a shared heuristConfigIni.php file in /var/www/html/HEURIST (which you should have ...)"
+echo "If you do not have a shared heuristConfigIni.php file in /var/www/html/HEURIST (which you should have ...)"
+echo "you need to edit the configIni.php file in /var/www/html/HEURIST/$1"
 echo "See /var/www/html/HEURIST/$1/move_to_parent_as_heuristConfigIni.php for instructions"
 echo
-echo "Please test your new Heurist install from  https://yourserver/$1 or https://yourserver/HEURIST/$1 and login to a database;"
-echo "Use Database->Verify installation to check all is installed correctly"
+echo "Please test your new Heurist install from  https://yourserver/$1 and log in to a database;"
+echo "Use Database->Verify installation to check all is installed correctly and test major functions"
+echo "such as add record, add image, search, facet search, view record and map."
 echo 
-echo "When you have confirmed that the this Heurist upgrade is running correctly, make it the default by repointing"
-echo "your symlink /var/www/html/HEURIST/heurist to point to /var/www/html/HEURIST/$1"
+echo "When you have confirmed that the this Heurist upgrade is running correctly, make it the default by"
+echo "redirecting your /var/www/html/heurist symlink to point to /var/www/html/HEURIST/$1"
 echo
 echo
