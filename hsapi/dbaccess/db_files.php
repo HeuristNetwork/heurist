@@ -560,17 +560,21 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
 
         }else{
             //last resort however flash is blocked nearly everywhere this time
-            $player = HEURIST_BASE_URL."external/mediaelement/flashmediaelement.swf";
+            //$player = HEURIST_BASE_URL."external/mediaelement/flashmediaelement.swf";
 
             //preload="none"
             $result = '<video '.$size.' controls="controls">'
             .'<source type="'.$mimeType.'" src="'.$filepath.'" />'
+            /* 2019-03-05
+            since flash is disabled by default in most browsers - this is not reliable approach
             .'<!-- Flash fallback for non-HTML5 browsers -->'
             .'<object '.$size.' type="application/x-shockwave-flash" data="'.$player.'">'
             .'<param name="movie" value="'.$player.'" />'
             .'<param name="flashvars" value="controls=true&file='.$filepath.'" />'
             .'<img src="'.$thumb_url.'" width="320" height="240" title="No video playback capabilities" />'
             .'</object>'
+            */
+            .'<img src="'.$thumb_url.'" width="320" height="240" title="No video playback capabilities" />'
             .'</video>';
 
         }
