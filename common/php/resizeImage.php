@@ -49,6 +49,8 @@ if(!$system->init(@$_REQUEST['db'])){
     exit();
 }
 
+$force_recreate = (@$_REQUEST['refresh']==1);
+
 if (! @$_REQUEST['w']  &&  ! @$_REQUEST['h']  &&  ! @$_REQUEST['maxw']  &&  ! @$_REQUEST['maxh']) {
     $standard_thumb = true;
     $x = 200;
@@ -77,7 +79,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
     return;
     }*/
     
-    if ($standard_thumb  &&  file_exists($thumbnail_file)) {
+    if (!$force_recreate && $standard_thumb  &&  file_exists($thumbnail_file)) {
        header('Content-type: image/png');
        echo readfile($thumbnail_file);
        return;
@@ -91,7 +93,8 @@ if (array_key_exists('ulf_ID', $_REQUEST))
         exit();
     }
     
-    if ($standard_thumb  &&  $file['ulf_Thumbnail']) {
+/*2019-03-06 never use thumbnail from database    
+    if (!$force_recreate && $standard_thumb  &&  $file['ulf_Thumbnail']) {
 
         //save as file - recreate from thumb blob from database
         $img = @imagecreatefromstring($file['ulf_Thumbnail']);
@@ -103,6 +106,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
         }
         return;
     }
+*/    
     
     $type_source = null;
     $type_media = null;
@@ -152,6 +156,51 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             preg_match('/\\.([^.]+)$/', $file["ulf_OrigFileName"], $matches);	//find the extention
             $mimeExt = $matches[1];
         }
+        
+        //special case for pdf        
+        if(@$file && ($mimeExt=='application/pdf' || $mimeExt=='pdf')){
+            
+            //$thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.$file['ulf_ObfuscatedFileID'].'.png';
+            
+            if(true || !extension_loaded('imagick')){
+                //print 'imagick not loaded<br>';
+                //print phpinfo();
+                //exit();
+                
+                $cmd = 'convert -thumbnail x200 -flatten '; //-background white -alpha remove 
+                $cmd .= ' '.escapeshellarg($filename.'[0]');
+                $cmd .= ' '.escapeshellarg($thumbnail_file);
+                exec($cmd, $output, $error);
+                
+//error_log($cmd);        
+
+                if ($error) {
+                    error_log ('ERROR on pdf thumbnail creation: '.implode('\n', $output));
+                    exit();
+                }
+                $im = file_get_contents($thumbnail_file);
+                
+            }else{
+                $im =  new Imagick($filename.'[0]'); 
+                $im->setImageFormat('png'); 
+                $im->thumbnail(200,200);
+
+                if ($standard_thumb) {
+                    // store to database
+                    //save_thumnail_indb($mysqli, $file, $resized);
+                    
+                    if(file_exists($thumbnail_file)){
+                        unlink($thumbnail_file);
+                    }
+                    $im->writeImage($thumbfile);
+                }
+            }
+            header('Content-Type: image/png');
+            echo $im;
+            exit();
+        }
+        
+        
         
         if (function_exists('exif_imagetype')) {
             switch(@exif_imagetype($filename)){
@@ -209,6 +258,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
         $img = null;
 
         if(!$too_large){
+            
                 
             $errline_prev = 0;
             
@@ -347,13 +397,27 @@ $resized = file_get_contents($resized_file);
 
 if ($standard_thumb  &&  @$file) {
     // store to database
-    $mysqli->query('update recUploadedFiles set ulf_Thumbnail = "' . $mysqli->real_escape_string($resized) . '" where ulf_ID = ' . $file['ulf_ID']);
+    /*2019-03-06 never use thumbnail from database    
+    save_thumnail_indb($mysqli, $file, $resized);
+    */
 }else{
     unlink($resized_file);
 }
 
 // output to browser
 echo $resized;
+
+//
+// store to database 
+//
+function save_thumnail_indb($mysqli, $file_info, $resized){
+    
+    //$resized = file_get_contents($resized_file);
+    
+    $mysqli->query('update recUploadedFiles set ulf_Thumbnail = "' 
+        . $mysqli->real_escape_string($resized) . '" where ulf_ID = ' . $file_info['ulf_ID']);
+    
+}
 
 /**
 * Creates image from given string
