@@ -625,6 +625,7 @@ class HPredicate {
     //@todo - remove?
     var $negate = false;
     var $exact = false;
+    var $case_sensitive = false;
     var $lessthan = false;
     var $greaterthan = false;
 
@@ -1349,6 +1350,8 @@ class HPredicate {
     function getFieldValue(  ){
 
         global $mysqli, $params_global;
+        
+        $this->case_sensitive = false;
 
         //@todo between , datetime, terms
         if(is_array($this->value)){
