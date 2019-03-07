@@ -1085,7 +1085,7 @@ $.widget( "heurist.resultList", {
         var html_pwdrem = '';
         var pwd = window.hWin.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
         if(pwd){
-            html_pwdrem =  '<span class="ui-icon ui-icon-key rec_pwdrem" style="display:inline;left:10px"></span>';
+            html_pwdrem =  '<span class="ui-icon ui-icon-key rec_pwdrem" style="display:inline;left:14px;font-size:0.99em"></span>';
             pwd = ' pwd="'+pwd+'" ';
         }else{
             pwd = '';
@@ -1131,12 +1131,12 @@ $.widget( "heurist.resultList", {
 
             // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner" style="width:20px;padding-top:6;display:inline-block;color:'
-                     + clr + '" title="' + hint + '"><b>' + (owner_id==0?'E':owner_id) + '</b></span>';
+                     + clr + '" title="' + hint + '"><b>' + (owner_id==0?'':owner_id) + '</b></span>';
             
             if(clr != 'blue')         
             html_owner =  html_owner + '<span class="ui-icon ui-icon-cancel" '
-            +'style="color:darkgray;display:inline;font-size: 2em;vertical-align: -2px"></span>'
-                +'<span class="ui-icon ui-icon-eye" style="color:darkgray;display:inline;vertical-align:0px" title="'
+            +'style="color:darkgray;display:inline;font-size:1.5em;vertical-align: -2px"></span>'
+                +'<span class="ui-icon ui-icon-eye" style="font-size:0.9em;color:darkgray;display:inline;vertical-align:0px" title="'
                 + 'This record is not publicly visible - user must be logged in to see it'
                 + '" ></span>';
                      
