@@ -576,7 +576,7 @@ $system_folders = $system->getSystemFolders();
                                 }
 
                                 $record = array();
-                                $record['ID'] = -1; //add new
+                                $record['ID'] = 0; //add new
                                 $record['RecTypeID'] = $recordType;
                                 $record['AddedByImport'] = 2;
                                 $record['no_validation'] = true;
@@ -753,7 +753,7 @@ XML;
 
                         //add-update Heurist record
                         $record = array();
-                        $record['ID'] = -1;
+                        $record['ID'] = 0; //add new
                         $record['RecTypeID'] = RT_MEDIA_RECORD;
                         $record['AddedByImport'] = 2;
                         $record['no_validation'] = true;

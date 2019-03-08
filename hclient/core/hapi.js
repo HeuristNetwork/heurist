@@ -718,8 +718,8 @@ prof =Profile
     *
     * methods:
     *           for record_edit controller
-    *   add       - creates new temporary record
-    *   save      - save record
+    *   addRecord       - creates new temporary record
+    *   saveRecord      - save record
     *   remove    - delete record
     *   duplicate
     *   access    - ownership and visibility
@@ -749,7 +749,7 @@ prof =Profile
             *      optional  rt - rectype, ro - owner,  rv - visibility
             * @param callback - response hRecordSet object
             */
-            add: function(request, callback){
+            addRecord: function(request, callback){
                 if(request){
                     request.a = 'a';
                 }else{
@@ -764,7 +764,7 @@ prof =Profile
             * @param request a: s|save
             * @param callback - response hRecordSet object
             */
-            ,save: function(request, callback){
+            ,saveRecord: function(request, callback){
                 if(request) request.a = 's';
                 _callserver('record_edit', request, callback);
             }

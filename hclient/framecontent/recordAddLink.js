@@ -957,7 +957,7 @@ function hRecordAddLink() {
                     
                     
                     requests.push({a: 'save',    //add new relationship record
-                        ID:-1, //new record
+                        ID:0, //new record
                         RecTypeID: RT_RELATION,
                         //RecTitle: 'Relationship ('+sSourceName+' '+sRelation+' '+sTargetName+')',
                         details: details });
@@ -999,7 +999,7 @@ function hRecordAddLink() {
             if(request.a=='add'){  //add link - batch update - add new field
                 window.hWin.HAPI4.RecordMgr.batch_details(request, __callBack);
             }else{ //add relationship - add new record
-                window.hWin.HAPI4.RecordMgr.save(request, __callBack);
+                window.hWin.HAPI4.RecordMgr.saveRecord(request, __callBack);
             }
         }else if(requests.length>0){
             res.count = requests.length;

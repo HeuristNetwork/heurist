@@ -450,7 +450,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(!isOpenAready){            
     
             var that = this; 
-            this._currentEditID = recID;
+            this._currentEditID = (recID<0)?0:recID;
             
             if(this.options.edit_mode=='popup'){
                 //OLD WAY - NOT USED
@@ -1467,7 +1467,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that.options.new_record_params['RecTypeID'] = that._currentEditRecTypeID;
             }        
             
-            that.options.new_record_params['ID'] = -1;
+            that.options.new_record_params['ID'] = 0;
             that.options.new_record_params['FlagTemporary'] = 1;
             that.options.new_record_params['no_validation'] = 1;
             
@@ -1484,7 +1484,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 if(that.options.new_record_params['details']){                     
                     //need to use save because method "add" inserts only header
-                    window.hWin.HAPI4.RecordMgr.save( that.options.new_record_params,
+                    window.hWin.HAPI4.RecordMgr.saveRecord( that.options.new_record_params,
                         function(response){ 
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     response.is_insert=true; 
@@ -1492,10 +1492,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 } else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
                                 }
-                                // for  window.hWin.HAPI4.RecordMgr.add that._initEditForm_step4(response); 
+                                // for  window.hWin.HAPI4.RecordMgr.addRecord that._initEditForm_step4(response); 
                         });
                 }else{
-                    window.hWin.HAPI4.RecordMgr.add( that.options.new_record_params,
+                    window.hWin.HAPI4.RecordMgr.addRecord( that.options.new_record_params,
                         function(response){ 
                             response.is_insert=true; 
                             that._initEditForm_step4(response); //it returns full record data
@@ -2146,7 +2146,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             var dlged = that._getEditDialog();
             if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
             
-            window.hWin.HAPI4.RecordMgr.save(request, 
+            window.hWin.HAPI4.RecordMgr.saveRecord(request, 
                     function(response){
                         
                         window.hWin.HEURIST4.msg.sendCoverallToBack();

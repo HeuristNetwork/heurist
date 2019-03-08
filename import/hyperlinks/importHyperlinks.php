@@ -521,7 +521,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
 	// no similar URLs, no exactly matching URL, or user has explicitly selected "add new URL"
 	//insert the main record
     $record = array();
-    $record['ID'] = -1;
+    $record['ID'] = 0; //add new record
     $record['RecTypeID'] = RT_INTERNET_BOOKMARK;
     $record['AddedByImport'] = 1;
     $record['no_validation'] = true;

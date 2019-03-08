@@ -43,7 +43,7 @@ resultList.js -> resultListMenuSelected.html/resultListMenu.js
 detailBatchEditPopup opens either
 
 to convert
-    recordAddLink - define links/relationship -> RecordMgr.batch_details for links, RecordMgr.save new record for relationship
+    recordAddLink - define links/relationship -> RecordMgr.batch_details for links, RecordMgr.saveRecord new record for relationship
     recordAction - change details in batch    -> RecordMgr.batch_details
 
     recordAccess - define ownership and access rights  -> h3 executeAction("set_wg_and_vis") or just close window
@@ -61,7 +61,7 @@ todo
     recordNotify - send email about record
     
 on server side - controller
-RecordMgr.add, save, duplicate, remove  -> record_edit.php -> db_records.php
+RecordMgr.addRecord, saveRecord, duplicate, remove  -> record_edit.php -> db_records.php
 
 RecordMgr.batch_details -> record_details.php  -> $dbRecDetails
 

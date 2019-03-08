@@ -1757,8 +1757,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             self::$rep_permission++;
             return null;
         }
-    }else if(!$recordId){
-        $recordId = -1;
+    }else if($recordId==null ||  $recordId==''){
+        $recordId = 0; //add new record
     }
 
     $record = array();
@@ -2576,6 +2576,115 @@ public static function performImport($params, $mode_output){
     }    
     return $res;
 } //end performImport
+
+ 
+//------------------------- import for heurist json/html/xml format 
+/**
+* Reads import file 
+* 
+* detect format
+* if xml coverts to json
+* 
+* @param mixed $filename - archive or temp  import file
+* @param mixed $type - type of file manifest of record data
+*/
+private static function importH_readfile($filename, $type=null){
+   
+    try{
+        $data = json_decode(file_get_contents($tmp_file), true);
+    } catch (Exception  $e){
+        $data = null;
+    }   
+    
+    return $data;
+}
+
+/**
+* return list of definitions (record types to be imported)
+* 
+* @param mixed $filename
+*/
+public static function importH_GetDefintions($filename){
+
+    $res = false;
+    
+    $data = self::importH_readfile( $filename );
+    
+    $imp_rectypes = @$data['heurist']['database']['rectypes'];
+    if($data==null || !$imp_rectypes){
+        $system->addError(HEURIST_ERROR, 'Import data has wrong data. "Record type" section is not found');
+    }else{
+        
+        $database_defs = dbs_GetRectypeStructures(self::$system, null, 2);
+        $database_defs = array('rectypes'=>$database_defs);
+        
+        foreach ($imp_rectypes as $rtid=>$rt){
+            $conceptCode = $rt['code'];
+            $local_id = DbsImport::getLocalCode('rectypes', $database_defs, $conceptCode, false);
+            $imp_rectypes[$rtid]['localid'] = $local_id;
+        }
+        
+        //return array of $imp_rectypes - record types to be imported
+        $res = array("status"=>HEURIST_OK, "data"=> $imp_rectypes );
+    }
+
+    return $res;
+}
+
+//
+// imports missed record types (along with dependencies)  dbsImport.php
+// maintain mapping remote->local definitions (dbsImport->xxx_correspondence)
+//
+public static function importH_ImportDefintions($filename){
+    
+    $res = false;
+    
+    $data = self::importH_readfile( $filename );
+    
+    $imp_rectypes = @$data['heurist']['database']['rectypes'];
+    if($data==null || !$imp_rectypes){
+        $system->addError(HEURIST_ERROR, 'Import data has wrong data. Record type section is not found');
+    }else{
+        
+        ini_set('max_execution_time', 0);
+        $importDef = new DbsImport( self::$system );
+
+        if($importDef->doPrepare(  array('defType'=>'rectype', 
+                    'databaseID'=>@$data['heurist']['database']['id'], 
+                    'definitionID'=>array_keys($imp_rectypes) )))
+        {
+            $res = $importDef->doImport();
+        }
+
+        
+        if(!$res){
+            $err = $system->getError();
+            if($err && $err['status']!=HEURIST_NOT_FOUND){
+                $system->error_exit(null);  //produce json output and exit script
+            }
+        }else{
+            $res = $importDef->getReport();
+            $res['status'] = HEURIST_OK;            
+            //record type will be replaced with new correspondent record type
+            $defs_correspondence = $importDef->getCorrespondences();
+        
+        }
+        
+        return $res;
+    }
+    
+    return $res;
+}
+
+//
+//
+//
+public static function importH_ImportRecords($filename){
+    $res = false;
+    
+    
+    return $res;
+}
 
  
 } //end class

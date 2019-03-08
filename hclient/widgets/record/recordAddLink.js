@@ -748,7 +748,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     
                     
                     requests.push({a: 'save',    //add new relationship record
-                        ID:-1, //new record
+                        ID:0, //new record
                         RecTypeID: RT_RELATION,
                         //RecTitle: 'Relationship ('+sSourceName+' '+sRelation+' '+sTargetName+')',
                         details: details });
@@ -796,7 +796,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             if(request.a=='add'){  //add link - batch update - add new field
                 window.hWin.HAPI4.RecordMgr.batch_details(request, __callBack);
             }else{ //add relationship - add new record
-                window.hWin.HAPI4.RecordMgr.save(request, __callBack);
+                window.hWin.HAPI4.RecordMgr.saveRecord(request, __callBack);
             }
         }else{
             window.hWin.HEURIST4.msg.sendCoverallToBack();
