@@ -3,6 +3,8 @@
     /**
     * Application interface. See hRecordMgr in hapi.js
     * Record search and output in required format
+    * used in recordExportCSV.js
+    * 
     * 
     * parameters
     * db - heurist database

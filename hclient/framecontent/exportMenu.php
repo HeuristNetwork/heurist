@@ -74,6 +74,16 @@ require_once(dirname(__FILE__)."/initPage.php");
                 HuNI harvestable (file-per-record) <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
         </div>
 
+        <div id="menu-export-json-multifile" style="padding-left:5px;">
+            <button class="export-button">JSON</button>
+            <a href="#" oncontextmenu="return false;" 
+                data-logaction="exp_JSON"
+                data-action="menu-export-json-multifile"
+                title="Generate JSON for current set of search results (current query) with one record per file, plus manifest">
+                JSON<span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
+        </div>
+        
+        
         <div id="menu-export-kml" style="padding-left:5px;">
             <button class="export-button">KML</button>
             <a href="#" oncontextmenu="return false;" 

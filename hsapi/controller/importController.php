@@ -21,19 +21,21 @@
     */
     
     /*
-    parameter
+    =================== parameters for csv/kml import
     
     content
         function parse_content - parse CSV from content parameter and returns parsed array (used in import terms)
         
-    set_primary_rectype
-        set main rectype for given session and returns list of dependencies (resource field->rectype)    
-
     records
         get records from import table    
 
         
     action
+    
+    set_primary_rectype
+        set main rectype for given session and returns list of dependencies (resource field->rectype)    
+
+    
     1) step0
         ImportCsvParser::saveToTempFile   save CSV form "data" parameter into temp file in scratch folder, returns filename
                      (used to post pasted csv to server side)    
@@ -75,6 +77,14 @@
     5) step5
         ImportAction::performImport - do import - add/update records in heurist database
     
+    ============== parameters for xml/json import
+    
+    filename - name of temp file with import data
+    
+    action
+        import_prepare      - reads import file and returns list of records to be imported
+        import_definitions  - 
+        import_records 
 
     */
 require_once(dirname(__FILE__)."/../System.php");
@@ -192,10 +202,24 @@ if(!$system->init(@$_REQUEST['db'])){
                 
             }
             
+        }else if($action=='import_preview'){
+            //reads import file and returns list of records to be imported
+            $res = ImportAction::importH_GetDefintions(@$REQUEST['filename']);
+            
+        }else if($action=='import_definitions'){
+            
+            $res = ImportAction::importH_ImportDefintions(@$REQUEST['filename']);
+            
+        }else if($action=='import_records'){
+            
+            $res = ImportAction::importH_ImportRecords(@$REQUEST['filename']);
+            
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missed or wrong");                
             $res = false;
         }
+        
+         
         
         
         if(is_bool($res) && $res==false){

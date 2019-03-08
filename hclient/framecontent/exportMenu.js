@@ -227,13 +227,15 @@ function hexportMenu() {
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV');
             
         }else if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
-            _exportHML(true,false,false); // isAll, includeRelated, multifile = separate files
+            _exportRecords('hml',true,false,false); // isAll, includeRelated, multifile = separate files
         }else if(action == "menu-export-hml-selected"){ // Currently selected records only
-            _exportHML(false,false,false);
+            _exportRecords('hml',false,false,false);
         }else if(action == "menu-export-hml-plusrelated"){ // Current resulteset plus any related records
-            _exportHML(true,true,false);
+            _exportRecords('hml',true,true,false);
         }else if(action == "menu-export-hml-multifile"){ // selected + related
-            _exportHML(true,false,true);
+            _exportRecords('hml',true,false,true);
+        }else if(action == "menu-export-json-multifile"){ 
+            _exportRecords('json',true,false,true);  //all, multifile
         }else if(action == "menu-export-kml"){
             _exportKML(true);
         }else if(action == "menu-export-rss"){
@@ -250,7 +252,7 @@ function hexportMenu() {
     //
     //
     //
-    function _exportHML(isAll, includeRelated, multifile){ // isAll = resultset, false = current selection only
+    function _exportRecords(format, isAll, includeRelated, multifile){ // isAll = resultset, false = current selection only
 
         var q = "",
         layoutString,rtFilter,relFilter,ptrFilter,
@@ -281,8 +283,21 @@ function hexportMenu() {
         }
 
         if(q!=''){
+            
+            var script; 
+            var params = '';
+            if(format=='hml'){
+                script = 'export/xml/flathml.php';                
+                params =  'depth='+(includeRelated?1:0)
+                          + (multifile?'&file=1':'');    
+                
+            }else{
+                script = 'hsapi/controller/record_output.php';
+                params = 'format=json&file=0&defs=0';
+            }
+            
 
-            var url = window.hWin.HAPI4.baseURL + "export/xml/flathml.php?"+
+            var url = window.hWin.HAPI4.baseURL + script + '?' +
             "w=all"+
             "&a=1"+
             "&depth="+depth +
@@ -292,8 +307,8 @@ function hexportMenu() {
             (rtFilter ? "&" + rtFilter : "") +
             (relFilter ? "&" + relFilter : "") +
             (ptrFilter ? "&" + ptrFilter : "") +*/
-            "&db=" + window.hWin.HAPI4.database +
-            (multifile?'&file=1':'');
+            "&db=" + window.hWin.HAPI4.database
+            +'&'+params;
 
             window.open(url, '_blank');
         }
