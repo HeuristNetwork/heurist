@@ -267,6 +267,9 @@ window.hWin.HEURIST4.util = {
             return '?';
     },
 
+    //
+    // removes codes section and empty levels
+    //
     cleanRules: function(rules){
         
         if(window.hWin.HEURIST4.util.isempty(rules)){
