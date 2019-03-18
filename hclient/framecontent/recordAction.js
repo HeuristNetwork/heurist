@@ -255,11 +255,15 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             allowed.splice(allowed.indexOf("geo"),1);
             allowed.splice(allowed.indexOf("file"),1);
             
+            var initially_selected = 0;
+            
+            
             if(action_type=='extract_pdf'){
                 allowed = ['blocktext'];    
+                initially_selected = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTRACTED_TEXT'];
             }
 
-            window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
+            window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null, {selected_value:initially_selected});
         }
         
         fieldSelect.onchange = _createInputElements;
