@@ -1561,6 +1561,44 @@ if(!detailtypes[dtID]){
                             
                         }else{
                             
+                            if(isNaN(field.mmin0) || isNaN(field.mmax0)){
+                                field.mmin0 = mmin;
+                                field.mmax0 = mmax;
+                            }
+                            
+                            
+                            function __roundNumericLabel(val) {
+                                var prefix = '';
+                                if(val>=10e21){
+                                    prefix = 'Z'; //Sextillion
+                                    val = val/1e21;
+                                }else if(val>=10e18){
+                                    prefix = 'E'; //Quintillion
+                                    val = val/1e18;
+                                }else if(val>=10e15){
+                                    prefix = 'P'; //Quadrillion
+                                    val = val/1e15;
+                                }else if(val>=10e12){
+                                    prefix = 'T'; //Trillion  
+                                    val = val/1e12;
+                                }else if(val>=10e9){
+                                    prefix = 'G'; //Billion 
+                                    val = val/1e9;
+                                }else if(val>=10e6){
+                                    prefix = 'M'; //Million
+                                    val = val/1e6;
+                                }else if(val>=10e3){
+                                    prefix = 'k'; //Thousand
+                                    val = val/1e3;
+                                }
+                                if(prefix!=''){
+                                    return Math.round(val)+prefix;    
+                                }else{
+                                    return val;
+                                }
+                                
+                            }
+                            
                             function __updateSliderLabel() {
                                       
                                 if(arguments && arguments.length>1){
@@ -1591,6 +1629,9 @@ if(!detailtypes[dtID]){
                                         }catch(err) {
                                             max = ""; 
                                         }
+                                    }else{
+                                        min = __roundNumericLabel(min);
+                                        max = __roundNumericLabel(max);
                                     }
                                     $( "#facet_range"+facet_index )
                                         .text( min + " - " + max + ((cnt>0)?" ("+cnt+")":"") );
@@ -1605,6 +1646,15 @@ if(!detailtypes[dtID]){
 
                                 var field = that.options.params.facets[facet_index];
                                 
+                                if(min<field.mmin0) {
+                                    min = field.mmin0;   
+                                    slider.slider( "values", 0, min);
+                                }
+                                if(max>field.mmax0) {
+                                    max = field.mmax0;
+                                    slider.slider( "values", 1, max);
+                                }
+
                                 if(field['type']=="date"){
                                     min = (new Date(min)).toISOString(); 
                                     max = (new Date(max)).toISOString(); 
@@ -1622,7 +1672,6 @@ if(!detailtypes[dtID]){
                                 that.doSearch();
                             }
                         
-                        
                             var flbl = $("<div>",{id:"facet_range"+facet_index})
                                         .css({'padding-bottom':'1em'})
                                         .appendTo($facet_values);
@@ -1633,7 +1682,10 @@ if(!detailtypes[dtID]){
                                       max: mmax + delta,
                                       values: [ mmin, mmax ],
                                       slide: __updateSliderLabel,
-                                      stop: __onSlideStop
+                                      stop: __onSlideStop,
+                                      create: function(){
+                                          $(this).find('.ui-slider-handle').css({width:'4px',background:'black'});
+                                      }
                                     })
                                 .css('height','0.4em')
                             .appendTo($facet_values);
