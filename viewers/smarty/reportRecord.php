@@ -359,7 +359,7 @@ class ReportRecord {
                                     $term = $this->dtTerms['termsByDomainLookup'][$domain][$value];
 
                                     //IJ wants to show terms for all parents
-                                    $term_full = getTermFullLabel($this->dtTerms, $term, $domain, false); //sse db_strcture.php
+                                    $term_full = getTermFullLabel($this->dtTerms, $term, $domain, false); //see db_structure.php
 
                                     $res_id = $this->_add_term_val($res_id, $value);
                                     $res_cid = $this->_add_term_val($res_cid, $term[ $fi['trm_ConceptID'] ]);

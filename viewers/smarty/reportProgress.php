@@ -14,13 +14,13 @@
                 $res = 'terminate';
                 mysql__update_progress($mysqli, $_REQUEST['session'], false, $res);
             }else{
+                //retrieve current status
                 $res = mysql__update_progress($mysqli, $_REQUEST['session'], false, null);
-
             }
             
             $mysqli->close();
         }
-        
+//error_log('repror '.$res);        
         print $res;
     }else{
         print 'done';

@@ -63,9 +63,17 @@ class DbRecDetails
     private $result_data = array();
     
     
+    private $session_id = null;
+    
+    
     function __construct( $system, $data ) {
        $this->system = $system;
        $this->data = $data;
+       
+       $this->session_id = @$this->data['session'];
+       if($this->session_id!=null){
+            mysql__update_progress($system->get_mysqli(), $this->session_id, true, '0,1');
+       }
     }
 
     
@@ -775,6 +783,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
         $mysqli = $this->system->get_mysqli();
         
+        $tot_count = count($this->recIDs);
+        
+        $execution_counter = 0;
+        
         $processedRecIDs = array();//success  
         $sqlErrors = array();
         $skippedRecIDs = array(); //values already defined
@@ -822,27 +834,58 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         if(file_exists($file)){
         // 3. Parse pdf file
                             try{
+                               
+                               if(true){ 
                                 $pdf    = $parser->parseFile($file);
-                                $text = $pdf->getText();
-                                if($text==null || strlen(trim($text))==0){
-                                    $skippedEmpty[] = $recID;
-                                }else{
-                                    if(strlen($text)>64000){
-                                        $text = substr($text,0,64000)
-                                            .' <more text is available. Remaining text has not been extracted from file>';
+
+                                if(false){
+                                    $text = $pdf->getText();
+                                    if($text && mb_strlen($text)>64000){
+                                        $text = mb_substr($text,0,64000)
+                                                .' <more text is available. Remaining text has not been extracted from file>';
                                     }
+                                }else{
+                                    // Retrieve all pages from the pdf file.
+                                    $pages  = $pdf->getPages();
+                                    $page_cnt = 0; 
+                                    $text = '';
+                                    // Loop over each page to extract text.
+                                    foreach ($pages as $page) {
+                                        $text = $text . $page->getText();
+                                        if(mb_strlen($text)>64000 || $page_cnt>10){
+                                            $text = mb_substr($text,0,64000)
+                                                .' <more text is available. Remaining text has not been extracted from file>';
+                                            break;    
+                                        }
+                                        $page_cnt++;
+                                    }     
+                                }
+                                                           
+                               }else{
+                                    //debug without real parsing 
+                                    sleep(1);
+                                    $text = 'test';
+                                    $skippedParseEx[$recID] = $file.' Debug parse exception';
+                               }
+                                
+                                if($text==null || mb_strlen(trim($text))==0){
+                                    $skippedEmpty[$recID] = $file;
+                                }else{
                                     $details[] = $text;    
                                 }
+                                
                             } catch (\Exception $ex) {
                                 //throw new ParseException($ex);
-                                $skippedParseEx[$recID] = 'PDF parser exception';//.print_r($ex,true);
+                                $skippedParseEx[$recID] = $file.' '.print_r($ex, true);
+                                //error_log('parse exception '.$recID.'  '.$file);
+                                //error_log(print_r($ex,true));
                             }
                         }else{
                             $skippedNoPDF[$recID] = 'PDF file not found';
                         }
                     }
                 }
-            }
+            }//details
             
             if(!$hasPDFs){
                 $skippedNoPDF[] = $recID;
@@ -857,15 +900,42 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 }else{}
                 */    
     // 5. Add new values to 2-652 - one entry per file
+                if(true){
                     $dtl['dtl_RecID'] = $recID;
                     foreach($details as $text){
                         $dtl['dtl_Value'] = $text;
-                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
-                        if (!is_numeric($ret)) {
-                            $sqlErrors[$recID] = $ret;
+                        if(mb_detect_encoding($dtl['dtl_Value'], 'UTF-8', true)===false){
+                            $sqlErrors[$recID] = 'Extracted text has not valid utf8 encoding';
                             break;
+                        }else{   
+                            $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
+                            if (!is_numeric($ret)) {
+                                $sqlErrors[$recID] = $ret;
+                                break;
+                            }
                         }
-                    }
+                        
+                        /*DEBUG
+                        $offset = 17000;
+                        while($offset<mb_strlen($text)){
+                            $dtl['dtl_Value'] = mb_substr($text,$offset,5000);
+                            if(mb_detect_encoding($dtl['dtl_Value'], 'UTF-8', true)===false){
+                                $sqlErrors[$recID] = 'String is not valid utf8';
+                                break;
+                            }else{   
+   
+                                $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
+                                if (!is_numeric($ret)) {
+                                    $sqlErrors[$recID] = $ret; // $dtl['dtl_Value'];//($ret.'  '.$offset);
+                                    break;
+                                }
+                                $offset = $offset + 5000;
+                            }
+                        }
+                        if(@$sqlErrors[$recID]) break;
+                        */
+                        
+                    }//foreach
                     if(@$sqlErrors[$recID]) continue;
 
                     //update record edit date
@@ -874,20 +944,41 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     if (!is_numeric($ret)) {
                         $sqlErrors[$recID] = 'Cannot update record "Modify date". '.$ret;
                     }
-                    $processedRecIDs[] = $recID;
+                }
+                $processedRecIDs[] = $recID;
+            }
+            
+            
+            if($this->session_id!=null){
+                //check for termination and set new value
+                $execution_counter++;
+                $session_val = $execution_counter.','.$tot_count;
+                $current_val = mysql__update_progress($mysqli, $this->session_id, false, $session_val);
+                if($current_val=='terminate'){ //session was terminated from client side
+                    break;
+                }
             }
 
-        }//for recodrs
+        }//for records
         
         //assign special system tags
         $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
         $this->_assignTagsAndReport('undefined', $skippedNoPDF, null);  //no pdf assigned
         $this->_assignTagsAndReport('limited',   $skippedRecIDs, null);  //value already defined
         $this->_assignTagsAndReport('parseexception', $skippedParseEx, null);  
-        $this->_assignTagsAndReport('empty', $skippedEmpty, null);  
-        $this->_assignTagsAndReport('errors',    $sqlErrors, $baseTag);
+        $this->_assignTagsAndReport('parseempty', $skippedEmpty, null);  
+        $this->_assignTagsAndReport('errors',  $sqlErrors, null);//$baseTag);
         
         return $this->result_data;        
+    }
+    
+    //
+    // remove long-time opeartion from session table
+    //
+    public function removeSession(){
+        if($this->session_id!=null){
+            mysql__update_progress($this->system->get_mysqli(), $this->session_id, false, 'REMOVE');
+        }
     }
     
 /*    
@@ -919,8 +1010,8 @@ public methods
     {        
         if (count($recordIds)>0) {
             
-            if($type=='errors'){
-                $this->result_data['errors_list'] = $recordIds;    
+            if($type=='errors' || $type=='parseexception' || $type=='parseempty'){
+                $this->result_data[$type.'_list'] = $recordIds;    
                 $recordIds = array_keys($recordIds);
             }
             

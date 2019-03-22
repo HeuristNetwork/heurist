@@ -175,7 +175,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
 //error_log($cmd);        
 
                 if ($error) {
-                    error_log ('ERROR on pdf thumbnail creation: '.implode('\n', $output));
+                    error_log ('ERROR on pdf thumbnail creation: '.$filename.'  '.implode('\n', $output));
                     exit();
                 }
                 $im = file_get_contents($thumbnail_file);

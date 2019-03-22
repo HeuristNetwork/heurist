@@ -555,25 +555,12 @@ function smarty_function_progress($params, &$smarty){
         if($execution_counter<2 || $execution_counter % 10==0 || $execution_counter>$tot_count-3){
 
 
-            //$mysqli = mysqli_connection_overwrite(DATABASE);
-
-            //get 
-            $current_val = mysql__update_progress($mysqli, $session_id, false, null);
-
+            $session_val = $execution_counter.','.$tot_count;
+            $current_val = mysql__update_progress($mysqli, $session_id, false, $session_val);
             if($current_val && $current_val=='terminate'){
-
                 $session_val = ''; //remove from db
                 $res = true;
-            }else{
-                /*
-                if($execution_counter<2 || $execution_counter>$tot_count-3){  
-                error_log('next '.$execution_counter.'   '.@$params['done'].'  '.$tot_count.'  current_val='.$current_val);        
-                }
-                */
-                $session_val = $execution_counter.','.$tot_count;
             }
-            //set
-            mysql__update_progress($mysqli, $session_id, false, $session_val);
 
             //$mysqli->close();
         }
