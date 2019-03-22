@@ -204,15 +204,15 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='import_preview'){
             //reads import file and returns list of records to be imported
-            $res = ImportAction::importH_GetDefintions(@$REQUEST['filename']);
+            $res = ImportAction::importH_GetDefintions(@$_REQUEST['filename']);
             
         }else if($action=='import_definitions'){
             
-            $res = ImportAction::importH_ImportDefintions(@$REQUEST['filename']);
+            $res = ImportAction::importH_ImportDefintions(@$_REQUEST['filename']);
             
         }else if($action=='import_records'){
             
-            $res = ImportAction::importH_ImportRecords(@$REQUEST['filename']);
+            $res = ImportAction::importH_ImportRecords(@$_REQUEST['filename'], @$_REQUEST['session']);
             
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missed or wrong");                

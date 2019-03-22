@@ -25,7 +25,10 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_file.php');
 
+$post_max_size = get_php_bytes('post_max_size');
+$file_max_size = get_php_bytes('upload_max_filesize');
 ?>
 <html>
     <head>
@@ -39,6 +42,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
+
+        <script src="../../external/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+        <script src="../../external/jquery-file-upload/js/jquery.fileupload.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
         <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
@@ -60,16 +66,12 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
         <script type="text/javascript">
 
-            var importRecordsCSV;
+            var importRecords;
             // Callback function after initialization
             $(document).ready(function() {
-                if(success){
                     var max_size = Math.min(<?php echo $file_max_size;?>, <?php echo $post_max_size;?>);
-                    importRecordsCSV = new hImportRecordsCSV(
-                                window.hWin.HEURIST4.util.getUrlParameter('imp_ID', window.location.search), 
-                                max_size, "<?php echo $format;?>");
-                }
-            }
+                    importRecords = new hImportRecords(max_size);
+            });
         
         
         </script>

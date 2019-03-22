@@ -52,6 +52,27 @@ class DbsImport {
     function __construct( $system ) {
         $this->system = $system;
     }
+
+    /*
+    // getter
+    //    
+    public function getCorrespondences(){
+        return array('rectypes'=>$this->rectypes_correspondence,
+                     'fields'=>$this->fields_correspondence,
+                     'terms'=>$this->terms_correspondence);
+    }
+    */
+    
+    //
+    // getter
+    //    
+    public function getDefinitions($type='target'){
+        if($type=='target'){
+            return $this->target_defs;
+        }else{
+            return $this->source_defs;   
+        }
+    }
     
     
 // 1. get database url
@@ -763,6 +784,43 @@ $mysqli->commit();
         
         return ($defs!=null)?$localID:false;
     }
+    
+    //
+    //
+    //
+    public function getTargetIdBySourceId($defType, $source_id){
+        //get concept code in source
+        if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
+            $defType = 'rectypes';
+            $fieldName = 'rty_ConceptID';
+            $defs = $this->source_defs[$defType]['typedefs'];
+            $idx_ccode = intval($defs['commonNamesToIndex'][$fieldName]);
+            
+            $conceptCode = $defs[$source_id]['commonFields'][$idx_ccode];
+            
+        }else if($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
+            $defType = 'detailtypes';
+            $fieldName = 'dty_ConceptID';
+            $defs = $this->source_defs[$defType]['typedefs'];
+            $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
+            
+            $conceptCode = $defs[$source_id]['commonFields'][$idx_ccode];
+            
+        }else if($defType=='enum' || $defType=='relationtype'){
+            
+            $defType = 'terms';
+            $fieldName = 'trm_ConceptID';
+            $defs = $this->source_defs[$defType]['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
+            $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
+            
+            $conceptCode = $defs[$source_id][$idx_ccode];
+            
+        }
+        
+        
+        
+        return DbsImport::getLocalCode($defType, $this->target_defs, $conceptCode, false);
+    }
     //
     // get local code by concept code
     //
@@ -786,17 +844,35 @@ $mysqli->commit();
             $fieldName = 'dty_ConceptID';
             $defs = $database_defs[$defType]['typedefs'];
             $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
+            
+        }else if($defType=='enum' || $defType=='relationtype'){
+            
+            $defType = 'terms';
+            $fieldName = 'trm_ConceptID';
+            $defs = $database_defs[$defType]['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
+            $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
+            
+            $conceptCode = $defs[$source_id][$idx_ccode];
+            
         }
     
-        
-    
         foreach ($defs as $id => $def) {
-            if(is_numeric($id) && $def['commonFields'][$idx_ccode]==$conceptCode){
-                if($sall){
-                    array_push($res, $id);
+            if(is_numeric($id)){
+                
+                if($defType=='terms'){
+                    $is_equal = $def[$idx_ccode]==$conceptCode;
                 }else{
-                    return $id;
+                    $is_equal = $def['commonFields'][$idx_ccode]==$conceptCode;
                 }
+                
+                if($is_equal){
+                    if($sall){
+                        array_push($res, $id);
+                    }else{
+                        return $id;
+                    }
+                }
+                
             }
         }
         
@@ -1148,7 +1224,7 @@ $mysqli->commit();
     // replace term_ids in string to new ones
     // function that translates all term ids in the passed string to their local/imported value
     //
-    private function replaceTermIds( $sterms, $domain ) {
+    public function replaceTermIds( $sterms, $domain ) {
 
         if($sterms==null || $sterms=="") return $sterms;
 
@@ -1176,6 +1252,7 @@ $mysqli->commit();
         
     //
     // Preparation report output
+    // it returns updated definitions (as json) and html snippets with report about imported definitions
     //    
     public function getReport(){
 
@@ -1264,5 +1341,6 @@ $mysqli->commit();
         return array("data"=>array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_detailtypes,'terms'=>$trg_terms),
             "report"=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms) );
     }    
+    
 }
 ?>

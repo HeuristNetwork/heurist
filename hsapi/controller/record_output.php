@@ -770,7 +770,7 @@ function output_Records($system, $data, $params){
     }   
     
     if($params['format']=='json'){
-        fwrite($fd, '{"heurist":[{"records":[');         
+        fwrite($fd, '{"heurist":{"records":[');         
     }else{
         fwrite($fd, '<?xml version="1.0" encoding="UTF-8"?><heurist><records>');     
     }
@@ -804,7 +804,7 @@ function output_Records($system, $data, $params){
     }//while records
     
     if($params['format']=='json'){
-        fwrite($fd, ']}');     
+        fwrite($fd, ']');     
     }else{
         fwrite($fd, '</records>');     
     }
@@ -861,8 +861,8 @@ function output_Records($system, $data, $params){
     $database_info['rectypes'] = $rt_counts;
     
     if($params['format']=='json'){
-        fwrite($fd, ',{"database":'.json_encode($database_info));
-        fwrite($fd, ']}');     
+        fwrite($fd, ',"database":'.json_encode($database_info));
+        fwrite($fd, '}}');     
     }else{
         $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
         array_to_xml($database_info, $xml);
