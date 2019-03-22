@@ -141,6 +141,7 @@ public static function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
 
 /**
 * Returns term ID if label is valid and false if invalid
+* Label can be dot separated hierarchical label Parent.Child
 *
 * used in import csv
 * 
@@ -152,6 +153,8 @@ public static function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
 public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $isStripAccents=false){
 
     if($dtyID==null || !@self::$dtyIDDefs_labels[$dtyID]){
+        
+        $withHierarchy = (strpos($label,'.')>0);
     
         self::initialize();
         if(self::$terms==null)  self::$terms = dbs_GetTerms(self::$system);
@@ -165,7 +168,11 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
         $domain = @self::$terms['termsByDomainLookup']['relation'][$allowed_terms[0]]?'relation':'enum';
         $list = self::$terms['termsByDomainLookup'][$domain];
         foreach($allowed_terms as $term_id){
-           $allowed_labels[$term_id] = $list[$term_id][$idx_label] ;
+           if($withHierarchy){
+                $allowed_labels[$term_id] = getTermFullLabel(self::$terms, $list[$term_id], $domain, false);
+           }else{
+                $allowed_labels[$term_id] = $list[$term_id][$idx_label] ;    
+           } 
         }
     
         if($isStripAccents && is_array($allowed_labels)){
@@ -183,6 +190,10 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
     
     //check if given label among allowed
     $label = trim(mb_strtolower($label));
+    /*if(strpos($label,'.')>0){
+        $label = explode('.',$label);
+        $label = array_pop($label);    
+    }*/
 
     if(count($allowed_labels)>0){
         $term_ID = array_search($label, $allowed_labels, true);

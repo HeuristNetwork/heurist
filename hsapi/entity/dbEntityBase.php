@@ -22,8 +22,14 @@ class DbEntityBase
 {
     protected $system;  
     
+    // set transaction in save,delete action - otherwise transaction is set on action above (batch action)
+    protected $need_transaction = true;
+    
     /*  
         request from client side - contains field values for search and update
+        
+        fields - values for particular record 
+                 initially in prepareRecords
     */    
     protected $data;  
     
@@ -48,7 +54,7 @@ class DbEntityBase
     * 
     * @var array
     */
-    protected $records;
+    protected $records = null;
     
     
     /**
@@ -106,13 +112,15 @@ class DbEntityBase
     
     //
     // save one or several records 
-    // return false or record IDs
+    // returns false or array of record IDs
     //
     public function save(){
 
         //extract records from $_REQUEST data 
-        if(!$this->prepareRecords()){
-                return false;    
+        if($this->records==null){ //records can be pepared beforehand
+            if(!$this->prepareRecords()){
+                    return false;    
+            }
         }
 
         //validate permission for current user and set of records see $this->recordIDs
@@ -142,6 +150,7 @@ class DbEntityBase
         //start transaction
         $mysqli = $this->system->get_mysqli();
         
+        if($this->need_transaction)
         $keep_autocommit = mysql__begin_transaction($mysqli);
         
         foreach($this->records as $rec_idx => $record){
@@ -165,24 +174,28 @@ class DbEntityBase
                                     $this->config['tableName'], $this->fields,
                                     $values );
 
-            if($ret===true || $ret==null){ //it return true for non-numeric primary field
+            if($ret===true || $ret==null){ //it returns true for non-numeric primary field
                    $results[] = $record[$this->primaryField];
             }else if(is_numeric($ret)){
                    $this->records[$rec_idx][$this->primaryField] = $ret;
                    $results[] = $ret;
             }else{
                     //rollback
-                    $mysqli->rollback();
-                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    if($this->need_transaction){
+                        $mysqli->rollback();
+                        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    }
                     $this->system->addError(HEURIST_INVALID_REQUEST, 
                         'Cannot save data in table '.$this->config['entityName'], $ret);
                     return false;
             }
             
         }//for records
-        //commit
-        $mysqli->commit();
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($this->need_transaction){
+            //commit
+            $mysqli->commit();
+            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        }
         return $results;
     }
 
@@ -287,7 +300,7 @@ class DbEntityBase
     }
 
     //
-    //
+    // 
     //    
     protected function _validateMandatory(){
         
@@ -509,7 +522,8 @@ class DbEntityBase
             }
     }
     //
-    // extract records from data parameter - it is used in delete, save
+    // extracts records from "data" parameter and fills $this->recordIDs and $this->records 
+    // it is used in delete, save
     //            
     //  fields:[fldname:value,fieldname2:values,.....]
     //
@@ -540,6 +554,9 @@ class DbEntityBase
         return true; 
     }    
     
+    //
+    //
+    //
     public function search_title(){
 
         $this->data[$this->primaryField] = $this->data['recID'];

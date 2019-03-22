@@ -257,7 +257,7 @@ window.hWin.HEURIST4.ui = {
     },    
     
     //
-    // return list of all children for given trm_ParentTermID in lower case
+    // returns list of all children for given trm_ParentTermID in lower case
     //
     getChildrenLabels: function(trm_ParentDomain, trm_ParentTermID){
         

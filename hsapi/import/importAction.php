@@ -1014,7 +1014,9 @@ public static function validateImport($params) {
                 array_push($query_enum, $field_name);
                 $trm1 = "trm".count($query_enum);
                 array_push($query_enum_join,
-                    " defTerms $trm1 on ($trm1.trm_Label=$field_name OR $trm1.trm_Code=$field_name)");
+                    " defTerms $trm1 on ($trm1.trm_Code=$field_name OR "
+                    ." $trm1.trm_Label=$field_name OR $trm1.trm_Label=SUBSTRING_INDEX($field_name,'.',-1))"
+                    );
                 array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($field_name is null or $field_name=''))");
             }else if($ft_vals[$idx_fieldtype] == "resource"){
                 array_push($query_res, $field_name);
@@ -1140,7 +1142,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             
             $wrong_records = self::validateEnumerations($query, $imp_session, $field, $dt_mapping[$field], 
                 $idx, $recStruc, $recordType,
-                "Term list values read must match existing terms defined for the field", "new terms");
+                "Term list values read must match existing terms defined for the field. Periods are taken as indicators of hierarchy", "new terms");
 
         }else{
 
@@ -1149,7 +1151,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             ." where ".$only_for_specified_id."(".$query_enum_where[$k].")";  //implode(" or ",$query_enum_where);
             
             $wrong_records = self::getWrongRecords($query, $imp_session,
-                "Term list values read must match existing terms defined for the field",
+                "Term list values read must match existing terms defined for the field. Periods are taken as indicators of hierarchy",
                 "Invalid Terms", $field);
         }
 
@@ -1395,7 +1397,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
                         $term_id = VerifyValue::isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id, true );
                      
                         if(!$term_id){
-                            $term_id = VerifyValue::isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
+                            $term_id = VerifyValue::isValidTermCode($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
                         }
                     }
                     
@@ -2220,12 +2222,14 @@ public static function performImport($params, $mode_output){
                                 
                                 if($r_value!=""){
 
+                                    //value is numeric - check for trm_ID    
                                     if(ctype_digit($r_value)
                                     && VerifyValue::isValidTerm( $ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type)){
 
                                         $value = $r_value;
                                     }
 
+                                    //value not numeric or not found - find label or code
                                     if($value == null){
                                         //stip accents on both sides
                                         $value = VerifyValue::isValidTermLabel($ft_vals[$idx_term_tree], $ft_vals[$idx_term_nosel], $r_value, $field_type, true );
@@ -2578,7 +2582,7 @@ public static function performImport($params, $mode_output){
 } //end performImport
 
  
-//------------------------- import for heurist json/html/xml format 
+//------------------------- import record and defintions from heurist json/hml/xml format 
 /**
 * Reads import file 
 * 
@@ -2588,10 +2592,21 @@ public static function performImport($params, $mode_output){
 * @param mixed $filename - archive or temp  import file
 * @param mixed $type - type of file manifest of record data
 */
-private static function importH_readfile($filename, $type=null){
+private static function importH_readfile($filename, $type=null, $validate=true){
    
     try{
-        $data = json_decode(file_get_contents($tmp_file), true);
+        $filename = HEURIST_SCRATCH_DIR.$filename;
+        
+        $data = json_decode(file_get_contents($filename), true);
+        
+        if($validate){
+            $imp_rectypes = @$data['heurist']['database']['rectypes'];
+            if($data==null || !$imp_rectypes){
+                self::$system->addError(HEURIST_ERROR, 'Import data has wrong data. "Record type" section is not found');
+                $data=null;
+            }
+        }
+        
     } catch (Exception  $e){
         $data = null;
     }   
@@ -2600,51 +2615,56 @@ private static function importH_readfile($filename, $type=null){
 }
 
 /**
-* return list of definitions (record types to be imported)
+* returns list of definitions (record types to be imported)
 * 
+* It reads menifest files and tries to find all record types in current database by concept code. All record types from manifest file
+* with local ids (if it is found otherwise null ) are returned
+*
 * @param mixed $filename
 */
 public static function importH_GetDefintions($filename){
+    
+    self::initialize();
 
     $res = false;
     
     $data = self::importH_readfile( $filename );
     
-    $imp_rectypes = @$data['heurist']['database']['rectypes'];
-    if($data==null || !$imp_rectypes){
-        $system->addError(HEURIST_ERROR, 'Import data has wrong data. "Record type" section is not found');
-    }else{
+    if($data!=null){
         
         $database_defs = dbs_GetRectypeStructures(self::$system, null, 2);
         $database_defs = array('rectypes'=>$database_defs);
         
+        $imp_rectypes = $data['heurist']['database']['rectypes'];
+        
         foreach ($imp_rectypes as $rtid=>$rt){
             $conceptCode = $rt['code'];
             $local_id = DbsImport::getLocalCode('rectypes', $database_defs, $conceptCode, false);
-            $imp_rectypes[$rtid]['localid'] = $local_id;
+            $imp_rectypes[$rtid]['target_RecTypeID'] = $local_id;
         }
         
         //return array of $imp_rectypes - record types to be imported
-        $res = array("status"=>HEURIST_OK, "data"=> $imp_rectypes );
+        $res = $imp_rectypes;
     }
 
     return $res;
 }
 
 //
-// imports missed record types (along with dependencies)  dbsImport.php
-// maintain mapping remote->local definitions (dbsImport->xxx_correspondence)
+// Imports missed record types (along with all dependencies). Uses dbsImport.php
 //
 public static function importH_ImportDefintions($filename){
     
+    self::initialize();
+    
     $res = false;
     
+    //read manifest
     $data = self::importH_readfile( $filename );
     
-    $imp_rectypes = @$data['heurist']['database']['rectypes'];
-    if($data==null || !$imp_rectypes){
-        $system->addError(HEURIST_ERROR, 'Import data has wrong data. Record type section is not found');
-    }else{
+    if($data!=null){
+        
+        $imp_rectypes = $data['heurist']['database']['rectypes'];
         
         ini_set('max_execution_time', 0);
         $importDef = new DbsImport( self::$system );
@@ -2658,16 +2678,12 @@ public static function importH_ImportDefintions($filename){
 
         
         if(!$res){
-            $err = $system->getError();
+            /*$err = self::$system->getError();
             if($err && $err['status']!=HEURIST_NOT_FOUND){
-                $system->error_exit(null);  //produce json output and exit script
-            }
+                self::$system->error_exit(null);  //produce json output and exit script
+            }*/
         }else{
             $res = $importDef->getReport();
-            $res['status'] = HEURIST_OK;            
-            //record type will be replaced with new correspondent record type
-            $defs_correspondence = $importDef->getCorrespondences();
-        
         }
         
         return $res;
@@ -2679,10 +2695,229 @@ public static function importH_ImportDefintions($filename){
 //
 //
 //
-public static function importH_ImportRecords($filename){
+public static function importH_ImportRecords($filename, $session_id){
+    
+    self::initialize();
+    
     $res = false;
     
+    $data = self::importH_readfile( $filename );
     
+    
+    if($data!=null){
+
+        $mysqli = self::$system->get_mysqli();
+    
+        $execution_counter = 0;
+        
+        $tot_count = count(@$data['heurist']['database']['records']);
+        if($tot_count>0){
+            $tot_count = $data['heurist']['records'];  
+        } 
+        
+        if($session_id!=null){
+            mysql__update_progress($mysqli, $session_id, true, '0,'.$tot_count);
+        }
+            
+        
+        $imp_rectypes = $data['heurist']['database']['rectypes'];
+        $source_url = $data['heurist']['database']['url']; //need to copy files
+        $source_db = $data['heurist']['database']['db']; //need to copy files
+        
+        ini_set('max_execution_time', 0);
+        $importDef = new DbsImport( self::$system );
+        
+        $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
+                    'databaseID'=>@$data['heurist']['database']['id'], 
+                    'definitionID'=>array_keys($imp_rectypes) ));
+                    
+        if(!$res2){
+            $err = self::$system->getError();
+            if($err && $err['status']!=HEURIST_NOT_FOUND){
+                return false;
+            }
+            self::$system->clearError();  
+        }  
+        //get target definitions (this database)
+        $defs = $importDef->getDefinitions();
+        $def_dts  = $defs['detailtypes']['typedefs'];
+        $idx_type = $def_dts['fieldNamesToIndex']['dty_Type'];
+        
+        $file_entity = new DbRecUploadedFiles(self::$system, null);
+        
+        $records = $data['heurist']['records'];
+        
+        $records_corr = array(); //source id -> target id
+        $resource_fields = array(); //source id -> field id -> field value (source recid)
+        
+        $is_rollback = false;
+        
+        foreach($records as $record_src){
+            
+            if(!is_array($record_src) && $record_src>0){
+                //this is record id - record data in the separate file
+                //@todo
+            }
+        
+            // prepare records - replace all fields, terms, record types to local ones
+            // keep record IDs in resource fields to replace them later
+            $record = array();
+            $record['ID'] = 0; //add new
+            $record['RecTypeID'] = $importDef->getTargetIdBySourceId('rectypes', $record_src['rec_RecTypeID']);
+            $record['AddedByImport'] = 2; //import without strict validation
+            $record['no_validation'] = true;
+            $record['URL'] = $record_src['rec_URL'];
+            $record['URLLastVerified'] = $record_src['rec_URLLastVerified'];
+            $record['ScratchPad'] = $record_src['rec_ScratchPad'];
+            $record['Title'] = $record_src['rec_Title'];
+            
+            $record['details'] = array();
+            
+            foreach($record_src['details'] as $dty_ID => $values){
+                
+                //field id in target database
+                $ftId = $importDef->getTargetIdBySourceId('detailtypes', $dty_ID);
+                
+                $def_field = $def_dts[$ftId]['commonFields'];
+                
+                $new_values = array();
+                if($def_field[$idx_type] == "enum" || 
+                   $def_field[$idx_type] == "relationtype")
+                {
+                    foreach($values as $value){
+                        //change terms ids for enum and reltypes
+                        $new_values[] = $importDef->getTargetIdBySourceId($def_field[$idx_type], $value); 
+                        //replaceTermIds( $value, $def_field[$idx_type] );
+                    }
+                }else if($def_field[$idx_type] == "geo"){
+                    
+                   foreach($values as $value){
+                        $new_values[] = $value['geo']['type'].' '.$value['geo']['wkt'];
+                   }
+                   
+                }else if($def_field[$idx_type] == "file"){
+                    
+                   //copy remote file to target filestore, register and get ulf_ID
+                   foreach($values as $value){
+                       
+                       $tmp_file = null;
+                       $value = $value['file'];
+                       
+                       if(@$value['ulf_ExternalFileReference']){
+                           
+                            if(@$value['ulf_ID']>0) unset($value['ulf_ID']);
+                           
+                            $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$value);
+                            
+                            $file_entity->setData($fileinfo);
+                            $dtl_UploadedFileID = $file_entity->save();   //it returns ulf_ID
+                           
+                       }else{
+                            //download to scratch folder
+                            $tmp_file = HEURIST_SCRATCH_DIR.$value['ulf_OrigFileName'];
+                            
+                            if(strpos($source_url, HEURIST_SERVER_URL)===0){
+                                copy(HEURIST_FILESTORE_ROOT.$source_db.'/'.$value['fullPath'] , $tmp_file);
+                            }else{
+                                $remote_path = $file_URL = $source_url.'?db='.$source_db
+                                        .'&file='.$value['ulf_ObfuscatedFileID']; //download
+                                saveURLasFile($remote_path, $tmp_file);
+                            }
+
+                            $dtl_UploadedFileID = $file_entity->registerFile($tmp_file, null); //it returns ulf_ID
+                       }
+
+                        if($dtl_UploadedFileID===false){
+                            $err_msg = self::$system->getError();
+                            $err_msg = $err_msg['message'];
+                            self::$system->clearError();  
+                            $dtl_UploadedFileID = null;
+                        }else{
+                            $dtl_UploadedFileID = $dtl_UploadedFileID[0];
+                        }
+                        
+                        if(file_exists($tmp_file)){
+                            unlink($tmp_name);    
+                        }
+                       
+                        $new_values[] = $dtl_UploadedFileID;
+                    }
+                    
+                }else{
+                    
+                   if($def_field[$idx_type] == "resource"){ 
+                       //keep source record id to replace it to new target record id 
+                       if(!@$resource_fields[$record_src['ID']]){
+                           $resource_fields[$record_src['ID']] = array();
+                       }
+                       $resource_fields[$record_src['ID']][$ftId] = $values;
+                   }
+                    
+                   $new_values = $values; 
+                }
+                
+                $record['details'][$ftId] = $new_values; 
+            }
+            
+            $out = recordSave(self::$system, $record);  //see db_records.php
+
+            if ( @$out['status'] != HEURIST_OK ) {
+                error_log('NOT SAVED');
+                error_log(print_r($record, true));
+                $is_rollback = true;
+                break;
+            }
+            
+            $records_corr[$record_src['ID']] = $out['data']; //new record id
+            
+            $execution_counter++;
+        
+            if($session_id!=null){
+                $session_val = $execution_counter.','.$tot_count;
+                //check for termination and set new value
+                $current_val = mysql__update_progress($mysqli, $session_id, false, $session_val);
+                if($current_val && $current_val=='terminate'){ //session was terminated from client side
+                    //need rollback
+                    $is_rollback = true;
+                    break;
+                }
+            }
+        
+        }//records
+        
+        if($session_id!=null){
+            mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
+        }
+        
+        if($is_rollback){
+            
+        }else{
+            //update resource fields with new record ids
+            foreach ($resource_fields as $src_recid=>$fields){
+                
+                $trg_recid = @$records_corr[$src_recid];
+                if($trg_recid>0)
+                foreach ($fields as $field_id=>$old_value){
+                    
+                    $new_value = @$records_corr[$old_value];
+                    if($new_value>0){
+                        $query = 'UPDATE recDetails SET dtl_Value='.$new_value
+                                .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$field_id
+                                .' AND dtl_Value='.$old_value;
+                                
+                        mysql__exec_param_query($mysqli, $query, null);
+                    }else{
+                        //@todo - remove detail with wrong resource value?
+                        
+                    }
+                }
+            }
+            
+            //@todo commit
+            $res = true;
+        }
+    }//$data
+
     return $res;
 }
 

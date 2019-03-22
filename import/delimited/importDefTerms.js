@@ -462,7 +462,7 @@ function hImportDefTerms(_trm_ParentTermID) {
         
     
             var request = {
-                'a'          : 'save',
+                'a'          : 'batch',
                 'entity'     : 'defTerms',
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'fields'     : _prepareddata                     
