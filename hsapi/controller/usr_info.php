@@ -125,7 +125,7 @@
               $op = @$_REQUEST['operation'];
               if(!$op || $op=='list'){
                 
-                $res = folderTree(@$_REQUEST['root_dir'], array('systemFolders'=>$folders,'format'=>'fancy') );
+                $res = folderTree(@$_REQUEST['root_dir'], array('systemFolders'=>$folders,'format'=>'fancy') ); //see utils_file
                 $res = $res['children'];
                 //$res = folderTreeToFancyTree($res, 0, $folders);
               }else{

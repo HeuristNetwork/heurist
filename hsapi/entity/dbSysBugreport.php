@@ -128,7 +128,9 @@ class DbSysBugreport extends DbEntityBase
         
         $user = $this->system->getCurrentUser();
         if($user){
-            array_push($ext_info, "   Heurist user: ".@$user['ugr_Name']);
+            $user = user_getByField($this->system->get_mysqli(), 'ugr_ID', $user['ugr_ID']);
+            
+            array_push($ext_info, "   Heurist user: ".@$user['ugr_Name'].' ('.@$user['ugr_eMail'].')');
         }
         $message['type:2-51'] = $ext_info;  //DT_BUG_REPORT_EXTRA_INFO;
         

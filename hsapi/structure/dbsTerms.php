@@ -18,6 +18,23 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    
+    /*
+    * Public methods
+    *  findTermByConceptCode
+    *  getTermsFromFormat
+    *  getTermLabel
+    *  getTermCode
+    *  getTerm
+    *  getSiblings
+    *  findChildren
+    *  addNewTerm
+    *  addChild    
+    *  getTopMostTermParent
+    *  doDisambiguateTerms
+    *  getSameLevelLabelsAndCodes
+    */
+    
 class DbsTerms
 {
     protected $system;  
@@ -215,7 +232,7 @@ class DbsTerms
         }
 
     }
-    
+
     //
     //
     //
@@ -255,6 +272,7 @@ class DbsTerms
             $lvl[$new_term_id] = array();
         }
     }    
+
     
     //
     //  Find vocabulary ID

@@ -2494,13 +2494,13 @@ $.widget( "heurist.expertnation_nav", {
 
             var request = {a: 'save', 
                 db: window.hWin.HAPI4.database+'_Signups',
-                ID:-1, //new record
+                ID:0, //new record
                 RecTypeID: that.RT_PERSON,
                 RecTitle: newsletter_type_name+' ('+newsletter_type_email+')',
                 Captcha: entered_captcha,
                 details: details };     
 
-            window.hWin.HAPI4.RecordMgr.save(request, 
+            window.hWin.HAPI4.RecordMgr.saveRecord(request, 
                 function(response){
                     var  success = (response.status == window.hWin.ResponseStatus.OK);
                     if(success){

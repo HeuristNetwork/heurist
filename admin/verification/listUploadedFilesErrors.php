@@ -1,8 +1,6 @@
 <?php
 
 /**
-* @todo need h4 client
-* 
 * listUploadedFilesErrors.php: Lists orphaned and missed files, broken paths
 *
 * @package     Heurist academic knowledge management system

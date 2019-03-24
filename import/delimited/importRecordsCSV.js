@@ -3732,6 +3732,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         var skip_dup=0, skip_long=0, skip_long=0, skip_na=0;
         
+        //list of all children for given trm_ParentTermID in lower case
         var trm_ParentChildren = window.hWin.HEURIST4.ui.getChildrenLabels('enum', trm_ParentTermID);
         
         for(var i=0;i<newvalues.length;i++){
@@ -3744,8 +3745,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
                 if(!window.hWin.HEURIST4.util.isempty(lbl)){
                     
-                    //verify duplication in parent term and in already added
-                    if(trm_ParentChildren.indexOf(lbl.toLowerCase())>=0)
+                    //verify duplication in parent term and if already added
+                    if(false && trm_ParentChildren.indexOf(lbl.toLowerCase())>=0)
                     {
                         skip_dup++;
                         continue;
@@ -3787,7 +3788,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     function _importTerms($dlg, _prepareddata, is_all)
     {
         var request = {
-            'a'          : 'save',
+            'a'          : 'batch',
             'entity'     : 'defTerms',
             'request_id' : window.hWin.HEURIST4.util.random(),
             'fields'     : _prepareddata                     

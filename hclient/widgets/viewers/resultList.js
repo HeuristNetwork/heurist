@@ -622,7 +622,7 @@ $.widget( "heurist.resultList", {
             this.div_header.hide();
         }
 
-        this.div_toolbar.css({'top':top+'px', height:this.options.show_savefilter?'4.9em':'2.5em'});
+        this.div_toolbar.css({'top':top+'px', height:'auto'});//this.options.show_savefilter?'4.9em':'2.5em'});
         if(this.options.show_toolbar){
             this.div_toolbar.show();
             top = top + this.div_toolbar.height();
@@ -637,7 +637,7 @@ $.widget( "heurist.resultList", {
             top = top + this.div_content_header.height()-2;
         }
 
-        this.div_content.css({'top': top+4+'px'});
+        this.div_content.css({'top': top+'px'}); //'110px'});
         
         if(has_content_header){ //table_header
             this.div_content_header
@@ -662,6 +662,8 @@ $.widget( "heurist.resultList", {
             this.span_pagination.hide();
             this.span_info.hide();
         }
+        
+        this._adjustHeadersPos();
 
     },
 
@@ -1083,7 +1085,7 @@ $.widget( "heurist.resultList", {
         var html_pwdrem = '';
         var pwd = window.hWin.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
         if(pwd){
-            html_pwdrem =  '<span class="ui-icon ui-icon-key rec_pwdrem" style="display:inline;left:10px"></span>';
+            html_pwdrem =  '<span class="ui-icon ui-icon-key rec_pwdrem" style="display:inline;left:14px;font-size:0.99em"></span>';
             pwd = ' pwd="'+pwd+'" ';
         }else{
             pwd = '';
@@ -1129,12 +1131,12 @@ $.widget( "heurist.resultList", {
 
             // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner" style="width:20px;padding-top:6;display:inline-block;color:'
-                     + clr + '" title="' + hint + '"><b>' + (owner_id==0?'E':owner_id) + '</b></span>';
+                     + clr + '" title="' + hint + '"><b>' + (owner_id==0?'':owner_id) + '</b></span>';
             
             if(clr != 'blue')         
             html_owner =  html_owner + '<span class="ui-icon ui-icon-cancel" '
-            +'style="color:darkgray;display:inline;font-size: 2em;vertical-align: -2px"></span>'
-                +'<span class="ui-icon ui-icon-eye" style="color:darkgray;display:inline;vertical-align:0px" title="'
+            +'style="color:darkgray;display:inline;font-size:1.5em;vertical-align: -2px"></span>'
+                +'<span class="ui-icon ui-icon-eye" style="font-size:0.9em;color:darkgray;display:inline;vertical-align:0px" title="'
                 + 'This record is not publicly visible - user must be logged in to see it'
                 + '" ></span>';
                      
@@ -1684,151 +1686,152 @@ $.widget( "heurist.resultList", {
 
         this._updateInfo();
 
-        if (pageCount < 2) {
-            return;
-        }else if(this.options.navigator=='none'){
-            this._renderPage(0);
-            return;
-        }
-
-        // KJ's patented heuristics for awesome useful page numbers
-        if (pageCount > 9) {
-            if (currentPage < 5) { start = 1; finish = 8; }
-            else if (currentPage < pageCount-4) { start = currentPage - 2; finish = currentPage + 4; }
-                else { start = pageCount - 7; finish = pageCount; }
-        } else {
-            start = 1; finish = pageCount;
-        }
-
-
-        /*if (currentPage == 0) {
-        this.btn_goto_prev.hide();
-        }else{
-        this.btn_goto_prev.show();
-        }
-        if (currentPage == pageCount-1) {
-        this.btn_goto_next.hide();
-        }else{
-        this.btn_goto_next.show();
-        }*/
-
-        var that = this;
-
-        var ismenu = that.options.navigator!='buttons' && (that.options.navigator=='menu' || (that.element.width()<450));
-
-        var smenu = '';
-
-        if (start != 1) {    //force first page
-            if(ismenu){
-                smenu = smenu + '<li id="page0"><a href="#">1</a></li>'
-                if(start!=2){                                                                              
-                    smenu = smenu + '<li>...</li>';
-                }
+        if (pageCount > 1) {
+            
+            if(this.options.navigator=='none'){
+                this._renderPage(0);
             }else{
-                $( "<button>", { text: "1", id:'page0'}).css({'font-size':'0.7em'}).button()
-                .appendTo( span_pages ).on("click", function(){ 
-                    that._renderPage(0); 
-                } );
-                if(start!=2){
-                    $( "<span>" ).html("..").appendTo( span_pages );
+                
+                // KJ's patented heuristics for awesome useful page numbers
+                if (pageCount > 9) {
+                    if (currentPage < 5) { start = 1; finish = 8; }
+                    else if (currentPage < pageCount-4) { start = currentPage - 2; finish = currentPage + 4; }
+                        else { start = pageCount - 7; finish = pageCount; }
+                } else {
+                    start = 1; finish = pageCount;
                 }
+
+
+                /*if (currentPage == 0) {
+                this.btn_goto_prev.hide();
+                }else{
+                this.btn_goto_prev.show();
+                }
+                if (currentPage == pageCount-1) {
+                this.btn_goto_next.hide();
+                }else{
+                this.btn_goto_next.show();
+                }*/
+
+                var that = this;
+
+                var ismenu = that.options.navigator!='buttons' && (that.options.navigator=='menu' || (that.element.width()<450));
+
+                var smenu = '';
+
+                if (start != 1) {    //force first page
+                    if(ismenu){
+                        smenu = smenu + '<li id="page0"><a href="#">1</a></li>'
+                        if(start!=2){                                                                              
+                            smenu = smenu + '<li>...</li>';
+                        }
+                    }else{
+                        $( "<button>", { text: "1", id:'page0'}).css({'font-size':'0.7em'}).button()
+                        .appendTo( span_pages ).on("click", function(){ 
+                            that._renderPage(0); 
+                        } );
+                        if(start!=2){
+                            $( "<span>" ).html("..").appendTo( span_pages );
+                        }
+                    }
+                }
+                for (i=start; i <= finish; ++i) {
+                    if(ismenu){
+                        smenu = smenu + '<li id="page'+(i-1)+'"><a href="#">'+i+'</a></li>'
+                    }else{
+
+                        var $btn = $( "<button>", { text:''+i, id: 'page'+(i-1) }).css({'font-size':'0.7em'}).button()
+                        .appendTo( span_pages )
+                        .click( function(event){
+                            var page = Number(this.id.substring(4));
+                            that._renderPage(page);
+                        } );
+                        if(i-1==currentPage){
+                            //$btn.button('disable').addClass('ui-state-active').removeClass('ui-state-disabled');
+                        }
+                    }
+                }
+                if (finish != pageCount) { //force last page
+                    if(ismenu){
+                        if(finish!= pageCount-1){
+                            smenu = smenu + '<li>...</li>';
+                        }
+                        smenu = smenu + '<li id="page'+(pageCount-1)+'"><a href="#">'+pageCount+'</a></li>';
+                    }else{
+                        if(finish!= pageCount-1){
+                            $( "<span>" ).html("..").appendTo( span_pages );
+                        }
+                        $( "<button>", { text: ''+pageCount, id:'page'+finish }).css({'font-size':'0.7em'}).button()
+                        .appendTo( span_pages ).on("click", function(){ that._renderPage(pageCount-1); } );
+                    }
+                }
+
+                if(ismenu){
+                    //show as menu
+                    this.btn_page_prev = $( "<button>", {text:currentPage} )
+                    .appendTo( span_pages )
+                    .css({'font-size':'0.7em', 'width':'1.6em'})
+                    .button({icons: {
+                        primary: "ui-icon-triangle-1-w"
+                        }, text:false});
+
+                    this.btn_page_menu = $( "<button>", {
+                        text: (currentPage+1)
+                    })
+                    .appendTo( span_pages )
+                    .css({'font-size':'0.7em'})
+                    .button({icons: {
+                        secondary: "ui-icon-triangle-1-s"
+                    }});
+
+                    this.btn_page_menu.find('.ui-icon-triangle-1-s').css({'font-size': '1.3em', right: 0});
+
+                    this.btn_page_next = $( "<button>", {text:currentPage} )
+                    .appendTo( span_pages )
+                    .css({'font-size':'0.7em', 'width':'1.6em'})
+                    .button({icons: {
+                        primary: "ui-icon-triangle-1-e"
+                        }, text:false});
+
+
+                    this.menu_pages = $('<ul>'+smenu+'</ul>')   //<a href="#">
+                    .css({position:'absolute', zIndex:9999, 'font-size':'0.7em'})
+                    .appendTo( this.document.find('body') )
+                    .menu({
+                        select: function( event, ui ) {
+                            var page =  Number(ui.item.attr('id').substr(4));
+                            that._renderPage(page);
+                    }})
+                    .hide();
+
+                    this._on( this.btn_page_prev, {
+                        click: function() {  that._renderPage(that.current_page-1)  }});
+                    this._on( this.btn_page_next, {
+                        click: function() {  that._renderPage(that.current_page+1)  }});
+
+                    this._on( this.btn_page_menu, {
+                        click: function() {
+                            $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
+                            var menu = $( this.menu_pages )
+                            //.css('min-width', '80px')
+                            .show()
+                            .position({my: "right top", at: "right bottom", of: this.btn_page_menu });
+                            $( document ).one( "click", function() { menu.hide(); });
+                            return false;
+                        }
+                    });
+
+                }
+                
+                
+                if(this.options.header_class){
+                    this.span_pagination.find('button').addClass(this.options.header_class).css({'border':'none'});
+                }
+                if(!ismenu)
+                    span_pages.find('#page'+currentPage).css({'border':'1px solid white'});
+
             }
         }
-        for (i=start; i <= finish; ++i) {
-            if(ismenu){
-                smenu = smenu + '<li id="page'+(i-1)+'"><a href="#">'+i+'</a></li>'
-            }else{
-
-                var $btn = $( "<button>", { text:''+i, id: 'page'+(i-1) }).css({'font-size':'0.7em'}).button()
-                .appendTo( span_pages )
-                .click( function(event){
-                    var page = Number(this.id.substring(4));
-                    that._renderPage(page);
-                } );
-                if(i-1==currentPage){
-                    //$btn.button('disable').addClass('ui-state-active').removeClass('ui-state-disabled');
-                }
-            }
-        }
-        if (finish != pageCount) { //force last page
-            if(ismenu){
-                if(finish!= pageCount-1){
-                    smenu = smenu + '<li>...</li>';
-                }
-                smenu = smenu + '<li id="page'+(pageCount-1)+'"><a href="#">'+pageCount+'</a></li>';
-            }else{
-                if(finish!= pageCount-1){
-                    $( "<span>" ).html("..").appendTo( span_pages );
-                }
-                $( "<button>", { text: ''+pageCount, id:'page'+finish }).css({'font-size':'0.7em'}).button()
-                .appendTo( span_pages ).on("click", function(){ that._renderPage(pageCount-1); } );
-            }
-        }
-
-        if(ismenu){
-            //show as menu
-            this.btn_page_prev = $( "<button>", {text:currentPage} )
-            .appendTo( span_pages )
-            .css({'font-size':'0.7em', 'width':'1.6em'})
-            .button({icons: {
-                primary: "ui-icon-triangle-1-w"
-                }, text:false});
-
-            this.btn_page_menu = $( "<button>", {
-                text: (currentPage+1)
-            })
-            .appendTo( span_pages )
-            .css({'font-size':'0.7em'})
-            .button({icons: {
-                secondary: "ui-icon-triangle-1-s"
-            }});
-
-            this.btn_page_menu.find('.ui-icon-triangle-1-s').css({'font-size': '1.3em', right: 0});
-
-            this.btn_page_next = $( "<button>", {text:currentPage} )
-            .appendTo( span_pages )
-            .css({'font-size':'0.7em', 'width':'1.6em'})
-            .button({icons: {
-                primary: "ui-icon-triangle-1-e"
-                }, text:false});
-
-
-            this.menu_pages = $('<ul>'+smenu+'</ul>')   //<a href="#">
-            .css({position:'absolute', zIndex:9999, 'font-size':'0.7em'})
-            .appendTo( this.document.find('body') )
-            .menu({
-                select: function( event, ui ) {
-                    var page =  Number(ui.item.attr('id').substr(4));
-                    that._renderPage(page);
-            }})
-            .hide();
-
-            this._on( this.btn_page_prev, {
-                click: function() {  that._renderPage(that.current_page-1)  }});
-            this._on( this.btn_page_next, {
-                click: function() {  that._renderPage(that.current_page+1)  }});
-
-            this._on( this.btn_page_menu, {
-                click: function() {
-                    $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
-                    var menu = $( this.menu_pages )
-                    //.css('min-width', '80px')
-                    .show()
-                    .position({my: "right top", at: "right bottom", of: this.btn_page_menu });
-                    $( document ).one( "click", function() { menu.hide(); });
-                    return false;
-                }
-            });
-
-        }
-        
-        
-        if(this.options.header_class){
-            this.span_pagination.find('button').addClass(this.options.header_class).css({'border':'none'});
-        }
-        if(!ismenu)
-            span_pages.find('#page'+currentPage).css({'border':'1px solid white'});
-
 
         this._showHideOnWidth();
     }

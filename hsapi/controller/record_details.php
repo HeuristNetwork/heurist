@@ -34,6 +34,8 @@
 
     }else {
         
+        //set_time_limit(0);
+        
         $dbRecDetails = new DbRecDetails($system, $_REQUEST);
 
         if(@$_REQUEST['a'] == 'add_child'){ //add child record
@@ -69,6 +71,8 @@
 
             $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
         }
+        
+        $dbRecDetails->removeSession();
     }
 
     

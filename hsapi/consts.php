@@ -27,9 +27,10 @@
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.2.0"); //minimal version of db for current version of code
-define('HEURIST_HELP', "https://heuristplus.sydney.edu.au/heurist/help");
-define('HEURIST_INDEX_BASE_URL', "https://heuristplus.sydney.edu.au/heurist/"); //central index database url
+define('HEURIST_MAIN_SERVER', 'https://heuristplus.sydney.edu.au');
+define('HEURIST_INDEX_BASE_URL', 'https://heuristplus.sydney.edu.au/heurist/'); //central index database url
 define('HEURIST_INDEX_DATABASE', 'Heurist_Master_Index');
+define('HEURIST_HELP', "https://heuristplus.sydney.edu.au/heurist/help");
 
 if (@$httpProxy != '') {
     define('HEURIST_HTTP_PROXY', $httpProxy); //http address:port for proxy request
@@ -78,7 +79,7 @@ define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
 define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. Heurist.sydney.edu.au
 if(!defined('HEURIST_DIR')) define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
 define('HEURIST_SERVER_URL', $serverBaseURL);
-define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); // eg. https://heuristplus.sydney.edu.au/h5/
+define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); // eg. https://heuristplus.sydney.edu.au/heurist/
 
 define('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir());
 

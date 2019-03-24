@@ -267,7 +267,7 @@ function DetailTypeEditor() {
         
         //add to temp array
         var vocabs = [];
-        for(termID in termTree) { // For every term in first levet of tree
+        for(termID in termTree) { // For every term in first level of tree
             if(!Hul.isnull(termID)){
                 termName = terms[termID][fi_label];
                 vocabs.push({key:termID, title:termName });

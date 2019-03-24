@@ -161,11 +161,22 @@
 
 
         //ActioN!
+        
+        if(@$record['ID']>0){
+            //case: insert csv with predefined ID
+            $rec_id = $record['ID'];
+            $recid1 = 'rec_ID, ';
+            $recid2 = '?, '; 
+        }else{
+            $rec_id = 0;
+            $recid1 = '';
+            $recid2 = ''; 
+        }
 
         $query = "INSERT INTO Records
-        (rec_AddedByUGrpID, rec_RecTypeID, rec_OwnerUGrpID, rec_NonOwnerVisibility,"
+        ($recid1 rec_AddedByUGrpID, rec_RecTypeID, rec_OwnerUGrpID, rec_NonOwnerVisibility,"
         ."rec_URL, rec_ScratchPad, rec_Added, rec_AddedByImport, rec_FlagTemporary, rec_Title) "
-        ."VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        ."VALUES ($recid2 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $mysqli->prepare($query);
 
@@ -179,8 +190,14 @@
         //DateTime('now')->format('Y-m-d H:i:s') is same as date('Y-m-d H:i:s')
         $data_add = date('Y-m-d H:i:s');
         
-        $stmt->bind_param('iiissssiis', $currentUserId, $rectype, $owner_grps[0], $access,
-            $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp, $rec_title);
+        if(@$record['ID']>0){
+            //case: insert csv with predefined ID
+            $stmt->bind_param('iiiissssiis', $rec_id, $currentUserId, $rectype, $owner_grps[0], $access,
+                $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp, $rec_title);
+        }else{
+            $stmt->bind_param('iiissssiis', $currentUserId, $rectype, $owner_grps[0], $access,
+                $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp, $rec_title);
+        }
         $stmt->execute();
         $newId = $stmt->insert_id;
         $syserror = $mysqli->error;
@@ -227,6 +244,11 @@
     *    details = array("t:1" => array("bd:234463" => "7th Ave"),
     *                      ,,,
     *                     "t:11" => array("0" => "p POINT (-73.951172 40.805661)"));
+    * 
+    * returns
+    * array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
+    * or
+    * error array
     *
     */
     function recordSave($system, $record){
@@ -261,7 +283,7 @@
         }
 
         $recID = intval(@$record['ID']);
-        if ( $recID==0 ) {
+        if ( @$record['ID']!=='0' && @$record['ID']!==0 && $recID==0 ) {
             return $system->addError(HEURIST_INVALID_REQUEST, "Record ID is not defined");
         }
 
@@ -318,6 +340,12 @@
                 if(mysql__select_value($mysqli, $query)>0){
                     $record['FlagTemporary'] = 1;
                 }
+            }
+            
+            //add with predifined id - this is is case happens only in import csv
+            //to keep H-ID defined in source csv
+            if($recID<0){ 
+                $record['ID'] = abs($recID);
             }
         
             // start transaction
@@ -415,7 +443,8 @@
                     //$email_to, $email_title, $email_text, $email_header
                     sendEmail(HEURIST_MAIL_TO_ADMIN, 
                             'DATABASE ERROR :'.$system->dbname().' Cannot save details.',
-                            ($syserror?'. System message:'.$syserror:'').'\n'.print_r($values,true), null);
+                            ($syserror?'. System message:'.$syserror:'')."\n Record#: $recID \n"
+                            .print_r($values,true), null);
                     
                     return $system->addError(HEURIST_DB_ERROR, 'Cannot save details.', $syserror);
                 }
@@ -1346,7 +1375,7 @@
             
             if((is_array($pairs) && count($pairs)==0) || $pairs=='') continue; //empty value
             
-            if(preg_match("/^t:\\d+$/", $dtyID)){
+            if(preg_match("/^t:\\d+$/", $dtyID)){ //old format with t:NNN
                 $dtyID = substr($dtyID, 2);
             }
             if($dtyID>0){
@@ -1476,7 +1505,6 @@
                         if($dtl_Value=='generate_thumbnail_from_url' && @$record['URL']){
                             
                             $tmp_file = generate_thumbnail($record['URL']);
-                            
 
                             if(!is_a($tmp_file,'stdClass')){
                                 $err_msg = is_array($tmp_file) ?$tmp_file['error'] :'Unknown error '.$tmp_file;

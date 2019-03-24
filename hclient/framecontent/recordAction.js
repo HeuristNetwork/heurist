@@ -38,6 +38,8 @@ IT USES
 function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     var _className = "RecordAction",
     _version   = "0.4",
+    session_id,
+    progressInterval,
 
     selectRecordScope, allSelectedRectypes;
 
@@ -255,11 +257,15 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             allowed.splice(allowed.indexOf("geo"),1);
             allowed.splice(allowed.indexOf("file"),1);
             
+            var initially_selected = 0;
+            
+            
             if(action_type=='extract_pdf'){
                 allowed = ['blocktext'];    
+                initially_selected = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTRACTED_TEXT'];
             }
 
-            window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null);
+            window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect, rtyIDs, allowed, null, {selected_value:initially_selected});
         }
         
         fieldSelect.onchange = _createInputElements;
@@ -520,12 +526,20 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         $('.loading').show();
         
         //request['DBGSESSID'] = '425944380594800002;d=1,p=0,c=07';
+        if(request['a']=='extract_pdf'){
+            session_id = Math.round((new Date()).getTime()/1000);
+            request['session'] = session_id;
+            _showProgress( session_id );
+        }
 
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-
+            
+            _hideProgress();
+            
             $('body > div:not(.loading)').show();
             $('body > #ui-datepicker-div').hide();
             $('.loading').hide();
+
             var  success = (response.status == window.hWin.ResponseStatus.OK);
             if(success){
                 $('#div_parameters').hide();
@@ -577,26 +591,39 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&q=sortby:-m after:"5 minutes ago"')+
                             '" target="_blank">view recent changes</a></span>';
+                        }else if(key=="parseexception"){
+                            
+                            //tag_link = '<span><a href="#" onclick="">'+'view details</a></span>';
                         }
                         
                         sResult = sResult + '<div style="padding:4px"><span>'+lbl+'</span><span>&nbsp;&nbsp;'
                         +response[key]+'</span>'
                         +tag_link+'</div>';
                         
-                        if(key=='errors' && response['errors_list']){
-                            var recids = Object.keys(response['errors_list']);
+                        function __report_details(key){
+                            var recids = Object.keys(response[key]);
+                            var sResult = '';
                             if(recids && recids.length>0){
-                                sResult += '<div style="max-height:300;overflow-y:auto;background-color:#ffcccc">';
-                                for(key in response['errors_list']){
-                                    sResult += (key+': '+response['errors_list'][key] + '<br>');   
+                                sResult += '<div style="max-height:230px;overflow-y:auto;background-color:#ffcccc">';
+                                for(var recid in response[key]){
+                                    sResult += (recid+': '+response[key][recid] + '<br><br>');   
                                 }
                                 sResult += '</div>';   
                             }
+                            return sResult;
+                        }
+                        
+                        if(key=='errors' && response['errors_list']){
+                            sResult += __report_details('errors_list');
+                        }else if(key=='parseexception' && response['parseexception_list']){
+                            sResult += __report_details('parseexception_list');
+                        }else if(key=='parseempty' && response['parseempty_list']){
+                            sResult += __report_details('parseempty_list');
                         }
                     }
                 }
                 
-console.log(response);               
+//console.log(response);               
 
                 $('#div_result').html(sResult);
                 $('#div_result').css({padding:'10px'}).show();
@@ -611,6 +638,92 @@ console.log(response);
 
     }
 
+    //
+    // @todo move to utils_msg
+    //
+    function _showProgress( session_id ){
+
+        var progressCounter = 0;        
+        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+
+        
+        $('body').css('cursor','progress');
+        var pbar_div = $('#progressbar_div').show();
+        var pbar = $('#progressbar');
+        var progressLabel = pbar.find('.progress-label').text('');
+        pbar.progressbar({value:0});
+        
+        var btn = $('#progress_stop');
+        if(btn.button("instance")==undefined){
+            btn.button().click(function() {
+                
+                _hideProgress();
+                
+                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
+                
+                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+                    if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                        //console.log('TERMINATION', response);                   
+                    }
+                });
+            } );
+        }
+        
+        progressInterval = setInterval(function(){ 
+            
+            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+            
+            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+
+                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    _hideProgress();
+                }else{
+                    
+                    var resp = response?response.split(','):[0,0];
+                    
+                    if(resp && resp[0]>=0){
+                        if(progressCounter>0){
+                            if(resp[1]>0){
+                                var val = resp[0]*100/resp[1];
+                                pbar.progressbar( "value", val );
+                                progressLabel.text(resp[0]+' of '+resp[1]);
+                            }else{
+                                progressLabel.text('wait...');
+                                //progressLabel.text('');
+                            }
+                        }else{
+                            pbar.progressbar( "value", 0 );
+                            progressLabel.text('preparing...');
+                        }
+                    }else if(progressCounter>3){
+                        _hideProgress();
+                    }
+                    
+                    progressCounter++;
+                    
+                }
+            },'text');
+          
+        
+        }, 1000);                
+        
+    }
+    
+    function _hideProgress(){
+        
+        
+        $('body').css('cursor','auto');
+        
+        if(progressInterval!=null){
+            
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+        $('#progressbar_div').hide();
+        
+    }    
+           
+    
 
     //public members
     var that = {

@@ -148,11 +148,11 @@ var cfg_layouts = [
     // 3 main tabs on top with accordion menu on each one - most of admin/import/export in iframes
     {id:'SearchAnalyze', name:'Search Analyze Publish', theme:'heurist', type:'cardinal',
     
-        west:{size:260, minsize:150, apps:[{appid:'heurist_SearchTree', hasheader:false, 
+        west:{size:260, Xminsize:150, apps:[{appid:'heurist_SearchTree', hasheader:false, 
                 css:{border:'none', 'background':'none'},
                 options:{btn_visible_dbstructure:false} }]},  //saved searches
                 
-        center:{minsize:300, dropable:false,
+        center:{Xminsize:300, dropable:false,
             apps:[{appid:'include_layout', name: 'AAA', layout_id:'FAP2',dragable:false,
                         options:{ref: 'SearchAnalyze2'}
                         ,css:{position:'absolute', top:0,left:0,bottom:'0.1em',right:0}}] //,'font-size':'0.9em'
@@ -168,10 +168,10 @@ var cfg_layouts = [
                 border:'none', 'background':'white', 'min-width':'75em'}, 
             options:{has_paginator:false, btn_visible_newrecord:true} }, 
         ]},
-        center:{minsize:300, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false, 
+        center:{Xminsize:300, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false, 
                      dockable:false, dragable:false, css:{'background-color':'white'}, 
                      options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true, header_class:'ui-heurist-header2'} }]},  //search result
-        east:{size:'50%', minsize:300, dropable:false,
+        east:{size:'50%', Xminsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, //css:{'font-size':'0.95em'},
                 apps:[
                     {appid:'heurist_resultListExt', name: 'Record View', 

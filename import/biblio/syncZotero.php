@@ -1111,7 +1111,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
 
         //add-update Heurist record
         $record = array();
-        $record['ID'] = $recId?$recId:-1;
+        $record['ID'] = $recId?$recId:0; //0 means insert
         $record['RecTypeID'] = $recordType;
         $record['AddedByImport'] = 2;
         $record['no_validation'] = true;

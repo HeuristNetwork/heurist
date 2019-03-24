@@ -101,7 +101,7 @@ regional['en'] = {
     
     'record_action_undefined_extract_pdf': 'Records with no associated pdf',
     'record_action_parseexception_extract_pdf': 'Records with locked PDFs (extraction forbidden)',
-    'record_action_empty_extract_pdf': 'Records with no text to extract (eg. images)',
+    'record_action_parseempty_extract_pdf': 'Records with no text to extract (eg. images)',
     'record_action_limited_extract_pdf': 'Records with field already populated',
     
     'record_action_errors': 'Errors',

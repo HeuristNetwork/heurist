@@ -34,18 +34,24 @@ $system = new System(); //without connection
 $db = @$_REQUEST['db'];
 
 if($db){
-
+    
     $fileid = @$_REQUEST['thumb'];
     if($fileid){ 
         $system->initPathConstants($db);
 
+        $force_recreate = (@$_REQUEST['refresh']==1);
+
         $thumbfile = HEURIST_THUMB_DIR.'ulf_'.$fileid.'.png';
-        if(file_exists($thumbfile)){
+        if(!$force_recreate && file_exists($thumbfile)){
             downloadFile('image/png', $thumbfile);
         }else{
             //recreate thumbnail
             //@todo - change to the same script in h4  or use Imagic
             $thumb_url = HEURIST_BASE_URL."common/php/resizeImage.php?db=".$db."&ulf_ID=".$fileid;
+            if($force_recreate){
+                $thumb_url = $thumb_url.'&refresh=1';    
+            }
+            
             header("Location: ".$thumb_url);
             exit();
         }

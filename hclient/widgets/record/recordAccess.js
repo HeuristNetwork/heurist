@@ -237,8 +237,9 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
             var scope_val = this.selectRecordScope.val();
             
-            if (window.hWin.HEURIST4.util.isempty(scope_val) 
-                && !this.getSelectedParameters(true))  return;
+            if(window.hWin.HEURIST4.util.isempty(scope_val)) return; 
+    
+            if(!this.getSelectedParameters(true)) return;
             
         
             if(this.options.scope_types=='none'){

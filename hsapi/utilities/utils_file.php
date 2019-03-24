@@ -340,7 +340,7 @@
      * @param boolean $ignoreEmpty Do not add empty directories to the tree
      * @return array
      */
-    function folderTree($dir, $params)
+    function folderTree($dir, $params, $is_system=false)
     {
         if($dir==null){
             $dir = HEURIST_FILESTORE_DIR;
@@ -358,21 +358,34 @@
         $ignoreEmpty = (@$params['ignoreEmtpty']==true);
         $systemFolders = @$params['systemFolders'];
         $isFancy = (@$params['format']=='fancy');
-        if(is_array($params)) {$params['systemFolders'] = null;}
+        if(is_array($params)) {$params['systemFolders'] = null;} //use on first level only
         if($regex==null) $regex = '';
         
         $fancytree = array();
         
         foreach ($dir as $node) {
             if ($node->isDir() && !$node->isDot()) {
-                $tree = folderTree($node->getPathname(), $params);
+                
+                $folder_name = $node->getFilename();
+                $is_system = (@$systemFolders[$folder_name]!=null);
+                //(@$params['is_system']==true) || 
+                //$params['is_system'] = $is_system;
+                
+                $tree = folderTree($node->getPathname(), $params, $is_system);
                 if (!$ignoreEmpty || count($tree)) {
-                    $folder_name = $node->getFilename();
                     
                     if($isFancy){
-                        $fancytree[] = array( 'key'=>$folder_name, 'title'=>$folder_name, 
-                            'folder'=>true, 'issystem'=>(@$systemFolders[$folder_name]!=null),
+                        $arr = array( 'key'=>$folder_name, 'title'=>$folder_name, 
+                            'folder'=>true, 'issystem'=>$is_system, 
                             'children'=>$tree['children'], 'files_count'=>$tree['count'] );
+                            
+                       if($is_system){
+                           $arr['unselectable'] = true;
+                           $arr['unselectableStatus'] = false;
+                       }    
+                       
+                       $fancytree[] = $arr;
+                            
                     }else{
                         $dirs[$folder_name] = $tree;    
                     }            
@@ -770,7 +783,9 @@ function loadRemoteURLContentSpecial($url){
 
     if(strpos($url, HEURIST_SERVER_URL)===0){
         
-        //replace https://heuristplus.sydney.edu.au/h5/ to script path in current installation folder
+        //if requested url is on the same server 
+        //replace URL to script path in current installation folder
+        //and execute script 
         $path = str_replace(HEURIST_BASE_URL, HEURIST_DIR, $url);
 
         $path = substr($path,0,strpos($path,'?'));

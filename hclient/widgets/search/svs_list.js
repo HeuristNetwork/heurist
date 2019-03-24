@@ -1690,13 +1690,15 @@ $.widget( "heurist.svs_list", {
 
                 var request = Hul.parseHeuristQuery(qsearch);
 
+                request.rules = window.hWin.HEURIST4.util.cleanRules(request.rules);
+                
                 //query is not defenied, but rules are - this is pure RuleSet - apply it to current result set
                 if(Hul.isempty(request.q)&&!Hul.isempty(request.rules)){
 
                     if(this.currentSearch){
                         this.currentSearch.rules = Hul.cloneJSON(request.rules);
                     }
-
+                    
                     //target is required
                     if(! window.hWin.HAPI4.SearchMgr.doApplyRules( this, request.rules, request.rulesonly ) ){
                         window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('RuleSets require an initial search result as a starting point.'),

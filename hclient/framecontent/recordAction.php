@@ -43,7 +43,7 @@ resultList.js -> resultListMenuSelected.html/resultListMenu.js
 detailBatchEditPopup opens either
 
 to convert
-    recordAddLink - define links/relationship -> RecordMgr.batch_details for links, RecordMgr.save new record for relationship
+    recordAddLink - define links/relationship -> RecordMgr.batch_details for links, RecordMgr.saveRecord new record for relationship
     recordAction - change details in batch    -> RecordMgr.batch_details
 
     recordAccess - define ownership and access rights  -> h3 executeAction("set_wg_and_vis") or just close window
@@ -61,7 +61,7 @@ todo
     recordNotify - send email about record
     
 on server side - controller
-RecordMgr.add, save, duplicate, remove  -> record_edit.php -> db_records.php
+RecordMgr.addRecord, saveRecord, duplicate, remove  -> record_edit.php -> db_records.php
 
 RecordMgr.batch_details -> record_details.php  -> $dbRecDetails
 
@@ -168,7 +168,7 @@ if(!in_array($action_type, $allowed_actions)){
 
     </div>
 
-    <div id="div_result" class="content_div" style="display: none;">
+    <div id="div_result" class="content_div" style="display: none;overflow-y: auto;position: absolute;top: 0;bottom: 50;">
         RESULT
     </div>
     
@@ -180,6 +180,13 @@ if(!in_array($action_type, $allowed_actions)){
     </div>
 
     <div class="loading" style="width:100%;height:100%;display: none;">
+        <div id="progressbar_div" style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:20%;display:none;">
+            <div id="progressbar">
+                <div class="progress-label">Processing...</div>
+            </div>
+            <div id="progress_stop" style="text-align:center;margin-top:4px">Abort</div>
+        </div>
     </div>
+    
 </body>
 </html>

@@ -531,17 +531,6 @@ class DbRecUploadedFiles extends DbEntityBase
     }
     
     
-    /**
-    * @todo
-    * 
-    * @param mixed $url
-    * @param mixed $generate_thumbmail
-    */
-    public function registerURL($url, $generate_thumbmail = false){
-
- 
-    }   
-
     //
     // 
     //
@@ -675,5 +664,18 @@ class DbRecUploadedFiles extends DbEntityBase
        }        
        
     }
+    
+    /**
+    * @todo
+    * 
+    * @param mixed $url
+    * @param mixed $generate_thumbmail
+    */
+    public function registerURL($url, $generate_thumbmail = false){
+
+ 
+    }   
+
+    
 }
 ?>

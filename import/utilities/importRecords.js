@@ -1,0 +1,359 @@
+/**
+* Class to import records from JSON/XML
+* 
+* @returns {Object}
+* 
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2019 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+function hImportRecords(_max_upload_size) {
+    var _className = "ImportRecords",
+    _version   = "0.4",
+    
+    btnUploadData,
+    upload_file_name,  //file on server with original uploaded data
+    progressInterval,
+    session_id;
+    
+    function _init( _max_upload_size){
+    
+        var uploadWidget = $('#uploadFile');
+        
+        //init STEP 1  - upload
+        $('button').button();
+                    
+        //buttons
+        btnUploadData = $('#btn_UploadData').click(function(e) {
+                            if( window.hWin.HAPI4.is_admin() ){
+                                uploadWidget.click();    
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr({
+                                    status:window.hWin.ResponseStatus.REQUEST_DENIED,
+                                    message:'Administrator permissions are required'});    
+                            }
+                        });
+                    
+        $('#btn_ImportRt').click(_importDefinitions);
+
+        $('#btn_ImportRecords').click(_importRecords);
+            
+        //upload file to server and store intemp file
+        var uploadData = null;
+        var pbar_div = $('#progressbar_div');
+        var pbar = $('#progressbar');
+        var progressLabel = pbar.find('.progress-label').text('');
+        pbar.progressbar({value:0});
+                
+        $('#progress_stop').button().on({click: function() {
+                if(uploadData && uploadData.abort) uploadData.abort();
+        }});
+                
+                uploadWidget.fileupload({
+        url: window.hWin.HAPI4.baseURL +  'hsapi/utilities/fileUpload.php', 
+        formData: [ {name:'db', value: window.hWin.HAPI4.database}, //{name:'DBGSESSID', value:'424533833945300001;d=1,p=0,c=0'},
+                    {name:'max_file_size', value: _max_upload_size},
+                    {name:'entity', value:'temp'}, //just place file into scratch folder
+                    {name:'autodect', value:1}], //try to detect line and field separator 
+        //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+        autoUpload: true,
+        sequentialUploads:false,
+        dataType: 'json',
+        //dropZone: $input_img,
+        add: function (e, data) {  
+        
+            uploadData = data;//keep this object to use conviniece methods (abort for instance)
+            data.submit(); 
+
+        },
+        //send: function (e, data) {},
+        //start: function(e, data){},
+        //change: function(){},
+        error: function (jqXHR, textStatus, errorThrown) {
+            //!!! $('#upload_form_div').show();
+            _showStep(0);
+            pbar_div.hide();
+            if(textStatus!='abort'){
+                window.hWin.HEURIST4.msg.showMsgErr(textStatus+' '+errorThrown);
+            }
+        },
+        done: function (e, response) {
+
+                //!!! $('#upload_form_div').show();                
+                pbar_div.hide();       //hide progress bar
+                response = response.result;
+                if(response.status==window.hWin.ResponseStatus.OK){  //after upload
+                    var data = response.data;
+                    $.each(data.files, function (index, file) {
+                        if(file.error){
+                            window.hWin.HEURIST4.msg.showMsgErr(file.error);
+                        }else{
+                            
+                            upload_file_name = file.name;
+                            
+                            //save session - new primary rectype and sequence
+                            var request = { action: 'import_preview',
+                                filename: upload_file_name,
+                                id: window.hWin.HEURIST4.util.random()
+                            };
+                                   
+                            window.hWin.HAPI4.doImportAction(request, function( response ){
+                                    
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                        //render list of rectypes to be imported
+                                        var rectypes = response.data;
+                                        var s = '';
+                                        for(var rtyID in rectypes){
+                                            var rectype = rectypes[rtyID];
+                                            if(!(rectype['target_RecTypeID']>0)){
+                                                s = s + '<tr><td>'
+                                                    +rectype['code']+'</td><td>'
+                                                    +rectype['count']+'</td><td>'
+                                                    //+rectype['target_RecTypeID']+'</td><td>'
+                                                    +rectype['name']+'</td></tr>';
+                                            }
+                                        }
+                                        if(s!=''){
+                                            $('#div_RectypeToBeImported').html('<table>'+s+'</table>');
+                                            _showStep(1);
+                                        }else{
+                                            //all record types are alrady in target database
+                                            //goto import records step
+                                            _showStep(2);
+                                        }
+                                        
+                                    }else{
+                                        _showStep(0);
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    }
+                                });
+                            
+                            
+                        }
+                    });
+                }else{
+                    //$('#divFieldRolesHeader').show();
+                    _showStep(0);
+                    window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                }
+                
+                //need to reassign  event handler since widget creates temp input
+                var inpt = this;
+                btnUploadData.off('click');
+                btnUploadData.on({click: function(){
+                            $(inpt).click();
+                }});                
+           
+        },//done                    
+        progressall: function (e, data) { 
+                    $('#divStep0').hide();
+                    var progress = parseInt(data.loaded / data.total * 100, 10);
+                    progressLabel = pbar.find('.progress-label').text(
+                                    Math.ceil(data.loaded/1024)+'Kb / '+Math.ceil(data.total/1024)) + 'Kb ';
+                    pbar.progressbar({value: progress});
+                    if (data.total>_max_upload_size && uploadData) {
+                            uploadData.abort();
+                            window.hWin.HEURIST4.msg.showMsgErr(
+                            'Sorry, this file exceeds the upload '
+                            //+ ((max_file_size<max_post_size)?'file':'(post data)')
+                            + ' size limit set for this server ('
+                            + Math.round(_max_upload_size/1024/1024) + ' MBytes). '
+                            +'Please reduce the file size, or ask your system administrator to increase the upload limit.'
+                            );
+                    }else if(!pbar_div.is(':visible')){
+                        //!!! $('#upload_form_div').hide();
+                        _showStep(0);
+                        pbar_div.show();
+                    }
+                }                            
+                
+                            });                        
+        
+    }
+
+    //
+    //
+    //
+    function _importDefinitions(){
+        
+            
+            $('#divStep1').hide();
+        
+            var request = { action: 'import_definitions',
+                filename: upload_file_name,
+                id: window.hWin.HEURIST4.util.random()
+            };
+                   
+            window.hWin.HAPI4.doImportAction(request, function( response ){
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        //goto import records step
+                        _showStep(2);
+                        //update local definitions
+                        window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                        window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
+                        window.hWin.HEURIST4.terms = response.data.terms;
+                        //show report
+                        window.hWin.HEURIST4.msg.showMsgDlg('<table>'+response.report.rectypes+'</table>');
+                    }else{
+                        _showStep(1);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+        
+    }        
+
+    //
+    //
+    //
+    function _importRecords(){
+
+            $('#divStep2').hide();
+            session_id = Math.round((new Date()).getTime()/1000);
+        
+            var request = { action: 'import_records',
+                filename: upload_file_name,
+                session: session_id,
+                id: window.hWin.HEURIST4.util.random()
+            };
+            
+            _showProgress( session_id );
+                   
+            window.hWin.HAPI4.doImportAction(request, function( response ){
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HEURIST4.msg.showMsgDlg(response.data);
+                    }else{
+                        _showStep(2);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+
+        
+    }        
+    
+    //
+    //
+    //
+    function _showProgress( session_id ){
+
+        var progressCounter = 0;        
+        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+
+        
+        $('body').css('cursor','progress');
+        var pbar_div = $('#progressbar_div');
+        var pbar = $('#progressbar');
+        var progressLabel = pbar.find('.progress-label').text('');
+        pbar.progressbar({value:0});
+                
+        $('#progress_stop').button().on({click: function() {
+            
+            var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
+            
+            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+                _hideProgress();
+                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    console.log(response);                   
+                }
+            });
+        } }, 'text');
+        
+        progressInterval = setInterval(function(){ 
+            
+            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+            
+            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+                
+                if(!response || response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    _hideProgress();
+                    //console.log(response+'  '+session_id);                   
+                }else{
+                    
+                    var resp = response?response.split(','):[0,0];
+                    
+                    if(resp && resp[0]){
+                        if(progressCounter>0){
+                            if(resp[1]>0){
+                                var val = resp[0]*100/resp[1];
+                                pbar.progressbar( "value", val );
+                                progressLabel.text(resp[0]+' of '+resp[1]);
+                            }else{
+                                progressLabel.text('wait...');
+                                //progressLabel.text('');
+                            }
+                        }else{
+                            pbar.progressbar( "value", 0 );
+                            progressLabel.text('preparing...');
+                        }
+                    }else{
+                        _hideProgress();
+                    }
+                    
+                    
+                    progressCounter++;
+                    
+                }
+            },'text');
+          
+        
+        }, 1000);                
+        
+    }
+    
+    function _hideProgress(){
+        
+        
+        $('body').css('cursor','auto');
+        
+        if(progressInterval!=null){
+            
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+        $('#progressbar_div').hide();
+        
+    }    
+       
+    /*
+    navigation steps
+    0 - progress
+    1 - select file to upload
+    2 - preview and field roles as data and id
+    --
+    3 - matching: assign rec ids 
+    4 - validate import   
+    5 - import
+    */
+    function _showStep(page){
+        currentStep = page;
+        
+        $("div[id^='divStep']").hide();
+        $("#divStep"+(page>2?2:page)).show();
+    }
+    
+    //public members
+    var that = {
+
+        getClass: function () {return _className;},
+        isA: function (strClass) {return (strClass === _className);},
+        getVersion: function () {return _version;},
+    }
+
+    _init(_max_upload_size );
+    return that;  //returns object
+}
+    
+    
