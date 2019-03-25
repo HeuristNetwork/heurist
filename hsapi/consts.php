@@ -29,6 +29,10 @@ define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.2.0"); //minimal version of db for current version of code
 define('HEURIST_MAIN_SERVER', 'https://heuristplus.sydney.edu.au');
 define('HEURIST_INDEX_BASE_URL', 'https://heuristplus.sydney.edu.au/heurist/'); //central index database url
+define('HEURIST_INDEX_DBREC', 22);
+/*define('HEURIST_MAIN_SERVER', 'http://127.0.0.1');
+define('HEURIST_INDEX_BASE_URL', 'http://127.0.0.1/h5-ao/'); //central index database url
+define('HEURIST_INDEX_DBREC', 49);*/
 define('HEURIST_INDEX_DATABASE', 'Heurist_Master_Index');
 define('HEURIST_HELP', "https://heuristplus.sydney.edu.au/heurist/help");
 
@@ -62,7 +66,7 @@ $REQUEST_PROTOCOL = $isSecure ? 'https' : 'http';
 $serverBaseURL = $REQUEST_PROTOCOL . "://" . $serverName;
 
 // calculate the dir where the Heurist code is installed, for example /h5 or /h5-ij
-$topdirs = "admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
+$topdirs = "admin|api|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
 
 $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
 if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
@@ -111,16 +115,16 @@ $talkToSysAdmin="Please advise your system administrator or email info - at - He
 /**
 * Response status for ajax requests. See ResponseStatus in hapi.js
 */
-define("HEURIST_INVALID_REQUEST", "invalid");    // The Request provided was invalid.
-define("HEURIST_NOT_FOUND", "notfound");         // The requested object not found.
-define("HEURIST_ERROR", "error");                // General error: wrong data, file i/o
-define("HEURIST_OK", "ok");                      // The response contains a valid Result.
-define("HEURIST_REQUEST_DENIED", "denied");      // The webpage is not allowed to use the service.
-define("HEURIST_ACTION_BLOCKED", "blocked");     // No enough rights or action is blocked by constraints
-define("HEURIST_UNKNOWN_ERROR", "unknown");      // A request could not be processed due to a server error. The request may succeed if you try again.
-define("HEURIST_DB_ERROR", "database");          // A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
-define("HEURIST_SYSTEM_CONFIG", "syscfg");       // System not-fatal configuration error. Contact system admin
-define("HEURIST_SYSTEM_FATAL", "system");        // System fatal configuration error. Contact system admin
+define("HEURIST_INVALID_REQUEST", "invalid");    // 400 The Request provided was invalid.
+define("HEURIST_NOT_FOUND", "notfound");         // 404 The requested object not found.
+define("HEURIST_ERROR", "error");                // 500 General error: wrong data, file i/o
+define("HEURIST_OK", "ok");                      // 200 The response contains a valid Result.
+define("HEURIST_REQUEST_DENIED", "denied");      // 403 No enough rights or action
+define("HEURIST_ACTION_BLOCKED", "blocked");     // 409 The request could not be completed due to a conflict with the current state of the target resource. This code is used in situations where the user might be able to resolve the conflict and resubmit the request.
+define("HEURIST_UNKNOWN_ERROR", "unknown");      // 500 A request could not be processed due to a server error. The request may succeed if you try again.
+define("HEURIST_DB_ERROR", "database");          // 500 A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
+define("HEURIST_SYSTEM_CONFIG", "syscfg");       // 500 System not-fatal configuration error. Contact system admin
+define("HEURIST_SYSTEM_FATAL", "system");        // 500 System fatal configuration error. Contact system admin
 /*
 $usrTags = array(
 "rty_ID"=>"i",
