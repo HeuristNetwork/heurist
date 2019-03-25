@@ -3753,7 +3753,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }
                     
                     
-                    if(lbl.length>500){
+                    if(lbl.indexOf('.')<0 && lbl.length>500){
                         skip_long++;
                         continue;
                     }
