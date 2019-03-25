@@ -62,39 +62,57 @@
         //$entity->$method();
 
         if(!$entity){
-            $this->system->addError(HEURIST_ERROR, "Wrong entity parameter: $entity_name");
+            $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong entity parameter: $entity_name");
+        }else{
+            $res = $entity->run();    
         }
 
-        if($entity && $entity->isvalid()){
-            if(@$_REQUEST['a'] == 'search'){
-                $res = $entity->search();
-            }else  if(@$_REQUEST['a'] == 'title'){ //search for entity title by id
-                $res = $entity->search_title();
-            }else if(@$_REQUEST['a'] == 'save'){
-                $res = $entity->save();
-            }else if(@$_REQUEST['a'] == 'delete'){
-                $res = $entity->delete();
-            }else if(@$_REQUEST['a'] == 'config'){
-                $res = $entity->config();
-            }else if(@$_REQUEST['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
-                $res = $entity->counts();
-            }else if(@$_REQUEST['a'] == 'action' || @$_REQUEST['a'] == 'batch'){ 
-                //batch action. see details of operaion for method of particular class
-                $res = $entity->batch_action();
-            }else {
-                $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
+    }
+    
+    
+    if(@$_REQUEST['restapi']==1){
+        if( is_bool($res) && !$res ){
+            
+            $system->error_exit_api();
+            
+        }else{
+            $response = array("status"=>HEURIST_OK, "data"=> $res);
+            
+            
+            header("Access-Control-Allow-Origin: *");
+            header('Content-type: application/json;charset=UTF-8');
+            
+            $req = $entity->getData();
+            
+            $response = $response['data'];
+            if(count($response)==0){
+                $code = 404;    
+            }else if (@$req['a'] == 'save'){
+                $code = 201;
+            }else{
+                $code = 200;
             }
+            http_response_code($code);    
+            print json_encode($response);
         }
-        
-    }
-    
-    if( is_bool($res) && !$res ){
-        $response = $system->getError();
     }else{
-        $response = array("status"=>HEURIST_OK, "data"=> $res);
+        
+        if( is_bool($res) && !$res ){
+            $response = $system->getError;
+        }else{
+            $response = array("status"=>HEURIST_OK, "data"=> $res);
+        }
+        print json_encode($response);
     }
-    
-    header('Content-type: application/json;charset=UTF-8'); //'text/javascript');
-    print json_encode($response);
-    exit();
+/*
+Description Of Usual Server Responses:
+200 OK - the request was successful (some API calls may return 201 instead).
+201 Created - the request was successful and a resource was created.
+204 No Content - the request was successful but there is no representation to return (i.e. the response is empty).
+400 Bad Request - the request could not be understood or was missing required parameters.
+401 Unauthorized - authentication failed or user doesn't have permissions for requested operation.
+403 Forbidden - access denied.
+404 Not Found - resource was not found.
+405 Method Not Allowed - requested method is not supported for resource.
+*/    
 ?>

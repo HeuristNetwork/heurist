@@ -65,26 +65,9 @@ class DbDefFileExtToMimetype extends DbEntityBase
     */
     public function search(){
         
-        $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
-
-        /*
-        if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed");
-            return false;
+        if(parent::search()===false){
+              return false;   
         }
-        
-        if(!$this->_validateParamsAndCounts()){
-            return false;
-        }else if (count(@$this->recIDs)==0){
-            return $this->result_data;
-        }
-        */
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
-        }else{
-            if(!$res) return false;        
-        }        
 
         //compose WHERE 
         $where = array();    
@@ -146,8 +129,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
          
          $query = $query.' ORDER BY fxm_Extension ';
          
-         $query = $query.$this->searchMgr->getOffset()
-                        .$this->searchMgr->getLimit();
+         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
         
         $res = $this->searchMgr->execute($query, $is_ids_only, 'defFileExtToMimetype');
         return $res;

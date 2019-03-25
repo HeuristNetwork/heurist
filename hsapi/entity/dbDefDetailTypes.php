@@ -63,15 +63,10 @@ class DbDefDetailTypes extends DbEntityBase
     */
     public function search(){
         
-        $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
-
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
-        }else{
-            if(!$res) return false;        
-        }        
-
+        if(parent::search()===false){
+              return false;   
+        }
+        
         //compose WHERE 
         $where = array(); 
         $from_table = array($this->config['tableName']);   
@@ -173,8 +168,7 @@ class DbDefDetailTypes extends DbEntityBase
             $query = $query.' ORDER BY '.implode(',',$order);
          }
          
-         $query = $query.$this->searchMgr->getOffset()
-                        .$this->searchMgr->getLimit();
+         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
 
         $calculatedFields = null;
@@ -193,7 +187,7 @@ class DbDefDetailTypes extends DbEntityBase
         
         if(!$this->system->is_admin() && count($this->recordIDs)>0){ //there are records to update/delete
             
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+            $this->system->addError(HEURIST_REQUEST_DENIED, 
                     'You are not admin and can\'t edit field types. Insufficient rights for this operation');
                 return false;
         }
@@ -208,17 +202,15 @@ class DbDefDetailTypes extends DbEntityBase
     
         $ret = parent::prepareRecords();
 
-        //@todo captcha validation for registration
-        
         //add specific field values
         foreach($this->records as $idx=>$record){
 
-            $this->records[$idx]['rty_Modified'] = null; //reset
+            $this->records[$idx]['dty_Modified'] = null; //reset
 
             //validate duplication
             $mysqli = $this->system->get_mysqli();
             $res = mysql__select_value($mysqli,
-                    "SELECT dty_ID FROM ".$this->config['tableName']."  WHERE rty_Name='"
+                    "SELECT dty_ID FROM ".$this->config['tableName']."  WHERE dty_Name='"
                     .$mysqli->real_escape_string( $this->records[$idx]['dty_Name'])."'");
             if($res>0 && $res!=@$this->records[$idx]['dty_ID']){
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists');
@@ -226,7 +218,6 @@ class DbDefDetailTypes extends DbEntityBase
             }
 
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['dty_ID']>0));
-            
         }
         
         return $ret;

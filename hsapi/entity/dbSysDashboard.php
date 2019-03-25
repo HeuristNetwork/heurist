@@ -43,15 +43,9 @@ class DbSysDashboard extends DbEntityBase
     */
     public function search(){
 
-                
-        $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
-
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
-        }else{
-            if(!$res) return false;        
-        }        
+        if(parent::search()===false){
+              return false;   
+        }
         
         $needCheck = false;
         $is_ids_only = false;
@@ -125,8 +119,7 @@ class DbSysDashboard extends DbEntityBase
             $query = $query.' ORDER BY '.implode(',',$order);
          }
          
-         $query = $query.$this->searchMgr->getOffset()
-                        .$this->searchMgr->getLimit();
+         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
         $calculatedFields = null;
         

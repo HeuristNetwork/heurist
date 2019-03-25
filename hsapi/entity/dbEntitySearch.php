@@ -377,7 +377,7 @@ class DbEntitySearch
     public function getLimit(){
         if(@$this->data['limit']){
             $limit = intval($this->data['limit']);
-            if($offset>=0){
+            if($limit>=0){
                 return ' LIMIT '.$limit;
             }else{
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong parameter limit: ".$this->data['limit']);
@@ -450,17 +450,34 @@ class DbEntitySearch
                         $order[] = $row[0];
                     }
                     $res->close();
+                    
+                    
+                    if(@$this->data['restapi']==1){
+                        
+                       $response = array(); 
+                       foreach ($records as $record) {
+                           $rec = array();
+                           foreach ($fields as $idx=>$field){
+                               $rec[$field] = $record[$idx];
+                           }
+                           $response[] = $rec;
+                       }
+                       if(@$this->data['recID']>0 && count($response)==1){
+                           $response = $response[0];
+                       }
 
-                    $response = array(
-                            'queryid'=>@$this->data['request_id'],  //query unqiue id set in doRequest
-                            'pageno'=>@$this->data['pageno'],  //page number to sync
-                            'offset'=>@$this->data['offset'],
-                            'count'=>$total_count_rows,
-                            'reccount'=>count($records),
-                            'fields'=>$fields,
-                            'records'=>$records,
-                            'order'=>$order,
-                            'entityName'=>$entityName);
+                    }else{    
+                        $response = array(
+                                'queryid'=>@$this->data['request_id'],  //query unqiue id set in doRequest
+                                'pageno'=>@$this->data['pageno'],  //page number to sync
+                                'offset'=>@$this->data['offset'],
+                                'count'=>$total_count_rows,
+                                'reccount'=>count($records),
+                                'fields'=>$fields,
+                                'records'=>$records,
+                                'order'=>$order,
+                                'entityName'=>$entityName);
+                    }
 
                 }//$is_ids_only
             }

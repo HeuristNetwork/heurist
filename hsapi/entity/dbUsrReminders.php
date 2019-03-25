@@ -41,18 +41,13 @@ class DbUsrReminders extends DbEntityBase
     */
     public function search(){
                 
-        $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
-        
         if(!@$this->data['rem_OwnerUGrpID']){
             $this->data['rem_OwnerUGrpID'] = $this->system->get_user_id();
         }
         
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
-        }else{
-            if(!$res) return false;        
-        }        
+        if(parent::search()===false){
+              return false;   
+        }
         
         $needCheck = false;
         $needRecords = false;
@@ -157,8 +152,7 @@ class DbUsrReminders extends DbEntityBase
             $query = $query.' ORDER BY '.implode(',',$order);
          }
          
-         $query = $query.$this->searchMgr->getOffset()
-                        .$this->searchMgr->getLimit();
+         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
         $calculatedFields = null;
         
@@ -185,7 +179,7 @@ class DbUsrReminders extends DbEntityBase
             $cnt = count($recIDs_norights);       
                     
             if($cnt>0){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                $this->system->addError(HEURIST_REQUEST_DENIED, 
                 (($cnt==1 && (!isset($this->records) || count($this->records)==1))
                     ? 'Reminder belongs'
                     : $cnt.' Reminders belong')
@@ -389,12 +383,12 @@ class DbUsrReminders extends DbEntityBase
             
             }else{
                 //can get owner data
-                $this->system->addError(HEURIST_DB_ERROR, 'Can\'t get reminder\'s owner information');
+                $this->system->addError(HEURIST_NOT_FOUND, 'Can\'t get reminder\'s owner information');
                 return false;
             }
             }else{
                 //no recipients found
-                $this->system->addError(HEURIST_DB_ERROR, 'Can\'t get reminder\'s recipients');
+                $this->system->addError(HEURIST_NOT_FOUND, 'Can\'t get reminder\'s recipients');
                 return false;
             }
             
