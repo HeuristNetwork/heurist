@@ -1353,6 +1353,7 @@ error_log('login '.$session_type.'  '.$session_id);
                 return null;
             }
             
+            updateDatabseToLatest2($this);
             /*
             $rep = updateDatabseToLatest($this);
             if($rep===false){

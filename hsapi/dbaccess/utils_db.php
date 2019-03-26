@@ -650,6 +650,36 @@
     //
     //
     //
+    function updateDatabseToLatest2($system){
+
+        $ret = false;        
+        $mysqli = $system->get_mysqli();
+    
+        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_DefaultValue'";
+        $res = $mysqli->query($query);
+        if($res){
+            $row = $res->fetch_assoc();
+            $method = null;
+            if(!$row){
+                $method = 'ADD';
+            }else if (strpos($row['Type'],'varchar')!==false){
+                $method = 'MODIFY';
+            }
+            if($method!=null){
+                $query = "ALTER TABLE `defRecStructure` $method "
+                        ." `rst_DefaultValue` text COMMENT 'The default value for this detail type for this record type'";
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure.rst_DefaultValue', $mysqli->error);
+                }
+            }
+            $ret = true;
+        }
+        return $ret;
+    }
+    //
+    //
+    //
     function updateDatabseToLatest($system){
         
         $mysqli = $system->get_mysqli();
