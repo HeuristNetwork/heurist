@@ -34,7 +34,7 @@
 
     }else {
         
-        //set_time_limit(0);
+        set_time_limit(0);
         
         $dbRecDetails = new DbRecDetails($system, $_REQUEST);
 

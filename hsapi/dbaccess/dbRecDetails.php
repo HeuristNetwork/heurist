@@ -851,10 +851,30 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                                     $text = '';
                                     // Loop over each page to extract text.
                                     foreach ($pages as $page) {
-                                        $text = $text . $page->getText();
-                                        if(mb_strlen($text)>64000 || $page_cnt>10){
-                                            $text = mb_substr($text,0,64000)
-                                                .' <more text is available. Remaining text has not been extracted from file>';
+                                        
+                                        $pagetext = $page->getText();
+                                        
+                                        if(mb_detect_encoding($pagetext, 'UTF-8', true)===false){
+                                            
+                                            $pagetext = iconv("UTF-8","UTF-8//IGNORE", $pagetext); // to remove
+                                            
+                                            //$pagetext = Encoding::fixUTF8($pagetext);
+                                            if(mb_detect_encoding($pagetext, 'UTF-8', true)===false){
+                                                $pagetext = 'Page '.$page_cnt.' can not be converted to UTF-8';
+                                            }    
+                                        }
+                                        
+                                        $text = $text . $pagetext;
+                                        //if(mb_strlen($text)>64000 || $page_cnt>10){
+                                        ///$text = mb_substr($text,0,64000)
+                                        if(strlen($text)>20000 || $page_cnt>10){
+                                            $k = 20000;
+                                            while (strlen($text)>20000){
+                                                $text = mb_substr($text,0,$k);
+                                                $k = $k - 1000;
+                                            }
+//error_log(strlen($text).'  '.mb_strlen($text));                                           
+                                            $text = $text.' <more text is available. Remaining text has not been extracted from file>';
                                             break;    
                                         }
                                         $page_cnt++;
@@ -907,13 +927,22 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         if(mb_detect_encoding($dtl['dtl_Value'], 'UTF-8', true)===false){
                             $sqlErrors[$recID] = 'Extracted text has not valid utf8 encoding';
                             break;
+                            /*
+                            $query = 'INSERT INTO recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('
+                            .$dtl['dtl_RecID'].', '.$dtl['dtl_DetailTypeID'].', '
+                            .'CONVERT( CAST(? AS BINARY) USING utf8))';
+                            
+                            $ret = mysql__exec_param_query($mysqli, $query, array($dtl['dtl_Value']));
+                            */
                         }else{   
+
                             $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
                             if (!is_numeric($ret)) {
-                                $sqlErrors[$recID] = $ret;
-                                break;
+                                    $sqlErrors[$recID] = $ret;
+                                    break;
                             }
                         }
+                        
                         
                         /*DEBUG
                         $offset = 17000;

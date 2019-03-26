@@ -537,6 +537,7 @@
 
             $dtype = ((substr($fieldname, -2) === 'ID' || substr($fieldname, -2) === 'Id')?'i':'s');
             if($fieldname == 'ulf_ObfuscatedFileID') $dtype = 's'; //exception
+            //else if($fieldname == 'dtl_Value') $dtype = 'b'; //exception
             
             $params[0] = $params[0].$dtype;
             if($dtype=='i' && $value==''){
