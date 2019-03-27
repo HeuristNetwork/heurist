@@ -50,15 +50,9 @@ class DbDefDetailTypeGroups extends DbEntityBase
     */
     public function search(){
         
-        $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );
-
-
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
-        }else{
-            if(!$res) return false;        
-        }        
+        if(parent::search()===false){
+              return false;   
+        }
         
         //compose WHERE 
         $where = array();    
@@ -69,12 +63,17 @@ class DbDefDetailTypeGroups extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('dtg_Name');
         if($pred!=null) array_push($where, $pred);
 
-       
+        if(@$this->data['details']==null) $this->data['details'] = 'full';//default
+               
         //compose SELECT it depends on param 'details' ------------------------
         //@todo - take it form fiels using some property
         if(@$this->data['details']=='id'){
         
             $this->data['details'] = 'dtg_ID';
+            
+        //}else if(@$this->data['details']=='title'){
+            
+            //$this->data['details'] = 'dtg_Name';
             
         }else if(@$this->data['details']=='name'){
 
@@ -91,7 +90,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
             //unset($fields2['dtg_FieldCount']);
 
             $this->data['details'] = implode(',', $this->fieldNames )
-             .'(select count(dty_ID) from defdetailtypes where dtg_ID=dty_DetailTypeGroupID) as dtg_FieldCount';
+             .', (select count(dty_ID) from defDetailTypes where dtg_ID=dty_DetailTypeGroupID) as dtg_FieldCount';
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -124,8 +123,8 @@ class DbDefDetailTypeGroups extends DbEntityBase
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
-         $query = $query.$this->searchMgr->getOffset()
-                        .$this->searchMgr->getLimit();
+         $query = $query.$this->searchMgr->getLimit()
+                        .$this->searchMgr->getOffset();
         
 
         $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName']);
@@ -148,12 +147,41 @@ class DbDefDetailTypeGroups extends DbEntityBase
         $ret = mysql__select_value($mysqli, $query);
         
         if($ret>0){
-            $this->system->addError(HEURIST_ERROR, 'Cannot delete non empty group');
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot delete non empty group');
             return false;
         }
 
         return parent::delete();        
     }
 
+    
+    //
+    //
+    //    
+    protected function prepareRecords(){
+    
+        $ret = parent::prepareRecords();
+
+        //add specific field values
+        foreach($this->records as $idx=>$record){
+
+            $this->records[$idx]['dtg_Modified'] = null; //reset
+
+            //validate duplication
+            $mysqli = $this->system->get_mysqli();
+            $res = mysql__select_value($mysqli,
+                    "SELECT dtg_ID FROM ".$this->config['tableName']."  WHERE dtg_Name='"
+                    .$mysqli->real_escape_string( $this->records[$idx]['dtg_Name'])."'");
+            if($res>0 && $res!=@$this->records[$idx]['dtg_ID']){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists');
+                return false;
+            }
+
+            $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['dtg_ID']>0));
+        }
+        
+        return $ret;
+        
+    }       
 }
 ?>

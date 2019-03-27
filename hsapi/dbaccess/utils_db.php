@@ -537,6 +537,7 @@
 
             $dtype = ((substr($fieldname, -2) === 'ID' || substr($fieldname, -2) === 'Id')?'i':'s');
             if($fieldname == 'ulf_ObfuscatedFileID') $dtype = 's'; //exception
+            //else if($fieldname == 'dtl_Value') $dtype = 'b'; //exception
             
             $params[0] = $params[0].$dtype;
             if($dtype=='i' && $value==''){
@@ -647,6 +648,54 @@
         return $sysValues;
     }
     
+    //
+    //
+    //
+    function updateDatabseToLatest2($system){
+
+        $ret = false;        
+        $mysqli = $system->get_mysqli();
+    
+        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_DefaultValue'";
+        $res = $mysqli->query($query);
+        if($res){
+            $row = $res->fetch_assoc();
+            $method = null;
+            if(!$row){
+                $method = 'ADD';
+            }else if (strpos($row['Type'],'varchar')!==false){
+                $method = 'MODIFY';
+            }
+            if($method!=null){
+                $query = "ALTER TABLE `defRecStructure` $method "
+                        ." `rst_DefaultValue` text COMMENT 'The default value for this detail type for this record type'";
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure.rst_DefaultValue', $mysqli->error);
+                }
+            }
+        }
+        
+        $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_SemanticReferenceURL'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if(!$row_cnt){ //column not defined
+            $query = 'ALTER TABLE `defTerms` ADD '
+                    .' `trm_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL'
+                    ." COMMENT 'The URI to a semantic definition or web page describing the term'"
+                    .' AFTER `trm_Code`';
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot add defTerms.trm_SemanticReferenceURL', $mysqli->error);
+            }else{
+                $ret = true;    
+            }
+        }else{
+            $ret = true;
+        }
+        
+        return $ret;
+    }
     //
     //
     //

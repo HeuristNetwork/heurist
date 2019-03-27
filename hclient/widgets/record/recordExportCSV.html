@@ -1,4 +1,4 @@
-<fieldset id="div_fieldset">
+<fieldset id="div_fieldset" style="position:absolute;top:0;bottom:0;min-height: 360px;">
 
 <div style="padding: 0.2em; width: 100%;" class="input">
     <div class="header" style="padding: 0 16px 0 16px;">
@@ -7,53 +7,55 @@
     <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
 </div>
 
-<hr style="margin:5px"/>
 
-<div style="padding: 0.2em; min-width: 600px;" class="input">
-    <div class="header" style="padding: 0 16px 0 16px;"><label>Select fields to export:</label></div>
+<div style="padding: 0.2em; min-width: 600px;position:absolute;top:40px;bottom:65px" class="input">
+<hr style="margin:5px"/>
+    <div class="header" style="padding: 0 16px 0 16px;display: inline-block;vertical-align:top"><label>Select fields to export:</label></div>
     
-    <div class="detailRow rtt-tree" style="padding-bottom:1em;max-height:280px;overflow-y: auto;outline: none;" id="rectype_tree">
+    <div class="detailRow rtt-tree" style="display: inline-block;padding-bottom:1em;height: 85%;overflow-y: auto;outline: none;" id="rectype_tree">
     </div>
+<hr style="margin:5px"/>
 </div>
 
-<hr style="margin:5px"/>
 
-<div style="padding: 0.2em; min-width: 600px;" class="input">
-    <div class="header" style="padding: 0 16px 0 16px;"><label>Field delimeter:</label></div>
+<div style="padding:10px 0.2em 0 0.2em; min-width: 640px;position:absolute;height:65px;bottom:0" class="input">
     
-    <div class="detailRow" style="padding-bottom:1em;">
+    <div class="header" style="padding: 0 16px 0 16px;display: inline-block;"><label>Field delimeter:</label></div>
+    
+    <div class="detailRow" style="padding-bottom:1em;display: inline-block;">
         <select style="width:80px" id="delimiterSelect">
             <option value="," selected>comma</option><option value="&#9;" >tab</option>
         </select>
         &nbsp;&nbsp;&nbsp;Quotemark:
-        <select  style="width:40px" id="quoteSelect">
+        <select  style="width:40px;" id="quoteSelect">
             <option selected value='0'>&nbsp;</option><option value='"' selected>"</option><option value="'">'</option>
         </select>
     </div>
-</div>
-<div style="display:block">
-    <label style="padding-right:3em; font-weight: bold;">Include:</label>
-    <label style="padding-right:2em;display:none" title="Field names will be output as the first row of the output file">
-        <input style="display:none" type="checkbox" checked id="cbNamesAsFirstRow"/>Field names</label>
-    
-    <label
-        title="Outputs a separate column with the record title as well as the record id for the record(s) pointed to by the field">
-        <input type="checkbox" checked id="cbIncludeResourceTitles"/>Target title for pointers</label>
-    
-    <label style="padding-right:2em;"
-        title="Output the terms preceded by any hierarchically higher terms separated by 
-    periods. If unchecked, only the lowest level (leaf) term label is output.">
-        <input type="checkbox" checked id="cbIncludeTermHierarchy"/>Term hierarchy</label>
 
-    <label style="padding-right:2em;" 
-        title="Outputs a separate column containing the ID(s) for a term field">
-        <input type="checkbox" id="cbIncludeTermIDs"/>Term IDs</label>
+    <div style="display:block">
+        <label style="padding-right:3em; font-weight: bold;">Include:</label>
+        <label style="padding-right:2em;display:none" title="Field names will be output as the first row of the output file">
+            <input style="display:none" type="checkbox" checked id="cbNamesAsFirstRow"/>Field names</label>
         
-    <label style="padding-right:2em;" 
-        title="Outputs a separate column containing the internal ID(s) for a term field">
-        <input type="checkbox" id="cbIncludeTermCodes"/>Term codes</label>
+        <label
+            title="Outputs a separate column with the record title as well as the record id for the record(s) pointed to by the field">
+            <input type="checkbox" checked id="cbIncludeResourceTitles"/>Target title for pointers</label>
         
-        
+        <label style="padding-right:2em;"
+            title="Output the terms preceded by any hierarchically higher terms separated by 
+        periods. If unchecked, only the lowest level (leaf) term label is output.">
+            <input type="checkbox" checked id="cbIncludeTermHierarchy"/>Term hierarchy</label>
+
+        <label style="padding-right:2em;" 
+            title="Outputs a separate column containing the ID(s) for a term field">
+            <input type="checkbox" id="cbIncludeTermIDs"/>Term IDs</label>
+            
+        <label style="padding-right:2em;" 
+            title="Outputs a separate column containing the internal ID(s) for a term field">
+            <input type="checkbox" id="cbIncludeTermCodes"/>Term codes</label>
+            
+            
+    </div>
 </div>
 </fieldset>
 <!-- hidden form -->

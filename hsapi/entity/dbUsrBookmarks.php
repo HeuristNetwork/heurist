@@ -42,15 +42,9 @@ class DbUsrBookmarks extends DbEntityBase
     */
     public function search(){
 
-                
-        $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
-        
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
-        }else{
-            if(!$res) return false;        
-        }        
+        if(parent::search()===false){
+              return false;   
+        }
         
         $needCheck = false;
         
@@ -103,8 +97,7 @@ class DbUsrBookmarks extends DbEntityBase
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
          
-         $query = $query.$this->searchMgr->getOffset()
-                        .$this->searchMgr->getLimit();
+         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
         $calculatedFields = null;
         
@@ -134,7 +127,7 @@ class DbUsrBookmarks extends DbEntityBase
             $cnt = count($recIDs_norights);       
                     
             if($cnt>0){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                $this->system->addError(HEURIST_REQUEST_DENIED, 
                 (($cnt==1 && (!isset($this->records) || count($this->records)==1))
                     ? 'Bookmark belongs'
                     : $cnt.' Bookmark belong')

@@ -46,14 +46,9 @@ class DbSysUsers extends DbEntityBase
 
         $not_in_group = @$this->data['not:ugl_GroupID'];
                 
-        $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
-
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
-        }else{
-            if(!$res) return false;        
-        }        
+        if(parent::search()===false){
+              return false;   
+        }
         
         $needCheck = false;
         $needRole = false;
@@ -195,8 +190,7 @@ class DbSysUsers extends DbEntityBase
             $query = $query.' ORDER BY '.implode(',',$order);
          }
          
-         $query = $query.$this->searchMgr->getOffset()
-                        .$this->searchMgr->getLimit();
+         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
         $calculatedFields = null;
         
@@ -217,7 +211,7 @@ class DbSysUsers extends DbEntityBase
             $ugrID = $this->system->get_user_id();
             if($this->recordIDs[0]!=$ugrID || count($this->recordIDs)>1){
                 
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                $this->system->addError(HEURIST_REQUEST_DENIED, 
                     'You are not admin and can\'t edit another user. Insufficient rights for this operation');
                 return false;
             }
@@ -444,7 +438,7 @@ class DbSysUsers extends DbEntityBase
     public function batch_action($ignore_permissions=false){
 
         if(!$ignore_permissions && !$this->system->is_admin()){ 
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+            $this->system->addError(HEURIST_REQUEST_DENIED, 
                 'You are not admin and can\'t add/edit other users. Insufficient rights for this operation');
             return false;
         }
@@ -457,7 +451,7 @@ class DbSysUsers extends DbEntityBase
 
         /* @todo
         if(!$sytem_source->is_admin()){ 
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+            $this->system->addError(HEURIST_REQUEST_DENIED, 
                 'You are not admin in source database '.$sytem_source->dbname_full().'. Insufficient rights for this operation');
             return false;
         }

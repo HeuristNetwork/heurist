@@ -149,8 +149,7 @@ class DbSysDatabases extends DbEntityBase
              if(count($where)>0){
                 $query = $query.' WHERE '.implode(' AND ',$where);
              }
-             $query = $query.$this->searchMgr->getOffset()
-                            .$this->searchMgr->getLimit();
+             $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
              */
 
             $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );

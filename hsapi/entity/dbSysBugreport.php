@@ -52,7 +52,7 @@ class DbSysBugreport extends DbEntityBase
     protected function _validatePermission(){
         
         if(!$this->system->has_access()){
-             $this->system->addError(HEURIST_ACTION_BLOCKED, 
+             $this->system->addError(HEURIST_REQUEST_DENIED, 
                     'You must be logged in for bug reporting. Insufficient rights for this operation');
              return false;
         }

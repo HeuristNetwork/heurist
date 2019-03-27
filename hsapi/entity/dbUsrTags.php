@@ -44,20 +44,15 @@ class DbUsrTags extends DbEntityBase
 
         //fields - from configuration - list of field names
         //data - from request - values
-        
-        $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
 
         //if usergroup is not defined search for user groups of current user
         if(!@$this->data['tag_UGrpID']){
             $this->data['tag_UGrpID'] = $this->system->get_user_group_ids();
         }
         
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
-        }else{
-            if(!$res) return false;        
-        }        
+        if(parent::search()===false){
+              return false;   
+        }
         
         $needCount = false;
         $needCheck = false;
@@ -159,8 +154,7 @@ class DbUsrTags extends DbEntityBase
             $query = $query.' ORDER BY '.implode(',',$order);
          }
          
-         $query = $query.$this->searchMgr->getOffset()
-                        .$this->searchMgr->getLimit();
+         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
         $calculatedFields = null;
         
@@ -189,7 +183,7 @@ class DbUsrTags extends DbEntityBase
             $cnt = count($recIDs_norights);       
                     
             if($cnt>0){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                $this->system->addError(HEURIST_REQUEST_DENIED, 
                 (($cnt==1 && (!isset($this->records) || count($this->records)==1))
                     ? 'Tag belongs'
                     : $cnt.' tags belong')

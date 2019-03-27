@@ -50,15 +50,9 @@ class DbDefRecTypeGroups extends DbEntityBase
     */
     public function search(){
         
-        $this->searchMgr = new DbEntitySearch( $this->system, $this->fields );
-
-
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
-        }else{
-            if(!$res) return false;        
-        }        
+        if(parent::search()===false){
+              return false;   
+        }
         
         //compose WHERE 
         $where = array();    
@@ -124,8 +118,7 @@ class DbDefRecTypeGroups extends DbEntityBase
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
-         $query = $query.$this->searchMgr->getOffset()
-                        .$this->searchMgr->getLimit();
+         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
         
 
         $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName']);
@@ -148,7 +141,7 @@ class DbDefRecTypeGroups extends DbEntityBase
         $ret = mysql__select_value($mysqli, $query);
         
         if($ret>0){
-            $this->system->addError(HEURIST_ERROR, 'Cannot delete non empty group');
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot delete non empty group');
             return false;
         }
 

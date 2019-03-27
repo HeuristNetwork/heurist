@@ -28,8 +28,8 @@ class DbEntityBase
     /*  
         request from client side - contains field values for search and update
         
-        fields - values for particular record 
-                 initially in prepareRecords
+        data[fields] - values for particular record 
+                 initiated in prepareRecords
     */    
     protected $data;  
     
@@ -97,6 +97,10 @@ class DbEntityBase
     public function setData($data){
         $this->data = $data; 
     }
+
+    public function getData(){
+        return $this->data; 
+    }
     
     //
     // config getter
@@ -108,6 +112,35 @@ class DbEntityBase
     
     public function records(){
         return $this->records;
+    }
+    
+    public function run(){
+        
+        $res = false;
+        
+        if($this->isvalid()){
+            if(@$this->data['a'] == 'search'){
+                $res = $this->search();
+            }else  if(@$this->data['a'] == 'title'){ //search for entity title by id
+                $res = $this->search_title();
+            }else if(@$this->data['a'] == 'save'){
+                $res = $this->save();
+            }else if(@$this->data['a'] == 'delete'){
+                $res = $this->delete();
+            }else if(@$this->data['a'] == 'config'){ //return configuration
+                $res = $this->config();
+            }else if(@$this->data['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
+                $res = $this->counts();
+            }else if(@$this->data['a'] == 'action' || @$this->data['a'] == 'batch'){ 
+                //batch action. see details of operaion for method of particular class
+                $res = $this->batch_action();
+            }else {
+                $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
+            }
+        }
+        
+        return $res;
+        
     }
     
     //
@@ -150,8 +183,9 @@ class DbEntityBase
         //start transaction
         $mysqli = $this->system->get_mysqli();
         
-        if($this->need_transaction)
-        $keep_autocommit = mysql__begin_transaction($mysqli);
+        if($this->need_transaction){
+            $keep_autocommit = mysql__begin_transaction($mysqli);
+        }
         
         foreach($this->records as $rec_idx => $record){
             
@@ -342,7 +376,7 @@ class DbEntityBase
     private function _readConfig(){
 
         //$entity_file = dirname(__FILE__)."/".@$this->data['entity'].'.json';
-        $entity_file = HEURIST_DIR.'hsapi/entity/'.@$this->data['entity'].'.json';
+        $entity_file = HEURIST_DIR.'hsapi/entity/'.lcfirst(@$this->data['entity']).'.json';
         
         if(file_exists($entity_file)){
             
@@ -358,16 +392,18 @@ class DbEntityBase
            }
            
            if(!$this->isvalid()){
-                $this->system->addError(HEURIST_INVALID_REQUEST, 
+                $this->system->addError(HEURIST_SYSTEM_FATAL, 
                     "Configuration file $entity_file is invalid. Cannot init instance on server");     
            }
+           
         }else{
-           $this->system->addError(HEURIST_INVALID_REQUEST, "Cannot find configuration for entity ".@$this->data['entity']);     
+           $this->system->addError(HEURIST_SYSTEM_FATAL, "Cannot find configuration for entity ".@$this->data['entity']);     
         }
     }
     
     //
     // read fields definition from config file
+    // assign primaryField
     //
     private function _readFields($fields){
 
@@ -521,6 +557,7 @@ class DbEntityBase
                 return null;                     
             }
     }
+    
     //
     // extracts records from "data" parameter and fills $this->recordIDs and $this->records 
     // it is used in delete, save
@@ -528,13 +565,14 @@ class DbEntityBase
     //  fields:[fldname:value,fieldname2:values,.....]
     //
     protected function prepareRecords(){
-
+        //fields contains record data
         if(!is_array(@$this->data['fields']) || count($this->data['fields'])<1){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Missed 'fields' parameter. Fields are not defined");
                 return false;    
         }
         //detect wheter this is multi record save
         if(array_keys($this->data['fields']) !== range(0, count($this->data['fields']) - 1)){
+            //number of keys equals to number of entries it means single record
             $this->records = array();
             $this->records[0] = $this->data['fields']; 
             //$this->recordIDs = $record[$this->primaryField];           
@@ -559,7 +597,6 @@ class DbEntityBase
     //
     public function search_title(){
 
-        $this->data[$this->primaryField] = $this->data['recID'];
         $this->data['details'] = 'name'; 
 
         $ret = $this->search(); 
@@ -574,6 +611,27 @@ class DbEntityBase
             return false;
         }
 
+    }
+    
+    //
+    //
+    //
+    public function search(){
+        
+        if(@$this->data['recID']>0 && @$this->data[$this->primaryField]==null){
+            $this->data[$this->primaryField] = $this->data['recID'];
+        }
+        
+        $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
+
+        $res = $this->searchMgr->validateParams( $this->data );
+        if(!is_bool($res)){
+            $this->data = $res;
+        }else{
+            if(!$res) return false;        
+        }        
+
+        return true;        
     }
     
 }  

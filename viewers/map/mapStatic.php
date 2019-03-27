@@ -74,14 +74,18 @@
         $_REQUEST['w'] = 'e';
         $_REQUEST['detail'] = 'timemap';
         //retrieve records
-        $response = recordSearch($system, $_REQUEST, true, true);
+        $response = recordSearch($system, $_REQUEST);
         
         if($response && $response['status'] == HEURIST_OK && $response['data'] && $response['data']['count']>0){
+            
+            $geo_fieldtypes_ids = dbs_GetDetailTypes($system, array('geo'), 3);
              
             $records = $response['data']['records'];
             foreach($records as $recID => $record){
-                if($record['d'] && $record['d'][28])
-                foreach($record['d'][28] as $as_wkt){
+             if($record['d'])
+              foreach($geo_fieldtypes_ids as $dty_ID)
+               if(@$record['d'][$dty_ID])
+                foreach($record['d'][$dty_ID] as $as_wkt){
                     //extract type
                     $k = strpos($as_wkt, ' ');
                     $geo_type = substr($as_wkt, 0, $k);

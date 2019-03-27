@@ -41,13 +41,8 @@ class DbDefRecTypes extends DbEntityBase
     */
     public function search(){
 
-        $this->searchMgr = new dbEntitySearch( $this->system, $this->fields);
-
-        $res = $this->searchMgr->validateParams( $this->data );
-        if(!is_bool($res)){
-            $this->data = $res;
-        }else{
-            if(!$res) return false;        
+        if(parent::search()===false){
+              return false;   
         }        
         
         $needCount = false; //find usage by records
@@ -144,8 +139,7 @@ class DbDefRecTypes extends DbEntityBase
             $query = $query.' ORDER BY '.implode(',',$order);
          }
          
-         $query = $query.$this->searchMgr->getOffset()
-                        .$this->searchMgr->getLimit();
+         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
         $calculatedFields = null;
         
@@ -163,7 +157,7 @@ class DbDefRecTypes extends DbEntityBase
         
         if(!$this->system->is_admin() && count($this->recordIDs)>0){ //there are records to update/delete
             
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+            $this->system->addError(HEURIST_REQUEST_DENIED, 
                     'You are not admin and can\'t edit record types. Insufficient rights for this operation');
                 return false;
         }

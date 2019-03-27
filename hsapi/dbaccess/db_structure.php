@@ -1054,12 +1054,12 @@ function dbs_GetRectypeConstraint($system) {
 
         $dtStructs = array();
 
-        if($imode!=1){
+        if($imode==0 || $imode==2){
             $dtG = getDetailTypeGroups($mysqli);
             $dtStructs['groups'] = $dtG;
             $dtStructs['names'] = array();
         }
-        if($imode>0){
+        if($imode==1 || $imode==2){
             $dtStructs['typedefs'] = array('commonFieldNames' => getDetailTypeColNames(),
                 'fieldNamesToIndex' => __getColumnNameToIndex(getDetailTypeColNames()));
             $dtStructs['lookups'] = dbs_GetDtLookups();

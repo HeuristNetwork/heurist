@@ -61,9 +61,7 @@
     
     if( ! $system->init(@$params['db']) ){
         //get error and response
-        $response = $system->getError();
-        print 'Error';
-        exit();
+        $system->error_exit_api(); //exit from script
     }
     
     if(!@$params['format']) $params['format'] = 'json';
@@ -73,11 +71,17 @@
     $search_params['rules'] = @$params['rules'];
     $search_params['needall'] = 1;  //search without limit of returned record count
     
-    if(@$params['ids']){
+    if(@$params['recID']>0){
+        $search_params['q'] = array('ids'=>$params['recID']);
+    }else if(@$params['ids']){
         $search_params['q'] = array('ids'=>implode(',',$params['ids']));
     }else{
-        $search_params['q'] = $params['q'];
+        $search_params['q'] = @$params['q'];
     }
+    if($search_params['q']==null || $search_params['q']==''){
+        $search_params['q'] = 'sortby:-m'; //get all records
+    }
+    
 
     $is_csv = (@$params['format'] == 'csv');
     if(@$params['format']){
@@ -116,7 +120,9 @@
         //header('Content-type: application/json;charset=UTF-8');
         //echo json_encode($out);
         
-        output_Records($system, $response, $params);
+        if(!output_Records($system, $response, $params)){
+            $system->error_exit_api();
+        }
         
         //output_Data($stream, $params);
     }
@@ -744,8 +750,7 @@ function output_CSV($system, $data, $params){
 function output_Records($system, $data, $params){
     
     if (!($data && @$data['status']==HEURIST_OK)){
-        print print_r($data, true); //print out error array
-        return;
+        return false;
     }
 
     $data = $data['data'];
@@ -766,10 +771,17 @@ function output_Records($system, $data, $params){
     //$fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
     $fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
     if (false === $fd) {
-        die('Failed to create temporary file');
+        $system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');
+        return false;
     }   
     
-    if($params['format']=='json'){
+    if($params['restapi']==1){
+        if(count($records)==1 && @$params['recID']>0){
+            //fwrite($fd, '');             
+        }else{
+            fwrite($fd, '{"records":[');             
+        }
+    }else if($params['format']=='json'){
         fwrite($fd, '{"heurist":{"records":[');         
     }else{
         fwrite($fd, '<?xml version="1.0" encoding="UTF-8"?><heurist><records>');     
@@ -803,74 +815,84 @@ function output_Records($system, $data, $params){
         }
     }//while records
     
-    if($params['format']=='json'){
-        fwrite($fd, ']');     
+    if($params['restapi']==1){
+        if(count($records)==1 && @$params['recID']>0){
+            //fwrite($fd, '');             
+        }else{
+            fwrite($fd, ']}');             
+        }
     }else{
-        fwrite($fd, '</records>');     
-    }
     
-    // include defintions
-    if(@$params['defs']==1){
+        if($params['format']=='json'){
+            fwrite($fd, ']');     
+        }else{
+            fwrite($fd, '</records>');     
+        }
         
-        $rectypes = dbs_GetRectypeStructures($system, null, 2);
-        $detailtypes = dbs_GetDetailTypes($system, null, 2);
-        $terms = dbs_GetTerms($system);
-        
-        unset($rectypes['names']);
-        unset($rectypes['pluralNames']);
-        unset($rectypes['groups']);
-        unset($rectypes['dtDisplayOrder']);
-        
-        unset($detailtypes['names']);
-        unset($detailtypes['groups']);
-        unset($detailtypes['rectypeUsage']);
+        // include defintions
+        if(@$params['defs']==1){
+            
+            $rectypes = dbs_GetRectypeStructures($system, null, 2);
+            $detailtypes = dbs_GetDetailTypes($system, null, 2);
+            $terms = dbs_GetTerms($system);
+            
+            unset($rectypes['names']);
+            unset($rectypes['pluralNames']);
+            unset($rectypes['groups']);
+            unset($rectypes['dtDisplayOrder']);
+            
+            unset($detailtypes['names']);
+            unset($detailtypes['groups']);
+            unset($detailtypes['rectypeUsage']);
 
-        $rectypes = array('rectypes'=>$rectypes);
-        $detailtypes = array('detailtypes'=>$detailtypes);
-        $terms = array('terms'=>$terms);
+            $rectypes = array('rectypes'=>$rectypes);
+            $detailtypes = array('detailtypes'=>$detailtypes);
+            $terms = array('terms'=>$terms);
+            
+            if($params['format']=='json'){
+                fwrite($fd, ',{"definitions":['); 
+                fwrite($fd, json_encode($rectypes).',');
+                fwrite($fd, json_encode($detailtypes).',');
+                fwrite($fd, json_encode($terms));
+                fwrite($fd, ']}'); 
+            }else{
+                $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><definitions/>');
+                array_to_xml($rectypes, $xml);
+                array_to_xml($detailtypes, $xml);
+                array_to_xml($terms, $xml);
+                fwrite($fd, substr($xml->asXML(),38));
+            }
+        }
+        
+        //add database information to be able to load definitions later
+        $dbID = $system->get_system('sys_dbRegisteredID');
+        $database_info = array('id'=>$dbID, 
+                                            'url'=>HEURIST_BASE_URL, 
+                                            'db'=>$system->dbname());
+            
+        $query = 'select rty_ID,rty_Name,'
+        ."if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID"
+        .' from defRecTypes where rty_ID in ('.implode(',',array_keys($rt_counts)).')';    
+        $rectypes = mysql__select_all($system->get_mysqli(),$query,1);    
+            
+        foreach($rt_counts as $rtid => $cnt){
+            $rt_counts[$rtid] = array('name'=>$rectypes[$rtid][0],'code'=>$rectypes[$rtid][1],'count'=>$cnt);
+        }
+        $database_info['rectypes'] = $rt_counts;
         
         if($params['format']=='json'){
-            fwrite($fd, ',{"definitions":['); 
-            fwrite($fd, json_encode($rectypes).',');
-            fwrite($fd, json_encode($detailtypes).',');
-            fwrite($fd, json_encode($terms));
-            fwrite($fd, ']}'); 
+            fwrite($fd, ',"database":'.json_encode($database_info));
+            fwrite($fd, '}}');     
         }else{
-            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><definitions/>');
-            array_to_xml($rectypes, $xml);
-            array_to_xml($detailtypes, $xml);
-            array_to_xml($terms, $xml);
+            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
+            array_to_xml($database_info, $xml);
             fwrite($fd, substr($xml->asXML(),38));
+            fwrite($fd, '</heurist>');     
         }
-    }
-    
-    //add database information to be able to load definitions later
-    $dbID = $system->get_system('sys_dbRegisteredID');
-    $database_info = array('id'=>$dbID, 
-                                        'url'=>HEURIST_BASE_URL, 
-                                        'db'=>$system->dbname());
         
-    $query = 'select rty_ID,rty_Name,'
-    ."if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID"
-    .' from defRecTypes where rty_ID in ('.implode(',',array_keys($rt_counts)).')';    
-    $rectypes = mysql__select_all($system->get_mysqli(),$query,1);    
-        
-    foreach($rt_counts as $rtid => $cnt){
-        $rt_counts[$rtid] = array('name'=>$rectypes[$rtid][0],'code'=>$rectypes[$rtid][1],'count'=>$cnt);
-    }
-    $database_info['rectypes'] = $rt_counts;
-    
-    if($params['format']=='json'){
-        fwrite($fd, ',"database":'.json_encode($database_info));
-        fwrite($fd, '}}');     
-    }else{
-        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
-        array_to_xml($database_info, $xml);
-        fwrite($fd, substr($xml->asXML(),38));
-        fwrite($fd, '</heurist>');     
     }
  
-    if($params['zip']==1){
+    if(@$params['zip']==1){
         
     }else{
  
@@ -885,6 +907,11 @@ function output_Records($system, $data, $params){
         }else{
             header( 'Content-Type: text/xml');
         }
+        
+        if($params['restapi']==1 && count($records)==0){
+            http_response_code(404);
+        }
+        
         exit($content);
     }
     unlink($tmp_destination);

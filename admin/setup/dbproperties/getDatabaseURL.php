@@ -69,7 +69,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     if($database_id>0){
 
         $rec = mysql__select_row_assoc($system2->get_mysqli(),
-            'select rec_Title, rec_URL from Records where rec_RecTypeID=22 and rec_ID='
+            'select rec_Title, rec_URL from Records where rec_RecTypeID='.HEURIST_INDEX_DBREC.' and rec_ID='  //22
             .$database_id);
         if ($rec!=null){
             $database_url = __replaceToLastServe(@$rec['rec_URL']);
