@@ -834,66 +834,73 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         if(file_exists($file)){
         // 3. Parse pdf file
                             try{
-                               
-                               if(true){ 
-                                $pdf    = $parser->parseFile($file);
 
-                                if(false){
-                                    $text = $pdf->getText();
-                                    if($text && mb_strlen($text)>64000){
-                                        $text = mb_substr($text,0,64000)
-                                                .' <more text is available. Remaining text has not been extracted from file>';
-                                    }
-                                }else{
-                                    // Retrieve all pages from the pdf file.
-                                    $pages  = $pdf->getPages();
-                                    $page_cnt = 0; 
-                                    $text = '';
-                                    // Loop over each page to extract text.
-                                    foreach ($pages as $page) {
-                                        
-                                        $pagetext = $page->getText();
-                                        
-                                        if(mb_detect_encoding($pagetext, 'UTF-8', true)===false){
-                                            
-                                            $pagetext = iconv("UTF-8","UTF-8//IGNORE", $pagetext); // to remove
-                                            
-                                            //$pagetext = Encoding::fixUTF8($pagetext);
+                                if(true){ 
+                                    $pdf    = $parser->parseFile($file);
+
+                                    if(false){
+                                        $text = $pdf->getText();
+                                    }else{
+                                        // Retrieve all pages from the pdf file.
+                                        $pages  = $pdf->getPages();
+                                        $page_cnt = 0; 
+                                        $text = '';
+                                        // Loop over each page to extract text.
+                                        foreach ($pages as $page) {
+
+                                            $pagetext = $page->getText();
+
                                             if(mb_detect_encoding($pagetext, 'UTF-8', true)===false){
-                                                $pagetext = 'Page '.$page_cnt.' can not be converted to UTF-8';
-                                            }    
-                                        }
-                                        
-                                        $text = $text . $pagetext;
-                                        //if(mb_strlen($text)>64000 || $page_cnt>10){
-                                        ///$text = mb_substr($text,0,64000)
-                                        if(strlen($text)>20000 || $page_cnt>10){
-                                            $k = 20000;
-                                            while (strlen($text)>20000){
-                                                $text = mb_substr($text,0,$k);
-                                                $k = $k - 1000;
+
+                                                $pagetext = iconv("UTF-8","UTF-8//IGNORE", $pagetext); // to remove
+
+                                                //$pagetext = Encoding::fixUTF8($pagetext);
+                                                if(mb_detect_encoding($pagetext, 'UTF-8', true)===false){
+                                                    $pagetext = 'Page '.$page_cnt.' can not be converted to UTF-8';
+                                                }    
                                             }
-//error_log(strlen($text).'  '.mb_strlen($text));                                           
-                                            $text = $text.' <more text is available. Remaining text has not been extracted from file>';
-                                            break;    
-                                        }
-                                        $page_cnt++;
-                                    }     
-                                }
-                                                           
-                               }else{
+
+                                            $text = $text . $pagetext;
+                                            if(strlen($text)>60000 || $page_cnt>10){
+                                                break;
+                                            }
+                                            $page_cnt++;
+
+
+                                        }//foreach     
+                                    }
+
+                                }else{
                                     //debug without real parsing 
                                     sleep(1);
                                     $text = 'test';
                                     $skippedParseEx[$recID] = $file.' Debug parse exception';
-                               }
-                                
+                                }
+
                                 if($text==null || mb_strlen(trim($text))==0){
                                     $skippedEmpty[$recID] = $file;
                                 }else{
-                                    $details[] = $text;    
+                                    $orig_len = mb_strlen($text);
+                                    $maxlen = 20000;
+                                    if($orig_len>$maxlen){ //split by 20k
+                                            
+                                            $k=0;
+                                            while (strlen($text)>$maxlen && $k<3){
+                                                $details[] = mb_substr($text,0,$maxlen);
+                                                $text = mb_substr($text,$maxlen);
+                                                $k++;
+                                            }
+                                            if($k>2){
+                                                $len = count($details)-1;
+                                                $details[$len] =
+                                                    $details[$len]
+                                                    .' <more text is available. Remaining text has not been extracted from file>';
+                                            }
+                                   }else{
+                                        $details[] = $text;       
+                                   }
                                 }
-                                
+
                             } catch (\Exception $ex) {
                                 //throw new ParseException($ex);
                                 $skippedParseEx[$recID] = $file.' '.print_r($ex, true);
@@ -935,7 +942,6 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                             $ret = mysql__exec_param_query($mysqli, $query, array($dtl['dtl_Value']));
                             */
                         }else{   
-
                             $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
                             if (!is_numeric($ret)) {
                                     $sqlErrors[$recID] = $ret;
