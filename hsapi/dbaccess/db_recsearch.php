@@ -1377,7 +1377,7 @@ $loop_cnt=1;
                                 .' AND dtl_DetailTypeID in ('.$fieldtypes_ids.'))';
                                 
                                 
-                                if($find_places_for_geo){
+                                if($find_places_for_geo){ //find location in linked Place records
                                     $detail_query = $detail_query . 'UNION  '
                                     .'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,AsWKT(dtl_Geo), rl_TargetID, 0, 0 '
                                     .' FROM recDetails, recLinks, Records '
