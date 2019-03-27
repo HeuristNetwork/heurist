@@ -674,8 +674,26 @@
                     $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure.rst_DefaultValue', $mysqli->error);
                 }
             }
+        }
+        
+        $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_SemanticReferenceURL'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if(!$row_cnt){ //column not defined
+            $query = 'ALTER TABLE `defTerms` ADD '
+                    .' `trm_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL'
+                    ." COMMENT 'The URI to a semantic definition or web page describing the term'"
+                    .' AFTER `trm_Code`';
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot add defTerms.trm_SemanticReferenceURL', $mysqli->error);
+            }else{
+                $ret = true;    
+            }
+        }else{
             $ret = true;
         }
+        
         return $ret;
     }
     //
