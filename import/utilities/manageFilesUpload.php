@@ -81,11 +81,12 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     }*/
                 }
             }
+            
         </script>
     </head>
 
 
-    <body class="popup" style="margin:0 !important; color:black;">
+    <body class="popup" style="margin:0 !important; color:black;"">
 
         <div class="banner">
             <h2>FILE MANAGEMENT</h2>
@@ -253,7 +254,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
             </div>
             <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
             <div class="fileupload-buttonbar" style="display:<?php print $is_dir_found?'block':'none';?>">
-                <label><input type="checkbox" onchange="setUploadEntireFolder()">
+                <label><input type="checkbox" checked=checked onchange="setUploadEntireFolder()">
                     Upload directory and keep its structure on server side
                 </label>
                 <label style="font-size:smaller;font-style:italic"> (If you want to maintain the directory structure, you must use Chrome or FireFox browser)</label>
@@ -263,16 +264,16 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                     <!-- The fileinput-button span is used to style the file input field as button -->
                     <span class="fileinput-button">
                         <span>Add files...</span>
-                        <input type="file" name="files[]" multiple>
+                        <input type="file" name="files[]" multiple webkitdirectory="true">
                     </span>
-                    <button type="submit" class="start">Start uploads</button>
-                    <button type="reset" class="cancel" id="btnCancel">Cancel uploads</button>
+                    <button id="btnStart" type="submit" class="start" disabled>Start uploads</button>
+                    <button id="btnCancel" type="reset" class="cancel">Cancel uploads</button>
                     <!-- Ian 17/6/16 It's quite confusing what these are for
                     <button type="button" class="delete">Delete selected</button>
                     <input type="checkbox" class="toggle">
                     -->
                     <div style="display:inline-block;min-width:40px"></div>
-                    <button id="btnFinished">Finished</button>
+                    <button id="btnFinished" disabled>Finished</button>
                     <!-- The global file processing state -->
                     <span class="fileupload-process"></span>
                 </div>
@@ -397,14 +398,59 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
             $(function () {
                 'use strict';
 
+                window.hWin.HEURIST4.filesWereUploaded = false;
+                
                 // Initialize the jQuery File Upload widget:
                 $('#fileupload').fileupload({
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
                     upload_thumb_dir: '<?=HEURIST_THUMB_DIR?>', 
-                    url: '<?=HEURIST_BASE_URL?>external/jquery-file-upload/server/php/'
+                    url: '<?=HEURIST_BASE_URL?>external/jquery-file-upload/server/php/',
+                 
+                    added: function(e, data){
+      
+                        //verify that all files are processed and show total size to be uploaded
+                        var ele = $('tbody.files');
+                        var size = 0;
+                        var cnt = ele.find('.template-upload').length;
+                        ele.find('.size').each(function (index,item){
+                            if($(item).text() == 'Processing...'){
+                                size = -1;
+                                return false;
+                            }else{
+                                size = size + Number($(item).attr('file-size'));    
+                            }
+                        });
+                        if(size>=0){
+
+                            window.hWin.HEURIST4.util.setDisabled($('#btnStart'), false);                    
+                            $('#btnStart').button('option','label','Start uploads '+window.hWin.HEURIST4.util.formatFileSize(size));
+                        }
+                  
+                    },
+                    finished: function(e, data){
+
+                        var ele = $('tbody.files');
+                        var cnt = ele.find('.template-download').length;
+                        
+                        window.hWin.HEURIST4.filesWereUploaded = window.hWin.HEURIST4.filesWereUploaded || (cnt>0);
+ 
+                        window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), false);                    
+                    }
                 });
                 
+                $('#btnCancel').click(function(e){ 
+                    window.hWin.HEURIST4.util.setDisabled($('#btnStart'), true);                    
+                    $('#btnStart').button('option','label','Start uploads');
+                });
+                
+                $('#btnStart').click(function(e){ 
+                    window.hWin.HEURIST4.util.setDisabled($('#btnStart'), true);                    
+                    window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), true);                    
+                    $('#btnStart').button('option','label','Start uploads');
+                });
+                
+                //cancel and close window
                 $('#btnFinished')
                         .button({icons:{primary: 'ui-icon-check'}})
                         .click( function(e){ 
