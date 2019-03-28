@@ -849,6 +849,25 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
                 if(options['height']>maxh) options['height'] = maxh*0.95;
                 
+                if (item.hasClass('upload_files')) {
+                    //beforeClose
+                    options['afterclose'] = function( event, ui ) {
+
+                            if(window.hWin.HEURIST4.filesWereUploaded){
+                                
+                                var buttons = {};
+                                buttons[window.hWin.HR('OK')]  = function() {
+                                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                    $dlg.dialog( "close" );
+                                    that.menuActionById('menu-index-files');
+                                };                                 
+                                
+                                window.hWin.HEURIST4.msg.showMsgDlg('The files you have uploaded will not appear as records in the database'
+                                +' until you run Import > index multimedia This function will open when you click OK.',buttons);
+                            }
+                    }
+                }
+                
                 window.hWin.HEURIST4.msg.showDialog( href, options);    
             }
             
