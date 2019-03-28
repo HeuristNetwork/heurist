@@ -17,6 +17,7 @@
                 csv_mvsep     :'|',
                 csv_linebreak :'nix',
                 csv_header    :true
+                csv_headeronly:false
     *           fields        : {rtid:[dtid1, dtid3, dtid2]}
     * 
     * prefs for json,xml
@@ -111,7 +112,12 @@
         error_log($search_params['q']);    
     }
 */
-    $response = recordSearch($system, $search_params);
+    if(@$params['prefs']['csv_headeronly']===true){
+        $response = array('status'=>HEURIST_OK,'data'=>array());
+        //$search_params['limit'] = 1;
+        //$search_params['needall'] = 0;
+    }else
+        $response = recordSearch($system, $search_params);
 
     if($is_csv){
         output_CSV($system, $response, $params);
@@ -249,7 +255,9 @@ function output_CSV($system, $data, $params){
 
     $data = $data['data'];
     
-    if(!(@$data['reccount']>0)){
+    $csv_headeronly =  $params['prefs']['csv_headeronly']?$params['prefs']['csv_headeronly']:false;
+    
+    if(!$csv_headeronly && !(@$data['reccount']>0)){
         print 'EMPTY RESULT SET'; //'empty result set';
         return;
     }
@@ -367,10 +375,19 @@ function output_CSV($system, $data, $params){
     $csv_linebreak =  $params['prefs']['csv_linebreak']?$params['prefs']['csv_linebreak']:'nix'; //not used
     $csv_header =  $params['prefs']['csv_header']?$params['prefs']['csv_header']:true;
     
-    
     //------------
+    if($csv_headeronly){
+        //stub
+        $records = array();
+        foreach($headers as $rty_ID => $columns){
+            if(count($columns)>1){
+                $records[] = $rty_ID;
+            }
+        }
+    }else{
+        $records = $data['records'];    
+    }
     
-    $records = $data['records'];
     $records_out = array(); //ids already out
     $streams = array(); //one per record type
     $rt_counts = array();
@@ -381,11 +398,16 @@ function output_CSV($system, $data, $params){
     $idx = 0;
     while ($idx<count($records)){ //replace to WHILE
     
-        $recID = $records[$idx];
+        if($csv_headeronly){
+            $rty_ID = $records[$idx];
+        }else{
+            $recID = $records[$idx];
+            $record = recordSearchByID($system, $recID, false);
+            $rty_ID = ($any_rectype!=null)?$any_rectype :$record['rec_RecTypeID'];
+        }
+
         $idx++;
-        $record = recordSearchByID($system, $recID, false);
-        
-        $rty_ID = ($any_rectype!=null)?$any_rectype :$record['rec_RecTypeID'];
+
         
         if(!@$fields[$rty_ID]) continue; //none of fields for this record type marked to output
         
@@ -408,6 +430,8 @@ function output_CSV($system, $data, $params){
             
             $rt_counts[$rty_ID]++;
         }
+        
+        if($csv_headeronly) continue;
         
         if(count(@$details[$rty_ID])>0){
             //fills $record
@@ -610,6 +634,7 @@ function output_CSV($system, $data, $params){
         }//for fields
         
         // write the data to csv
+        if(count($record_row)>0)
         fputcsv($fd, $record_row, $csv_delimiter, $csv_enclosure);
         
     }//for records
@@ -637,7 +662,7 @@ function output_CSV($system, $data, $params){
         
             $filename = 'Export_'.$system->dbname();
             if($rty_ID>0){
-                        $filename = $filename.'_'.$rtStructs['names'][$rty_ID];
+                        $filename = $filename.'_'.$rty_ID.'_'.$rtStructs['names'][$rty_ID];
             }
             $filename = $filename.'_'.date("YmdHis").'.csv';
         

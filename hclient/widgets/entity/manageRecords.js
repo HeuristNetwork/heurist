@@ -2280,14 +2280,16 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 +'<span class="btn-edit-rt ui-icon ui-icon-gear smallicon" style="height:18px;margin-left:4px"></span></span>'
 
                 +'<span class="btn-config4-container" style="padding: 4px;margin-left: 10px;">'
-                +'<span class="btn-edit-rt-titlemask" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">edit title mask</span>'
+                +'<span class="btn-edit-rt-titlemask" style="font-size: smaller;font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">edit title mask</span>'
                 +'<span class="btn-edit-rt-titlemask ui-icon ui-icon-pencil smallicon" style="height:18px;margin-left:4px"></span></span>'
+                +'<span class="btn-edit-rt-template" style="font-size: smaller;font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">template</span>'
+                +'<span class="btn-edit-rt-template ui-icon ui-icon-arrowthickstop-1-s smallicon" style="height:18px;margin-left:4px"></span></span>'
 
                     +'<hr style="margin-top: 10px;width:230px">'
              +'</div>'
              +'<div style="display:table-cell;text-align:right;padding: 10px 40px 0px 0px;font-weight: bold;">'
 
-                +'<span class="btn-config6" style="cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Bug report</span>'
+                +'<span class="btn-config6" style="font-size: smaller;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Bug report</span>'
                 +'<span class="btn-config7 ui-icon ui-icon-bug smallicon"></span>'
              +'</div></div>').insertBefore(this.editForm.first('fieldset'));
 
@@ -2302,6 +2304,10 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 //this.element.find('.btn-config5a').css({height: '18px', 'margin-left':'4px'})
                 
                 this.element.find('.btn-edit-rt-titlemask').click(function(){that.editRecordTypeTitle();});
+                
+                this.element.find('.btn-edit-rt-template').click(function(){
+                        window.hWin.HEURIST4.ui.showRecordActionDialog('recordTemplate',{recordType:that._currentEditRecTypeID});});
+                
             }else{
                 this.element.find('.btn-config4-container').hide();
                 //this.element.find('.btn-config5').hide();
