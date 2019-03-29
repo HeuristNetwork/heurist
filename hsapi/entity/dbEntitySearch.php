@@ -219,7 +219,7 @@ class DbEntitySearch
                 $negate = false;
             }
         
-            if($data_type=='freetext'){
+            if($data_type=='freetext' ||  $data_type=='url' || $data_type=='blocktext'){
                 $value = prepareStrIds($value);    
             }else{
                 $value = prepareIds($value);    
@@ -332,7 +332,7 @@ class DbEntitySearch
                     $res = $between.$values[0].' and '.$values[1];
                 }else{
                     
-                    if($eq=='=' && !$exact && ($data_type == 'freetext' || $data_type == 'blocktext') ){
+                    if($eq=='=' && !$exact && ($data_type == 'freetext' || $data_type == 'url' || $data_type == 'blocktext') ){
                         $eq = 'like';
                         $k = strpos($value,"%");
                         if($k===false || ($k>0 && $k+1<strlen($value))){
