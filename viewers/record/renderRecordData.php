@@ -769,7 +769,7 @@ function print_personal_details($bkmk) {
 
 
 function print_public_details($bib) {
-    global $system, $terms, $is_map_popup, $is_production, $ACCESSABLE_OWNER_IDS;
+    global $system, $terms, $is_map_popup, $is_production, $ACCESSABLE_OWNER_IDS, $relRT;
     
     $has_thumbs = false;
     
@@ -793,12 +793,43 @@ function print_public_details($bib) {
     dtl_ID';      //show null last
 
     $bds = array();
+    $bds_temp = array();
     $thumbs = array();
 
     $bds_res = $mysqli->query($query);
 
     if($bds_res){
+        
+        $bds = array();
+        
         while ($bd = $bds_res->fetch_assoc()) {
+            $bds_temp[] = $bd;    
+        }
+        $bds_res->close();
+        
+        //get linked records with file fields
+        $query = 'select 999 as rst_DisplayOrder, d2.dtl_ID, dt2.dty_ID, "Linked media" as name, '
+                .'d2.dtl_Value as val, '
+                .'d2.dtl_UploadedFileID, '
+                .'dt2.dty_Type, '
+                .'null as dtl_Geo, '
+                .'null as bd_geo_envelope '
+        .' from recDetails d1, defDetailTypes dt1, recDetails d2, defDetailTypes dt2, Records '
+        .' where d1.dtl_RecID = '. $bib['rec_ID'].' and d1.dtl_DetailTypeID = dt1.dty_ID and dt1.dty_Type = "resource" '
+        .' AND d2.dtl_RecID = d1.dtl_Value and d2.dtl_DetailTypeID = dt2.dty_ID and dt2.dty_Type = "file" ' 
+        .' AND rec_ID = d2.dtl_RecID and rec_RecTypeID != '.$relRT
+        .' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
+            ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")');
+        
+        $bds_res = $mysqli->query($query);     
+        if($bds_res){   
+            while ($bd = $bds_res->fetch_assoc()) {
+                $bds_temp[] = $bd;    
+            }
+            $bds_res->close();
+        }
+        
+        foreach ($bds_temp as $bd) {
 
             if ($bd['dty_ID'] == 603) { //DT_FULL_IMAG_URL
                 array_push($thumbs, array(
@@ -902,6 +933,7 @@ function print_public_details($bib) {
                     $originalFileName = $fileinfo['ulf_OrigFileName'];
                     $fileSize = $fileinfo['ulf_FileSizeKB'];
                     $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
+                    $file_description = $fileinfo['ulf_Description'];
                     
 
                     $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce.'&mode=tag';
@@ -918,13 +950,17 @@ function print_public_details($bib) {
                         'file_size'=>$fileSize,
                         'thumb' => $file_thumbURL,
                         'player' => $file_playerURL,
-                        'nonce' => $file_nonce
+                        'nonce' => $file_nonce,
+                        'linked' => ($bd['name']=='Linked media')
                     ));
               
-                    if($originalFileName){ 
+                    if($originalFileName && !$external_url){ 
                         $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($file_URL).'">'.htmlspecialchars($originalFileName).'</a> '.($fileSize>0?'[' .htmlspecialchars($fileSize) . 'kB]':'');
                     }else{
-                        $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($file_URL).'">'.htmlspecialchars($file_URL).'</a>';
+                        $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($file_URL).'">'.htmlspecialchars($external_url).'</a>';
+                    }
+                    if($file_description!=null && $file_description!=''){
+                        $bd['val'] = $bd['val'].'<br>'.htmlspecialchars($file_description);
                     }
                 }
                 
@@ -1040,7 +1076,7 @@ function print_public_details($bib) {
             array_push($bds, $bd);
     }//for
 
-        $bds_res->close();
+        
     }
     
     usort($bds, "__sortResourcesByDate");
@@ -1125,7 +1161,8 @@ function print_public_details($bib) {
             }
             
             print '<a href="' . htmlspecialchars($url) 
-                                . '" class="external-link" target=_surf class="image_tool">DOWNLOAD</a></div>';
+                                . '" class="external-link" target=_surf class="image_tool">DOWNLOAD'
+                                . (@$thumb['linked']?' (linked media)':'').'</a></div>';
             print '</div>';
             if($is_map_popup){
                 print '<br>';
