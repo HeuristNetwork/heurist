@@ -45,7 +45,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 }); 
 
             this.btn_add_record_popup.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Paste file to upload"), icons: {
+                    .button({label: window.hWin.HR("Drag and drop file to upload"), icons: {
                             primary: "ui-icon-plus"
                     }})
                 .click(function(e) {

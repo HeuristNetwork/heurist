@@ -27,6 +27,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     _isAdditionOfLocal:false, //flag to enabel "Save" button on file upload completion
     
     _previousURL:null,
+    _requestForMimeType:false,
     
     //
     //
@@ -237,7 +238,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             }
         }
         
-        if(!isLocal){ //remote
+        if(!isLocal){ //remote - detect mimetype when URL is changed
             var that = this;
             var ele = that._editing.getFieldByName('ulf_ExternalFileReference');
             ele.editing_input('option', 'change', function(){
@@ -251,39 +252,24 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 // remarked since we need to check it on server side
                 //var ext = window.hWin.HEURIST4.util.getMediaServerFromURL(res[0]);
                 //if(ext==null && !window.hWin.HEURIST4.util.isempty(res[0])){
-                if( !window.hWin.HEURIST4.util.isempty(curr_url[0])  && curr_url[0]!=that._previousURL ){    
+                if( !window.hWin.HEURIST4.util.isempty(curr_url[0]) && curr_url[0]!=that._previousURL ){    
 
                     that._previousURL = curr_url[0];
                     
                     var ext = window.hWin.HEURIST4.util.getFileExtension(curr_url[0]);
-                    
+               
                     //can't get ext from url
                     if(window.hWin.HEURIST4.util.isempty(ext)){
-                        //request server to detect content type
-                        window.hWin.HAPI4.SystemMgr.get_url_content_type(curr_url[0], function(response){
-                            if(response.status == window.hWin.ResponseStatus.OK){
-                                var ext = response.data.extension;
-
-                                var ele2 = that._editing.getFieldByName('ulf_MimeExt');
-                                
-                                if(response.data.needrefresh){
-                                    var cfg = ele2.editing_input('getConfigMode');
-                                    window.hWin.HAPI4.EntityMgr.clearEntityData( cfg.entity );
-                                }
-                                
-                                ele2.editing_input('setValue', ext );
-                                
-                                if(ext=='bin'){
-                                    window.hWin.HEURIST4.msg.showMsgDlg('Cannot retrieve content type for given url '
-                                    +' or mimetype is not found among allowed types.'
-                                        +' Generic mimetype is selected. Please select or add mimetype manaully');
-                                }
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr('Cannot retrieve content type for given url.'
-                                +' Please enter it manaully');
-                            }
-                        });
-                        that.onEditFormChange();
+                        
+                        if(that._requestForMimeType || that._requestForMimeType_Timeout>0){
+                            if(that._requestForMimeType_Timeout>0) clearTimeout(that._requestForMimeType_Timeout);
+                            that._requestForMimeType_Timeout = setTimeout(function(){that._requestMimeTypeByURL()},1000);
+                        }else{
+                            that._requestMimeTypeByURL();    
+                        }
+                        
+                        
+                        
                         return;
                     }
                     
@@ -291,9 +277,12 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     var curr_ext = ele2.editing_input('getValues');
                     if(curr_ext[0]!=ext){
                         ele2.editing_input('setValue', ext );
+                        that.onEditFormChange();
                     }
+                    ele2.editing_input('showErrorMsg', ''); //hide
+                    //that.onEditFormChange();
                 }
-                that.onEditFormChange();
+                
             });
             
             ele.editing_input('focus');
@@ -312,6 +301,53 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         ele.find('#btnRecRemove').hide();
                 
     },    
+    
+    
+    _requestMimeTypeByURL:function(){
+  
+        var that = this;
+        
+        var url = that._previousURL;
+
+        that._requestForMimeType_Timeout = 0;
+        that._requestForMimeType = true;                          
+        //request server to detect content type
+        window.hWin.HAPI4.SystemMgr.get_url_content_type(url, function(response){
+            
+            that._requestForMimeType = false;
+            var ele2 = that._editing.getFieldByName('ulf_MimeExt');
+             
+            if(response.status == window.hWin.ResponseStatus.OK){
+                var ext = response.data.extension;
+                
+                if(response.data.needrefresh){
+                    var cfg = ele2.editing_input('getConfigMode');
+                    window.hWin.HAPI4.EntityMgr.clearEntityData( cfg.entity );
+                }
+                
+                ele2.editing_input('setValue', ext );
+                that.onEditFormChange();
+                
+                if(ext=='bin'){
+                    ele2.editing_input('showErrorMsg', 'Cannot retrieve content type for given url '
+                    +' or mimetype is not found among allowed types.'
+                        +' Generic mimetype is selected. Please select or add mimetype manaully');
+                    
+                    /*
+                    window.hWin.HEURIST4.msg.showMsgDlg();
+                    */    
+                }else{
+                    ele2.editing_input('showErrorMsg', ''); //hide
+                }
+            }else{
+                ele2.editing_input('showErrorMsg', 'Cannot retrieve content type for given url.'
+                +' Please enter it manaully');
+            }
+            //that.onEditFormChange();
+        });
+        
+        
+    },
         
     //----------------------
     //

@@ -60,7 +60,7 @@
                     "dtFields":{
                         "dty_Type":"url",
                         "rst_DisplayName": "External URL:",
-                        "rst_DisplayHelpText": "URI of an external file, which may or may not be cached locally", 
+                        "rst_DisplayHelpText": "URL of an external file, which may or may not be cached locally", 
                         "rst_DisplayWidth":80,
                         "rst_Display":"visible",
                         "dty_Size":1000

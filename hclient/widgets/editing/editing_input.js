@@ -1462,10 +1462,13 @@ $.widget( "heurist.editing_input", {
                             $input.removeClass('rec_URL').addClass('text').removeAttr("readonly");
                             that._off( $input, 'click');
                             if(!window.hWin.HEURIST4.util.isnull( $btn_extlink)){
-                                $btn_extlink.remove();
-                                $btn_editlink.remove();
-                                $btn_extlink = null;
-                                $btn_editlink = null;
+                                
+                                //$btn_editlink.remove();
+                                //$btn_extlink = null;
+                                if($btn_editlink!=null){
+                                    $btn_editlink.remove();
+                                    $btn_editlink = null;
+                                }
                             }
                             if(force_edit===true){
                                 $input.focus();   
@@ -1477,14 +1480,6 @@ $.widget( "heurist.editing_input", {
                             }
                             $input.addClass('rec_URL').removeClass('text').attr('readonly','readonly');
                             
-                            $btn_extlink = $( '<span>', {title: 'Open URL in new window'})
-                                .addClass('smallicon ui-icon ui-icon-extlink')
-                                .appendTo( $inputdiv );
-                                //.button({icons:{primary: 'ui-icon-extlink'},text:false});
-                        
-                            that._on( $btn_extlink, { click: function(){ window.open($input.val(), '_blank') }} );
-                            that._on( $input, { click: function(){ window.open($input.val(), '_blank') }} );
-
                             $btn_editlink = $( '<span>', {title: 'Edit URL'})
                                 .addClass('smallicon ui-icon ui-icon-pencil')
                                 .appendTo( $inputdiv );
@@ -1494,10 +1489,20 @@ $.widget( "heurist.editing_input", {
                         }
                 
                     }
-                
-                    $input.focusout( __url_input_state ); 
+
+                    if($btn_extlink==null){
+                        $btn_extlink = $( '<span>', {title: 'Open URL in new window'})
+                            .addClass('smallicon ui-icon ui-icon-extlink')
+                            .appendTo( $inputdiv );
+                            //.button({icons:{primary: 'ui-icon-extlink'},text:false});
                     
-                    __url_input_state();               
+                        that._on( $btn_extlink, { click: function(){ window.open($input.val(), '_blank') }} );
+                        that._on( $input, { click: function(){ if ($input.val()!='') window.open($input.val(), '_blank') }} );
+                    }
+
+                    //$input.focusout( __url_input_state ); 
+                    
+                    __url_input_state(true);               
                 
             }
             else if(this.detailType=="integer" || this.detailType=="year"){
@@ -2617,12 +2622,25 @@ console.log('onpaste');
                     sMsg = 'The term "'+termLookup[value][terms.fieldNamesToIndex['trm_Label']]+'" (code '+value+') is not valid for this field. '
                     +'Please select from dropdown or modify field definition to include this term';
                 }
-                this.error_message.text(sMsg).show();
+                this.showErrorMsg(sMsg);
+                
             }    
             
         }
         
         return $input;
+    },
+    
+    //
+    //
+    //
+    showErrorMsg: function(sMsg){
+        if(sMsg!=''){
+            this.error_message.text(sMsg).show();    
+        }else{
+            this.error_message.hide();
+            $(this.inputs).removeClass('ui-state-error');
+        }
     },
     
     //
@@ -2700,7 +2718,7 @@ console.log('onpaste');
 
         var repeatable = (Number(this.f('rst_MaxValues')) != 1);
         if(values.length>1 && !repeatable){
-            this.error_message.text('Repeated value for a single value field - please correct').show();
+            this.showErrorMsg('Repeated value for a single value field - please correct');
         }
         
         this._setAutoWidth();
@@ -2923,13 +2941,7 @@ console.log('onpaste');
         }
         
 
-        if(errorMessage!=''){
-            this.error_message.text(errorMessage);
-            this.error_message.show();
-        }else{
-            this.error_message.hide();
-            $(this.inputs).removeClass('ui-state-error');
-        }
+        this.showErrorMsg(errorMessage);
 
         return (errorMessage=='');
     },
