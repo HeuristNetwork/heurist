@@ -213,11 +213,11 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
                 <form action="registerDB.php" method="POST" name="NewDBRegistration">
                    
                    <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
-<fieldset>
+<fieldset style="padding-right:30px">
     
     <div>
         <div class="header" style="vertical-align:top;min-width:100px"><label>Database Description:</label></div>
-        <textarea  type="memo" maxlength="1000" cols="80" rows="3" name="dbDescription" id="dbDescription" class="text"
+        <textarea  type="memo" maxlength="1000" cols="70" rows="3" name="dbDescription" id="dbDescription" class="text"
         style="border:1px solid;padding:2px"
                                 onkeyup="onKeyUpDbDescription( event )"><?php echo $dbDescription;?></textarea>
 
