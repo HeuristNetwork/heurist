@@ -1854,7 +1854,7 @@ if(!detailtypes[dtID]){
             var f_link_content = $("<span>").text(cterm.text).appendTo(f_link);    
             
             if(display_mode=='block'){                 
-                f_link_content.css('width',this.facets_list_container.width()*0.6).addClass('truncate');    
+                f_link_content.css('width','85%').addClass('truncate');    //was this.facets_list_container.width()*0.6
                 f_link_content.attr('title',cterm.text);
             }
             
