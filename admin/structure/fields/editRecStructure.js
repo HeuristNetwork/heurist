@@ -636,10 +636,12 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                             '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                             '<div class="input-cell">'+
-                                '<textarea class="initially-dis" style="width:450px" maxlength="255" cols="450" rows="2" id="ed_dty_HelpText" '+
+                                '<textarea class="initially-dis" style="width:450px" maxlength="255" cols="450" rows="4" id="ed_dty_HelpText" '+
                                 'onkeypress="removeErrorClass(this)"'+
                                 'onfocus="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
                                 'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
+                                '<div class="prompt">Use &lt;br&gt; for new line and &lt;a href="web page URL" target=_blank&gt;Help&lt;/a&gt; for a link to a help page.</div>'+
+                                
                                 //'<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
                                 //            'This text is optional.</div>'+
                             '</div></div>'+
@@ -755,8 +757,10 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                         '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                         '<div class="input-cell">'+
-                        '<textarea style="width:450px" cols="450" rows="2" maxlength="255" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
+                        '<textarea style="width:450px" cols="450" rows="4" maxlength="255" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
                         'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
+                        '<div class="prompt">Use &lt;br&gt; for new line and &lt;a href="web page URL" target=_blank&gt;Help&lt;/a&gt; for a link to a help page.</div>'+
+                        
                         //'<div class="prompt">Please edit the heading and this text to values appropriate to this record type. '+
                         //                    'This text is optional.</div>'+
                         '</div></div>'+
