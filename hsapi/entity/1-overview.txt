@@ -1,13 +1,15 @@
+Directory:    /hsapi/entity
 
-Directory:    /hclient
+Overview: This directory contains classes to work with database tables. CRUD operations. 
 
-Overview:     Client-side functions, H4 onwards. See also hserver for server-side functions
+dbEntityBase.php - base class
+db{TableName}.php - class for particular table
+{TableName}.json - cofiguration file that describes table fields and used to create edit form, in validation and search
+dbEntitySearch.php - helper class to parse request and prepare SQL query
 
-Notes:
+Updated:     29th March 2019
 
-Updated:     18 Oct 2015
-
-----------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------
 
 /**
 * @package     Heurist academic knowledge management system
@@ -26,4 +28,3 @@ Updated:     18 Oct 2015
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
