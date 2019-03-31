@@ -565,7 +565,7 @@
     }
 
     //
-    //
+    // returns true ot mysql error
     //
     function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
 
@@ -1048,7 +1048,9 @@ $query = 'CREATE TABLE sysDashboard ('
     function mysql__begin_transaction($mysqli){
         
         $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
-        if($keep_autocommit===true) $mysqli->autocommit(FALSE);
+        if($keep_autocommit===true || $keep_autocommit==1){
+                $mysqli->autocommit(FALSE);  
+        } 
         if (strnatcmp(phpversion(), '5.5') >= 0) {
             $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
         }

@@ -102,6 +102,14 @@ class DbEntityBase
         return $this->data; 
     }
     
+    public function setNeedTransaction($value){
+        $this->need_transaction = $value;
+    }
+    
+    public function setRecords($records){
+        $this->records = $records;
+    }
+    
     //
     // config getter
     //

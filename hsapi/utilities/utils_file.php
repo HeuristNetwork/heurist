@@ -1068,6 +1068,21 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     return array('csv_linebreak'=>$csv_linebreak, 'csv_delimiter'=>$csv_delimiter, 'csv_enclosure'=>$csv_enclosure);
 }
 
+//
+//
+//
+function isXMLfile($filename){
+    
+    $res = false;
+    $handle = @fopen($filename, 'r');
+    if ($handle) {
+        $output = fread($handle, 10);    
+        $res = (strpos($output, '<?xml') === 0);
+        fclose($handle);
+    }
+    return $res;
+}
+
 function flush_buffers($start=true){
     //ob_end_flush();
     @ob_flush();

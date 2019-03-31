@@ -800,7 +800,7 @@ function output_Records($system, $data, $params){
         return false;
     }   
     
-    if($params['restapi']==1){
+    if(@$params['restapi']==1){
         if(count($records)==1 && @$params['recID']>0){
             //fwrite($fd, '');             
         }else{
@@ -840,7 +840,7 @@ function output_Records($system, $data, $params){
         }
     }//while records
     
-    if($params['restapi']==1){
+    if(@$params['restapi']==1){
         if(count($records)==1 && @$params['recID']>0){
             //fwrite($fd, '');             
         }else{
@@ -933,7 +933,7 @@ function output_Records($system, $data, $params){
             header( 'Content-Type: text/xml');
         }
         
-        if($params['restapi']==1 && count($records)==0){
+        if(@$params['restapi']==1 && count($records)==0){
             http_response_code(404);
         }
         

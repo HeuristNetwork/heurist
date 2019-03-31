@@ -337,7 +337,7 @@ class DbRecUploadedFiles extends DbEntityBase
                     'select fxm_Extension from defFileExtToMimetype where fxm_Mimetype="'.addslashes($mimeType).'"');
             }
 
-            if(!$this->records[$idx]['ulf_FileSizeKB']) {
+            if(!@$this->records[$idx]['ulf_FileSizeKB']) {
                 $this->records[$idx]['ulf_FileSizeKB'] = 0;
             }
             
@@ -431,7 +431,7 @@ class DbRecUploadedFiles extends DbEntityBase
                         
                     }else{
                         $this->system->addError(HEURIST_INVALID_REQUEST,
-                             "Upload file: $name couldn't be saved to upload path definied for db = "
+                             "Upload file: $new_name couldn't be saved to upload path definied for db = "
                             . $this->system->dbname().' ('.HEURIST_FILES_DIR
                             .'). Please ask your system administrator to correct the path and/or permissions for this directory');
                     }                    
@@ -637,6 +637,8 @@ class DbRecUploadedFiles extends DbEntityBase
     * @returns record or false
     */
     public function registerFile($file, $newname, $needclean = true){
+        
+       $this->records = null; //reset 
         
        $fields = $this->getFileInfoForReg($file, $newname);
                     

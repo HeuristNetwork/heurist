@@ -251,7 +251,7 @@
     * error array
     *
     */
-    function recordSave($system, $record){
+    function recordSave($system, $record, $use_transaction=true){
 
         //check capture for newsletter subscription
         if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
@@ -349,14 +349,18 @@
             }
         
             // start transaction
-            $keep_autocommit = mysql__begin_transaction($mysqli);
+            if($use_transaction){
+                $keep_autocommit = mysql__begin_transaction($mysqli);    
+            }
 
             $response = recordAdd($system, $record, true);
             if($response['status'] == HEURIST_OK){
                 $recID = intval($response['data']);
             }else{
-                $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($use_transaction){
+                    $mysqli->rollback();
+                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                }
                 return $response;
             }
 
@@ -372,7 +376,9 @@
             }
 
             // start transaction
-            $keep_autocommit = mysql__begin_transaction($mysqli);
+            if($use_transaction){
+                $keep_autocommit = mysql__begin_transaction($mysqli);
+            }
 
             $query = "UPDATE Records set rec_Modified=?, rec_RecTypeID=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=?,"
             ."rec_URL=?, rec_ScratchPad=?, rec_FlagTemporary=0 "
@@ -389,8 +395,10 @@
             if(!$stmt->execute()){
                 $syserror = $mysqli->error;
                 $stmt->close();
-                $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($use_transaction){
+                    $mysqli->rollback();
+                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                }
                 return $system->addError(HEURIST_DB_ERROR, 'Cannot save record', $syserror);
             }
             $stmt->close();
@@ -404,8 +412,10 @@
             $query = "DELETE FROM recDetails where dtl_RecID=".$recID;
             if(!$mysqli->query($query)){
                 $syserror = $mysqli->error;
-                $mysqli->rollback();
-                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                if($use_transaction){
+                    $mysqli->rollback();
+                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                }
                 return $system->addError(HEURIST_DB_ERROR, 'Cannot delete old details', $syserror);
             }
         }
@@ -438,7 +448,10 @@
                 $stmt->bind_param('isis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo);
                 if(!$stmt->execute()){
                     $syserror = $mysqli->error;
-                    $mysqli->rollback();if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    if($use_transaction){
+                        $mysqli->rollback();
+                        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                    }
                     
                     //$email_to, $email_title, $email_text, $email_header
                     sendEmail(HEURIST_MAIL_TO_ADMIN, 
@@ -468,8 +481,10 @@
                             
                             if($res<0){
                                 $syserror = $mysqli->error;
-                                $mysqli->rollback();
-                                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                                if($use_transaction){
+                                    $mysqli->rollback();
+                                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                                }
                                 return $system->addError(HEURIST_DB_ERROR, 
                                     'Cannot save details. Cannot insert reverse pointer for child record', $syserror);
                             }else if($res!=0){ 
@@ -485,8 +500,10 @@
                             $res = addParentToChildPointer($mysqli, $recID, $rectype, $dtl_Value, null, $addedByImport);                                       
                             if($res<0){
                                 $syserror = $mysqli->error;
-                                $mysqli->rollback();
-                                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                                if($use_transaction){
+                                    $mysqli->rollback();
+                                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                                }
                                 return $system->addError(HEURIST_DB_ERROR, 
                                     'Cannot save details. Cannot insert pointer for parent record', $syserror);
                             }else if($res!=0){ 
@@ -506,8 +523,10 @@
             
         }else{
             $syserror = $mysqli->error;
-            $mysqli->rollback();
-            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            if($use_transaction){
+                $mysqli->rollback();
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            }
             return $system->addError(HEURIST_DB_ERROR, 'Cannot save details(3)', $syserror);
         }
 
@@ -554,9 +573,10 @@
             }
         }
         
-        
-        $mysqli->commit();
-        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        if($use_transaction){
+            $mysqli->commit();
+            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        }
 
         return array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
         /*
@@ -568,7 +588,7 @@
         "rectypes"=>$rectypes,
         "structures"=>$rectype_structures));
         */
-    }
+    }//recordSave
 
     /**
     * 

@@ -94,7 +94,8 @@ require_once (dirname(__FILE__).'/../dbaccess/db_structure_tree.php');
 
 require_once (dirname(__FILE__).'/../import/importParser.php'); //parse CSV, KML and save into import table
 require_once (dirname(__FILE__).'/../import/importSession.php'); //work work with import session 
-require_once (dirname(__FILE__).'/../import/importAction.php'); //work with import tbale: matching, assign id, performs validation and import
+require_once (dirname(__FILE__).'/../import/importAction.php'); //work with import tabale: matching, assign id, performs validation and import
+require_once (dirname(__FILE__).'/../import/importHeurist.php'); //work with Heurist exchange format
 
 require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 
@@ -204,15 +205,16 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='import_preview'){
             //reads import file and returns list of records to be imported
-            $res = ImportAction::importH_GetDefintions(@$_REQUEST['filename']);
+            $res = ImportHeurist::getDefintions(@$_REQUEST['filename']);
             
         }else if($action=='import_definitions'){
             
-            $res = ImportAction::importH_ImportDefintions(@$_REQUEST['filename']);
+            $res = ImportHeurist::importDefintions(@$_REQUEST['filename'], @$_REQUEST['session']);
             
         }else if($action=='import_records'){
             
-            $res = ImportAction::importH_ImportRecords(@$_REQUEST['filename'], @$_REQUEST['session']);
+            //returns count of imported records
+            $res = ImportHeurist::importRecords(@$_REQUEST['filename'], @$_REQUEST['session']);
             
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missed or wrong");                

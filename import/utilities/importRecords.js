@@ -19,6 +19,15 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*
+_importDefinitions - downloads and import defintions from other database
+
+                                               ImportHeurist::getDefintions 
+hapi.doImportAction -> importController.php -> ImportHeurist::importDefintions
+                                               ImportHeurist::importRecords
+
+*/
+
 function hImportRecords(_max_upload_size) {
     var _className = "ImportRecords",
     _version   = "0.4",
@@ -49,8 +58,11 @@ function hImportRecords(_max_upload_size) {
         $('#btn_ImportRt').click(_importDefinitions);
 
         $('#btn_ImportRecords').click(_importRecords);
-            
+
+        $('#btn_Close').click(function(){window.close()});
+
         //upload file to server and store intemp file
+        
         var uploadData = null;
         var pbar_div = $('#progressbar_div');
         var pbar = $('#progressbar');
@@ -74,6 +86,7 @@ function hImportRecords(_max_upload_size) {
         //dropZone: $input_img,
         add: function (e, data) {  
         
+            _showProgress(0, 0);    
             uploadData = data;//keep this object to use conviniece methods (abort for instance)
             data.submit(); 
 
@@ -83,7 +96,7 @@ function hImportRecords(_max_upload_size) {
         //change: function(){},
         error: function (jqXHR, textStatus, errorThrown) {
             //!!! $('#upload_form_div').show();
-            _showStep(0);
+            _hideProgress(0, 0);
             pbar_div.hide();
             if(textStatus!='abort'){
                 window.hWin.HEURIST4.msg.showMsgErr(textStatus+' '+errorThrown);
@@ -92,7 +105,8 @@ function hImportRecords(_max_upload_size) {
         done: function (e, response) {
 
                 //!!! $('#upload_form_div').show();                
-                pbar_div.hide();       //hide progress bar
+                //pbar_div.hide();       //hide progress bar
+                _hideProgress(0, -1);
                 response = response.result;
                 if(response.status==window.hWin.ResponseStatus.OK){  //after upload
                     var data = response.data;
@@ -129,7 +143,7 @@ function hImportRecords(_max_upload_size) {
                                             $('#div_RectypeToBeImported').html('<table>'+s+'</table>');
                                             _showStep(1);
                                         }else{
-                                            //all record types are alrady in target database
+                                            //all record types are already in target database
                                             //goto import records step
                                             _showStep(2);
                                         }
@@ -158,7 +172,8 @@ function hImportRecords(_max_upload_size) {
            
         },//done                    
         progressall: function (e, data) { 
-                    $('#divStep0').hide();
+                    //$('#divStep0').hide();
+                    
                     var progress = parseInt(data.loaded / data.total * 100, 10);
                     progressLabel = pbar.find('.progress-label').text(
                                     Math.ceil(data.loaded/1024)+'Kb / '+Math.ceil(data.total/1024)) + 'Kb ';
@@ -180,19 +195,23 @@ function hImportRecords(_max_upload_size) {
                 }                            
                 
                             });                        
-        
+     
+     
     }
 
     //
     //
     //
     function _importDefinitions(){
-        
             
-            $('#divStep1').hide();
+            session_id = Math.round((new Date()).getTime()/1000);
         
+            _showProgress( 0, 1 );
+            //$('#divStep1').hide();
+            
             var request = { action: 'import_definitions',
                 filename: upload_file_name,
+                session: session_id,
                 id: window.hWin.HEURIST4.util.random()
             };
                    
@@ -200,15 +219,16 @@ function hImportRecords(_max_upload_size) {
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
                         //goto import records step
-                        _showStep(2);
+                        _hideProgress(2);
                         //update local definitions
-                        window.hWin.HEURIST4.rectypes = response.data.rectypes;
-                        window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
-                        window.hWin.HEURIST4.terms = response.data.terms;
+                        if(response.data.data.rectypes) window.hWin.HEURIST4.rectypes = response.data.data.rectypes;
+                        if(response.data.data.detailtypes) window.hWin.HEURIST4.detailtypes = response.data.data.detailtypes;
+                        if(response.data.data.terms) window.hWin.HEURIST4.terms = response.data.data.terms;
                         //show report
-                        window.hWin.HEURIST4.msg.showMsgDlg('<table>'+response.report.rectypes+'</table>');
+                        window.hWin.HEURIST4.msg.showMsgDlg('<div style="font:small"><table>'
+                            +response.data.report.rectypes+'</table></div>',null,'Result of import definitions');
                     }else{
-                        _showStep(1);
+                        _hideProgress(1);
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
@@ -220,7 +240,7 @@ function hImportRecords(_max_upload_size) {
     //
     function _importRecords(){
 
-            $('#divStep2').hide();
+            //$('#divStep2').hide();
             session_id = Math.round((new Date()).getTime()/1000);
         
             var request = { action: 'import_records',
@@ -229,14 +249,16 @@ function hImportRecords(_max_upload_size) {
                 id: window.hWin.HEURIST4.util.random()
             };
             
-            _showProgress( session_id );
+            _showProgress( session_id, 2 );
                    
             window.hWin.HAPI4.doImportAction(request, function( response ){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        window.hWin.HEURIST4.msg.showMsgDlg(response.data);
+                        _hideProgress(3);
+                        $('#spanRecCount2').text(response.data);
+                        //window.hWin.HEURIST4.msg.showMsgDlg('Imported '+response.data+' records');
                     }else{
-                        _showStep(2);
+                        _hideProgress(2);
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 });
@@ -245,75 +267,84 @@ function hImportRecords(_max_upload_size) {
     }        
     
     //
+    // Move to UI
     //
-    //
-    function _showProgress( session_id ){
+    function _showProgress( session_id, currentStep ){
 
         var progressCounter = 0;        
         var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
 
+        $('body > div:not(.loading)').hide();
+        $('.loading').show();
         
         $('body').css('cursor','progress');
-        var pbar_div = $('#progressbar_div');
+
         var pbar = $('#progressbar');
         var progressLabel = pbar.find('.progress-label').text('');
         pbar.progressbar({value:0});
-                
-        $('#progress_stop').button().on({click: function() {
-            
-            var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
-            
-            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-                _hideProgress();
-                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    console.log(response);                   
-                }
-            });
-        } }, 'text');
         
-        progressInterval = setInterval(function(){ 
-            
-            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
-            
-            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+        if(session_id>0){
+        
+            $('#progress_stop').button().on({click: function() {
                 
-                if(!response || response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    _hideProgress();
-                    //console.log(response+'  '+session_id);                   
-                }else{
+                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
+                
+                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+                    _hideProgress( currentStep );
+                    if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                        console.log(response);                   
+                    }
+                });
+            } }, 'text');
+            
+            progressInterval = setInterval(function(){ 
+                
+                var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+                
+                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     
-                    var resp = response?response.split(','):[0,0];
-                    
-                    if(resp && resp[0]){
-                        if(progressCounter>0){
-                            if(resp[1]>0){
-                                var val = resp[0]*100/resp[1];
-                                pbar.progressbar( "value", val );
-                                progressLabel.text(resp[0]+' of '+resp[1]);
+                    if(!response || response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                        _hideProgress( currentStep );
+                        //console.log(response+'  '+session_id);                   
+                    }else{
+                        
+                        var resp = response?response.split(','):[0,0];
+                        
+                        if(resp && resp[0]){
+                            if(progressCounter>0){
+                                if(resp[1]>0){
+                                    var val = resp[0]*100/resp[1];
+                                    pbar.progressbar( "value", val );
+                                    progressLabel.text(resp[0]+' of '+resp[1]);
+                                }else{
+                                    progressLabel.text('wait...');
+                                    //progressLabel.text('');
+                                }
                             }else{
-                                progressLabel.text('wait...');
-                                //progressLabel.text('');
+                                pbar.progressbar( "value", 0 );
+                                progressLabel.text('preparing...');
                             }
                         }else{
-                            pbar.progressbar( "value", 0 );
-                            progressLabel.text('preparing...');
+                            _hideProgress( currentStep );
                         }
-                    }else{
-                        _hideProgress();
+                        
+                        
+                        progressCounter++;
+                        
                     }
-                    
-                    
-                    progressCounter++;
-                    
-                }
-            },'text');
-          
-        
-        }, 1000);                
+                },'text');
+              
+            
+            }, 1000);                
+            
+        }
         
     }
     
-    function _hideProgress(){
+    //
+    // alwasys call _showStep after this method
+    //
+    function _hideProgress( currentStep ){
         
         
         $('body').css('cursor','auto');
@@ -323,7 +354,13 @@ function hImportRecords(_max_upload_size) {
             clearInterval(progressInterval);
             progressInterval = null;
         }
-        $('#progressbar_div').hide();
+        //$('#progressbar_div').hide();
+        
+        $('.loading').hide();
+        if(currentStep>=0){
+            $('body > div:not(.loading)').show();
+            _showStep( currentStep );    
+        }
         
     }    
        
@@ -341,7 +378,7 @@ function hImportRecords(_max_upload_size) {
         currentStep = page;
         
         $("div[id^='divStep']").hide();
-        $("#divStep"+(page>2?2:page)).show();
+        $("#divStep"+(page>3?3:page)).show();
     }
     
     //public members
