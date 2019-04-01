@@ -80,6 +80,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/record/recordAdd.js"></script>
         <script type="text/javascript" src="hclient/widgets/record/recordAddLink.js"></script>
         <script type="text/javascript" src="hclient/widgets/record/recordExportCSV.js"></script>
+        <script type="text/javascript" src="hclient/widgets/record/recordTemplate.js"></script>
         
         
         <!-- DOCUMENTATION TODO: explain this -->
@@ -344,7 +345,7 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                 
                 
                 //perform search in the case that parameter "q" is defined
-                var qsearch = '<?php echo str_replace("'","\'",@$_REQUEST['q']); ?>';
+                var qsearch = '<?php echo trim(str_replace("'","\'",@$_REQUEST['q'])); ?>';
                 if(window.hWin.HAPI4.sysinfo.db_total_records>0 && !window.hWin.HEURIST4.util.isempty(qsearch)){
                     var qdomain = '<?=@$_REQUEST['w']?>';
                     var rules = '<?=@$_REQUEST['rules']?>';
