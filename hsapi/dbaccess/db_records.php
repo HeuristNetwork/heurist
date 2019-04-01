@@ -1599,9 +1599,10 @@
                         break;
                     case "boolean":
 
-                        $isValid = preg_match("/^(?:yes|true|no|false)$/", $dtl_Value);
+                        $isValid = preg_match("/^(?:yes|true|no|false|1|0|T|F|Y|N)$/", $dtl_Value);
                         if($isValid){
-                            if ($dtl_Value == "yes"  ||  $dtl_Value == "true")
+                            if ($dtl_Value==1 || $dtl_Value == 'T' || $dtl_Value == 'Y' 
+                                || $dtl_Value == "yes"  ||  $dtl_Value == "true")
                                 $dtl_Value = "true";
                             else
                                 $dtl_Value = "false";
