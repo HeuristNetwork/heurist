@@ -191,8 +191,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 
                 //DEBUG console.log( node.data.code );
             }
-            //DEBUG 
-console.log( selectedFields );
+            //DEBUG console.log( selectedFields );
             
             
             var request = {
