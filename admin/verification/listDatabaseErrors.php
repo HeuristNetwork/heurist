@@ -1179,11 +1179,13 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             <a name="required_fields"/>
             <?php
 
-            $res = $mysqli->query("select rec_ID, rst_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title, dty_Type
+            $res = $mysqli->query(
+            "select rec_ID, rec_RecTypeID, rst_DetailTypeID, rst_DisplayName, dtl_Value, rec_Title, dty_Type, rty_Name
                 from Records
                 left join defRecStructure on rst_RecTypeID = rec_RecTypeID
                 left join recDetails on rec_ID = dtl_RecID and rst_DetailTypeID = dtl_DetailTypeID
                 left join defDetailTypes on dty_ID = rst_DetailTypeID
+                left join defRecTypes on rty_ID = rec_RecTypeID
                 where rec_FlagTemporary!=1 and rst_RequirementType='required' and (dtl_Value is null or dtl_Value='')
                 and dtl_UploadedFileID is null and dtl_Geo is null and dty_Type!='separator'
             order by rec_ID");
@@ -1206,8 +1208,8 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                     <h3>Records with missing or empty required values</h3>
                     <span>
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&amp;w=all&amp;q=ids:<?= implode(',', array_keys($ids)) ?>'>
-                            (show results as search)</a>
-                        <a target=_new href='#' id=selected_link3 onClick="return open_selected_by_name('recCB3');">(show selected as search)</a>
+                            (show results as search) <img src='../../common/images/external_link_16x16.gif'></a>
+                        <a target=_new href='#' id=selected_link3 onClick="return open_selected_by_name('recCB3');">(show selected as search) <img src='../../common/images/external_link_16x16.gif'></a>
                     </span>
                 </div>
 
@@ -1225,6 +1227,8 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                     <a target=_new
                                         href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                         <?= $row['rec_ID'] ?>
+<img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" title="<?php echo $row['rty_Name']?>" 
+src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;
                                         <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                     </a>
                                 </td>
@@ -1256,11 +1260,12 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             <a name="nonstandard_fields"></a>
             <?php
 
-            $query = "select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title
+            $query = "select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title, rty_Name
                 from Records
                 left join recDetails on rec_ID = dtl_RecID
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join defRecStructure on rst_RecTypeID = rec_RecTypeID and rst_DetailTypeID = dtl_DetailTypeID
+                left join defRecTypes on rty_ID = rec_RecTypeID
                 where rec_FlagTemporary!=1 AND rst_ID is null";            
                 
             if(defined('DT_PARENT_ENTITY') && DT_PARENT_ENTITY>0){
@@ -1289,8 +1294,8 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                     <h3>Records with extraneous fields (not defined in the list of fields for the record type)</h3>
                     <span>
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
-                            (show results as search)</a>
-                        <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search)</a>
+                            (show results as search) <img src='../../common/images/external_link_16x16.gif'></a>
+                        <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search) <img src='../../common/images/external_link_16x16.gif'></a>
                     </span>
                     <table>
                         <?php
@@ -1306,6 +1311,8 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                         <a target=_new
                                             href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'>
                                             <?= $row['rec_ID'] ?>
+                                        <img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" title="<?php echo $row['rty_Name']?>" 
+src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;
                                             <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                         </a>
                                     </td>
