@@ -1135,8 +1135,8 @@ $.widget( "heurist.resultList", {
             
             if(clr != 'blue')         
             html_owner =  html_owner + '<span class="ui-icon ui-icon-cancel" '
-            +'style="color:darkgray;display:inline;font-size:1.5em;vertical-align: -2px"></span>'
-                +'<span class="ui-icon ui-icon-eye" style="font-size:0.9em;color:darkgray;display:inline;vertical-align:0px" title="'
+            +'style="color:darkgray;display:inline;font-size:1.3em;vertical-align: -1px"></span>'
+                +'<span class="ui-icon ui-icon-eye" style="font-size:0.8em;color:darkgray;display:inline;vertical-align:0px" title="'
                 + 'This record is not publicly visible - user must be logged in to see it'
                 + '" ></span>';
                      
