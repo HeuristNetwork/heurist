@@ -909,60 +909,90 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var headers = relations.headers;
                 var ele1=null, ele2=null;
                 
-                //relations                            
+                //direct relations                            
                 var sRel_Ids = [];
                 for(var k in direct){
                     if(direct[k]['trmID']>0){ //relation    
                         var targetID = direct[k].targetID;
                         sRel_Ids.push(targetID);
                         
-                        var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
-                            {rec_ID: targetID, 
-                             rec_Title: headers[targetID][0], 
-                             rec_RecTypeID: headers[targetID][1], 
-                             relation_recID: direct[k]['relationID'], 
-                             trm_ID: direct[k]['trmID'],
-                             dtl_StartDate: direct[k]['dtl_StartDate'],
-                             dtl_EndDate: direct[k]['dtl_EndDate']
-                            }, true);
-                        if(!ele1) ele1 = ele;     
+                        if(sRel_Ids.length<25){
+                            var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
+                                {rec_ID: targetID, 
+                                 rec_Title: headers[targetID][0], 
+                                 rec_RecTypeID: headers[targetID][1], 
+                                 relation_recID: direct[k]['relationID'], 
+                                 trm_ID: direct[k]['trmID'],
+                                 dtl_StartDate: direct[k]['dtl_StartDate'],
+                                 dtl_EndDate: direct[k]['dtl_EndDate']
+                                }, true);
+                            if(!ele1) ele1 = ele;     
+                        }
                     }
                 }
+                //reverse relations
                 for(var k in reverse){
                     if(reverse[k]['trmID']>0){ //relation    
                         var sourceID = reverse[k].sourceID;
                         sRel_Ids.push(sourceID);
                         
-                        var invTermID = window.hWin.HEURIST4.ui.getInverseTermById(reverse[k]['trmID']);
+                        if(sRel_Ids.length<25){
                         
-                        var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
-                            {rec_ID: sourceID, 
-                             rec_Title: headers[sourceID][0], 
-                             rec_RecTypeID: headers[sourceID][1], 
-                             relation_recID: reverse[k]['relationID'], 
-                             trm_ID: invTermID,
-                             dtl_StartDate: reverse[k]['dtl_StartDate'],
-                             dtl_EndDate: reverse[k]['dtl_EndDate']
-                            }, true);
-                        if(!ele1) ele1 = ele;     
+                            var invTermID = window.hWin.HEURIST4.ui.getInverseTermById(reverse[k]['trmID']);
+                            
+                            var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
+                                {rec_ID: sourceID, 
+                                 rec_Title: headers[sourceID][0], 
+                                 rec_RecTypeID: headers[sourceID][1], 
+                                 relation_recID: reverse[k]['relationID'], 
+                                 trm_ID: invTermID,
+                                 dtl_StartDate: reverse[k]['dtl_StartDate'],
+                                 dtl_EndDate: reverse[k]['dtl_EndDate']
+                                }, true);
+                            if(!ele1) ele1 = ele;     
+                        }
                     }
                 }
-
+                if(sRel_Ids.length>25){
+                    $('<div><a href="'
+                    +window.hWin.HAPI4.baseURL + '?q='
+                    +encodeURIComponent('{"related":{"ids":'+that._currentEditID+'}}')
+                    +'&db='+window.hWin.HAPI4.database
+                    +'" target="_blank">more ('+(sRel_Ids.length-25)
+                    +'<span class="ui-icon ui-icon-extlink" style="font-size:0.8em;top:2px;right:2px"></span>'
+                    +') </a></div>').appendTo(panel);
+                }
+                
+                //reverse links
                 var sLink_Ids = [];
                 for(var k in reverse){
                     if(!(reverse[k]['trmID']>0)){ //links    
                         var sourceID = reverse[k].sourceID;
                         sLink_Ids.push(sourceID);
                         
-                        var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
-                            {rec_ID: sourceID, 
-                             rec_Title: headers[sourceID][0], 
-                             rec_RecTypeID: headers[sourceID][1]
-                            }, true);
-                        if(!ele2) ele2 = ele;     
+                        if(sLink_Ids.length<25){
+                        
+                            var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
+                                {rec_ID: sourceID, 
+                                 rec_Title: headers[sourceID][0], 
+                                 rec_RecTypeID: headers[sourceID][1]
+                                }, true);
+                            if(!ele2) ele2 = ele;   
+                        }  
                     }
                 }
+                if(sLink_Ids.length>25){
+                    $('<div><a href="'
+                    +window.hWin.HAPI4.baseURL + '?q='
+                    +encodeURIComponent('{"linked_to":{"ids":'+that._currentEditID+'}}')
+                    +'&db='+window.hWin.HAPI4.database
+                    +'" target="_blank">more ('+(sLink_Ids.length-25)
+                    +'<span class="ui-icon ui-icon-extlink" style="font-size:0.8em;top:2px;right:2px"></span>'
+                    +') </a></div>').appendTo(panel);
+                }
                 
+                
+                //insert headers
                 if(sRel_Ids.length>0){
                     $('<div class="detailRowHeader" style="border:none">Related</div>').css('border','none').insertBefore(ele1);
                 }
