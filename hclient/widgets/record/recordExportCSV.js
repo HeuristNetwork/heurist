@@ -191,7 +191,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 
                 //DEBUG console.log( node.data.code );
             }
-            //DEBUG console.log( selectedFields );
+            //DEBUG 
+console.log( selectedFields );
             
             
             var request = {
@@ -290,7 +291,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             this._selectedRtyID = rtyID;
             
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['header_ext','all'] );
+            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['header_ext','all','parent_link'] );
             
             treedata[0].expanded = true; //first expanded
             
@@ -327,7 +328,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     var rectypes = node.data.rt_ids;
                     
                     var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
-                                        rectypes, ['header_ext','all'], parentcode );
+                                                        rectypes, ['header_ext','all'], parentcode );
                     if(res.length>1){
                         data.result = res;
                     }else{

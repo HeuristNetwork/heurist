@@ -46,10 +46,15 @@
     * @param mixed $mode  5 - fields only (no header fields), 3 - all
     *    4 - for treeview, for faceted search (with type names)
     *    5 - for treeview, for faceted search (with type names) ONE level only - lazy load
+    * 
+    * @param mixed $fieldtypes - field types to be listed
+    * @param mixed $parentcode
     */
     function dbs_GetRectypeStructureTree($system, $rectypeids, $mode, $fieldtypes=null, $parentcode=null){
 
         global $dbs_rtStructs, $dbs_lookups;
+        
+        $system->defineConstant('DT_PARENT_ENTITY');
 
         if($mode>=4) set_time_limit(0); //no limit
         
@@ -72,6 +77,10 @@
 
         //create hierarchy tree 
         foreach ($rectypeids as $rectypeID){
+                
+                //find all parent recordtypes and modify fieldstype (add fake resource fields)
+                __addParentResourceFields($rectypeID);
+            
                 $def = __getRecordTypeTree($system, $rectypeID, 0, $mode, $fieldtypes, null);
                 if($def!==null) {
                     if($parentcode!=null){
@@ -115,6 +124,61 @@
                         return $def;
     }
 
+    //
+    // adds resource fields to parent 
+    //
+    function __addParentResourceFields($recTypeId){
+        
+        global $dbs_rtStructs;
+        
+        if(!(defined('DT_PARENT_ENTITY') && DT_PARENT_ENTITY>0)) return;
+        
+        $rst_fi = $dbs_rtStructs['typedefs']['dtFieldNamesToIndex'];
+        $parent_Rts = array();
+        
+        foreach ($dbs_rtStructs['typedefs'] as $rtKey => $recstruct){
+            if($rtKey>0){
+                $details =  @$recstruct['dtFields'];
+                
+                if(!$details){
+                    continue;
+                }
+                
+                foreach ($details as $dtKey => $dtValue){
+                    
+                    if($dtValue[$rst_fi['rst_RequirementType']]=='forbidden') continue;
+                    
+                    if($dtValue[$rst_fi['dty_Type']]=='resource' && $dtValue[$rst_fi['rst_CreateChildIfRecPtr']]==1){
+                        
+                        $constraint = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
+                        if($constraint && in_array($recTypeId, explode(',',$constraint)) && !in_array($rtKey, $parent_Rts) ){
+                            array_push($parent_Rts, $rtKey);    
+                            //break;
+                        }
+                        
+                    }
+                }
+            }
+        }        
+        
+        if(count($parent_Rts)>0){
+            //$res['recParent'] = 'Record Parent';
+            $dtKey = DT_PARENT_ENTITY;
+            
+            //create fake rectype structure field
+            $ffr = array();
+            $ffr[$rst_fi['rst_DisplayName']] = 'Parent entity';//'Record Parent ('.$rtStructs['names'][$parent_Rt].')';
+            $ffr[$rst_fi['rst_PtrFilteredIDs']] = implode(',',$parent_Rts);
+            $ffr[$rst_fi['dty_Type']] = 'resource';
+            $ffr[$rst_fi['rst_DisplayHelpText']] = 'Reverse pointer to parent record';
+            $ffr[$rst_fi['rst_RequirementType']] = 'optional';
+                  
+            $dbs_rtStructs['typedefs'][$recTypeId][DT_PARENT_ENTITY] = $ffr;
+        }        
+        
+    }
+    
+    
     //
     //   {rt_id: , rt_name, recID, recTitle, recModified, recURL, recWootText,
     //                  fNNN: 'display name of field', 

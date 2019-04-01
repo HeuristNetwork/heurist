@@ -296,16 +296,26 @@ window.hWin.HEURIST4.dbs = {
     */
     createRectypeStructureTree: function( db_structure, $mode, rectypeids, fieldtypes, parentcode ) {
         
+        var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+        
+        if(db_structure==null){
+            db_structure = window.hWin.HEURIST4;
+        }
+        
+        //clone rectypes - since it can be modified (added parent resource fields)
+        var dbs_Rectypes = window.hWin.HEURIST4.util.cloneJSON( db_structure.rectypes );
+        
+    //-------------------- internal functions    
         
     function __getRecordTypeTree($recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields){
             
-            var rectypes = db_structure.rectypes;
+            var rectypes = dbs_Rectypes; //db_structure.rectypes;
             var $res = {};
             var $children = [];
             
             //add default fields
             if($recursion_depth==0 && 
-                ($fieldtypes.indexOf('header')>=0 || $fieldtypes.indexOf('header_ext')>=0) ) {
+                ($fieldtypes.indexOf('header')>=0 || $fieldtypes.indexOf('header_ext')>=0) ) { //include record header fields
 
                 if($fieldtypes.indexOf('header_ext')>=0){
                     $children.push({key:'rec_ID', type:'integer',
@@ -355,7 +365,27 @@ window.hWin.HEURIST4.dbs = {
                                 
                                                                                                                   
                 if(($mode<5 || $recursion_depth==0)){
+                    //
+                    if($fieldtypes.indexOf('parent_link')>=0 && !rectypes['typedefs'][$recTypeId]['dtFields'][DT_PARENT_ENTITY]){
+                        //find all parent record types that refers to this record type
+                        var $parent_Rts = window.hWin.HEURIST4.dbs.getLinkedRecordTypesReverse($recTypeId, db_structure, true);
+                        
+                        //$dtKey = DT_PARENT_ENTITY;
+                        $rst_fi = rectypes['typedefs']['dtFieldNamesToIndex'];
+                        
+                        //create fake rectype structure field
+                        $ffr = {};
+                        $ffr[$rst_fi['rst_DisplayName']] = 'Parent entity';//'Record Parent ('.$rtStructs['names'][$parent_Rt].')';
+                        $ffr[$rst_fi['rst_PtrFilteredIDs']] = Object.keys($parent_Rts).join(',');
+                        $ffr[$rst_fi['dty_Type']] = 'resource';
+                        $ffr[$rst_fi['rst_DisplayHelpText']] = 'Reverse pointer to parent record';
+                        $ffr[$rst_fi['rst_RequirementType']] = 'optional';
+                              
+                        rectypes['typedefs'][$recTypeId]['dtFields'][DT_PARENT_ENTITY] = $ffr;
+                    }
+
                     $details = rectypes['typedefs'][$recTypeId]['dtFields'];
+
                     
                     var $children_links = [];
                     var $new_pointer_fields = [];
@@ -390,7 +420,7 @@ window.hWin.HEURIST4.dbs = {
                             }
                             */
                         }
-                    }//for
+                    }//for details
                     
                     //add resource and relation at the end of result array
                     $children = $children.concat($children_links);
@@ -450,7 +480,7 @@ window.hWin.HEURIST4.dbs = {
     //
     function __getReverseLinkedRecordTypes($rt_ID){
         
-        var $dbs_rtStructs = db_structure.rectypes;
+        var $dbs_rtStructs = dbs_Rectypes; //db_structure.rectypes;
         //find all reverse links (pointers and relation that point to selected rt_ID)
         var $alldetails = $dbs_rtStructs['typedefs'];
         var $fi_type = $alldetails['dtFieldNamesToIndex']['dty_Type'];
@@ -502,7 +532,7 @@ window.hWin.HEURIST4.dbs = {
     */
     function __getDetailSection($recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId, $pointer_fields){
 
-        var $dbs_rtStructs = db_structure.rectypes;
+        var $dbs_rtStructs = dbs_Rectypes; //db_structure.rectypes;
         var $dbs_lookups   = window.hWin.HEURIST4.detailtypes.lookups;
 
         $res = null;
@@ -701,10 +731,6 @@ window.hWin.HEURIST4.dbs = {
             fieldtypes = fieldtypes.split(',');
         }
         
-        if(db_structure==null){
-            db_structure = window.hWin.HEURIST4;
-        }
-
         var rtypes = db_structure.rectypes['names'];
         var res = [];
         
@@ -812,18 +838,23 @@ window.hWin.HEURIST4.dbs = {
 
     //
     // returns array of record types that points to given record type
+    // rt_id => field id
     //
-    getLinkedRecordTypesReverse: function($rt_ID, db_structure){
+    getLinkedRecordTypesReverse: function($rt_ID, db_structure, parent_child_only){
         
         if(!db_structure){
             db_structure = window.hWin.HEURIST4;
         }
+        
+        if(parent_child_only!==true) parent_child_only = false;
         
         var $dbs_rtStructs = db_structure.rectypes;
         //find all DIREreverse links (pointers and relation that point to selected rt_ID)
         var $alldetails = $dbs_rtStructs['typedefs'];
         var $fi_type = $alldetails['dtFieldNamesToIndex']['dty_Type'];
         var $fi_rectypes = $alldetails['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+        var $fi_req_type = $alldetails['dtFieldNamesToIndex']['rst_RequirementType'];
+        var $fi_parent_child_flag = $alldetails['dtFieldNamesToIndex']['rst_CreateChildIfRecPtr'];
         
         var $arr_rectypes = {};
         
@@ -839,11 +870,15 @@ window.hWin.HEURIST4.dbs = {
                 for (var $dtID in $details) {
                     
                     var $dtValue = $details[$dtID];
-            
-                    if(($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')){
-
+                    
+                    if($dtValue[$fi_req_type]=='forbidden') continue;
+                    
+                    if ((parent_child_only && $dtValue[$fi_type]=='resource' && $dtValue[$fi_parent_child_flag]==1)
+                        ||
+                       (!parent_child_only && ($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')))
+                    {
                             //find constraints
-                            var $constraints = $dtValue[$fi_rectypes];
+                            var $constraints = $dtValue[$fi_rectypes];  //rst_PtrFilteredIDs
                             $constraints = $constraints.split(",");
                             //verify that selected record type is in this constaint
                             if($constraints.length>0 && 
@@ -853,6 +888,8 @@ window.hWin.HEURIST4.dbs = {
                                 $arr_rectypes[$recTypeId] = $dtID;
                             }
                     }
+                    
+                    
                 }
             }
         }

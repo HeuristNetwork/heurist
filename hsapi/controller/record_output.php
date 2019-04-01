@@ -116,9 +116,12 @@
         $response = array('status'=>HEURIST_OK,'data'=>array());
         //$search_params['limit'] = 1;
         //$search_params['needall'] = 0;
-    }else
+    }else{
         $response = recordSearch($system, $search_params);
-
+    }
+        
+    $system->defineConstant('DT_PARENT_ENTITY');    
+        
     if($is_csv){
         output_CSV($system, $response, $params);
     }else{
@@ -313,9 +316,14 @@ function output_CSV($system, $data, $params){
                 
                 if(is_numeric($dt_id) && $dt_id>0){
                     
-                    //get field name from structure
-                    $field_name = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_name];
-                    $field_type = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
+                    if($dt_id==DT_PARENT_ENTITY){
+                        $field_name = 'Parent entity';
+                        $field_type = 'resource';
+                    }else{
+                        //get field name from structure
+                        $field_name = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_name];
+                        $field_type = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
+                    }
                     if($constr_rt_id>0){
                         $rectypename_is_in_fieldname = (strpos(strtolower($field_name), 
                                             strtolower($rtStructs['names'][$constr_rt_id]))!==false);
@@ -530,8 +538,12 @@ function output_CSV($system, $data, $params){
                     }
                     
                 }else{
-                
-                    $dt_type = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_dtype];
+                    
+                    if($dt_id == DT_PARENT_ENTITY){
+                        $dt_type = 'resource';
+                    }else{
+                        $dt_type = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_dtype];    
+                    }
                         
                     $values = @$record['details'][$dt_id];
                     
