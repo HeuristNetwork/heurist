@@ -65,6 +65,7 @@ link predicates
 
 linked_to: pointer field type : query     recordtype
 linkedfrom:
+related: related in any direction
 relatedfrom: relation type id (termid)    recordtype
 related_to:
 links: recordtype
@@ -630,7 +631,7 @@ class HPredicate {
     var $greaterthan = false;
 
     var $allowed = array('title','t','modified','url','notes','type','ids','id','count','cnt',
-            'f','field','linked_to','linkedfrom','related_to','relatedfrom','links','plain',
+            'f','field','linked_to','linkedfrom','related','related_to','relatedfrom','links','plain',
             'addedby','owner','access');
     /*
     notes, n:        record heder notes (scratchpad)
@@ -778,6 +779,10 @@ class HPredicate {
             case 'linkedfrom':
 
                 return $this->predicateLinkedFrom();
+                
+            case 'related':
+
+                return $this->predicateRelated();
 
             case 'related_to':
 
@@ -1129,6 +1134,56 @@ class HPredicate {
         return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
 
+    
+    /**
+    * find records that are source relation for specified records
+    * 
+    * "related:term_id": query for target record
+    * 
+    * $this->field_id - relation type (term id)
+    */
+    function predicateRelated(){
+
+        global $top_query, $params_global;
+        $not_nested = (@$params_global['nested']===false);
+        
+
+        $this->field_type = "link";
+        $p = $this->qlevel;
+        $rl = "rl".$p."x".$this->index_of_predicate;
+
+        if($this->query){
+            $this->query->makeSQL();
+            if($this->query->where_clause && trim($this->query->where_clause)!=""){
+                
+                if($not_nested){
+                    $val = ' = r'.$this->query->level.'.rec_ID AND '.$this->query->where_clause;
+                    $top_query->top_limb->addTable($this->query->from_clause);
+                }else{
+                    $val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE ".$this->query->where_clause.")";
+                }
+            }else{
+                return null;
+            }
+
+        }else{
+            $val = $this->getFieldValue();
+
+            if(!$this->field_list){
+                $val = "=0";
+                //@todo  findAnyField query
+                //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
+            }
+        }
+
+        $where = 
+        (($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
+         ." AND ((r$p.rec_ID=$rl.rl_SourceID AND  $rl.rl_TargetID".$val
+            .") OR (r$p.rec_ID=$rl.rl_TargetID AND  $rl.rl_SourceID".$val.'))';
+
+        return array("from"=>"recLinks ".$rl, "where"=>$where);
+    }
+    
 
     /**
     * find records that are source relation for specified records
