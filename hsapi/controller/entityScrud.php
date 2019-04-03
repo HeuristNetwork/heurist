@@ -98,7 +98,7 @@
     }else{
         
         if( is_bool($res) && !$res ){
-            $response = $system->getError;
+            $response = $system->getError();
         }else{
             $response = array("status"=>HEURIST_OK, "data"=> $res);
         }

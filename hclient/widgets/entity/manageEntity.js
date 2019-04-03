@@ -92,6 +92,8 @@ $.widget( "heurist.manageEntity", {
         edit_title :null,
         edit_need_load_fullrecord: false, //if for edit form we need to load full(all data) record
         
+        edit_addrecordfirst: false, //special behaviour - show editor first
+        
         layout_mode:'short', //short wide  or valid html snippet
     
         // manager - all selection ui (buttons, checkboxes, label with number of sel.records) is hidden
@@ -368,7 +370,7 @@ $.widget( "heurist.manageEntity", {
         //$('.heurist-helper1').css('display',ishelp_on?'block':'none');
 
         
-        if(this.options.isdialog){
+        if(this.options.isdialog && !this.options.edit_addrecordfirst){
             this.popupDialog();
         }
         

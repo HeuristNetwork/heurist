@@ -29,6 +29,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.btn_add_record_loc = this.element.find('#btn_add_record_loc');
         this.btn_add_record_ext = this.element.find('#btn_add_record_ext');
         this.btn_add_record_popup = this.element.find('#btn_add_record_popup'); 
+        this.btn_add_record_any = this.element.find('#btn_add_record_any');
         if(this.options.edit_mode=='none'){
             this.element.find('#div_add_record').hide();
         }else{
@@ -59,6 +60,15 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 .click(function(e) {
                     that._trigger( "onaddext" );
                 }); 
+            
+            /*    
+            this.btn_add_record_any.css({'min-width':'9em','z-index':2})
+                    .button({label: window.hWin.HR("Add any"),icons: {
+                            primary: "ui-icon-plus"
+                    }})
+                .click(function(e) {
+                    that._trigger( "onaddany" );
+                }); */
                 
             /*
             if(this.options.edit_mode=='inline'){

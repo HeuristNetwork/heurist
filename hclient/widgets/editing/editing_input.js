@@ -1753,6 +1753,7 @@ $.widget( "heurist.editing_input", {
                         var popup_options = {
                             isdialog: true,
                             select_mode: 'select_single',
+                            edit_addrecordfirst: true, //show editor atonce
                             select_return_mode:select_return_mode, //ids or recordset(for files)
                             filter_group_selected:null,
                             filter_groups: this.configMode.filter_group,

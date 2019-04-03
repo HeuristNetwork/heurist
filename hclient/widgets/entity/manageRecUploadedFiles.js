@@ -24,7 +24,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     
     _editing_uploadfile:null, //hidden edit form to upload file
     
-    _isAdditionOfLocal:false, //flag to enabel "Save" button on file upload completion
+    _additionMode:'local',// remote, all 
     
     _previousURL:null,
     _requestForMimeType:false,
@@ -41,6 +41,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 640;
         this.options.edit_width = 950;
+        
+        //this.options.edit_addrecordfirst = true; //special behaviour - show editor first
+        
+        if(this.options.edit_addrecordfirst){
+            this.options.select_mode='select_single';
+        }
+        
 
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
@@ -65,10 +72,21 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     //
     _initControls: function() {
         
+        if(this.options.edit_addrecordfirst){
+            this._additionMode='any'; 
+            this.addEditRecord(-1);
+            
+            if(this.options.isdialog){
+                //hide
+                this._as_dialog.dialog("close");   
+            }
+            return;
+        }
+
         if(!this._super()){
             return false;
         }
-
+        
         // init search header
         this.editForm.css('padding-top',20);
         this.searchForm.searchRecUploadedFiles(this.options);
@@ -100,9 +118,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         
         this._on( this.searchForm, {
                 "searchrecuploadedfilesonresult": this.updateRecordList,
-                "searchrecuploadedfilesonaddext": function() { this._isAdditionOfLocal = false; this.addEditRecord(-1); },
-                "searchrecuploadedfilesonaddpopup": function() { this._isAdditionOfLocal = true; this.addEditRecord(-1); },
-                "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister
+                "searchrecuploadedfilesonaddext": function() { this._additionMode='remote'; this.addEditRecord(-1); },
+                "searchrecuploadedfilesonaddpopup": function() {this._additionMode='local'; this.addEditRecord(-1); },
+                "searchrecuploadedfilesonaddany": function() { this._additionMode='any'; this.addEditRecord(-1); },
+                "searchrecuploadedfilesonaddlocal": this._uploadFileAndRegister   //browse, register and exit at once
                 });
         
         return true;
@@ -119,13 +138,13 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         
         var isLocal = true;
         if(recordset!=null){
-            this.options.entity.fields[i_id].dtFields['rst_Display'] = 'readonly';
+            //edit
+            this.options.entity.fields[i_id].dtFields['rst_Display'] = 'readonly'; //path to download
             isLocal = window.hWin.HEURIST4.util.isempty(this._getField('ulf_ExternalFileReference'));
         }else{
             //new record
             this.options.entity.fields[i_id].dtFields['rst_Display'] = 'hidden';
-            isLocal = this._isAdditionOfLocal;
-            //change popup title
+            isLocal = (this._additionMode=='local');
         }
         
         var i_url = this.getEntityFieldIdx('ulf_HeuristURL');
@@ -137,7 +156,22 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var i_mime_ext = this.getEntityFieldIdx('ulf_MimeExt');   // for external
 
         var i_file_upl = this.getEntityFieldIdx('ulf_FileUpload');   
+        var i_descr = this.getEntityFieldIdx('ulf_Description');   // for external
         
+        if(this._additionMode=='any'){ //uncertain addition show both upload and url
+          //only addition
+                this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'hidden'; //show DnD zone
+                this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'visible'; //edit url
+            
+                this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';            
+                this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
+                this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
+                this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden';
+                this.options.entity.fields[i_descr].dtFields['rst_Display'] = 'hidden';
+                this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'visible';
+            
+                this._edit_dialog.dialog('option','height',350);
+        }else
         if(isLocal){ //local
             this.options.entity.fields[i_url].dtFields['rst_DefaultValue'] = window.hWin.HAPI4.baseURL
                                                     + '?db=' + window.hWin.HAPI4.database 
@@ -145,8 +179,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'hidden'; 
             
             this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'hidden';
+            this.options.entity.fields[i_descr].dtFields['rst_Display'] = 'visible';
             
-            if(this._currentEditRecordset){//edit
+            if(this._currentEditRecordset){
+                //edit
                 this.options.entity.fields[i_url].dtFields['rst_Display'] = 'readonly';
                 this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'readonly';
                 this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'readonly';
@@ -154,8 +190,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'hidden';
             }else{
                 //add new file
-                this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'visible';
-                this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';
+                this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'visible'; //show DnD zone
+                this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';            
                 this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden';
@@ -165,15 +201,16 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
             
         }else{ //remote
-            this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';
-            this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'visible';
+            this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';  
+            this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'visible'; //edit url
             this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
 
             this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'visible';
             
-            this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'hidden';
+            this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'hidden'; //DnD
+            this.options.entity.fields[i_descr].dtFields['rst_Display'] = 'visible';
         }
         
         this._super(recordset);
@@ -227,7 +264,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             isLocal = window.hWin.HEURIST4.util.isempty(this._getField('ulf_ExternalFileReference'));
         }else{
             //new record
-            isLocal = this._isAdditionOfLocal;
+            isLocal = (this._additionMode=='local');
             
             if(isLocal){
                 //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
@@ -235,6 +272,41 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 if(ele.length>0){
                     ele.fileupload('option','pasteZone',this._edit_dialog);
                 }
+            }else if(this._additionMode=='any'){
+                //add two button on top
+                //select and register at once + close this dialog and open file selector
+                
+                $('<div><div class="header optional" style="vertical-align: top; display: table-cell;">'
+                +'<label>Upload:</label></div><span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
+                +'<div class="input-cell" style="padding-bottom: 12px;"><div id="btn_upload_file"></div></div></div>'
+                
+                +'<div><div class="header optional" style="vertical-align: top; display: table-cell;">'
+                +'<label>Select:</label></div><span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
+                +'<div class="input-cell" style="padding-bottom: 12px;"><div id="btn_select_file"></div></div></div>')
+                .insertBefore(this._edit_dialog.find('fieldset > div:first'));
+                
+                
+                this._edit_dialog.find('#btn_upload_file').css({'min-width':'9em','z-index':2})
+                    .button({label: window.hWin.HR("Choose file"),icons: {
+                            primary: "ui-icon-upload"
+                    }})
+                    .click(function(e) {
+                        that._uploadFileAndRegister();
+                    }); 
+
+                this._edit_dialog.find('#btn_select_file').css({'min-width':'9em','z-index':2})
+                    .button({label: window.hWin.HR("Choose previously uploaded file"),icons: {
+                            primary: "ui-icon-grid"
+                    }})
+                    .click(function(e) {
+                         that._currentEditID = null;
+                         that.editFormPopup.dialog('close');
+                         if(that.options.edit_addrecordfirst){
+                             that.options.edit_addrecordfirst = false;
+                             that._initControls();
+                         }
+                    }); 
+                
             }
         }
         
@@ -451,7 +523,13 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     addEditRecord: function(recID){
 
         if(recID<0){
-            this.options['edit_title'] = this._isAdditionOfLocal?'Upload file':'Specify external file/URL';
+            if(this._additionMode=='local'){
+                this.options['edit_title'] = 'Upoad file';
+            }else if(this._additionMode=='remote'){
+                this.options['edit_title'] = 'Specify external file/URL';
+            }else{
+                this.options['edit_title'] = 'Upoad file, Select existing or specify URL';
+            }
         }else{
             this.options['edit_title'] = null;
         }
@@ -477,13 +555,25 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 this._editing_uploadfile = new hEditing({entity:this.options.entity, container:container, 
                  onchange:
                 function(){
+                    //registerAtOnce is true, so we get new file id
+                    
                     var ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');
                     var res = ele.editing_input('getValues'); 
                     var ulf_ID = res[0];
 
                     if(ulf_ID>0){
-                        that._currentEditID = null;//to prevent warn about save
-                        that.addEditRecord(ulf_ID, true);
+                        if(that.options.edit_addrecordfirst){
+                            
+                            var fields = that._editing_uploadfile.getValues(false);     
+                            fields['ulf_ID'] = (''+ulf_ID);
+                            that._afterSaveEventHandler(ulf_ID, fields ); //trigger onselect
+                            
+                            //that.editFormPopup.dialog('close');
+                            //that._trigger( "onselect", null, {selection:[ulf_ID]});
+                        }else{
+                            that._currentEditID = null;//to prevent warn about save
+                            that.addEditRecord(ulf_ID, true);
+                        }
                     }
                 }}); //pass container
             
@@ -495,11 +585,12 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     "dtFields":{
                         "dty_Type":"file",
                         "rst_DisplayName":"File upload:",
-                        "rst_FieldConfig":{"entity":"recUploadedFiles","registerAtOnce":1},
-                        "dty_Role":"virtual"
+                        "rst_FieldConfig":{"entity":"recUploadedFiles", "registerAtOnce":1},
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden"
                     }
                 }], null);
-            //this._editing_uploadfile.getContainer().hide(); //this form is hidden
+            this._editing_uploadfile.getContainer().hide(); //this form is hidden
             var ele = this._editing_uploadfile.getFieldByName('ulf_FileUpload');    
             ele.find('.fileupload').click(); //open file select dialog
 
@@ -508,19 +599,30 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     
     _afterSaveEventHandler: function( recID, fieldvalues ){
     
-        if(this._currentEditID>0 || this._isAdditionOfLocal){
-            this._isAdditionOfLocal = false;
-            if(this.options.select_mode=='select_single'){
-                this._selection = new hRecordSet();
-                //{fields:{}, order:[recID], records:[fieldvalues]});
-                this._selection.addRecord(recID, fieldvalues);
-                this._selectAndClose();
-                return;        
-            }else{
-                
-                var domain = (window.hWin.HEURIST4.util.isempty(fieldvalues['ulf_ExternalFileReference']))?'local':'external';
-                //it was insert - select recent and search
-                this.searchForm.searchRecUploadedFiles('searchRecent', domain);
+
+        if(recID>0){
+            
+            if(this.options.edit_addrecordfirst){
+                    
+                this._currentEditID = null; //to avoid warning
+                this.editFormPopup.dialog('close');
+                //this._trigger( "onselect", null, {selection:[this._currentEditID]});
+            }
+            if(this.options.edit_addrecordfirst || this._additionMode=='local'){ //close dialog after save
+            
+                this._additionMode = null; //reset
+                if(this.options.select_mode=='select_single'){
+                    this._selection = new hRecordSet();
+                    //{fields:{}, order:[recID], records:[fieldvalues]});
+                    this._selection.addRecord(recID, fieldvalues);
+                    this._selectAndClose();
+                    return;        
+                }else{
+                    
+                    var domain = (window.hWin.HEURIST4.util.isempty(fieldvalues['ulf_ExternalFileReference']))?'local':'external';
+                    //it was insert - select recent and search
+                    this.searchForm.searchRecUploadedFiles('searchRecent', domain);
+                }
             }
         }
         this._super( recID, fieldvalues );
