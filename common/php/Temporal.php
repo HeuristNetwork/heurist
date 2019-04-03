@@ -117,10 +117,26 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 //
 //
 //
-function validateAndConvertToISO($value){
+function validateAndConvertToISO($value, $today_date=null){
           if (strpos($value,"|")!==false) {// temporal encoded date
                 return 'Temporal';
           }else{
+                if($today_date!=null){
+                    $t2 = new DateTime($today_date);
+                    
+                    $sdate = strtolower(trim($value));
+                    if($sdate=='today'){
+                        $value = $t2->format('Y-m-d');
+                    }else if($sdate=='now'){
+                        $value = $t2->format('Y-m-d H:i:s');
+                    }else if($sdate=='yesterday'){
+                        $t2->modify('-1 day');
+                        $value = $t2->format('Y-m-d');//date('Y-m-d',strtotime("-1 days"));
+                    }else if($sdate=='tomorrow'){
+                        $t2->modify('+1 day');
+                        $value = $t2->format('Y-m-d');//date('Y-m-d',strtotime("+1 days"));
+                    }
+                }
                 //$date = parseDateTime($value);
                 //return @$date['year'].'-'.@$date['month'].'-'.@$date['day'];
                 return removeLeadingYearZeroes($value, false, true);
