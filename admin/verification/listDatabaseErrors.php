@@ -85,6 +85,18 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
                 }
                 return ids;
             }
+            
+            function mark_all_by_name(ele,  sname){
+                var cbs = document.getElementsByName(sname);
+                if (!cbs  ||  ! cbs instanceof Array)
+                    return false;
+                
+                var is_checked = $(ele).is(':checked');
+                
+                for (var i = 0; i < cbs.length; i++) {
+                    cbs[i].checked = is_checked;
+                }
+            }
 
             function open_selected_by_name(sname) {
                 var ids = get_selected_by_name();
@@ -371,9 +383,9 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
             ?>
                 <br/><p><br/></p><h3>Warning: Wrong field default values for record type structures</h3><br/>&nbsp;<br/>
 
-                The following field's default values in record types structures have inconsistent data (unknown codes for terms and). This is nothing to be concerned about, unless it reoccurs, in which case please advise Heurist developers.
-                <br/><br/>
-                You can also look at therecord type structureby clicking on the name in the list below<br />&nbsp;<br/>
+The following fields' default values in record type structures have inconsistent data (unknown codes for terms). This is nothing to be concerned about, unless it reoccurs, in which case please advise Heurist developers. 
+<br/><br/>
+You can edit the record type structure by clicking on the name in the list below. Simply opening the problem field and hitting save will in many cases resolve the problem; you may also wish to choose a default value from the dropdown of allowable values.<br />&nbsp;<br/>
                 
                 <?php 
                 foreach ($rtysWithInvalidRectypeConstraint as $row) {
@@ -454,6 +466,11 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
                     </div>
                 </div>
                 <table>
+                    <tr>
+                        <td colspan="3">
+                            <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB');}">Mark all</label>
+                        </td>
+                    </tr>
                     <?php
                     foreach ($bibs as $row) {
                         ?>
@@ -800,6 +817,11 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                 </div>
 
                 <table>
+                    <tr>
+                        <td colspan="3">
+                            <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB6');}">Mark all</label>
+                        </td>
+                    </tr>
                 <?php
 
                 
@@ -835,7 +857,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             // ----- Fields of type "Date" with  wrong values -------------------
 
             //find all fields with faulty dates
-            $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_Title
+            $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_Title, a.rec_Added
                 from recDetails, defDetailTypes, Records a
                 where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
             and (dty_Type = "date") and (dtl_Value is not null)');
@@ -852,7 +874,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
 
                 if(!($row['dtl_Value']==null || $row['dtl_Value']=='')){ //empty dates are not allowed
                     //parse and validate value
-                    $row['new_value'] = validateAndConvertToISO($row['dtl_Value']);
+                    $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added']);
                     if($row['new_value']=='Temporal'){
                         continue;
                     }else if($row['new_value']==trim($row['dtl_Value'])){
@@ -900,12 +922,17 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                     </span>
                     <div>To fix faulty date values as suggested, mark desired records and please click here:
                         <button
-onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&recids='+ids,'_self')}}">
+onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&recids='+ids,'_self')}else{ window.hWin.HEURIST4.msg.showMsgDlg('Mark at least one record to correct'); }}">
                             Correct</button>
                     </div>
                 </div>
 
                 <table>
+                    <tr>
+                        <td colspan="4">
+                            <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB5');}">Mark all</label>
+                        </td>
+                    </tr>
                 <?php
                 foreach ($bibs as $row) {
                     ?>
@@ -921,7 +948,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
                             </a></td>
                         <td><?= htmlspecialchars(substr($row['rec_Title'],0,50)) ?></td>
                         <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
-                        <td><?= $row['new_value']?('=>&nbsp;&nbsp;'.$row['new_value']):'<no auto fix>' ?></td>
+                        <td><?= ($row['new_value']?('=>&nbsp;&nbsp;'.$row['new_value']):'<no auto fix>') ?></td>
                     </tr>
                     <?php
                 }
@@ -996,6 +1023,12 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
                 </div>
 
                 <table>
+                    <tr>
+                        <td colspan="3">
+                            <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB1');}">Mark all</label>
+                        </td>
+                    </tr>
+                
                 <?php
                 foreach ($bibs as $row) {
                     ?>
@@ -1136,6 +1169,13 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 </div>
 
                 <table>
+                
+                    <tr>
+                        <td colspan="3">
+                            <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB2');}">Mark all</label>
+                        </td>
+                    </tr>
+                
                     <?php
                     $rec_id = null;
                     foreach ($bibs as $row) {
@@ -1214,6 +1254,12 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 </div>
 
                 <table>
+                    <tr>
+                        <td colspan="4">
+                            <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB3');}">Mark all</label>
+                        </td>
+                    </tr>
+                
                     <?php
                     $rec_id = null;
                     foreach ($bibs as $row) {
@@ -1298,6 +1344,14 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;
                         <a target=_new href='#' id=selected_link4 onClick="return open_selected_by_name('recCB4');">(show selected as search) <img src='../../common/images/external_link_16x16.gif'></a>
                     </span>
                     <table>
+                    
+                        <tr>
+                            <td colspan="6">
+                                <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB4');}">Mark all</label>
+                            </td>
+                        </tr>
+                    
+                    
                         <?php
                         $rec_id = null;
                         foreach ($bibs as $row) {
