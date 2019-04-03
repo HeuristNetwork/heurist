@@ -62,8 +62,9 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.1.1"; // sets current program version number, determined by Heurist development lead
+$version = "5.1.2"; // sets current program version number, determined by Heurist development lead
 
+// h5.1.2 3 Apr 2019 case sensitive/exact multilingual search, DB properties file folder manager, multi file upload duplicates directory structure, import dot-separated hierarchical terms, CSV data entry template generation,  auto image display from linked multimedia, HML import first draft, Restful API WIP 
 // h5.1.1 26 Feb 2019 Render simple html & hyperlinsk in record titles, better handling of map zooms, add Google analytics detail, imprt child records, better error reporting, drag and drop reordering of values in edit form, instant preview of search in facet search builder, clear marker of non-public records, import multimedia with dirctory structure, output Gephi node types, 
 // h5.0.5 Feb 2019 Drag/drop & paste images, expose semantic reference fields, expose parent record fields in facet search tree, improved startup help, improved map view info popup, clustering and zooming, KML and map tile handling, mapdocument and views parameters for embedded searches, lots of small fixes and cosmetics
 // h5.0.4 Jan 2019 Minor fixes, CSV output, dashboard creation, icon directories etc.
