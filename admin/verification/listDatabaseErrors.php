@@ -1328,7 +1328,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;
                                 ?>
 
                                 <td><?= $row['dty_ID'] ?></td>
-                                <td><?= $row['dty_Name'] ?></td>
+                                <td width="100px" style="max-width:100px" class="truncate"><?= $row['dty_Name'] ?></td>
                                 <td><?= htmlspecialchars($row['dtl_Value']) ?></td>
                             </tr>
                             <?php
