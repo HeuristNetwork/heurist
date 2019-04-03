@@ -1049,7 +1049,10 @@ $query = 'CREATE TABLE sysDashboard ('
         
         $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
         if($keep_autocommit===true || $keep_autocommit==1){
-                $mysqli->autocommit(FALSE);  
+                $mysqli->autocommit(FALSE);
+                $keep_autocommit = true;  
+        }else{
+                $keep_autocommit = false;  
         } 
         if (strnatcmp(phpversion(), '5.5') >= 0) {
             $mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
