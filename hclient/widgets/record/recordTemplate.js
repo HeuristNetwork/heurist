@@ -25,7 +25,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
         height: 520,
         width:  800,
         modal:  true,
-        title:  'Create tab separated template files',
+        title:  'Create comma separated template files',
         currentOwner: 0,
         currentAccess: null,
         currentAccessGroups: null,
@@ -133,7 +133,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 'format': 'csv',
                 'prefs':{
                 'fields': selectedFields,
-                'csv_delimiter':  '\t',
+                'csv_delimiter':  ',',//'\t',
                 'csv_enclosure':  '"',
                 'csv_mvsep':'|',
                 'csv_linebreak':'nix', //not used at tne moment
@@ -142,7 +142,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 'include_term_ids': 0,
                 'include_term_codes': 0,
                 'include_term_hierarchy': 0,
-                'include_resource_titles': 1
+                'include_resource_titles': 0
                 }};
                 
             
@@ -188,8 +188,6 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
     
     _initControls: function(){
         
-console.log('>>'+this.options.recordType);
-        
         this._super();
         
         $('#sel_record_type').text( window.hWin.HEURIST4.rectypes.names[this.options.recordType] );
@@ -211,7 +209,7 @@ console.log('>>'+this.options.recordType);
 
             
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['header_ext','all'] );
+            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['ID','url','tags','all'] );
             
             treedata[0].expanded = true; //first expanded
             
@@ -248,7 +246,7 @@ console.log('>>'+this.options.recordType);
                     var rectypes = node.data.rt_ids;
                     
                     var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
-                                        rectypes, ['header_ext','all'], parentcode );
+                                        rectypes, ['ID','url','tags','all'], parentcode );
                     if(res.length>1){
                         data.result = res;
                     }else{
