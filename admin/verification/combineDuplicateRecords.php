@@ -565,6 +565,8 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master ) {
             $detail_val = mysql__select_value($mysqli,
                     'select ulf_OrigFileName from recUploadedFiles where ulf_ID ='.$rg['dtl_UploadedFileID']);
         }
+        
+        if($detail_val==null) $detail_val = '';
        
         $input = '<input type="'.($is_type_repeatable? "checkbox":"radio").
         '" name="'.($is_type_repeatable? ($is_master?"keep":"add").$detail_type.'[]':"update".$detail_type).
