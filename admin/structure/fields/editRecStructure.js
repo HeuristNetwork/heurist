@@ -258,8 +258,12 @@ function EditRecStructure() {
                         +' rst_ID="'+oRecord.getData("rst_ID")+'"/>';
                         
                         $(elLiner).css({cursor:'pointer'})
-                            .attr('rst_ID', oRecord.getData("rst_ID"))
-                            .click(function(event){editStructure.onAddFieldAtIndex(event, true);});
+                            .attr('rst_ID', oRecord.getData("rst_ID"));
+                        $(elLiner).off('click');
+                        $(elLiner).click(function(event){
+                                    editStructure.onAddFieldAtIndex(event, true);
+                                    window.hWin.HEURIST4.util.stopEvent(event);
+                            });
                         //elLiner.innerHTML = oData;
                         //elLiner.title = oRecord.getData("conceptCode");
                     }
@@ -291,12 +295,14 @@ function EditRecStructure() {
                         
                         $(elLiner).css({cursor:'pointer'})
                             .attr('rst_ID', oRecord.getData("rst_ID"))
-                            .click(function(event){
+                        $(elLiner).off('click');
+                        $(elLiner).click(function(event){
                                 
                                     _isStreamLinedAddition = $('#cbStreamLinedAddition').is(':checked');
                                 
                                     if(!_isStreamLinedAddition){
                                         editStructure.onAddFieldAtIndex(event, false);    
+                                        window.hWin.HEURIST4.util.stopEvent(event);
                                     }else{
                                         var oArgs = {event:'MouseEvent', target: elLiner};
                                         onCellClickEventHandler( oArgs ); 
@@ -934,7 +940,7 @@ function EditRecStructure() {
 
                                 //Save and cancel (buttons)
                                 '<input style="margin-right:10px;padding-left:20px;padding-right:20px;" id="btnSave_'+rst_ID+'" type="button" value="Save"'+
-                                'title="Save any changes to the field settings. You may also simply click on another field to save this one and open the other" onclick="doExpliciteCollapse(event);"  style="margin:0 2px;"/>'+
+                                'title="Save any changes to the field settings. You may also simply click on another field to save this one and open the other" onclick="if(checkDisplayName(event)){doExpliciteCollapse(event);}"  style="margin:0 2px;"/>'+
                                 '<input id="btnCancel_'+rst_ID+'" type="button" value="Cancel" '+
                                 'title="Cancel any changes made to the field settings for this field (will not cancel previously saved settings)" onclick="doExpliciteCollapse(event);" style="margin:0 2px;"/>'+
                                     
@@ -1421,6 +1427,9 @@ function EditRecStructure() {
                          }
                     }else if(fieldnames[k]=="rst_CreateChildIfRecPtr"){
                             edt.value = $(edt).is(':checked')?1:0;
+                            
+                    }else if(fieldnames[k]=="rst_DisplayName" && edt.value == ''){
+//console.log(__rst_ID+'  empty name');                        
                     }
                     
                     //values && k<values.length && 
@@ -1709,11 +1718,16 @@ function EditRecStructure() {
                 }else if(rst_type === "resource"){
                     //show disable target pnr rectype
 
-                }else if(rst_type === "separator"  &&
-                    !(fieldnames[k] === "rst_DisplayName" //|| fieldnames[k] === "rst_DisplayWidth" 
+                }else if(rst_type === "separator" ) {
+                     if(!(fieldnames[k] === "rst_DisplayName" //|| fieldnames[k] === "rst_DisplayWidth" 
                             || fieldnames[k] === "rst_DisplayHelpText" )){ //|| fieldnames[k] === "rst_RequirementType"
                         //hide all but name  and help
                         edt.parentNode.parentNode.style.display = "none";
+                     }else
+                     if(fieldnames[k] === "rst_DisplayName" && edt.value.indexOf('edit the name')==edt.value.length-13){
+                            edt.value = '';  
+                     }
+                            
                 }else if(rst_type === "fieldsetmarker" && 
                         !(fieldnames[k] === "rst_DisplayName" || fieldnames[k] === "rst_Status")){ //fieldnames[k] === "rst_DisplayWidth" || 
                             //hide all, required - once
@@ -2017,10 +2031,12 @@ function EditRecStructure() {
                     }else if (dt_type === "boolean") {
                         def_width = 4; break;
                     }
+                    
+                var isSingleSep = (arrDty_ID.length==1 && dt_type === 'separator');
 
                 var arr_target = new Array();
                 arr_target[rst.rst_DisplayName] = arrs[fi.dty_Name];
-                arr_target[rst.rst_DisplayHelpText] = arrs[fi.dty_HelpText];
+                arr_target[rst.rst_DisplayHelpText] = (isSingleSep)?'':arrs[fi.dty_HelpText];
                 arr_target[rst.rst_DisplayExtendedDescription] = arrs[fi.dty_ExtendedDescription];
                 arr_target[rst.rst_DefaultValue ] = "";
                 arr_target[rst.rst_RequirementType] = defValues.rst_RequirementType;
@@ -2050,7 +2066,7 @@ function EditRecStructure() {
                     expandColumn:dty_ID,
                     rst_DisplayOrder: order,
                     dty_Name: arrs[fi.dty_Name],
-                    rst_DisplayName: arrs[fi.dty_Name],
+                    rst_DisplayName: arrs[fi.dty_Name], //isSingleSep?'':
                     dty_Type: arrs[fi.dty_Type],
                     rst_RequirementType: defValues.rst_RequirementType,
                     rst_DisplayWidth: def_width,
@@ -2171,7 +2187,7 @@ function EditRecStructure() {
                 var elLiner = _myDataTable.getTdLinerEl({record:oRecord, column:_myDataTable.getColumn('expandColumn')});
                 //$.find("tr.yui-dt-last > td.yui-dt-col-rst_DisplayName")[0]
                 var oArgs = {event:'MouseEvent', target: elLiner};
-                onCellClickEventHandler(oArgs);
+                onCellClickEventHandler(oArgs);  //expand
             },50);
         }
     }
@@ -3149,6 +3165,19 @@ function doExpliciteCollapse(event){
     var btn = event.target;
     var rst_ID = btn.id.substr(btn.id.indexOf("_")+1);
     editStructure.doExpliciteCollapse(rst_ID, btn.id.indexOf("btnSave")===0 );
+}
+function checkDisplayName(event){
+    YAHOO.util.Event.stopEvent(event);
+    var btn = event.target;
+    var rst_ID = btn.id.substr(btn.id.indexOf("_")+1);
+    if(window.hWin.HEURIST4.util.isempty( $('#ed'+rst_ID+'_rst_DisplayName').val().trim())){
+        
+        window.hWin.HEURIST4.msg.showMsgFlash('Please enter a Prompt (display name)');
+        setTimeout(function(){$('#ed'+rst_ID+'_rst_DisplayName').focus();},1100);
+        return false;
+    }else{
+        return true;
+    }
 }
 
 /**
