@@ -314,6 +314,8 @@ function output_CSV($system, $data, $params){
                     list($dt_id, $constr_rt_id) = explode(':',$dt_id);
                 }
                 
+                $field_name_title = '';
+                
                 if(is_numeric($dt_id) && $dt_id>0){
                     
                     if($dt_id==DT_PARENT_ENTITY){
@@ -332,6 +334,8 @@ function output_CSV($system, $data, $params){
                                                 .'RecordTitle';
                         $field_name = $field_name.($rectypename_is_in_fieldname
                                             ?'':' ('.$rtStructs['names'][$constr_rt_id].')').' H-ID';
+                    }else{
+                        $field_name_title = $field_name.' RecordTitle';
                     }
                     if($field_type=='relmarker'){
                         $relmarker_details[$rt][$dt_id] = $constr_rt_id; 
@@ -370,6 +374,7 @@ function output_CSV($system, $data, $params){
                     array_push($headers[$rt], $field_name);                
                 }
                 
+                //add title for resource fields
                 if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
                     array_push($headers[$rt], $field_name_title);            
                 }

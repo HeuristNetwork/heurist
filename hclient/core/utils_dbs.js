@@ -312,34 +312,43 @@ window.hWin.HEURIST4.dbs = {
             var rectypes = dbs_Rectypes; //db_structure.rectypes;
             var $res = {};
             var $children = [];
+            var headerFields = [];
             
             //add default fields
-            if($recursion_depth==0 && 
-                ($fieldtypes.indexOf('header')>=0 || $fieldtypes.indexOf('header_ext')>=0) ) { //include record header fields
-
-                if($fieldtypes.indexOf('header_ext')>=0){
+            if($recursion_depth==0 && $fieldtypes.length>0){    
+                 //include record header fields
+                var all_header_fields = $fieldtypes.indexOf('header_ext')>=0;
+                if($fieldtypes.indexOf('header')>=0){
+                    $fieldtypes.push('title');
+                    $fieldtypes.push('modified');
+                }                 
+                
+                if(all_header_fields || $fieldtypes.indexOf('ID')>=0 || $fieldtypes.indexOf('rec_ID')>=0){
                     $children.push({key:'rec_ID', type:'integer',
                         title:"ID  <span style='font-size:0.7em'>(integer)</span>", 
                         code:($recTypeId+':id'), name:'Record ID'});
                 }
 
-                
-                $children.push({key:'rec_Title', type:'freetext',
-                    title:"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 
-                    code:($recTypeId+':title'), name:'Record title'});
-
-                $children.push({key:'rec_Modified', type:'date',
-                    title:"Modified  <span style='font-size:0.7em'>(Date)</span>", 
-                    code:($recTypeId+':modified'), name:'Record modified'});
+                if(all_header_fields || $fieldtypes.indexOf('title')>=0 || $fieldtypes.indexOf('rec_Title')>=0){
+                    $children.push({key:'rec_Title', type:'freetext',
+                        title:"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 
+                        code:($recTypeId+':title'), name:'Record title'});
+                }
+                if(all_header_fields || $fieldtypes.indexOf('modified')>=0 || $fieldtypes.indexOf('rec_Modified')>=0){
+                    $children.push({key:'rec_Modified', type:'date',
+                        title:"Modified  <span style='font-size:0.7em'>(Date)</span>", 
+                        code:($recTypeId+':modified'), name:'Record modified'});
+                }
                     
                 //array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL', 'code'=>$recTypeId.":url"));
                 //array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
                 
-                if($fieldtypes.indexOf('header_ext')>=0){
+                if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_URL')>=0){
                     $children.push({key:'rec_URL', type:'freetext',
                         title:"URL  <span style='font-size:0.7em'>(freetext)</span>", 
                         code:($recTypeId+':url'), name:'Record URL'});
-                        
+                }
+                if(all_header_fields || $fieldtypes.indexOf('tags')>=0 || $fieldtypes.indexOf('rec_Tags')>=0){
                     $children.push({key:'rec_Tags', type:'freetext',
                         title:"Tags  <span style='font-size:0.7em'>(freetext)</span>", 
                         code:($recTypeId+':tags'), name:'Record Tags'});
