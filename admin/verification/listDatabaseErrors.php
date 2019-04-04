@@ -99,7 +99,7 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
             }
 
             function open_selected_by_name(sname) {
-                var ids = get_selected_by_name();
+                var ids = get_selected_by_name( sname );
                 //var link = document.getElementById('selected_link');
                 //if (link) return false;
                 if(ids){
