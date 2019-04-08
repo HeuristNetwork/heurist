@@ -127,21 +127,43 @@ function hImportRecords(_max_upload_size) {
                                     
                                     if(response.status == window.hWin.ResponseStatus.OK){
                                         //render list of rectypes to be imported
+                                        var isAllRecognized = true;
                                         var rectypes = response.data;
                                         var s = '';
+                                        var recCount = 0;
                                         for(var rtyID in rectypes){
                                             var rectype = rectypes[rtyID];
-                                            if(!(rectype['target_RecTypeID']>0)){
-                                                s = s + '<tr><td>'
+                                            s = s + '<tr><td>'
                                                     +rectype['code']+'</td><td>'
                                                     +rectype['count']+'</td><td>'
                                                     //+rectype['target_RecTypeID']+'</td><td>'
-                                                    +rectype['name']+'</td></tr>';
-                                            }
+                                                    +rectype['name']+'</td><td>'
+                                                    +(rectype['target_RecTypeID']>0?rectype['target_RecTypeID']:'')+'</td></tr>';
+                                            isAllRecognized = isAllRecognized && (rectype['target_RecTypeID']>0); 
+                                            recCount = recCount + rectype['count'];
                                         }
+
+                                        $('#div_RectypeToBeImported').html('<table><tr>'
+                                                +'<td>Code</td><td>Rec count</td><td>Name</td><td>ID in this db</td></tr>'
+                                                +s+'</table>');
+                                        _showStep(1);
+                                        
+                                        if(isAllRecognized){
+                                            $('#btn_ImportRt').button('option','label','Synch listed entity types');
+                                            $('.st1_A').hide();
+                                            $('#st1_B').show();
+                                            $('#st2_B').hide();
+                                            $("#divStep2").show();
+                                        }else{
+                                            $('#btn_ImportRt').button('option','label','Download listed entity types');
+                                            $('.st1_A').show();
+                                            $('#st1_B').hide();
+                                            $('#st2_A').show();
+                                        }
+
+                                        $('#spanRecCount').text(recCount);
+                                        
                                         if(s!=''){
-                                            $('#div_RectypeToBeImported').html('<table>'+s+'</table>');
-                                            _showStep(1);
                                         }else{
                                             //all record types are already in target database
                                             //goto import records step
@@ -214,19 +236,30 @@ function hImportRecords(_max_upload_size) {
                 session: session_id,
                 id: window.hWin.HEURIST4.util.random()
             };
+            
+//var _time_debug = new Date().getTime() / 1000;            
                    
             window.hWin.HAPI4.doImportAction(request, function( response ){
                     
+//console.log('inport defs '+(new Date().getTime() / 1000 - _time_debug));
+//_time_debug = new Date().getTime() / 1000;
+
                     if(response.status == window.hWin.ResponseStatus.OK){
                         //goto import records step
                         _hideProgress(2);
                         //update local definitions
-                        if(response.data.data.rectypes) window.hWin.HEURIST4.rectypes = response.data.data.rectypes;
-                        if(response.data.data.detailtypes) window.hWin.HEURIST4.detailtypes = response.data.data.detailtypes;
-                        if(response.data.data.terms) window.hWin.HEURIST4.terms = response.data.data.terms;
-                        //show report
-                        window.hWin.HEURIST4.msg.showMsgDlg('<div style="font:small"><table>'
-                            +response.data.report.rectypes+'</table></div>',null,'Result of import definitions');
+                        if(response.data.data){
+                            if(response.data.data.rectypes) window.hWin.HEURIST4.rectypes = response.data.data.rectypes;
+                            if(response.data.data.detailtypes) window.hWin.HEURIST4.detailtypes = response.data.data.detailtypes;
+                            if(response.data.data.terms) window.hWin.HEURIST4.terms = response.data.data.terms;
+                            //show report
+                            if(response.data.report){
+                                window.hWin.HEURIST4.msg.showMsgDlg('<div style="font:small"><table>'
+                                    +response.data.report.rectypes+'</table></div>',null,'Result of import definitions');
+                            }
+                        }
+                        //refresh database definitions
+                        window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document);
                     }else{
                         _hideProgress(1);
                         window.hWin.HEURIST4.msg.showMsgErr(response);

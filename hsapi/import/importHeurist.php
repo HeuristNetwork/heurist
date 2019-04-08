@@ -278,6 +278,8 @@ public static function importDefintions($filename, $session_id){
         ini_set('max_execution_time', 0);
         $importDef = new DbsImport( self::$system );
 
+//$time_debug = microtime(true);        
+        
         if($importDef->doPrepare(  array(
                     'session_id'=>$session_id,
                     'defType'=>'rectype', 
@@ -287,6 +289,9 @@ public static function importDefintions($filename, $session_id){
             $res = $importDef->doImport();
         }
 
+//if(_DBG) 
+//error_log('prepare and import '.(microtime(true)-$time_debug));        
+//$time_debug = microtime(true);        
         
         if(!$res){
             /*$err = self::$system->getError();
@@ -294,8 +299,11 @@ public static function importDefintions($filename, $session_id){
                 self::$system->error_exit(null);  //produce json output and exit script
             }*/
         }else{
-            $res = $importDef->getReport();
+            //need to call refresh clinet side defintions
+            $res = 'ok'; //$importDef->getReport(false);
         }
+
+//error_log('report '.(microtime(true)-$time_debug));        
         
         return $res;
     }

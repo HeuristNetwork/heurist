@@ -98,14 +98,15 @@ $file_max_size = get_php_bytes('upload_max_filesize');
         </div>
 
         <div id="divStep1" style="display:none">
-            <p>The following entity (record) types in this file do not yet exist in the database into which you are importing data:</p>
+           <p class="st1_A">The following entity (record) types in this file do not yet exist in the database into which you are importing data:</p>
+           <p id="st1_B" style="display:none;">All entity types are recognised. However it is not guaranteed that they are identical. Press "Sync" button to make sure that all fields and terms are the same in source and destination databases. If you are sure that structure is valid you may skip sync step and proceed to record import.</p>
            <div id="div_RectypeToBeImported">
            </div>     
            
-           <p>
+           <p class="st1_A">
 The source database MUST be registered with the Heurist Master Index BEFORE the data is exported. If it has not been registered, please close this dialogue, register the source database (only the owner or an administrator can do this), re-export the data and then run this function on the new file.
            </p>
-           <p>
+           <p class="st1_A">
 If the download of listed entity types fails to clear this message, please click on Help > Bug report and let us know. We will get back to you within 24 hours and help you import your data.
            </p>
            <br><br>
@@ -113,8 +114,9 @@ If the download of listed entity types fails to clear this message, please click
         </div>
         
         <div id="divStep2" style="display:none">
-
-<p>All entity types recognised. Importing <span id="spanRecCount"></span> items as new records.</p>
+<br>
+<p id="st2_B" style="display:none;">All entity types are recognised and synched.</p>
+<p>Importing <span id="spanRecCount"></span> items as new records.</p>
 <p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please contact the Heurist team for assistance (support at heuristnetwork dot org or use the bug report function)</p>
            <br><br>
            <button id="btn_ImportRecords">Import Records</button>

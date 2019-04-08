@@ -102,6 +102,7 @@ require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 set_time_limit(0);
     
 $response = null;
+$need_compress = false;
 
 $system = new System();
 
@@ -210,6 +211,7 @@ if(!$system->init(@$_REQUEST['db'])){
         }else if($action=='import_definitions'){
             
             $res = ImportHeurist::importDefintions(@$_REQUEST['filename'], @$_REQUEST['session']);
+            $need_compress = true;
             
         }else if($action=='import_records'){
             
@@ -252,8 +254,20 @@ if(@$_REQUEST['output']=='csv'){
     }
     
                 
-}else{
+}
 
+else if($need_compress){ //importDefintions returns complete set of new defintions - need to compress
+    
+    ob_start(); 
+    echo json_encode($response);
+    $output = gzencode(ob_get_contents(),6); 
+    ob_end_clean(); 
+    header('Content-Encoding: gzip');
+    header('Content-type: application/json;charset=UTF-8');
+    echo $output; 
+    unset($output);      
+}else{
+    
     header('Content-type: application/json');
     print json_encode($response);
 }

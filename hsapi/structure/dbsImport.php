@@ -1,6 +1,6 @@
 <?php
 /**
-* dbsImport.php - import definition from other database
+* dbsImport.php - import definitions from other database
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -31,8 +31,9 @@ class DbsImport {
 
     private $system = null;
 
-    private $imp_recordtypes;
-    private $rectypes_correspondence;
+    // definition to be imported
+    private $imp_recordtypes; //ids in source database
+    private $rectypes_correspondence; //source->target id
     
     private $imp_fieldtypes;
     private $fields_correspondence;
@@ -78,6 +79,7 @@ class DbsImport {
 // 1. get database url
 // 2. get definitions from remote database
 // 3. Find what defintions will be imported
+//        for rectypes perfrom deep check for field structure and compare terms
 
 // 4. With list of all record types, build a list of all the base field types:
 // 5. Perform database action - add rectypes, structure, fields and terms into our database
@@ -89,22 +91,25 @@ class DbsImport {
     * 
     * array(
         defType - rectype,detailtype,term
-
-        conceptCode - unique identifier (optional if definitionID is set)
-        definitionID  - id in source database or arrayo of ids
         databaseID - database where to search definition if not defined take db from conceptCode
+        conceptCode - unique identifier (optional if definitionID is set)
+        
+        definitionID  - id in source database or array of ids
         
       )
     * @return mixed
     */
     public function doPrepare( $data ){
         
-        $defType = $data['defType']; //rt|rectype,field|dt|detailtype,term
+$time_debug = microtime(true);
+$time_debug2 = $time_debug;
+        
+        $entityTypeToBeImported = $data['defType']; //rt|rectype,field|dt|detailtype,term
         
         $allowed_types = array('rectype','detailtype','term');
         
-        if(!in_array($defType,$allowed_types)){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "No allowed type to import");
+        if(!in_array($entityTypeToBeImported, $allowed_types)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, $entityTypeToBeImported." is not allowed type to be import");
             return false;
         }
         
@@ -155,22 +160,29 @@ class DbsImport {
         // 1. get database url by database id
         $database_url = $this->_getDatabaseURL($db_reg_id);
 
+if(_DBG) error_log('get db url '.(microtime(true)-$time_debug));        
+$time_debug = microtime(true);        
+        
         if(!$database_url){
             return false; //see $system->getError
         }        
         
         // 2. get definitions from remote database
-        $this->source_defs  = $this->_getDatabaseDefinitions($database_url, $db_reg_id, ($defType=='term'));
+        $this->source_defs  = $this->_getDatabaseDefinitions($database_url, $db_reg_id, ($entityTypeToBeImported=='term'));
         if (!$this->source_defs) {
             return false; //see $system->getError
         }
 
+if(_DBG) error_log('get src defs '.(microtime(true)-$time_debug));        
+$time_debug = microtime(true);        
+        
+        
         //find source id by conceptcodes or verify local_ids     
         $def_ids = array();
         $wrong_id = 0;
 
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
-        if($defType=='term'){
+        if($entityTypeToBeImported=='term'){
             if(count($local_ids)>0){
                 foreach($local_ids as $local_id){
                     $rt = $this->sourceTerms->getTerm($local_id);        
@@ -187,7 +199,7 @@ class DbsImport {
         }else{
             if(count($local_ids)>0){
                 foreach($local_ids as $local_id){
-                    if($this->_checkLocalCode($defType, $this->source_defs, $local_id)>0){
+                    if($this->_checkLocalCode($entityTypeToBeImported, $this->source_defs, $local_id)>0){
                         $def_ids[] = $local_id;
                     }else{
                         $wrong_id = $local_id;
@@ -196,13 +208,14 @@ class DbsImport {
                 }
                 
             }else{
-                $def_ids[] = $this->_getLocalCode($defType, $this->source_defs, $cCode); //get local id in source db
+                //get local id in source db by concept code
+                $def_ids[] = $this->_getLocalCode($entityTypeToBeImported, $this->source_defs, $cCode); 
             }
         }
         
         if (count($def_ids)==0 || $wrong_id>0) { //definition not found in source database
             $smsg = ($wrong_id>0) ?'id#'.$wrong_id :'concept code '.$cCode;
-            $this->system->addError(HEURIST_ERROR, 'Unable to get '.$defType. ' definition with '.$smsg.' in database #'.$db_reg_id);
+            $this->system->addError(HEURIST_ERROR, 'Unable to get '.$entityTypeToBeImported. ' definition with '.$smsg.' in database #'.$db_reg_id);
             return false; //see $system->getError
         }
         
@@ -220,7 +233,7 @@ class DbsImport {
         
         //target(local) definitions
         $this->target_defs = array();
-        if($defType!='term'){
+        if($entityTypeToBeImported!='term'){
             $this->target_defs['rectypes'] = dbs_GetRectypeStructures($this->system, null, 2);
             $this->target_defs['detailtypes'] = dbs_GetDetailTypes($this->system, null, 2);
         }
@@ -230,7 +243,7 @@ class DbsImport {
 
     
         // 3. Find what defintions will be imported
-        if($defType=='term'){
+        if($entityTypeToBeImported=='term'){
             
             foreach($def_ids as $def_id){
                 $this->_getTopMostVocabulary($def_id, 'enum');
@@ -240,26 +253,26 @@ class DbsImport {
             
         }else{
             
-            if($defType=='rectype'){
+            if($entityTypeToBeImported=='rectype'){
                 //find record types
                 foreach($def_ids as $def_id){
                     $this->_findDependentRecordTypes($def_id, null, 0);
                 }
                 
-                if(count($this->imp_recordtypes)==0){
-                    $this->system->addError(HEURIST_NOT_FOUND, 'No one record type to be imported found');
+                if(count($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0 && count($this->imp_terms)==0){
+                    $this->system->addError(HEURIST_NOT_FOUND, 'No one entity to be imported found');
                     return false;
                 }
         
                 
-            } else if($defType=='detailtype'){
+            } else if($entityTypeToBeImported=='detailtype'){
                 
                 foreach($def_ids as $def_id){
                     $this->_findDependentRecordTypesByFieldId($def_id);
                 }
                 
-                if(count($this->imp_fieldtypes)==0){
-                    $this->system->addError(HEURIST_NOT_FOUND, 'No one field to be imported found');
+                if(count($this->imp_fieldtypes)==0 && count($this->imp_terms)==0){
+                    $this->system->addError(HEURIST_NOT_FOUND, 'No one field or vocabulary to be imported found');
                     return false;
                 }
                 
@@ -283,14 +296,6 @@ class DbsImport {
                         $ccode = $def_dts[$ftId]['commonFields'][$idx_ccode];
                         $local_ftId = $this->_getLocalCode('detailtype', $this->target_defs, $ccode);
 
-                        if($local_ftId>0){
-                            $this->fields_correspondence[$ftId] = $local_ftId;
-                            //$this->fields_correspondence_existed[$ftId] = $local_ftId;
-                            continue; //field with the same concerpt code is already in database
-                        }
-
-                        array_push($this->imp_fieldtypes, $ftId);
-
                         // ------------------------------------------------------------------------------------------------
 
                         //Get vocabulary for all terms used
@@ -299,10 +304,24 @@ class DbsImport {
                             //get topmost vocabulary
                             $this->_getTopMostVocabulary($def_dts[$ftId]['commonFields'][$idx_terms], $dt_Type);
                         }
+                        
+                        if($local_ftId>0){
+                            $this->fields_correspondence[$ftId] = $local_ftId;
+                            //$this->fields_correspondence_existed[$ftId] = $local_ftId;
+                            continue; //field with the same concept code is already in database
+                        }
+
+                        //there is no such field in target - it must be imported
+                        array_push($this->imp_fieldtypes, $ftId);
+
+                        
+                        
                     }
                 }
             }//for
         }
+     
+if(_DBG) error_log('Preparation '.(microtime(true)-$time_debug2));        
      
         return true;   
     }
@@ -326,7 +345,7 @@ class DbsImport {
         $mysqli = $this->system->get_mysqli();
         $mysqli->autocommit(FALSE);
 
-$time_debug = time();
+$time_debug = microtime(true);
 $time_debug2 = $time_debug;
         
         // I. Add Terms (whole vocabulary)
@@ -338,8 +357,8 @@ $time_debug2 = $time_debug;
             return false;                
         }
         
-if(_DBG) error_log('Terms '.(time()-$time_debug));        
-$time_debug = time();        
+if(_DBG) error_log('Terms '.(microtime(true)-$time_debug));        
+$time_debug = microtime(true);        
         
         $group_ft_ids = array();
         $group_rt_ids = array();
@@ -444,43 +463,51 @@ foreach ($this->imp_recordtypes as $rtyID){
 
     $def_rectype = $def_rts[$rtyID]['commonFields'];
 
-    //replace group id with local one
-    $grp_id = $def_rectype[$idx_rt_grp];
-    $def_rectype[$idx_rt_grp] = $group_rt_ids[$grp_id];
-
-    //disambiguate rectype name
-    $def_rectype[$idx_name] = $this->doDisambiguate($def_rectype[$idx_name], $trg_rectypes['names']);
-
-    //assign canonical to title mask (since in DB we store only rty_TitleMask)
-    $def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
-
-    //fill original ids if missed
-    if($def_rectype[$idx_ccode] && (!$def_rectype[$idx_origin_dbid] || !$def_rectype[$idx_origin_id])){
-        $codes = explode("-",$def_rectype[$idx_ccode]);
-        if($codes && count($codes)==2){
-            $def_rectype[$idx_origin_dbid] = $codes[0];
-            $def_rectype[$idx_origin_id] = $codes[1];
-        }
-    }
-
-    $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null);
-//if(_DBG) error_log('rt '.$rtyID);
-    if(is_numeric($res)){
-
-        $new_rtyID  = abs($res);
-        $this->rectypes_correspondence[$rtyID] = $new_rtyID;
-        $trg_rectypes['names'][$new_rtyID] = $def_rectype[$idx_name];
-        $this->copyRectypeIcon($rtyID, $new_rtyID);
-
+    $new_rtyID = @$this->rectypes_correspondence[$rtyID];
+    if($new_rtyID>0){ //already  exists - update fields only - add missed fields
+        
     }else{
+    
+        //replace group id with local one
+        $grp_id = $def_rectype[$idx_rt_grp];
+        $def_rectype[$idx_rt_grp] = $group_rt_ids[$grp_id];
+        
 
-        $this->error_exit2("Cannot add record type for id#".$recId.". ".$res);
-        return false;
+        //disambiguate rectype name
+        $def_rectype[$idx_name] = $this->doDisambiguate($def_rectype[$idx_name], $trg_rectypes['names']);
 
+        //assign canonical to title mask (since in DB we store only rty_TitleMask)
+        $def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
+
+        //fill original ids if missed
+        if($def_rectype[$idx_ccode] && (!$def_rectype[$idx_origin_dbid] || !$def_rectype[$idx_origin_id])){
+            $codes = explode("-",$def_rectype[$idx_ccode]);
+            if($codes && count($codes)==2){
+                $def_rectype[$idx_origin_dbid] = $codes[0];
+                $def_rectype[$idx_origin_id] = $codes[1];
+            }
+        }
+
+        $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null);
+    //if(_DBG) error_log('rt '.$rtyID);
+        if(is_numeric($res)){
+
+            $new_rtyID  = abs($res);
+            $this->rectypes_correspondence[$rtyID] = $new_rtyID;
+            $trg_rectypes['names'][$new_rtyID] = $def_rectype[$idx_name];
+            $this->copyRectypeIcon($rtyID, $new_rtyID);
+
+        }else{
+
+            $this->error_exit2("Cannot add record type for id#".$recId.". ".$res);
+            return false;
+
+        }
+        
     }
-}
-if(_DBG) error_log('Recordtypes '.(time()-$time_debug).'   '.count($this->imp_recordtypes));        
-$time_debug = time();        
+}//for
+if(_DBG) error_log('Recordtypes '.(microtime(true)-$time_debug).'   '.count($this->imp_recordtypes));        
+$time_debug = microtime(true);        
 
 
 // ------------------------------------------------------------------------------------------------
@@ -593,13 +620,14 @@ foreach ($this->imp_fieldtypes as $ftId){
         return false;
     }
 }
-if(_DBG) error_log('Fields '.(time()-$time_debug).'   '.count($this->imp_fieldtypes));        
-$time_debug = time();        
+if(_DBG) error_log('Fields '.(microtime(true)-$time_debug).'   '.count($this->imp_fieldtypes));        
+$time_debug = microtime(true);        
 
 // ------------------------------------------------------------------------------------------------
 
-// VI. Add record structures
-
+// VI. Add/update record structures
+$trg_def_rts = $this->target_defs['rectypes']['typedefs'];
+                
 $idx_type           = $def_rts['dtFieldNamesToIndex']['dty_Type'];
 $idx_terms_tree     = $def_rts['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];  //value is the same as
 $idx_terms_disabled = $def_rts['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
@@ -608,27 +636,37 @@ $idx_constraints    = $def_rts['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
 $dtFieldNames = $def_rts['dtFieldNames'];
 
 foreach ($this->imp_recordtypes as $rtyID){
+    
+    $target_RtyID = @$this->rectypes_correspondence[$rtyID];
 
-    if(@$this->rectypes_correspondence[$rtyID]){
-
-        $fields = array();
+    if($target_RtyID>0){
+        
+        if(@$trg_def_rts[$target_RtyID]['dtFields']){//this record type is already in destination need to sync structure
+            $fields = $trg_def_rts[$target_RtyID]['dtFields'];
+        }else{
+            $fields = array();    
+        }
+        
         foreach ($def_rts[$rtyID]['dtFields'] as $ftId => $def_field){
+            
+            if(!@$fields[ $this->fields_correspondence[$ftId] ]){
 
-            if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype" || $def_field[$idx_type] == "relmarker"){
-                //change terms ids for enum and reltypes
-                $def_field[$idx_terms_tree] = ""; //$this->replaceTermIds(@$def_field[$idx_terms_tree], $def_field[$idx_type] );
-                $def_field[$idx_terms_disabled] = ""; //$this->replaceTermIds(@$def_field[$idx_terms_disabled], $def_field[$idx_type]);
+                if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype" || $def_field[$idx_type] == "relmarker"){
+                    //change terms ids for enum and reltypes
+                    $def_field[$idx_terms_tree] = ""; //$this->replaceTermIds(@$def_field[$idx_terms_tree], $def_field[$idx_type] );
+                    $def_field[$idx_terms_disabled] = ""; //$this->replaceTermIds(@$def_field[$idx_terms_disabled], $def_field[$idx_type]);
 
+                }
+                if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
+                    //change record ids for pointers
+                    $def_field[$idx_constraints] = ""; //$this->replaceRectypeIds(@$def_field[$idx_constraints]);
+                }
+
+                $fields[ $this->fields_correspondence[$ftId] ] = $def_field;
             }
-            if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
-                //change record ids for pointers
-                $def_field[$idx_constraints] = ""; //$this->replaceRectypeIds(@$def_field[$idx_constraints]);
-            }
-
-            $fields[ $this->fields_correspondence[$ftId] ] = $def_field;
         }
 
-        $ret = updateRecStructure( $dtFieldNames , $this->rectypes_correspondence[$rtyID], array("dtFields"=>$fields));
+        $ret = updateRecStructure( $dtFieldNames , $target_RtyID, array("dtFields"=>$fields));
         if(is_array($ret)){
             foreach($ret as $id=>$res2){
                 foreach($res2 as $dtid=>$res){
@@ -647,8 +685,8 @@ foreach ($this->imp_recordtypes as $rtyID){
         }
     }
 }
-if(_DBG) error_log('Structures '.(time()-$time_debug));        
-$time_debug = time();        
+if(_DBG) error_log('Structures '.(microtime(true)-$time_debug));        
+$time_debug = microtime(true);        
 
 // ------------------------------------------------------------------------------------------------
 
@@ -676,7 +714,7 @@ foreach ($this->imp_recordtypes as $rtyID){
 }
 
 TitleMask::set_fields_correspondence(null);
-if(_DBG) error_log('Total '.(time()-$time_debug2));           
+if(_DBG) error_log('Total '.(microtime(true)-$time_debug2));           
 
 $mysqli->commit();        
             
@@ -771,7 +809,7 @@ $mysqli->commit();
     }
     
     //
-    //
+    // verifies that definition with given ID exists
     //
     private function _checkLocalCode($defType, $database_defs, $localID){
         
@@ -785,8 +823,8 @@ $mysqli->commit();
         return ($defs!=null)?$localID:false;
     }
     
-    //
-    //
+    // 
+    // finds target id by source id via concept code
     //
     public function getTargetIdBySourceId($defType, $source_id){
         //get concept code in source
@@ -808,10 +846,9 @@ $mysqli->commit();
             
         }else if($defType=='enum' || $defType=='relationtype'){
             
-            $defType = 'terms';
             $fieldName = 'trm_ConceptID';
-            $defs = $this->source_defs[$defType]['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
-            $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
+            $defs = $this->source_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
+            $idx_ccode = intval($this->source_defs['terms']['fieldNamesToIndex'][$fieldName]);
             
             $conceptCode = $defs[$source_id][$idx_ccode];
             
@@ -847,19 +884,16 @@ $mysqli->commit();
             
         }else if($defType=='enum' || $defType=='relationtype'){
             
-            $defType = 'terms';
             $fieldName = 'trm_ConceptID';
-            $defs = $database_defs[$defType]['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
-            $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
-            
-            $conceptCode = $defs[$source_id][$idx_ccode];
+            $defs = $database_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
+            $idx_ccode = intval($database_defs['terms']['fieldNamesToIndex'][$fieldName]);
             
         }
     
         foreach ($defs as $id => $def) {
             if(is_numeric($id)){
                 
-                if($defType=='terms'){
+                if($defType=='enum' || $defType=='relationtype'){
                     $is_equal = $def[$idx_ccode]==$conceptCode;
                 }else{
                     $is_equal = $def['commonFields'][$idx_ccode]==$conceptCode;
@@ -965,7 +999,7 @@ $mysqli->commit();
     //
     private function _findDependentRecordTypes($rectype_id, $depth){
         
-        $excludeDuplication = true;
+        $excludeDuplication = false;
         
         $trg_rectypes = $this->target_defs['rectypes'];
        
@@ -985,14 +1019,13 @@ $mysqli->commit();
 
         //is this record type already in target?
         $local_recid = $this->_getLocalCode('rectype', $this->target_defs, $ccode); 
-        if($local_recid>0){  //already exist
+        if($local_recid>0){  //already exist in destination
             $this->rectypes_correspondence[$rectype_id] = $local_recid;
             if($excludeDuplication){
                     return false; //rectype with the same concept code is already in database
             }
             //$correspondence = array($local_recid);
         }
-
         array_push($this->imp_recordtypes, $rectype_id);
 
         $res = array('correspondence'=>$local_recid, 'dependence'=>array());
@@ -1000,8 +1033,9 @@ $mysqli->commit();
         $fields = $def_rts[$rectype_id]['dtFields'];
 
         if(is_array($fields))
-        //loop all fields and check constraint for pointers and relmarkers
+        //loop all fields check constraint for pointers and relmarkers
         foreach ($fields as $ftId => $field){
+            
                 if($field[$idx_type] == "resource" || $field[$idx_type] == "relmarker"){
 
                     $constraints = $def_dts[$ftId]['commonFields'][$idx_constraints];
@@ -1024,18 +1058,27 @@ $mysqli->commit();
         
     }
     
-    //
-    // import entire vocabulary
-    //
+    /*
+     import entire vocabulary (including all children)
+     
+     $term_id - term to be imported, if not defined use $this->imp_terms to import all missed vocabs
+     $domain - enum or relation
+     $children - array of term ids (source)
+     $parent_id - parent term id (target)
+     $same_level_labels - labels and codes on the same level to disambiguate
+     
+    */ 
     private function _importVocabulary($term_id, $domain, $children=null, $parent_id=null, $same_level_labels=null){
         
 
         if($term_id==null){
+            //loop through all this->imp_terms
+            
             //top level import vocabularies
                 
             foreach($this->imp_terms[$domain] as $term_id){
                 $res = $this->_importVocabulary($term_id, $domain, 
-                            @$this->source_defs['terms']['treesByDomain'][$domain][$term_id]);
+                            @$this->source_defs['terms']['treesByDomain'][$domain][$term_id]);  //children
                 if(!$res) return false;
             }
             
@@ -1062,7 +1105,6 @@ $mysqli->commit();
                 //such term already exists
                 //$terms_correspondence_existed[$term_id] = $new_term_id;
                 $new_term_id = -$new_term_id;
-                
             }else{
                 //if not found add new term
 
@@ -1086,7 +1128,7 @@ $mysqli->commit();
                 }
                 
 
-                //fill original ids if missed
+                //fill original ids (concept codes) if missed
                 if($term_import[$idx_ccode] && (!$term_import[$idx_origin_dbid] || !$term_import[$idx_origin_id])){
                     $codes = explode("-",$term_import[$idx_ccode]);
                     if($codes && count($codes)==2){
@@ -1099,7 +1141,7 @@ $mysqli->commit();
                 if(is_numeric($res)){
                     $new_term_id = $res;
                     
-                    $this->targetTerms->addNewTerm($new_term_id, $term_import);
+                    $this->targetTerms->addNewTerm($new_term_id, $term_import); //add in memory
                     
                 }else{
                     $this->system->addError(HEURIST_ERROR,
@@ -1113,14 +1155,16 @@ $mysqli->commit();
 
             if($children){
                 
-                //find same level codes and labels
-                $lvl_src = $this->targetTerms->getSameLevelLabelsAndCodes(-$new_term_id, $domain);
+                $target_parent_id = abs($new_term_id);
+                
+                //find same level codes and labels in target
+                $lvl_src = $this->targetTerms->getSameLevelLabelsAndCodes($target_parent_id, $domain);
                 
                 foreach($children as $id=>$children2){
                     //($term_id, $domain, $children=null, $parent_id=null, $same_level_labels=null)
-                    $new_id = $this->_importVocabulary($id, $domain, $children2, abs($new_term_id), $lvl_src);
+                    $new_id = $this->_importVocabulary($id, $domain, $children2, $target_parent_id, $lvl_src);
                     if($new_id>0){
-                        //new term 
+                        //new term - add to codes and labels
                         $lvl_src['code'][] = $this->targetTerms->getTermCode($new_id);
                         $lvl_src['label'][] = $this->targetTerms->getTermLabel($new_id);
                     } else if($new_id<0){ 
@@ -1254,7 +1298,7 @@ $mysqli->commit();
     // Preparation report output
     // it returns updated definitions (as json) and html snippets with report about imported definitions
     //    
-    public function getReport(){
+    public function getReport($need_updated_defs=true){
 
             //reload structures
             $trg_rectypes = null;
@@ -1338,8 +1382,12 @@ $mysqli->commit();
             .$trg_terms['termsByDomainLookup'][$domain][$trg_id][$idx_name]."</td></tr>";
         }
         
-        return array("data"=>array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_detailtypes,'terms'=>$trg_terms),
-            "report"=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms) );
+        $resp =  array( "report"=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms) );
+        
+        if($need_updated_defs){
+            $resp['defs'] = array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_detailtypes,'terms'=>$trg_terms);
+        }
+        return $resp;    
     }    
     
 }

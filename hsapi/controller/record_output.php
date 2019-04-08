@@ -258,7 +258,7 @@ function output_CSV($system, $data, $params){
 
     $data = $data['data'];
     
-    $csv_headeronly =  $params['prefs']['csv_headeronly']?$params['prefs']['csv_headeronly']:false;
+    $csv_headeronly =  @$params['prefs']['csv_headeronly']?$params['prefs']['csv_headeronly']:false;
     
     if(!$csv_headeronly && !(@$data['reccount']>0)){
         print 'EMPTY RESULT SET'; //'empty result set';

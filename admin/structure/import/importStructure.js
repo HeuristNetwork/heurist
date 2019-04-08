@@ -974,9 +974,11 @@ $.widget( "heurist.importStructure", {
             if(response.status == window.hWin.ResponseStatus.OK){
 
                 //refresh local definitions
-                if(response.data.rectypes) window.hWin.HEURIST4.rectypes = response.data.rectypes;
-                if(response.data.detailtypes) window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
-                if(response.data.terms) window.hWin.HEURIST4.terms = response.data.terms;
+                if(response.defs){
+                    if(response.defs.rectypes) window.hWin.HEURIST4.rectypes = response.defs.rectypes;
+                    if(response.defs.detailtypes) window.hWin.HEURIST4.detailtypes = response.defs.detailtypes;
+                    if(response.defs.terms) window.hWin.HEURIST4.terms = response.defs.terms;
+                }
 
                 window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                 that.panel_report.find('#btn_close_panel_report').click();
