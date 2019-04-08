@@ -811,7 +811,9 @@ private static function saveToDatabase($preproc){
     if(strpos($filename,"\\")>0){
         $filename = str_replace("\\","\\\\",$filename);
     }
-
+    if(strpos($filename,"'")>0){
+        $filename = str_replace("'","\\'",$filename);
+    }
     //load file into table  LOCAL
     $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
     ." CHARACTER SET UTF8"
@@ -832,7 +834,7 @@ private static function saveToDatabase($preproc){
 .'<br>[mysql] '
 .'<br>local-infile = 1'
 .'<br>2. Replace the driver php5-mysql by the native driver'
-.'<br><br>see: http://stackoverflow.com/questions/10762239/mysql-enable-load-data-local-infile');
+.'<br><br>see: http://stackoverflow.com/questions/10762239/mysql-enable-load-data-local-infile', $mysqli->error);
         //self::$system->addError(HEURIST_DB_ERROR, 'Unable to import data. MySQL command: "'.$query.'" returns error: '.$mysqli->error);                
         return false;
     }
