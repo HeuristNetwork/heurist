@@ -32,6 +32,7 @@ define('PDIR','../../');  //need for proper path to js and css
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
 
 $mysqli = $system->get_mysqli();
 
@@ -54,6 +55,15 @@ if(@$_REQUEST['data']){
         }
     }
 }
+
+//remove Records those which have been forwarded and still exist with no values
+$query = 'select rec_ID FROM Records left join recDetails on rec_ID=dtl_RecID, recForwarding '
+.' WHERE (dtl_RecID is NULL) AND (rec_ID=rfw_OldRecID)';
+$recids = mysql__select_list2($mysqli, $query);
+if(count($recids)>0){
+    recordDelete($system, $recids); 
+}
+
 
 $dtysWithInvalidTerms = @$lists["terms"];
 $dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
