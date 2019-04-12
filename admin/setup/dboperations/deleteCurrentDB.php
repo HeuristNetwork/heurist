@@ -75,7 +75,12 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 
             if(!@$_REQUEST['mode']) {
                 ?>
-        <div class='banner'><h2>Delete Current Heurist Database</h2></div>
+        <div class='banner'><h2>Deleting Current Heurist Database</h2></div>
+            
+        <div id="wait_p" class="loading" style="width:100%;height:320px;display:none">
+            <i>Please wait for confirmation message (may take a couple of minutes for large databases)</i>
+        </div>
+        
         <div id='page-inner' style='overflow:auto'>
         
                 <div class="gray-gradient" style="display:inline-block;">
@@ -91,7 +96,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
                     <p>Type the words above to confirm deletion <input type='input' maxlength='20' size='20' name='del' id='del'>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <input type='button' class="h3button" value='OK to Delete' style='font-weight: bold;' 
-                        onclick="$('#page-inner').hide(); forms[0].submit();">
+                        onclick="$('#page-inner').hide(); $('#wait_p').show(); forms[0].submit();">
                     <input name="pwd" value="<?php echo $pwd;?>" type='hidden'>
                     <input name='mode' value='2' type='hidden'>
                     <input name='db' value='<?=$dbname?>' type='hidden'>

@@ -288,11 +288,13 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     list($targetdbname_full, $targetdbname) = mysql__get_names( $targetdbname );
 
     //create new empty database and structure
-    echo_flush ("<p>Create Database Structure (tables)</p>");
+    echo_flush ('<p>Creating Database Structure (tables)</p>'
+    .'<div id="wait_p" class="loading" style="width:100%;height:150px">'
+    .'<i>Please wait for confirmation message (may take a couple of minutes for large databases)</i></div>');
     if(!DbUtils::databaseCreate($targetdbname_full, 1)){
         return false;
     }else{
-        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+        echo_flush ('<script>document.getElementById("wait_p").style.display="none"</script><p style="padding-left:20px">SUCCESS</p>');
     }
     
     // Connect to new database and  Remove initial values from empty database
@@ -323,7 +325,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     list($source_database_full, $source_database) = mysql__get_names( $source_database );
     
 
-    echo_flush ("<p>Copy data</p>");
+    echo_flush ("<p>Copying data</p>");
     // db_clone function in /common/php/db_utils.php does all the work
     if( DbUtils::databaseClone($source_database_full, $targetdbname_full, true, $nodata, $isCloneTemplate) ){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
