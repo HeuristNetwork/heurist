@@ -766,8 +766,14 @@ $.widget( "heurist.importStructure", {
             var recURL = this._cachedRecordset_dbs.fld(record, 'rec_URL');
 
             if(action=='open'){
-
-                window.open(recURL+'?db='+dbName,'_blank');
+                
+                //show intermediate warn
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    'These links are intended only as a shortcut for the owner of this database and '
+                    +'would require you to be able to log into the database. '
+                    +'Please use download or clone links on the left if you are not the owner of the database. Proceed?', 
+                    function(){ window.open(recURL+'?db='+dbName,'_blank'); }, 
+                    {title:'Info',yes:'Proceed',no:'Cancel'});        
 
             }else if(action=='clone'){
 
@@ -839,13 +845,18 @@ $.widget( "heurist.importStructure", {
         + '</div>'
         + '<div class="recordTitle" style="left:40px !important">'
         +     recTitle 
-        + '</div>'
-
-        + '<div title="Click to open database in new window" '
-        + 'class="rec_edit_link_ext ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
-        + 'role="button" aria-disabled="false" data-key="open">'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/><span class="ui-button-text"/>'
         + '</div>';
+        
+        
+        var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+        if(usr_exp_level==0){ //advanced
+            html = html
+            + '<div title="Click to open database in new window" '
+            + 'class="rec_edit_link_ext ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+            + 'role="button" aria-disabled="false" data-key="open">'
+            + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/><span class="ui-button-text"/>'
+            + '</div>';
+        }
 
         if(recID<1000){
             html = html

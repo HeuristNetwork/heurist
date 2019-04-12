@@ -382,7 +382,7 @@ copy_IconAndThumb_FromLibrary
                     addDefaultFieldForNewRecordType($rtyID, $newfields);
                 }
 
-                //create canonical title mask
+                //create canonical title mask - convert names to ids
                 if($titleMask){
                     updateTitleMask($rtyID, $titleMask);
                 }
@@ -512,7 +512,6 @@ copy_IconAndThumb_FromLibrary
 		if($mask){
                 $parameters = array("");
 				$val = TitleMask::execute($mask, $rtyID, 1, null, _ERR_REP_SILENT);//convert from human to coded
-
                 $parameters = addParam($parameters, "s", $val);
                 /* DEPRECATED
 				$colName = "rty_CanonicalTitleMask";
