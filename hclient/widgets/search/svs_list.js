@@ -633,7 +633,8 @@ $.widget( "heurist.svs_list", {
         
         $('<h4 style="padding:20px 0px;">Focussed searches</h4>').appendTo(this.accordeon);
 
-        var i, svsIDs = Object.keys(this.allowed_svsIDs);
+        var i, svsIDs = Object.keys(this.allowed_svsIDs),
+            visible_cnt = 0, visible_svsID;
 
         for (i=0; i<svsIDs.length; i++)
         {
@@ -664,8 +665,12 @@ $.widget( "heurist.svs_list", {
                 }
             }
 
+            
+            var sname = this.allowed_svsIDs[svsID][_NAME];
+            
+            if(sname.toLowerCase().indexOf('placeholder')===0) continue;
 
-            $('<button>', {text: this.allowed_svsIDs[svsID][_NAME], 'data-svs-id':svsID})
+            $('<button>', {text: sname, 'data-svs-id':svsID})
             .css({'width':'100%','margin-top':'0.4em'})
             .button({icons:{primary: iconBtn}}).on("click", function(event){
 
@@ -680,10 +685,12 @@ $.widget( "heurist.svs_list", {
             })
             .appendTo(this.accordeon);
 
-        }
+            visible_svsID = svsID;
+            visible_cnt++;
+        }//for
 
-        if(this.allowed_svsIDs && svsIDs.length==1){
-            $(this.accordeon).find('button[data-svs-id="'+svsIDs[0]+'"]').click();
+        if(this.allowed_svsIDs && visible_cnt==1){
+            $(this.accordeon).find('button[data-svs-id="'+svsIDs[visible_svsID]+'"]').click();
         }
 
         //$(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
