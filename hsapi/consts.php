@@ -27,6 +27,7 @@
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
 define('HEURIST_MIN_DBVERSION', "1.2.0"); //minimal version of db for current version of code
+
 define('HEURIST_MAIN_SERVER', 'https://heuristplus.sydney.edu.au');
 define('HEURIST_INDEX_BASE_URL', 'https://heuristplus.sydney.edu.au/heurist/'); //central index database url
 define('HEURIST_INDEX_DBREC', 22);
@@ -74,6 +75,7 @@ $installDir = preg_replace("/\/(" . $topdirs . ")\/.*/", "", @$_SERVER["SCRIPT_N
 if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // no top directories in this URI must be a root level script file or blank
     $installDir = preg_replace("/\/[^\/]*$/", "", @$_SERVER["SCRIPT_NAME"]); // strip away everything past the last slash "/index.php" if it's there
 }
+
 
 if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path difference between document root and heurist code root
     $installDir = '/';

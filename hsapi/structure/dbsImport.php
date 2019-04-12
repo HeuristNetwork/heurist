@@ -652,14 +652,14 @@ foreach ($this->imp_recordtypes as $rtyID){
             if(!@$fields[ $this->fields_correspondence[$ftId] ]){
 
                 if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype" || $def_field[$idx_type] == "relmarker"){
-                    //change terms ids for enum and reltypes
-                    $def_field[$idx_terms_tree] = ""; //$this->replaceTermIds(@$def_field[$idx_terms_tree], $def_field[$idx_type] );
-                    $def_field[$idx_terms_disabled] = ""; //$this->replaceTermIds(@$def_field[$idx_terms_disabled], $def_field[$idx_type]);
+                    //clean constraints in structure - it will be taken from fields defs (see $this->replaceTermIds)
+                    $def_field[$idx_terms_tree] = "";
+                    $def_field[$idx_terms_disabled] = "";
 
                 }
                 if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
-                    //change record ids for pointers
-                    $def_field[$idx_constraints] = ""; //$this->replaceRectypeIds(@$def_field[$idx_constraints]);
+                    //clean constraints in structure - it will be taken from fields defs (see $this->replaceRectypeIds)
+                    $def_field[$idx_constraints] = "";
                 }
 
                 $fields[ $this->fields_correspondence[$ftId] ] = $def_field;
