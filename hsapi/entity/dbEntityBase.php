@@ -24,6 +24,9 @@ class DbEntityBase
     
     // set transaction in save,delete action - otherwise transaction is set on action above (batch action)
     protected $need_transaction = true;
+
+    //reset all primary fields to zero - tp force addition (POST request via API)
+    protected $is_addition = false;
     
     /*  
         request from client side - contains field values for search and update
@@ -131,6 +134,11 @@ class DbEntityBase
                 $res = $this->search();
             }else  if(@$this->data['a'] == 'title'){ //search for entity title by id
                 $res = $this->search_title();
+            }else if(@$this->data['a'] == 'add'){
+                $this->is_addition = true;
+                $this->data['a'] = 'save';
+                $res = $this->save();
+                $this->is_addition = false;
             }else if(@$this->data['a'] == 'save'){
                 $res = $this->save();
             }else if(@$this->data['a'] == 'delete'){
@@ -266,14 +274,18 @@ class DbEntityBase
         $mysqli->query('SET foreign_key_checks = 0');
         $query = 'DELETE FROM '.$this->config['tableName'].' WHERE '.$this->primaryField.' in ('.implode(',', $this->recordIDs).')';
         $ret = $mysqli->query($query);
+        $affected = $mysqli->affected_rows;
         $mysqli->query('SET foreign_key_checks = 1');
         
         if(!$ret){
             $this->system->addError(HEURIST_DB_ERROR, 
                     "Cannot delete from table ".$this->config['entityName'], $mysqli->error);
             return false;
+        }else if($affected===0){
+            $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found');
+            return false;
         }
-        
+                
         return true;
     }
 
@@ -591,7 +603,10 @@ class DbEntityBase
         
         //exctract primary keys
         $this->recordIDs = array();
-        foreach($this->records as $record){
+        foreach($this->records as $idx=>$record){
+            if($this->is_addition){
+                $this->records[$idx][$this->primaryField] = 0;
+            }
             if(@$record[$this->primaryField]>0){
                 $this->recordIDs[] = $record[$this->primaryField];
             }

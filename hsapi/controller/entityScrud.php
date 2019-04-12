@@ -85,7 +85,7 @@
             $req = $entity->getData();
             
             $response = $response['data'];
-            if(count($response)==0){
+            if(count($response)==0 && @$req['a'] == 'search'){
                 $code = 404;    
             }else if (@$req['a'] == 'save'){
                 $code = 201;

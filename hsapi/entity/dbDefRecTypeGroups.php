@@ -63,6 +63,7 @@ class DbDefRecTypeGroups extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('rtg_Name');
         if($pred!=null) array_push($where, $pred);
 
+        if(@$this->data['details']==null) $this->data['details'] = 'full';//default
        
         //compose SELECT it depends on param 'details' ------------------------
         //@todo - take it form fiels using some property
@@ -77,15 +78,12 @@ class DbDefRecTypeGroups extends DbEntityBase
         }else if(@$this->data['details']=='list'){
 
             $this->data['details'] = 'rtg_ID,rtg_Name,rtg_Description,rtg_Order,'
-            .'(select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount';
+            .'(select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ';
             
         }else if(@$this->data['details']=='full'){
             
-            $fields2 = $this->fields;
-            unset($fields2['rtg_RtCount']);
-
-            $this->data['details'] = implode(',', $fields2 )
-             .'(select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount';
+            $this->data['details'] = implode(',', $this->fieldNames )
+             .', (select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ';
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -137,8 +135,8 @@ class DbDefRecTypeGroups extends DbEntityBase
             return false;
         }        
         
-        $query = 'select count(rty_ID) from defRecTypes where rtg_ID in ('.implode(',', $this->recordIDs).')';
-        $ret = mysql__select_value($mysqli, $query);
+        $query = 'select count(rty_ID) from defRecTypes where `rty_RecTypeGroupID` in ('.implode(',', $this->recordIDs).')';
+        $ret = mysql__select_value($this->system->get_mysqli(), $query);
         
         if($ret>0){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot delete non empty group');
@@ -148,5 +146,53 @@ class DbDefRecTypeGroups extends DbEntityBase
         return parent::delete();        
     }
     
+    //
+    // validate permission
+    //    
+    protected function _validatePermission(){
+        
+        if(!$this->system->is_admin() && count($this->recordIDs)>0){ //there are records to update/delete
+            
+            $this->system->addError(HEURIST_REQUEST_DENIED, 
+                    'AAAA You are not admin and can\'t edit record type groups. Insufficient rights for this operation');
+                return false;
+        }
+        
+        return true;
+    }      
+    
+    
+    //
+    //
+    //    
+    protected function prepareRecords(){
+    
+        $ret = parent::prepareRecords();
+
+        //add specific field values
+        foreach($this->records as $idx=>$record){
+
+            //validate duplication
+            $mysqli = $this->system->get_mysqli();
+            $res = mysql__select_value($mysqli,
+                    "SELECT rtg_ID FROM ".$this->config['tableName']."  WHERE rtg_Name='"
+                    .$mysqli->real_escape_string( $this->records[$idx]['rtg_Name'])."'");
+            if($res>0 && $res!=@$this->records[$idx]['rtg_ID']){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Record type group cannot be saved. The provided name already exists');
+                return false;
+            }
+
+            $this->records[$idx]['rtg_Modified'] = null; //reset
+            
+            if(!(@$this->records[$idx]['rtg_Order']>0)){
+                $this->records[$idx]['rtg_Order'] = 2;
+            }
+            
+            $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['rtg_ID']>0));
+        }
+        
+        return $ret;
+        
+    }     
 }
 ?>

@@ -62,6 +62,8 @@ class DbDefRecTypes extends DbEntityBase
         $pred = $this->searchMgr->getPredicate('rty_RecTypeGroupID');
         if($pred!=null) array_push($where, $pred);
         
+        if(@$this->data['details']==null) $this->data['details'] = 'full';
+        
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
         
@@ -148,6 +150,94 @@ class DbDefRecTypes extends DbEntityBase
         return $result;
     }
     
+    //
+    //
+    //
+    public function delete(){
+
+        $this->recordIDs = prepareIds($this->data['recID']);
+
+        if(count($this->recordIDs)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid record type identificator');
+            return false;
+        }        
+        if(count($this->recordIDs)>1){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'It is not possible to remove record types in batch');
+            return false;
+        }        
+        
+        $rtyID = $this->recordIDs[0];
+        
+        $mysqli = $this->system->get_mysqli();
+        
+        $query = 'SELECT dty_ID, dty_Name FROM defDetailTypes where FIND_IN_SET('.$rtyID.', dty_PtrTargetRectypeIDs)>0';
+        
+        $fields = mysql__select_assoc2($mysqli, $query);
+        $dtCount = count($fields);
+        
+        if ($dtCount>0) { // there are fields that use this rectype, need to return error and the dty_IDs
+                $errMsg = "You cannot delete record type $rtyID. "
+                            ." It is referenced in $dtCount base field defintions "
+                            ."- please delete field definitions or remove rectype from pointer constraints to allow deletion of this record type.<div style='text-align:left'><ul>";
+                foreach($fields as $dty_ID => $dty_Name){
+                    $errMsg = $errMsg.("<li>".$dty_ID."&nbsp;".$dty_Name."</li>");
+                }
+                $errMsg= $errMsg."</ul></div>";
+                
+                $system->addError(HEURIST_ACTION_BLOCKED, $errMsg);
+                return false;
+        }
+        
+        //-----------
+        $query = 'SELECT sys_TreatAsPlaceRefForMapping FROM sysIdentification where 1';
+        
+        $val = mysql__select_value($mysqli, $query);
+        if($val!=null && $val!=''){
+                $places = explode(',', $val);
+                if (in_array($rtyID, $places)) {
+                    $system->addError(HEURIST_ACTION_BLOCKED, "You cannot delete record type $rtyID. "
+                                ." It is referenced as 'treat as places for mapping' in database properties");
+                    return false;
+                }
+        }
+        
+        //--------------
+        $query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=0 limit 1";
+        $dtCount = mysql__select_value($mysqli, $query);
+        
+        if($dtCount>0){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                "You cannot delete record type $rtyID as it has existing data records");
+            return false;
+        }
+        
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+
+        
+        //delete temporary records
+        $query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=1";
+        $recIds = mysql__select_list2($mysqli, $query);
+        $res = recordDelete($system, $recIds, false);
+
+        if($res['status']==HEURIST_OK){
+            $res = parent::delete();        
+            
+            //@todo - remove assosiated images
+            
+            
+        }else{
+            $res = false;
+        }
+        if($res){
+            $mysqli->commit();   
+        }else{
+            $mysqli->rollback();
+        }
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+        return $res;
+    }
+ 
     
     //
     // validate permission for edit record type
@@ -204,15 +294,55 @@ class DbDefRecTypes extends DbEntityBase
 
 
         $ret = parent::save();
-
        
         if($ret!==false){
+            
+            $dbID = $this->system->get_system('sys_dbRegisteredID');
+            $mysqli = $this->system->get_mysqli();
             
             foreach($this->records as $idx=>$record){
                 $rty_ID = @$record['rty_ID'];
                 if($rty_ID>0 && in_array($rty_ID, $ret)){
                     
-                    //treat thumbnail
+                    if($record['is_new']){
+                        //1. if new add default set of fields TODO!
+                        /*if($isAddDefaultSetOfFields){
+                            //add default set of detail types
+                            addDefaultFieldForNewRecordType($rtyID, $newfields);
+                        }*/
+                        
+                        //2. set dbid or update modified locally
+                        if($dbID>0){
+                            $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
+                                .', rty_NameInOriginatingDB=rty_Name'
+                                .', rty_IDInOriginatingDB='.$rty_ID
+                                .' WHERE (NOT rty_OriginatingDBID>0) AND rty_ID='.$rty_ID;
+                                $res = $mysqli->query($query);
+                        }            
+                    }else{
+                        $query = 'UPDATE defRecTypes SET rty_LocallyModified=IF(rty_OriginatingDBID>0,1,0)'
+                                . ' WHERE rty_ID = '.$rty_ID;
+                    }
+                    mysql__exec_param_query($mysqli, $query, null);
+                        
+                    //3. update titlemask - from names to ids
+                    $mask = @$record['rty_TitleMask'];
+                    if($mask){
+                            $parameters = array("");
+                            $val = TitleMask::execute($mask, $rtyID, 1, null, _ERR_REP_SILENT);//convert from human to coded
+                            $parameters = addParam($parameters, "s", $val);
+
+                            $query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rty_ID";
+
+                            $res = mysql__exec_param_query($mysqli, $query, $parameters, true);
+                            if(!is_numeric($res)){
+                                $system->addError(HEURIST_DB_ERROR, 
+                                    'SQL error updating title mask for record type '.$rty_ID, $res);
+                            }
+                    }
+            
+            
+                    //4. treat thumbnail
                     $thumb_file_name = @$record['rty_Thumb'];
                     //rename it to recID.png
                     if($thumb_file_name){
@@ -232,13 +362,6 @@ class DbDefRecTypes extends DbEntityBase
         return $ret;
     }  
             
-    //
-    //
-    //
-    public function delete(){
-         //@todo
-    }
-    
     //
     // batch action for rectypes
     // 1) import rectype from another db

@@ -597,7 +597,7 @@
     * @param mixed $user
     * @param mixed $recids
     */
-    function recordDelete($system, $recids){
+    function recordDelete($system, $recids, $need_transaction=true){
 
         $recids = prepareIds($recids);
         if(count($recids)>0){
@@ -638,8 +638,9 @@
             
             $is_error = false;
             $mysqli = $system->get_mysqli();
-            $keep_autocommit = mysql__begin_transaction($mysqli);
-
+            if($need_transaction){
+                $keep_autocommit = mysql__begin_transaction($mysqli);
+            }
 
             $bkmk_count = 0;
             $rels_count = 0;
@@ -663,17 +664,22 @@
             }//foreach
             
             if($msg_error){
-                $mysqli->rollback();
                 $res = $system->addError(HEURIST_DB_ERROR, 'Cannot delete record. '.$msg_error);
             }else{
-                $mysqli->commit();
                 $res = array('status'=>HEURIST_OK, 
                     'data'=> array( 'processed'=>count($allowed_recids),
                                     'deleted'=>count($deleted), 'noaccess'=>$noaccess_count,
                                     'bkmk_count'=>$bkmk_count, 'rels_count'=>$rels_count));
             }
             
-            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            if($need_transaction){
+                if($msg_error){
+                    $mysqli->rollback();
+                }else{
+                    $mysqli->commit();    
+                }
+                if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            }
             return $res;
             
         }else{

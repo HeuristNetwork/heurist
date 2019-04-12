@@ -91,6 +91,8 @@ class DbDefDetailTypes extends DbEntityBase
         
 
         $needCheck = false;
+        
+        if(@$this->data['details']==null) $this->data['details'] = 'full';
        
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
@@ -180,6 +182,37 @@ class DbDefDetailTypes extends DbEntityBase
     }
  
     //
+    //
+    //
+    public function delete(){
+
+        $this->recordIDs = prepareIds($this->data['recID']);
+
+        if(count($this->recordIDs)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid field type identificator');
+            return false;
+        }        
+        if(count($this->recordIDs)>1){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'It is not possible to remove field types in batch');
+            return false;
+        }        
+        
+        $dtyID = $this->recordIDs[0];
+        
+        $query = 'select count(dtl_ID) from recDetails where dtl_DetailTypeID='.$dtyID;
+        $dtCount = mysql__select_value($this->system->get_mysqli(), $query);
+        
+        if($dtCount>0){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                "You cannot delete field type $dtyID as it is used $dtCount times in the data");
+            return false;
+        }
+
+        return parent::delete();        
+    }
+ 
+ 
+    //
     // validate permission for edit record type
     // for delete and assign see appropriate methods
     //    
@@ -205,8 +238,6 @@ class DbDefDetailTypes extends DbEntityBase
         //add specific field values
         foreach($this->records as $idx=>$record){
 
-            $this->records[$idx]['dty_Modified'] = null; //reset
-
             //validate duplication
             $mysqli = $this->system->get_mysqli();
             $res = mysql__select_value($mysqli,
@@ -216,6 +247,11 @@ class DbDefDetailTypes extends DbEntityBase
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists');
                 return false;
             }
+            
+            //$query = $query.", dty_LocallyModified=IF(dty_OriginatingDBID>0,1,0)"
+            //!!!! todo $this->records[$idx]['dty_LocallyModified'] = 
+
+            $this->records[$idx]['dty_Modified'] = null; //reset
 
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['dty_ID']>0));
         }

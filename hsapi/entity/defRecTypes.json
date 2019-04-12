@@ -123,6 +123,24 @@
                         ]
                     }
                 },
+                {  "dtID": "rty_LocallyModified",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {  "dtID": "rty_OriginatingDBID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {  "dtID": "rty_IDInOriginatingDB",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
                 
                 {
                 "groupHeader": "Additional information",

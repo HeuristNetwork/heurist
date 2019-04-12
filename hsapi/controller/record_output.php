@@ -70,7 +70,8 @@
     $search_params = array();
     $search_params['w'] = @$params['w'];
     $search_params['rules'] = @$params['rules'];
-    $search_params['needall'] = 1;  //search without limit of returned record count
+    if(!(@$params['offset'] || @$params['limit']))
+        $search_params['needall'] = 1;  //search without limit of returned record count
     
     if(@$params['recID']>0){
         $search_params['q'] = array('ids'=>$params['recID']);
@@ -950,7 +951,7 @@ function output_Records($system, $data, $params){
             header( 'Content-Type: text/xml');
         }
         
-        if(@$params['restapi']==1 && count($records)==0){
+        if(@$params['restapi']==1 && count($rt_counts)==0){
             http_response_code(404);
         }
         

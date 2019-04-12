@@ -383,6 +383,8 @@ class DbSysUsers extends DbEntityBase
             return false;
         }
         
+        //---------------------------------------------------
+        
         $keep_autocommit = mysql__begin_transaction($mysqli);
 
         //remove temporary records
@@ -390,7 +392,7 @@ class DbSysUsers extends DbEntityBase
                         . implode(',', $this->recordIDs) . ') and rec_FlagTemporary=1';
         $rec_ids_to_delete = mysql__select_list2($mysqli, $query);
         if(count($rec_ids_to_delete)>0){
-            $res = recordDelete($this->system, $rec_ids_to_delete);
+            $res = recordDelete($this->system, $rec_ids_to_delete, false);
             if(@$res['status']!=HEURIST_OK) return false;
         }
                 
@@ -420,6 +422,8 @@ class DbSysUsers extends DbEntityBase
         if($ret){
             $ret = parent::delete();
         }
+        
+        //@todo - remove assosiated images
 
         if($ret){
             $mysqli->commit();

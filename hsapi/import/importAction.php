@@ -288,7 +288,7 @@ private static function findRecordIds($imp_session, $params){
                     if(@$pairs[$keyvalue]){  //we already found record for this combination
                     
                         if(array_key_exists($keyvalue, $tmp_idx_insert)){
-                            $imp_session['validation']['recs_insert'][$tmp_idx_insert[$keyvalue]][0] .= (",".$imp_id);
+                            $imp_session['validation']['recs_insert'][$tmp_idx_insert[$keyvalue]][0] .= (','.$imp_id);
                             $is_insert = true;
                         }else if(array_key_exists($keyvalue, $tmp_idx_update)) {
                             

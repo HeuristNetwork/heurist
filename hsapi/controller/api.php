@@ -4,17 +4,21 @@
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 $requestParams = $_REQUEST;
 
-//get method
-$method = $_SERVER['REQUEST_METHOD'];
-if ($method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
-    if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'DELETE') {
-        $method = 'DELETE';
-    } else if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'PUT') {
-        $method = 'PUT';
-    } else {
-        exitWithError('Unexpected Header', 400);
-    }
-} 
+if(@$_REQUEST['method']){
+    $method = $_REQUEST['method'];
+}else{
+    //get method
+    $method = $_SERVER['REQUEST_METHOD'];
+    if ($method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {  //add
+        if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'DELETE') {
+            $method = 'DELETE';
+        } else if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'PUT') {
+            $method = 'PUT';   //replace
+        } else {
+            exitWithError('Unexpected Header', 400);
+        }
+    } 
+}
 
 //$requestUri[1] = "api"
 //$requestUri[2] - resource(entity )
@@ -59,13 +63,14 @@ if($method == null){
     exitWithError('Method Not Allowed', 405);
 }
 
-if($method=='save'){
+if($method=='save' || $method=='add'){
+    //get request body
     $data = json_decode(file_get_contents('php://input'), true);
     
 //DEBUG error_log(print_r($data,true));    
     //request body
     $_REQUEST['fields'] = $data;
-    if(@$_REQUEST['fields']['db']){
+    if(@$_REQUEST['fields']['db']){ //may contain db
         $_REQUEST['db'] = $_REQUEST['fields']['db'];
         unset($_REQUEST['fields']['db']);
     }
@@ -117,7 +122,7 @@ function getAction($method){
     if($method=='GET'){
         return 'search';
     }else if($method=='POST'){ //add new 
-        return 'save';
+        return 'add';
     }else if($method=='PUT'){ //replace
         return 'save';
     }else if($method=='DELETE'){

@@ -143,8 +143,8 @@ class DbDefDetailTypeGroups extends DbEntityBase
             return false;
         }        
         
-        $query = 'select count(dty_ID) from defDetailTypes where dtg_ID in ('.implode(',', $this->recordIDs).')';
-        $ret = mysql__select_value($mysqli, $query);
+        $query = 'select count(dty_ID) from defDetailTypes where dty_DetailTypeGroupID in ('.implode(',', $this->recordIDs).')';
+        $ret = mysql__select_value($this->system->get_mysqli(), $query);
         
         if($ret>0){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot delete non empty group');
@@ -156,6 +156,23 @@ class DbDefDetailTypeGroups extends DbEntityBase
 
     
     //
+    // validate permission
+    //    
+    protected function _validatePermission(){
+        
+        if(!$this->system->is_admin() && count($this->recordIDs)>0){ //there are records to update/delete
+            
+            $this->system->addError(HEURIST_REQUEST_DENIED, 
+                    'AAAA You are not admin and can\'t edit field type groups. Insufficient rights for this operation '
+                        .$this->system->get_user_id().'  '.print_r($this->system->getCurrentUser(), true));
+            return false;
+                
+        }
+        
+        return true;
+    }    
+        
+    //
     //
     //    
     protected function prepareRecords(){
@@ -165,18 +182,22 @@ class DbDefDetailTypeGroups extends DbEntityBase
         //add specific field values
         foreach($this->records as $idx=>$record){
 
-            $this->records[$idx]['dtg_Modified'] = null; //reset
-
             //validate duplication
             $mysqli = $this->system->get_mysqli();
             $res = mysql__select_value($mysqli,
                     "SELECT dtg_ID FROM ".$this->config['tableName']."  WHERE dtg_Name='"
                     .$mysqli->real_escape_string( $this->records[$idx]['dtg_Name'])."'");
             if($res>0 && $res!=@$this->records[$idx]['dtg_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists');
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type group cannot be saved. The provided name already exists');
                 return false;
             }
 
+            $this->records[$idx]['dtg_Modified'] = null; //reset
+            
+            if(!(@$this->records[$idx]['dtg_Order']>0)){
+                $this->records[$idx]['dtg_Order'] = 2;
+            }
+            
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['dtg_ID']>0));
         }
         
