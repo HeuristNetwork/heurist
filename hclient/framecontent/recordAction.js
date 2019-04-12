@@ -476,6 +476,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 request['rtyID'] = scope_type;
             }
         }
+        var count_or_records = scope.length;
         request['recIDs'] = scope.join(',');
 
         if(action_type=='rectype_change'){
@@ -496,7 +497,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
           
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'You are about to convert '
-                + (request['rtyID']>0 ?('"'+window.hWin.HEURIST4.rectypes.names[request['rtyID']]+'"'):request['recIDs'].length)
+                + (request['rtyID']>0 ?('"'+window.hWin.HEURIST4.rectypes.names[request['rtyID']]+'"'):count_or_records)
                 +' records from their original record (entity) type into "'
                 + window.hWin.HEURIST4.rectypes.names[rtyID] 
                 + '" records.  This can result in invalid data for these records.<br><br>Are you sure?',

@@ -746,8 +746,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                    array_push($processedRecIDs, $recID);
                    //update title
                    $new_title = TitleMask::fill($recID);
-                   $rec_update = Array('rec_ID'  => $recID, 'rec_Title'  => $new_title);
-                   mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
+                   $rec_update2 = Array('rec_ID'  => $recID, 'rec_Title'  => $new_title);
+                   mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update2);
                }
         }//for recors
         

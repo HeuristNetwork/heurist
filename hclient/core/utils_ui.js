@@ -1471,7 +1471,7 @@ window.hWin.HEURIST4.ui = {
     applyCompetencyLevel: function(exp_level, $context){
 
             if(!(exp_level>=0)){
-                exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+                exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2); //beginner default
             }
             
             var is_exit = false;
