@@ -226,14 +226,14 @@
                     if(!@$rtStructs['groups']['groupIDToIndex'][$rtg_ID]){
                         if($rtg_ID>0){
                         }
-                        
                         $idxs = array_keys($rtStructs['groups']['groupIDToIndex']);
                         $rtg_ID = $idxs[0];
                     }
-                    
-                    array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['allTypes'], $rtyID);
-                    if ($row[14]) { //rty_ShowInList
-                        array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['showTypes'], $rtyID);
+                    if(@$rtStructs['groups']['groupIDToIndex'][$rtg_ID]>=0){
+                        array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['allTypes'], $rtyID);
+                        if ($row[14]) { //rty_ShowInList
+                            array_push($rtStructs['groups'][$rtStructs['groups']['groupIDToIndex'][$rtg_ID]]['showTypes'], $rtyID);
+                        }
                     }
                 }
                 $commonFields = array_slice($row, 3);
@@ -309,9 +309,11 @@
                     if(@$rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]){
                         $rtyID = $row[0];
                         
-                        array_push($rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]['allTypes'], $rtyID);
-                        if ($row[2]) { //rty_ShowInList
-                            array_push($rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]['showTypes'], $rtyID);
+                        if(@$rtStructs['groups']['groupIDToIndex'][$rtg_ID]>=0){
+                            array_push($rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]['allTypes'], $rtyID);
+                            if ($row[2]) { //rty_ShowInList
+                                array_push($rtGroups[$rtGroups['groupIDToIndex'][$rtg_ID]]['showTypes'], $rtyID);
+                            }
                         }
                     }
                 }
@@ -1116,18 +1118,27 @@ function dbs_GetRectypeConstraint($system) {
                 error_log('Database: '.$system->dbname());
             }else{
                 while ($row = $res->fetch_row()) {
-                    if($imode!=1){
-                        array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['allTypes'], $row[2]);
-                        if ($row[17]) {// dty_ShowInLists
-                            array_push($dtStructs['groups'][$dtG['groupIDToIndex'][$row[0]]]['showTypes'], $row[2]);
+                    $dty_ID = $row[2];
+                    if($imode==0 || $imode==2){
+                        $dtg_ID = $row[0]; 
+                        $idx = @$dtStructs['groups']['groupIDToIndex'][$dtg_ID];
+                        if(!@$dtStructs['groups'][$idx]){
+                            $idx = 0; //orphaned detail without group
+                            $row[11] = $dtStructs['groups'][0]['id'];
                         }
-                        $dtStructs['names'][$row[2]] = $row[3];
+                        $dty_ShowInLists = $row[17];
+                        array_push($dtStructs['groups'][$idx]['allTypes'], $dty_ID);
+                        if ($dty_ShowInLists) {// dty_ShowInLists
+                            array_push($dtStructs['groups'][$idx]['showTypes'], $dty_ID);
+                        }
+
+                        $dtStructs['names'][$dty_ID] = $row[3];
                     }
-                    $dtStructs['typedefs'][$row[2]]['commonFields'] = array_slice($row, 2);
+                    $dtStructs['typedefs'][$dty_ID]['commonFields'] = array_slice($row, 2);
                 }
             }
         }catch(Exception $e) {
-            //trying to find veird error - missed trm_Modified column
+            //trying to find weird error - missed trm_Modified column
             error_log('Message: ' .$e->getMessage());
             error_log('QUERY: '.$query);
             error_log('Database: '.$system->dbname());
