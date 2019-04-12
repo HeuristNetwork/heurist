@@ -138,7 +138,7 @@ var cfg_layouts = [
                             css:{'background-color':'white','font-size':'14px'}, 
                             options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
                             show_inner_header: true} },  //search result
-                    {appid:'heurist_Map', layout_id:'map', options:{layout:['map','timeline']}, 
+                    {appid:'heurist_Map', layout_id:'map', options:{layout:['map','timeline'],tabpanel:true}, 
                                     css:{'background-color':'white'} } //mapping
                 ]
             }]

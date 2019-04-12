@@ -28,7 +28,8 @@ $.widget( "heurist.app_timemap", {
         layout:null, //['header','map','timeline']
         startup:0,         //map document loaded on map init
         autoupdate:true,   //update content on global search events   ON_REC_SEARCHSTART (clear) and ON_REC_SEARCH_FINISH (add data)
-        eventbased:true
+        eventbased:true,
+        tabpanel:false  //if true located on tabcontrol need top:30
     },
 
     _events: null,
@@ -48,8 +49,10 @@ $.widget( "heurist.app_timemap", {
         //     'background':'url('+window.hWin.HAPI4.baseURL+'assets/loading-animation-white.gif) no-repeat center center'})
         .appendTo( this.element );
 
-        if($(".header"+that.element.attr('id')).length===0){
-            this.framecontent.css('top',0);
+        if(this.options.tabpanel){
+            this.framecontent.css('top', 30);
+        }else if ($(".header"+that.element.attr('id')).length===0){
+            this.framecontent.css('top', 0);
         }
 
 
