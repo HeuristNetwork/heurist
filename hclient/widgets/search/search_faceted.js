@@ -1847,15 +1847,18 @@ if(!detailtypes[dtID]){
                         step:step})
                     .addClass("facet_link")
         
+        //----
+        var f_link_content;
+        
         if(window.hWin.HEURIST4.util.isempty(cterm.value)){
-            $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
-                .css({'font-size':'0.9em','height':'10px','margin-left':'-15px'}).appendTo(f_link);    
+            f_link_content = $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
+                .css({'font-size':'0.9em','height':'10px','margin-left':'-15px'});    
         }else{
-            var f_link_content = $("<span>").text(cterm.text).appendTo(f_link);    
+            f_link_content = $("<span>").text(cterm.text);
             
             if(display_mode=='block'){                 
                 f_link_content.css('width','80%').addClass('truncate');    //was this.facets_list_container.width()*0.6
-                f_link_content.attr('title',cterm.text);
+                f_link_content.attr('title', cterm.text);
             }
             
             if(!window.hWin.HEURIST4.util.isempty(currval)){
@@ -1870,21 +1873,16 @@ if(!detailtypes[dtID]){
             
             }
         }
+        f_link_content.appendTo(f_link);
         
-        if(cterm.count=='reset'){
-            
-            var dcount = $('<span>').addClass('badge').text('X').appendTo(f_link);
-            if(display_mode!='inline-block'){
-                 dcount.css({float:'right'});
-            }
-            
-        }
-        else if(cterm.count>0){
+        //---
+        if(cterm.count=='reset' || cterm.count>0){
             //.css('float','right')
-            var dcount = $('<span>').addClass('badge').text(cterm.count).appendTo(f_link);
-            if(display_mode!='inline-block'){
-                 //dcount.css({position:'absolute', right:'4px'});
-                 dcount.css({float:'right'});
+            var dcount = $('<span>').addClass('badge').text(cterm.count=='reset'?'X':cterm.count);
+            if(display_mode=='inline-block'){
+                 dcount.appendTo(f_link).appendTo(f_link_content);
+            }else{
+                 dcount.appendTo(f_link).css({float:'right'});
             }
         }
         
