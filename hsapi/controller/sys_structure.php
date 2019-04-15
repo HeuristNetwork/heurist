@@ -49,6 +49,7 @@
                 $splittedURL = explode('?', $remoteURL);
                    
                 $remoteURL = $splittedURL[0].'hsapi/controller/sys_structure.php?db='.$match[1];
+
                 if (@$_REQUEST['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$_REQUEST['rectypes'];
                 if (@$_REQUEST['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$_REQUEST['detailtypes'];
                 if (@$_REQUEST['mode']) $remoteURL = $remoteURL.'&mode='.$_REQUEST['mode'];
@@ -59,14 +60,17 @@
                     //$system->addError(HEURIST_ERROR,  );
                     $data = array("status"=>HEURIST_ERROR, "message"=>'Cannot access database structure for database '
                                             .$match[1].' on '.$splittedURL[0], "sysmsg"=>null);
+                    $data = json_encode($data); 
+                }else{
+                    header('Content-Encoding: gzip');
                 }
-                //$response = json_decode($data, true);
-                //$is_remote = true;
                 
-                header('Content-Encoding: gzip');
                 header('Content-type: application/json;charset=UTF-8');
                 echo $data; 
                 exit();                
+                //$response = json_decode($data, true);
+                //$is_remote = true;
+                
        }
     }
     
