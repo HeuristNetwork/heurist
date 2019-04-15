@@ -1659,7 +1659,7 @@ $loop_cnt++;
 
             if($r_tree){
                 foreach ($r_tree as $rule) {
-                    $e_rule = array('query'=>$rule['query'],
+                    $e_rule = array('query'=>@$rule['query'],
                                     'results'=>array(),
                                     'parent'=>$parent_index,
                                     'islast'=>(!@$rule['levels'] || count($rule['levels'])==0)?1:0 );

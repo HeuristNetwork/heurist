@@ -197,6 +197,8 @@ if($dbID>0) {
     
 }else{// new registration
 
+    $mysqli->query('set @logged_in_user_id = 2');
+
     $dbID = mysql__insertupdate($mysqli, 'Records', 'rec_', 
         array(
             'rec_ID'=>($newid>0)?-$newid:0,
@@ -210,6 +212,7 @@ if($dbID>0) {
             'rec_Popularity'=>99,
         ), true
     );
+    $mysqli->query('set @logged_in_user_id = '.$system->get_user_id());
     
     if($dbID>0){
         
@@ -266,6 +269,9 @@ if($dbID>0) {
         
         echo $dbID;
     }else{
+        
+        $system->addError(HEURIST_DB_ERROR, 'Cannot write record in Heurist master index ', $dbID);
+        
         $error = 'Cannot write record in Heurist master index database<br>'
         .'The URL may have been registered with a previous database.<br>'
         .'Please contact <a href=mailto:info@heuristNetwork.org> Heurist developers</a> for advice';

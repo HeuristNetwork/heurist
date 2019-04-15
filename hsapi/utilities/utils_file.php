@@ -786,7 +786,11 @@ function loadRemoteURLContentSpecial($url){
         //if requested url is on the same server 
         //replace URL to script path in current installation folder
         //and execute script 
-        $path = str_replace(HEURIST_BASE_URL, HEURIST_DIR, $url);
+        if(strpos($url, HEURIST_INDEX_BASE_URL)===0){
+            $path = str_replace(HEURIST_INDEX_BASE_URL, HEURIST_DIR, $url);
+        }else{
+            $path = str_replace(HEURIST_BASE_URL, HEURIST_DIR, $url);
+        }
 
         $path = substr($path,0,strpos($path,'?'));
 

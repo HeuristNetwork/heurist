@@ -31,7 +31,9 @@ define('PDIR','../../../');  //need for proper path to js and css
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 
-if(!$system->is_dbowner() && $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
+$sysadmin_pwd = @$_REQUEST['pwd'];
+
+if(!$system->is_dbowner() && $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions) ){
     $err = $response = $system->getError();
     print @$err['message'];
     exit();
@@ -128,7 +130,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
                     $isRegistrationInProgress = false;
                 }
                 
-                if($dbNewID!=null){
+                if($dbNewID!=null && $dbNewID!=''){
                                             
                     if($dbNewID>0 && $dbNewID<4294967295) {
                         
@@ -145,8 +147,6 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
                         echo "<p style='color:red;font-weight:bold'>The database ID must be positive number</p>";
                         $isRegistrationInProgress = false;
                     }
-                    
-                    
                 }
             }
 
@@ -159,7 +159,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             }else if ($isAlreadyRegistred)
             { // already registered, display info and link to Heurist_Master_Index edit
             
-            $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
+                $edit_url = HEURIST_INDEX_BASE_URL.'?fmt=edit&recID='.$dbID.'&db='.HEURIST_INDEX_DATABASE;
 ?>
     <fieldset>
     
@@ -212,6 +212,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
             <div id="registerDBForm" class="input-row" style="margin-top: 20px;">
                 <form action="registerDB.php" method="POST" name="NewDBRegistration">
                    
+                   <input type="hidden" name="pwd" value="<?=$sysadmin_pwd?>">
                    <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
 <fieldset style="padding-right:30px">
     
@@ -333,12 +334,12 @@ function registerDatabase() {
                 "&usrLastName=" . $usrLastName . "&usrEmail=".$usrEmail
                 ."&serverURL=" . rawurlencode($serverURL);
                 
-                if($dbNewID>0){
+                if($dbNewID!=null && intval($dbNewID)>0){
                     $reg_url = $reg_url.'&newid='.$dbNewID;
                 }
-                
-                $data = loadRemoteURLContentSpecial($reg_url); //without proxy
 
+                $data = loadRemoteURLContentSpecial($reg_url); //without proxy
+                
                 if (!isset($data) || $data==null) {
                     
                     echo '<p class="ui-state-error">'
