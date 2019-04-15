@@ -1961,6 +1961,7 @@
     }
 
     // @todo REMOVE - all these functions are duplicated in VerifyValue and db_structure
+    // see DbsTerms->getListForParent
     function getTermsByParent($term_id, $domain, $getalldescents = true)
     {
         global $terms;
@@ -2042,6 +2043,8 @@
         }
 
         if($terms_ids){
+            
+            //see DbsTerms->getAllTermsForField
 
             $allowed_terms = null;
 

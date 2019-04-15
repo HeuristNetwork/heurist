@@ -124,7 +124,14 @@
     $system->defineConstant('DT_PARENT_ENTITY');    
         
     if($is_csv){
-        output_CSV($system, $response, $params);
+        
+        if(@$params['prefs']['csv_headeronly'])
+        {
+            output_HeaderOnly($system, $response, $params);
+        }else{
+            output_CSV($system, $response, $params);    
+        }
+        
     }else{
         
         //header('Content-type: application/json;charset=UTF-8');
@@ -259,9 +266,7 @@ function output_CSV($system, $data, $params){
 
     $data = $data['data'];
     
-    $csv_headeronly =  @$params['prefs']['csv_headeronly']?$params['prefs']['csv_headeronly']:false;
-    
-    if(!$csv_headeronly && !(@$data['reccount']>0)){
+    if(!(@$data['reccount']>0)){
         print 'EMPTY RESULT SET'; //'empty result set';
         return;
     }
@@ -390,19 +395,8 @@ function output_CSV($system, $data, $params){
     $csv_header =  $params['prefs']['csv_header']?$params['prefs']['csv_header']:true;
     
     //------------
-    if($csv_headeronly){
-        //stub
-        $records = array();
-        foreach($headers as $rty_ID => $columns){
-            if(count($columns)>1){
-                $records[] = $rty_ID;
-            }
-        }
-    }else{
-        $records = $data['records'];    
-    }
+    $records = $data['records'];    
     
-    $records_out = array(); //ids already out
     $streams = array(); //one per record type
     $rt_counts = array();
     
@@ -412,16 +406,11 @@ function output_CSV($system, $data, $params){
     $idx = 0;
     while ($idx<count($records)){ //replace to WHILE
     
-        if($csv_headeronly){
-            $rty_ID = $records[$idx];
-        }else{
-            $recID = $records[$idx];
-            $record = recordSearchByID($system, $recID, false);
-            $rty_ID = ($any_rectype!=null)?$any_rectype :$record['rec_RecTypeID'];
-        }
+        $recID = $records[$idx];
+        $record = recordSearchByID($system, $recID, false);
+        $rty_ID = ($any_rectype!=null)?$any_rectype :$record['rec_RecTypeID'];
 
         $idx++;
-
         
         if(!@$fields[$rty_ID]) continue; //none of fields for this record type marked to output
         
@@ -437,15 +426,12 @@ function output_CSV($system, $data, $params){
             if($csv_header)
                 fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure);
             
-            
             $rt_counts[$rty_ID] = 1;
         }else{
             $fd = $streams[$rty_ID];
             
             $rt_counts[$rty_ID]++;
         }
-        
-        if($csv_headeronly) continue;
         
         if(count(@$details[$rty_ID])>0){
             //fills $record
@@ -667,111 +653,7 @@ function output_CSV($system, $data, $params){
     
     $error_log[] = print_r($rt_counts, true);
         
-    if($count_streams<2){
-        
-        $out = false;
-        $rty_ID = 0;
-        
-        if(count($streams)==0){
-            array_push($error_log, "Streams are not defined");
-        }else{
-            $rty_ID = array_keys($streams);
-            $rty_ID = $rty_ID[0];
-        
-            $filename = 'Export_'.$system->dbname();
-            if($rty_ID>0){
-                        $filename = $filename.'_'.$rty_ID.'_'.$rtStructs['names'][$rty_ID];
-            }
-            $filename = $filename.'_'.date("YmdHis").'.csv';
-        
-            $fd = $streams[$rty_ID];
-
-            if($fd==null){
-                array_push($error_log, "Stream for record type $rty_ID is not defined");
-            }else{
-                rewind($fd);
-                $out = stream_get_contents($fd);
-                fclose($fd);
-            }
-        }
-
-        if($out===false || strlen($out)==0){
-            array_push($error_log, "Stream for record type $rty_ID is empty");
-            $out = implode(PHP_EOL, $error_log);
-        }
-        
-        header('Content-Type: text/csv');
-        header('Content-disposition: attachment; filename='.$filename);
-        header('Content-Length: ' . strlen($out));
-        exit($out);
-        
-    }else{
-    
-        $zipname = 'Export_'.$system->dbname().'_'.date("YmdHis").'.zip';
-        $destination = tempnam(HEURIST_SCRATCH_DIR, "zip");
-        
-        $zip = new ZipArchive();
-        if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
-            array_push($error_log, "Cannot create zip $destination");    
-        }else{
-            $is_first = true;
-        
-            foreach($streams as $rty_ID => $fd){
-                
-                if($fd==null){
-                    array_push($error_log, "Stream for record type $rty_ID is not defined");
-                }else{
-                    // return to the start of the stream
-                    rewind($fd);
-                    
-                    if($is_first || count($headers[$rty_ID])>1){
-                        $is_first = false;
-                    
-                        $content = stream_get_contents($fd);
-
-                        if($content===false || strlen($content)==0){
-                            array_push($error_log, "Stream for record type $rty_ID is empty");
-                        }else{
-                            // add the in-memory file to the archive, giving a name
-                            $zip->addFromString('rectype-'.$rty_ID.'.csv',  $content);
-                        }
-                        
-                    }
-                    //close the file
-                    fclose($fd);
-                }
-            }    
-            
-            if(count($error_log)>0){
-                $zip->addFromString('log.txt', implode(PHP_EOL, $error_log) );
-            }
-            
-            // close the archive
-            $zip->close();
-        }
-        
-        if(@file_exists($destination)>0){
-        
-            header('Content-Type: application/zip');
-            header('Content-disposition: attachment; filename='.$zipname);
-            header('Content-Length: ' . filesize($destination));
-            readfile($destination);
-
-            // remove the zip archive
-            unlink($destination);    
-        
-        }else{
-            array_push($error_log, "Zip archive ".$destination." doesn't exist");
-            
-            $out = implode(PHP_EOL, $error_log);
-            header('Content-Type: text/csv');
-            header('Content-disposition: attachment; filename=log.txt');
-            header('Content-Length: ' . strlen($out));
-            exit($out);
-            
-        }
-        
-    }
+    writeResults( $streams, 'Export_'.$system->dbname(), $headers, $error_log );
     
 //DEBUG error_log(print_r($error_log,true));
 
@@ -960,6 +842,322 @@ function output_Records($system, $data, $params){
     unlink($tmp_destination);
     
 }
+
+//
+//
+//
+function output_HeaderOnly($system, $data, $params){
+    
+    $include_term_ids = (@$params['prefs']['include_term_ids']==1);
+    $include_term_codes = (@$params['prefs']['include_term_codes']==1);
+    $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
+    $include_term_hierarchy = (@$params['prefs']['include_term_hierarchy']==1);
+    
+    $fields = @$params['prefs']['fields'];
+    $details = array();  //array of detail fields included into output
+    $relmarker_details = array(); //relmarker fields included into output
+    
+    $rtStructs = dbs_GetRectypeStructures($system, null, 2);
+    $idx_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+    $idx_dtype = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
+    $idx_term_tree = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
+    $idx_term_nosel = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+    
+
+    //create header
+    $any_rectype = null;
+    $headers = array();
+    $terms_pickup = array();
+    if($fields){
+        foreach($fields as $rt=>$flds){
+            
+            //always include ID field into output
+            if($flds[0]!='rec_ID') array_unshift($flds, 'rec_ID');
+            $fields[$rt] = $flds;
+            
+            $details[$rt] = array();
+            $headers[$rt] = array();
+            $relmarker_details[$rt] = array();
+            
+            foreach($flds as $dt_id){
+                
+                $constr_rt_id = 0;
+                if(strpos($dt_id,':')>0){ //for constrained resource fields
+                    //example author:person or organization
+                    list($dt_id, $constr_rt_id) = explode(':',$dt_id);
+                }
+                
+                $field_name_title = '';
+                
+                if(is_numeric($dt_id) && $dt_id>0){
+                    
+                    if($dt_id==DT_PARENT_ENTITY){
+                        $field_name = 'Parent entity';
+                        $field_type = 'resource';
+                    }else{
+                        //get field name from structure
+                        $field_name = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_name];
+                        $field_type = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
+                    }
+                    if($constr_rt_id>0){
+                        $rectypename_is_in_fieldname = (strpos(strtolower($field_name), 
+                                            strtolower($rtStructs['names'][$constr_rt_id]))!==false);
+                        $field_name_title = $field_name.' '
+                                                //.($rectypename_is_in_fieldname?'':($rtStructs['names'][$constr_rt_id].' '))
+                                                .'RecordTitle';
+                        $field_name = $field_name.($rectypename_is_in_fieldname
+                                            ?'':' ('.$rtStructs['names'][$constr_rt_id].')').' H-ID';
+                    }else{
+                        $field_name_title = $field_name.' RecordTitle';
+                    }
+                    if($field_type=='relmarker'){
+                        $relmarker_details[$rt][$dt_id] = $constr_rt_id; 
+                    }else{
+                        array_push($details[$rt], $dt_id);    
+                    }
+                    
+                }else{
+                    //record header
+                    $field_type = null;
+                    
+                    if($dt_id=='rec_ID'){
+                        if($rt>0){
+                            $field_name = $rtStructs['names'][$rt].' H-ID';
+                        }else{
+                            $field_name = 'H-ID';
+                            $any_rectype = $rt;
+                        }
+                    }else{
+                        $field_name = $dt_id; //record header field
+                    }
+                }
+    
+                if($field_type=='enum' || $field_type=='relationtype'){
+
+                    array_push($headers[$rt], $field_name);  //labels are always included           
+                    
+                    if($include_term_ids){
+                        array_push($headers[$rt], $field_name.' ID');            
+                    }
+                    
+                    if($include_term_codes){
+                        array_push($headers[$rt], $field_name.' StdCode' );   
+                    }    
+                    
+                    //add terms pickup list
+                    if(!@$terms_pickup[$rt]) $terms_pickup[$rt] = array();
+                    $terms_pickup[$rt][$dt_id] = array('name'=>$field_name, 'domain'=>$field_type,
+                                             'term_ids'=>$rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_term_tree],
+                                             'nonsel'=>$rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_term_tree]);
+                    
+                }else{
+                    array_push($headers[$rt], $field_name);                
+                }
+                
+                //add title for resource fields
+                if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
+                    array_push($headers[$rt], $field_name_title);            
+                }
+            }
+        }
+    }
+    
+    
+    if(count($terms_pickup)>0) {
+        $rtTerms = dbs_GetTerms($system);
+        $rtTerms = new DbsTerms($system, $rtTerms);
+    }
+    
+    
+    $csv_delimiter =  $params['prefs']['csv_delimiter']?$params['prefs']['csv_delimiter']:',';
+    $csv_enclosure =  $params['prefs']['csv_enclosure']?$params['prefs']['csv_enclosure']:'"';
+   
+    $streams = array(); //one per record type
+    
+    $temp_name = null;    
+    //------------
+    foreach($headers as $rty_ID => $columns){
+        
+        $placeholders = null;
+        $cnt_cols = count($columns);
+        if($cnt_cols>1){
+            if(!@$fields[$rty_ID]) continue; //none of fields for this record type marked to output
+            
+            //prepare terms
+            if(is_array(@$terms_pickup[$rty_ID])){  //there are enum fields for this rt
+                
+                $max_count = 0;
+                $placeholders = array_fill(0, $cnt_cols, '');
+                
+                foreach($terms_pickup[$rty_ID] as $dtid => $field){
+                    $headers[$rty_ID][] = $field['name'].': Lookup list';
+                    $placeholders[] = 'Use to create a value control list';
+                    //get list of terms
+                    $terms = $rtTerms->getAllowedTermsForField( $field['term_ids'], $field['nonsel'], $field['domain'] );
+                    $max_count = max($max_count, count($terms));    
+                    $terms_pickup[$rty_ID][$dtid]['terms'] = $terms;
+                }
+            }
+            
+            $fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
+            $streams[$rty_ID] = $fd;
+            
+            //write header
+            fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure);
+              
+            //write terms
+            if($placeholders!=null){
+                
+                fputcsv($fd, $placeholders, $csv_delimiter, $csv_enclosure);
+            
+                $k = 0;
+                while ($k<$max_count){
+
+                    $placeholders = array_fill(0, $cnt_cols, '');
+                    
+                    foreach($terms_pickup[$rty_ID] as $dtid => $field){
+                        
+                        $terms = $terms_pickup[$rty_ID][$dtid]['terms'];
+
+                        if($k<count($terms)){
+                            $placeholders[] =  $rtTerms->getTermLabel($terms[$k], true);
+                        }else{
+                            $placeholders[] = '';    
+                        }
+                    }//for fields
+                    
+                    fputcsv($fd, $placeholders, $csv_delimiter, $csv_enclosure);
+            
+                    $k++;
+                }//while
+            
+            }
+
+            if($temp_name==null)
+                $temp_name = 'Template_'.$system->dbname().'_'.$rty_ID.'_'.$rtStructs['names'][$rty_ID];
+        }
+    }
+    writeResults( $streams, $temp_name, $headers, null );
+}
+
+   
+//
+//
+//        
+function writeResults( $streams, $temp_name, $headers, $error_log ) {
+  
+    if(count($streams)<2){
+        
+        $out = false;
+        $rty_ID = 0;
+        
+        if(count($streams)==0){
+            if($error_log) array_push($error_log, "Streams are not defined");
+        }else{
+            $rty_ID = array_keys($streams);
+            $rty_ID = $rty_ID[0];
+        
+            $filename = $temp_name;
+            if($rty_ID>0){
+                        $filename = $filename.'_'.$rty_ID.'_'.$rtStructs['names'][$rty_ID];
+            }
+            $filename = $filename.'_'.date("YmdHis").'.csv';
+        
+            $fd = $streams[$rty_ID];
+
+            if($fd==null){
+                if($error_log) array_push($error_log, "Stream for record type $rty_ID is not defined");
+            }else{
+                rewind($fd);
+                $out = stream_get_contents($fd);
+                fclose($fd);
+            }
+        }
+
+        if($out===false || strlen($out)==0){
+            $out = "Stream for record type $rty_ID is empty";
+            if($error_log) {
+                array_push($error_log, $out);   
+                $out = implode(PHP_EOL, $error_log);
+            }
+        }
+        
+        header('Content-Type: text/csv');
+        header('Content-disposition: attachment; filename='.$filename);
+        header('Content-Length: ' . strlen($out));
+        exit($out);
+        
+    }else{
+    
+        $zipname = $temp_name.'_'.date("YmdHis").'.zip';
+        $destination = tempnam(HEURIST_SCRATCH_DIR, "zip");
+        
+        $zip = new ZipArchive();
+        if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
+            array_push($error_log, "Cannot create zip $destination");    
+        }else{
+            $is_first = true;
+        
+            foreach($streams as $rty_ID => $fd){
+                
+                if($fd==null){
+                    array_push($error_log, "Stream for record type $rty_ID is not defined");
+                }else{
+                    // return to the start of the stream
+                    rewind($fd);
+                    
+                    if($is_first || count($headers[$rty_ID])>1){
+                        $is_first = false;
+                    
+                        $content = stream_get_contents($fd);
+
+                        if($content===false || strlen($content)==0){
+                            array_push($error_log, "Stream for record type $rty_ID is empty");
+                        }else{
+                            // add the in-memory file to the archive, giving a name
+                            $zip->addFromString('rectype-'.$rty_ID.'.csv',  $content);
+                        }
+                        
+                    }
+                    //close the file
+                    fclose($fd);
+                }
+            }    
+            
+            if(count($error_log)>0){
+                $zip->addFromString('log.txt', implode(PHP_EOL, $error_log) );
+            }
+            
+            // close the archive
+            $zip->close();
+        }
+        
+        if(@file_exists($destination)>0){
+        
+            header('Content-Type: application/zip');
+            header('Content-disposition: attachment; filename='.$zipname);
+            header('Content-Length: ' . filesize($destination));
+            readfile($destination);
+
+            // remove the zip archive
+            unlink($destination);    
+        
+        }else{
+            array_push($error_log, "Zip archive ".$destination." doesn't exist");
+            
+            $out = implode(PHP_EOL, $error_log);
+            header('Content-Type: text/csv');
+            header('Content-disposition: attachment; filename=log.txt');
+            header('Content-Length: ' . strlen($out));
+            exit($out);
+            
+        }
+        
+    }    
+    
+}       
+       
+
 
 //
 //

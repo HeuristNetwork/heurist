@@ -33,6 +33,8 @@
     *  getTopMostTermParent
     *  doDisambiguateTerms
     *  getSameLevelLabelsAndCodes
+    *  getAllTermsForField
+    *  getListForParent - flat list
     */
     
 class DbsTerms
@@ -376,5 +378,64 @@ class DbsTerms
         }
         return $term_value;
     }
+    
+    //
+    //
+    //
+    public function getAllowedTermsForField($terms_ids, $terms_none, $domain){
+        
+            $allowed_terms = null;
+
+            $terms = $this->getTermsFromFormat($terms_ids, $domain); //parse
+
+            if (($cntTrm = count($terms)) > 0) {
+                if ($cntTrm == 1) { //vocabulary
+                    $vocabId = $terms[0];
+                            
+                    $terms = $this->getListForParent($terms[0], $domain);
+                    if(!in_array($vocabId, $terms))
+                        array_unshift($terms, $vocabId);
+                }else{
+                    
+                    $nonTerms = getAllTermsForField($terms_none, $domain);
+                    if (count($nonTerms) > 0) {
+                        $terms = array_diff($terms, $nonTerms);
+                    }
+                }
+                if (!empty($terms)) {
+                    $allowed_terms = $terms;
+                }
+            }
+            
+            return $allowed_terms;
+        
+    }
+    
+    //
+    //
+    //
+    public function getListForParent($term_id, $domain, $getalldescents = true){
+
+        $offspring = array();
+
+        if(is_array($domain)){
+            $lvl = $domain;
+        }else{
+            $lvl = $this->data['treesByDomain'][$domain];
+        }
+        foreach($lvl as $sub_term_id=>$childs){
+
+            if($term_id==null || $sub_term_id == $term_id){
+                array_push($offspring, $sub_term_id);
+                if( $getalldescents && count($childs)>0) {
+                    $offspring = array_merge($offspring, $this->getListForParent(null, $childs) );
+                }
+            }
+        }
+
+        return $offspring;
+        
+    }
+    
 }  
 ?>
