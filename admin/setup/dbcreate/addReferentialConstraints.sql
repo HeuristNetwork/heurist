@@ -94,7 +94,7 @@ ALTER TABLE recRelationshipsCache
 -- If this fails due to constraint failure you may need to use this first
 -- delete from recDetails where NOT dtl_RecID in (select rec_ID from Records);
 -- 8 in sandpit
-ALTER TABLE  `recUploadedFiles` ENGINE = INNODB;
+-- ALTER TABLE  `recUploadedFiles` ENGINE = INNODB;
 ALTER TABLE recDetails
   ADD CONSTRAINT fk_dtl_RecID FOREIGN KEY (dtl_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT fk_dtl_DetailTypeID FOREIGN KEY (dtl_DetailTypeID) REFERENCES defDetailTypes (dty_ID) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -122,10 +122,11 @@ ALTER TABLE recThreadedComments
   ADD CONSTRAINT fk_cmt_RecID FOREIGN KEY (cmt_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ---------------------------------------------------------------------------
+UPDATE recUploadedFiles left join sysUGrps on ulf_UploaderUGrpID=ugr_ID set ulf_UploaderUGrpID=null where ugr_ID is null  and ulf_ID>0;
 
 ALTER TABLE recUploadedFiles
   ADD CONSTRAINT fk_ulf_UploaderUGrpID FOREIGN KEY (ulf_UploaderUGrpID) REFERENCES sysUGrps (ugr_ID)  ON DELETE set null ON UPDATE CASCADE,
-  ADD CONSTRAINT fk_ulf_MimeExt FOREIGN KEY (ulf_MimeExt) REFERENCES defFileExtToMimetype (fxm_Extension) ON UPDATE CASCADE ON DELETE RESTRICT;
+  ADD CONSTRAINT fk_ulf_MimeExt FOREIGN KEY (ulf_MimeExt) REFERENCES defFileExtToMimetype (fxm_Extension) ON DELETE RESTRICT ON UPDATE CASCADE;
 
   -- ---------------------------------------------------------------------------
 
@@ -134,6 +135,7 @@ ALTER TABLE recUploadedFiles
   ADD CONSTRAINT fk_ugl_GroupID FOREIGN KEY (ugl_GroupID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ---------------------------------------------------------------------------
+DELETE FROM usrBookmarks where bkm_ID>0 and NOT bkm_UGrpID in (select ugr_ID from sysUGrps);
 
 ALTER TABLE usrBookmarks
   ADD CONSTRAINT fk_bkm_UGrpID FOREIGN KEY (bkm_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -141,8 +143,7 @@ ALTER TABLE usrBookmarks
 -- 133 in sandpit @ 4/4/11
 -- delete from usrBookmarks where NOT bkm_RecId in (select rec_ID from Records);
   ADD CONSTRAINT fk_bkm_RecID FOREIGN KEY (bkm_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE;
--- while this does allow someone to delete other people's bookmarks, record deletion is only available to
--- system adminstrators, and the function checks to see if the record has been bookmarked and warns
+
 
 -- ---------------------------------------------------------------------------
 
@@ -162,7 +163,7 @@ ALTER TABLE usrRecTagLinks
 -- users but might allow deletion of workgroup-only tagged records without warning
 
 -- ---------------------------------------------------------------------------
-
+DELETE FROM usrRecentRecords where rre_UGrpID>0 AND NOT rre_UGrpID in (select ugr_ID from sysUGrps);
 ALTER TABLE usrRecentRecords
   ADD CONSTRAINT fk_rre_UGrpID FOREIGN KEY (rre_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT fk_rre_RecID FOREIGN KEY (rre_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -186,7 +187,7 @@ ALTER TABLE usrRemindersBlockList
   ADD CONSTRAINT fk_rbl_UGrpID FOREIGN KEY (rbl_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ---------------------------------------------------------------------------
-
+DELETE FROM usrSavedSearches where svs_ID>0 AND NOT svs_UGrpID in (select ugr_ID from sysUGrps);
 ALTER TABLE usrSavedSearches
   ADD CONSTRAINT fk_svs_UGrpID FOREIGN KEY (svs_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
