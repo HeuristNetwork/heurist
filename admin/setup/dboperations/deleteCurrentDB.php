@@ -148,7 +148,7 @@ function () {
                 style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                 <span class="ui-icon ui-icon-alert" style="float: left; margin-right:.3em;font-weight:bold"></span>
                 Unable to delete <b> <?php echo $dbname;?></b>. <?php echo $message;?>
-                <p>Check that the database still exists. Consult Heurist helpdesk if needed<br></p>
+                <p>Check that the database still exists. <?php echo CONTACT_HEURIST_TEAM;?> if needed<br></p>
             </div>
         </div>
 <?php                            

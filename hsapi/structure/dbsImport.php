@@ -792,13 +792,14 @@ $mysqli->commit();
            $defs = json_decode(gzdecode($defs), true);
            if (!$defs || @$defs['status']!=HEURIST_OK) {
                 $this->system->addError(HEURIST_ERROR,
-                        "Unable to contact the selected source database, possibly due to a timeout or proxy setting");
+                        "Unable to connect the selected source database, possibly due to a timeout or proxy setting");
                 return false;
            }
            $defs = $defs['data'];
         }
         if (!($defs['terms']  &&  ($only_terms || ($defs['rectypes'] && $defs['detailtypes'])))) {
-            $this->system->addError(HEURIST_ERROR, "Structure definitions read from source database # $database_id are invalid. Please advise Heurist development team");
+            $this->system->addError(HEURIST_ERROR, "Structure definitions read from source database # $database_id are invalid. Please "
+                .CONTACT_HEURIST_TEAM);
             return false;
         }
         

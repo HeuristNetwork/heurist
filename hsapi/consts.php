@@ -114,7 +114,6 @@ define('HEURIST_DB_PREFIX', $dbPrefix);
 //---------------------------------
 
 define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2019 The University of Sydney.');
-$talkToSysAdmin="Please advise your system administrator or email info - at - HeuristNetwork.org for assistance.";
 
 /**
 * Response status for ajax requests. See ResponseStatus in hapi.js
@@ -164,6 +163,8 @@ define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org');
 define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org');
 define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO);
 
+define('CONTACT_HEURIST_TEAM', 'contact <a href=mailto:'.HEURIST_MAIL_TO_INFO.'>Heurist team</a> ');
+define('CONTACT_SYSADMIN', 'contact your <a href=mailto:'.HEURIST_MAIL_TO_ADMIN.'>system administrator</a> ');
 
 //
 define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);

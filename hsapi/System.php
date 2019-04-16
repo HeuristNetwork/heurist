@@ -258,7 +258,6 @@ error_log(print_r($_REQUEST, true));
     * @return    int local rectype ID or null if not found
     */
     private function rectypeLocalIDLookup($rtID, $dbID = 2, $reset=false) {
-        global $talkToSysAdmin;
         static $RTIDs;
         
         /*if($dbID==$this->get_system('sys_dbRegisteredID')){
@@ -268,7 +267,7 @@ error_log(print_r($_REQUEST, true));
             $res = $this->mysqli->query('select rty_ID as localID,
             rty_OriginatingDBID as dbID, rty_IDInOriginatingDB as id from defRecTypes order by dbID');
             if (!$res) {
-                echo "Unable to build internal record-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
+                echo "Unable to build internal record-type lookup table. Please ".CONTACT_SYSADMIN." for assistance. MySQL error: " . mysql_error();
                 exit();
             }
             
@@ -320,7 +319,6 @@ error_log(print_r($_REQUEST, true));
     * @return    int local detailtype ID or null if not found
     */
     private function detailtypeLocalIDLookup($dtID, $dbID = 2, $reset=false) {
-        global $talkToSysAdmin;
         static $DTIDs;
         
         /*if($dbID==$this->get_system('sys_dbRegisteredID')){
@@ -329,7 +327,7 @@ error_log(print_r($_REQUEST, true));
         if (!$DTIDs || $reset) {
             $res = $this->mysqli->query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
             if (!$res) {
-                echo "Unable to build internal field-type lookup table. ".$talkToSysAdmin." MySQL error: " . mysql_error();
+                echo "Unable to build internal field-type lookup table. Please ".CONTACT_SYSADMIN." for assistance. MySQL error: " . mysql_error();
                 exit();
             }
                 

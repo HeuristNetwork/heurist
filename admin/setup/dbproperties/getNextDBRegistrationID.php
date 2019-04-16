@@ -172,7 +172,7 @@ if(!($indexdb_user_id>0)) { // did not find the user, create a new one and pass 
     
     if(!($indexdb_user_id>0)) { // Unable to create the new user
         echo '0,Unable to write new user in Heurist master index database<br>'.
-            'Please contact <a href=mailto:info@heuristNetwork.org>Heurist developers</a> for advice';   
+            'Please '.CONTACT_HEURIST_TEAM.' for advice';   
         return;
     }
 
@@ -274,7 +274,7 @@ if($dbID>0) {
         
         $error = 'Cannot write record in Heurist master index database<br>'
         .'The URL may have been registered with a previous database.<br>'
-        .'Please contact <a href=mailto:info@heuristNetwork.org> Heurist developers</a> for advice';
+        .'Please '.CONTACT_HEURIST_TEAM.' for advice';
         echo '0,'. $error;
     }
 }

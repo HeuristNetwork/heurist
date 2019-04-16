@@ -74,14 +74,14 @@
         <div id="page-inner" style="overflow:auto">
         
             <div>Although rollback data has been recorded, there is currently no end-user interface way of rolling
-     back the database. Please contact the Heurist team to request restoration of previous data.</div>
+     back the database. Please <?php echo CONTACT_HEURIST_TEAM;?> to request restoration of previous data.</div>
 
 <?php         
 if (FALSE) {       
 ?>
         
             <div id=errorMsg><span>This function has not yet been converted from Vsn 2</span></div>
-            <div>Please advise Heurist developers if rollback is critical to your use of Heurist</div>
+            <div>Please <?php echo CONTACT_HEURIST_TEAM;?> if rollback is critical to your use of Heurist</div>
 
             <?php
 /* @TODO replace with H4            

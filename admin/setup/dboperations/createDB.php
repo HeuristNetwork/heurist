@@ -178,7 +178,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 $system->addError(HEURIST_SYSTEM_CONFIG, 
                     'Error importing core definitions from coreDefinitions.txt '
                     .' for database '.$database_name_full.'<br>'
-                    .'Please check whether this file or database is valid; consult Heurist support if needed');
+                    .'Please check whether this file or database is valid; '.CONTACT_HEURIST_TEAM.' if needed');
                     
                 mysql__drop_database( $mysqli, $database_name_full );
                 

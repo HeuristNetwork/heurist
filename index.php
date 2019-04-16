@@ -476,7 +476,7 @@ if(strpos('heuristplus', $_SERVER["SERVER_NAME"])===false){
         <div id="heurist-platform-warning" style="display:none;">
             <p style="padding:10px">Heurist is designed primarily for use with a keyboard and mouse. Tablets are not fully supported at this time, except for data collection on Android (see FAIMS in the Help system).</p>
 
-            <p style="padding:10px">Please contact the Heurist developers (info at HeuristNetwork dot org) for further information or to express an interest in a tablet version</p>
+            <p style="padding:10px">Please <?php echo CONTACT_HEURIST_TEAM;?> for further information or to express an interest in a tablet version</p>
         </div> 
 
         <div id="heurist-dialog">

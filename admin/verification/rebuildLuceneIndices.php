@@ -47,7 +47,7 @@
     if ($code ==0) {
         print('<div>Database indices have been rebuilt, please check for errors above</div>');
     } else {
-        print('<div class="ui-state-error">Failed to rebuild indices, please consult Heurist support team (error code: '.$code.')</div>');
+        print('<div class="ui-state-error">Failed to rebuild indices, please '.CONTACT_HEURIST_TEAM.' (error code: '.$code.')</div>');
     }
 ?>
     </body>

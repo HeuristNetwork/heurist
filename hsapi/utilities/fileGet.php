@@ -85,7 +85,7 @@ if($filename){ //download from scratch
             if (!$handle) {
                 $s = null;
                 if (! file_exists($file_read)) $s = ' does not exist.<br><br>'
-                    .'Please clear your browser cache and try again. if problem persists please report immediately to Heurist developers (info at HeuristNetwork dot org)';
+                    .'Please clear your browser cache and try again. if problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
                 else if (! is_readable($file_read)) $s = ' is not readable';
                 else $s = ' could not be read';        
                 

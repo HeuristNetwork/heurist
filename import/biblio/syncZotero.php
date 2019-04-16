@@ -638,9 +638,7 @@ if($step=="1"){  //first step - info about current status
         print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_ignored).'</div>';
     }
     if($cnt_ignored>0 || $isFailure){
-        print "<span><br>Please advise the Heurist development team - info  @ </span>" ;
-        print "<a href ='http://heuristnetwork.org'>Heurist Network</a>" ;
-        print "<span> - to provide a mapping for each of the undefined record types.</span>";
+        print '<span><br>Please '.CONTACT_HEURIST_TEAM.' - to provide a mapping for each of the undefined record types.</span>';
     }
 
     if(count($unresolved_pointers)>0){

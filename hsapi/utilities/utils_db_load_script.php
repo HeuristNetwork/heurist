@@ -175,7 +175,7 @@ if (!$error && !TESTMODE)
 
     error_echo (  
     "<p class=\"error\">Database connection failed due to ".mysqli_connect_error()."</p>\n"
-    ."<p>Edit the database settings in your configuration file, or contact your system administrator.</p>\n");
+    ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
       
   }else{
     $success = $mysqli->select_db($db_name);
@@ -184,7 +184,7 @@ if (!$error && !TESTMODE)
       { 
         error_echo(
             "<p class=\"error\">Database connection failed due to ".$mysqli->error."</p>\n"
-            ."<p>Edit the database settings in your configuration file, or contact your system administrator.</p>\n");
+            ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
       }
   }
     

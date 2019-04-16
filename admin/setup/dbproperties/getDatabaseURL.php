@@ -38,7 +38,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
     $data = loadRemoteURLContentSpecial($reg_url);
 
     if (!$data) {
-        $error_msg = "Unable to contact Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".
+        $error_msg = "Unable to connect Heurist Master Index, possibly due to timeout or proxy setting<br /><br />".
         "URL requested: ".$reg_url;
     }else{
 

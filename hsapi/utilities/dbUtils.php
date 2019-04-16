@@ -417,7 +417,7 @@ class DbUtils {
         if (folderCreate($database_folder, true)){
             folderAddIndexHTML( $database_folder ); //add index file to block directory browsing
         }else{
-            return array('Database root folder. Please check/create directory by hand. Consult Heurist helpdesk if needed');
+            return array('Database root folder. Please check/create directory by hand. Please '.CONTACT_HEURIST_TEAM.' if needed');
         }
 
         $warnings = array();

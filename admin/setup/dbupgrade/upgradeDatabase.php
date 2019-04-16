@@ -127,7 +127,8 @@ if(!defined('PDIR')){
                                 }
 
                             }else{
-                                print "<p style='font-weight:bold'>Cannot find the database upgrade script '".$filename."'. Please contact Heurist support</p>";
+                                print "<p style='font-weight:bold'>Cannot find the database upgrade script '".$filename
+                                ."'. Please ".CONTACT_HEURIST_TEAM."</p>";
                                 $upgrade_success = false;
                                 break;
                             }
@@ -164,7 +165,7 @@ if(!defined('PDIR')){
                         if($system->is_admin()){
 
                             if($src_maj!=$trg_maj){
-                                print '<p style="font-weight:bold">Automatic upgrade applies to minor version updates only (ie. within database version 1, 2 etc.). Please contact Heurist support to upgrade major version (1 => 2, 2 => 3)</p>';
+                                print '<p style="font-weight:bold">Automatic upgrade applies to minor version updates only (ie. within database version 1, 2 etc.). Please '.CONTACT_HEURIST_TEAM.' to upgrade major version (1 => 2, 2 => 3)</p>';
                             }else{
                                 
                                 //verification that all scripts exist and get safety rating from these scrips
@@ -201,7 +202,7 @@ if(!defined('PDIR')){
                                             }
                                             fclose($file);
                                         }else{
-                                            print "<p style='font-weight:bold'>Cannot read the upgrade script '".$filename."'. Please contact Heurist support</p>";
+                                            print "<p style='font-weight:bold'>Cannot read the upgrade script '".$filename."'. Please ".CONTACT_HEURIST_TEAM."</p>";
                                             $is_allfind = false;
                                             break;
                                         }
@@ -212,7 +213,8 @@ if(!defined('PDIR')){
 
                                         $src_min++;
                                     }else{
-                                        print "<p style='font-weight:bold'>Cannot find the upgrade script '".$filename."'. Please contact Heurist support</p>";
+                                        print "<p style='font-weight:bold'>Cannot find the upgrade script '".$filename
+                                        ."'. Please ".CONTACT_HEURIST_TEAM."</p>";
                                         $is_allfind = false;
                                         break;
                                     }
@@ -278,7 +280,7 @@ if(!defined('PDIR')){
                 <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                     <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
                     Error: Unable to execute $filename for database <?php echo HEURIST_DBNAME; ?><br>
-                    Please check whether this file is valid; consult Heurist helpdesk if needed<br>
+                    Please check whether this file is valid; <?php echo CONTACT_HEURIST_TEAM;?> if needed<br>
                     <button onclick="doLogin(true)">Login</button>
                 </div>
 <?php                        
@@ -291,7 +293,7 @@ if(!defined('PDIR')){
 
         if ($res2 != 0 ) {
             echo ("<p class='error'>Error $res2 on MySQL exec: Unable to execute $filename for database ".HEURIST_DBNAME."<br>");
-            echo ("Please check whether this file is valid; consult Heurist helpdesk if needed<br>&nbsp;<br></p>");
+            echo ("Please check whether this file is valid; ".CONTACT_HEURIST_TEAM." if needed<br>&nbsp;<br></p>");
             echo($output2);
             return false;
         }else{

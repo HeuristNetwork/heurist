@@ -261,7 +261,7 @@ if(@$_REQUEST['mode']=='2'){
     
     if(!$res){
         echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">WARNING: Your database has not been cloned.</h2>'
-        .'Please contact your system administrator or the Heurist developers (support at HeuristNetwork dot org) for assistance with cloning of your database.');
+        .'Please '.CONTACT_SYSADMIN.' or '.CONTACT_HEURIST_TEAM.' for assistance with cloning of your database.');
     }
         
 
@@ -373,8 +373,11 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     //7. cleanup orphaned bookmarks
     $mysqli->query('delete FROM usrBookmarks where bkm_RecID not in (select rec_ID from Records)');
 
-    
-    $sHighLoadWarning = "<p><h4>Note: </h4>Failure to clone a database may result from high server load. Please try again, and if the problem continues contact the Heurist developers at info heuristnetwork dot org</p>";
+/*    
+    echo_flush ("<p>DEBUG. Db created without indicies and triggers</p>");
+    return true;
+*/    
+    $sHighLoadWarning = "<p><h4>Note: </h4>Failure to clone a database may result from high server load. Please try again, and if the problem continues ".CONTACT_HEURIST_TEAM."</p>";
     
     // 4. add contrainsts, procedure and triggers
     echo_flush ("<p>Addition of Referential Constraints</p>");
@@ -382,7 +385,8 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
         DbUtils::databaseDrop( false, $targetdbname_full, false, false );
-        print $sHighLoadWarning;
+        print '<p><h4>Note: </h4>Clone failed due to referential integrity check. Please '
+                .CONTACT_HEURIST_TEAM.' for assistance</p>';
         return false;
     }
 

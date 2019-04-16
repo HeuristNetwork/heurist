@@ -15,7 +15,7 @@ function getMediaFolders($mysqli) {
     $row1 = mysql__select_row($mysqli, $query1);
     if (!$row1) {
         return array('error'=>'Sorry, unable to read the sysIdentification from the current database '.HEURIST_DBNAME
-            .'. Possibly wrong database format, please consult Heurist team');
+            .'. Possibly wrong database format, please '.CONTACT_HEURIST_TEAM);
     }
 
     // Get the set of directories defined in Advanced Properties as FieldHelper indexing directories

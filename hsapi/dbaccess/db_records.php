@@ -1668,7 +1668,7 @@
             $ss = (count($errorValues)>1?'s':'');    
             array_push($errorValues,                                                        
             '<br><br>Please run Verify > Verify integrity to check for and fix data problems.<br>' 
-            .'If the problem cannot be fixed, or re-occurs frequently, please email the Heurist development team (support at HeuristNetwork dor org)');
+            .'If the problem cannot be fixed, or re-occurs frequently, please '.CONTACT_HEURIST_TEAM);
             
             $system->addError(HEURIST_ERROR, 'Encountered invalid value'.$ss
                                                         .' for Record#'.$recID.'<br>'.implode('<br>',$errorValues), null);

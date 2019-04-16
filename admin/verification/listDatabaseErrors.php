@@ -355,7 +355,7 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
                 <a name="field_type"/>
                 <br/><p><br/></p><h3>Warning: Inconsistent field definitions</h3><br/>&nbsp;<br/>
 
-                The following field definitions have inconsistent data (unknown codes for terms and/or record types). This is nothing to be concerned about, unless it reoccurs, in which case please advise Heurist developers<br/><br/>
+                The following field definitions have inconsistent data (unknown codes for terms and/or record types). This is nothing to be concerned about, unless it reoccurs, in which case please <?php echo CONTACT_HEURIST_TEAM;?><br/><br/>
                 To fix the inconsistencies, please click here: <button onclick="repairFieldTypes()">Auto Repair</button>  <br/>&nbsp;<br/>
                 You can also look at the individual field definitions by clicking on the name in the list below<br />&nbsp;<br/>
                 <hr/>
@@ -393,7 +393,7 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
             ?>
                 <br/><p><br/></p><h3>Warning: Wrong field default values for record type structures</h3><br/>&nbsp;<br/>
 
-The following fields' default values in record type structures have inconsistent data (unknown codes for terms). This is nothing to be concerned about, unless it reoccurs, in which case please advise Heurist developers. 
+The following fields' default values in record type structures have inconsistent data (unknown codes for terms). This is nothing to be concerned about, unless it reoccurs, in which case please <?php echo CONTACT_HEURIST_TEAM;?>. 
 <br/><br/>
 You can edit the record type structure by clicking on the name in the list below. Simply opening the problem field and hitting save will in many cases resolve the problem; you may also wish to choose a default value from the dropdown of allowable values.<br />&nbsp;<br/>
                 

@@ -343,7 +343,7 @@ function registerDatabase() {
                 if (!isset($data) || $data==null) {
                     
                     echo '<p class="ui-state-error">'
-                        .'Unable to contact Heurist master index, possibly due to timeout or proxy setting<br />'
+                        .'Unable to connect Heurist master index, possibly due to timeout or proxy setting<br />'
                         ."URL requested: <a href='$reg_url'>$reg_url</a></p>";
                     return false;
                 }
@@ -364,7 +364,7 @@ function registerDatabase() {
                     }else{
                         $msg = "Problem allocating a database identifier from the Heurist master index, " .
                         "returned the following instead of a registration number:\n" . substr($data, 0, 25) .
-                        " ... \nPlease contact <a href=mailto:info@HeuristNetwork.org>Heurist developers</a> for advice";
+                        " ... \nPlease ".CONTACT_HEURIST_TEAM." for advice";
                     }
                     echo '<p class="ui-state-error">'. $msg . "</p><br />";
                     return false;
@@ -431,7 +431,7 @@ function registerDatabase() {
                     } else {
                         $msg = '<div class=wrap><div class="ui-state-error"><span>Unable to write database identification record</span>'.
                         'this database might be incorrectly set up<br />'.
-                        'Please contact <a href=mailto:info@HeuristNetwork.org>Heurist developers</a> for advice</div></div>';
+                        'Please '.CONTACT_HEURIST_TEAM.' for advice</div></div>';
                         echo $msg;
                     } // unable to write db identification record
                 } // successful new DB ID

@@ -432,7 +432,7 @@
         //
         if(@$_REQUEST['verbose']==1 && count($databases)==1){
            if($has_issues){
-               print '<p>The differences indicated are not necessarily of concern, as we make incremental improvements to the core structures, but if there appear to be errors and you are concerned, please contact the Heurist development team with the name of your database and we will check it out</p>';
+               print '<p>The differences indicated are not necessarily of concern, as we make incremental improvements to the core structures, but if there appear to be errors and you are concerned, please '.CONTACT_HEURIST_TEAM.' with the name of your database and we will check it out</p>';
            }else{
                print '<p>No differences found</p>';
            }

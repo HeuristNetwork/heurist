@@ -117,7 +117,7 @@ If the download of listed entity types fails to clear this message, please click
 <br>
 <p id="st2_B" style="display:none;">All entity types are recognised and synched.</p>
 <p>Importing <span id="spanRecCount"></span> items as new records.</p>
-<p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please contact the Heurist team for assistance (support at heuristnetwork dot org or use the bug report function)</p>
+<p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please <?php echo CONTACT_HEURIST_TEAM;?> for assistance (support at heuristnetwork dot org or use the bug report function)</p>
            <br><br>
            <button id="btn_ImportRecords">Import Records</button>
         </div>

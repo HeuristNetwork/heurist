@@ -110,7 +110,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     $s = null;
     if (! file_exists($upload_file_name)) $s = ' does not exist.<br><br>'
     .'Please clear your browser cache and try again. '
-    .' If problem persists please report immediately to Heurist developers (info at HeuristNetwork dot org)';
+    .' If problem persists please '.CONTACT_HEURIST_TEAM.' immediately';
     else if (! is_readable($upload_file_name)) $s = ' is not readable';
         
     if($s){
