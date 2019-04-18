@@ -661,7 +661,9 @@ window.hWin.HEURIST4.util = {
         return 100 - widthWithScroll;
     },
 
-    // @todo change temporal to moment.js for conversion
+    //
+    // Parse string date using Temoral library
+    //
     parseDates: function(start, end){
          if(window['Temporal'] && (start || end)){   
                 //Temporal.isValidFormat(start)){

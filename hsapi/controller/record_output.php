@@ -48,9 +48,17 @@
     require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
     require_once(dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
+    require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
+    
+    
     $response = array();
 
     $system = new System();
+    
+    //global variable to keep defs
+    $rtStructs = null;
+    $detailtypes = null;
+    $rtTerms = null;
     
     if(@$_REQUEST['postdata']){
         //in export csv all parameters send as json array in postdata 
@@ -122,6 +130,8 @@
     }
         
     $system->defineConstant('DT_PARENT_ENTITY');    
+    $system->defineConstant('DT_START_DATE');
+    $system->defineConstant('DT_END_DATE');
         
     if($is_csv){
         
@@ -252,12 +262,13 @@ if parameter prefs.fields is defined it creates separate file for every record t
                                
 fields {rtid:{id, url, title, dt1, dt2, ....  dt4:resource_rt1, dt4:resource_rt2  } }                               
                                
-for constrained resourse fields we use "dt#:rt#"                                
+for constrained resource fields we use "dt#:rt#"                                
 @todo for enum fields use dt#:code,dt#:id,dt#:label
                                
 NOTE: fastest way it simple concatenation in comparison to fputcsv and implode. We use fputcsv
 */
 function output_CSV($system, $data, $params){
+    global $rtStructs;
     
     if (!($data && @$data['status']==HEURIST_OK)){
         print print_r($data, true); //print out error array
@@ -281,7 +292,7 @@ function output_CSV($system, $data, $params){
     $details = array();  //array of detail fields included into output
     $relmarker_details = array(); //relmarker fields included into output
     
-    $rtStructs = dbs_GetRectypeStructures($system, null, 2);
+    if($rtStructs==null) $rtStructs = dbs_GetRectypeStructures($system, null, 2);
     $idx_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
     $idx_term_tree = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
@@ -664,7 +675,7 @@ function output_CSV($system, $data, $params){
 // output records as json or xml 
 //
 // $parmas 
-//    format - json|xml
+//    format - json|geojson|xml
 //    defs  0|1  include database definitions
 //    file  0|1
 //    zip   0|1
@@ -673,6 +684,7 @@ function output_CSV($system, $data, $params){
 //      split records by 1000 entries chunks
 //
 function output_Records($system, $data, $params){
+    global $rtStructs;
     
     if (!($data && @$data['status']==HEURIST_OK)){
         return false;
@@ -700,17 +712,27 @@ function output_Records($system, $data, $params){
         return false;
     }   
     
-    if(@$params['restapi']==1){
+    //OPEN BRACKETS
+    if($params['format']=='geojson'){
+
+        fwrite($fd, '[');         
+        
+    }else if(@$params['restapi']==1){
+        
         if(count($records)==1 && @$params['recID']>0){
             //fwrite($fd, '');             
         }else{
+            //@todo xml for api
             fwrite($fd, '{"records":[');             
         }
+        
     }else if($params['format']=='json'){
         fwrite($fd, '{"heurist":{"records":[');         
     }else{
         fwrite($fd, '<?xml version="1.0" encoding="UTF-8"?><heurist><records>');     
     }
+
+    //CONTENT
     
     $comma = '';
     
@@ -729,7 +751,12 @@ function output_Records($system, $data, $params){
             $rt_counts[$rty_ID]++;
         }
         
-        if($params['format']=='json'){
+        if($params['format']=='geojson'){
+
+            fwrite($fd, $comma.json_encode(getGeoJsonFeature($record)));
+            $comma = ',';
+        
+        }else if($params['format']=='json'){ 
             fwrite($fd, $comma.json_encode($record));
             $comma = ',';
         }else{
@@ -740,10 +767,18 @@ function output_Records($system, $data, $params){
         }
     }//while records
     
-    if(@$params['restapi']==1){
+    
+    //CLOSE brackets
+    
+    if($params['format']=='geojson'){
+        
+        fwrite($fd, ']');
+        
+    }else if(@$params['restapi']==1){
         if(count($records)==1 && @$params['recID']>0){
             //fwrite($fd, '');             
-        }else{
+        }else{ 
+            //@todo xml for api
             fwrite($fd, ']}');             
         }
     }else{
@@ -754,65 +789,69 @@ function output_Records($system, $data, $params){
             fwrite($fd, '</records>');     
         }
         
-        // include defintions
-        if(@$params['defs']==1){
-            
-            $rectypes = dbs_GetRectypeStructures($system, null, 2);
-            $detailtypes = dbs_GetDetailTypes($system, null, 2);
-            $terms = dbs_GetTerms($system);
-            
-            unset($rectypes['names']);
-            unset($rectypes['pluralNames']);
-            unset($rectypes['groups']);
-            unset($rectypes['dtDisplayOrder']);
-            
-            unset($detailtypes['names']);
-            unset($detailtypes['groups']);
-            unset($detailtypes['rectypeUsage']);
+        if($params['format']!=='geojson'){
+        
+            // include defintions
+            if(@$params['defs']==1){
+                
+                if($rtStructs==null) $rectypes = dbs_GetRectypeStructures($system, null, 2);
+                $detailtypes = dbs_GetDetailTypes($system, null, 2);
+                $terms = dbs_GetTerms($system);
+                
+                unset($rectypes['names']);
+                unset($rectypes['pluralNames']);
+                unset($rectypes['groups']);
+                unset($rectypes['dtDisplayOrder']);
+                
+                unset($detailtypes['names']);
+                unset($detailtypes['groups']);
+                unset($detailtypes['rectypeUsage']);
 
-            $rectypes = array('rectypes'=>$rectypes);
-            $detailtypes = array('detailtypes'=>$detailtypes);
-            $terms = array('terms'=>$terms);
+                $rectypes = array('rectypes'=>$rectypes);
+                $detailtypes = array('detailtypes'=>$detailtypes);
+                $terms = array('terms'=>$terms);
+                
+                if($params['format']=='json'){
+                    fwrite($fd, ',{"definitions":['); 
+                    fwrite($fd, json_encode($rectypes).',');
+                    fwrite($fd, json_encode($detailtypes).',');
+                    fwrite($fd, json_encode($terms));
+                    fwrite($fd, ']}'); 
+                }else{
+                    $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><definitions/>');
+                    array_to_xml($rectypes, $xml);
+                    array_to_xml($detailtypes, $xml);
+                    array_to_xml($terms, $xml);
+                    fwrite($fd, substr($xml->asXML(),38));
+                }
+            }
+            
+            //add database information to be able to load definitions later
+            $dbID = $system->get_system('sys_dbRegisteredID');
+            $database_info = array('id'=>$dbID, 
+                                                'url'=>HEURIST_BASE_URL, 
+                                                'db'=>$system->dbname());
+                
+            $query = 'select rty_ID,rty_Name,'
+            ."if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID"
+            .' from defRecTypes where rty_ID in ('.implode(',',array_keys($rt_counts)).')';    
+            $rectypes = mysql__select_all($system->get_mysqli(),$query,1);    
+                
+            foreach($rt_counts as $rtid => $cnt){
+                $rt_counts[$rtid] = array('name'=>$rectypes[$rtid][0],'code'=>$rectypes[$rtid][1],'count'=>$cnt);
+            }
+            $database_info['rectypes'] = $rt_counts;
             
             if($params['format']=='json'){
-                fwrite($fd, ',{"definitions":['); 
-                fwrite($fd, json_encode($rectypes).',');
-                fwrite($fd, json_encode($detailtypes).',');
-                fwrite($fd, json_encode($terms));
-                fwrite($fd, ']}'); 
+                fwrite($fd, ',"database":'.json_encode($database_info));
+                fwrite($fd, '}}');     
             }else{
-                $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><definitions/>');
-                array_to_xml($rectypes, $xml);
-                array_to_xml($detailtypes, $xml);
-                array_to_xml($terms, $xml);
+                $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
+                array_to_xml($database_info, $xml);
                 fwrite($fd, substr($xml->asXML(),38));
+                fwrite($fd, '</heurist>');     
             }
-        }
-        
-        //add database information to be able to load definitions later
-        $dbID = $system->get_system('sys_dbRegisteredID');
-        $database_info = array('id'=>$dbID, 
-                                            'url'=>HEURIST_BASE_URL, 
-                                            'db'=>$system->dbname());
             
-        $query = 'select rty_ID,rty_Name,'
-        ."if(rty_OriginatingDBID, concat(cast(rty_OriginatingDBID as char(5)),'-',cast(rty_IDInOriginatingDB as char(5))), concat('$dbID-',cast(rty_ID as char(5)))) as rty_ConceptID"
-        .' from defRecTypes where rty_ID in ('.implode(',',array_keys($rt_counts)).')';    
-        $rectypes = mysql__select_all($system->get_mysqli(),$query,1);    
-            
-        foreach($rt_counts as $rtid => $cnt){
-            $rt_counts[$rtid] = array('name'=>$rectypes[$rtid][0],'code'=>$rectypes[$rtid][1],'count'=>$cnt);
-        }
-        $database_info['rectypes'] = $rt_counts;
-        
-        if($params['format']=='json'){
-            fwrite($fd, ',"database":'.json_encode($database_info));
-            fwrite($fd, '}}');     
-        }else{
-            $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
-            array_to_xml($database_info, $xml);
-            fwrite($fd, substr($xml->asXML(),38));
-            fwrite($fd, '</heurist>');     
         }
         
     }
@@ -821,13 +860,11 @@ function output_Records($system, $data, $params){
         
     }else{
  
-        //rewind($fd);   
-        //@todo read and output chunk
         //$content = stream_get_contents($fd);
         $content = file_get_contents($tmp_destination);
         fclose($fd);
         
-        if($params['format']=='json'){
+        if($params['format']=='json' || $params['format']=='geojson'){
             header( 'Content-Type: application/json');    
         }else{
             header( 'Content-Type: text/xml');
@@ -844,9 +881,11 @@ function output_Records($system, $data, $params){
 }
 
 //
+// output rectordtype template as csv (and terms pckup list)
 //
-//
-function output_HeaderOnly($system, $data, $params){
+function output_HeaderOnly($system, $data, $params)
+{
+    global $rtStructs;
     
     $include_term_ids = (@$params['prefs']['include_term_ids']==1);
     $include_term_codes = (@$params['prefs']['include_term_codes']==1);
@@ -857,7 +896,7 @@ function output_HeaderOnly($system, $data, $params){
     $details = array();  //array of detail fields included into output
     $relmarker_details = array(); //relmarker fields included into output
     
-    $rtStructs = dbs_GetRectypeStructures($system, null, 2);
+    if($rtStructs==null) $rtStructs = dbs_GetRectypeStructures($system, null, 2);
     $idx_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
     $idx_term_tree = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
@@ -1042,7 +1081,7 @@ function output_HeaderOnly($system, $data, $params){
 
    
 //
-//
+// save streams into file and zip 
 //        
 function writeResults( $streams, $temp_name, $headers, $error_log ) {
   
@@ -1160,7 +1199,7 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
 
 
 //
-//
+// json to xml
 //
 function array_to_xml( $data, &$xml_data ) {
     foreach( $data as $key => $value ) {
@@ -1174,5 +1213,170 @@ function array_to_xml( $data, &$xml_data ) {
             $xml_data->addChild("$key",htmlspecialchars("$value"));
         }
      }
+}
+
+//
+// convert heurist record to GeoJSON Feasture
+//
+function getGeoJsonFeature($record, $extended=false){
+    
+    global $system, $rtStructs, $detailtypes, $rtTerms;
+
+    $rtTerms = null;
+    
+    if($extended){
+        if($rtStructs==null) $rtStructs = dbs_GetRectypeStructures($system, null, 2);
+        $idx_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+        
+        if($rtTerms==null) {
+            $rtTerms = dbs_GetTerms($system);
+            $rtTerms = new DbsTerms($system, $rtTerms);
+        }
+    }
+    
+    if($detailtypes==null) $detailtypes = dbs_GetDetailTypes($system, null, 2);
+    $idx_dname = $detailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
+    $idx_dtype = $detailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
+    $idx_ccode = $detailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
+
+    $res = array('type'=>'Feature',
+           'id'=>$record['rec_ID'], 
+           'properties'=>array(),
+           'geometry'=>array());
+
+    $rty_ID = $record['rec_RecTypeID'];
+    
+    $res['properties'] = $record;
+    $res['properties']['details'] = array();
+    
+    $geovalues = array();
+    $timevalues = array();
+    $date_start = null;
+    $date_end = null;
+               
+    //convert details to proper JSON format, extract geo fields and convert WKT to geojson geometry
+    foreach ($record['details'] as $dty_ID=>$field_details) {
+
+        $field_type = $detailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
+        
+        foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
+            
+            if(is_array($value)){
+                if(@$value['file']){
+                    //remove some fields
+                    $val = $value['file'];
+                    unset($val['ulf_ID']);
+                    unset($val['fullPath']);
+                    unset($val['ulf_Parameters']);
+                    
+                }else if(@$value['id']){ //resource
+                    $val = $value['id'];
+                }else if(@$value['geo']){
+                    
+                    $wkt = $value['geo']['wkt'];
+                    if($value['geo']['type']=='r'){
+                        //@todo convert rect to polygone  
+                        
+                    }else if($value['geo']['type']='c'){
+                        //@todo convert circle to polygone
+                        
+                    }
+                    
+                    $geom = geoPHP::load($wkt, 'wkt');
+                    if(!$geom->isEmpty()){
+                       
+                       $geojson_adapter = new GeoJSON(); 
+                       $geojson_res = $geojson_adapter->write($geom, true); 
+                       
+                       if(count($geojson_res['coordinates'])>0){
+                            $geovalues[] = $geojson_res;
+                       }
+                    }
+                    
+                    $val = $wkt;
+                    continue;  //it will be inccluded into separate geometry property  
+                }
+            }else{
+                if($field_type=='date' || $field_type=='year'){
+                    if($dty_ID==DT_START_DATE){
+                         $date_start = temporalToSimple($value);
+                    }else if($dty_ID==DT_END_DATE){
+                         $date_end = temporalToSimple($value);
+                    }else{
+                        //parse temporal
+                        $ta = temporalToSimpleRange($value);
+                        if($value!=null) $timevalues[] = $ta;
+                    }
+                }  
+                $val = $value;
+            }
+
+            $val = array('ID'=>$dty_ID,'value'=>$val);
+            
+            if(@$value['id']>0){ //resource
+                $val['resourceTitle']     = @$value['title'];
+                $val['resourceRecTypeID'] = @$value['type'];
+            }
+
+            if($extended){
+                //It needs to include the field name and term label and term standard code.
+                if($field_type=='enum' || $field_type=='relationtype'){
+                   $val['termLabel'] = $rtTerms->getTermLabel($val, true);
+                   $term_code  = $rtTerms->getTermCode($val);
+                   if(!$term_code) $val['termCode'] = $term_code;    
+                }
+
+                if(@$rtStructs['typedefs'][$rty_ID]['dtFields'][$dty_ID]){
+                    $val['fieldName'] = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];    
+                }else{
+                    //non standard field
+                    $val['fieldName'] = $detailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];    
+                }
+                
+                $val['fieldType'] = $field_type;
+                $val['conceptID'] = $detailtypes['typedefs'][$dty_ID]['commonFields'][$idx_ccode];
+            }
+            
+            $res['properties']['details'][] = $val;
+        } //for detail multivalues
+    } //for all details of record
+      
+    
+    if(count($geovalues)>1){
+        $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
+    }else if(count($geovalues)==1){
+        $res['geometry'] = $geovalues[0];
+    }
+
+    if($date_start!=null || $date_end!=null){
+        if($date_start==null){
+            $date_start = $date_end;
+        }
+        if($date_end==null) $date_end = '';
+        $timevalues[] = array($date_start,'','',$date_end,'');
+    }
+    
+    if(count($timevalues)>0){
+        
+        $res['when'] = array('timespans'=>$timevalues);
+        
+/*
+https://github.com/kgeographer/topotime/wiki/GeoJSON%E2%80%90T
+
+"when": {
+  "timespans": [["-323-01-01 ","","","-101-12-31","Hellenistic period"]],  [start, latest-start, earliest-end, end, label]
+  "duration": "?",  //an integer followed by a single letter (d, m, y for day, month, years respectively)
+  "periods": [{
+    "name": "Hellenistic Period",
+    "period_uri": " http://n2t.net/ark:/99152/p0mn2ndq6bv"
+ }],
+  "follows": "<feature or geometry id>",  optional, internal identifier for the preceding segment of an ordered set
+}
+
+*/   
+    }
+    
+    return $res;
+ 
 }
 ?>

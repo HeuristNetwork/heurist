@@ -236,6 +236,8 @@ function hexportMenu() {
             _exportRecords('hml',true,false,true);
         }else if(action == "menu-export-json-multifile"){ 
             _exportRecords('json',true,false,true);  //all, multifile
+        }else if(action == "menu-export-geojson-multifile"){ 
+            _exportRecords('geojson',true,false,true);  //all, multifile
         }else if(action == "menu-export-kml"){
             _exportKML(true);
         }else if(action == "menu-export-rss"){
@@ -293,7 +295,7 @@ function hexportMenu() {
                 
             }else{
                 script = 'hsapi/controller/record_output.php';
-                params = 'format=json&file=0&defs=0';
+                params = 'format='+format+'&file=0&defs=0';
             }
             
 

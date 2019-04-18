@@ -30,84 +30,116 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+/*
+parse tempoaral string and returns array of values
+CLD - calendar
+CL2 
+
+TYP - type: s (simple), f (fuzzy), c (carbon), p (probability range) 
+
+DAT  - date for s,f,c
+RNG  - range for f
+
+for carbon
+BPD, BCE - 
+DEV, DVP, DVN
+
+for probability rnage
+PDB - probably begin
+PDE - end
+TPQ -
+TAQ - 
+
+*/
+function temporalToArray( $value ){
+
+    if (strpos($value,"|")!==false) {// temporal encoded date
+
+        $tDate = array();
+        $props = explode("|",substr_replace($value,"",0,1)); // remove first verticle bar and create array
+        foreach ($props as $prop) {//create an assoc array
+            list($tag, $val) = explode("=",$prop);
+            $tDate[$tag] = $val;
+        }
+
+        if (@$tDate["CLD"] && @$tDate["CL2"] && strtolower($tDate["CLD"])!='gregorian') {
+            $cld = $tDate["CL2"]." ".$tDate["CLD"];
+            if(strpos($cld,'null')!==false) $tDate["CLD"] = substr($cld,4); //some dates were saved in wrong format - fix it
+        }        
+    
+    }  else {
+          $tDate = array('TYP'=>'s', 'DAT'=>$value);
+    } 
+    
+    return $tDate; 
+}
+
+//
+//
+//
 function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 
-		if (strpos($value,"|")!==false) {// temporal encoded date
-			$value2 = $value;
-            $cld = null;
-			$tDate = array();
-			$props = explode("|",substr_replace($value2,"",0,1)); // remove first verticle bar and create array
-			foreach ($props as $prop) {//create an assoc array
-				list($tag, $val) = explode("=",$prop);
-				$tDate[$tag] = $val;
-			}
-            
-            if (@$tDate["CLD"] && @$tDate["CL2"] && strtolower($tDate["CLD"])!='gregorian') {
-                $cld = $tDate["CL2"]." ".$tDate["CLD"];
-                if(strpos($cld,'null')!==false) $cld = substr($cld,4); //some dates were saved in wrong format - fix it
-            }
-            
-            $is_greg_or_julian = ((!@$tDate["CLD"]) || 
-                                strtolower($tDate["CLD"])=='gregorian' || strtolower(@$tDate["CLD"])=='julian');
+        $value2 = $value;
+    
+        $tDate = temporalToArray($value);
 
-			switch ($tDate["TYP"]){
-				case 's'://simple
-					if (@$tDate['DAT']){
-						$value = removeLeadingYearZeroes($tDate['DAT'], $is_greg_or_julian);
-					}else{
-						$value = "unknown temporal format";
-					}
-					break;
-				case 'f'://fuzzy
-					if (@$tDate['DAT']){
-						$value = removeLeadingYearZeroes($tDate['DAT'], $is_greg_or_julian) .
-									($tDate['RNG']? ' ' . convertDurationToDelta($tDate['RNG'],'±'):"");
-					}else{
-						$value = "unknown fuzzy temporal format";
-					}
-					break;
-				case 'c'://carbon
-					$value = (@$tDate['BPD']? ('' . $tDate['BPD'] . ' BP'):
-									(@$tDate['BCE']? '' . $tDate['BCE'] . ' BCE': "") );
-					if ($value) {
+        $is_greg_or_julian = ((!@$tDate["CLD"]) || 
+                            strtolower($tDate["CLD"])=='gregorian' || strtolower(@$tDate["CLD"])=='julian');
+
+		switch ($tDate["TYP"]){
+			case 's'://simple
+				if (@$tDate['DAT']){
+					$value = removeLeadingYearZeroes($tDate['DAT'], $is_greg_or_julian);
+				}else{
+					$value = "unknown temporal format";
+				}
+				break;
+			case 'f'://fuzzy
+				if (@$tDate['DAT']){
+					$value = removeLeadingYearZeroes($tDate['DAT'], $is_greg_or_julian) .
+								($tDate['RNG']? ' ' . convertDurationToDelta($tDate['RNG'],'±'):"");
+				}else{
+					$value = "unknown fuzzy temporal format";
+				}
+				break;
+			case 'c'://carbon
+				$value = (@$tDate['BPD']? ('' . $tDate['BPD'] . ' BP'):
+								(@$tDate['BCE']? '' . $tDate['BCE'] . ' BCE': "") );
+				if ($value) {
+                    
+                    if(@$tDate['DEV']){
+                        $value = $value . ' ' . convertDurationToDelta($tDate['DEV'],'±');
                         
-                        if(@$tDate['DEV']){
-                            $value = $value . ' ' . convertDurationToDelta($tDate['DEV'],'±');
-                            
-                        }else if (@$tDate['DVP']){
-						    $value = $value. 
-                                    ' ' . convertDurationToDelta($tDate['DVP'],'+').
-									(@$tDate['DVN']?("/ ".convertDurationToDelta($tDate['DVN'],'-')):"");
-                        }else if (@$tDate['DVN']){
-                                $value = $value.' '.convertDurationToDelta($tDate['DVN'],'-');
-                        }
-                        
-                        
-					}else{
-						$value = "unknown carbon temporal format";
-					}
-					break;
-				case 'p'://probability range
-					if (@$tDate['PDB'] && @$tDate['PDE']){
-						$value = "" . removeLeadingYearZeroes($tDate['PDB'], $is_greg_or_julian).
-                                " to ". removeLeadingYearZeroes($tDate['PDE'], $is_greg_or_julian);
-					}else if (@$tDate['TPQ'] && @$tDate['TAQ']){
-						$value = "" . removeLeadingYearZeroes($tDate['TPQ'],$is_greg_or_julian).
-                                    " to ". removeLeadingYearZeroes($tDate['TAQ'],$is_greg_or_julian);
-					}else{
-						$value = "unknown probability range temporal format";
-					}
-					break;
-			}
-            if($cld){
-                $value = $cld.' (Gregorian '.$value.')';
-            }            
-			if($showoriginal_temporal){
-				$value .= " [ $value2 ]";
-			}
-            
-		}else{
-			$value = removeLeadingYearZeroes($value);
+                    }else if (@$tDate['DVP']){
+						$value = $value. 
+                                ' ' . convertDurationToDelta($tDate['DVP'],'+').
+								(@$tDate['DVN']?("/ ".convertDurationToDelta($tDate['DVN'],'-')):"");
+                    }else if (@$tDate['DVN']){
+                            $value = $value.' '.convertDurationToDelta($tDate['DVN'],'-');
+                    }
+                    
+                    
+				}else{
+					$value = "unknown carbon temporal format";
+				}
+				break;
+			case 'p'://probability range
+				if (@$tDate['PDB'] && @$tDate['PDE']){
+					$value = "" . removeLeadingYearZeroes($tDate['PDB'], $is_greg_or_julian).
+                            " to ". removeLeadingYearZeroes($tDate['PDE'], $is_greg_or_julian);
+				}else if (@$tDate['TPQ'] && @$tDate['TAQ']){
+					$value = "" . removeLeadingYearZeroes($tDate['TPQ'],$is_greg_or_julian).
+                                " to ". removeLeadingYearZeroes($tDate['TAQ'],$is_greg_or_julian);
+				}else{
+					$value = "unknown probability range temporal format";
+				}
+				break;
+		}
+        if($cld){
+            $value = $cld.' (Gregorian '.$value.')';
+        }            
+		if($showoriginal_temporal && strpos($value2,"|")!==false){
+			$value .= " [ $value2 ]";
 		}
 
 		return $value;
@@ -322,7 +354,11 @@ function parseDateTime($value) {
 
 		return count($res)?$res:null;
 }
-function convertDurationToDelta($value,$prefix = "") {
+
+//
+//
+//
+function convertDurationToDelta($value, $prefix = "") {
 	$date = parseDateTime($value);
 	if ($date) { // valid ISO Duration split into date and time
 
@@ -344,43 +380,85 @@ function convertDurationToDelta($value,$prefix = "") {
 *
 * @param mixed $value
 */
-function temporalToSimple($value){
-		if ($value && strpos($value,"|")!==false) {// temporal encoded date
-			$value2 = $value;
-			$tDate = array();
-			$props = explode("|",substr_replace($value2,"",0,1)); // remove first verticle bar and create array
-			foreach ($props as $prop) {//create an assoc array
-				list($tag, $val) = explode("=",$prop);
-				$tDate[$tag] = $val;
-			}
-			switch ($tDate["TYP"]){
-				case 's'://simple
-				case 'f'://fuzzy
-					if (@$tDate['DAT']){
-						$value = $tDate['DAT'];
-					}else{
-						$value = null;
-					}
-					break;
-				case 'c'://carbon
+function temporalToSimple($value)
+{
+        $tDate = temporalToArray($value);
+
+		switch ($tDate["TYP"]){
+			case 's'://simple
+			case 'f'://fuzzy
+				if (@$tDate['DAT']){
+					$value = $tDate['DAT'];
+				}else{
 					$value = null;
-					break;
-				case 'p'://probability range
-					if (@$tDate['PDB'] && @$tDate['PDE']){
-						$value = "".$tDate['PDB'];
-					}else if (@$tDate['TPQ'] && @$tDate['TAQ']){
-						$value = "".$tDate['TPQ'];
-					}else{
-						$value = null;
-					}
-					break;
-			}
+				}
+				break;
+			case 'c'://carbon
+				$value = null;
+				break;
+			case 'p'://probability range
+				if (@$tDate['PDB'] && @$tDate['PDE']){
+					$value = "".$tDate['PDB'];
+				}else if (@$tDate['TPQ'] && @$tDate['TAQ']){
+					$value = "".$tDate['TPQ'];
+				}else{
+					$value = null;
+				}
+				break;
 		}
+		
 		//ART - @todo rewrite - it is ugly!!!
 		if($value && strlen($value)>10 && strpos($value," ")==10){
+            
+                $is_greg_or_julian = ((!@$tDate["CLD"]) || 
+                            strtolower($tDate["CLD"])=='gregorian' || strtolower(@$tDate["CLD"])=='julian');
+            
+                $value = removeLeadingYearZeroes($value, $is_greg_or_julian, true);
 				$value = substr_replace($value,"T",10,1);
 		}
 		return $value;
+}
+
+//
+//
+//
+function temporalToSimpleRange($value){
+    
+    $tDate = temporalToArray($value);
+
+    $is_greg_or_julian = ((!@$tDate["CLD"]) || 
+                            strtolower($tDate["CLD"])=='gregorian' || strtolower(@$tDate["CLD"])=='julian');
+    
+    switch ($tDate["TYP"]){
+            case 's'://simple
+            case 'f'://fuzzy
+                if (@$tDate['DAT']){
+                    $res = array(removeLeadingYearZeroes($tDate['DAT'], $is_greg_or_julian, true),'','','','');
+                }else{
+                    $res = null;
+                }
+                break;
+            case 'c'://carbon
+                $res = null;
+                break;
+            case 'p'://probability range
+                $res = array('','','','','');            
+                if (@$tDate['PDB']){
+                    $res[0] = removeLeadingYearZeroes($tDate['PDB'], $is_greg_or_julian, true); 
+                }
+                if (@$tDate['TPQ']){
+                    $res[1] = removeLeadingYearZeroes($tDate['TPQ'], $is_greg_or_julian, true); 
+                }
+                if (@$tDate['TAQ']){
+                    $res[2] = removeLeadingYearZeroes($tDate['TAQ'], $is_greg_or_julian, true); 
+                }
+                if (@$tDate['PDE']){
+                    $res[3] = removeLeadingYearZeroes($tDate['PDE'], $is_greg_or_julian, true); 
+                }
+                break;
+    }
+    
+    return $res;  
 }
 
 ?>
