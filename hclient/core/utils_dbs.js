@@ -609,6 +609,7 @@ window.hWin.HEURIST4.dbs = {
                                 if($mode==5 || $mode==6){
                                     $res['lazy'] = true;
                                 }
+                                $res['isreverse'] = 1;
                             }
                     }else{
 

@@ -1139,6 +1139,9 @@ Allow use of icon-large to be properly aligned
 .fancytree-edit-input{
     min-width: 12em !important;
 }
+li.fancytree-hidden{
+    display:none !important;
+}
 
 span.fancytree-checkbox{
     width:26;

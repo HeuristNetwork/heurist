@@ -739,20 +739,14 @@ $.widget( "heurist.search_faceted_wiz", {
                                     } 
                                     */                                   
                                 },
+                                expand: function(e, data){
+                                    that.showHideReverse();
+                                },
                                 loadChildren: function(e, data){
-                                        var showrev = $('#fsw_showreverse').is(":checked");
-                                        var tree = treediv.fancytree("getTree");
-                                        tree.visit(function(node){
-                                            if(node.data.isreverse==1){ 
-                                                if(showrev===true){
-                                                    $(node.li).show();
-                                                }else{
-                                                    $(node.li).hide();
-                                                }
-                                            }
-                                        });
-                                        
+                                    setTimeout(function(){
+                                        that.showHideReverse();   
                                         that._assignSelectedFacets();
+                                    },500);
                                 },
                                 select: function(e, data) {
                                     /* Get a list of all selected nodes, and convert to a key array:
@@ -827,17 +821,19 @@ $.widget( "heurist.search_faceted_wiz", {
 
                             $("#fsw_showreverse").change(function(event){
 
+                                that.showHideReverse();
+                                /*
                                 var showrev = $(event.target).is(":checked");
                                 var tree = treediv.fancytree("getTree");
                                 tree.visit(function(node){
                                     if(node.data.isreverse==1){ //  window.hWin.HEURIST4.util.isArrayNotEmpty(node.children) &&
-                                        if(showrev){
-                                            $(node.li).show();
-                                        }else{
-                                            $(node.li).hide();
-                                        }
+                                                if(showrev===true){
+                                                    $(node.li).removeClass('fancytree-hidden');
+                                                }else{
+                                                    $(node.li).addClass('fancytree-hidden');
+                                                }
                                     }
-                                });
+                                });*/
                             });
 
                             //tree.options.filter.mode = "hide";
@@ -855,6 +851,24 @@ $.widget( "heurist.search_faceted_wiz", {
 
             }
         }
+    }
+    
+    , showHideReverse: function(){
+        
+        var showrev = $('#fsw_showreverse').is(":checked");
+        var treediv = $('#field_treeview');
+        var tree = treediv.fancytree("getTree");
+        tree.visit(function(node){
+
+            if(node.data.isreverse==1){ 
+
+                if(showrev===true){
+                    $(node.li).removeClass('fancytree-hidden');
+                }else{
+                    $(node.li).addClass('fancytree-hidden');
+                }
+            }
+        });
     }
     
     //restore selection in treeview
