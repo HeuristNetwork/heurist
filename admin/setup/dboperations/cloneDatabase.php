@@ -419,7 +419,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     // Copy the images and the icons directories
     //TODO: Needs error report, trap error and warn or abort clone
-
+    if(!$nodata)
     folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database, HEURIST_FILESTORE_ROOT.$targetdbname );
 
     // Update file path in target database  with absolute paths
