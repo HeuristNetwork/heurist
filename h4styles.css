@@ -453,6 +453,7 @@ div.recordDiv:hover {
 div.recordDiv:hover  .rec_edit_link, 
     div.recordDiv:hover  .rec_edit_link_ext, 
     div.recordDiv:hover  .rec_view_link, 
+    div.recordDiv:hover  .rec_view_link_ext,
     div.recordDiv:hover  .rec_actions 
 {
     display: inline-block;
@@ -462,6 +463,7 @@ h3:hover > #rec_add_link,
     div.recordDiv:hover > .rec_edit_link, 
     div.recordDiv:hover > .rec_edit_link_ext, 
     div.recordDiv:hover > .rec_view_link,
+    div.recordDiv:hover > .rec_view_link_ext,
     div.recordDiv:hover > .rec_actions
 {
     display: block;
@@ -473,7 +475,8 @@ h3:hover > #rec_add_link,
 h3 > #rec_add_link, 
     div.recordDiv  .rec_edit_link, 
     div.recordDiv  .rec_edit_link_ext,
-    div.recordDiv  .rec_view_link {
+    div.recordDiv  .rec_view_link,
+    div.recordDiv  .rec_view_link_ext {
     display: none;
     height: 16px;
     width: 16px;
@@ -488,13 +491,17 @@ div.recordDiv  .rec_actions {
 
 div.recordDiv > .rec_edit_link, 
 div.recordDiv > .rec_edit_link_ext,
-div.recordDiv > .rec_view_link{
+div.recordDiv > .rec_view_link,
+div.recordDiv > .rec_view_link_ext{
     position: absolute;
     top: 2px;
 }
 
+div.recordDiv > .rec_view_link_ext {
+    right: 76px;
+}
 div.recordDiv > .rec_edit_link{
-    right: 52px;
+    right: 50px;
 }
 div.recordDiv > .rec_edit_link_ext{
     right: 26px;
@@ -505,7 +512,8 @@ div.recordDiv > .rec_view_link {
 
 .list  .rec_edit_link, 
 .list  .rec_edit_link_ext,
-.list  .rec_view_link {
+.list  .rec_view_link,
+.list  .rec_view_link_ext {
     top: 5px !important;
 }
 

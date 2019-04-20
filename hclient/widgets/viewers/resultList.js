@@ -1158,17 +1158,15 @@ $.widget( "heurist.resultList", {
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
         + '<div title="dbl-click to edit : '+recTitle_strip_all+'" class="recordTitle">'
-        +     (fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
+        +     (this.options.select_mode=='manager' && fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
             + recTitle_strip1 + "</a>") :recTitle_strip2)
         + '</div>'
 
-        // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
-        // TODO: add an open-in-new-search icon to the display of a record in the results list
         + '<div title="Click to edit record (opens in new tab)" '
         + ' class="rec_edit_link_ext logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
         + ' role="button" aria-disabled="false" data-key="edit_ext">'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/><span class="ui-button-text"/>'
-        + '</div>'  <!-- Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished -->
+        + '</div>'  // Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished 
 
         + '<div title="Click to view record (opens in popup)" '
         + 'class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
@@ -1182,6 +1180,18 @@ $.widget( "heurist.resultList", {
         + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil" style="color:gray"/><span class="ui-button-text"/>'
         + '</div>'
 
+        // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
+        // TODO: add an open-in-new-search icon to the display of a record in the results list
+        + ((this.options.select_mode!='manager' && fld('rec_URL'))
+            ?
+        '<div title="Click to view external link (opens in new window)" '
+        + 'class="rec_view_link_ext ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+        + 'role="button" aria-disabled="false">'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/><span class="ui-button-text"/>'
+        + '</div>'
+            :'')
+        
+        
         + '</div>';
 
 
@@ -1356,6 +1366,13 @@ $.widget( "heurist.resultList", {
                 window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { 
                         width: (lt=='WebSearch'?(window.hWin.innerWidth*0.9):700),
                         height: 800, title:'Record Info'});
+                return;
+            }
+            if($target.parents('.rec_view_link_ext').length>0){
+                if(this._currentRecordset){
+                    var url = this._currentRecordset.fld( this._currentRecordset.getById(selected_rec_ID), 'rec_URL' );
+                    if(url) window.open(url, "_new");
+                }
                 return;
             }
         }
