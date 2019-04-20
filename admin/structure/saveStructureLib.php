@@ -771,9 +771,11 @@ copy_IconAndThumb_FromLibrary
                         
                         $ret = "Error on $oper field type $dtyID for record type $rtyID in updateRecStructure";
                         handleError($ret, $query, $rows);
+                        
+                        //array_push($ret[$rtyID], $ret);
                         return false;
 					} else {
-						array_push($ret[$rtyID], $dtyID);
+						array_push($ret[$rtyID], $dtyID);  //numeric ok 
 					}
 				}
 			}//for each dt
@@ -1709,7 +1711,7 @@ copy_IconAndThumb_FromLibrary
                             }else{
                                 $recCount = $res->num_rows;
                                 if ($recCount>0) { //yes, $termID is in use
-                                    $labels = getTermLabels(array($termID, $vocab_id));
+                                    $labels = getTermLabels($mysqli, array($termID, $vocab_id));
                                     
                                     $ret_message = "Term $termID [{$labels[$termID]}] "
                                     .'cannot currently be moved because it belongs to a vocabulary ('
