@@ -135,8 +135,8 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 				}
 				break;
 		}
-        if($cld){
-            $value = $cld.' (Gregorian '.$value.')';
+        if(@$tDate["CLD"]){
+            $value = $tDate["CLD"].' (Gregorian '.$value.')';
         }            
 		if($showoriginal_temporal && strpos($value2,"|")!==false){
 			$value .= " [ $value2 ]";

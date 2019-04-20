@@ -278,7 +278,7 @@ $.widget( "heurist.editing_input", {
             if(values_to_set=='increment_new_values_by_1'){
                 
                    //find incremented value on server side
-                   window.hWin.HAPI4.RecordMgr.increment(this.options.rtyID, this.options.dtyID, 
+                   window.hWin.HAPI4.RecordMgr.increment(this.options.rectypeID, this.options.dtID, 
                      function(response){
                       if(!window.hWin.HEURIST4.util.isnull(response)){
                             if(response.status == window.hWin.ResponseStatus.OK){

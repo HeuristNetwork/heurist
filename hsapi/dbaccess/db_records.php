@@ -710,22 +710,23 @@
 
             //2. get max value for numeric and last value for non numeric    
                 if($isNumeric){
-                    $res = mysql__select_list($mysqli, 'recDetails, Records','max(CAST(dtl_Value as SIGNED))',
-                            'dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID);    
+                    $res = mysql__select_value($mysqli, 'select max(CAST(dtl_Value as SIGNED)) FROM recDetails, Records'
+                            .' WHERE dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID);    
                 }else{
-                    $res = mysql__select_list($mysqli, 'recDetails, Records','dtl_Value',
-                            'dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID.' ORDER BY dtl_ID desc LIMIT 1');    
+                    $res = mysql__select_value($mysqli, 'select dtl_Value FROM recDetails, Records'
+                            .' WHERE dtl_RecID=rec_ID and rec_RecTypeID='.$rt_ID.' and dtl_DetailTypeID='.$dt_ID
+                            .' ORDER BY dtl_ID desc LIMIT 1');    
                 }
                 
                 $value = 1;
                 
-                if(is_array($res) && count($res)>0){
+                if($res!=null){
                     
                     if($isNumeric){
-                        $value = 1 + intval($res[0]);    
+                        $value = 1 + intval($res);    
                     }else{
                         //find digits at the end of string
-                        $value = $res[0];
+                        $value = $res;
                         $matches = array();
                         if (preg_match('/(\d+)$/', $value, $matches)){
                             $digits = $matches[1];
@@ -736,8 +737,7 @@
                     }
                 }
                 
-                $res = array("status"=>HEURIST_OK, 'result'=>$value);    
-                
+                return array("status"=>HEURIST_OK, 'result'=>$value);    
             }else{
                 return $system->addError(HEURIST_INVALID_REQUEST, 'Get incremented value. Detail type '.$dt_ID.' not found');
             }
