@@ -647,24 +647,20 @@ foreach ($this->imp_recordtypes as $rtyID){
             $fields = array();    
         }
         
+        //assign values from source
         foreach ($def_rts[$rtyID]['dtFields'] as $ftId => $def_field){
-            
             if(!@$fields[ $this->fields_correspondence[$ftId] ]){
-
-                if($def_field[$idx_type] == "enum" || $def_field[$idx_type] == "relationtype" || $def_field[$idx_type] == "relmarker"){
-                    //clean constraints in structure - it will be taken from fields defs (see $this->replaceTermIds)
-                    $def_field[$idx_terms_tree] = "";
-                    $def_field[$idx_terms_disabled] = "";
-
-                }
-                if($def_field[$idx_type] == "resource" || $def_field[$idx_type] == "relmarker"){
-                    //clean constraints in structure - it will be taken from fields defs (see $this->replaceRectypeIds)
-                    $def_field[$idx_constraints] = "";
-                }
-
                 $fields[ $this->fields_correspondence[$ftId] ] = $def_field;
             }
         }
+        //clear term trees and resource constraints
+        foreach ($fields as $ftId => $def_field){
+            $def_field[$idx_terms_tree] = '';
+            $def_field[$idx_terms_disabled] = '';
+            $def_field[$idx_constraints] = '';
+            $fields[$ftId] = $def_field;
+        }
+        
 
         $ret = updateRecStructure( $dtFieldNames , $target_RtyID, array("dtFields"=>$fields));
         if(is_array($ret)){
@@ -679,6 +675,11 @@ foreach ($this->imp_recordtypes as $rtyID){
 
         }else{
 
+            $error = $this->system->getError();
+            if(@$error['message']){
+                $ret = substr($error['message'],0,100);
+            }
+            
             $this->error_exit2("Can't update record type structure rectype#".$this->rectypes_correspondence[$rtyID].". ".$ret);
             return false;
 
