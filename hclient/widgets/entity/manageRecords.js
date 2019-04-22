@@ -626,12 +626,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(this.options.edit_mode=='editonly'){
             
             if(this.options.isdialog){
-                this._as_dialog.dialog('close');
+                if(this._as_dialog.dialog('instance')){
+                    this._as_dialog.dialog('close');    
+                }else{
+                    //console.log('dialog is not opened');
+                }
+                
             }else{
                 window.close(this._currentEditRecordset);
             }
             
-        }else if(this._edit_dialog && this._edit_dialog.dialog('isOpen')){
+        }else if(this._edit_dialog && this._edit_dialog.dialog('instance') && this._edit_dialog.dialog('isOpen')){
             this._edit_dialog.dialog('close');
         }
     },
