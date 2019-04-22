@@ -487,12 +487,18 @@ $.widget( "heurist.editing_input", {
         if ( this.detailType=='freetext' || this.detailType=='integer' || 
              this.detailType=='float' || this.detailType=='url' || this.detailType=='file'){
             $.each(this.inputs, function(index, input){ 
-                var ow = $(input).width();
+                var ow = $(input).width(); //current width
                 if(ow<580){
                     var nw = ($(input).val().length+4)+'ex';
                     $(input).css('width', nw);
-                    if($(input).width()<ow) $(input).width(ow) //we can only increase - restore
-                    else if($(input).width()>600) $(input).width(600); //max width
+                    if($(input).width()<ow) $(input).width(ow); //we can only increase - restore
+                    else if($(input).width()>600){
+                        if($(input).parents('fieldset').width()>0){
+                            $(input).width($(input).parents('fieldset').width()-20);    
+                        }else{
+                            $(input).width(600); 
+                        }
+                    } 
                 }
             });
         }
@@ -1179,8 +1185,8 @@ $.widget( "heurist.editing_input", {
             //define explicit add relationship button
             $( "<button>", {title: "Select record to be linked"})
                         .button({icon:"ui-icon-triangle-1-e",
-                               label:('&nbsp;&nbsp;&nbsp;select'+(isparententity?' child':'')+' '+rts)})
-                        .addClass('sel_link2 truncate').css('max-width','300px')
+                               label:('&nbsp;&nbsp;&nbsp;select'+(isparententity?' child':'')+'&nbsp: '+rts)})
+                        .addClass('sel_link2 truncate').css({'max-width':'300px', 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
             
@@ -2206,8 +2212,9 @@ console.log('onpaste');
                   $input.css('width', Math.round(2 + Math.min(120, Number(dwidth))) + "ex"); //was *4/3
               
         }
-        if(this.detailType!='blocktext')
-            $input.css('max-width', '600px');
+        
+        //if(this.detailType!='blocktext')
+        //    $input.css('max-width', '600px');
 
         this.inputs.push($input);
 
