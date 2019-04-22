@@ -973,10 +973,12 @@
         }//while
         
         if($mysqli->error || $msg_error){
-            return array("error" => $msg_error.'  '.$mysqli->error);
+            $res = array("error" => $msg_error.'  '.$mysqli->error);
         }else{
-            return array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels_count);
+            $res = array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels_count);
         }
+        $mysqli->query('SET foreign_key_checks = 1');
+        return $res;
     }
     
     //
@@ -1848,14 +1850,16 @@
             } //foreach
 
             break;
-        }
+        }//while
 
         if($error==null){
-            return array("status"=>HEURIST_OK, 'data'
+            $res = array("status"=>HEURIST_OK, 'data'
                         =>array("added"=>$new_id, "bkmk_count"=>$bkmk_count, "rel_count"=>$rels_count));
         }else{
-            return $system->addError(HEURIST_DB_ERROR, $error);
+            $res = $system->addError(HEURIST_DB_ERROR, $error);
         }
+        $mysqli->query('SET foreign_key_checks = 1');
+        return $res;
         
     }
     
