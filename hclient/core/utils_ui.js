@@ -1780,7 +1780,7 @@ window.hWin.HEURIST4.ui = {
                                 query_request = {q:query_request, w:'all'};
                             }
                         }else if(rec_ID>0){
-                            query_request = {q:'ids:'+rec_ID, w:'all'};
+                            query_request = {q:'ids:'+rec_ID, w:'e'}; //including temporary
                         }
                         
                         var widget = this; //reference to manageRecords
@@ -1948,6 +1948,14 @@ window.hWin.HEURIST4.ui = {
             sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:23px;text-align:right;"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         
+        var reltype = ''
+        if(info['trm_ID']>0){
+            reltype = window.hWin.HEURIST4.ui.getTermValue(info['trm_ID']);
+            reltype = '<div class="detailType" style="display:table-cell;width:'
+                + Math.max(19, Math.min(reltype.length,25))+'ex;">'
+                + reltype + '</div>'
+        }
+        
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
                         +' style="margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
@@ -1955,10 +1963,7 @@ window.hWin.HEURIST4.ui = {
                         + '<div class="detail" '  // truncate
                         + 'style="display:table-cell;min-width:60ex;max-width:160ex;">'  //padding:2px;
                         
-                        + (info['trm_ID']>0
-                           ?'<div class="detailType" style="display:table-cell;width:19ex;">'  //padding-top:4px;
-                            + window.hWin.HEURIST4.ui.getTermValue(info['trm_ID'])+'</div>'
-                           :'')                          
+                        + reltype
                         
                         + (info['rec_IsChildRecord']==1
                             ?'<span style="font-size:0.8em;color:#999999;padding:4px 2px;display:table-cell;min-width: 5ex;">child</span>':'')

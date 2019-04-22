@@ -325,23 +325,33 @@
         
         $system->defineConstant('RT_RELATION');
         $system->defineConstant('DT_PARENT_ENTITY');
-            
+
         $is_insert = ($recID<1);   
-
-        if($is_insert){   // ADD NEW RECORD
-
-            //if source of target of relationship record is temporal - relationship is temporal as well
-            if($record['RecTypeID']==RT_RELATION && @$record['FlagTemporary']!=1){
-                $system->defineConstant('DT_PRIMARY_RESOURCE');
-                $system->defineConstant('DT_TARGET_RESOURCE');
-                
-                $query = 'SELECT rec_FlagTemporary FROM Records where rec_FlagTemporary=1 AND rec_ID in ('
-                    .$record['details']['t:'.DT_PRIMARY_RESOURCE][0].','.$record['details']['t:'.DT_TARGET_RESOURCE][0].')';
-                if(mysql__select_value($mysqli, $query)>0){
-                    $record['FlagTemporary'] = 1;
+            
+        // if source of target of relationship record is temporal - relationship is temporal as well 
+        if($record['RecTypeID']==RT_RELATION && @$record['FlagTemporary']!=1){
+            $system->defineConstant('DT_PRIMARY_RESOURCE');
+            $system->defineConstant('DT_TARGET_RESOURCE');
+            
+            $recids = array();
+            foreach ($detailValues as $values) {
+                $dtyID = $values['dtl_DetailTypeID'];
+                if(($dtyID==DT_PRIMARY_RESOURCE || $dtyID==DT_TARGET_RESOURCE) && @$values['dtl_Value']){
+                       $recids[] = $values['dtl_Value'];
                 }
             }
             
+            $query = 'SELECT rec_FlagTemporary FROM Records where rec_FlagTemporary=1 AND rec_ID in ('
+                .implode(',',$recids).')';
+            if(mysql__select_value($mysqli, $query)>0){
+                $record['FlagTemporary'] = 1;
+            }
+        }else if(!$is_insert) {
+            $record['FlagTemporary'] = 0;
+        }
+            
+        if($is_insert){   // ADD NEW RECORD
+
             //add with predifined id - this is is case happens only in import csv
             //to keep H-ID defined in source csv
             if($recID<0){ 
@@ -381,7 +391,7 @@
             }
 
             $query = "UPDATE Records set rec_Modified=?, rec_RecTypeID=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=?,"
-            ."rec_URL=?, rec_ScratchPad=?, rec_FlagTemporary=0 "
+            ."rec_URL=?, rec_ScratchPad=?, rec_FlagTemporary=? "
             ." where rec_ID=".$recID;
 
             $stmt = $mysqli->prepare($query);
@@ -389,8 +399,9 @@
             $rec_mod = date('Y-m-d H:i:s');
             $rec_url = @$record['URL'];
             $rec_spad = @$record['ScratchPad'];
+            $rec_temp = (@$record['FlagTemporary']==1)?1:0;
 
-            $stmt->bind_param('siisss', $rec_mod, $rectype, $owner_grps[0], $access, $rec_url, $rec_spad);
+            $stmt->bind_param('siisssi', $rec_mod, $rectype, $owner_grps[0], $access, $rec_url, $rec_spad, $rec_temp);
 
             if(!$stmt->execute()){
                 $syserror = $mysqli->error;
@@ -1418,7 +1429,8 @@
             //load list of required details except relmarker
             $query = 'SELECT rst_DetailTypeID, IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
             .'FROM defRecStructure, defDetailTypes WHERE '
-            ."rst_RecTypeID=$rectype and rst_RequirementType='required' and dty_ID=rst_DetailTypeID and dty_Type!='relmarker'";
+            ."rst_RecTypeID=$rectype and rst_RequirementType='required' and dty_ID=rst_DetailTypeID "
+            ." and dty_Type!='relmarker' and dty_Type!='separator'";
             $det_required = mysql__select_assoc2($mysqli, $query);
         }
 
