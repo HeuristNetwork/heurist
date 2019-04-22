@@ -166,9 +166,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';            
                 this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
-                this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_descr].dtFields['rst_Display'] = 'hidden';
-                this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'visible';
+                
+                this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'hidden';  //temp till ext will be defined
+                this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden'; //readonly fxm_MimeType
             
                 this._edit_dialog.dialog('option','height',350);
         }else
@@ -276,7 +277,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 //add two button on top
                 //select and register at once + close this dialog and open file selector
                 
-                $('<div><div class="header optional" style="vertical-align: top; display: table-cell;">'
+                $('<div style="height:20px"/><div><div class="header optional" style="vertical-align: top; display: table-cell;">'
                 +'<label>Upload:</label></div><span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
                 +'<div class="input-cell" style="padding-bottom: 12px;"><div id="btn_upload_file"></div></div></div>'
                 
@@ -349,6 +350,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     var curr_ext = ele2.editing_input('getValues');
                     if(curr_ext[0]!=ext){
                         ele2.editing_input('setValue', ext );
+                        ele2.show();
                         that.onEditFormChange();
                     }
                     ele2.editing_input('showErrorMsg', ''); //hide

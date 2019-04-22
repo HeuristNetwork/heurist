@@ -43,7 +43,7 @@ class DbRecUploadedFiles extends DbEntityBase
        
        $this->error_ext = 'Error inserting file metadata or unable to recognise uploaded file format. '
 .'This generally means that the mime type for this file has not been defined for this database (common mime types are defined by default). '
-.'Please add mime type from Database > Administration > Structure > Define mime types. '
+.'Please add mime type from Structure > Define mime types. '
 .'Otherwise please '.CONTACT_SYSADMIN.' or '.CONTACT_HEURIST_TEAM.'.';       
     }
     
@@ -275,12 +275,12 @@ class DbRecUploadedFiles extends DbEntityBase
                     'select fxm_Mimetype from defFileExtToMimetype where fxm_Extension="'.addslashes($mimetypeExt).'"');
 
             if(!$mimeType){
-                    $this->system->addError(HEURIST_INVALID_REQUEST, $this->error_ext);
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Extension: '.$mimetypeExt.'. '.$this->error_ext);
                     return false;
             }
             
             if($fieldvalues['ulf_FileSizeKB']<0 || !is_numeric($fieldvalues['ulf_FileSizeKB'])){
-                    $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid file size value: '.$fieldvalues['ulf_FileSizeKB']);
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Invalid file size value: '.$fieldvalues['ulf_FileSizeKB']);
                     return false;
             }
         }
@@ -329,7 +329,7 @@ class DbRecUploadedFiles extends DbEntityBase
             //change mimetype to extension
             $mimeType = strtolower($this->records[$idx]['ulf_MimeExt']);
             if($mimeType==''){
-                    $this->system->addError(HEURIST_INVALID_REQUEST, $this->error_ext);
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, $this->error_ext);
                     return false;
             }else
             if(strpos($mimeType,'/')>0){ //this is mimetype - find extension
