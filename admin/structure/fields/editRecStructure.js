@@ -1423,7 +1423,11 @@ function EditRecStructure() {
                             edt.value = 'increment_new_values_by_1';
                             
                          }else if(values[dti]=='resource') {
-                            edt.value = $('#pointerDefValue'+__rst_ID).editing_input('getValues');
+                            if($('#pointerDefValue'+__rst_ID).editing_input('instance')){
+                                edt.value = $('#pointerDefValue'+__rst_ID).editing_input('getValues');    
+                            }else{
+                                edt.value = '';
+                            }
                          }
                     }else if(fieldnames[k]=="rst_CreateChildIfRecPtr"){
                             edt.value = $(edt).is(':checked')?1:0;
@@ -1685,7 +1689,7 @@ function EditRecStructure() {
                             
                             var ele = $('#pointerDefValue'+rst_ID);
 
-                            ele.empty().editing_input(ed_options);
+                            ele.empty().editing_input(ed_options); //init
                             
                             ele.find('.input-div').css('font-size','0.8em');
                             ele.find('.editint-inout-repeat-button').css('min-width',0);
@@ -3519,7 +3523,7 @@ var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
 var sName = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[rst_ID][fi.rst_DisplayName];
                                 
 sMsg = '<h3>Conversion of records to child records</h3><br><b>Pointer field:'+ sName +'</b><br><br>'
-+'<div>'+response.data['passed']+' values were found (child record ids)</div>'
++'<div>'+response.data['passed']+' record pointer values were found for this field</div>'
 +(response.data['disambiguation']>0?('<div>'+response.data['disambiguation']+' values ignored. The same records were pointed to as a child record by more than one parent</div>'):'')
 +(response.data['noaccess']>0?('<div>'+response.data['noaccess']+' records cannot be converted to child records (no access rights)</div>'):'');
 
@@ -3532,12 +3536,12 @@ sMsg = sMsg
 }
 if(response.data['childAlready'].length>0){
 sMsg = sMsg
-+'<div>'+__getlink(response.data['childAlready'])+' child records</a> already have the required reverse pointer</div>';
++'<div>'+__getlink(response.data['childAlready'])+' child records</a> already have the required reverse pointer (OK)</div>';
 }
 
 if(response.data['childMiltiplied'].length>0){
 sMsg = sMsg
-+'<div>'+__getlink(response.data['childMiltiplied'])+' records</a> were pointed to as a child record by more than one parent</div>'
++'<div>'+__getlink(response.data['childMiltiplied'])+' records</a> were pointed to as a child record by more than one parent (Problem)</div>'
 +'<br><div>You will need to edit these records and choose which record is the parent (child records can only have one parent).</div>'
 +'<div>To find these records use Verify > Verify integrity <new tab icon></div><br>'
 }
