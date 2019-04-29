@@ -808,9 +808,12 @@ $.widget( "heurist.editing_input", {
                             $(dosframe.contentDocument).find('#trmName').focus();
                         },
                         callback: function(context){
-                                $input.css('width','auto');
-                                $input = that._recreateSelector($input, true);
-                                $input.change( __onTermChange );
+                                $.each(that.inputs, function(index, input){ 
+                                    input = $(input);
+                                    input.css('width','auto');
+                                    input = that._recreateSelector(input, true);
+                                    input.change( __onTermChange );
+                                });
                                 
                                 __showHideSelByImage();
                         }
@@ -834,9 +837,12 @@ $.widget( "heurist.editing_input", {
                                 that.options['dtFields']['rst_FilteredJsonTermIDTree'] = editedTermTree;
                                 that.options['dtFields']['rst_TermIDTreeNonSelectableIDs'] = editedDisabledTerms
                                                                 
-                                $input = that._recreateSelector($input, true);
-                                
-                                $input.change( __onTermChange );
+                                $.each(that.inputs, function(index, input){ 
+                                    input = $(input);
+                                    input.css('width','auto');
+                                    input = that._recreateSelector(input, true);
+                                    input.change( __onTermChange );
+                                });
                                 
                                 __showHideSelByImage();
                             }

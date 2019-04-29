@@ -260,7 +260,7 @@ class DbDefTerms extends DbEntityBase
         foreach($tree as $label => $children)
         {
             $record_idx = @$this->labels_to_idx[$parentLabel.$label];
-            if($record_idx==null){ //one of parent terms not defined - add it
+            if($record_idx===null){ //one of parent terms not defined - add it
                 $record_idx = count($this->records_all);
                 $this->labels_to_idx[$parentLabel.$label] = $record_idx;
                 $this->records_all[] = array();
