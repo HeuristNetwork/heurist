@@ -622,13 +622,13 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <!-- Toolbar -->
         <div class="ui-layout-north" id="mapToolbarDiv" style="display: block !important; height: 30px; z-index:999;">
 
-            <span id="map-settingup-message" style="padding-left:1em;line-height:2em">
-                Setting up map ...
+            <span id="map-settingup-message" style="padding-left:1em;line-height:2em;color:red">
+                EXPERIMENTAL
             </span>
 
             <!-- Map document selector -->
             
-            <div id="mapSelector" class="map-inited" style="float:left;">
+            <div id="mapSelector" class="map-inited" style="float:left;display:none">
                 <label id="map-doc-select-lbl" style="padding: 4px;line-height: 2.2em;"><i>Map document:</i></label>
                 <button id="mapSelectorBtn" class="truncate" style="max-width:300px;text-align:left"></button> 
             </div>

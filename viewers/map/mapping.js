@@ -284,6 +284,7 @@ $.widget( "heurist.mapping", {
         //default values        
         if(!style.iconType) style.iconType ='rectype';
         style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :((style.iconType=='circle')?9:18);
+        var fcolor = (style.color?style.color:'#0000ff');
         
         if(style.iconType=='url'){
             
@@ -307,7 +308,6 @@ $.widget( "heurist.mapping", {
             var cname = (style.iconFont.indexOf('ui-icon-')==0?'':'ui-icon-')+style.iconFont;
             var fsize = style.iconSize;
             var isize = 6+fsize;
-            var fcolor = (style.color?style.color:'#0000ff');
             var bgcolor = (style.fillColor0?(';background-color:'+style.fillColor):';background:none');
             
             myIcon = L.divIcon({
@@ -338,7 +338,7 @@ $.widget( "heurist.mapping", {
                         
                         var fsize = style.iconSize;
                         setIcon = L.icon({
-                            iconUrl: (window.hWin.HAPI4.iconBaseURL + rty_ID + '.png'),
+                            iconUrl: (window.hWin.HAPI4.iconBaseURL + rty_ID + 's.png&color='+encodeURIComponent(fcolor)),
                             iconSize: [fsize, fsize]                        
                         });
                         myIconRectypes[rty_ID] = setIcon;
@@ -478,7 +478,7 @@ var geojsonMarkerOptions = {
               */          
               //set default style for result set
               this.main_layer = L.geoJSON(data, {
-                  default_style: {color: "#00ff00"}
+                  default_style: {color: "#00b0f0"}
                   , layer_name: 'Current query'
                   //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
                   , onEachFeature: function(feature, layer) {
@@ -614,22 +614,24 @@ var geojsonMarkerOptions = {
     setSelection: function( _selection, is_external ){
         var that = this;
         
-        this.selected_rec_ids = (window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) ?_selection:[];
-        //redraw
-        //@todo highlight markers
-        affected_layer.setStyle(function(feature) {
-            if(that.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
-                return {color: "#ff0000"};
-            }else{
-                //either specific style from json or common layer style
-                return feature.style || feature.default_style;
+        if(this.main_layer){
+            this.selected_rec_ids = (window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) ?_selection:[];
+            //redraw
+            //@todo highlight markers
+            this.main_layer.setStyle(function(feature) {
+                if(that.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
+                    return {color: "#ff0000"};
+                }else{
+                    //either specific style from json or common layer style
+                    return feature.style || feature.default_style;
+                }
+            });
+          
+            //this.main_layer.remove();
+            //this.main_layer.addTo( this.nativemap );
+            if (is_external===true) { //call from external source (app_timemap)
+                this.vistimeline.timeline('setSelection', this.selected_rec_ids);
             }
-        });
-      
-        //this.main_layer.remove();
-        //this.main_layer.addTo( this.nativemap );
-        if (is_external===true) { //call from external source (app_timemap)
-            this.vistimeline.timeline('setSelection', this.selected_rec_ids);
         }
     },
     
