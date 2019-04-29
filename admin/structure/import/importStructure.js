@@ -1137,8 +1137,12 @@ $.widget( "heurist.importStructure", {
         for(var i=0;i<linked_rts.length;i++){
             name_rts.push(dbs.rectypes.names[linked_rts[i]]);
         }
+        var linkedto = '';
+        if(linked_rts.length>0){
+            linkedto = 'Links to: '+ window.hWin.HEURIST4.util.htmlEscape(name_rts.join(','));
+        }
         recTitle = recTitle + '<div class="item" style="font-style:italic;width:45em" title="Linked record types">'
-        + window.hWin.HEURIST4.util.htmlEscape(name_rts.join(','))+'</div>';
+        + linkedto +'</div>';
 
 
         var html = '<div class="recordDiv" style="min-height:16px"'
