@@ -29,7 +29,9 @@ $.widget( "heurist.app_timemap", {
         startup:0,         //map document loaded on map init
         autoupdate:true,   //update content on global search events   ON_REC_SEARCHSTART (clear) and ON_REC_SEARCH_FINISH (add data)
         eventbased:true,
-        tabpanel:false  //if true located on tabcontrol need top:30
+        tabpanel:false,  //if true located on tabcontrol need top:30
+        
+        leaflet: false
     },
 
     _events: null,
@@ -158,7 +160,8 @@ $.widget( "heurist.app_timemap", {
                     this.options.startup = mapdocument;    
                 }
                 
-                var url = window.hWin.HAPI4.baseURL + 'viewers/map/map.php?db='+window.hWin.HAPI4.database;
+                var url = window.hWin.HAPI4.baseURL + 'viewers/map/map'+
+                    (this.options.leaflet?'_leaflet':'')+'.php?db='+window.hWin.HAPI4.database;
                 if(this.options.layout){
                     if( this.options.layout.indexOf('timeline')<0 )
                         url = url + '&notimeline=1';
@@ -183,10 +186,14 @@ $.widget( "heurist.app_timemap", {
         }
     },
 
+    //
+    // called as soon as map.php is loaded into iframe and on _refresh (after search finished)
+    //
     _initmap: function( cnt_call ){
 
         if( !window.hWin.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0 ){
 
+console.log('_initmap');
 
             var mapping = this.mapframe[0].contentWindow.mapping;
 
@@ -201,20 +208,50 @@ $.widget( "heurist.app_timemap", {
 
             if(this.map_inited && cnt_call>0) return;
             
-            this.map_inited = true;
+            if(this.options.leaflet){ //LEAFLET
             
-            mapping.load( null, //mapdataset,
-                this.options.selection,  //array of record ids
-                this.options.startup,    //map document on load
-                function(selected){  //callback if something selected on map
-                    $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
-                        { selection:selected, source:that.element.attr('id') } );
-                },
-                function(){ //callback function on native map init completion
-                    var params = {id:'main', recordset:that.options.recordset, title:'Current query'};
-                    that.addRecordsetLayer(params, -1);
+                if(that.options.recordset){
+                    mapping.mapping('addDataset', that.options.recordset, 'main');
+                //}else if(this.options.selection){
                 }
-            );
+                
+                if(!this.map_inited){
+               
+                    mapping.mapping('option','onselect',function(selected ) {
+                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
+                                                { selection:selected, source:that.element.attr('id') } );
+                        });
+/*
+                    this._on( mapping, {
+                        "mappingonselect": function( event, selected ) {
+console.log('onselet triggered 2');                             
+                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
+                                                { selection:selected, source:that.element.attr('id') } );
+                        }
+                    });                    
+*/                
+                }
+                
+                this.map_inited = true;
+            
+            }else{
+                this.map_inited = true;
+                
+                mapping.load( null, //mapdataset,
+                    this.options.selection,  //array of record ids
+                    this.options.startup,    //map document on load
+                    function(selected){  //callback if something selected on map
+                        $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
+                            { selection:selected, source:that.element.attr('id') } );
+                    },
+                    function(){ //callback function on native map init completion
+    console.log('call addRecordsetLayer on map complete init');
+                        var params = {id:'main', recordset:that.options.recordset, title:'Current query'};
+                        that.addRecordsetLayer(params, -1);
+                    }
+                );
+            
+            }
 
             this.recordset_changed = false;
         }
@@ -231,8 +268,19 @@ $.widget( "heurist.app_timemap", {
             || window.hWin.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
             return;
         }
+        
+        if (this.mapframe[0].contentWindow.mapping) {
+            var  mapping = this.mapframe[0].contentWindow.mapping;  
+            
+            if(this.options.leaflet){ //leaflet
 
-        this.mapframe[0].contentWindow.mapping.showSelection(this.options.selection);  //see viewers/map/map.js
+                mapping.mapping('setSelection', this.options.selection, true);
+                
+            }else{
+                mapping.showSelection(this.options.selection);  //see viewers/map/map.js
+            }
+            
+        }
     }
 
 

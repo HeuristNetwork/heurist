@@ -49,6 +49,7 @@
     require_once(dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
     require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
+    require_once(dirname(__FILE__).'/../../viewers/map/Simplify.php');
     
     
     $response = array();
@@ -692,7 +693,9 @@ function output_Records($system, $data, $params){
 
     $data = $data['data'];
     
-    if(!(@$data['reccount']>0)){
+    if(@$data['memory_warning']){
+        $records = array(); //@todo
+    }else if(!(@$data['reccount']>0)){
         $records = array();
     }else{
         $records = $data['records'];
@@ -753,7 +756,7 @@ function output_Records($system, $data, $params){
         
         if($params['format']=='geojson'){
 
-            fwrite($fd, $comma.json_encode(getGeoJsonFeature($record)));
+            fwrite($fd, $comma.json_encode(getGeoJsonFeature($record, false, @$params['simplify'])));
             $comma = ',';
         
         }else if($params['format']=='json'){ 
@@ -1217,50 +1220,53 @@ function array_to_xml( $data, &$xml_data ) {
 
 //
 // convert heurist record to GeoJSON Feasture
+// 
+// $extended - include concept codes, term code and labels
+// $simplify - simplify paths with more than 1000 vertices
 //
-function getGeoJsonFeature($record, $extended=false){
-    
+function getGeoJsonFeature($record, $extended=false, $simplify=false){
+
     global $system, $rtStructs, $detailtypes, $rtTerms;
 
     $rtTerms = null;
-    
+
     if($extended){
         if($rtStructs==null) $rtStructs = dbs_GetRectypeStructures($system, null, 2);
         $idx_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
-        
+
         if($rtTerms==null) {
             $rtTerms = dbs_GetTerms($system);
             $rtTerms = new DbsTerms($system, $rtTerms);
         }
     }
-    
+
     if($detailtypes==null) $detailtypes = dbs_GetDetailTypes($system, null, 2);
     $idx_dname = $detailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
     $idx_dtype = $detailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     $idx_ccode = $detailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
 
     $res = array('type'=>'Feature',
-           'id'=>$record['rec_ID'], 
-           'properties'=>array(),
-           'geometry'=>array());
+        'id'=>$record['rec_ID'], 
+        'properties'=>array(),
+        'geometry'=>array());
 
     $rty_ID = $record['rec_RecTypeID'];
-    
+
     $res['properties'] = $record;
     $res['properties']['details'] = array();
-    
+
     $geovalues = array();
     $timevalues = array();
     $date_start = null;
     $date_end = null;
-               
+
     //convert details to proper JSON format, extract geo fields and convert WKT to geojson geometry
     foreach ($record['details'] as $dty_ID=>$field_details) {
 
         $field_type = $detailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
-        
+
         foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
-            
+
             if(is_array($value)){
                 if(@$value['file']){
                     //remove some fields
@@ -1268,40 +1274,61 @@ function getGeoJsonFeature($record, $extended=false){
                     unset($val['ulf_ID']);
                     unset($val['fullPath']);
                     unset($val['ulf_Parameters']);
-                    
+
                 }else if(@$value['id']){ //resource
                     $val = $value['id'];
                 }else if(@$value['geo']){
-                    
+
                     $wkt = $value['geo']['wkt'];
-                    if($value['geo']['type']=='r'){
-                        //@todo convert rect to polygone  
-                        
+                    /*if($value['geo']['type']=='r'){
+                    //@todo convert rect to polygone  
                     }else if($value['geo']['type']='c'){
-                        //@todo convert circle to polygone
-                        
-                    }
-                    
+                    //@todo convert circle to polygone
+                    }*/
+
                     $geom = geoPHP::load($wkt, 'wkt');
                     if(!$geom->isEmpty()){
-                       
-                       $geojson_adapter = new GeoJSON(); 
-                       $geojson_res = $geojson_adapter->write($geom, true); 
-                       
-                       if(count($geojson_res['coordinates'])>0){
-                            $geovalues[] = $geojson_res;
-                       }
-                    }
-                    
+
+                        /*The GEOS-php extension needs to be installed for these functions to be available 
+                        if($simplify)$geom->simplify(0.0001, TRUE);
+                        */
+
+                        $geojson_adapter = new GeoJSON(); 
+                        $json = $geojson_adapter->write($geom, true); 
+
+                        if(count($json['coordinates'])>0){
+
+                            if($simplify){
+                                if($json['type']=='LineString'){
+
+                                    simplifyCoordinates($json['coordinates']);
+
+                                } else if($json['type']=='Polygon'){
+                                    for($idx=0; $idx<count($json['coordinates']); $idx++){
+                                        simplifyCoordinates($json['coordinates'][$idx]);
+                                    }
+                                } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
+                                {
+                                    for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
+                                        for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
+                                            simplifyCoordinates($json['coordinates'][$idx][$idx2]);
+                                }
+                            }
+
+                            $geovalues[] = $json;
+                        }
+                    }//isEmpty
+
+
                     $val = $wkt;
-                    continue;  //it will be inccluded into separate geometry property  
+                    continue;  //it will be included into separate geometry property  
                 }
             }else{
                 if($field_type=='date' || $field_type=='year'){
                     if($dty_ID==DT_START_DATE){
-                         $date_start = temporalToSimple($value);
+                        $date_start = temporalToSimple($value);
                     }else if($dty_ID==DT_END_DATE){
-                         $date_end = temporalToSimple($value);
+                        $date_end = temporalToSimple($value);
                     }else{
                         //parse temporal
                         $ta = temporalToSimpleRange($value);
@@ -1312,7 +1339,7 @@ function getGeoJsonFeature($record, $extended=false){
             }
 
             $val = array('ID'=>$dty_ID,'value'=>$val);
-            
+
             if(@$value['id']>0){ //resource
                 $val['resourceTitle']     = @$value['title'];
                 $val['resourceRecTypeID'] = @$value['type'];
@@ -1321,9 +1348,9 @@ function getGeoJsonFeature($record, $extended=false){
             if($extended){
                 //It needs to include the field name and term label and term standard code.
                 if($field_type=='enum' || $field_type=='relationtype'){
-                   $val['termLabel'] = $rtTerms->getTermLabel($val, true);
-                   $term_code  = $rtTerms->getTermCode($val);
-                   if(!$term_code) $val['termCode'] = $term_code;    
+                    $val['termLabel'] = $rtTerms->getTermLabel($val, true);
+                    $term_code  = $rtTerms->getTermCode($val);
+                    if(!$term_code) $val['termCode'] = $term_code;    
                 }
 
                 if(@$rtStructs['typedefs'][$rty_ID]['dtFields'][$dty_ID]){
@@ -1332,16 +1359,16 @@ function getGeoJsonFeature($record, $extended=false){
                     //non standard field
                     $val['fieldName'] = $detailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];    
                 }
-                
+
                 $val['fieldType'] = $field_type;
                 $val['conceptID'] = $detailtypes['typedefs'][$dty_ID]['commonFields'][$idx_ccode];
             }
-            
+
             $res['properties']['details'][] = $val;
         } //for detail multivalues
     } //for all details of record
-      
-    
+
+
     if(count($geovalues)>1){
         $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
     }else if(count($geovalues)==1){
@@ -1355,28 +1382,43 @@ function getGeoJsonFeature($record, $extended=false){
         if($date_end==null) $date_end = '';
         $timevalues[] = array($date_start,'','',$date_end,'');
     }
-    
-    if(count($timevalues)>0){
-        
-        $res['when'] = array('timespans'=>$timevalues);
-        
-/*
-https://github.com/kgeographer/topotime/wiki/GeoJSON%E2%80%90T
 
-"when": {
-  "timespans": [["-323-01-01 ","","","-101-12-31","Hellenistic period"]],  [start, latest-start, earliest-end, end, label]
-  "duration": "?",  //an integer followed by a single letter (d, m, y for day, month, years respectively)
-  "periods": [{
-    "name": "Hellenistic Period",
-    "period_uri": " http://n2t.net/ark:/99152/p0mn2ndq6bv"
- }],
-  "follows": "<feature or geometry id>",  optional, internal identifier for the preceding segment of an ordered set
+    if(count($timevalues)>0){
+        //https://github.com/kgeographer/topotime/wiki/GeoJSON%E2%80%90T
+        // "timespans": [["-323-01-01 ","","","-101-12-31","Hellenistic period"]],  [start, latest-start, earliest-end, end, label]
+
+        $res['when'] = array('timespans'=>$timevalues);
+    }
+
+    return $res;
+
 }
 
-*/   
-    }
+function simplifyCoordinates(&$orig_points){
     
-    return $res;
- 
+    if(count($orig_points)>1000){
+
+        $points = array();    
+        foreach ($orig_points as $point) {
+            array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
+        }
+        
+        $tolerance = 0.01;// 0.002;
+        $crn = 0; //count of run
+        $points2 = $points;
+        while(count($points2)>1000 && $crn<4){
+            $points2 = Simplify::run($points, $tolerance);
+            $tolerance = $tolerance + 0.002;
+            $crn++;
+        }//while simplify
+
+        if(count($points2)<=1000){
+            $orig_points = array();
+            foreach ($points2 as $point) {
+                array_push($orig_points, array($point['x'], $point['y']) );
+            }
+        }
+        
+    }
 }
 ?>

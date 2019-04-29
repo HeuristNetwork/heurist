@@ -1039,7 +1039,7 @@ if(_mapdata.limit_warning){
                     });
 
                     $( document ).bubble( "option", "content", "" );
-                    _showSelection(true, true, null); //show selction on map
+                    _showSelection(true, true, null); //show selection on map
                     if(_onSelectEventListener)_onSelectEventListener.call(that, selection); //trigger global selection event
                 }
             });
@@ -1221,7 +1221,7 @@ console.log('tileloaded 2');
                 }
 
                 if(_callback){
-                    _callback.call();
+                    _callback.call(); //call init completed and further addRecordsetLayer
                 }else{
                     //ART 20151026  _updateLayout();
                     //highlight selection

@@ -50,7 +50,7 @@
                         "dty_Type":"url",
                         "rst_DisplayName": "Download URL:",
                         "rst_DisplayWidth":80,
-                        "rst_DisplayHelpText": "Heusit URL to download file", 
+                        "rst_DisplayHelpText": "Heurist URL to download file", 
                         "rst_Display":"hidden",
                         "dty_Role":"virtual"
                     }

@@ -877,6 +877,14 @@ prof =Profile
                 _callserver('record_search', request, callback);    //standard search
 
             }
+            
+            //
+            // prepare result in required format
+            //
+            ,search_new: function(request, callback){
+                // start search
+                _callserver('record_output', request, callback);    //standard search
+            }
 
 
             /**

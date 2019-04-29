@@ -33,8 +33,12 @@ function hEditing(_options) {
 
     /**
     * Initialization
-    * 
-    * container - element Id or jqyuery element
+    * options:
+    *   container - element Id or jqyuery element
+    *   entity 
+    *   recstructure - configuration of fields
+    *   recdata - initial data
+    *   onchange
     */
     function _init(_options) {
         
@@ -120,17 +124,18 @@ function hEditing(_options) {
         if(_recstructure) recstructure = _recstructure;
                 
         var recID = '';
-        if(recdata!=null){ //for edit mode
-            record = recdata.getFirstRecord();
-            //get record ID
-            var idx;
-            for (idx=0; idx<recstructure.length; idx++){
-               if(recstructure[idx]['keyField']){
-                    recID = recdata.fld(record, recstructure[idx]['dtID']);
-                    break;
-               }
+        if(recdata!=null){
+            if($.isFunction(recdata['isA']) && recdata.isA('hRecordSet')){ //for edit mode
+                record = recdata.getFirstRecord();
+                //get record ID
+                var idx;
+                for (idx=0; idx<recstructure.length; idx++){
+                   if(recstructure[idx]['keyField']){
+                        recID = recdata.fld(record, recstructure[idx]['dtID']);
+                        break;
+                   }
+                }
             }
-            
         }
         
         

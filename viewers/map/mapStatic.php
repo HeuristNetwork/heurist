@@ -295,7 +295,7 @@
                         }
                         
                         $tolerance = 0.01;// 0.002;
-                        $crn = 0;
+                        $crn = 0; //count of run
                         $points2 = $points;
                         while(count($points2)>1000 && $crn<4){
                             $points2 = Simplify::run($points, $tolerance);
@@ -351,7 +351,7 @@
                         }
                         
                         $tolerance = 0.02;// 0.002;
-                        $crn = 0;
+                        $crn = 0; //count of run
                         $points2 = $points;
                         while($verties_cnt+count($points2)>100 && $crn<4){
                             $points2 = Simplify::run($points, $tolerance);

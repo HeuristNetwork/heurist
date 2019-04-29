@@ -502,7 +502,16 @@ window.hWin.HEURIST4.util = {
 
     isArray: function (a)
     {
-        return Object.prototype.toString.apply(a) === '[object Array]';
+        return $.isArray(a); //Object.prototype.toString.apply(a) === '[object Array]';
+    },
+    
+    isGeoJSON: function(a, allowempty){
+        
+        if(allowempty && $.isArray(a) && a.length==0){
+            return true;   
+        }else{
+            return (window.hWin.HEURIST4.util.isArrayNotEmpty(a) && (a[0]['type']=='Feature' || a[0]['type']=='FeatureCollection'));
+        }
     },
 
     /*

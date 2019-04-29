@@ -546,7 +546,7 @@ $.widget( "heurist.editing_input", {
 
         var $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.input_prompt);  //.appendTo( this.input_cell );
 
-        if(this.detailType=='blocktext'){
+        if(this.detailType=='blocktext'){//----------------------------------------------------
 
             var dheight = this.f('rst_DisplayHeight');
             
@@ -652,7 +652,7 @@ $.widget( "heurist.editing_input", {
               
 
         }
-        else if(this.detailType=='enum' || this.detailType=='relationtype'){
+        else if(this.detailType=='enum' || this.detailType=='relationtype'){//--------------------------------------
 
             var dwidth = this.f('rst_DisplayWidth');
             if(parseFloat(dwidth)>0){
@@ -854,7 +854,7 @@ $.widget( "heurist.editing_input", {
             
             
         }
-        else if(this.detailType=='boolean'){
+        else if(this.detailType=='boolean'){//----------------------------------------------------
 
             $input = $( '<input>',{type:'checkbox', value:'1'} )
             .uniqueId()
@@ -902,7 +902,7 @@ $.widget( "heurist.editing_input", {
             }
 
         }
-        else if(this.detailType=='relmarker'){ 
+        else if(this.detailType=='relmarker'){ //---------------------------------------------------- 
             
                 this.options.showclear_button = false;
                 $inputdiv.css({'display':'inline-block','vertical-align':'middle'});
@@ -1154,7 +1154,7 @@ $.widget( "heurist.editing_input", {
                 
 
         }
-        else if(this.detailType=='resource' && this.configMode.entity=='records'){
+        else if(this.detailType=='resource' && this.configMode.entity=='records'){//---------------------------------
 
             /*
             if(value=='' && this.element.find('.sel_link2').is(':visible')){
@@ -1323,7 +1323,7 @@ $.widget( "heurist.editing_input", {
             
         } 
         
-        else if(this.detailType=='resource')
+        else if(this.detailType=='resource') //----------------------------------------------------
         {
             
             //replace input with div
@@ -1434,10 +1434,14 @@ $.widget( "heurist.editing_input", {
             this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
 
         }
-        else{
+        else{              //----------------------------------------------------
             $input = $( "<input>")
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
+            .attr('autocomplete','disabled')
+            .attr('autocorrect','off')
+            .attr('autocapitalize','none')
+            .attr('spellcheck','false')
             .val(value)
             .keyup(function(){that._onChange();})
             .change(function(){
@@ -1458,7 +1462,7 @@ $.widget( "heurist.editing_input", {
                 }
             }
             
-            if(this.options.dtID=='rec_URL' || this.detailType=='url'){
+            if(this.options.dtID=='rec_URL' || this.detailType=='url'){//----------------------------------
                 
                     var $btn_extlink = null, $btn_editlink = null;
                 
@@ -1511,7 +1515,7 @@ $.widget( "heurist.editing_input", {
                     __url_input_state(true);               
                 
             }
-            else if(this.detailType=="integer" || this.detailType=="year"){
+            else if(this.detailType=="integer" || this.detailType=="year"){//-----------------------------------------
 
                 $input.keypress(function (e) {
                     var code = e.charCode || e.keyCode;
@@ -1537,7 +1541,7 @@ $.widget( "heurist.editing_input", {
                 }
                 });*/
             }else
-            if(this.detailType=="float"){
+            if(this.detailType=="float"){//----------------------------------------------------
 
                     $input.keypress(function (e) {
                         var code = e.charCode || e.keyCode; //(e.keyCode ? e.keyCode : e.which);
@@ -1561,7 +1565,7 @@ $.widget( "heurist.editing_input", {
                     });
 
             }else
-            if(this.detailType=='date'){
+            if(this.detailType=='date'){//----------------------------------------------------
                 
                 $input.css('width', this.options.is_faceted_search?'13ex':'20ex');
 
@@ -1615,11 +1619,14 @@ $.widget( "heurist.editing_input", {
                             beforeShow: function(){
                                 
                                 if(that.is_disabled) return false;
+                                var cv = $input.val();
                                 
                                 var prev_dp_value = window.hWin.HAPI4.get_prefs('edit_record_last_entered_date'); 
-                                if($input.val()=='' && !window.hWin.HEURIST4.util.isempty(prev_dp_value)){
+                                if(cv=='' && !window.hWin.HEURIST4.util.isempty(prev_dp_value)){
                                     //$datepicker.datepicker( "setDate", prev_dp_value );    
                                     $datepicker.datepicker( "option", "defaultDate", prev_dp_value); 
+                                }else if(cv!='' && cv.indexOf('-')<0){
+                                    $datepicker.datepicker( "option", "defaultDate", cv+'-01-01'); 
                                 }
                             
                             },
@@ -1636,6 +1643,18 @@ $.widget( "heurist.editing_input", {
                                 });
                             }*/
                         });
+                        
+                        this._on( $input, {keyup: function(event){
+                            if(!isNaN(String.fromCharCode(event.which))){
+                                var cv = $input.val();
+                                if(cv!='' && cv.indexOf('-')<0){
+                                    $datepicker.datepicker( "setDate", cv+'-01-01');   
+                                    $input.val(cv);
+                                    /*var wg = $datepicker.datepicker( "widget" );
+                                    wg.find('.ui-datepicker-year').val(cv);*/
+                                }
+                            }
+                        }});
 
                         var $btn_datepicker = $( '<span>', {title: 'Show calendar'})
                             .addClass('smallicon ui-icon ui-icon-calendar')
@@ -1698,7 +1717,7 @@ $.widget( "heurist.editing_input", {
                 $input.change();   
                                      
             }else 
-            if(this.isFileForRecord){
+            if(this.isFileForRecord){ //----------------------------------------------------
                 
                         var $input_img, $gicon;
                         
@@ -1851,7 +1870,7 @@ $.widget( "heurist.editing_input", {
                 
             }
             else
-            if( this.detailType=='folder' ){
+            if( this.detailType=='folder' ){ //----------------------------------------------------
                 
                 $input.css({'padding-left':'30px'});
                 
@@ -1877,7 +1896,7 @@ $.widget( "heurist.editing_input", {
                     }} );
             }
             else
-            if( this.detailType=='file' ){
+            if( this.detailType=='file' ){ //----------------------------------------------------
                 
                 
                         this.options.showclear_button = (this.configMode.hideclear!=1);
@@ -2136,8 +2155,8 @@ console.log('onpaste');
 
                 this._on( $input, { keypress: __show_action_dialog, click: __show_action_dialog } );
                 this._on( $gicon, { click: __show_action_dialog } );
-            }else //-----------------------------------------------
-            if(this.detailType=='geo'){
+            }else 
+            if(this.detailType=='geo'){   //----------------------------------------------------
                 
                 $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
                    
@@ -2193,6 +2212,15 @@ console.log('onpaste');
                 //this._on( $btn_digitizer_dialog, { click: __show_mapdigit_dialog } );
                 this._on( $input, { keypress: __show_mapdigit_dialog, click: __show_mapdigit_dialog } );
                 this._on( $gicon, { click: __show_mapdigit_dialog } );
+                
+            }else if(this.configMode && this.configMode['colorpicker']){ //-----------------------------------------------
+                
+                $input.colorpicker({
+                        hideButton: false, //show button right to input
+                        showOn: "both",
+                        val:value});
+                $input.parent('.evo-cp-wrap').css({display:'inline-block',width:'200px'});
+
             }
             /*else if(this.detailType=="freetext" && this.options['input_width']){
             $input.css('width', this.options['input_width']);
