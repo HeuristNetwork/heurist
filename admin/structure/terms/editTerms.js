@@ -1476,6 +1476,8 @@ function EditTerms() {
             ind,
             parentNode = (context.parent===0)?_currTreeView.getRoot():_currentNode, //??????
             fi = window.hWin.HEURIST4.terms.fieldNamesToIndex;
+            
+            var added_nodes = [];
 
             if(res.length>0){
 
@@ -1497,11 +1499,29 @@ function EditTerms() {
                                 term.description = arTerm[fi.trm_Description];
                                 term.termcode = "";
                                 term.trm_SemanticReferenceURL = arTerm[fi.trm_SemanticReferenceURL];
-                                term.parent_id = context.parent; //_currentNode.data.id;
+                                term.parent_id = arTerm[fi.trm_ParentTermID];
+                                    //context.parent; //_currentNode.data.id;
                                 term.domain = _currentDomain;
                                 term.inverseid = null;
+                                
+                                if(parentNode.data.id!=term.parent_id){
+                                    var  nnode = _findNodeById(term.parent_id, false);
+                                    if(nnode){
+                                        parentNode = nnode;  
+                                    }else{
+                                        //find in already added 
+                                        for(k=0;k<added_nodes.length;k++){
+                                            var nnode = added_nodes[k];
+                                            if(nnode.data.id==term.parent_id){
+                                                parentNode = nnode;
+                                                break;
+                                            }
+                                        }
+                                    } 
+                                }
 
-                                var newNode= parentNode.addChildren(term);    
+                                var newNode = parentNode.addChildren(term);    
+                                added_nodes.push(newNode);
                             }
                         }
                     }
