@@ -385,8 +385,9 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
         DbUtils::databaseDrop( false, $targetdbname_full, false, false );
-        print '<p><h4>Note: </h4>Clone failed due to referential integrity check. Please '
-                .CONTACT_HEURIST_TEAM.' for assistance</p>';
+        print '<p><h4>Note: </h4>Cloning failed due to an SQL constraints problem (internal database inconsistency). Please '
+                .CONTACT_HEURIST_TEAM
+                .' and request a fix for this problem - it should be cleaned up even if you don\'t need to clone the database</p>';
         return false;
     }
 

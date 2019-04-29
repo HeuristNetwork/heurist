@@ -135,7 +135,7 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 				}
 				break;
 		}
-        if(@$tDate["CLD"]){
+        if(@$tDate["CLD"] && !$is_greg_or_julian){
             $value = $tDate["CLD"].' (Gregorian '.$value.')';
         }            
 		if($showoriginal_temporal && strpos($value2,"|")!==false){

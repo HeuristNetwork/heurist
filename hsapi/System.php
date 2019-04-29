@@ -387,9 +387,13 @@ error_log(print_r($_REQUEST, true));
         }
     }
     
-    //
-    //
-    //
+    /**
+    *  Returns three values array for each system folder
+    *  0 - parth of constant HEURIST_XXX_DIR and HEURIST_XXX_URL
+    *  1 - desciption
+    *  2 - allow webaccess (.htaccess_via_url will be copied to this folder)
+    *  3 - must be backuped
+    */
     public function getArrayOfSystemFolders(){
         
         //const name, description, allow webaccess, for backup
@@ -423,7 +427,7 @@ error_log(print_r($_REQUEST, true));
         $system_folders = array();
         
         foreach ($folders as $folder_name=>$folder){        
-            if(!$is_for_backup || $folder[3]){
+            if(!$is_for_backup || @$folder[3]===true){
                 array_push($system_folders, HEURIST_FILESTORE_DIR.$folder_name.'/');
             }
         }

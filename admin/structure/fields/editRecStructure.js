@@ -702,7 +702,7 @@ function EditRecStructure() {
                         // Terms - enums and relmarkers
                         '<div class="input-row" Xstyle="display:none"><div class="input-header-cell">Vocabulary (terms):</div>'+
                             '<div class="input-cell" title="The lsit of terms available for selection as values for this field">'+
-                                '<select id="selVocab" Xclass="initially-dis"/>'+
+                                '<select id="selVocab" Xclass="initially-dis" style="width:300px"/>'+
                                 '<input id="ed_dty_JsonTermIDTree" type="hidden"/>'+
                                 '<input id="ed_dty_TermIDTreeNonSelectableIDs" type="hidden"/>'+
                                 '<span>'+
@@ -3652,6 +3652,7 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
             //el_sel.onchange =  onchangehandler;
             el_sel.className = "previewList"; //was for enum only?
             el_sel.style.display = 'block';
+            if(!isdefselector) el_sel.style.width = '300px';
             parent.appendChild(el_sel);
             
             if($(el_sel).hSelect('instance')!==undefined) $(el_sel).hSelect('destroy');
@@ -3889,7 +3890,7 @@ function _recreateTermsVocabSelector(datatype, toselect)  {
         el_sel.onchange =  function(){
             document.getElementById("ed_dty_JsonTermIDTree").value =  el_sel.value;
         };
-        el_sel.style.maxWidth = '120px';
+        el_sel.style.maxWidth = '300px';
        
         if($(el_sel).hSelect('instance')!==undefined) $(el_sel).hSelect('destroy');
         var el_menu = window.hWin.HEURIST4.ui.initHSelect(el_sel, false);
