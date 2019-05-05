@@ -84,7 +84,7 @@ if ($installDir == @$_SERVER["SCRIPT_NAME"]) { // this should be the path differ
 }
 
 define('HEURIST_CURRENT_URL', $serverBaseURL . $_SERVER["REQUEST_URI"]);
-define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. Heurist.sydney.edu.au
+define('HEURIST_SERVER_NAME', @$serverName); // server host name for the configured name, eg. Heuristplus.sydney.edu.au
 if(!defined('HEURIST_DIR')) define('HEURIST_DIR', @$_SERVER["DOCUMENT_ROOT"] . $installDir); //  eg. /var/www/html/HEURIST @todo - read simlink (realpath)
 define('HEURIST_SERVER_URL', $serverBaseURL);
 define('HEURIST_BASE_URL', $serverBaseURL . $installDir ); // eg. https://heuristplus.sydney.edu.au/heurist/

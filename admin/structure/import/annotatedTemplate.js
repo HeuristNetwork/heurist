@@ -181,7 +181,7 @@ function receiveMessage(event)
 var message;
 //if (event.origin !== "https://Heuristplus.sydney.edu.au"){
 if (false) {
-message = 'Response: ("' + event.origin + '"), but not from Heurist.sydney.edu.au';
+message = 'Response: ("' + event.origin + '"), but not from Heuristplus.sydney.edu.au';
 } else {
 
 var dv = jQuery('#HeuristRecTypeSource');

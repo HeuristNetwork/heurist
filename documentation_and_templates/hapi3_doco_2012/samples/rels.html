@@ -9,8 +9,9 @@
 img.icon { margin-right: 4px; }
 </style>
 
-<script src=http://hapi.Heurist.sydney.edu.au/load?v=02&key=ce1c992c139cfd5a6fdc77c5c71444925f229942></script>
-<script src=http://hapi.Heurist.sydney.edu.au/02/goi.js></script>
+<!-- May 2019: This code was deprecated years ago. hapi no longer runs on heuristplus.sydney.edu.au -->
+<script src=https://hapi.Heuristplus.sydney.edu.au/load?v=02&key=ce1c992c139cfd5a6fdc77c5c71444925f229942></script>
+<script src=https://hapi.Heuristplus.sydney.edu.au/02/goi.js></script>
 
 <script src="http://maps.google.com/maps?file=api&amp;v=2.105&amp;key=ABQIAAAAWXRbJ6-0zaNuAoz9XBmHZRTOHJksE5z9Wm_cd8XHFESSXyKZQhQ6Wa_KV6YE4tIo4Jn1cD3eEmpr8Q" type="text/javascript"></script>
 <xscript src="main-105.js"></xscript>
@@ -82,10 +83,11 @@ function GMarkerClusterManager(map) {
 	this.clusterMarkers = {};
 
 	this.map = map;
+    // May 2019: This code was deprecated years ago. hapi no longer runs on heuristplus.sydney.edu.au
 	this.collapseIcon = new GIcon(baseIcon);
-		this.collapseIcon.image = "http://hapi.Heurist.sydney.edu.au/samples/collapso-circle.gif";
+		this.collapseIcon.image = "https://hapi.Heuristplus.sydney.edu.au/samples/collapso-circle.gif";
 	this.expandIcon = new GIcon(baseIcon);
-		this.expandIcon.image = "http://hapi.Heurist.sydney.edu.au/samples/expando-circle.gif";
+		this.expandIcon.image = "https://hapi.Heuristplus.sydney.edu.au/samples/expando-circle.gif";
 	this.expandedClusters = [];
 
 	map.clusterManager = this;
@@ -666,9 +668,9 @@ function pointsCallback(vals) {
 	plotMap();
 }
 
-
+// May 2019: This code was deprecated years ago. hapi no longer runs on heuristplus.sydney.edu.au
 function loadPointsAndLines(id) {
-	HAPI.XHR.sendRequest("http://hapi.Heurist.sydney.edu.au/get_points.php?bib_id=" + id, pointsCallback);
+	HAPI.XHR.sendRequest("https://hapi.Heuristplus.sydney.edu.au/get_points.php?bib_id=" + id, pointsCallback);
 }
 
 </script>

@@ -3,7 +3,7 @@
 
 /**
 * registerDB.php - Registers the current database with Heurist_Master_Index database, 
-* on the Heurist master server (heurist.sydney.edu.au as at 2016), stores
+* on the Heurist master server (heurist.sydney.edu.au as at 2016, heuristplus.sydney.edu.au as at 2019), stores
 * metadata in the index database, sets registration code in sysIdentification table.
 *
 * @package     Heurist academic knowledge management system
