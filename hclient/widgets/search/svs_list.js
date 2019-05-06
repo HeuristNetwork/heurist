@@ -689,10 +689,6 @@ $.widget( "heurist.svs_list", {
             visible_cnt++;
         }//for
 
-        if(this.allowed_svsIDs && visible_cnt==1){
-            $(this.accordeon).find('button[data-svs-id="'+svsIDs[visible_svsID]+'"]').click();
-        }
-
         //$(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
         $(this.accordeon).css({'overflow':'hidden',position:'unset','padding':'4px'});
 
@@ -728,6 +724,11 @@ $.widget( "heurist.svs_list", {
 
 
         this.accordeon.show();
+        
+        
+        if(visible_cnt==1){//this.allowed_svsIDs &&
+            $(this.accordeon).find('button[data-svs-id="'+visible_svsID+'"]').click();
+        }
 
     },
 

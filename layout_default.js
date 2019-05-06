@@ -128,7 +128,7 @@ var cfg_layouts = [
     
     // WebSearch to embed into other websites
     {id:'WebSearch', name:'Heurist Embed', theme:'heurist', type:'cardinal',
-        west:{size:260, minsize:150, apps:[{appid:'heurist_SearchTree', hasheader:false,
+        west:{size:300, minsize:150, apps:[{appid:'heurist_SearchTree', hasheader:false,
                 options:{buttons_mode: true},
                 css:{border:'none','font-size':'14px'} }]},  //saved searches
                 
