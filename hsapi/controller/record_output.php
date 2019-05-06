@@ -718,6 +718,10 @@ function output_Records($system, $data, $params){
     //OPEN BRACKETS
     if($params['format']=='geojson'){
 
+        if($params['leaflet']){
+            fwrite($fd, '{"geojson":');         
+        }
+        
         fwrite($fd, '[');         
         
     }else if(@$params['restapi']==1){
@@ -736,6 +740,7 @@ function output_Records($system, $data, $params){
     }
 
     //CONTENT
+    $timeline_data = [];
     
     $comma = '';
     
@@ -755,8 +760,19 @@ function output_Records($system, $data, $params){
         }
         
         if($params['format']=='geojson'){
+            
+            $feature = getGeoJsonFeature($record, false, @$params['simplify']);
+            if($params['leaflet']){
+                   if(@$feature['when']){
+                        $timeline_data[] = array('rec_ID'=>$recID, 'when'=>$feature['when']['timespans'], 
+                                        'rec_RecTypeID'=>$rty_ID, "rec_Title"=>$record['rec_Title']);
+                        $feature['when'] = null;
+                        unset($feature['when']);
+                   }
+                   if(!@$feature['geometry']) continue;
+            }
 
-            fwrite($fd, $comma.json_encode(getGeoJsonFeature($record, false, @$params['simplify'])));
+            fwrite($fd, $comma.json_encode($feature));
             $comma = ',';
         
         }else if($params['format']=='json'){ 
@@ -776,6 +792,10 @@ function output_Records($system, $data, $params){
     if($params['format']=='geojson'){
         
         fwrite($fd, ']');
+        
+        if($params['leaflet']){ //return 2 array - pure geojson and timeline items
+           fwrite($fd, ',"timeline":'.json_encode($timeline_data).'}');
+        }
         
     }else if(@$params['restapi']==1){
         if(count($records)==1 && @$params['recID']>0){
@@ -1373,6 +1393,8 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
         $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
     }else if(count($geovalues)==1){
         $res['geometry'] = $geovalues[0];
+    }else{
+        //$res['geometry'] = [];
     }
 
     if($date_start!=null || $date_end!=null){
@@ -1380,7 +1402,7 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
             $date_start = $date_end;
         }
         if($date_end==null) $date_end = '';
-        $timevalues[] = array($date_start,'','',$date_end,'');
+        $timevalues[] = array($date_start, '', '', $date_end, '');
     }
 
     if(count($timevalues)>0){

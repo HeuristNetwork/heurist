@@ -16,8 +16,28 @@
 * mapping base widget
 *
 * It manipulates with map component (google or leaflet is implemented in descendants)
+*      all native mathods for mapping must be defined here
 * 
-* See  map_control.js for UI, timeline.js for Vis timeline and map_document.js for map document
+* mapManager.js is UI with list (tree) of mapdocuments, result sets and base maps
+* timeline.js for Vis timeline 
+* mapDocument.js maintains map document list and their layers
+* mapLayer2.js loads data for particular layer
+* 
+* workflow for map documents:
+* mapManager.defineContent('mapdocs') -> creates mapDocument -> mapDocument loads list of mapdocs -> in callback returns treeData
+* mapManager onexpand loads content of particular document mapDocument.openMapDocument(id) 
+*                          - it creates mapLayers in turn they are added layers to native map
+*            edit ->  mapDocument.editRecord (map doc or layer)
+*            add (on DnD or on add layer from search results
+*            show/hide entire mapdoc or layer mapDocument.setVisibility(recID)
+*            zoomTo mapDocument.zoomTo(recID)
+* All references by Heurist recID, native leaflet id is stored in mapLayer
+* 
+* workflow for search results:
+* mapManager.defineContent('search') -> creates fake mapdocument searchResults that will consist of search results
+* mapManager.onSearchResult(recordset or query) - searchResults.add(recordset) -> add mapLayer.addRecordsetLayer(recordset)
+* 
+* 
 * 
 * options:
 * element_layout
@@ -91,18 +111,20 @@ $.widget( "heurist.mapping", {
         
         // callbacks
         onselect: null,
-        oninit: null
-        
+        oninit: null,
+
+        //        
+        nativemap: null
     },
     
     //reference to google or leaflet map
     
     nativemap: null,
     vistimeline: null,
-    mapcontrol: null,
+    mapManager: null,
 
-    main_layer: null, //current search layer
-    all_layers: [], //aray of all loaded geojson layers
+    main_layer: null, // current search layer
+    all_layers: [],   // array of all loaded geojson layers
     main_popup:null,
     selected_rec_ids:[],
 
@@ -197,14 +219,15 @@ $.widget( "heurist.mapping", {
             id: 'mapbox.streets',
             accessToken: 'pk.eyJ1Ijoib3NtYWtvdiIsImEiOiJjanV2MWI0Y3Awb3NmM3lxaHI2NWNyYjM0In0.st2ucaGF132oehhrpHfYOw'
         }).addTo( this.nativemap );       
+*/
 
+/*
         L.tileLayer('http://127.0.0.1/HEURIST_FILESTORE/osmak_5/{id}/{z}/{x}/{y}.png', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://    creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
             maxZoom: 15,
             id: 'LondonAtlas'
         }).addTo( this.nativemap );       
-*/
-        
+*/        
         //3. INIT TIMELINE 
         this.vistimeline = $(this.element).find('.ui-layout-south').timeline({
             element_timeline: this.options.element_timeline,
@@ -221,9 +244,9 @@ $.widget( "heurist.mapping", {
             }});
 
         //4. INIT MANAGER
-        this.mapcontrol = L.control.manager({ position: 'topright' }).addTo( this.nativemap );
+        this.mapManager = L.control.manager({ position: 'topright' }).addTo( this.nativemap );
         
-        this.mapcontrol = new hMapManager(this.mapcontrol._container, this.nativemap, this.element);
+        this.mapManager = new hMapManager({container:this.mapManager._container, mapwidget:this.element});
         
         
         this.nativemap.setView([51.505, -0.09], 13);
@@ -256,9 +279,9 @@ $.widget( "heurist.mapping", {
         console.log('onInitComplete');
         
         //Load default base map
-        // $(this.mapcontrol).mapmanager('loadBaseMap', 0);
+        // $(this.mapManager).mapmanager('loadBaseMap', 0);
         //Load default map doument
-        //this.mapcontrol = new hMapManager(this.mapcontrol, this.nativemap);
+        //this.mapManager = new hMapManager(this.mapManager, this.nativemap);
         
     },
     
@@ -406,7 +429,7 @@ $.widget( "heurist.mapping", {
     //
     // data - recordset, query or json
     //
-    addDataset: function(data, dataset_name) 
+    addDataset: function(data, timeline_data, dataset_name) 
     {
         var curr_request = null;
         
@@ -415,7 +438,7 @@ $.widget( "heurist.mapping", {
                 var recset = data;
                 
                 if(recset.length()<2001){ //limit query by id otherwise use current query
-                    curr_request = { w: 'all', q:'ids:'+recset.getIds().join(',') };
+                    curr_request = { w:'all', q:'ids:'+recset.getIds().join(',') };
                 }else{
                     curr_request = recset.getRequest();
                 }            
@@ -434,14 +457,26 @@ $.widget( "heurist.mapping", {
                         q: curr_request.q,
                         rules: curr_request.rules,
                         w: curr_request.w,
+                        leaflet: true, //returns strict geojson and timeline data as two separate arrays
                         simplify: true,
                         format:'geojson'};
             //perform search        
             window.hWin.HAPI4.RecordMgr.search_new(curr_request,
                 function(response){
                     
-                    if( window.hWin.HEURIST4.util.isGeoJSON(response, true) ){
-                        that.addDataset(response, dataset_name);
+                    var geojson_data = null;
+                    var timeline_data = [];
+                    if(response['geojson'] && response['timeline']){
+                        geojson_data = response['geojson'];
+                        timeline_data = response['timeline'];   
+                    }else{
+                        geojson_data = response;
+                    }
+                    
+                    if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
+                        || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
+                    {
+                        that.addDataset(geojson_data, timeline_data, dataset_name);
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -449,163 +484,225 @@ $.widget( "heurist.mapping", {
                 }
             );                     
                         
-        }else if (window.hWin.HEURIST4.util.isGeoJSON(data, true)){
+        }else if (window.hWin.HEURIST4.util.isGeoJSON(data, true) || 
+                    window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data)){
         
-/*            
-var geojsonMarkerOptions = {
-    radius: 8,
-    fillColor: "#ff7800",
-    color: "#000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8
-};
-*/            
-          if(this.main_layer && this.main_layer.options.layer_name == 'Current query'){
-             this.main_layer.remove(); 
-          }
-          
-          if (data.length==0){
-             if(this.mapcontrol)
-                    this.mapcontrol.removeEntry('search', { layer_name: 'Current query' }); 
-              
-          }else{
-
-              /* 
-              Styling
-              each layer has  options.default_style
-              each feature can have feature.style from geojson it overrides layer's style
-              */          
-              //set default style for result set
-              this.main_layer = L.geoJSON(data, {
-                  default_style: {color: "#00b0f0"}
-                  , layer_name: 'Current query'
-                  //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
-                  , onEachFeature: function(feature, layer) {
-
-                      feature.default_style = layer.options.default_style;
-
-                      layer.on('click', function (event) {
-                          //console.log('onclick');                
-                          that.vistimeline.timeline('setSelection', [feature.properties.rec_ID]);
-
-                          that.setSelection([feature.properties.rec_ID]);
-                          if($.isFunction(that.options.onselect)){
-                              that.options.onselect.call(that, [feature.properties.rec_ID]);
-                          }
-                          //open popup
-                          var popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
-                          +feature.properties.rec_ID+'&db='+window.hWin.HAPI4.database;
-
-                          $.get(popupURL, function(responseTxt, statusTxt, xhr){
-                              if(statusTxt == "success"){
-                                  that.main_popup.setLatLng(event.latlng)
-                                  .setContent(responseTxt) //'<div style="width:99%;">'+responseTxt+'</div>')
-                                  .openOn(that.nativemap);
-                              }
-                          });
-
-                          //that._trigger('onselect', null, [feature.properties.rec_ID]);
-
-                      });
-                      // does this feature have a property named popupContent?
-                      //if (feature.properties && feature.properties.rec_Title) {
-                      //    layer.bindPopup(feature.properties.rec_Title);
-                      //}
-                  }
-
-                  /* , style: function(feature) {
-                  if(that.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
-                  return {color: "#ff0000"};
-                  }else{
-                  //either specific style from json or common layer style
-                  return feature.style || feature.default_style;
-                  }
-                  }
-                  */
-                  /*
-                  pointToLayer: function (feature, latlng) {
-                  return L.circleMarker(latlng, geojsonMarkerOptions);
-                  },                
-                  //The filter option can be used to control the visibility of GeoJSON features
-                  filter: function(feature, layer) {
-                  return feature.properties.show_on_map;
-                  }                
-                  */
-              })
-              /*.bindPopup(function (layer) {
-              return layer.feature.properties.rec_Title;
-              })*/
-              .addTo( this.nativemap );            
-
-              this.resetStyle();
-
-              if(this.main_popup==null) this.main_popup = L.popup();
-
-              //init timeline
-              var dataset_name = this.main_layer._leaflet_id;
-              var timeline_data = [],
-              timeline_groups = [{ id:dataset_name, content: 'Current query'}];
-
-              var titem, k, ts, iconImg;
-
-              //convert data to timeline format
-              this.main_layer.eachLayer(function(layer){
-
-                  var feature = layer.feature;
-
-                  if (feature.when && window.hWin.HEURIST4.util.isArrayNotEmpty(feature.when.timespans) ) {
-
-                      for(k=0; k<feature.when.timespans.length; k++){
-                          ts = feature.when.timespans[k];
-
-                          iconImg = window.hWin.HAPI4.iconBaseURL + feature.properties.rec_RecTypeID + '.png';
-
-                          titem = {
-                              id: dataset_name+'-'+feature.properties.rec_ID+'-'+k, //unique id
-                              group: dataset_name,
-                              content: '<img src="'+iconImg 
-                              +'"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
-                              +feature.properties.rec_Title+'</span>',
-                              //'<span>'+recName+'</span>',
-                              title: feature.properties.rec_Title,
-                              start: ts[0],
-                              recID:feature.properties.rec_ID
-                          };
-
-                          if(ts[3] && ts[0]!=ts[3]){
-                              titem['end'] = ts[3];
-                          }else{
-                              titem['type'] = 'point';
-                              //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
-                          }
-
-                          timeline_data.push(titem); 
-                      }
-                  }
-              });
-              this.vistimeline.timeline('timelineRefresh', timeline_data, timeline_groups);
-
-              /*
-              this.main_layer.on('click', function () {
-              this.setStyle({
-              color: 'green'
-              });
-              });
-              if(!$.isFunction(this.mapcontrol)){    
-              this.mapcontrol = new hMapManager(this.mapcontrol, this.nativemap);
-              }
-              */     
-
-              //name:'Current query'   
-              this.mapcontrol.redefineContent('search', {
-                  layer_id: this.main_layer._leaflet_id,
-                  layer_name: this.main_layer.options.layer_name });    
-
-          }
+            this.addGeoJson(data, timeline_data, 'Current query' );        
 
         }
         
+    },
+    
+    //
+    //
+    //
+    addGeoJson: function(geojson_data, timeline_data, dataset_name){
+
+
+        if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) || 
+            window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data)){
+                
+            var that = this;
+
+            /*            
+            var geojsonMarkerOptions = {
+            radius: 8,
+            fillColor: "#ff7800",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+            };
+            */            
+            if(this.main_layer && dataset_name == 'Current query'){ 
+                this.main_layer.remove(); 
+            }
+
+            var timeline_dataset_name = 'main';
+
+            if (geojson_data.length==0 && dataset_name == 'Current query'){
+                if(this.mapManager)
+                    this.mapManager.removeEntry('search', { layer_name: 'Current query' }); 
+
+            }else{
+
+                /* 
+                Styling
+                each layer has  options.default_style
+                each feature can have feature.style from geojson it overrides layer's style
+                */          
+                //set default style for result set
+                this.main_layer = L.geoJSON(geojson_data, {
+                    default_style: {color: "#00b0f0"}
+                    , layer_name: 'Current query'
+                    //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
+                    , onEachFeature: function(feature, layer) {
+
+                        feature.default_style = layer.options.default_style;
+
+                        layer.on('click', function (event) {
+                            //console.log('onclick');                
+                            that.vistimeline.timeline('setSelection', [feature.properties.rec_ID]);
+
+                            that.setSelection([feature.properties.rec_ID]);
+                            if($.isFunction(that.options.onselect)){
+                                that.options.onselect.call(that, [feature.properties.rec_ID]);
+                            }
+                            //open popup
+                            var popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
+                            +feature.properties.rec_ID+'&db='+window.hWin.HAPI4.database;
+
+                            $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                                if(statusTxt == "success"){
+                                    that.main_popup.setLatLng(event.latlng)
+                                    .setContent(responseTxt) //'<div style="width:99%;">'+responseTxt+'</div>')
+                                    .openOn(that.nativemap);
+                                }
+                            });
+
+                            //that._trigger('onselect', null, [feature.properties.rec_ID]);
+
+                        });
+                        // does this feature have a property named popupContent?
+                        //if (feature.properties && feature.properties.rec_Title) {
+                        //    layer.bindPopup(feature.properties.rec_Title);
+                        //}
+                    }
+
+                    /* , style: function(feature) {
+                    if(that.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
+                    return {color: "#ff0000"};
+                    }else{
+                    //either specific style from json or common layer style
+                    return feature.style || feature.default_style;
+                    }
+                    }
+                    */
+                    /*
+                    pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, geojsonMarkerOptions);
+                    },                
+                    //The filter option can be used to control the visibility of GeoJSON features
+                    filter: function(feature, layer) {
+                    return feature.properties.show_on_map;
+                    }                
+                    */
+                })
+                /*.bindPopup(function (layer) {
+                return layer.feature.properties.rec_Title;
+                })*/
+                .addTo( this.nativemap );            
+
+                this.resetStyle();
+
+                if(this.main_popup==null) this.main_popup = L.popup();
+
+                /*
+                this.main_layer.on('click', function () {
+                this.setStyle({
+                color: 'green'
+                });
+                });
+                if(!$.isFunction(this.mapManager)){    
+                this.mapManager = new hMapManager(this.mapManager, this.nativemap);
+                }
+                */     
+
+                if(dataset_name == 'Current query') //change to special dataset
+                    this.mapManager.defineContent('search', {
+                        layer_id: this.main_layer._leaflet_id,
+                        layer_name: this.main_layer.options.layer_name });    
+
+                timeline_dataset_name = this.main_layer._leaflet_id;
+
+            }
+
+            // init timeline
+            // leaflet accept only valid geojson (with coordinates), we may have time enabled items without geo
+            // thus, timeline items are in separate array
+            var timeline_items = [],
+            timeline_groups = []; 
+            var titem, k, ts, iconImg;
+
+
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) ){
+
+                timeline_groups = [{ id:timeline_dataset_name, content: 'Current query'}];    
+
+                $.each(timeline_data, function(idx, tdata){
+
+                    iconImg = window.hWin.HAPI4.iconBaseURL + tdata.rec_RecTypeID + '.png';
+
+                    ts = tdata.when;
+
+                    for(k=0; k<tdata.when.length; k++){
+                        ts = tdata.when[k];
+
+                        titem = {
+                            id: timeline_dataset_name+'-'+tdata.rec_ID+'-'+k, //unique id
+                            group: timeline_dataset_name,
+                            content: '<img src="'+iconImg 
+                            +'"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
+                            +tdata.rec_Title+'</span>',
+                            //'<span>'+recName+'</span>',
+                            title: tdata.rec_Title,
+                            start: ts[0],
+                            recID:tdata.rec_ID
+                        };
+
+                        if(ts[3] && ts[0]!=ts[3]){
+                            titem['end'] = ts[3];
+                        }else{
+                            titem['type'] = 'point';
+                            //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
+                        }
+
+                        timeline_items.push(titem); 
+                    }//for timespans
+
+                });
+
+            }
+
+            /*convert geojson_data to timeline format
+            this.main_layer.eachLayer(function(layer){
+
+            var feature = layer.feature;
+
+            if (feature.when && window.hWin.HEURIST4.util.isArrayNotEmpty(feature.when.timespans) ) {
+
+            for(k=0; k<feature.when.timespans.length; k++){
+            ts = feature.when.timespans[k];
+
+            iconImg = window.hWin.HAPI4.iconBaseURL + feature.properties.rec_RecTypeID + '.png';
+
+            titem = {
+            id: timeline_dataset_name+'-'+feature.properties.rec_ID+'-'+k, //unique id
+            group: timeline_dataset_name,
+            content: '<img src="'+iconImg 
+            +'"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
+            +feature.properties.rec_Title+'</span>',
+            //'<span>'+recName+'</span>',
+            title: feature.properties.rec_Title,
+            start: ts[0],
+            recID:feature.properties.rec_ID
+            };
+
+            if(ts[3] && ts[0]!=ts[3]){
+            titem['end'] = ts[3];
+            }else{
+            titem['type'] = 'point';
+            //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
+            }
+
+            timeline_items.push(titem); 
+            }
+            }
+            });*/
+            this.vistimeline.timeline('timelineRefresh', timeline_items, timeline_groups);          
+
+        }        
+
     },
         
     //
@@ -673,6 +770,11 @@ var geojsonMarkerOptions = {
             
         }
         
+    },
+    
+    //@todo remove - all actions with layer via this widget
+    getNativemap: function(){
+        return this.nativemap;
     }
     
 });

@@ -93,7 +93,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                         {
                             var record = records[idx];
                             var recID  = resdata.fld(record, 'rec_ID'),
-                            recName = resdata.fld(record, 'rec_Title');
+                                recName = resdata.fld(record, 'rec_Title');
 
                             //ele.append("<option value='"+recID+"'>"+recName+"</option>");
                             mapdocs = mapdocs + "<li mapdoc_id='"+recID+"'><a>"+recName+"</a></li>";

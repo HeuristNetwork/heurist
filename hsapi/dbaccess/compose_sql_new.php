@@ -357,7 +357,7 @@ class HQuery {
         $this->sort_phrases = array();
         
         foreach ($query_json as $key => $value){
-            if(is_numeric($key)){  //this is sequental array
+            if(is_numeric($key) && is_array($value)){  //this is sequental array
                 $key = array_keys($value);
                 $key = $key[0];
                 if(is_string($value[$key])){
@@ -513,7 +513,7 @@ class HLimb {
         foreach ($query_json as $key => $value){
 
             //echo "<br>key=".$key."  ".(print_r($value,true));
-            if(is_numeric($key)){  //this is sequental array
+            if(is_numeric($key) && is_array($value)){  //this is sequental array
                 $key = array_keys($value);
                 $key = $key[0];
                 $value = $value[$key];

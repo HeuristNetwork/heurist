@@ -193,7 +193,7 @@ $.widget( "heurist.app_timemap", {
 
         if( !window.hWin.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0 ){
 
-console.log('_initmap');
+//console.log('_initmap');
 
             var mapping = this.mapframe[0].contentWindow.mapping;
 
@@ -211,7 +211,7 @@ console.log('_initmap');
             if(this.options.leaflet){ //LEAFLET
             
                 if(that.options.recordset){
-                    mapping.mapping('addDataset', that.options.recordset, 'main');
+                    mapping.mapping('addDataset', that.options.recordset, null, 'Current query');
                 //}else if(this.options.selection){
                 }
                 

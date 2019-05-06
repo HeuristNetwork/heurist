@@ -34,26 +34,31 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 ?>
     <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/leaflet.css"/>
     <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/leaflet.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
 <?php
 }else{
 ?>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
    integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
    crossorigin=""/>
-   
 <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
    integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
    crossorigin=""></script>   
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>
 <?php
 }
 ?>
 <script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
 
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
+
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapping.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/timeline.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>viewers/map/map_control.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapManager.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapDocument.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapLayer2.js"></script>
 
 
 <!--
@@ -129,6 +134,48 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     .vis-item-bbox{
         background-color:rgb(142, 169, 185);
     }
+    
+    span.fancytree-node,
+    span.fancytree-title,
+    div.svs-contextmenu3 > span.ui-icon{
+        vertical-align:bottom;
+        padding-left:2px;
+    }
+    div.svs-contextmenu3{
+        cursor:pointer;
+        position:absolute;
+        right:7px;
+        margin: 1px;
+        padding: 2 2 0 2;
+        /*
+        color: white !important;
+        visibility: hidden;
+        float:right;
+        padding-left:10px;
+        */
+        display:none;
+        background:white;
+        color:#95A7B7;
+        border-radius:2px;
+    }
+    span.fancytree-node{
+        min-width: 300px;
+        padding:2px !important;
+    }
+    #term_tree{
+         background:none;
+         border:none;
+    }
+    span.fancytree-node {
+        border: none !important;
+        display: block;
+        width:100%;
+    }
+    
+    span.fancytree-node.fancytree-active{
+        background: #95A7B7 !important;
+        color: white !important;
+    }    
 </style>
 
 <!-- Initializing -->

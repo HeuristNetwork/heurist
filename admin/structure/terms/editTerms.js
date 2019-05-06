@@ -2124,7 +2124,7 @@ function EditTerms() {
         }, 500);  
 
        function __defineActionIcons(item){ 
-           if($(item).find('.svs-contextmenu3').length==0){
+           if($(item).find('.svs-contextmenu3').length==0){ //not exists yet
 
                var actionspan = $('<div class="svs-contextmenu3">'
                    +'<span class="ui-icon ui-icon-plus" title="Add a child term (a term hierarchichally below the current vocabulary or term)"></span>'
