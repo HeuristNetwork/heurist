@@ -905,10 +905,13 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
         // KML snippet
         if(source.kmlSnippet !== undefined) {
             /** NOTE: Snippets do not seem to be supported by the Google Maps API straight away.. */
-            console.log("KML snippet: " + source.kmlSnippet);
+            //console.log("KML snippet: " + source.kmlSnippet);
 
+            var fileURL = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_kml.php?db='
+                    +window.hWin.HAPI4.database+'&recID='+source.id;
+            
             // Display on Google Maps
-            kmlLayer = new google.maps.KmlLayer(source.kmlSnippet, {
+            kmlLayer = new google.maps.KmlLayer(fileURL, {
                 suppressInfoWindows: true,
                 preserveViewport: is_mapdoc,
                 map: map
