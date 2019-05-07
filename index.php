@@ -209,7 +209,6 @@ _time_debug = new Date().getTime() / 1000;
            // Performs inital search: parameters from request or from user preferences
            //
            function onInitCompleted_PerformSearch(){
-               
 <?php
 
      //returns total records in db and counts of active entries in dashboard  
@@ -359,7 +358,7 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                             window.hWin.HAPI4.SearchMgr.doSearch(document, request);
                     }, 3000);
                 }
-                else if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935')){
+                else if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch')){
                     
                     var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
                     if(window.hWin.HAPI4.sysinfo.db_total_records>100 && 
