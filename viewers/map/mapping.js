@@ -123,8 +123,9 @@ $.widget( "heurist.mapping", {
     vistimeline: null,
     mapManager: null,
 
-    main_layer: null, // current search layer
     all_layers: [],   // array of all loaded geojson layers
+
+    main_layer: null, // current search layer
     main_popup:null,
     selected_rec_ids:[],
 
@@ -248,9 +249,9 @@ $.widget( "heurist.mapping", {
         
         this.mapManager = new hMapManager({container:this.mapManager._container, mapwidget:this.element});
         
-        
         this.nativemap.setView([51.505, -0.09], 13);
 
+        if(this.main_popup==null) this.main_popup = L.popup();
     },
 
     //Called whenever the option() method is called
@@ -427,9 +428,16 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    // data - recordset, query or json
+    // Adds layer to searchResults mapdoc
+    // data - recordset, heurist query or json
+    // this method is invoked on global onserachfinish event in app_timemap
     //
-    addDataset: function(data, timeline_data, dataset_name) 
+    addDataset: function(data, dataset_name) {
+        
+        this.mapManager.addLayerToSearchResults( data, dataset_name );
+    },
+    
+    addDataset_old: function(data, timeline_data, dataset_name) 
     {
         var curr_request = null;
         
@@ -487,14 +495,27 @@ $.widget( "heurist.mapping", {
         }else if (window.hWin.HEURIST4.util.isGeoJSON(data, true) || 
                     window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data)){
         
-            this.addGeoJson(data, timeline_data, 'Current query' );        
+            this.main_layer.remove(); 
+            if (data.length==0){
+                
+                this.mapManager.removeEntry('search', { layer_name: 'Current query' }); 
+                
+            }else{
+                this.addGeoJson(data, timeline_data, 'Current query');            
+                
+                    //add new search result to search results mapdoc
+                    this.main_layer = new_layer;
+                    this.mapManager.defineContent('search', {
+                        layer_id: new_layer._leaflet_id,
+                        layer_name: new_layer.options.layer_name });    
+            }
 
         }
         
     },
     
     //
-    //
+    // returns nativemap id
     //
     addGeoJson: function(geojson_data, timeline_data, dataset_name){
 
@@ -514,25 +535,16 @@ $.widget( "heurist.mapping", {
             fillOpacity: 0.8
             };
             */            
-            if(this.main_layer && dataset_name == 'Current query'){ 
-                this.main_layer.remove(); 
-            }
 
             var timeline_dataset_name = 'main';
-
-            if (geojson_data.length==0 && dataset_name == 'Current query'){
-                if(this.mapManager)
-                    this.mapManager.removeEntry('search', { layer_name: 'Current query' }); 
-
-            }else{
 
                 /* 
                 Styling
                 each layer has  options.default_style
                 each feature can have feature.style from geojson it overrides layer's style
                 */          
-                //set default style for result set
-                this.main_layer = L.geoJSON(geojson_data, {
+            //set default style for result set
+            var new_layer = L.geoJSON(geojson_data, {
                     default_style: {color: "#00b0f0"}
                     , layer_name: 'Current query'
                     //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
@@ -595,8 +607,6 @@ $.widget( "heurist.mapping", {
 
                 this.resetStyle();
 
-                if(this.main_popup==null) this.main_popup = L.popup();
-
                 /*
                 this.main_layer.on('click', function () {
                 this.setStyle({
@@ -608,16 +618,11 @@ $.widget( "heurist.mapping", {
                 }
                 */     
 
-                if(dataset_name == 'Current query') //change to special dataset
-                    this.mapManager.defineContent('search', {
-                        layer_id: this.main_layer._leaflet_id,
-                        layer_name: this.main_layer.options.layer_name });    
 
-                timeline_dataset_name = this.main_layer._leaflet_id;
+                timeline_dataset_name = new_layer._leaflet_id;
 
-            }
 
-            // init timeline
+            // init timeline @todo - loop through all_layers
             // leaflet accept only valid geojson (with coordinates), we may have time enabled items without geo
             // thus, timeline items are in separate array
             var timeline_items = [],
@@ -701,8 +706,35 @@ $.widget( "heurist.mapping", {
             });*/
             this.vistimeline.timeline('timelineRefresh', timeline_items, timeline_groups);          
 
+            this.all_layers[new_layer._leaflet_id] = new_layer;
+            
+            return new_layer._leaflet_id;
         }        
 
+        else{
+            return 0;
+        }
+        
+    },
+    
+    zoomToLayer: function(layer_id){
+        
+        var affected_layer = this.all_layers[layer_id];
+        
+        if(affected_layer){
+            var bounds = affected_layer.getBounds();
+            this.nativemap.fitBounds(bounds);
+        }
+        
+    },
+    
+    removeLayer: function(layer_id)
+    {
+        var affected_layer = this.all_layers[layer_id];
+        if(affected_layer){
+            affected_layer.remove();
+            this.all_layers[layer_id] = null;
+        }
     },
         
     //

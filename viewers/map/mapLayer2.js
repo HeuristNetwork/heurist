@@ -26,82 +26,76 @@ function hMapLayer2( _options ) {
     _version   = "0.4";
 
     var options = {
-      //mapwidget:              
-      //map_recordset:   // creates layer from given records
-      //rec_layer:  
-      //rec_datasource:
-      
-      //map_recordset
-      //map_recordset_name
-      preserveViewport: true  
+        //mapwidget:              
+        //mapdoc_recordset: // recordset to retrieve values from rec_layer and rec_datasource
+        
+        //rec_layer:       // record of type Heurist layer
+        //rec_datasource:  // record of type map dataseource
+
+        preserveViewport: true  
     };
+
+    var _record, 
+        _recordset;
+        
+    var _map_overlay;  //object with layer action methods 
     
-    var _record, _recordset; //record from recordset
-    var _map_overlay, DT_QUERY_STRING;  //object with layer action methods 
-    
+    var _nativelayer_id = 0;
+
     //
     //
     //
     function _init( _options ){
 
-        DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
-            
         options = $.extend(options, _options);
-        
-        _recordset = options.map_recordset;
-        
-        if(!options.rec_datasource){
-            //_record = _recordset.getFirstRecord();
-            _map_overlay = _addRecordsetLayer();
-            return;
-        }else{
-            //_record = options.rec_layer;
-            _record = options.rec_datasource;
-        }
-        
+
+        _recordset = options.mapdoc_recordset;
+        _record = options.rec_datasource;
+
         //detect layer type
         var rectypeID = _recordset.fld(_record, 'rec_RecTypeID');
-        
-        if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
-            
+
+        if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] 
+           || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
+
             _map_overlay = _addQueryLayer();
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
-            
+
             _map_overlay = _addTiledImage();
-            
+
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
             _map_overlay = _addImage();
-            
+
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE']){
-            
+
             _map_overlay = _addKML();
         }
     }
-    
+
     //
     // add tiled image
     //
     function _addTiledImage() {
-    
+
         var imageLayer = null;
 
         var sourceURL = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
-        
+
         // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
         if(sourceURL !== undefined) {
 
             var tilingSchema = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_LAYER_SCHEMA']);
             var mimeType = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE']);
-            
+
             var tileUrlFunc = null; 
 
             var idx_ccode = window.hWin.HEURIST4.terms.fieldNamesToIndex.trm_ConceptID;
-            
+
             tilingSchema = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][tilingSchema];
             mimeType = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][mimeType];
-            
+
             if(tilingSchema && tilingSchema[idx_ccode]=='2-549'){ //virtual earth
 
                 tileUrlFunc = function (a,b) {
@@ -134,7 +128,7 @@ function hMapLayer2( _options ) {
                     var tile_url = sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
                     + (mimeType && mimeType[idx_ccode] == '2-540'? ".png" : ".gif");
                     //console.log("URL: " + tile_url);
-               
+
                     return tile_url;
                 };
 
@@ -150,19 +144,19 @@ function hMapLayer2( _options ) {
                 radius: 1738000,
                 name: _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'])
             });
-  
-/*
-        visible
-        setVisibility
-        removeOverlay
-        zoomToOverlay
-*/
+
+            /*
+            visible
+            setVisibility
+            removeOverlay
+            zoomToOverlay
+            */
             var overlay_index = options.gmap.overlayMapTypes.push( tileType )-1;
 
             imageLayer = {
-                
+
                 overlay_index: overlay_index,
-                
+
                 visible:true,
                 // Set visibility
                 setVisibility: function(isvisible) {
@@ -183,27 +177,27 @@ function hMapLayer2( _options ) {
             };
 
         }
-        
+
         return imageLayer;
     }
-    
+
     //
     // add image
     //
     function _addImage(){
-        
-        
+
+
     }
-    
+
     //
     // add kml
     // files
     // kmlSnippet
     //
     function _addKML() {
-        
+
         var kmlLayer = null;
-        
+
         var fileID = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
         var kmlSnippet = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_KML']);
 
@@ -211,10 +205,10 @@ function hMapLayer2( _options ) {
         if(!window.hWin.HEURIST4.util.isnull(fileID)) {
 
             var fileURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+fileID[0];
-            
+
             // note google refuses kml from localhost
             //console.log("KML file: " + fileURL);
-            
+
             // Display on Google Maps
             kmlLayer = new google.maps.KmlLayer({
                 url: fileURL,
@@ -241,7 +235,7 @@ function hMapLayer2( _options ) {
         }
 
         if(kmlLayer!=null){
-            
+
             kmlLayer.title = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
             kmlLayer.url = fileURL;
             kmlLayer.visible = true;
@@ -258,17 +252,17 @@ function hMapLayer2( _options ) {
             kmlLayer.removeOverlay = function(){
                 this.setMap(null);
             };
-            
+
             kmlLayer.zoomToOverlay = function(){
                 //map.fitBounds(bounds);
                 console.log('to implement');
             };
         }
-        
+
         return kmlLayer;
     }
 
-    
+
     //
     // query layer
     //
@@ -276,20 +270,21 @@ function hMapLayer2( _options ) {
 
         var query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
         var request = window.hWin.HEURIST4.util.parseHeuristQuery(query);
-        
+
         if(request.q){
-        
+
             request = {
-                            q: request.q,
-                            rules: request.rules,
-                            w: request.w,
-                            leaflet: true, //returns strict geojson and timeline data as two separate arrays
-                            simplify: true,
-                            format:'geojson'};
+                q: request.q,
+                rules: request.rules,
+                w: request.w,
+                leaflet: true, //returns strict geojson and timeline data as two separate arrays
+                simplify: true,
+                format:'geojson'};
+                
             //perform search        
             window.hWin.HAPI4.RecordMgr.search_new(request,
                 function(response){
-                    
+
                     var geojson_data = null;
                     var timeline_data = [];
                     if(response['geojson'] && response['timeline']){
@@ -298,11 +293,14 @@ function hMapLayer2( _options ) {
                     }else{
                         geojson_data = response;
                     }
-                    
+
                     if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
                         || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
                     {
-                        options.mapwidget.mapping('addGeoJson', geojson_data, timeline_data, _recordset.fld(_record, 'rec_Title') );
+                        _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                                                        geojson_data, 
+                                                        timeline_data, 
+                                                        _recordset.fld(_record, 'rec_Title') );
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -310,33 +308,8 @@ function hMapLayer2( _options ) {
                 }
             );          
         }
-        
-    }
-
-
-    //
-    // recordset layer - get record ids and returns geojson via _addQueryLayer
-    //
-    function _addRecordsetLayer(){
-        
-        if(options.map_recordset){
-            
-                var curr_request;
-                
-                if(options.map_recordset.length()<2001){ //limit query by id otherwise use current query
-                    curr_request = { w:'all', q:'ids:'+options.map_recordset.getIds().join(',') };
-                }else{
-                    curr_request = options.map_recordset.getRequest();
-                }            
-                
-                _record = {rec_Title: options.map_recordset_name, d:{}};
-                _record['d'][DT_QUERY_STRING] = curr_request;
-            
-                _addQueryLayer();
-        }
 
     }
-    
 
     //public members
     var that = {
@@ -347,17 +320,18 @@ function hMapLayer2( _options ) {
         setVisibility:function(isvisible){
             if(_map_overlay) _map_overlay.setVisibility( isvisible );  
         },
-            
+
         zoomToLayer: function(){
             
+            if(_nativelayer_id>0){
+                options.mapwidget.mapping('zoomToLayer', _nativelayer_id);
+            }
+
         },
-        
+
         removeLayer: function(){
-            if(_map_overlay){
-                _map_overlay.removeOverlay();  
-                delete _map_overlay;
-                _map_overlay = null;
-            } 
+            if(_nativelayer_id>0)
+                options.mapwidget.mapping('removeLayer', _nativelayer_id);
         }
     }
 

@@ -30,12 +30,13 @@ function hMapDocument( _options )
     options = {
         container:null,  //@todo all ui via mapcontrol
         mapwidget:null, 
-        onRefreshList:null //callback  
     },
     
     RT_MAP_DOCUMENT = 0,
     RT_MAP_LAYER = 0,
     DT_DATA_SOURCE = 0,
+    RT_QUERY_SOURCE = 0,
+    DT_QUERY_STRING = 0,
     
     map_documents = null, //recordset - all loaded documents
     map_documents_content = {}; //mapdoc_id=>recordset with all layers and datasources of document
@@ -53,14 +54,16 @@ function hMapDocument( _options )
         RT_MAP_DOCUMENT = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'];
         RT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'];
         DT_DATA_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'];
+        DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
+        RT_QUERY_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'];
         
-        _loadMapDocuments();
+        //_loadMapDocuments();
     }
     
     //
     // loads all map documents from server, init treeview and stores recordset in map_documents 
     //
-    function _loadMapDocuments(){
+    function _loadMapDocuments( onRefreshList ){
         
             if(!(RT_MAP_DOCUMENT>0)) return;
             
@@ -78,7 +81,7 @@ function hMapDocument( _options )
                         var resdata = new hRecordSet(response.data);
                         map_documents = resdata;
                         
-                        if($.isFunction(that.options.onRefreshList)) that.options.onRefreshList.call(that, resdata);
+                        if($.isFunction(onRefreshList)) onRefreshList.call(that, resdata);
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -87,6 +90,40 @@ function hMapDocument( _options )
             );           
         
     }
+    
+    //
+    // returns content of mapdocument in fancytree data format
+    //
+    function _getTreeData( mapdoc_id ){
+        
+        var treedata = [];
+        
+        var resdata = map_documents_content[mapdoc_id];
+        if(resdata){
+            var idx, records = resdata.getRecords();
+            for(idx in records){
+                if(idx)
+                {
+                    var record = records[idx];
+                    
+                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER){
+                        var recID  = resdata.fld(record, 'rec_ID'),
+                        recName = resdata.fld(record, 'rec_Title');
+                        
+                        var $res = {};  
+                        $res['key'] = recID;
+                        $res['title'] = recName;
+                        $res['type'] = 'layer';
+                        $res['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
+
+                        treedata.push($res);
+                    }
+                }
+            }//for
+        }
+        return treedata;
+    }
+    
 
     //
     // load all linked layers and dataset records for given map document
@@ -113,29 +150,8 @@ function hMapDocument( _options )
                         map_documents_content[mapdoc_id] = resdata;
                         
                         if(deferred){
-                            var treedata = [];
-                            
-                            var idx, records = resdata.getRecords();
-                            for(idx in records){
-                                if(idx)
-                                {
-                                    var record = records[idx];
-                                    
-                                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER){
-                                        var recID  = resdata.fld(record, 'rec_ID'),
-                                        recName = resdata.fld(record, 'rec_Title');
-                                        
-                                        var $res = {};  
-                                        $res['key'] = recID;
-                                        $res['title'] = recName;
-                                        $res['type'] = 'layer';
-
-                                        treedata.push($res);
-                                    }
-                                }
-                            }//for
-                            
-                            deferred.resolve( treedata );
+                            var treedata = _getTreeData(mapdoc_id);
+                            deferred.resolve( treedata ); //returns data t fancytree to render child layers for given mapdocument
                         }
                         
                         _openMapDocument( mapdoc_id );
@@ -152,7 +168,7 @@ function hMapDocument( _options )
     }
 
     //
-    // 
+    // opens map document - loads content (resolve deferred - to updated treeview) and add layers on map
     //
     function _openMapDocument(mapdoc_id, deferred){
         
@@ -184,41 +200,11 @@ function hMapDocument( _options )
                     //returns mapLayer object
                     record['layer'] = new hMapLayer2({rec_layer: record, 
                                                       rec_datasource: datasource_record, 
-                                                      map_recordset: resdata, //need to get fields
+                                                      mapdoc_recordset: resdata, //need to get fields
                                                       mapwidget: options.mapwidget});
                 }
             }
         }//for
-    }
-    
-    //
-    //
-    //
-    function _layerAction( e ){
-        
-        var layerid = $(e.target).attr('data-layerid');
-        var action  = $(e.target).attr('data-action'); 
-        var value = null;
-        if(action=='visibility'){
-            value = $(e.target).is(':checked');
-        }
-     
-        that.layerAction( layerid, action, value );
-    }
-        
-    //
-    // returns index
-    //
-    function _findInSearchResults(byId, byName){
-        var idx = -1;
-        for (var k=0; k<map_searchresults.length; k++){
-            if( map_searchresults[k]['layer_id'] == byId || 
-                map_searchresults[k]['layer_name'] == byName){
-                idx = k;
-                break;
-            }
-        }
-        return idx;
     }
     
     
@@ -228,8 +214,8 @@ function hMapDocument( _options )
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
-        loadMapDocuments: function(){
-            _loadMapDocuments();    
+        loadMapDocuments: function( onRefreshList ){
+            _loadMapDocuments( onRefreshList );    
         },
         
         openMapDocument: function(mapdoc_id, deferred){
@@ -239,19 +225,86 @@ function hMapDocument( _options )
         isLoaded: function(mapdoc_id){
            return !window.hWin.HEURIST4.util.isnull( map_documents_content[mapdoc_id] );
         },
+        
+        //return layer or mapdocument layer
+        getLayer: function(mapdoc_id, rec_id){
+            
+            if(map_documents_content[mapdoc_id]){
+                var _record = null;
+                if(rec_id>0){
+                    _record = (map_documents_content[mapdoc_id]).getById( rec_id );
+                }else{
+                    _record = map_documents.getById( mapdoc_id );
+                }
+                if(_record) return _record; 
+            }
+            return null;
+        },
+        
+        
+        //
+        // adds new layer to mapdoc
+        // data - recordset, heurist query or json
+        //
+        addLayer: function(mapdoc_id, data, dataset_name){
+
+            var curr_request;
+            
+            if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
+                    
+                    var recset = data;
+                    
+                    if(recset.length()<2001){ //limit query by id otherwise use current query
+                        curr_request = { w:'all', q:'ids:'+recset.getIds().join(',') };
+                    }else{
+                        curr_request = recset.getRequest();
+                    }            
+                
+            }else if( window.hWin.HEURIST4.util.isObject(data)&& data['q']) {
+                
+                 curr_request = data;
+            }
+                
+            if(!map_documents_content[mapdoc_id]){
+                map_documents_content[mapdoc_id] = new hRecordSet(); //create new recordset
+            }
+            
+            var recset = map_documents_content[mapdoc_id];
+            
+            var _record = recset.getById(dataset_name);
+            
+            if(_record){
+                _record['d'][DT_QUERY_STRING] = curr_request;
+                //remove previous result set from map
+                _record['layer'].removeLayer();    
+            }else{
+                _record = {rec_Title: dataset_name, rec_RecTypeID:RT_MAP_LAYER,  d:{}};
+                _record['d'][DT_QUERY_STRING] = curr_request;
+                map_documents_content[mapdoc_id].addRecord(dataset_name, _record);
+            }
+            
+            _record['layer'] = new hMapLayer2({rec_datasource: _record, 
+                                              mapdoc_recordset: map_documents_content[mapdoc_id], //need to get fields
+                                              mapwidget: options.mapwidget});
+            
+        },
+         
+        getTreeData: function( mapdoc_id )
+        {
+            return _getTreeData( mapdoc_id );
+        },
+        
+        //@todo
+        zoomToMapDocument: function(mapdoc_id){
+           console.log('todo zoom to maodoc '+mapdoc_id); 
+            //options.mapwidget.mapping('zoomToExtent', map_document_extent);  
+        },
 
         //
         // remove map document data and remove it from map
         //
         closeMapDocument: function(){
             
-        },
-
-        //
-        // data - layer name and reference
-        // 
-        defineContent: function(){
-
         },
 
         removeEntry: function(groupID, data){

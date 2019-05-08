@@ -54,7 +54,7 @@ function hRecordSet(initdata) {
     * Initialization
     */
     function _init(response) {
-
+        
         if(response){
 
             that.entityName = response.entityName;           
@@ -90,7 +90,11 @@ function hRecordSet(initdata) {
                 _isMapEnabled = false;
             }
         }
-        
+        else {
+            //if response not defined this is "Heurist Records" 
+            that.entityName = 'Records';           
+            fields = [];
+        }
     }
 
     /**
@@ -1564,6 +1568,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
         },
 
+        //
+        // add/replace record with given ID
+        //    
         addRecord:function(recID, record){
             var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx<0){ //add new
@@ -1575,6 +1582,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             this.setRecord(recID, record);
         },
         
+        //
+        // add/replace record with given ID
+        //    
         setRecord:function(recID, record){
             var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx>=0){

@@ -54,12 +54,10 @@ function hMapManager( _options )
     },
         
     nativemap = null,
-    mapDocuments = null, //hMapDocument for db map docs
-    searchResults = null, //hMapDocument that contains the only one fake mapdoc with search results as layers
+    mapDocuments = null, //hMapDocument for db map docs,  Note: mapdocument with index=0 is search results
     
-    hidden_layers = [],  //hidden layers (removed from map)
-    
-    map_searchresults = [], //list of layer ids and names {layer_id: , layer_name:} 
+    //hidden_layers = [],  //hidden layers (removed from map)
+    //map_searchresults = [], //list of layer ids and names {layer_id: , layer_name:} 
     
     basemaplayer =null,  //current basemap layer
     
@@ -91,6 +89,8 @@ function hMapManager( _options )
 
         options.container = $(options.container);
         nativemap =  options.mapwidget.mapping('getNativemap');
+        
+        mapDocuments = hMapDocument( { mapwidget:options.mapwidget } ); 
         
         $('<div>').attr('grpid','basemaps').addClass('svs-acordeon')
                 .append( _defineHeader('Base Maps', 'basemaps'))
@@ -177,6 +177,14 @@ function hMapManager( _options )
         
         if(groupID=='search'){
             
+            content = $('<div>');
+            
+            var resdata = mapDocuments.getTreeData(0);
+            
+            _refreshMapDocumentTree( resdata, content )
+            
+            
+            /*
             if(data){
                 if($.isArray(data)){
                     map_searchresults = data;
@@ -213,7 +221,7 @@ function hMapManager( _options )
                 content = $(content);
                 content.find('input').on({ change: _layerAction });
                 content.find('div.svs-contextmenu').on({ click: _layerAction });
-            }
+            }*/
             
         }else if(groupID=='basemaps'){
             // load list of predefined base layers 
@@ -229,10 +237,10 @@ function hMapManager( _options )
         }else  if(groupID=='mapdocs'){
             //load list of mapddocuments
             content = $('<div>');
-            mapDocuments = hMapDocument( {container:content, mapwidget:options.mapwidget, 
-                    onRefreshList:function(resdata){
-                        _refreshMapDocumentTree( resdata, content);
-                    }} );
+            
+            mapDocuments.loadMapDocuments( function(resdata){
+                        _refreshMapDocumentTree( resdata, content );
+                    } );
         }
         
         if(window.hWin.HEURIST4.util.isempty(content) ){
@@ -252,31 +260,38 @@ function hMapManager( _options )
     
     //
     // it is invoked on map document list retieve
+    // or on update search results
     //
     function _refreshMapDocumentTree( resdata, tree_container ){
 
         //create treeview data
         var treedata = [];
         
-        var idx, records = resdata.getRecords();
-        for(idx in records){
-            if(idx)
-            {
-                var record = records[idx];
-                var recID  = resdata.fld(record, 'rec_ID'),
-                recName = resdata.fld(record, 'rec_Title');
-                
-                var $res = {};  
-                $res['key'] = recID;
-                $res['title'] = recName;
-                $res['type'] = 'mapdocument';
-                $res['lazy'] = true;
+        if( (typeof resdata.isA == "function") && resdata.isA("hRecordSet") ){
+        
+            var idx, records = resdata.getRecords();
+            for(idx in records){
+                if(idx)
+                {
+                    var record = records[idx];
+                    var recID  = resdata.fld(record, 'rec_ID'),
+                    recName = resdata.fld(record, 'rec_Title');
+                    
+                    var $res = {};  
+                    $res['key'] = recID;
+                    $res['title'] = recName;
+                    $res['type'] = 'mapdocument';
+                    $res['lazy'] = true;
 
-                treedata.push($res);
-                //ele.append("<option value='"+recID+"'>"+recName+"</option>");
-                //mapdocs = mapdocs + "<li mapdoc_id='"+recID+"'><a>"+recName+"</a></li>";
-            }
-        }//for
+                    treedata.push($res);
+                    //ele.append("<option value='"+recID+"'>"+recName+"</option>");
+                    //mapdocs = mapdocs + "<li mapdoc_id='"+recID+"'><a>"+recName+"</a></li>";
+                }
+            }//for
+            
+        }else{
+            treedata = resdata;
+        }
                 
         tree_container.empty();        
      
@@ -394,33 +409,66 @@ console.log('expand '+mapdoc_id);
     //
     function _defineActionIcons(item)
     { 
-        var item_li = item.li, 
-            recid = item.key;
+        var item_li = $(item.li), 
+            recid = item.key, 
+            mapdoc_id = 0;
         
         if($(item).find('.svs-contextmenu3').length==0){
             
-            var actionspan = $('<div class="svs-contextmenu3" data-recid="'+recid+'">'
-                +'<span class="ui-icon ui-icon-zoomin" title="Zoom to layer extent"></span>'
-                +'<span class="ui-icon ui-icon-pencil" title="Edit symbology"></span>'
-                +'<span class="ui-icon ui-icon-close" title="Remove from map"></span>'
-                +'</div>').appendTo(item);
+            if(item.data.type=='layer'){
+                mapdoc_id = item.data.mapdoc_id;
+            }else{
+                mapdoc_id = item.key;
+                recid = 0;
+            }
+            
+            var parent_span = item_li.children('span.fancytree-node');
+            
+            var actionspan = $('<div class="svs-contextmenu3" '
+                    +(mapdoc_id>0?('" data-mapdoc="'+mapdoc_id+'"'):'')
+                    +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
+                +'<span class="ui-icon ui-icon-zoomin" title="Zoom to '+item.data.type+' extent"></span>'
+                +'<span class="ui-icon ui-icon-pencil" title="Edit '
+                    +(item.data.type=='mapdocument' || mapdoc_id>0?(item.data.type+' record'):' symbology')+'"></span>'
+                +(item.data.type=='mapdocument' && mapdoc_id>0
+                    ?'<span class="ui-icon ui-icon-plus" title="Add new layer to mapdocument"></span>'
+                    :'')    
+                +(mapdoc_id>0
+                    ?'':'<span class="ui-icon ui-icon-close" title="Unload and remove from map"></span>')+
+                +'</div>').appendTo(parent_span);
 
             actionspan.find('.ui-icon').click(function(event){
                 var ele = $(event.target);
                 //timeout need to activate current node    
                 setTimeout(function(){                         
                     var recid = ele.parent('.svs-contextmenu3').attr('data-recid');
+                    var mapdoc_id = ele.parent('.svs-contextmenu3').attr('data-mapdoc');
                     if(recid>0){
                         if(ele.hasClass('ui-icon-zoomin')){
                             
+                            if(recid>0){
+                                
+                                if(mapdoc_id>=0){
+                                    var layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
+                                    if(layer_rec) (layer_rec['layer']).zoomToLayer();
+                                } 
+                                
+                            }else{
+                                if(mapdoc_id>0){
+                                    mapDocuments.zoomToMapDocument(mapdoc_id);
+                                }
+                            }
                             
-                            //mapDocuments.  
-                            //record['layer']
-                            
+                        }else if(ele.hasClass('ui-icon-plus')){ //add new layer to ma document
+                        
+                            //open layer selector dialog
+                        
                             
                         }else if(ele.hasClass('ui-icon-pencil')){
-                              window.hWin.HEURIST4.ui.openRecordEdit(recid);
+                              window.hWin.HEURIST4.ui.openRecordEdit(recid>0?recid:mapdoc_id);
                         }else if(ele.hasClass('ui-icon-close')){
+                            //remove from map and unload from memory
+                            
                         }
                     }
                 },500);
@@ -442,7 +490,7 @@ console.log('expand '+mapdoc_id);
                 ele.hide();
             }               
 
-            $(item).hover(
+            $(parent_span).hover(
                 function(event){
                     var node;
                     if($(event.target).hasClass('fancytree-node')){
@@ -454,14 +502,14 @@ console.log('expand '+mapdoc_id);
                     ele.css({'display':'inline-block'});//.css('visibility','visible');
                 }
             );               
-            $(item).mouseleave(
+            $(parent_span).mouseleave(
                 _onmouseexit
             );
         }
     }
     
     //
-    //
+    //NOT USED
     //
     function _layerAction( e ){
         
@@ -516,7 +564,18 @@ console.log('expand '+mapdoc_id);
                 that.layerAction( layer_id, 'remove' );
             }
         },
-
+        
+        //
+        // adds new layer to search results mapdoc
+        // data - recordset, heurist query or json
+        //
+        addLayerToSearchResults: function( data, dataset_name )
+        {
+            mapDocuments.addLayer( 0, data, dataset_name );
+            
+            //refresh search results 
+            that.defineContent( 'search' );
+        },
 
         //
         // switch base map layer
