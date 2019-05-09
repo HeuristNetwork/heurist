@@ -1,5 +1,5 @@
 /**
-* map_control..js - manage layers and proejcts
+* map_control.js - manage layers and proejcts
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -55,9 +55,6 @@ function hMapManager( _options )
         
     nativemap = null,
     mapDocuments = null, //hMapDocument for db map docs,  Note: mapdocument with index=0 is search results
-    
-    //hidden_layers = [],  //hidden layers (removed from map)
-    //map_searchresults = [], //list of layer ids and names {layer_id: , layer_name:} 
     
     basemaplayer =null,  //current basemap layer
     
@@ -182,50 +179,10 @@ function hMapManager( _options )
             var resdata = mapDocuments.getTreeData(0);
             
             _refreshMapDocumentTree( resdata, content )
-            
-            
-            /*
-            if(data){
-                if($.isArray(data)){
-                    map_searchresults = data;
-                }else{
-                    //replace or add new layer
-                    var idx = _findInSearchResults(null, data['layer_name']);
-                    if(idx<0){
-                        //not found - add new entry
-                        map_searchresults.push(data);
-                    }else{
-                        //replace to new layer id
-                        map_searchresults[idx]['layer_id'] = data['layer_id'];
-                    }
-                }
-            }    
-            content = '';
-            for (var k=0; k < map_searchresults.length; k++){
-                //internal leaflet layer id
-                //var layer = 
-                var layer_id = map_searchresults[k]['layer_id']; //layer._leaflet_id;
-                var layerName = map_searchresults[k]['layer_name'];
-                
-                content = content + '<div style="display:block;padding:2px;" data-layerid="'+layer_id+'">'
-                    +'<input type="checkbox" checked style="margin-right:5px" data-layerid="'+layer_id+'" data-action="visibility">'
-                    +'<span/>' //symbology
-                    +'<label style="padding-left:1em">' + layerName + '</label>'
-                    +'<div class="svs-contextmenu ui-icon ui-icon-close"  data-action="remove" data-layerid="'+layer_id+'"></div>'
-                    +'<div class="svs-contextmenu ui-icon ui-icon-pencil" data-action="edit" data-layerid="'+layer_id+'"></div>'
-                    +'<div class="svs-contextmenu ui-icon ui-icon-zoomin" data-action="zoom" data-layerid="'+layer_id+'"></div>'
-                    +'</div>';
 
-            }
-            if(content!=''){
-                content = $(content);
-                content.find('input').on({ change: _layerAction });
-                content.find('div.svs-contextmenu').on({ click: _layerAction });
-            }*/
-            
         }else if(groupID=='basemaps'){
             // load list of predefined base layers 
-            // see extensive list at leaflet-providers.js
+            // see extensive list in leaflet-providers.js
             content = '';
             for (var k=0; k<map_providers.length; k++){
                 content = content + '<label><input type="radio" name="basemap" data-mapindex="'+k+'">'
@@ -259,8 +216,8 @@ function hMapManager( _options )
     
     
     //
-    // it is invoked on map document list retieve
-    // or on update search results
+    // it is invoked on retieve of map document list 
+    // or on update of search results
     //
     function _refreshMapDocumentTree( resdata, tree_container ){
 
@@ -321,30 +278,19 @@ function hMapManager( _options )
                                 expand: function(e, data){
 
                                     var node = data.node;
-                                    var mapdoc_id = node.key;
-                                        
-console.log('expand '+mapdoc_id);       
-                                    _defineActionIcons( data.node );                      
-                                    $.each(data.node.children, function( idx, item ){
-                                            _defineActionIcons( item );
-                                    });
+//console.log(node.children);                                    
+                                    if(node.data.type=='mapdocument' && node.children.length==0) {
+                                        node.setSelected(true, {noEvents:true} );
+                                    }
                                     
                                 },
                                 loadChildren: function(e, data){
-/*console.log(data.node.key)
-                                    $.each(data.node.children)
-
-                                    $.each( $(data.node.li).find('.fancytree-node'), function( idx, item ){
-                                        _defineActionIcons(item);
-                                    });
-                                    */
-                                    /*
-                                    var node = data.node;
-                                    if(node.data.type=='mapdocument'){
-                                        //after loading of children - loads
-                                        var mapdoc_id = node.key;
-                                        mapDocuments.openMapDocument(node.key);
-                                    }*/
+//
+//console.log('loaded '+data.node.title+'  '+data.node.children.length);
+                                    setTimeout(function(){
+                                    $.each(data.node.children, function( idx, item ){
+                                            _defineActionIcons( item );
+                                    }) }, 500);                                           
                                 },
                                 select: function(e, data) {
                                     
@@ -354,9 +300,19 @@ console.log('expand '+mapdoc_id);
                                         var mapdoc_id = node.key;
                                         if(!node.isExpanded() && !mapDocuments.isLoaded(mapdoc_id)){
                                             node.setExpanded(true);
+                                        }else{
+
+                                            mapDocuments.setMapDocumentVisibulity(mapdoc_id, node.isSelected());
                                         }
                                         //
                                         //mapDocuments.openMapDocument(node.key, dfd);
+                                    }else if(node.data.type=='layer'){
+                                        
+                                        var mapdoc_id = node.data.mapdoc_id;
+                                        if(mapdoc_id>=0){
+                                            var layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
+                                            if(layer_rec) (layer_rec['layer']).setVisibility( node.isSelected() );
+                                        } 
                                     }
                                     
                                     
@@ -419,13 +375,13 @@ console.log('expand '+mapdoc_id);
                 mapdoc_id = item.data.mapdoc_id;
             }else{
                 mapdoc_id = item.key;
-                recid = 0;
+                recid = -1;
             }
             
             var parent_span = item_li.children('span.fancytree-node');
             
             var actionspan = $('<div class="svs-contextmenu3" '
-                    +(mapdoc_id>0?('" data-mapdoc="'+mapdoc_id+'"'):'')
+                    +(mapdoc_id>=0?('" data-mapdoc="'+mapdoc_id+'"'):'')
                     +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
                 +'<span class="ui-icon ui-icon-zoomin" title="Zoom to '+item.data.type+' extent"></span>'
                 +'<span class="ui-icon ui-icon-pencil" title="Edit '
@@ -433,8 +389,8 @@ console.log('expand '+mapdoc_id);
                 +(item.data.type=='mapdocument' && mapdoc_id>0
                     ?'<span class="ui-icon ui-icon-plus" title="Add new layer to mapdocument"></span>'
                     :'')    
-                +(mapdoc_id>0
-                    ?'':'<span class="ui-icon ui-icon-close" title="Unload and remove from map"></span>')+
+                + (((mapdoc_id>0 && recid==-1)||mapdoc_id==0)
+                    ?'<span class="ui-icon ui-icon-close" title="Unload and remove from map"></span>':'')+
                 +'</div>').appendTo(parent_span);
 
             actionspan.find('.ui-icon').click(function(event){
@@ -443,7 +399,8 @@ console.log('expand '+mapdoc_id);
                 setTimeout(function(){                         
                     var recid = ele.parent('.svs-contextmenu3').attr('data-recid');
                     var mapdoc_id = ele.parent('.svs-contextmenu3').attr('data-mapdoc');
-                    if(recid>0){
+                    
+                    
                         if(ele.hasClass('ui-icon-zoomin')){
                             
                             if(recid>0){
@@ -453,10 +410,8 @@ console.log('expand '+mapdoc_id);
                                     if(layer_rec) (layer_rec['layer']).zoomToLayer();
                                 } 
                                 
-                            }else{
-                                if(mapdoc_id>0){
+                            }else if(mapdoc_id>0){
                                     mapDocuments.zoomToMapDocument(mapdoc_id);
-                                }
                             }
                             
                         }else if(ele.hasClass('ui-icon-plus')){ //add new layer to ma document
@@ -465,12 +420,46 @@ console.log('expand '+mapdoc_id);
                         
                             
                         }else if(ele.hasClass('ui-icon-pencil')){
-                              window.hWin.HEURIST4.ui.openRecordEdit(recid>0?recid:mapdoc_id);
+                            
+                                if(mapdoc_id>0){
+                                    //edit layer or mapdocument record
+                                    window.hWin.HEURIST4.ui.openRecordEdit(recid>0?recid:mapdoc_id);
+                                }else{
+                                    // get layer record, take symbology field and title 
+                                    // open symbology editor
+                                    // on exit 1) call mapLayer.applyStyles
+                                    //         2) change title in tree and timeline
+                                    mapDocuments.editSymbology(0, recid, function(new_title, new_style){
+                                        //update layer title in legend and timeline
+                                        if(new_title){
+                                            item.title = new_title;
+                                            parent_span.find('span.fancytree-title').text( new_title );
+                                        }
+                                        
+                                        //render new symbology in legend
+                                        
+                                    });
+                                }
                         }else if(ele.hasClass('ui-icon-close')){
-                            //remove from map and unload from memory
+                            
+                            //mapdocument - remove from map and unload from memory
+                            if(mapdoc_id>0){
+                                mapDocuments.closeMapDocument(mapdoc_id);
+                                //remove children from treeview
+                                //item.setSelected(false, {noEvents:true});
+                                item.removeChildren();
+                                item.resetLazy();
+                                
+                                item.selected = false;
+                                parent_span.removeClass('fancytree-selected fancytree-partsel');
+                            }else if(recid>0){
+                                //search result
+                                mapDocuments.removeLayer(0, recid);
+                                item.remove();
+                            }
                             
                         }
-                    }
+                    
                 },500);
             });
 
@@ -507,22 +496,7 @@ console.log('expand '+mapdoc_id);
             );
         }
     }
-    
-    //
-    //NOT USED
-    //
-    function _layerAction( e ){
-        
-        var layerid = $(e.target).attr('data-layerid');
-        var action  = $(e.target).attr('data-action'); 
-        var value = null;
-        if(action=='visibility'){
-            value = $(e.target).is(':checked');
-        }
-     
-        that.layerAction( layerid, action, value );
-    }
-        
+
     //
     // returns index
     //
@@ -601,89 +575,8 @@ console.log('expand '+mapdoc_id);
 
             options.container.find('input[data-mapindex="'+mapindex+'"]').attr('checked',true);
 
-        },
-
-        //
-        //
-        //
-        layerAction: function( layer_id, action, value ){
-
-            var affected_layer = null;
-            var is_hidden = false;
-
-            for (var k=0; k<hidden_layers.length; k++){
-                if( hidden_layers[k]['_leaflet_id'] == layer_id ){
-                    affected_layer = hidden_layers[k];
-                    is_hidden = true;
-                    break;
-                }
-            }
-            if(!is_hidden){
-                nativemap.eachLayer(function(layer){
-                    if(layer._leaflet_id==layer_id){
-                        affected_layer = layer;
-                        return;
-                    }
-                });
-            }
-
-            if(affected_layer){
-
-                if(action=='visibility'){
-                    if(value===false){
-                        hidden_layers.push(affected_layer);
-                        affected_layer.remove();
-                    }else{
-                        affected_layer.addTo(nativemap);
-                    }
-                }else if(action=='zoom'){
-
-                    var bounds = affected_layer.getBounds();
-                    nativemap.fitBounds(bounds);
-
-                }else if(action=='edit'){ //@todo it when map is opened in standalone page
-
-                    var current_value = affected_layer.options.default_style;
-                    ///console.log(affected_layer);                   
-                    current_value.sym_Name = affected_layer.options.layer_name;
-                    //open edit dialog to specify symbology
-                    window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_value, function(new_value){
-
-                        //rename in list
-                        if(!window.hWin.HEURIST4.util.isempty(new_value.sym_Name)
-                            && current_value.sym_Name!=new_value.sym_Name)
-                        {
-                            affected_layer.options.layer_name = new_value.sym_Name;
-
-                            var idx = _findInSearchResults(affected_layer._leaflet_id);
-                            map_searchresults[idx]['layer_name'] = new_value.sym_Name;       
-                            delete new_value.sym_Name;
-                        }
-                        //update style
-                        affected_layer.options.default_style = new_value;
-                        affected_layer.eachLayer(function(layer){
-                            layer.feature.default_style = new_value;
-                        });  
-                        if(options.mapwidget && options.mapwidget.mapping('instance')){
-                            options.mapwidget.mapping('resetStyle', affected_layer);
-                        }
-                        /*affected_layer.setStyle( affected_layer.style );
-                        if(!is_hidden){
-                        affected_layer.remove();
-                        affected_layer.addTo(nativemap);
-                        }*/
-                        that.defineContent('search');
-                    });
-                }
-            }
-
-            if(action=='remove'){
-                if(affected_layer) affected_layer.remove();
-                var idx = _findInSearchResults(layer_id);
-                map_searchresults.splice(idx,1);
-                that.defineContent('search');
-            }
         }
+
     }
 
     _init( _options );

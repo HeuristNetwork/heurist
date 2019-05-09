@@ -186,7 +186,21 @@ function hMapLayer2( _options ) {
     //
     function _addImage(){
 
-
+         var imageFile = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+         
+         var image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+
+                    imageFile[0];
+         
+         var geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
+         var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[0].wkt, geodata[0].geotype, 'google' );
+         var extent = shape._extent;
+         var image_extent = [[extent.ymin,extent.xmin],[extent.ymax,extent.xmax]];
+          
+         _nativelayer_id = options.mapwidget.mapping('addImageOverlay', 
+                                                        image_url, 
+                                                        image_extent, 
+                                                        _recordset.fld(_record, 'rec_Title') );
+          
     }
 
     //
@@ -318,7 +332,11 @@ function hMapLayer2( _options ) {
         getVersion: function () {return _version;},
 
         setVisibility:function(isvisible){
-            if(_map_overlay) _map_overlay.setVisibility( isvisible );  
+
+            if(_nativelayer_id>0){
+                options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, isvisible);
+            }
+            
         },
 
         zoomToLayer: function(){
@@ -332,7 +350,13 @@ function hMapLayer2( _options ) {
         removeLayer: function(){
             if(_nativelayer_id>0)
                 options.mapwidget.mapping('removeLayer', _nativelayer_id);
+        },
+        
+        applyStyle: function( newStyle ){
+            if(_nativelayer_id>0)
+                options.mapwidget.mapping('applyStyle', _nativelayer_id, newStyle);
         }
+        
     }
 
     _init( _options );

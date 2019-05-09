@@ -70,8 +70,8 @@
 * zoomDataset
 * 
 *  --
-* setSelection
-* setVisibility - show hide shapes(layers in leaflet) on map by rec_ID
+* setFeatureSelection
+* setFeatureVisibility - show hide shapes(layers in leaflet) on map by rec_ID
 * showPopup - force popup for given record id
 * 
 * Events: see options.onselect and oninit
@@ -233,15 +233,15 @@ $.widget( "heurist.mapping", {
         this.vistimeline = $(this.element).find('.ui-layout-south').timeline({
             element_timeline: this.options.element_timeline,
             onselect: function(selected_rec_ids){
-                that.setSelection(selected_rec_ids); //highlight on map
+                that.setFeatureSelection(selected_rec_ids); //highlight on map
                 if($.isFunction(that.options.onselect)){ //trigger global event
                     that.options.onselect.call(that, selected_rec_ids);
                 }
             },                
             onfilter: function(show_rec_ids, hide_rec_ids){
                 
-                that.setVisibility(show_rec_ids, true);
-                that.setVisibility(hide_rec_ids, false);
+                that.setFeatureVisibility(show_rec_ids, true);
+                that.setFeatureVisibility(hide_rec_ids, false);
             }});
 
         //4. INIT MANAGER
@@ -284,147 +284,6 @@ $.widget( "heurist.mapping", {
         //Load default map doument
         //this.mapManager = new hMapManager(this.mapManager, this.nativemap);
         
-    },
-    
-    //
-    //
-    //
-    resetStyle: function(affected_layer) {
-
-        if(!affected_layer) affected_layer = this.main_layer;
-        if(!affected_layer) return;
-
-        var that = this;
-        
-        //create icons (@todo for all themes and recctypes)
-        var style = affected_layer.options.default_style;
-        
-        //update markers only if style has been changed
-        //var marker_style = null;
-        var myIcon = new L.Icon.Default(); //L.icon( L.Icon.Default.prototype.options );//Default;
-        
-        var myIconRectypes = {};
-        
-        //default values        
-        if(!style.iconType) style.iconType ='rectype';
-        style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :((style.iconType=='circle')?9:18);
-        var fcolor = (style.color?style.color:'#0000ff');
-        
-        if(style.iconType=='url'){
-            
-            var fsize = style.iconSize;
-            
-            myIcon = L.icon({
-                iconUrl: style.iconUrl,
-                iconSize: [fsize, fsize]
-                /*iconAnchor: [22, 94],
-                popupAnchor: [-3, -76],
-                shadowUrl: 'my-icon-shadow.png',
-                shadowSize: [68, 95],
-                shadowAnchor: [22, 94]*/
-            });      
-            //marker_style = {icon:myIcon};
-            
-        }else if(style.iconType=='iconfont'){
-            
-            if(!style.iconFont) style.iconFont = 'location';
-            
-            var cname = (style.iconFont.indexOf('ui-icon-')==0?'':'ui-icon-')+style.iconFont;
-            var fsize = style.iconSize;
-            var isize = 6+fsize;
-            var bgcolor = (style.fillColor0?(';background-color:'+style.fillColor):';background:none');
-            
-            myIcon = L.divIcon({
-                html: '<div class="ui-icon '+cname+'" style="padding:2px;border:none;font-size:'
-                        +fsize+'px;width:'+isize+'px;color:'+fcolor+bgcolor+'"/>',
-                iconSize:[isize, isize]
-            });
-            
-            //marker_style = {icon:myIcon};
-        }
-        
-        function __applyMarkerStyle(layer, parent_layer, feature){
-            
-            //var feature = layer.feature;    
-            if(layer instanceof L.LayerGroup){
-                
-                layer.eachLayer( function(child_layer){__applyMarkerStyle(child_layer, layer, feature);} );
-                
-            }else{
-
-                var setIcon = myIcon;
-                                        
-                if(style.iconType=='rectype' ){
-                    var rty_ID = feature.properties.rec_RecTypeID;
-                    if(myIconRectypes[rty_ID]){
-                        setIcon = myIconRectypes[rty_ID];
-                    }else{
-                        
-                        var fsize = style.iconSize;
-                        setIcon = L.icon({
-                            iconUrl: (window.hWin.HAPI4.iconBaseURL + rty_ID + 's.png&color='+encodeURIComponent(fcolor)),
-                            iconSize: [fsize, fsize]                        
-                        });
-                        myIconRectypes[rty_ID] = setIcon;
-                    }
-                }
-            
-                if(layer instanceof L.Marker){
-                    if(style.iconType=='circle'){
-                        //change to circleMarker
-                        var new_layer = L.circleMarker(layer.getLatLng(), style);    
-                        new_layer.feature = layer.feature;
-                        parent_layer.addLayer(new_layer);
-                        parent_layer.removeLayer(layer);
-                    }else{
-                        layer.setIcon(setIcon);    
-                    }
-                }else if(layer instanceof L.CircleMarker){
-                    if(style.iconType!='circle'){
-                        
-                        var new_layer = L.marker(layer.getLatLng(), {icon:setIcon});
-                        new_layer.feature = layer.feature;
-                        parent_layer.addLayer(new_layer);
-                        parent_layer.removeLayer(layer);
-                    }else{
-                        layer.setRadius(style.iconSize);                    
-                    }
-                }
-            }
-        }
-
-        affected_layer.eachLayer( function(child_layer){ 
-                __applyMarkerStyle(child_layer, affected_layer, child_layer.feature);
-        } );
-        
-        /*define markers
-        layer.options.pointToLayer(function(geoJsonPoint, latlng) {
-            
-                var style = layer.options.default_style;
-                
-                if(style.iconType=='circle'){
-                    
-                    return L.circleMarker(latlng, style);
-                    
-                }else if(style.iconType=='rectype'){
-                    
-                }else{
-                    return L.marker(latlng, marker_style);
-                }
-        });
-        */        
-
-
-        affected_layer.setStyle(function(feature) {
-            if(that.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
-                return {color: "#ff0000"};
-            }else{
-                //either specific style from json or common layer style
-                return feature.style || feature.default_style;
-            }
-        });
-
-
     },
     
     //
@@ -514,6 +373,16 @@ $.widget( "heurist.mapping", {
         
     },
     
+    
+    addImageOverlay: function(image_url, image_extent, dataset_name){
+    
+        var new_layer = L.imageOverlay(image_url, image_extent).addTo(this.nativemap);
+      
+        this.all_layers[new_layer._leaflet_id] = new_layer;
+        
+        return new_layer._leaflet_id;
+    },
+    
     //
     // returns nativemap id
     //
@@ -541,7 +410,7 @@ $.widget( "heurist.mapping", {
                 /* 
                 Styling
                 each layer has  options.default_style
-                each feature can have feature.style from geojson it overrides layer's style
+                each feature can have feature.style from geojson, it overrides layer's style
                 */          
             //set default style for result set
             var new_layer = L.geoJSON(geojson_data, {
@@ -556,7 +425,7 @@ $.widget( "heurist.mapping", {
                             //console.log('onclick');                
                             that.vistimeline.timeline('setSelection', [feature.properties.rec_ID]);
 
-                            that.setSelection([feature.properties.rec_ID]);
+                            that.setFeatureSelection([feature.properties.rec_ID]);
                             if($.isFunction(that.options.onselect)){
                                 that.options.onselect.call(that, [feature.properties.rec_ID]);
                             }
@@ -604,8 +473,6 @@ $.widget( "heurist.mapping", {
                 return layer.feature.properties.rec_Title;
                 })*/
                 .addTo( this.nativemap );            
-
-                this.resetStyle();
 
                 /*
                 this.main_layer.on('click', function () {
@@ -708,6 +575,10 @@ $.widget( "heurist.mapping", {
 
             this.all_layers[new_layer._leaflet_id] = new_layer;
             
+            //apply default style
+            this.applyStyle( new_layer._leaflet_id );
+
+            
             return new_layer._leaflet_id;
         }        
 
@@ -736,11 +607,178 @@ $.widget( "heurist.mapping", {
             this.all_layers[layer_id] = null;
         }
     },
+
+    //
+    //
+    //
+    setLayerVisibility: function(layer_id, is_visible)
+    {
+        var affected_layer = this.all_layers[layer_id];
+        if(affected_layer){
+            if(is_visible===false){
+                affected_layer.remove();
+            }else{
+                affected_layer.addTo(this.nativemap);
+            }
+        }
+    },
+    
+    //
+    // apply style for given layer
+    // it take style from options.default_style, each feature may have its own style that overwrites layer's one
+    //
+    applyStyle: function(layer_id, newStyle) {
+
+        var affected_layer = this.all_layers[layer_id];
+        if(!affected_layer) return;
+
+        var that = this;
+        
+        //create icons (@todo for all themes and recctypes)
+        if(newStyle){
+            affected_layer.options.default_style = newStyle;
+            affected_layer.eachLayer(function(layer){
+                layer.feature.default_style = newStyle;
+            });  
+        }
+        
+        var style = affected_layer.options.default_style;
+        
+        //update markers only if style has been changed
+        //var marker_style = null;
+        var myIcon = new L.Icon.Default(); //L.icon( L.Icon.Default.prototype.options );//Default;
+        
+        var myIconRectypes = {};
+        
+        //set default values -------       
+        if(!style.iconType) style.iconType ='rectype';
+        style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :((style.iconType=='circle')?9:18);
+        var fcolor = (style.color?style.color:'#0000ff');
+        
+        if(style.iconType=='url'){
+            
+            var fsize = style.iconSize;
+            
+            myIcon = L.icon({
+                iconUrl: style.iconUrl,
+                iconSize: [fsize, fsize]
+                /*iconAnchor: [22, 94],
+                popupAnchor: [-3, -76],
+                shadowUrl: 'my-icon-shadow.png',
+                shadowSize: [68, 95],
+                shadowAnchor: [22, 94]*/
+            });      
+            //marker_style = {icon:myIcon};
+            
+        }else if(style.iconType=='iconfont'){
+            
+            if(!style.iconFont) style.iconFont = 'location';
+            
+            var cname = (style.iconFont.indexOf('ui-icon-')==0?'':'ui-icon-')+style.iconFont;
+            var fsize = style.iconSize;
+            var isize = 6+fsize;
+            var bgcolor = (style.fillColor0?(';background-color:'+style.fillColor):';background:none');
+            
+            myIcon = L.divIcon({
+                html: '<div class="ui-icon '+cname+'" style="padding:2px;border:none;font-size:'
+                        +fsize+'px;width:'+isize+'px;color:'+fcolor+bgcolor+'"/>',
+                iconSize:[isize, isize]
+            });
+            
+            //marker_style = {icon:myIcon};
+        }
+        //set default values ------- END
+        
+        //recursion for all layer within layer group
+        function __applyMarkerStyle(layer, parent_layer, feature){
+            
+            //var feature = layer.feature;    
+            if(layer instanceof L.LayerGroup){
+                
+                layer.eachLayer( function(child_layer){__applyMarkerStyle(child_layer, layer, feature);} );
+                
+            }else{
+
+                var setIcon = myIcon;
+                                        
+                if(style.iconType=='rectype' ){
+                    var rty_ID = feature.properties.rec_RecTypeID;
+                    if(myIconRectypes[rty_ID]){
+                        setIcon = myIconRectypes[rty_ID];
+                    }else{
+                        
+                        var fsize = style.iconSize;
+                        setIcon = L.icon({
+                            iconUrl: (window.hWin.HAPI4.iconBaseURL + rty_ID + 's.png&color='+encodeURIComponent(fcolor)),
+                            iconSize: [fsize, fsize]                        
+                        });
+                        myIconRectypes[rty_ID] = setIcon;
+                    }
+                }
+            
+                if(layer instanceof L.Marker){
+                    if(style.iconType=='circle'){
+                        //change to circleMarker
+                        var new_layer = L.circleMarker(layer.getLatLng(), style);    
+                        new_layer.feature = layer.feature;
+                        parent_layer.addLayer(new_layer);
+                        parent_layer.removeLayer(layer);
+                    }else{
+                        layer.setIcon(setIcon);    
+                    }
+                }else if(layer instanceof L.CircleMarker){
+                    if(style.iconType!='circle'){
+                        
+                        var new_layer = L.marker(layer.getLatLng(), {icon:setIcon});
+                        new_layer.feature = layer.feature;
+                        parent_layer.addLayer(new_layer);
+                        parent_layer.removeLayer(layer);
+                    }else{
+                        layer.setRadius(style.iconSize);                    
+                    }
+                }
+            }
+        }
+
+        affected_layer.eachLayer( function(child_layer){ 
+                __applyMarkerStyle(child_layer, affected_layer, child_layer.feature);
+        } );
+        
+        /*define markers
+        layer.options.pointToLayer(function(geoJsonPoint, latlng) {
+            
+                var style = layer.options.default_style;
+                
+                if(style.iconType=='circle'){
+                    
+                    return L.circleMarker(latlng, style);
+                    
+                }else if(style.iconType=='rectype'){
+                    
+                }else{
+                    return L.marker(latlng, marker_style);
+                }
+        });
+        */        
+
+
+        affected_layer.setStyle(function(feature) {
+            if(that.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
+                return {color: "#ff0000"};
+            }else{
+                //either specific style from json or common layer style
+                return feature.style || feature.default_style;
+            }
+        });
+
+
+    },
+    
         
     //
     //
     //    
-    setSelection: function( _selection, is_external ){
+    setFeatureSelection: function( _selection, is_external ){
         var that = this;
         
         if(this.main_layer){
@@ -765,10 +803,10 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    //  apply visibility for given set of recIds
+    //  apply visibility for given set of recIds (filter from timeline)
     // _selection - true - apply all layers, or array of rec_IDs
     //
-    setVisibility: function( _selection, is_visible ){
+    setFeatureVisibility: function( _selection, is_visible ){
         
         if(_selection===true || window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) {
         

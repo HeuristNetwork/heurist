@@ -37,11 +37,12 @@ function hMapDocument( _options )
     DT_DATA_SOURCE = 0,
     RT_QUERY_SOURCE = 0,
     DT_QUERY_STRING = 0,
+    DT_SYMBOLOGY_POINTMARKER = 0, //@todo rename to DT_SYMBOLOGY
     
     map_documents = null, //recordset - all loaded documents
-    map_documents_content = {}; //mapdoc_id=>recordset with all layers and datasources of document
+    map_documents_content = {}, //mapdoc_id=>recordset with all layers and datasources of document
     //map_documents_layers = {};  //native map layers
-    
+    _uniqueid = 1;   
     
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
@@ -56,6 +57,7 @@ function hMapDocument( _options )
         DT_DATA_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'];
         DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
         RT_QUERY_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'];
+        DT_SYMBOLOGY_POINTMARKER = window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY_POINTMARKER'];
         
         //_loadMapDocuments();
     }
@@ -115,6 +117,7 @@ function hMapDocument( _options )
                         $res['title'] = recName;
                         $res['type'] = 'layer';
                         $res['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
+                        $res['selected'] = true;
 
                         treedata.push($res);
                     }
@@ -206,6 +209,52 @@ function hMapDocument( _options )
             }
         }//for
     }
+
+
+
+    // get layer record, take symbology field and title 
+    // open symbology editor
+    // on exit 1) call mapLayer.applyStyles
+    //         2) change title in tree and timeline
+    function _editSymbology( mapdoc_id, rec_id, callback ){
+
+
+        var _recset = map_documents_content[mapdoc_id];
+        var _record = _recset.getById( rec_id );
+        
+        var layer_title = _recset.fld(_record, 'rec_Title');
+        var layer_style = _recset.fld(_record, DT_SYMBOLOGY_POINTMARKER);
+        if(!layer_style) layer_style = {};
+
+        var current_value = layer_style;//affected_layer.options.default_style;
+        ///console.log(affected_layer);                   
+        current_value.sym_Name = layer_title; //affected_layer.options.layer_name;
+        //open edit dialog to specify symbology
+        window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_value, function(new_value){
+
+            var new_title = null, new_style = null;
+            
+            //rename in list
+            if(!window.hWin.HEURIST4.util.isempty(new_value.sym_Name)
+                && current_value.sym_Name!=new_value.sym_Name)
+            {
+                new_title = new_value.sym_Name;
+                _recset.setFld(_record, 'rec_Title', new_value.sym_Name);
+                delete new_value.sym_Name;
+            }
+            //update style
+            _recset.setFld(_record, DT_SYMBOLOGY_POINTMARKER, new_value);
+            
+            
+            (_record['layer']).applyStyle(new_value);
+            
+           //callback to update ui in mapManager
+            if($.isFunction(callback)){
+                callback( new_title, new_style );
+            }
+        });        
+    }
+
     
     
     //public members
@@ -226,7 +275,9 @@ function hMapDocument( _options )
            return !window.hWin.HEURIST4.util.isnull( map_documents_content[mapdoc_id] );
         },
         
-        //return layer or mapdocument layer
+        //
+        //returns layer record or mapdocument record
+        //
         getLayer: function(mapdoc_id, rec_id){
             
             if(map_documents_content[mapdoc_id]){
@@ -271,21 +322,30 @@ function hMapDocument( _options )
             
             var recset = map_documents_content[mapdoc_id];
             
-            var _record = recset.getById(dataset_name);
+            //dataset_name is unique within mapdoc
+            var search_res = recset.getSubSetByRequest({'rec_Title':('='+dataset_name)}); 
             
-            if(_record){
-                _record['d'][DT_QUERY_STRING] = curr_request;
+            //var _record = recset.getById(dataset_name);
+            var _record;
+            if(search_res && search_res.length()>0){
+                
+                var recID = search_res.getOrder();
+                recID = recID[0];
+                _record = recset.getById(recID);
+                recset.setFld(_record, DT_QUERY_STRING, curr_request);
                 //remove previous result set from map
-                _record['layer'].removeLayer();    
+                if(_record['layer']) _record['layer'].removeLayer();    
             }else{
-                _record = {rec_Title: dataset_name, rec_RecTypeID:RT_MAP_LAYER,  d:{}};
-                _record['d'][DT_QUERY_STRING] = curr_request;
-                map_documents_content[mapdoc_id].addRecord(dataset_name, _record);
+                _record = {rec_ID:_uniqueid,  rec_Title:dataset_name, rec_RecTypeID:RT_MAP_LAYER,  d:{}};
+                recset.setFld(_record, DT_QUERY_STRING, curr_request);
+                _record = recset.addRecord(_uniqueid, _record);
+                _uniqueid++;
             }
             
-            _record['layer'] = new hMapLayer2({rec_datasource: _record, 
-                                              mapdoc_recordset: map_documents_content[mapdoc_id], //need to get fields
-                                              mapwidget: options.mapwidget});
+            recset.setFld(_record, 'layer',
+                        new hMapLayer2({rec_datasource: _record, 
+                                              mapdoc_recordset: recset, //need to get fields
+                                              mapwidget: options.mapwidget}));
             
         },
          
@@ -297,19 +357,72 @@ function hMapDocument( _options )
         //@todo
         zoomToMapDocument: function(mapdoc_id){
            console.log('todo zoom to maodoc '+mapdoc_id); 
-            //options.mapwidget.mapping('zoomToExtent', map_document_extent);  
+           //options.mapwidget.mapping('zoomToExtent', map_document_extent);  
         },
 
+        
+        //
+        // show/hide entire map document
+        //
+        setMapDocumentVisibulity: function( mapdoc_id, is_visibile ){
+            //loop trough all 
+            var resdata = map_documents_content[mapdoc_id];
+            var idx, records = resdata.getRecords();
+            for(idx in records){
+                if(idx)
+                {
+                    var record = records[idx];
+                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER && record['layer']){
+                        (record['layer']).setVisibility( is_visibile );
+                    }
+                }
+            }
+        },
+        
         //
         // remove map document data and remove it from map
         //
-        closeMapDocument: function(){
+        closeMapDocument: function( mapdoc_id ){
+            //loop trough all 
+            var resdata = map_documents_content[mapdoc_id];
+            if(resdata){
+                var idx, records = resdata.getRecords();
+                for(idx in records){
+                    if(idx)
+                    {
+                        var record = records[idx];
+                        if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER && record['layer']){
+                            (record['layer']).removeLayer();
+                        }
+                    }
+                }
+                map_documents_content[mapdoc_id] = null;
+            }
+        },
+
+        //
+        //
+        //
+        removeLayer: function(mapdoc_id, rec_id){
             
+            if(rec_id>0){
+                var layer_rec = that.getLayer(mapdoc_id, rec_id);
+                if(layer_rec){
+                    (layer_rec['layer']).removeLayer();
+                    
+                    (map_documents_content[mapdoc_id]).removeRecord( rec_id );
+                } 
+            }
         },
-
-        removeEntry: function(groupID, data){
-
-        },
+        
+        
+        // get layer record, take symbology field and title 
+        // open symbology editor
+        // on exit 1) call mapLayer.applyStyles
+        //         2) change title in tree and timeline
+        editSymbology: function( mapdoc_id, rec_id, callback ){
+            _editSymbology( mapdoc_id, rec_id, callback );    
+        }
 
     }//end public methods
 

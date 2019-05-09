@@ -85,7 +85,11 @@ function hRecordSet(initdata) {
                 //@todo - merging
             }else{
                 records = {};
-                order = response.records;
+                if(response.order){
+                    order = $.isArray(response.order)?response.order:[response.order];    
+                }else{
+                    order = response.records;    
+                }
                 if(response.rectypes) rectypes = response.rectypes;
                 _isMapEnabled = false;
             }
@@ -1117,7 +1121,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             
             var _records = {}, _order=[], that = this;
             
-            if(fields==null || $.isEmptyObject(fields)) return null;
+            //if(fields==null || $.isEmptyObject(fields)) return null;
             if(request==null || $.isEmptyObject(request)) return this;
             
             function __getDataType(fieldname, struct){
@@ -1579,7 +1583,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 order.push(recID);
                 total_count = total_count+1;
             }
-            this.setRecord(recID, record);
+            return this.setRecord(recID, record);
         },
         
         //
@@ -1598,9 +1602,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     }
                 }else if($.isArray(record)){
                     records[recID] = record;
-                } 
+                }
+                return records[recID];
             }else{
-                this.addRecord(recID, record);
+                return this.addRecord(recID, record);
             }
         },
         
