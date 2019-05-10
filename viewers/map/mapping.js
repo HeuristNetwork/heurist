@@ -5,7 +5,7 @@
 * + 2) symbology: global,mapdocument,layer,item 
 * + 3) legend - add/remove,show/hide layers, set symbology (dialog - see Path and Marker options), save result as layer record
 * 4) thematic mapping
-* 5) map document  - get list, get content by id (as geojson), load layers (as FeatureCollection)
+* + 5) map document  - get list, get content by id (as geojson), load layers (as FeatureCollection)
 * 6) tiled and untiled images 
 * 7) kml, shapefiles, gpx
 * + 8) simplification complex paths
@@ -373,6 +373,83 @@ $.widget( "heurist.mapping", {
         
     },
     
+    addTileLayer: function(layer_url, layer_options, dataset_name){
+    
+        var new_layer;
+
+        var HeuristTilerLayer = L.TileLayer.extend({
+                    getBounds: function(){
+                        return this.options._extent;  
+                    }});
+
+    
+        if(layer_options['BingLayer'])
+        {
+                var BingLayer = L.HeuristTilerLayer.extend({
+                    getTileUrl: function (tilePoint) {
+                        //this._adjustTilePoint(tilePoint);
+                        return L.Util.template(this._url, {
+                            s: this._getSubdomain(tilePoint),
+                            q: this._quadKey(tilePoint.x, tilePoint.y, this._getZoomForUrl())
+                        });
+                    },
+                    _quadKey: function (x, y, z) {
+                        var quadKey = [];
+                        for (var i = z; i > 0; i--) {
+                            var digit = '0';
+                            var mask = 1 << (i - 1);
+                            if ((x & mask) != 0) {
+                                digit++;
+                            }
+                            if ((y & mask) != 0) {
+                                digit++;
+                                digit++;
+                            }
+                            quadKey.push(digit);
+                        }
+                        return quadKey.join('');
+                    }
+                });    
+                
+                if(!layer_options.subdomains) layer_options.subdomains = ['0', '1', '2', '3', '4', '5', '6', '7'];
+                
+                if(!layer_options.attribution) layer_options.attribution = '&copy; <a href="http://bing.com/maps">Bing Maps</a>';
+                
+                new_layer = new BingLayer(layer_url, layer_options).addTo(this.nativemap);  
+                /*{
+                   detectRetina: true
+                }*/
+                           
+        }else if(layer_options['MapTiler'])
+        {
+                
+                var MapTilerLayer = L.HeuristTilerLayer.extend({
+                    getTileUrl: function (tilePoint) {
+                        //this._adjustTilePoint(tilePoint);
+                        return L.Util.template(this._url, {
+                            s: this._getSubdomain(tilePoint),
+                            q: this._maptiler(tilePoint.x, tilePoint.y, this._getZoomForUrl())
+                        });
+                    },
+                    _maptiler: function (x, y, z) {
+                        
+                        var bound = Math.pow(2, z);
+                        var s = ''+z+'/'+x+'/'+(bound - y - 1); 
+                        return s;
+                    }
+                });    
+                
+            new_layer = new MapTilerLayer(layer_url, layer_options).addTo(this.nativemap);  
+                
+        }else{
+            new_layer = new HeuristTilerLayer(layer_url, layer_options).addTo(this.nativemap);             
+        }
+        
+        this.all_layers[new_layer._leaflet_id] = new_layer;
+        
+        return new_layer._leaflet_id;
+        
+    },
     
     addImageOverlay: function(image_url, image_extent, dataset_name){
     
@@ -594,7 +671,7 @@ $.widget( "heurist.mapping", {
         
         if(affected_layer){
             var bounds = affected_layer.getBounds();
-            this.nativemap.fitBounds(bounds);
+            if(bounds) this.nativemap.fitBounds(bounds);
         }
         
     },

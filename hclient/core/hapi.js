@@ -886,6 +886,14 @@ prof =Profile
                 _callserver('record_output', request, callback);    //standard search
             }
 
+            //
+            // load kml in geojson format
+            //
+            ,load_kml_as_geojson: function(request, callback){
+                request['format'] = 'geojson';
+                // start search
+                _callserver('record_kml', request, callback);    //standard search
+            }
 
             /**
             * Search relation within given set of records

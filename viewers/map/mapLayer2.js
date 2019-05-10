@@ -38,8 +38,6 @@ function hMapLayer2( _options ) {
     var _record, 
         _recordset;
         
-    var _map_overlay;  //object with layer action methods 
-    
     var _nativelayer_id = 0;
 
     //
@@ -58,7 +56,7 @@ function hMapLayer2( _options ) {
         if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] 
            || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
 
-            _map_overlay = _addQueryLayer();
+            _addQueryLayer();
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
 
@@ -66,11 +64,11 @@ function hMapLayer2( _options ) {
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
-            _map_overlay = _addImage();
+            _addImage();
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE']){
 
-            _map_overlay = _addKML();
+            _addKML();
         }
     }
 
@@ -79,16 +77,18 @@ function hMapLayer2( _options ) {
     //
     function _addTiledImage() {
 
-        var imageLayer = null;
-
-        var sourceURL = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
+        var layer_url = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
 
         // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
-        if(sourceURL !== undefined) {
+        if(!window.hWin.HEURIST4.util.isempty(layer_url)) {
 
             var tilingSchema = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_LAYER_SCHEMA']);
             var mimeType = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE']);
+            var minZoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MINMUM_ZOOM_LEVEL']);
+            var maxZoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM_LEVEL']);
 
+            var layer_options = {minZoom:minZoom , maxZoom:maxZoom};
+            
             var tileUrlFunc = null; 
 
             var idx_ccode = window.hWin.HEURIST4.terms.fieldNamesToIndex.trm_ConceptID;
@@ -97,88 +97,57 @@ function hMapLayer2( _options ) {
             mimeType = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][mimeType];
 
             if(tilingSchema && tilingSchema[idx_ccode]=='2-549'){ //virtual earth
+                
+                layer_options['BingLayer'] = true;
 
-                tileUrlFunc = function (a,b) {
+                if(layer_url.indexOf('{q}')<0){
+                    layer_url = layer_url + '{q}';
+                }
+                
+            }else if(tilingSchema && tilingSchema[idx_ccode]=='2-548'){ //maptiler
 
-                    function __tileToQuadKey(x, y, zoom) {
-                        var i, mask, cell, quad = "";
-                        for (i = zoom; i > 0; i--) {
-                            mask = 1 << (i - 1);
-                            cell = 0;
-                            if ((x & mask) != 0) cell++;
-                            if ((y & mask) != 0) cell += 2;
-                            quad += cell;
-                        }
-                        return quad;
-                    }
+                layer_options['MapTiler'] = true;
 
-
-                    var res = sourceURL + __tileToQuadKey(a.x,a.y,b) 
-                    + (mimeType && mimeType[idx_ccode] == '2-540'? ".png" : ".gif");
-                    return res;
-                };
-
+                if(layer_url.indexOf('{q}')<0){
+                    layer_url = layer_url + '{q}'
+                                + (mimeType && mimeType[idx_ccode] == '2-540'? ".png" : ".gif");
+                }
+                
             }else{
-
-                tileUrlFunc = function(coord, zoom) {
-                    //console.log(coord);
-                    //console.log(zoom);
-
-                    var bound = Math.pow(2, zoom);
-                    var tile_url = sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
-                    + (mimeType && mimeType[idx_ccode] == '2-540'? ".png" : ".gif");
-                    //console.log("URL: " + tile_url);
-
-                    return tile_url;
-                };
+                
+                if(layer_url.indexOf('{x}')<0){
+                    layer_url = layer_url + '/{z}/{x}/{y}'
+                                + (mimeType && mimeType[idx_ccode] == '2-540'? ".png" : ".gif");
+                }
 
             }
-
-
-            // Tile type
-            var tileType = new google.maps.ImageMapType({
-                getTileUrl: tileUrlFunc,
-                tileSize: new google.maps.Size(256, 256),
-                minZoom: 1,
-                maxZoom: 20,
-                radius: 1738000,
-                name: _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'])
-            });
-
-            /*
-            visible
-            setVisibility
-            removeOverlay
-            zoomToOverlay
-            */
-            var overlay_index = options.gmap.overlayMapTypes.push( tileType )-1;
-
-            imageLayer = {
-
-                overlay_index: overlay_index,
-
-                visible:true,
-                // Set visibility
-                setVisibility: function(isvisible) {
-                    console.log("Setting visibility to: " + isvisible);
-                    this.visible = isvisible;
-                    if(isvisible) {
-                        options.gmap.overlayMapTypes.setAt(this.overlay_index, tileType);
-                    }else{
-                        options.gmap.overlayMapTypes.setAt(this.overlay_index, null);        
-                    }
-                },
-                removeOverlay: function(){
-                    options.gmap.overlayMapTypes.setAt(this.overlay_index, null);
-                },
-                zoomToOverlay: function(){
-                    //gmap.fitBounds(bounds);
-                }
-            };
-
+            
+            layer_options._extent = _getBoundingBox();
+            
+            _nativelayer_id = options.mapwidget.mapping('addTileLayer', 
+                                                        layer_url, 
+                                                        layer_options, 
+                                                        _recordset.fld(_record, 'rec_Title') );
+            
         }
-
-        return imageLayer;
+    }
+    
+    //
+    // return extent in leaflet format
+    //
+    function _getBoundingBox(){
+        
+         var geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
+         if(geodata && geodata[0]){
+            var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[0].wkt, geodata[0].geotype, 'google' );
+            if(shape && shape._extent){
+                var extent = shape._extent;
+                return [[extent.ymin,extent.xmin],[extent.ymax,extent.xmax]];
+            }
+         }else{
+             return null;
+         }
+        
     }
 
     //
@@ -190,11 +159,9 @@ function hMapLayer2( _options ) {
          
          var image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+
                     imageFile[0];
+                    
+         var image_extent = _getBoundingBox();
          
-         var geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
-         var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[0].wkt, geodata[0].geotype, 'google' );
-         var extent = shape._extent;
-         var image_extent = [[extent.ymin,extent.xmin],[extent.ymax,extent.xmax]];
           
          _nativelayer_id = options.mapwidget.mapping('addImageOverlay', 
                                                         image_url, 
@@ -210,70 +177,23 @@ function hMapLayer2( _options ) {
     //
     function _addKML() {
 
-        var kmlLayer = null;
-
-        var fileID = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
-        var kmlSnippet = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_KML']);
-
-        // KML file
-        if(!window.hWin.HEURIST4.util.isnull(fileID)) {
-
-            var fileURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+fileID[0];
-
-            // note google refuses kml from localhost
-            //console.log("KML file: " + fileURL);
-
-            // Display on Google Maps
-            kmlLayer = new google.maps.KmlLayer({
-                url: fileURL,
-                suppressInfoWindows: true,
-                preserveViewport: options.preserveViewport,
-                map: options.gmap,
-                status_changed: function(){
-                    //console.log('status: '+kmlLayer.getStatus());
+        var rec_ID = _recordset.fld(_record, 'rec_ID');
+            
+        //var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_kml.php?db='
+        //            +window.hWin.HAPI4.database+'&format=geojson&recID='+rec_ID;
+                    
+        request = {recID:rec_ID};             
+        //perform loading kml as geojson
+        window.hWin.HAPI4.RecordMgr.load_kml_as_geojson(request,
+            function(response){
+                if(response){
+                    _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                                                response, 
+                                                null, 
+                                                _recordset.fld(_record, 'rec_Title') );
                 }
-            });
-        }
-
-        // KML snippet
-        if(!window.hWin.HEURIST4.util.isnull(kmlSnippet)) {
-            /** NOTE: Snippets do not seem to be supported by the Google Maps API straight away.. */
-            //console.log("KML snippet: " + kmlSnippet);
-
-            // Display on Google Maps
-            kmlLayer = new google.maps.KmlLayer(kmlSnippet, {
-                suppressInfoWindows: true,
-                preserveViewport: options.preserveViewport,
-                map: options.gmap
-            });
-        }
-
-        if(kmlLayer!=null){
-
-            kmlLayer.title = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']);
-            kmlLayer.url = fileURL;
-            kmlLayer.visible = true;
-            // Set visiblity method
-            kmlLayer.setVisibility = function(isvisible) {
-                this.visible = isvisible;
-                if(isvisible) {
-                    this.setMap(options.gmap);
-                }else{
-                    this.setMap(null);
-                }
-            };
-
-            kmlLayer.removeOverlay = function(){
-                this.setMap(null);
-            };
-
-            kmlLayer.zoomToOverlay = function(){
-                //map.fitBounds(bounds);
-                console.log('to implement');
-            };
-        }
-
-        return kmlLayer;
+            }
+        );          
     }
 
 

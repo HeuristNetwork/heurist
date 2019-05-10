@@ -276,19 +276,17 @@ function hMapManager( _options )
                                     
                                 },
                                 expand: function(e, data){
-
-                                    var node = data.node;
-//console.log(node.children);                                    
-                                    if(node.data.type=='mapdocument' && node.children.length==0) {
-                                        node.setSelected(true, {noEvents:true} );
-                                    }
-                                    
+                                   
                                 },
                                 loadChildren: function(e, data){
 //
 //console.log('loaded '+data.node.title+'  '+data.node.children.length);
                                     setTimeout(function(){
-                                    $.each(data.node.children, function( idx, item ){
+                                        
+                                        if(data.node.data.type=='mapdocument')
+                                            data.node.setSelected(true, {noEvents:true} );
+                                        
+                                        $.each(data.node.children, function( idx, item ){
                                             _defineActionIcons( item );
                                     }) }, 500);                                           
                                 },

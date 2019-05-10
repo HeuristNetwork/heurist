@@ -232,7 +232,6 @@ $.widget( "heurist.editing_input", {
                     
         } 
         
-        
         //add hidden error message div
         this.error_message = $( "<div>")
         .hide()
@@ -563,93 +562,98 @@ $.widget( "heurist.editing_input", {
             .keyup(function(){that._onChange();})
             .change(function(){that._onChange();})
             .appendTo( $inputdiv );
-            
-            var eid = $input.attr('id')+'_editor';
-            
-            $editor = $( "<div>")
-            .attr("id", eid)
-            .addClass('text ui-widget-content ui-corner-all')
-            .css({'overflow-x':'hidden','display':'inline-block'})
-            .appendTo( $inputdiv ).hide();
-            
-            
-              
-            var $btn_edit_switcher = $( '<span>html</span>', {title: 'Show/hide Rich text editor'})
-                //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                .addClass('smallbutton btn_add_term')
-                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                .appendTo( $inputdiv );
-                            
-            function __showEditor(is_manual){
-                var eid = '#'+$input.attr('id')+'_editor';                    
-                
-                $input.hide();
-                        $(eid).html($.parseHTML($input.val())).width($input.width()).height($input.height()).show();
 
-                        $btn_edit_switcher.text('text');
-                        
-                        tinymce.init({
-                                //target: $editor, 
-                                selector: (eid),
-                                inline: false,
-                                branding: false,
-                                elementpath: false,
-                                statusbar: true,
-                                resize: 'both',
-                                menubar: false,
-                                entity_encoding:'raw',
-                                 setup:function(ed) {
-                                   ed.on('change', function(e) {
-                                       var newval = ed.getContent();
-                                       var nodes = $.parseHTML(newval);
-                                       if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
-                                           (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
-                                       { 
-                                           //remove the only tag
-                                           $input.val(nodes[0].textContent);
-                                       }else{
-                                           $input.val(newval);     
-                                       }
-                                       
-                                       //$input.val( ed.getContent() );
-                                       that._onChange();
-                                   });
-                                 },
-                                plugins: [
-                                    'advlist autolink lists link image preview textcolor', //anchor charmap print 
-                                    'searchreplace visualblocks code fullscreen',
-                                    'media table contextmenu paste help'  //insertdatetime  wordcount
-                                  ],      
-                                  //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                                toolbar: ['formatselect | bold italic forecolor | align | bullist numlist outdent indent | removeformat | help'],
-                                content_css: [
-                                    '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
-                                    //,'//www.tinymce.com/css/codepen.min.css'
-                                    ]                    
-                          });
-  
-            }
-
+            
+            if( this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY_POINTMARKER']){
                 
-            this._on( $btn_edit_switcher, { click: function(){
-                    
+                
+            }else{
+            
+                var eid = $input.attr('id')+'_editor';
+                
+                $editor = $( "<div>")
+                .attr("id", eid)
+                .addClass('text ui-widget-content ui-corner-all')
+                .css({'overflow-x':'hidden','display':'inline-block'})
+                .appendTo( $inputdiv ).hide();
+                
+                  
+                var $btn_edit_switcher = $( '<span>html</span>', {title: 'Show/hide Rich text editor'})
+                    //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                    .addClass('smallbutton btn_add_term')
+                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                    .appendTo( $inputdiv );
+                                
+                function __showEditor(is_manual){
                     var eid = '#'+$input.attr('id')+'_editor';                    
-                    if($input.is(':visible')){
-                        __showEditor(true);
-                    }else{
-                        $btn_edit_switcher.text('html');
-                        $input.show();
-                        tinymce.remove(eid);
-                        $(eid).hide();
-                    }
-                }});
-                
-                //what is visible initially
-                var nodes = $.parseHTML(value);
-                if(nodes && (nodes.length>1 || nodes[0].nodeName!='#text')){ //if it has html show editor at once
-                     setTimeout(__showEditor,500); 
+                    
+                    $input.hide();
+                            $(eid).html($.parseHTML($input.val())).width($input.width()).height($input.height()).show();
+
+                            $btn_edit_switcher.text('text');
+                            
+                            tinymce.init({
+                                    //target: $editor, 
+                                    selector: (eid),
+                                    inline: false,
+                                    branding: false,
+                                    elementpath: false,
+                                    statusbar: true,
+                                    resize: 'both',
+                                    menubar: false,
+                                    entity_encoding:'raw',
+                                     setup:function(ed) {
+                                       ed.on('change', function(e) {
+                                           var newval = ed.getContent();
+                                           var nodes = $.parseHTML(newval);
+                                           if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
+                                               (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
+                                           { 
+                                               //remove the only tag
+                                               $input.val(nodes[0].textContent);
+                                           }else{
+                                               $input.val(newval);     
+                                           }
+                                           
+                                           //$input.val( ed.getContent() );
+                                           that._onChange();
+                                       });
+                                     },
+                                    plugins: [
+                                        'advlist autolink lists link image preview textcolor', //anchor charmap print 
+                                        'searchreplace visualblocks code fullscreen',
+                                        'media table contextmenu paste help'  //insertdatetime  wordcount
+                                      ],      
+                                      //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
+                                    toolbar: ['formatselect | bold italic forecolor | align | bullist numlist outdent indent | removeformat | help'],
+                                    content_css: [
+                                        '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+                                        //,'//www.tinymce.com/css/codepen.min.css'
+                                        ]                    
+                              });
+      
                 }
-              
+
+                    
+                this._on( $btn_edit_switcher, { click: function(){
+                        
+                        var eid = '#'+$input.attr('id')+'_editor';                    
+                        if($input.is(':visible')){
+                            __showEditor(true);
+                        }else{
+                            $btn_edit_switcher.text('html');
+                            $input.show();
+                            tinymce.remove(eid);
+                            $(eid).hide();
+                        }
+                    }});
+                    
+                    //what is visible initially
+                    var nodes = $.parseHTML(value);
+                    if(nodes && (nodes.length>1 || nodes[0].nodeName!='#text')){ //if it has html show editor at once
+                         setTimeout(__showEditor,500); 
+                    }
+            } 
 
         }
         else if(this.detailType=='enum' || this.detailType=='relationtype'){//--------------------------------------

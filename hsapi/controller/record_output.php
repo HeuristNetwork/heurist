@@ -1416,31 +1416,4 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
 
 }
 
-function simplifyCoordinates(&$orig_points){
-    
-    if(count($orig_points)>1000){
-
-        $points = array();    
-        foreach ($orig_points as $point) {
-            array_push($points, array('y'=>$point[1], 'x'=>$point[0]));
-        }
-        
-        $tolerance = 0.01;// 0.002;
-        $crn = 0; //count of run
-        $points2 = $points;
-        while(count($points2)>1000 && $crn<4){
-            $points2 = Simplify::run($points, $tolerance);
-            $tolerance = $tolerance + 0.002;
-            $crn++;
-        }//while simplify
-
-        if(count($points2)<=1000){
-            $orig_points = array();
-            foreach ($points2 as $point) {
-                array_push($orig_points, array($point['x'], $point['y']) );
-            }
-        }
-        
-    }
-}
 ?>
