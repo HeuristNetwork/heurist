@@ -564,7 +564,21 @@ $.widget( "heurist.editing_input", {
             .appendTo( $inputdiv );
 
             
-            if( this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY_POINTMARKER']){
+            if( this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
+
+                var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
+                    //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                    .addClass('smallbutton btn_add_term')
+                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                    .appendTo( $inputdiv );
+                
+                this._on( $btn_edit_switcher, { click: function(){
+                        var current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                        if(!current_val) current_val = {};
+                        window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, false, function(new_value){
+                            $input.val(JSON.stringify(new_value));
+                        });
+                }});
                 
                 
             }else{
@@ -648,11 +662,11 @@ $.widget( "heurist.editing_input", {
                         }
                     }});
                     
-                    //what is visible initially
-                    var nodes = $.parseHTML(value);
-                    if(nodes && (nodes.length>1 || nodes[0].nodeName!='#text')){ //if it has html show editor at once
+                //what is visible initially
+                var nodes = $.parseHTML(value);
+                if(nodes && (nodes.length>1 || nodes[0].nodeName!='#text')){ //if it has html show editor at once
                          setTimeout(__showEditor,500); 
-                    }
+                }
             } 
 
         }
@@ -2235,6 +2249,23 @@ console.log('onpaste');
             /*else if(this.detailType=="freetext" && this.options['input_width']){
             $input.css('width', this.options['input_width']);
             }*/
+            
+            if( this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
+                var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
+                    //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                    .addClass('smallbutton btn_add_term')
+                    .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                    .appendTo( $inputdiv );
+                
+                this._on( $btn_edit_switcher, { click: function(){
+                        var current_val = window.hWin.HEURIST4.util.isJSON($input.val());
+                        if(!current_val) current_val = {};
+                        window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, false, function(new_value){
+                            $input.val(JSON.stringify(new_value));
+                            that._onChange();
+                        });
+                }});
+            }            
 
         }
         

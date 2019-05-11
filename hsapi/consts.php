@@ -327,6 +327,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MINIMUM_MAP_ZOOM' => array(3, 1077), // from Jan 2017 uses DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM for both maps and layers
     'DT_MAXIMUM_MAP_ZOOM' => array(3, 1078), // prior Jan 2017 some databases used one, some used the other. Either now used for setting.
     'DT_SYMBOLOGY_POINTMARKER' => array(3, 1091),  //@todo rename to DT_SYMBOLOGY
+    'DT_SYMBOLOGY' => array(3, 1092),  //contains style for marker and vector symbology - it covers 109111037,551,1090
     'DT_SYMBOLOGY_COLOR' => array(3, 1037),
     'DT_BG_COLOR' => array(2, 551),
     'DT_OPACITY' => array(3, 1090),

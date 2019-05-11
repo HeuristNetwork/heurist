@@ -249,9 +249,18 @@ $.widget( "heurist.mapping", {
         
         this.mapManager = new hMapManager({container:this.mapManager._container, mapwidget:this.element});
         
-        this.nativemap.setView([51.505, -0.09], 13);
+        this.nativemap.setView([51.505, -0.09], 13); //@todo change to bookmarks
 
         if(this.main_popup==null) this.main_popup = L.popup();
+        
+        //bookmark plugin
+        var bkm_control = new L.Control.Bookmarks({ position: 'topleft' }).addTo( this.nativemap );
+        
+        //geocoder plugin
+        L.Control.geocoder({ position: 'topleft' }).addTo( this.nativemap );
+        
+        //print plugin
+        L.control.browserPrint({ position: 'topleft' }).addTo( this.nativemap );
     },
 
     //Called whenever the option() method is called
@@ -360,7 +369,7 @@ $.widget( "heurist.mapping", {
                 this.mapManager.removeEntry('search', { layer_name: 'Current query' }); 
                 
             }else{
-                this.addGeoJson(data, timeline_data, 'Current query');            
+                this.addGeoJson(data, timeline_data, null, 'Current query');            
                 
                     //add new search result to search results mapdoc
                     this.main_layer = new_layer;
@@ -463,7 +472,7 @@ $.widget( "heurist.mapping", {
     //
     // returns nativemap id
     //
-    addGeoJson: function(geojson_data, timeline_data, dataset_name){
+    addGeoJson: function(geojson_data, timeline_data, layer_style, dataset_name){
 
 
         if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) || 
@@ -491,11 +500,13 @@ $.widget( "heurist.mapping", {
                 */          
             //set default style for result set
             var new_layer = L.geoJSON(geojson_data, {
-                    default_style: {color: "#00b0f0"}
+                    default_style: null
                     , layer_name: 'Current query'
                     //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
                     , onEachFeature: function(feature, layer) {
 
+                        //each feature may have its own feature.style
+                        //if it is not defined then layer's default_style will be used
                         feature.default_style = layer.options.default_style;
 
                         layer.on('click', function (event) {
@@ -653,7 +664,7 @@ $.widget( "heurist.mapping", {
             this.all_layers[new_layer._leaflet_id] = new_layer;
             
             //apply default style
-            this.applyStyle( new_layer._leaflet_id );
+            this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style:{color: "#00b0f0"});
 
             
             return new_layer._leaflet_id;
@@ -712,11 +723,16 @@ $.widget( "heurist.mapping", {
         var that = this;
         
         //create icons (@todo for all themes and recctypes)
+        newStyle = window.hWin.HEURIST4.util.isJSON(newStyle);
         if(newStyle){
+            
             affected_layer.options.default_style = newStyle;
             affected_layer.eachLayer(function(layer){
                 layer.feature.default_style = newStyle;
             });  
+        }else if(affected_layer.options.default_style){
+            //new style is not defined and layer already has default one - no need action
+            return;
         }
         
         var style = affected_layer.options.default_style;

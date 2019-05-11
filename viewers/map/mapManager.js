@@ -412,16 +412,33 @@ function hMapManager( _options )
                                     mapDocuments.zoomToMapDocument(mapdoc_id);
                             }
                             
-                        }else if(ele.hasClass('ui-icon-plus')){ //add new layer to ma document
+                        }else if(ele.hasClass('ui-icon-plus')){ //add new layer to map document
                         
-                            //open layer selector dialog
                         
                             
                         }else if(ele.hasClass('ui-icon-pencil')){
                             
                                 if(mapdoc_id>0){
                                     //edit layer or mapdocument record
-                                    window.hWin.HEURIST4.ui.openRecordEdit(recid>0?recid:mapdoc_id);
+                                    window.hWin.HEURIST4.ui.openRecordEdit(recid>0?recid:mapdoc_id, null,
+                                    {selectOnSave:true,
+                                     onselect:function(event, data){
+                                        if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                            var recset = data.selection;
+                                            var rec = recset.getFirstRecord();
+                                            item.title = recset.fld(rec, 'rec_Title');
+                                            parent_span.find('span.fancytree-title').text( item.title );
+                                            
+                                            var symbology = recset.fld(rec
+                                                            , window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+                                            if(recid>0 && symbology){
+                                                //apply symbolgy on map
+                                                var layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
+                                                if(layer_rec) (layer_rec['layer']).applyStyle( symbology );
+                                            }
+                                            
+                                        }
+                                    }});
                                 }else{
                                     // get layer record, take symbology field and title 
                                     // open symbology editor

@@ -17,7 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function editSymbology(current_value, callback){
+function editSymbology(current_value, needName, callback){
 
     var edit_dialog = null;
     
@@ -80,8 +80,9 @@ function editSymbology(current_value, callback){
         {"dtID": "sym_Name",
             "dtFields":{
                 "dty_Type":"freetext",
-                "rst_RequirementType":"required",                        
-                "rst_DisplayName":"Name:"
+                //"rst_RequirementType":"required",                        
+                "rst_DisplayName":"Name:",
+                "rst_Display": needName?"visible":"hidden"
         }},
 
         {"dtID": "iconType",

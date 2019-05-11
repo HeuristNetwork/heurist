@@ -29,7 +29,7 @@ function hMapLayer2( _options ) {
         //mapwidget:              
         //mapdoc_recordset: // recordset to retrieve values from rec_layer and rec_datasource
         
-        //rec_layer:       // record of type Heurist layer
+        //rec_layer:       // record of type Heurist layer, it is needed for symbology
         //rec_datasource:  // record of type map dataseource
 
         preserveViewport: true  
@@ -55,7 +55,7 @@ function hMapLayer2( _options ) {
 
         if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] 
            || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
-
+               
             _addQueryLayer();
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
@@ -189,7 +189,7 @@ function hMapLayer2( _options ) {
                 if(response){
                     _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                                 response, 
-                                                null, 
+                                                null, null,
                                                 _recordset.fld(_record, 'rec_Title') );
                 }
             }
@@ -202,6 +202,7 @@ function hMapLayer2( _options ) {
     //
     function _addQueryLayer(){
 
+        var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         var query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
         var request = window.hWin.HEURIST4.util.parseHeuristQuery(query);
 
@@ -233,7 +234,7 @@ function hMapLayer2( _options ) {
                     {
                         _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                                         geojson_data, 
-                                                        timeline_data, 
+                                                        timeline_data, layer_style,
                                                         _recordset.fld(_record, 'rec_Title') );
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);

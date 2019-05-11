@@ -133,6 +133,7 @@
     $system->defineConstant('DT_PARENT_ENTITY');    
     $system->defineConstant('DT_START_DATE');
     $system->defineConstant('DT_END_DATE');
+    $system->defineConstant('DT_SYMBOLOGY');
         
     if($is_csv){
         
@@ -1259,7 +1260,7 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
             $rtTerms = new DbsTerms($system, $rtTerms);
         }
     }
-
+    
     if($detailtypes==null) $detailtypes = dbs_GetDetailTypes($system, null, 2);
     $idx_dname = $detailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
     $idx_dtype = $detailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
@@ -1279,6 +1280,7 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
     $timevalues = array();
     $date_start = null;
     $date_end = null;
+    $symbology = null;
 
     //convert details to proper JSON format, extract geo fields and convert WKT to geojson geometry
     foreach ($record['details'] as $dty_ID=>$field_details) {
@@ -1287,7 +1289,7 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
 
         foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
 
-            if(is_array($value)){
+            if(is_array($value)){ //geo,file,resource
                 if(@$value['file']){
                     //remove some fields
                     $val = $value['file'];
@@ -1354,7 +1356,9 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
                         $ta = temporalToSimpleRange($value);
                         if($value!=null) $timevalues[] = $ta;
                     }
-                }  
+                }else if($dty_ID==DT_SYMBOLOGY){
+                    $symbology = json_decode($value,true);                    
+                }
                 $val = $value;
             }
 
@@ -1408,8 +1412,10 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
     if(count($timevalues)>0){
         //https://github.com/kgeographer/topotime/wiki/GeoJSON%E2%80%90T
         // "timespans": [["-323-01-01 ","","","-101-12-31","Hellenistic period"]],  [start, latest-start, earliest-end, end, label]
-
         $res['when'] = array('timespans'=>$timevalues);
+    }
+    if($symbology){
+        $res['style'] = $symbology;
     }
 
     return $res;

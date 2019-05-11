@@ -2343,9 +2343,9 @@ window.hWin.HEURIST4.ui = {
     //
     // show record action dialog
     //
-    showEditSymbologyDialog: function(current_value, callback){
+    showEditSymbologyDialog: function(current_value, needName, callback){
         //todo optionally load dynamically editSymbology.js
-        editSymbology(current_value, callback);
+        editSymbology(current_value, needName, callback);
     },
     
     //

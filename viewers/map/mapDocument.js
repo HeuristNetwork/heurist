@@ -37,7 +37,7 @@ function hMapDocument( _options )
     DT_DATA_SOURCE = 0,
     RT_QUERY_SOURCE = 0,
     DT_QUERY_STRING = 0,
-    DT_SYMBOLOGY_POINTMARKER = 0, //@todo rename to DT_SYMBOLOGY
+    DT_SYMBOLOGY = 0, //@todo rename to DT_SYMBOLOGY
     
     map_documents = null, //recordset - all loaded documents
     map_documents_content = {}, //mapdoc_id=>recordset with all layers and datasources of document
@@ -57,7 +57,7 @@ function hMapDocument( _options )
         DT_DATA_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'];
         DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
         RT_QUERY_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'];
-        DT_SYMBOLOGY_POINTMARKER = window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY_POINTMARKER'];
+        DT_SYMBOLOGY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'];
         
         //_loadMapDocuments();
     }
@@ -223,14 +223,14 @@ function hMapDocument( _options )
         var _record = _recset.getById( rec_id );
         
         var layer_title = _recset.fld(_record, 'rec_Title');
-        var layer_style = _recset.fld(_record, DT_SYMBOLOGY_POINTMARKER);
+        var layer_style = _recset.fld(_record, DT_SYMBOLOGY);
         if(!layer_style) layer_style = {};
 
         var current_value = layer_style;//affected_layer.options.default_style;
         ///console.log(affected_layer);                   
         current_value.sym_Name = layer_title; //affected_layer.options.layer_name;
         //open edit dialog to specify symbology
-        window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_value, function(new_value){
+        window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_value, true, function(new_value){
 
             var new_title = null, new_style = null;
             
@@ -243,7 +243,7 @@ function hMapDocument( _options )
                 delete new_value.sym_Name;
             }
             //update style
-            _recset.setFld(_record, DT_SYMBOLOGY_POINTMARKER, new_value);
+            _recset.setFld(_record, DT_SYMBOLOGY, new_value);
             
             
             (_record['layer']).applyStyle(new_value);
