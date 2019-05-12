@@ -678,44 +678,24 @@ $.widget( "heurist.mapping", {
         
     },
     
-    //
-    //
-    //
     zoomToLayer: function(layer_id){
         
         var affected_layer = this.all_layers[layer_id];
         
         if(affected_layer){
             var bounds = affected_layer.getBounds();
-            
-            if(this.all_clusters[layer_id]){
-                var bounds2 = this.all_clusters[layer_id].getBounds();
-                if(bounds && bounds2){
-                    bounds.extend(bounds2.getNorthWest());
-                    bounds.extend(bounds2.getSouthEast());
-                }else if(bounds2){
-                    bounds = bounds2;
-                }    
-            }
-            
             if(bounds) this.nativemap.fitBounds(bounds);
         }
         
     },
     
-    //
-    //
-    //
     removeLayer: function(layer_id)
     {
         var affected_layer = this.all_layers[layer_id];
-
         if(affected_layer){
-            if(this.all_clusters[layer_id]){
-                this.all_clusters[layer_id].clearLayers();
-                this.all_clusters[layer_id].remove();
-                this.all_clusters[layer_id] = null;
-            }
+            this.all_clusters[layer_id].clearLayers();
+            this.all_clusters[layer_id].remove();
+            this.all_clusters[layer_id] = null;
             
             affected_layer.remove();
             this.all_layers[layer_id] = null;
@@ -732,10 +712,10 @@ $.widget( "heurist.mapping", {
         if(affected_layer){
             if(is_visible===false){
                 affected_layer.remove();
-                if(this.all_clusters[layer_id]) this.all_clusters[layer_id].remove();
+                this.all_clusters[layer_id].remove();
             }else{
                 affected_layer.addTo(this.nativemap);
-                if(this.all_clusters[layer_id]) this.all_clusters[layer_id].addTo(this.nativemap);
+                this.all_clusters[layer_id].addTo(this.nativemap);
             }
         }
     },
@@ -776,7 +756,7 @@ $.widget( "heurist.mapping", {
         
         var myIconRectypes = {};
         
-        // set default values -------       
+        //set default values -------       
         if(!style.iconType) style.iconType ='rectype';
         style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :((style.iconType=='circle')?9:18);
         var fcolor = (style.color?style.color:'#0000ff');
@@ -828,42 +808,19 @@ $.widget( "heurist.mapping", {
         var all_markers_in_layer = [];
         var  that = this;
 
-        //get all markers within layer group and apply new style
-        function __extractMarkers(layer, parent_layer, feature)
-        {
+        //recursion for all layer within layer group
+        function __applyMarkerStyle(layer, parent_layer, feature){
+            
             //var feature = layer.feature;    
             if(layer instanceof L.LayerGroup){
-                layer.eachLayer( function(child_layer){__extractMarkers(child_layer, layer, feature);} );
                 
-            }else if(layer instanceof L.Marker || layer instanceof L.CircleMarker){
+                layer.eachLayer( function(child_layer){__applyMarkerStyle(child_layer, layer, feature);} );
                 
-                layer.feature = feature;
-                
-                if(that.options.isMarkerClusterEnabled){
-                    parent_layer.removeLayer( layer );  
-                }else{
-                    layer.parent_layer = parent_layer;    
-                }
-                all_markers_in_layer.push( layer );
-            }
-        }
+            }else{
 
-        affected_layer.options.default_style = style;
-        
-        affected_layer.eachLayer( function(child_layer){ 
-                child_layer.feature.default_style = style;
-                __extractMarkers(child_layer, affected_layer, child_layer.feature);
-        } );
-        
-        //apply marker style
-        $(all_markers_in_layer).each(function(idx, layer){
-                
                 var setIcon = myIcon;
-                var feature = layer.feature;
-
-                //define icon for record type                                        
-                if(style.iconType=='rectype' )
-                {
+                                        
+                if(style.iconType=='rectype' ){
                     var rty_ID = feature.properties.rec_RecTypeID;
                     if(myIconRectypes[rty_ID]){
                         setIcon = myIconRectypes[rty_ID];
@@ -877,41 +834,53 @@ $.widget( "heurist.mapping", {
                         myIconRectypes[rty_ID] = setIcon;
                     }
                 }
-                
+            
                 var new_layer = null;
+            
                 if(layer instanceof L.Marker){
                     if(style.iconType=='circle'){
                         //change to circleMarker
                         new_layer = L.circleMarker(layer.getLatLng(), style);    
-                        new_layer.feature = feature;
+                        new_layer.feature = layer.feature;
+                        parent_layer.addLayer(new_layer);
+                        parent_layer.removeLayer(layer);
                     }else{
                         layer.setIcon(setIcon);    
+                        new_layer = layer;
                     }
 
                 }else if(layer instanceof L.CircleMarker){
                     if(style.iconType!='circle'){
                         //change from circle to icon marker
                         new_layer = L.marker(layer.getLatLng(), {icon:setIcon});
-                        new_layer.feature = feature;
+                        new_layer.feature = layer.feature;
+                        parent_layer.addLayer(new_layer);
+                        parent_layer.removeLayer(layer);
                     }else{
                         layer.setRadius(style.iconSize);                    
+                        new_layer = layer;
                     }
+                    
+                    new_layer.remove(); //detach from map
+                    all_markers_in_layer.push(new_layer);
                 }
                 
-                if(new_layer!=null){
-                    if(that.options.isMarkerClusterEnabled){
-                        all_markers_in_layer[idx] = new_layer; 
-                    }else{
-                        layer.parent_layer.addLayer(new_layer);
-                        layer.parent_layer.removeLayer(layer);
-                        layer.remove();
-                        layer = null;
-                    }
+                
+                if(new_layer!=null && that.options.isMarkerClusterEnabled){
+                    new_layer.remove(); //detach from map
+                    all_markers_in_layer.push(new_layer)
                 }
-            
-        });
+                
+            }
+        }
+
+        affected_layer.options.default_style = style;
+        
+        affected_layer.eachLayer( function(child_layer){ 
+                child_layer.feature.default_style = style;
+                __applyMarkerStyle(child_layer, affected_layer, child_layer.feature);
+        } );
      
-        //add all markers to cluster
         if(this.options.isMarkerClusterEnabled){
             markercluster.addLayers(all_markers_in_layer);                                 
             if(is_new_markercluster){
@@ -921,14 +890,12 @@ $.widget( "heurist.mapping", {
         }
 
         affected_layer.setStyle(function(feature) {
-            return feature.style || feature.default_style;
-            /*
             if(that.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
                 return {color: "#ff0000"};
             }else{
                 //either specific style from json or common layer style
                 return feature.style || feature.default_style;
-            }*/
+            }
         });
 
 

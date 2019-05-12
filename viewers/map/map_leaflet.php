@@ -58,6 +58,12 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.min.js"></script>
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
 <script src="<?php echo PDIR;?>external/leaflet/leaflet.browser.print.min.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/markercluster/MarkerCluster.css">
+<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/markercluster/MarkerCluster.Default.css">
+<script src="<?php echo PDIR;?>external/leaflet/markercluster/leaflet.markercluster.js"></script>
+
+
+
 
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
@@ -213,6 +219,10 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         mapping = $('#mapping').mapping({
             element_map: '#map'     
         });
+        
+        //check that page not in iframe - take url parameters and load either mapdocument or query
+        
+        
         
     }
 
