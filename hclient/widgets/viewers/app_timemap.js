@@ -274,7 +274,7 @@ console.log('onselet triggered 2');
             
             if(this.options.leaflet){ //leaflet
 
-                mapping.mapping('setSelection', this.options.selection, true);
+                mapping.mapping('setFeatureSelection', this.options.selection, true);
                 
             }else{
                 mapping.showSelection(this.options.selection);  //see viewers/map/map.js

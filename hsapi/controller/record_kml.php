@@ -39,22 +39,53 @@
     if(!(@$params['recID']>0)){
         $system->error_exit_api('recID parameter is not defined or has wrong value'); //exit from script
     }
-    if(!$system->defineConstant('DT_KML')){
-        $system->error_exit_api('Database '.$params['db'].' does not have field definitionr for KML snipppet'); //exit from script
+    
+    if(!($system->defineConstant('DT_KML')&&$system->defineConstant('DT_KML_FILE'))){
+        $system->error_exit_api('Database '.$params['db'].' does not have field definitions for KML snipppet and file'); //exit from script
     }
+    $system->defineConstant('DT_FILE_RESOURCE');
     
     $record = array("rec_ID"=>$params['recID']);
-    recordSearchDetails($system, $record, array(DT_KML));
-    if (@$record["details"] && @$record["details"][DT_KML]){
+    recordSearchDetails($system, $record, array(DT_KML, DT_KML_FILE, DT_FILE_RESOURCE));
+    if (@$record["details"] &&
+       (@$record["details"][DT_KML] || @$record["details"][DT_KML_FILE] || @$record["details"][DT_FILE_RESOURCE]))
+    {
     
-            $kml = array_shift($record["details"][DT_KML]);     
+            if(@$record["details"][DT_KML]){
+                $kml = array_shift($record["details"][DT_KML]);   
+            }else{
+                if(@$record["details"][DT_KML_FILE]){
+                    $kml_file =array_shift($record["details"][DT_KML_FILE]);
+                }else{
+                    $kml_file =array_shift($record["details"][DT_FILE_RESOURCE]);
+                }
+                $kml_file = $kml_file['file'];
+                $url = @$kml_file['ulf_ExternalFileReference'];
+                
+                if($url){
+                    $kml = loadRemoteURLContent($url, true);    
+                    if($kml===false){
+error_log('Cannot load remote kml file '.$url);
+                      exit(); //@todo error return  
+                    } 
+                }else {
+                    $filepath = resolveFilePath($kml_file['fullPath']);
+                    
+                    if (file_exists($filepath)) {
+                        $kml = file_get_contents($filepath);
+                    }else{
+                        error_log('Cannot load kml file '.$kml_file['fullPath']);                    
+                        exit(); //@todo error return
+                    }
+                }
+            }
         
             if(@$params['format']=='geojson'){
 
                 //@todo use importParser to proper kml parsing and extraction features                
                 
                 $geom = geoPHP::load($kml, 'kml');
-                if(!$geom->isEmpty()){
+                if($geom!==false && !$geom->isEmpty()){
                     
                     
                         $geojson_adapter = new GeoJSON(); 

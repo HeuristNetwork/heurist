@@ -164,7 +164,7 @@ console.log('timeline onselet');
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.selected_rec_ids)){
             
             this.vis_timeline.itemsData.forEach(function (itemData) {
-                if(selected.indexOf(itemData.recID)>=0){
+                if(window.hWin.HEURIST4.util.findArrayIndex(itemData.recID, selected)>=0){
                     selection_vis.push( itemData.id );
                 }
             });
@@ -195,9 +195,22 @@ console.log('timeline onselet');
         */
 
         if(timeline_data){
+            
+            var tdata = [];
+            if($.isPlainObject(timeline_data)){
+
+                for(var idx in timeline_data) {
+                    if(timeline_data.hasOwnProperty(idx)){
+                        tdata = tdata.concat(timeline_data[idx]);
+                    }
+                }
+                
+            }else{
+                tdata = timeline_data;
+            }
 
             var groups = new vis.DataSet( timeline_groups );
-            var items = new vis.DataSet( timeline_data ); //options.items );
+            var items = new vis.DataSet( tdata ); //options.items );
             
             
             this.vis_timeline_range = null; //reset

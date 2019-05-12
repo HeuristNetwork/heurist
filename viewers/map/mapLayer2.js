@@ -190,7 +190,7 @@ function hMapLayer2( _options ) {
                     _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                                 response, 
                                                 null, null,
-                                                _recordset.fld(_record, 'rec_Title') );
+                                                _recordset.fld(options.rec_layer || _record, 'rec_Title') );
                 }
             }
         );          
@@ -235,7 +235,7 @@ function hMapLayer2( _options ) {
                         _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                                         geojson_data, 
                                                         timeline_data, layer_style,
-                                                        _recordset.fld(_record, 'rec_Title') );
+                                                        _recordset.fld(options.rec_layer || _record, 'rec_Title') );
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }

@@ -6,12 +6,20 @@
 * + 3) legend - add/remove,show/hide layers, set symbology (dialog - see Path and Marker options), save result as layer record
 * 4) thematic mapping
 * + 5) map document  - get list, get content by id (as geojson), load layers (as FeatureCollection)
-* 6) tiled and untiled images 
+* + 6) tiled and untiled images 
 * 7) kml, shapefiles, gpx
 * + 8) simplification complex paths
-* 9) bookmarks
-* 10) geolocation (search)
+* + 9) bookmarks
+* + 10) geocoding (search)
 * 11) print, publish, preferences
+* 
+* options for preferences
+* markercluster on/off 
+*     showCoverageOnHover, zoomToBoundsOnClick, maxClusterRadius(80px)
+* Derive map location of non-geolocalised entities from connected Places
+* Map select tools (by click, in rect, in shape)
+* Default symbology (for search result)
+* Default base layer
 * 
 * mapping base widget
 *
@@ -125,9 +133,12 @@ $.widget( "heurist.mapping", {
     mapManager: null,
 
     all_layers: [],   // array of all loaded geojson layers
-    all_clusters: [],  // markerclusters
+    all_clusters: {},  // markerclusters
+    all_markers: {},
+    
+    timeline_items: {},
+    timeline_groups: [], 
 
-    main_layer: null, // current search layer
     main_popup:null,
     selected_rec_ids:[],
 
@@ -307,83 +318,6 @@ $.widget( "heurist.mapping", {
         this.mapManager.addLayerToSearchResults( data, dataset_name );
     },
     
-    addDataset_old: function(data, timeline_data, dataset_name) 
-    {
-        var curr_request = null;
-        
-        if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
-                
-                var recset = data;
-                
-                if(recset.length()<2001){ //limit query by id otherwise use current query
-                    curr_request = { w:'all', q:'ids:'+recset.getIds().join(',') };
-                }else{
-                    curr_request = recset.getRequest();
-                }            
-            
-        }else if( window.hWin.HEURIST4.util.isObject(data)&& data['q']) {
-            
-             curr_request = data;
-        }
-
-
-        var that = this;
-        
-        if(curr_request!=null){
-        
-            curr_request = {
-                        q: curr_request.q,
-                        rules: curr_request.rules,
-                        w: curr_request.w,
-                        leaflet: true, //returns strict geojson and timeline data as two separate arrays
-                        simplify: true,
-                        format:'geojson'};
-            //perform search        
-            window.hWin.HAPI4.RecordMgr.search_new(curr_request,
-                function(response){
-                    
-                    var geojson_data = null;
-                    var timeline_data = [];
-                    if(response['geojson'] && response['timeline']){
-                        geojson_data = response['geojson'];
-                        timeline_data = response['timeline'];   
-                    }else{
-                        geojson_data = response;
-                    }
-                    
-                    if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
-                        || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
-                    {
-                        that.addDataset(geojson_data, timeline_data, dataset_name);
-                    }else {
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-
-                }
-            );                     
-                        
-        }else if (window.hWin.HEURIST4.util.isGeoJSON(data, true) || 
-                    window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data)){
-        
-            this.main_layer.remove(); 
-            if (data.length==0){
-                
-                this.mapManager.removeEntry('search', { layer_name: 'Current query' }); 
-                
-            }else{
-                this.addGeoJson(data, timeline_data, null, 'Current query');            
-                
-                    //add new search result to search results mapdoc
-                    this.main_layer = new_layer;
-                    this.mapManager.defineContent('search', {
-                        layer_id: new_layer._leaflet_id,
-                        layer_name: new_layer.options.layer_name });    
-            }
-
-        }
-        
-    },
-    
     addTileLayer: function(layer_url, layer_options, dataset_name){
     
         var new_layer;
@@ -396,7 +330,7 @@ $.widget( "heurist.mapping", {
     
         if(layer_options['BingLayer'])
         {
-                var BingLayer = L.HeuristTilerLayer.extend({
+                var BingLayer = HeuristTilerLayer.extend({
                     getTileUrl: function (tilePoint) {
                         //this._adjustTilePoint(tilePoint);
                         return L.Util.template(this._url, {
@@ -434,7 +368,7 @@ $.widget( "heurist.mapping", {
         }else if(layer_options['MapTiler'])
         {
                 
-                var MapTilerLayer = L.HeuristTilerLayer.extend({
+                var MapTilerLayer = HeuristTilerLayer.extend({
                     getTileUrl: function (tilePoint) {
                         //this._adjustTilePoint(tilePoint);
                         return L.Util.template(this._url, {
@@ -482,29 +416,11 @@ $.widget( "heurist.mapping", {
                 
             var that = this;
 
-            /*            
-            var geojsonMarkerOptions = {
-            radius: 8,
-            fillColor: "#ff7800",
-            color: "#000",
-            weight: 1,
-            opacity: 1,
-            fillOpacity: 0.8
-            };
-            */   
-            
-            var timeline_dataset_name = 'main';
-
-                /* 
-                Styling
-                each layer has  options.default_style
-                each feature can have feature.style from geojson, it overrides layer's style
-                */          
-            //set default style for result set
             var new_layer = L.geoJSON(geojson_data, {
                     default_style: null
                     , layer_name: 'Current query'
                     //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
+                   /* 
                     , onEachFeature: function(feature, layer) {
 
                         //each feature may have its own feature.style
@@ -534,11 +450,7 @@ $.widget( "heurist.mapping", {
                             //that._trigger('onselect', null, [feature.properties.rec_ID]);
 
                         });
-                        // does this feature have a property named popupContent?
-                        //if (feature.properties && feature.properties.rec_Title) {
-                        //    layer.bindPopup(feature.properties.rec_Title);
-                        //}
-                    }
+                    }*/
 
                     /* , style: function(feature) {
                     if(that.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
@@ -564,67 +476,23 @@ $.widget( "heurist.mapping", {
                 })*/
                 .addTo( this.nativemap );            
 
-                /*
-                this.main_layer.on('click', function () {
-                this.setStyle({
-                color: 'green'
-                });
-                });
-                if(!$.isFunction(this.mapManager)){    
-                this.mapManager = new hMapManager(this.mapManager, this.nativemap);
-                }
-                */     
 
+            this.updateTimelineData(new_layer._leaflet_id, timeline_data, dataset_name);
 
-                timeline_dataset_name = new_layer._leaflet_id;
+            this.all_layers[new_layer._leaflet_id] = new_layer;
+            
+            //apply default style and fill markercluster
+            this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style:{color: "#00b0f0"});
 
+            
+            return new_layer._leaflet_id;
+        }        
 
-            // init timeline @todo - loop through all_layers
-            // leaflet accept only valid geojson (with coordinates), we may have time enabled items without geo
-            // thus, timeline items are in separate array
-            var timeline_items = [],
-            timeline_groups = []; 
-            var titem, k, ts, iconImg;
-
-
-            if(window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) ){
-
-                timeline_groups = [{ id:timeline_dataset_name, content: 'Current query'}];    
-
-                $.each(timeline_data, function(idx, tdata){
-
-                    iconImg = window.hWin.HAPI4.iconBaseURL + tdata.rec_RecTypeID + '.png';
-
-                    ts = tdata.when;
-
-                    for(k=0; k<tdata.when.length; k++){
-                        ts = tdata.when[k];
-
-                        titem = {
-                            id: timeline_dataset_name+'-'+tdata.rec_ID+'-'+k, //unique id
-                            group: timeline_dataset_name,
-                            content: '<img src="'+iconImg 
-                            +'"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
-                            +tdata.rec_Title+'</span>',
-                            //'<span>'+recName+'</span>',
-                            title: tdata.rec_Title,
-                            start: ts[0],
-                            recID:tdata.rec_ID
-                        };
-
-                        if(ts[3] && ts[0]!=ts[3]){
-                            titem['end'] = ts[3];
-                        }else{
-                            titem['type'] = 'point';
-                            //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
-                        }
-
-                        timeline_items.push(titem); 
-                    }//for timespans
-
-                });
-
-            }
+        else{
+            return 0;
+        }
+        
+    },
 
             /*convert geojson_data to timeline format
             this.main_layer.eachLayer(function(layer){
@@ -661,21 +529,95 @@ $.widget( "heurist.mapping", {
             }
             }
             });*/
-            this.vistimeline.timeline('timelineRefresh', timeline_items, timeline_groups);          
+    
+    //
+    //
+    //
+    updateTimelineData: function(layer_id, layer_data, dataset_name){
+      
+            var titem, k, ts, iconImg;
 
-            this.all_layers[new_layer._leaflet_id] = new_layer;
-            
-            //apply default style and fill markercluster
-            this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style:{color: "#00b0f0"});
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(layer_data) ){
 
-            
-            return new_layer._leaflet_id;
-        }        
+                var group_idx = this.getTimelineGroup(layer_id);
+                if(group_idx<0){
+                    this.timeline_groups.push({ id:layer_id, content:dataset_name });        
+                }else{
+                    this.timeline_groups[group_idx].content = dataset_name;
+                }
+                
+                this.timeline_items[layer_id] = [];
+                
+                var that = this;
 
-        else{
-            return 0;
-        }
+                $.each(layer_data, function(idx, tdata){
+
+                    iconImg = window.hWin.HAPI4.iconBaseURL + tdata.rec_RecTypeID + '.png';
+
+                    ts = tdata.when;
+
+                    for(k=0; k<tdata.when.length; k++){
+                        ts = tdata.when[k];
+
+                        titem = {
+                            id: layer_id+'-'+tdata.rec_ID+'-'+k, //unique id
+                            group: layer_id,
+                            content: '<img src="'+iconImg 
+                            + '"  align="absmiddle" style="padding-right:3px;" width="12" height="12"/>&nbsp;<span>'
+                            + tdata.rec_Title+'</span>',
+                            //'<span>'+recName+'</span>',
+                            title: tdata.rec_Title,
+                            start: ts[0],
+                            recID: tdata.rec_ID
+                        };
+
+                        if(ts[3] && ts[0]!=ts[3]){
+                            titem['end'] = ts[3];
+                        }else{
+                            titem['type'] = 'point';
+                            //titem['title'] = singleFieldName+': '+ dres[0] + '. ' + titem['title'];
+                        }
+
+                        that.timeline_items[layer_id].push(titem); 
+                    }//for timespans
+
+                });
+                
+            }else if(!this.removeTimelineGroup(layer_id)){
+                // no timeline data - remove entries from timeline_groups and items
+                // if no entries no need to redraw
+                return;
+            }
+                
+            this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);          
+    },
+    
+    //
+    //
+    //
+    getTimelineGroup:function(layer_id){
         
+        for (var k=0; k<this.timeline_groups.length; k++){
+            if(this.timeline_groups[k].id==layer_id){
+                return k;
+            }
+        }
+        return -1;
+    },
+    
+    //
+    //
+    //
+    removeTimelineGroup:function(layer_id){
+        var idx = this.getTimelineGroup(layer_id);
+        if(idx>=0){
+            this.timeline_groups.splice(idx,1);
+            this.timeline_items[layer_id] = null;
+            delete this.timeline_items[layer_id];
+            return true;
+        }else{
+            return false;
+        }
     },
     
     //
@@ -688,7 +630,7 @@ $.widget( "heurist.mapping", {
         if(affected_layer){
             var bounds = affected_layer.getBounds();
             
-            if(this.all_clusters[layer_id]){
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty( this.all_markers[layer_id] ) && this.all_clusters[layer_id]){
                 var bounds2 = this.all_clusters[layer_id].getBounds();
                 if(bounds && bounds2){
                     bounds.extend(bounds2.getNorthWest());
@@ -716,10 +658,17 @@ $.widget( "heurist.mapping", {
                 this.all_clusters[layer_id].remove();
                 this.all_clusters[layer_id] = null;
             }
+            if(this.all_markers[layer_id]){
+                this.all_markers[layer_id] = null;
+            }
             
             affected_layer.remove();
             this.all_layers[layer_id] = null;
             
+            if(this.removeTimelineGroup(layer_id)){
+                //update timeline
+                this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);
+            }
         }
     },
 
@@ -815,48 +764,64 @@ $.widget( "heurist.mapping", {
         }
         //set default values ------- END
         
-        if(this.options.isMarkerClusterEnabled){
-            var markercluster;
-            var is_new_markercluster = window.hWin.HEURIST4.util.isnull(this.all_clusters[layer_id]);
-            if(is_new_markercluster){
-                markercluster = L.markerClusterGroup({showCoverageOnHover:false});
-            }else{
-                this.all_clusters[layer_id].clearLayers() 
-                markercluster = this.all_clusters[layer_id];
-            }
-        }
-        var all_markers_in_layer = [];
-        var  that = this;
-
-        //get all markers within layer group and apply new style
-        function __extractMarkers(layer, parent_layer, feature)
-        {
-            //var feature = layer.feature;    
-            if(layer instanceof L.LayerGroup){
-                layer.eachLayer( function(child_layer){__extractMarkers(child_layer, layer, feature);} );
-                
-            }else if(layer instanceof L.Marker || layer instanceof L.CircleMarker){
-                
-                layer.feature = feature;
-                
-                if(that.options.isMarkerClusterEnabled){
-                    parent_layer.removeLayer( layer );  
-                }else{
-                    layer.parent_layer = parent_layer;    
-                }
-                all_markers_in_layer.push( layer );
-            }
-        }
-
         affected_layer.options.default_style = style;
         
-        affected_layer.eachLayer( function(child_layer){ 
-                child_layer.feature.default_style = style;
-                __extractMarkers(child_layer, affected_layer, child_layer.feature);
-        } );
+        
+        if(this.options.isMarkerClusterEnabled){
+
+            var is_new_markercluster = window.hWin.HEURIST4.util.isnull(this.all_clusters[layer_id]);
+            if(is_new_markercluster){
+                this.all_clusters[layer_id] = L.markerClusterGroup({showCoverageOnHover:false});
+            }else{
+                this.all_clusters[layer_id].clearLayers() 
+            }
+            
+        }else{
+            is_new_markercluster = window.hWin.HEURIST4.util.isnull(this.all_markers[layer_id]);
+        }
+            
+        if(is_new_markercluster){
+            
+            this.all_markers[layer_id] = [];
+            
+            var  that = this;
+
+            //get all markers within layer group and apply new style
+            function __extractMarkers(layer, parent_layer, feature)
+            {
+                //var feature = layer.feature;    
+                if(layer instanceof L.LayerGroup){
+                    layer.eachLayer( function(child_layer){__extractMarkers(child_layer, layer, feature);} );
+                    
+                }else if(layer instanceof L.Marker || layer instanceof L.CircleMarker){
+                    
+                    layer.feature = feature;
+                    
+                    if(that.options.isMarkerClusterEnabled){
+                        parent_layer.removeLayer( layer );  
+                    }else{
+                        layer.parent_layer = parent_layer;    
+                    }
+                    that.all_markers[layer_id].push( layer );
+                }
+
+                layer.on('click', function(e){that.onLayerClick(e)} );
+            }
+
+            affected_layer.eachLayer( function(child_layer){ 
+                    child_layer.feature.default_style = style;
+                    __extractMarkers(child_layer, affected_layer, child_layer.feature);
+            } );
+            
+        }else{
+            
+            affected_layer.eachLayer( function(child_layer){ 
+                    child_layer.feature.default_style = style;
+            } );
+        }
         
         //apply marker style
-        $(all_markers_in_layer).each(function(idx, layer){
+        $(this.all_markers[layer_id]).each(function(idx, layer){
                 
                 var setIcon = myIcon;
                 var feature = layer.feature;
@@ -899,24 +864,24 @@ $.widget( "heurist.mapping", {
                 }
                 
                 if(new_layer!=null){
-                    if(that.options.isMarkerClusterEnabled){
-                        all_markers_in_layer[idx] = new_layer; 
-                    }else{
+                    that.all_markers[layer_id][idx] = new_layer; 
+                    if(!that.options.isMarkerClusterEnabled){
                         layer.parent_layer.addLayer(new_layer);
                         layer.parent_layer.removeLayer(layer);
                         layer.remove();
                         layer = null;
                     }
+                    new_layer.on('click', function(e){that.onLayerClick(e)});
+                    
                 }
             
         });
      
         //add all markers to cluster
         if(this.options.isMarkerClusterEnabled){
-            markercluster.addLayers(all_markers_in_layer);                                 
+            this.all_clusters[layer_id].addLayers(this.all_markers[layer_id]);                                 
             if(is_new_markercluster){
-                markercluster.addTo( this.nativemap );
-                this.all_clusters[layer_id] = markercluster;
+                this.all_clusters[layer_id].addTo( this.nativemap );
             }
         }
 
@@ -934,6 +899,34 @@ $.widget( "heurist.mapping", {
 
     },
     
+    onLayerClick: function(event){
+        
+        var layer = (event.target);
+        if(layer && layer.feature){
+            
+            var  that = this;
+            //console.log('onclick');                
+            that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
+
+            that.setFeatureSelection([layer.feature.properties.rec_ID]);
+            if($.isFunction(that.options.onselect)){
+                that.options.onselect.call(that, [layer.feature.properties.rec_ID]);
+            }
+            //open popup
+            var popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
+            +layer.feature.properties.rec_ID+'&db='+window.hWin.HAPI4.database;
+
+            $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                if(statusTxt == "success"){
+                    that.main_popup.setLatLng(event.latlng)
+                    .setContent(responseTxt) //'<div style="width:99%;">'+responseTxt+'</div>')
+                    .openOn(that.nativemap);
+                }
+            });
+        
+        }
+    },
+    
         
     //
     //
@@ -941,8 +934,10 @@ $.widget( "heurist.mapping", {
     setFeatureSelection: function( _selection, is_external ){
         var that = this;
         
-        if(this.main_layer){
-            this.selected_rec_ids = (window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) ?_selection:[];
+        
+        this.selected_rec_ids = (window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) ?_selection:[];
+           
+        /* 
             //redraw
             //@todo highlight markers
             this.main_layer.setStyle(function(feature) {
@@ -953,13 +948,14 @@ $.widget( "heurist.mapping", {
                     return feature.style || feature.default_style;
                 }
             });
+        */
           
-            //this.main_layer.remove();
-            //this.main_layer.addTo( this.nativemap );
-            if (is_external===true) { //call from external source (app_timemap)
-                this.vistimeline.timeline('setSelection', this.selected_rec_ids);
-            }
+        //this.main_layer.remove();
+        //this.main_layer.addTo( this.nativemap );
+        if (is_external===true) { //call from external source (app_timemap)
+            this.vistimeline.timeline('setSelection', this.selected_rec_ids);
         }
+        
     },
     
     //
