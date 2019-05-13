@@ -96,8 +96,6 @@ $.widget( "heurist.timeline", {
             //on select listener
             this.vis_timeline.on('select', function(params){
                 
-console.log('timeline onselet');
-                
                 var selection = params.items;
                 that.selected_rec_ids = [];
                 if(selection && selection.length>0){
@@ -161,7 +159,7 @@ console.log('timeline onselet');
     setSelection: function(selected){
         this.selected_rec_ids = selected;
         var selection_vis = [];
-        if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.selected_rec_ids)){
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.selected_rec_ids) && this.vis_timeline.itemsData){
             
             this.vis_timeline.itemsData.forEach(function (itemData) {
                 if(window.hWin.HEURIST4.util.findArrayIndex(itemData.recID, selected)>=0){

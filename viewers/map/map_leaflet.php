@@ -75,6 +75,14 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapDocument.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapLayer2.js"></script>
 
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editSymbology.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
+<link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
+
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
 
 <!--
 // WARNING: CHANGES MADE TO vis.js
@@ -217,15 +225,67 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         if(!success) return;
         
         mapping = $('#mapping').mapping({
-            element_map: '#map'     
+            element_map: '#map',
+            oninit: onMapInit
         });
-        
-        //check that page not in iframe - take url parameters and load either mapdocument or query
-        
-        
-        
     }
 
+    //
+    //  init map data based on url parameters
+    //
+    function onMapInit(mapwdiget){
+  
+        //take url parameters and open mapdocument or/and perform query
+        var noinit = window.hWin.HEURIST4.util.getUrlParameter('noinit', location.search);
+        if(noinit!='1'){ 
+            //this case only for initialization of mapping when it is loaded independently 
+            //otherwise initialization is performed in app_timemap.js
+
+                
+            //take from frame
+            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);
+            //take from top most
+            if(!(mapdocument>0)){
+                mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+                if(!(mapdocument>0)){
+                    mapdocument = null;
+                }
+            }
+            
+            
+            var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
+            
+            //t:26 f:85:3313  f:1:building
+            // Perform database query if possible (for standalone mode - when map.php is separate page)
+            if( !window.hWin.HEURIST4.util.isempty(q) )
+            {
+                var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
+                
+                if(!window.hWin.HEURIST4.util.isempty(rules)){
+                    try{
+                        rules = JSON.parse(rules);
+                    }catch(ex){
+                        rules = null;    
+                    }
+                }else{
+                    rules = null;
+                }
+                
+                var request = {q: q, rules:rules, w: 'all'}
+                
+                mapwdiget.mapping('addDataset', request, 'Current query');
+                
+            } 
+    
+            if(mapdocument>0){
+                //mapping.load(null, null, mapdocument);//load with map document
+            }
+        
+        }//noinit!='1'        
+        
+    }
+    
+    
     function onPageInit_OLD(success){
 
         if(!success) return;
