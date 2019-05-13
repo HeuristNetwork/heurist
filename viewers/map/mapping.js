@@ -1,18 +1,32 @@
 /**
 * @todo for mapping+timeline
-* + 1) timeline integration
-*           todo update layout, check popup on timeline, apply symbology for timeline
-* + 2) symbology: global,mapdocument,layer,item 
-* + 3) legend - add/remove,show/hide layers, set symbology (dialog - see Path and Marker options), save result as layer record
-* 4) thematic mapping
-* + 5) map document  - get list, get content by id (as geojson), load layers (as FeatureCollection)
-* + 6) tiled and untiled images 
-* 7) kml, shapefiles, gpx
-* + 8) simplification complex paths
-* + 9) bookmarks
-* + 10) geocoding (search)
-* 11) print, publish, preferences
-* 
+
+Init standalone map (published) by query or mapdoc id in url  - 1 hr
++Filter timeline visible range to map - 1hr
+Highlight selection on map 1-2hr
+
+Cosmetics/workflow 2hr
+Scroll in map legend
+Render symbol colour in legend
+Publish button
+Zoom to entire mapdoc
+Add layer to mapdoc (open select record dialog from legend)
+Save current result set as layer+datasource records 
+
+Bugs 1-2hr
+Glitches in symbology editor (not proper init values for marker in some cases)
+Timeline does not expand automatically
+Always keep current query as top group in timeline
+Content of map popup is out of border (not wrapped)
+
+Later?
+KML is loaded as a single collection (without access to particular feature) Need to use our kml parser to parse and load each kml' placemark individually
+Altough our kml parser supports Placemarks only. It means no external links, image overlays and other complex kml features. 
+SHP loader not done (it seems there are leaflet plugin) 
+Selector map tool (rectangle and polygon/lasso)
+Editor map tool (to replace mapDraw.js based on gmap)
+Thematic mapping
+ 
 * options for preferences
 * markercluster on/off 
 *     showCoverageOnHover, zoomToBoundsOnClick, maxClusterRadius(80px)
@@ -657,9 +671,11 @@ $.widget( "heurist.mapping", {
                 this.all_clusters[layer_id].clearLayers();
                 this.all_clusters[layer_id].remove();
                 this.all_clusters[layer_id] = null;
+                delete this.all_clusters[layer_id];
             }
             if(this.all_markers[layer_id]){
                 this.all_markers[layer_id] = null;
+                delete this.all_markers[layer_id];
             }
             
             affected_layer.remove();
@@ -799,8 +815,11 @@ $.widget( "heurist.mapping", {
                     
                     if(that.options.isMarkerClusterEnabled){
                         parent_layer.removeLayer( layer );  
+                        layer.cluster_layer_id = layer_id;
                     }else{
-                        layer.parent_layer = parent_layer;    
+                        //need to store reference to add/remove marker on style change  
+                        //CircleMarker <> Marker
+                        layer.parent_layer = parent_layer;  
                     }
                     that.all_markers[layer_id].push( layer );
                 }
@@ -965,7 +984,7 @@ $.widget( "heurist.mapping", {
     setFeatureVisibility: function( _selection, is_visible ){
         
         if(_selection===true || window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) {
-        
+            
             var vis_val = (is_visible==false)?'none':'block';
             
             //use  window.hWin.HEURIST4.util.findArrayIndex(layer.properties.rec_ID, _selection)
@@ -974,14 +993,15 @@ $.widget( "heurist.mapping", {
             that.nativemap.eachLayer(function(top_layer){    
                 if(top_layer instanceof L.LayerGroup)
                 top_layer.eachLayer(function(layer){
-                      if (layer instanceof L.GeoJSON && (_selection===true || _selection.indexOf(layer.feature.properties.rec_ID)>=0)) 
+                      if (layer instanceof L.Layer && layer.feature && (!(layer.cluster_layer_id>0)) &&
+                      ( _selection===true || 
+                        window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
                       {
                           if(is_visible==false){
                                 layer.remove();    
                           }else if(layer._map==null){
                                 layer.addTo( that.nativemap );    
                           }
-                          
                           /*
                           if($.isFunction(layer.getElement)){
                                 var ele = layer.getElement();
@@ -993,6 +1013,31 @@ $.widget( "heurist.mapping", {
                       }
                 });
             });
+            
+            
+            if(this.options.isMarkerClusterEnabled){
+                
+                for(var layer_id in this.all_markers) {
+                    if(this.all_markers.hasOwnProperty(layer_id)){
+                            var markers = this.all_markers[layer_id];
+                            $(markers).each(function(idx, layer){
+                                if (_selection===true || (layer.feature &&
+                                 window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)){
+                                     
+                                      if(is_visible==false){
+                                          that.all_clusters[layer.cluster_layer_id].removeLayer(layer);
+                                      }else {
+                                            if(!that.all_clusters[layer.cluster_layer_id].hasLayer(layer)){
+                                                that.all_clusters[layer.cluster_layer_id].addLayer(layer);
+                                            }
+                                      }
+                                 }
+                            });
+                    }
+                }
+                
+                
+            }
             
         }
         
