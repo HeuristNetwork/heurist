@@ -50,33 +50,16 @@ function hMapManager( _options )
     // default options
     options = {
         container:null,  //@todo all ui via mapcontrol
-        mapwidget:null,    
+        mapwidget:null,   
+        visible_panels:null 
     },
         
-    nativemap = null,
     mapDocuments = null, //hMapDocument for db map docs,  Note: mapdocument with index=0 is search results
+    mapdoc_treeview = null,
     
-    basemaplayer =null,  //current basemap layer
+    basemaplayer =null;  //current basemap layer
     
-    map_providers = [
-    {name:'MapBox', options:{accessToken: 'pk.eyJ1Ijoib3NtYWtvdiIsImEiOiJjanV2MWI0Y3Awb3NmM3lxaHI2NWNyYjM0In0.st2ucaGF132oehhrpHfYOw'
-    , attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://    creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
-    }},
-    {name:'Esri.WorldStreetMap'},
-    {name:'Esri.WorldTopoMap'},
-    {name:'Esri.WorldImagery'},
-    //{name:'Esri.WorldTerrain'},
-    {name:'Esri.WorldShadedRelief'},
-    {name:'OpenStreetMap'},
-    //{name:'OpenPtMap'},
-    {name:'OpenTopoMap'},
-    {name:'Stamen.Toner'},
-    {name:'Stamen.TerrainBackground'},
-    //{name:'Stamen.TopOSMRelief'},
-    //{name:'OpenWeatherMap'}
-    {name:'Esri.NatGeoWorldMap'},
-    {name:'Esri.WorldGrayCanvas'}
-    ];
+
 
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
@@ -136,10 +119,12 @@ function hMapManager( _options )
         cdivs.find('.ui-accordion-header-icon').css('font-size','inherit');
         cdivs.find('.ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-se');        
        
-        that.loadBaseMap(0);
+        //that.loadBaseMap(0);
         
         options.container.addClass('ui-widget-content')
             .css({'margin-right':'5px',border:'1px solid gray',padding:'4px','font-size':'0.97em'});
+            
+        that.updatePanelVisibility();
     }
 
     //
@@ -183,9 +168,12 @@ function hMapManager( _options )
         }else if(groupID=='basemaps'){
             // load list of predefined base layers 
             // see extensive list in leaflet-providers.js
+            var map_providers = options.mapwidget.mapping('getBaseMapProviders');
+            
             content = '';
             for (var k=0; k<map_providers.length; k++){
-                content = content + '<label><input type="radio" name="basemap" data-mapindex="'+k+'">'
+                content = content + '<label><input type="radio" name="basemap" data-mapindex="'+k
+                                  + '" data-mapid="'+map_providers[k]['name']+'">'
                                   + map_providers[k]['name']+'</label><br>';
             }
             content = $(content);
@@ -193,11 +181,15 @@ function hMapManager( _options )
             
         }else  if(groupID=='mapdocs'){
             //load list of mapddocuments
-            content = $('<div>');
+            mapdoc_treeview = $('<div>');
             
             mapDocuments.loadMapDocuments( function(resdata){
-                        _refreshMapDocumentTree( resdata, content );
+                        _refreshMapDocumentTree( resdata, mapdoc_treeview );
+                        
+                        options.mapwidget.mapping('onInitComplete');
                     } );
+            
+            content = mapdoc_treeview;        
         }
         
         if(window.hWin.HEURIST4.util.isempty(content) ){
@@ -290,11 +282,11 @@ function hMapManager( _options )
                                             _defineActionIcons( item );
                                     }) }, 500);                                           
                                 },
-                                select: function(e, data) {
+                                select: function(e, data) {  //show/hide
                                     
                                     var node = data.node;
                                     if(node.data.type=='mapdocument'){
-                                        //if not expanded, expand, it loads layers
+                                        //if not expanded, expand, it loads layers (opens mapdocument)
                                         var mapdoc_id = node.key;
                                         if(!node.isExpanded() && !mapDocuments.isLoaded(mapdoc_id)){
                                             node.setExpanded(true);
@@ -359,7 +351,7 @@ function hMapManager( _options )
     }
     
     //
-    //  Adds menu buttons
+    //  Adds menu buttons to treeview items
     //
     function _defineActionIcons(item)
     { 
@@ -512,29 +504,13 @@ function hMapManager( _options )
         }
     }
 
-    //
-    // returns index
-    //
-    function _findInSearchResults(byId, byName){
-        var idx = -1;
-        for (var k=0; k<map_searchresults.length; k++){
-            if( map_searchresults[k]['layer_id'] == byId || 
-                map_searchresults[k]['layer_name'] == byName){
-                idx = k;
-                break;
-            }
-        }
-        return idx;
-    }
-    
-    
     //public members
     var that = {
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
-        //
+        /*
         // data - layer name and reference
         // 
         defineContent: function(groupID, data){
@@ -543,17 +519,46 @@ function hMapManager( _options )
             //define new
             _defineContent(groupID, data, grp_div.find('.ui-accordion-content'));
         },
-
-        removeEntry: function(groupID, data){
-
-            var idx = _findInSearchResults(data['layer_id'], data['layer_name']);
-
-            if(idx>=0){
-                layer_id = map_searchresults[idx]['layer_id'];
-                that.layerAction( layer_id, 'remove' );
+        */
+        
+        // params = [basemaps,search,mapdocuments|onedoc]
+        //
+        updatePanelVisibility: function(params){
+            if(params){
+                options.visible_panels = params; //array of visible panels
             }
+            if(!options.visible_panels) options.visible_panels = ['all'];
+            
+            function __set(val){
+                var is_visible = (options.visible_panels.indexOf('all')>=0 || options.visible_panels.indexOf(val)>=0);
+                var ele = options.container.find('.svs-acordeon[grpid="'+val+'"]');
+                if(is_visible){
+                    ele.show();
+                }else{
+                    ele.hide();
+                }
+            }
+            __set('basemaps');            
+            __set('search');            
+            __set('mapdocs');            
+            //__set('onedoc');            
         },
         
+        //
+        //
+        openMapDocument: function(mapdoc_id){
+            
+            var tree = mapdoc_treeview.fancytree("getTree");
+
+            tree.visit(function(node){
+                if(node.key===mapdoc_id){
+                    node.setSelected( true );
+                }
+                return false;
+            });
+            
+        },
+
         //
         // adds new layer to search results mapdoc
         // data - recordset, heurist query or json
@@ -563,33 +568,29 @@ function hMapManager( _options )
             mapDocuments.addLayer( 0, data, dataset_name );
             
             //refresh search results 
-            that.defineContent( 'search' );
+            var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
+            _defineContent('search', null, grp_div.find('.ui-accordion-content'));
+            //defineContent( 'search' );
         },
 
         //
         // switch base map layer
+        // @todo move work with nativemap to mapping.js
         //
         loadBaseMap: function( e ){
 
-            var mapindex = 0;
+            var idx = 0;
 
             if(window.hWin.HEURIST4.util.isNumber(e) && e>=0){
-                mapindex = e;
+                idx = e;
+            }else if(typeof e == 'string'){
+                idx = options.container.find('input[data-mapid="'+e+'"]').attr('data-mapindex');
             }else{
-                mapindex = $(e.target).attr('data-mapindex');
+                idx = $(e.target).attr('data-mapindex');
             }
 
-            var provider = map_providers[mapindex];
-
-            if(basemaplayer!=null){
-                basemaplayer.remove();
-            }
-
-            basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
-            .addTo(nativemap);        
-
-            options.container.find('input[data-mapindex="'+mapindex+'"]').attr('checked',true);
-
+            options.mapwidget.mapping('loadBaseMap', idx);
+            options.container.find('input[data-mapindex="'+idx+'"]').attr('checked',true);
         }
 
     }

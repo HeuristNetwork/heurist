@@ -217,27 +217,48 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
 <script type="text/javascript">
 
-    var mapping, menu_datasets, btn_datasets;
+    var mapping, menu_datasets, btn_datasets, is_init_here = false;
     
     // Callback function on page initialization - see initPage.php
     function onPageInit(success){
-
+        
         if(!success) return;
+        
+        function __gp(name){
+            return window.hWin.HEURIST4.util.getUrlParameter(name, location.search)
+        }
+        
+        var layout_params = {}
+        is_init_here = __gp('noinit')!='1';
+        if(is_init_here){ 
+            // params: 
+            //   nomap, notimeline
+            //   controls: [all,none,zoom,bookmark,geocoder,print,publish,legend]
+            //   legend: [basemaps,search,mapdocs|onedoc]
+            //   basemap: name of initial basemap
+            //   extent: fixed extent    
+            layout_params['nomap'] = __gp('nomap');
+            layout_params['notimeline'] = __gp('notimeline');
+            layout_params['controls'] = __gp('controls'); //cs list of visible controls
+            layout_params['legend'] = __gp('legend'); //cs list of visible panels
+            layout_params['basemap'] = __gp('basemap');
+            layout_params['extent'] = __gp('extent');
+        }
         
         mapping = $('#mapping').mapping({
             element_map: '#map',
+            layout_params:layout_params,
             oninit: onMapInit
         });
     }
 
     //
-    //  init map data based on url parameters
+    // init map data based on url parameters
     //
-    function onMapInit(mapwdiget){
+    function onMapInit( mapwdiget ){
   
         //take url parameters and open mapdocument or/and perform query
-        var noinit = window.hWin.HEURIST4.util.getUrlParameter('noinit', location.search);
-        if(noinit!='1'){ 
+        if(is_init_here){ 
             //this case only for initialization of mapping when it is loaded independently 
             //otherwise initialization is performed in app_timemap.js
 
@@ -278,7 +299,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
             } 
     
             if(mapdocument>0){
-                //mapping.load(null, null, mapdocument);//load with map document
+                mapwdiget.mapping('openMapDocument', mapdocument);
             }
         
         }//noinit!='1'        

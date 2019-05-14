@@ -45,21 +45,6 @@ Thematic mapping
 * mapDocument.js maintains map document list and their layers
 * mapLayer2.js loads data for particular layer
 * 
-* workflow for map documents:
-* mapManager.defineContent('mapdocs') -> creates mapDocument -> mapDocument loads list of mapdocs -> in callback returns treeData
-* mapManager onexpand loads content of particular document mapDocument.openMapDocument(id) 
-*                          - it creates mapLayers in turn they are added layers to native map
-*            edit ->  mapDocument.editRecord (map doc or layer)
-*            add (on DnD or on add layer from search results
-*            show/hide entire mapdoc or layer mapDocument.setVisibility(recID)
-*            zoomTo mapDocument.zoomTo(recID)
-* All references by Heurist recID, native leaflet id is stored in mapLayer
-* 
-* workflow for search results:
-* mapManager.defineContent('search') -> creates fake mapdocument searchResults that will consist of search results
-* mapManager.onSearchResult(recordset or query) - searchResults.add(recordset) -> add mapLayer.addRecordsetLayer(recordset)
-* 
-* 
 * 
 * options:
 * element_layout
@@ -77,28 +62,31 @@ Thematic mapping
 * init (former _load)
 * printMap
 * 
-* updateLayout - show/hide map and timeline
 * 
-* methods for dataset ****
-* addDataset(geojson - feature collection)  - add dataset to internal storage and call either reload or delete 
-*                                             (if exists and new oneempty)
-*                                             call refreshVisTimeline loadVisTimeline  
-* getDataset(id) get json data for given dataset
-* applyDatasetStyle(id, css)  (former _changeDatasetColor)
-* 
-* reloadDataset - add dataset to map and zoom to it (otionally)
-* deleteDataset - remove from map (hide) and optionally from storage and legend, call refreshVisTimeline  
-* setDatasetVisibility (former _showDataset) - call either deleteDataset or addDataset
-* zoomDataset
-* 
-*  --
-* setFeatureSelection
-* setFeatureVisibility - show hide shapes(layers in leaflet) on map by rec_ID
-* showPopup - force popup for given record id
-* 
+*     
+*   openMapDocument - opens given map document
+*   loadBaseMap
+    addDataset - loads geojson data based on heurist query, recordset or json to current search (see addGeoJson)
+    addGeoJson - adds geojson layer to map, apply style and trigger timeline update
+    addTileLayer - adds image tile layer to map
+    addImageOverlay - adds image overlay to map
+    updateTimelineData - add/replace timeline layer_data in this.timeline_items and triggers timelineRefresh
+    applyStyle
+    
+    setFeatureSelection - triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
+    setFeatureVisibility - applies visibility for given set of heurist recIds (filter from timeline)
+    
+    _onLayerClick - map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
+    _clearHighlightedMarkers - removes special "highlight" selection circle markers from map
+    _setStyleDefaultValues - assigns default values for style (size,color and marker type)
+    _createMarkerIcon - creates marker icon for url(image) and fonticon (divicon)
+    _stylerFunction - returns style for every path and polygone, either individual feature style of parent layer style.
+    _getMarkersByRecordID - returns markers by heurist ids (for filter and highlight)
+    
 * Events: see options.onselect and oninit
 * onSelection - 
-* onInitComplete
+* onInitComplete - triggers options.oninit event handler
+* 
 * 
 * 
 * @package     Heurist academic knowledge management system
@@ -127,9 +115,7 @@ $.widget( "heurist.mapping", {
         element_map: 'map',
         element_timeline: 'timeline',
  
-        notimeline: false, /// hide timeline (map only)
-        nomap: false, // timeline only
-        noheader: false, //hide map toolbar (north of layout)
+        layout_params:{},
         
         // callbacks
         onselect: null,
@@ -142,23 +128,57 @@ $.widget( "heurist.mapping", {
     
     //reference to google or leaflet map
     
+    //main elements
     nativemap: null,
     vistimeline: null,
     mapManager: null,
+    
+    //controls
+    map_legend: null,
+    map_zoom: null,
+    map_bookmark: null,
+    map_geocoder: null,
+    map_print: null,
+    main_popup: null,
 
-    all_layers: [],   // array of all loaded geojson layers
+    //storages
+    all_layers: [],    // array of all loaded top layers
     all_clusters: {},  // markerclusters
     all_markers: {},
     
     timeline_items: {},
     timeline_groups: [], 
 
-    main_popup:null,
     selected_rec_ids:[],
 
     myIconRectypes:{},  //storage for rectype icons by color and rectype id
-    
+
+    //base maps
+    basemaplayer_name: null,
+    basemaplayer: null,
+    basemap_providers: [
+    {name:'MapBox', options:{accessToken: 'pk.eyJ1Ijoib3NtYWtvdiIsImEiOiJjanV2MWI0Y3Awb3NmM3lxaHI2NWNyYjM0In0.st2ucaGF132oehhrpHfYOw'
+    , attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://    creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+    }},
+    {name:'Esri.WorldStreetMap'},
+    {name:'Esri.WorldTopoMap'},
+    {name:'Esri.WorldImagery'},
+    //{name:'Esri.WorldTerrain'},
+    {name:'Esri.WorldShadedRelief'},
+    {name:'OpenStreetMap'},
+    //{name:'OpenPtMap'},
+    {name:'OpenTopoMap'},
+    {name:'Stamen.Toner'},
+    {name:'Stamen.TerrainBackground'},
+    //{name:'Stamen.TopOSMRelief'},
+    //{name:'OpenWeatherMap'}
+    {name:'Esri.NatGeoWorldMap'},
+    {name:'Esri.WorldGrayCanvas'}
+    ],    
+    // ---------------    
     // the widget's constructor
+    
+    //
     _create: function() {
 
         var that = this;
@@ -199,33 +219,17 @@ $.widget( "heurist.mapping", {
         layout_opts.center__minWidth = 200;
         layout_opts.north__size = 30;
         layout_opts.north__spacing_open = 0;
+        /*
         var th = Math.floor($(this.options.element_layout).height*0.2);
         layout_opts.south__size = th>200?200:th;
         layout_opts.south__spacing_open = 7;
         layout_opts.south__spacing_closed = 12;
+        */
         layout_opts.south__onresize_end = function() {
             //if(mapping) mapping.setTimelineMinheight();
             //console.log('timeline resize end');
             //_adjustLegendHeight();
         };
-
-        if(this.options.notimeline){
-            layout_opts.south__size = 0;
-            layout_opts.south__spacing_open = 0;
-            layout_opts.south__spacing_closed = 0;
-        }else if(this.options.nomap){
-            _options['mapVisible'] = false;
-            layout_opts.center__minHeight = 0;
-            layout_opts.south__spacing_open = 0;
-        }
-        if(this.options.noheader){
-            layout_opts.north__size = 0;
-        }
-        /* todo
-        if(window.hWin.HEURIST4.util.getUrlParameter('legend', location.search)=='off'){
-            _options['legendVisible'] = false;
-        }
-        */
 
         this.mylayout = $(this.options.element_layout).layout(layout_opts);
         
@@ -238,8 +242,8 @@ $.widget( "heurist.mapping", {
         
         $('#'+map_element_id).css('padding',0); //reset padding otherwise layout set it to 10px
         
-        this.nativemap = L.map( map_element_id )
-            .on('load', function(){that.onInitComplete();} );
+        this.nativemap = L.map( map_element_id, {zoomControl:false} )
+            .on('load', function(){ } );
 
         //init basemap layer        
 /*        
@@ -273,29 +277,41 @@ $.widget( "heurist.mapping", {
                 that.setFeatureVisibility(hide_rec_ids, false);
             }});
 
-        //4. INIT MANAGER
-        this.mapManager = L.control.manager({ position: 'topright' }).addTo( this.nativemap );
-        
-        this.mapManager = new hMapManager({container:this.mapManager._container, mapwidget:this.element});
-        
         this.nativemap.setView([51.505, -0.09], 13); //@todo change to bookmarks
-
+        
+        //4. INIT CONTROLS
         if(this.main_popup==null) this.main_popup = L.popup();
         
+        //zoom plugin
+        this.map_zoom = L.control.zoom({ position: 'topleft' });//.addTo( this.nativemap );
+        
+        //legend contains mapManager
+        this.map_legend = L.control.manager({ position: 'topright' }).addTo( this.nativemap );
+        
         //bookmark plugin
-        var bkm_control = new L.Control.Bookmarks({ position: 'topleft' }).addTo( this.nativemap );
+        this.map_bookmark = new L.Control.Bookmarks({ position: 'topleft' });//.addTo( this.nativemap );
         
         //geocoder plugin
-        L.Control.geocoder({ position: 'topleft' }).addTo( this.nativemap );
+        this.map_geocoder = L.Control.geocoder({ position: 'topleft' });//.addTo( this.nativemap );
         
         //print plugin
-        L.control.browserPrint({ position: 'topleft' }).addTo( this.nativemap );
+        this.map_print = L.control.browserPrint({ position: 'topleft' });//.addTo( this.nativemap );
+        
+        this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element});
+        
+        this.updateLayout(this.options.layout_params);
+        
     },
 
     //Called whenever the option() method is called
     //Overriding this is useful if you can defer processor-intensive changes for multiple option change
     _setOptions: function( ) {
+        
         this._superApply( arguments );
+        
+        if((arguments[0] && arguments[0]['layout_params']) || arguments['layout_params'] ){
+            this.updateLayout(this.options.layout_params);
+        }
     },
 
     /* 
@@ -314,6 +330,11 @@ $.widget( "heurist.mapping", {
     
     //-------
     
+    //that.onInitComplete();
+    //
+    // triggers options.oninit event handler
+    //    it is invoked on completion of hMapManager initialization - map is inited and all mapdocuments are loaded
+    //
     onInitComplete:function(){
         console.log('onInitComplete');
         
@@ -321,11 +342,52 @@ $.widget( "heurist.mapping", {
                 this.options.oninit.call(this, this.element);
         }
         
-        //Load default base map
-        // $(this.mapManager).mapmanager('loadBaseMap', 0);
-        //Load default map doument
-        //this.mapManager = new hMapManager(this.mapManager, this.nativemap);
+    },
+    
+    //
+    //
+    //
+    openMapDocument: function( mapdoc_id ) {
         
+        this.mapManager.openMapDocument( mapdoc_id );
+    },
+    
+    //
+    //
+    //
+    getBaseMapProviders: function(basemap_id){
+        return this.basemap_providers;
+    },
+    
+    //
+    // basemap_id index in mapprovider array or provider name
+    //
+    loadBaseMap: function(basemap_id){
+        
+        var provider = this.basemap_providers[0];
+        if(window.hWin.HEURIST4.util.isNumber(basemap_id) && basemap_id>=0){
+            provider = this.basemap_providers[basemap_id];
+        }else{
+            $(this.basemap_providers).each(function(idx, item){
+                if(item['name']==basemap_id){
+                    provider = item;
+                    return;        
+                }
+            });
+        }
+        
+        if(this.basemaplayer_name!=provider['name']) {
+            
+            this.basemaplayer_name = provider['name'];
+            
+            if(this.basemaplayer!=null){
+                this.basemaplayer.remove();
+            }
+
+            this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
+                    .addTo(this.nativemap);        
+            
+        }   
     },
     
     //
@@ -338,6 +400,9 @@ $.widget( "heurist.mapping", {
         this.mapManager.addLayerToSearchResults( data, dataset_name );
     },
     
+    //
+    // adds image tile layer to map
+    //
     addTileLayer: function(layer_url, layer_options, dataset_name){
     
         var new_layer;
@@ -416,6 +481,9 @@ $.widget( "heurist.mapping", {
         
     },
     
+    //
+    // adds image overlay to map
+    //
     addImageOverlay: function(image_url, image_extent, dataset_name){
     
         var new_layer = L.imageOverlay(image_url, image_extent).addTo(this.nativemap);
@@ -426,6 +494,7 @@ $.widget( "heurist.mapping", {
     },
     
     //
+    // adds geojson layer to map
     // returns nativemap id
     //
     addGeoJson: function(geojson_data, timeline_data, layer_style, dataset_name){
@@ -549,6 +618,7 @@ $.widget( "heurist.mapping", {
             }
             }
             });*/
+
     
     //
     //
@@ -674,7 +744,7 @@ $.widget( "heurist.mapping", {
 
         if(affected_layer){
             
-            this.clearHighlightedMarkers();
+            this._clearHighlightedMarkers();
             
             if(this.all_clusters[layer_id]){
                 this.all_clusters[layer_id].clearLayers();
@@ -704,7 +774,7 @@ $.widget( "heurist.mapping", {
     {
         var affected_layer = this.all_layers[layer_id];
         if(affected_layer){
-            this.clearHighlightedMarkers();
+            this._clearHighlightedMarkers();
             
             if(is_visible===false){
                 affected_layer.remove();
@@ -718,14 +788,14 @@ $.widget( "heurist.mapping", {
     
     //
     // apply style for given layer
-    // it take style from options.default_style, each feature may have its own style that overwrites layer's one
+    // it takes style from options.default_style, each feature may have its own style that overwrites layer's one
     //
     applyStyle: function(layer_id, newStyle) {
         
         var affected_layer = this.all_layers[layer_id];
         if(!affected_layer) return;
 
-        this.clearHighlightedMarkers();
+        this._clearHighlightedMarkers();
 
         
         var that = this;
@@ -756,7 +826,7 @@ $.widget( "heurist.mapping", {
         // set default values -------       
         style = this._setStyleDefaultValues( style );
         
-        var myIcon = this._getMarkerIcon( style );
+        var myIcon = this._createMarkerIcon( style );
 
         //set default values ------- END
         
@@ -804,7 +874,7 @@ $.widget( "heurist.mapping", {
                     that.all_markers[layer_id].push( layer );
                 }
 
-                layer.on('click', function(e){that.onLayerClick(e)} );
+                layer.on('click', function(e){that._onLayerClick(e)} );
             }
 
             affected_layer.eachLayer( function(child_layer){ 
@@ -830,7 +900,7 @@ $.widget( "heurist.mapping", {
                 
                 if(layer.feature.style){ //indvidual style per record
                     markerStyle = that._setStyleDefaultValues(layer.feature.style);
-                    setIcon = that._getMarkerIcon( markerStyle );
+                    setIcon = that._createMarkerIcon( markerStyle );
                 }else{
                     //heurist layer common style
                     markerStyle = style;
@@ -885,7 +955,7 @@ $.widget( "heurist.mapping", {
                         layer.remove();
                         layer = null;
                     }
-                    new_layer.on('click', function(e){that.onLayerClick(e)});
+                    new_layer.on('click', function(e){that._onLayerClick(e)});
                     
                 }
             
@@ -899,11 +969,14 @@ $.widget( "heurist.mapping", {
             }
         }
 
-        affected_layer.setStyle(function(feature){ that.stylerFunction(feature); });
+        affected_layer.setStyle(function(feature){ that._stylerFunction(feature); });
         
     },
     
-    onLayerClick: function(event){
+    //
+    // map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
+    //
+    _onLayerClick: function(event){
         
         var layer = (event.target);
         if(layer && layer.feature){
@@ -932,9 +1005,9 @@ $.widget( "heurist.mapping", {
     },
     
     //
+    // remove special "highlight" selection circle markers from map
     //
-    //
-    clearHighlightedMarkers: function(){
+    _clearHighlightedMarkers: function(){
       
       for(var idx in this.highlightedMarkers){
           this.highlightedMarkers[idx].remove();
@@ -943,9 +1016,8 @@ $.widget( "heurist.mapping", {
       this.highlightedMarkers = [];  
     },
     
-    
     //
-    //
+    // assigns default values for style (size,color and marker type)
     //
     _setStyleDefaultValues: function(style){
         if(!style.iconType || style.iconType=='default') style.iconType ='rectype';
@@ -955,9 +1027,9 @@ $.widget( "heurist.mapping", {
     },        
     
     //
+    // creates marker icon for url(image) and fonticon (divicon)
     //
-    //
-    _getMarkerIcon: function(style){
+    _createMarkerIcon: function(style){
         
         var myIcon;
       
@@ -999,9 +1071,10 @@ $.widget( "heurist.mapping", {
     },
     
     //
+    // returns style for every path and polygone, either individual feature style of parent layer style.
+    // for markers style is defined in applyStyle
     //
-    //
-    stylerFunction: function(feature){
+    _stylerFunction: function(feature){
         
         
         //feature.style - individual style (set in symbology field per record)
@@ -1017,28 +1090,28 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    //
+    // triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
     //    
     setFeatureSelection: function( _selection, is_external ){
         var that = this;
         
-        this.clearHighlightedMarkers();
+        this._clearHighlightedMarkers();
         
         this.selected_rec_ids = (window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) ?_selection:[];
         
         that.nativemap.eachLayer(function(top_layer){    
             if(top_layer instanceof L.LayerGroup){
-                top_layer.setStyle(function(feature) {that.stylerFunction(feature); });
+                top_layer.setStyle(function(feature) {that._stylerFunction(feature); });
             }
         });
         
         //find selected markers by id
         this.highlightedMarkers = [];
-        var selected_markers = this.getMarkersByRecordID(_selection);
+        var selected_markers = this._getMarkersByRecordID(_selection);
         for(var idx in selected_markers){
             var layer = selected_markers[idx];
             /*if(layer instanceof L.CircleMarker){
-                layer.setStyle( {color: '#ffff00'});//function(feature) {that.stylerFunction(feature); });
+                layer.setStyle( {color: '#ffff00'});//function(feature) {that._stylerFunction(feature); });
             }else{*/
                 //create special hightlight marker below this one
                 var use_style = layer.feature.style || layer.feature.default_style;
@@ -1061,11 +1134,11 @@ $.widget( "heurist.mapping", {
         }
         
     },
-    
+
     //
+    // returns markers by heurist ids (for filter and highlight)
     //
-    //
-    getMarkersByRecordID: function( _selection ){
+    _getMarkersByRecordID: function( _selection ){
         
         var selected_markers = [];
         
@@ -1086,9 +1159,9 @@ $.widget( "heurist.mapping", {
         
         return selected_markers;
     },
-    
+
     //
-    //  apply visibility for given set of recIds (filter from timeline)
+    //  applies visibility for given set of heurist recIds (filter from timeline)
     // _selection - true - apply all layers, or array of rec_IDs
     //
     setFeatureVisibility: function( _selection, is_visible ){
@@ -1097,7 +1170,7 @@ $.widget( "heurist.mapping", {
             
             var vis_val = (is_visible==false)?'none':'block';
             
-            this.clearHighlightedMarkers();
+            this._clearHighlightedMarkers();
             
             //use  window.hWin.HEURIST4.util.findArrayIndex(layer.properties.rec_ID, _selection)
             var that = this;
@@ -1129,7 +1202,7 @@ $.widget( "heurist.mapping", {
             
             if(this.options.isMarkerClusterEnabled){
                 
-                var selected_markers = this.getMarkersByRecordID(_selection);
+                var selected_markers = this._getMarkersByRecordID(_selection);
                 for(var idx in selected_markers){
 
                     var layer = selected_markers[idx];
@@ -1171,6 +1244,108 @@ $.widget( "heurist.mapping", {
     //@todo remove - all actions with layer via this widget
     getNativemap: function(){
         return this.nativemap;
+    },
+    
+    //
+    // show/hide layout panels and map controls
+    // params: 
+    //   nomap, notimeline
+    //   controls: [all,none,zoom,bookmark,geocoder,print,publish,legend]
+    //   legend: [basemaps,search,mapdocs|onedoc]
+    //   basemap: name of initial basemap
+    //   extent: fixed extent    
+    //
+    updateLayout: function( params ){
+        
+        function __parseval(val){
+            if(!window.hWin.HEURIST4.util.isempty(val)){
+                val = val.toLowerCase();
+                return !(val==0 || val=='off' || val=='no' || val=='n');
+            }else{
+                return false;
+            }
+        }
+        function __splitval(val){
+            
+            var res = [];
+            if(!$.isArray(val)){
+                if(!val) val = 'all';
+                val = val.toLowerCase();
+                res = val.split(',');
+            }
+            if(!(res.length>0)) res = val.split(';');
+            if(!(res.length>0)) res = val.split('|');
+            
+            if(res.length==0) res.push['all'];
+            
+            return res;
+        }
+        
+        if(!params) return;
+        
+        //show/hide map or timeline
+        var nomap = __parseval(params['nomap']);
+        var notimeline = __parseval(params['notimeline']);
+        
+        var layout_opts = {};
+        if(notimeline){
+            layout_opts.south__size = 0;
+            layout_opts.south__spacing_open = 0;
+            layout_opts.south__spacing_closed = 0;
+        }else{
+            var th = Math.floor($(this.options.element_layout).height()*0.2);
+            layout_opts.south__size = th>200?200:th;
+            
+            if(nomap){
+                layout_opts.center__minHeight = 0;
+                layout_opts.south__spacing_open = 0;
+                layout_opts.south__spacing_closed = 0;
+            }else{
+                layout_opts.south__spacing_open = 7;
+                layout_opts.south__spacing_closed = 12;
+                layout_opts.center__minHeight = 30;
+                layout_opts.center__minWidth = 200;
+            }
+        }
+        if(__parseval(params['noheader'])){ //outdated
+            layout_opts.north__size = 0;
+        }
+        //$(this.mylayout).layout(layout_opts);
+        $(this.options.element_layout).layout(layout_opts);
+    
+        //map controls {all,none,zoom,bookmark,geocoder,print,publish,legend}
+        var controls = __splitval(params['controls']);
+        var that = this;
+        function __controls(val){
+            var is_visible = (controls.indexOf('all')>=0 || controls.indexOf(val)>=0);
+            
+            if(is_visible){
+                if(!that['map_'+val]._map) that['map_'+val].addTo(that.nativemap);
+            }else{
+                that['map_'+val].remove();
+            }
+
+        }
+        __controls('legend');
+        __controls('zoom');
+        __controls('bookmark');
+        __controls('geocoder');
+        __controls('print');
+        //__controls('publish');
+        //__controls('scale');
+            
+        //   legend: [basemaps,search,mapdocs|onedoc]
+        this.mapManager.updatePanelVisibility(__splitval(params['legend']));
+        
+        // basemap: name of initial basemap
+        if(params['basemap']){
+            this.mapManager.loadBaseMap( params['basemap'] );  
+        }else{
+            this.mapManager.loadBaseMap( 0 );  
+        }
+        
+        // extent: fixed extent    
     }
+    
     
 });

@@ -171,7 +171,7 @@ function hMapDocument( _options )
     }
 
     //
-    // opens map document - loads content (resolve deferred - to updated treeview) and add layers on map
+    // opens map document - loads content (resolve deferred - to updated treeview) and adds layers on map
     //
     function _openMapDocument(mapdoc_id, deferred){
         
