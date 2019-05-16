@@ -43,6 +43,7 @@ $.widget( "heurist.resultList", {
         show_viewmode: true,
         show_inner_header: false,   // show title of current search in header
         header_class: null,       //class name for menu
+        show_url_as_link:false,
 
         title: null,
         //searchsource: null,
@@ -1158,7 +1159,7 @@ $.widget( "heurist.resultList", {
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
         + '<div title="dbl-click to edit : '+recTitle_strip_all+'" class="recordTitle">'
-        +     (this.options.select_mode=='manager' && fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
+        +     (this.options.show_url_as_link && fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
             + recTitle_strip1 + "</a>") :recTitle_strip2)
         + '</div>'
 
@@ -1182,7 +1183,7 @@ $.widget( "heurist.resultList", {
 
         // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
         // TODO: add an open-in-new-search icon to the display of a record in the results list
-        + ((this.options.select_mode!='manager' && fld('rec_URL'))
+        + ((!this.options.show_url_as_link && fld('rec_URL'))
             ?
         '<div title="Click to view external link (opens in new window)" '
         + 'class="rec_view_link_ext ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '

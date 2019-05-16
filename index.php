@@ -94,6 +94,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/search/svs_edit.js"></script>
         <script type="text/javascript" src="hclient/widgets/search/svs_list.js"></script>
         <script type="text/javascript" src="hclient/widgets/viewers/resultList.js"></script>
+        <script type="text/javascript" src="hclient/widgets/viewers/resultListMenu.js"></script>
 
         <script type="text/javascript" src="hclient/widgets/viewers/staticPage.js"></script>
         
@@ -106,7 +107,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <!-- DEBUG -->
 
         <script type="text/javascript" src="hclient/widgets/profile/profile_login.js"></script>
-        <script type="text/javascript" src="hclient/widgets/viewers/resultListMenu.js"></script>
         <!-- todo: load dynamically
         <script type="text/javascript" src="hclient/widgets/editing/rec_search.js"></script>
         <script type="text/javascript" src="hclient/widgets/editing/rec_relation.js"></script>

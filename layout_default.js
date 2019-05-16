@@ -138,7 +138,7 @@ var cfg_layouts = [
                     {appid:'heurist_resultList', hasheader:true, name:'List', layout_id:'list',
                             css:{'background-color':'white','font-size':'14px'}, 
                             options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
-                            show_inner_header: true} },  //search result
+                            show_inner_header: true,show_url_as_link:true} },  //search result
                     {appid:'heurist_Map', layout_id:'map', options:{layout:['map','timeline'],tabpanel:true}, 
                                     css:{'background-color':'white'} } //mapping
                 ]
@@ -171,7 +171,7 @@ var cfg_layouts = [
         ]},
         center:{Xminsize:300, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false, 
                      dockable:false, dragable:false, css:{'background-color':'white'}, 
-                     options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true, header_class:'ui-heurist-header2'} }]},  //search result
+                     options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true, header_class:'ui-heurist-header2',show_url_as_link:true} }]},  //search result
         east:{size:'50%', Xminsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, //css:{'font-size':'0.95em'},
                 apps:[
