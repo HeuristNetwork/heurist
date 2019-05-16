@@ -346,6 +346,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
             </p>
               {% if (file.error) { %}
                 <div><span class="error">Upload error</span> {%=file.error%}</div>
+                <span class="error_for_msg" style="display:none">{%=file.name%} {%=file.error%}</span>
               {% } %}
                 </td>
                 <td>
@@ -436,6 +437,19 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                         window.hWin.HEURIST4.filesWereUploaded = window.hWin.HEURIST4.filesWereUploaded || (cnt>0);
  
                         window.hWin.HEURIST4.util.setDisabled($('#btnFinished'), false);                    
+                        
+                        var swarns = '';
+                        var eles = $.find('span.error_for_msg');
+                        $(eles).each(function(idx,item){
+                            swarns = swarns + '<br>'+$(item).text();
+                        }); 
+                        if(swarns!=''){
+                            swarns = 'Attention. '
+                                      +($(eles).length==1?'File was not':($(eles).length+' files were not'))
+                                      +' uploaded.<br> '+swarns;
+                            window.hWin.HEURIST4.msg.showMsgErr(swarns);    
+                        }
+
                     }
                 });
                 
