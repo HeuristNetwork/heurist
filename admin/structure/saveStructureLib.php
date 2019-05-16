@@ -1810,7 +1810,15 @@ copy_IconAndThumb_FromLibrary
                             //array_push($ret['dtyIDs'], $row[0]);
                             $errMessage = $errMessage.("<li>".$row[0]."&nbsp;".$row[1]."</li>");
                         }
-                        $errMessage = $errMessage."</ul></div>";
+                        $errMessage = $errMessage.'</ul>'
+                        .'<br>Please note the field(s) listed below, then '
+                        .'<a href="#" style="text-decoration:underline !important" onclick="{'
+                        .'var $dlg = window.hWin.HEURIST4.msg.getMsgDlg(); '           
+                        .'$dlg.dialog( \'close\' );'
+                        .'window.hWin.HEURIST4.msg.showDialog(\''
+                        .HEURIST_BASE_URL.'admin/structure/fields/manageDetailTypes.php?db='
+                        .HEURIST_DBNAME.'\',{width:1000});}">'
+                        .'Edit base field definitions</a></div>';
                         
                         //$ret['error_title'] = 'Warning: Terms in use';
                         
