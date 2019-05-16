@@ -397,6 +397,12 @@ public static function importRecords($filename, $session_id){
             
             foreach($record_src['details'] as $dty_ID => $values){
                 
+                
+                if(is_array($values) && @$values['dty_ID']>0){ //interpreatable format
+                    $dty_ID = $values['dty_ID'];
+                    $values = array($values);
+                }
+                
                 //field id in target database
                 $ftId = $importDef->getTargetIdBySourceId('detailtypes', $dty_ID);
                 

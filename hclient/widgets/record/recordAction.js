@@ -89,7 +89,8 @@ $.widget( "heurist.recordAction", {
         
         //load html from file
         if(this._need_load_content && this.options.htmlContent){        
-            this.element.load(window.hWin.HAPI4.baseURL+'hclient/widgets/record/'+this.options.htmlContent+'?t='+window.hWin.HEURIST4.util.random(), 
+            this.element.load(window.hWin.HAPI4.baseURL+'hclient/widgets/record/'+this.options.htmlContent
+                            +'?t='+window.hWin.HEURIST4.util.random(), 
             function(response, status, xhr){
                 that._need_load_content = false;
                 if ( status == "error" ) {

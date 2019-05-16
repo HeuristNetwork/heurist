@@ -8,7 +8,7 @@
     * 
     * parameters
     * db - heurist database
-    * format = json|csv|kml|xml|hml|gephi
+    * format = geojson|json|csv|kml|xml|hml|gephi
     * prefs:{ format specific parameters }, }
     * 
     * prefs for csv
@@ -24,6 +24,11 @@
     *           zip  : 0|1  compress
     *           file : 0|1  output as file or ptintout
     *           defs : 0|1  include database definitions
+    *           resapi: 0|1  not include db description and heurist header
+    * 
+    * prefs for geojson, json
+    *   extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels
+    * 
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -57,9 +62,9 @@
     $system = new System();
     
     //global variable to keep defs
-    $rtStructs = null;
-    $detailtypes = null;
-    $rtTerms = null;
+    $defRecTypes = null;
+    $defDetailtypes = null;
+    $defTerms = null;
     
     if(@$_REQUEST['postdata']){
         //in export csv all parameters send as json array in postdata 
@@ -270,7 +275,7 @@ for constrained resource fields we use "dt#:rt#"
 NOTE: fastest way it simple concatenation in comparison to fputcsv and implode. We use fputcsv
 */
 function output_CSV($system, $data, $params){
-    global $rtStructs;
+    global $defRecTypes;
     
     if (!($data && @$data['status']==HEURIST_OK)){
         print print_r($data, true); //print out error array
@@ -294,21 +299,16 @@ function output_CSV($system, $data, $params){
     $details = array();  //array of detail fields included into output
     $relmarker_details = array(); //relmarker fields included into output
     
-    if($rtStructs==null) $rtStructs = dbs_GetRectypeStructures($system, null, 2);
-    $idx_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
-    $idx_dtype = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
-    $idx_term_tree = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
-    $idx_term_nosel = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+    if($defRecTypes==null) $defRecTypes = dbs_GetRectypeStructures($system, null, 2);
+    $idx_name = $defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+    $idx_dtype = $defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_Type'];
+    $idx_term_tree = $defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
+    $idx_term_nosel = $defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
     
 
     if($include_term_label_and_code){
-        $rtTerms = dbs_GetTerms($system);
-        /*
-        $idx_term_label = $rtTerms['fieldNamesToIndex']['trm_Label'];
-        $idx_term_code = $rtTerms['fieldNamesToIndex']['trm_Code'];
-        $rtTerms = $rtTerms['termsByDomainLookup']['enum'];
-        */
-        $rtTerms = new DbsTerms($system, $rtTerms);
+        $defTerms = dbs_GetTerms($system);
+        $defTerms = new DbsTerms($system, $defTerms);
     }
     
     //create header
@@ -342,17 +342,17 @@ function output_CSV($system, $data, $params){
                         $field_type = 'resource';
                     }else{
                         //get field name from structure
-                        $field_name = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_name];
-                        $field_type = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
+                        $field_name = $defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_name];
+                        $field_type = $defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
                     }
                     if($constr_rt_id>0){
                         $rectypename_is_in_fieldname = (strpos(strtolower($field_name), 
-                                            strtolower($rtStructs['names'][$constr_rt_id]))!==false);
+                                            strtolower($defRecTypes['names'][$constr_rt_id]))!==false);
                         $field_name_title = $field_name.' '
-                                                //.($rectypename_is_in_fieldname?'':($rtStructs['names'][$constr_rt_id].' '))
+                                                //.($rectypename_is_in_fieldname?'':($defRecTypes['names'][$constr_rt_id].' '))
                                                 .'RecordTitle';
                         $field_name = $field_name.($rectypename_is_in_fieldname
-                                            ?'':' ('.$rtStructs['names'][$constr_rt_id].')').' H-ID';
+                                            ?'':' ('.$defRecTypes['names'][$constr_rt_id].')').' H-ID';
                     }else{
                         $field_name_title = $field_name.' RecordTitle';
                     }
@@ -367,7 +367,7 @@ function output_CSV($system, $data, $params){
                     
                     if($dt_id=='rec_ID'){
                         if($rt>0){
-                            $field_name = $rtStructs['names'][$rt].' H-ID';
+                            $field_name = $defRecTypes['names'][$rt].' H-ID';
                         }else{
                             $field_name = 'H-ID';
                             $any_rectype = $rt;
@@ -487,8 +487,8 @@ function output_CSV($system, $data, $params){
                         $target_rt = $related_recs['headers'][$relation->targetID][1];
                         if( $constr_rt_id==$target_rt && $relation->trmID>0){ //contrained rt and allowed relation type
                             
-                            $all_terms = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_tree];
-                            $nonsel_terms = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_nosel];
+                            $all_terms = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_tree];
+                            $nonsel_terms = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_nosel];
                             $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);    
                             
                             if($is_allowed){
@@ -512,11 +512,11 @@ function output_CSV($system, $data, $params){
                     foreach($related_recs['reverse'] as $relation){
                         $source_rt = $related_recs['headers'][$relation->sourceID][1];
                         if( $constr_rt_id==$source_rt && $relation->trmID>0
-                            && @$rtStructs['typedefs'][$source_rt]['dtFields'][$dt_id]
+                            && @$defRecTypes['typedefs'][$source_rt]['dtFields'][$dt_id]
                            ){ //contrained rt and allowed relation type
                             
-                            $all_terms = $rtStructs['typedefs'][$source_rt]['dtFields'][$dt_id][$idx_term_tree];
-                            $nonsel_terms = $rtStructs['typedefs'][$source_rt]['dtFields'][$dt_id][$idx_term_nosel];
+                            $all_terms = $defRecTypes['typedefs'][$source_rt]['dtFields'][$dt_id][$idx_term_tree];
+                            $nonsel_terms = $defRecTypes['typedefs'][$source_rt]['dtFields'][$dt_id][$idx_term_nosel];
                             $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);    
                             
                             if($is_allowed){
@@ -547,7 +547,7 @@ function output_CSV($system, $data, $params){
                     if($dt_id == DT_PARENT_ENTITY){
                         $dt_type = 'resource';
                     }else{
-                        $dt_type = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_dtype];    
+                        $dt_type = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_dtype];    
                     }
                         
                     $values = @$record['details'][$dt_id];
@@ -592,10 +592,10 @@ function output_CSV($system, $data, $params){
                             
                                 if(count($values)>0){
                                     foreach($values as $val){
-                                        $enum_label[] = $rtTerms->getTermLabel($val, $include_term_hierarchy);
-                                        // @$rtTerms[$val][$idx_term_label]?$rtTerms[$val][$idx_term_label]:'';
-                                        $enum_code[] = $rtTerms->getTermCode($val);
-                                        //@$rtTerms[$val][$idx_term_code]?$rtTerms[$val][$idx_term_code]:'';
+                                        $enum_label[] = $defTerms->getTermLabel($val, $include_term_hierarchy);
+                                        // @$defTerms[$val][$idx_term_label]?$defTerms[$val][$idx_term_label]:'';
+                                        $enum_code[] = $defTerms->getTermCode($val);
+                                        //@$defTerms[$val][$idx_term_code]?$defTerms[$val][$idx_term_code]:'';
                                     }                        
                                 }else{
                                     $enum_label[] = '';
@@ -686,8 +686,9 @@ function output_CSV($system, $data, $params){
 //      split records by 1000 entries chunks
 //
 function output_Records($system, $data, $params){
-    global $rtStructs;
     
+    global $defRecTypes, $defTerms;
+
     if (!($data && @$data['status']==HEURIST_OK)){
         return false;
     }
@@ -762,8 +763,8 @@ function output_Records($system, $data, $params){
         
         if($params['format']=='geojson'){
             
-            $feature = getGeoJsonFeature($record, false, @$params['simplify']);
-            if($params['leaflet']){
+            $feature = getGeoJsonFeature($record, (@$params['extended']==2), @$params['simplify']);
+            if($params['leaflet']){ //include only geoenabled features, timeline data goes in separate timeline array
                    if(@$feature['when']){
                         $timeline_data[] = array('rec_ID'=>$recID, 'when'=>$feature['when']['timespans'], 
                                         'rec_RecTypeID'=>$rty_ID, "rec_Title"=>$record['rec_Title']);
@@ -777,7 +778,13 @@ function output_Records($system, $data, $params){
             $comma = ',';
         
         }else if($params['format']=='json'){ 
-            fwrite($fd, $comma.json_encode($record));
+            
+            if(@$params['extended']>0 && @$params['extended']<3){
+                $feature = getJsonFeature($record, $params['extended']);
+                fwrite($fd, $comma.json_encode($feature));
+            }else{
+                fwrite($fd, $comma.json_encode($record)); //as is
+            }
             $comma = ',';
         }else{
             $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><record/>');
@@ -806,19 +813,18 @@ function output_Records($system, $data, $params){
             fwrite($fd, ']}');             
         }
     }else{
+            //json or xml 
     
-        if($params['format']=='json'){
-            fwrite($fd, ']');     
-        }else{
-            fwrite($fd, '</records>');     
-        }
+            if($params['format']=='json'){
+                fwrite($fd, ']');     
+            }else{ //xml
+                fwrite($fd, '</records>');     
+            }
         
-        if($params['format']!=='geojson'){
-        
+            $rectypes = dbs_GetRectypeStructures($system, null, 2);
             // include defintions
             if(@$params['defs']==1){
                 
-                if($rtStructs==null) $rectypes = dbs_GetRectypeStructures($system, null, 2);
                 $detailtypes = dbs_GetDetailTypes($system, null, 2);
                 $terms = dbs_GetTerms($system);
                 
@@ -832,7 +838,7 @@ function output_Records($system, $data, $params){
                 unset($detailtypes['rectypeUsage']);
 
                 $rectypes = array('rectypes'=>$rectypes);
-                $detailtypes = array('detailtypes'=>$detailtypes);
+                $defDetailtypes = array('detailtypes'=>$detailtypes);
                 $terms = array('terms'=>$terms);
                 
                 if($params['format']=='json'){
@@ -875,8 +881,6 @@ function output_Records($system, $data, $params){
                 fwrite($fd, substr($xml->asXML(),38));
                 fwrite($fd, '</heurist>');     
             }
-            
-        }
         
     }
  
@@ -909,7 +913,7 @@ function output_Records($system, $data, $params){
 //
 function output_HeaderOnly($system, $data, $params)
 {
-    global $rtStructs;
+    global $defRecTypes;
     
     $include_term_ids = (@$params['prefs']['include_term_ids']==1);
     $include_term_codes = (@$params['prefs']['include_term_codes']==1);
@@ -920,11 +924,11 @@ function output_HeaderOnly($system, $data, $params)
     $details = array();  //array of detail fields included into output
     $relmarker_details = array(); //relmarker fields included into output
     
-    if($rtStructs==null) $rtStructs = dbs_GetRectypeStructures($system, null, 2);
-    $idx_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
-    $idx_dtype = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_Type'];
-    $idx_term_tree = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
-    $idx_term_nosel = $rtStructs['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+    if($defRecTypes==null) $defRecTypes = dbs_GetRectypeStructures($system, null, 2);
+    $idx_name = $defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+    $idx_dtype = $defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_Type'];
+    $idx_term_tree = $defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
+    $idx_term_nosel = $defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
     
 
     //create header
@@ -959,17 +963,17 @@ function output_HeaderOnly($system, $data, $params)
                         $field_type = 'resource';
                     }else{
                         //get field name from structure
-                        $field_name = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_name];
-                        $field_type = $rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
+                        $field_name = $defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_name];
+                        $field_type = $defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
                     }
                     if($constr_rt_id>0){
                         $rectypename_is_in_fieldname = (strpos(strtolower($field_name), 
-                                            strtolower($rtStructs['names'][$constr_rt_id]))!==false);
+                                            strtolower($defRecTypes['names'][$constr_rt_id]))!==false);
                         $field_name_title = $field_name.' '
-                                                //.($rectypename_is_in_fieldname?'':($rtStructs['names'][$constr_rt_id].' '))
+                                                //.($rectypename_is_in_fieldname?'':($defRecTypes['names'][$constr_rt_id].' '))
                                                 .'RecordTitle';
                         $field_name = $field_name.($rectypename_is_in_fieldname
-                                            ?'':' ('.$rtStructs['names'][$constr_rt_id].')').' H-ID';
+                                            ?'':' ('.$defRecTypes['names'][$constr_rt_id].')').' H-ID';
                     }else{
                         $field_name_title = $field_name.' RecordTitle';
                     }
@@ -985,7 +989,7 @@ function output_HeaderOnly($system, $data, $params)
                     
                     if($dt_id=='rec_ID'){
                         if($rt>0){
-                            $field_name = $rtStructs['names'][$rt].' H-ID';
+                            $field_name = $defRecTypes['names'][$rt].' H-ID';
                         }else{
                             $field_name = 'H-ID';
                             $any_rectype = $rt;
@@ -1010,8 +1014,8 @@ function output_HeaderOnly($system, $data, $params)
                     //add terms pickup list
                     if(!@$terms_pickup[$rt]) $terms_pickup[$rt] = array();
                     $terms_pickup[$rt][$dt_id] = array('name'=>$field_name, 'domain'=>$field_type,
-                                             'term_ids'=>$rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_term_tree],
-                                             'nonsel'=>$rtStructs['typedefs'][$rt]['dtFields'][$dt_id][$idx_term_tree]);
+                                             'term_ids'=>$defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_term_tree],
+                                             'nonsel'=>$defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_term_tree]);
                     
                 }else{
                     array_push($headers[$rt], $field_name);                
@@ -1027,8 +1031,8 @@ function output_HeaderOnly($system, $data, $params)
     
     
     if(count($terms_pickup)>0) {
-        $rtTerms = dbs_GetTerms($system);
-        $rtTerms = new DbsTerms($system, $rtTerms);
+        $defTerms = dbs_GetTerms($system);
+        $defTerms = new DbsTerms($system, $defTerms);
     }
     
     
@@ -1056,7 +1060,7 @@ function output_HeaderOnly($system, $data, $params)
                     $headers[$rty_ID][] = $field['name'].': Lookup list';
                     $placeholders[] = 'Use to create a value control list';
                     //get list of terms
-                    $terms = $rtTerms->getAllowedTermsForField( $field['term_ids'], $field['nonsel'], $field['domain'] );
+                    $terms = $defTerms->getAllowedTermsForField( $field['term_ids'], $field['nonsel'], $field['domain'] );
                     $max_count = max($max_count, count($terms));    
                     $terms_pickup[$rty_ID][$dtid]['terms'] = $terms;
                 }
@@ -1083,7 +1087,7 @@ function output_HeaderOnly($system, $data, $params)
                         $terms = $terms_pickup[$rty_ID][$dtid]['terms'];
 
                         if($k<count($terms)){
-                            $placeholders[] =  $rtTerms->getTermLabel($terms[$k], true);
+                            $placeholders[] =  $defTerms->getTermLabel($terms[$k], true);
                         }else{
                             $placeholders[] = '';    
                         }
@@ -1097,7 +1101,7 @@ function output_HeaderOnly($system, $data, $params)
             }
 
             if($temp_name==null)
-                $temp_name = 'Template_'.$system->dbname().'_'.$rty_ID.'_'.$rtStructs['names'][$rty_ID];
+                $temp_name = 'Template_'.$system->dbname().'_'.$rty_ID.'_'.$defRecTypes['names'][$rty_ID];
         }
     }
     writeResults( $streams, $temp_name, $headers, null );
@@ -1122,7 +1126,7 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
         
             $filename = $temp_name;
             if($rty_ID>0){
-                        $filename = $filename.'_'.$rty_ID.'_'.$rtStructs['names'][$rty_ID];
+                        $filename = $filename.'_'.$rty_ID.'_'.$defRecTypes['names'][$rty_ID];
             }
             $filename = $filename.'_'.date("YmdHis").'.csv';
         
@@ -1247,24 +1251,22 @@ function array_to_xml( $data, &$xml_data ) {
 //
 function getGeoJsonFeature($record, $extended=false, $simplify=false){
 
-    global $system, $rtStructs, $detailtypes, $rtTerms;
-
-    $rtTerms = null;
+    global $system, $defRecTypes, $defDetailtypes, $defTerms;
 
     if($extended){
-        if($rtStructs==null) $rtStructs = dbs_GetRectypeStructures($system, null, 2);
-        $idx_name = $rtStructs['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+        if($defRecTypes==null) $defRecTypes = dbs_GetRectypeStructures($system, null, 2);
+        $idx_name = $defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
 
-        if($rtTerms==null) {
-            $rtTerms = dbs_GetTerms($system);
-            $rtTerms = new DbsTerms($system, $rtTerms);
+        if($defTerms==null) {
+            $defTerms = dbs_GetTerms($system);
+            $defTerms = new DbsTerms($system, $defTerms);
         }
     }
     
-    if($detailtypes==null) $detailtypes = dbs_GetDetailTypes($system, null, 2);
-    $idx_dname = $detailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
-    $idx_dtype = $detailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
-    $idx_ccode = $detailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
+    if($defDetailtypes==null) $defDetailtypes = dbs_GetDetailTypes($system, null, 2);
+    $idx_dname = $defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
+    $idx_dtype = $defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
+    $idx_ccode = $defDetailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
 
     $res = array('type'=>'Feature',
         'id'=>$record['rec_ID'], 
@@ -1285,7 +1287,7 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
     //convert details to proper JSON format, extract geo fields and convert WKT to geojson geometry
     foreach ($record['details'] as $dty_ID=>$field_details) {
 
-        $field_type = $detailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
+        $field_type = $defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
 
         foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
 
@@ -1372,20 +1374,20 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
             if($extended){
                 //It needs to include the field name and term label and term standard code.
                 if($field_type=='enum' || $field_type=='relationtype'){
-                    $val['termLabel'] = $rtTerms->getTermLabel($val, true);
-                    $term_code  = $rtTerms->getTermCode($val);
+                    $val['termLabel'] = $defTerms->getTermLabel($val, true);
+                    $term_code  = $defTerms->getTermCode($val);
                     if(!$term_code) $val['termCode'] = $term_code;    
                 }
 
-                if(@$rtStructs['typedefs'][$rty_ID]['dtFields'][$dty_ID]){
-                    $val['fieldName'] = $rtStructs['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];    
+                if(@$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID]){
+                    $val['fieldName'] = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];    
                 }else{
                     //non standard field
-                    $val['fieldName'] = $detailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];    
+                    $val['fieldName'] = $defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];    
                 }
 
                 $val['fieldType'] = $field_type;
-                $val['conceptID'] = $detailtypes['typedefs'][$dty_ID]['commonFields'][$idx_ccode];
+                $val['conceptID'] = $defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_ccode];
             }
 
             $res['properties']['details'][] = $val;
@@ -1420,6 +1422,87 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
 
     return $res;
 
+}
+
+
+//
+// convert heurist record to more interpretable format
+// 
+// $mode = 0 - as is, 1 - details in format {dty_ID: val: }, 2 - with concept codes and names/labels
+//
+function getJsonFeature($record, $mode){
+
+    global $system, $defRecTypes, $defDetailtypes, $defTerms;
+    
+    if($mode==0){ //leave as is
+        return $record;
+    }
+
+    $rty_ID = $record['rec_RecTypeID'];
+
+    $res = $record;
+    $res['details'] = array();
+    
+    
+    if($mode==2){ //extended - with concept codes and names/labels
+        if($defRecTypes==null) $defRecTypes = dbs_GetRectypeStructures($system, null, 2);
+        $idx_name = $defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+
+        if($defTerms==null) {
+            $defTerms = dbs_GetTerms($system);
+            $defTerms = new DbsTerms($system, $defTerms);
+        }
+    
+        if($defDetailtypes==null) $defDetailtypes = dbs_GetDetailTypes($system, null, 2);
+        $idx_dname = $defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
+        $idx_dtype = $defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
+        $idx_ccode = $defDetailtypes['typedefs']['fieldNamesToIndex']['dty_ConceptID'];
+        
+        
+        $idx_ccode2 = $defRecTypes['typedefs']['commonNamesToIndex']['rty_ConceptID'];
+        
+        $res['rec_RecTypeName'] = $defRecTypes['names'][$rty_ID];    
+        $idx_ccode2 = $defRecTypes['typedefs'][$rty_ID]['commonFields'][$idx_ccode2];
+        if($idx_ccode2) $res['rec_RecTypeConceptID'] = $idx_ccode2;
+        
+        
+    }
+
+
+    //convert details to proper JSON format, extract geo fields and convert WKT to geojson geometry
+    foreach ($record['details'] as $dty_ID=>$field_details) {
+
+        foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
+        
+            $val = array('dty_ID'=>$dty_ID,'value'=>$value);
+
+            if($mode==2){ //extended - with concept codes and names/labels
+                $field_type = $defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
+                //It needs to include the field name and term label and term standard code.
+                if($field_type=='enum' || $field_type=='relationtype'){
+                    $val['termLabel'] = $defTerms->getTermLabel($val, true);
+                    $term_code  = $defTerms->getTermCode($val);
+                    if(!$term_code) $val['termCode'] = $term_code; 
+                    $term_code  = $defTerms->getTermConceptID($val);
+                    if(!$term_code) $val['termConceptID'] = $term_code;    
+                }
+
+                if(@$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID]){
+                    $val['fieldName'] = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];    
+                }else{
+                    //non standard field
+                    $val['fieldName'] = $defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dname];    
+                }
+
+                $val['fieldType'] = $field_type;
+                $val['conceptID'] = $defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_ccode];
+            }
+
+            $res['details'][] = $val;
+        } //for detail multivalues
+    } //for all details of record
+
+    return $res;
 }
 
 ?>

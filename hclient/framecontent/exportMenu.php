@@ -41,7 +41,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 </head>
 
 <body style="background-color:white">
-    <div style="width:380px;top:0;bottom:0;left:0;position:absolute;padding:10px;font-size:1.2em">
+    <div style="width:480px;top:0;bottom:0;left:0;position:absolute;padding:10px;font-size:1.2em">
 
         <h2>Text file export</h2>
 
@@ -81,6 +81,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 data-action="menu-export-json-multifile"
                 title="Generate JSON for current set of search results (current query) with one record per file, plus manifest">
                 JSON<span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
+           <label>&nbsp;&nbsp;Include concept codes and names of definitions <input type="checkbox" id="extendedJSON" checked/></label>     
         </div>
 
         <div id="menu-export-geojson-multifile" style="padding-left:5px;">

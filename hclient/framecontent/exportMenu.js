@@ -295,7 +295,7 @@ function hexportMenu() {
                 
             }else{
                 script = 'hsapi/controller/record_output.php';
-                params = 'format='+format+'&file=0&defs=0';
+                params = 'format='+format+'&file=0&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
             }
             
 

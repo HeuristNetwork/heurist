@@ -181,6 +181,20 @@ class DbsTerms
             return '';
         }
     }
+
+    //
+    //
+    //
+    public function getTermConceptID($term_id) {
+        
+        $term = $this->getTerm($term_id);
+        if($term){
+            $idx_term_code = $this->data['fieldNamesToIndex']['trm_ConceptID'];
+            return @$term[$idx_term_code]?$term[$idx_term_code]:'';
+        }else{
+            return '';
+        }
+    }
     
     //
     //
