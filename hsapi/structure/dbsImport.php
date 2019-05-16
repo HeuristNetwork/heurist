@@ -1238,12 +1238,22 @@ $mysqli->commit();
             }
         }
 
-        if($name1=="Header"){
-        }
-
         if($found>0){
-            $newvalue = $name." ".($found+1);
+            $found++;
+            $newvalue = $name.' '.$found;
         }
+        
+        do{
+            $not_unique = false;
+            foreach($entities as $id=>$name1){
+                if(strcasecmp($newvalue, $name1)==0){
+                    $found++;
+                    $newvalue = $name.' '.$found;
+                    $not_unique = true;
+                    break;
+                }
+            }
+        }while ($not_unique);
 
         return $newvalue;
     }

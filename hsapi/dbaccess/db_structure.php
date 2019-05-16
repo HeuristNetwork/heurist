@@ -1249,7 +1249,7 @@ function dbs_GetRectypeConstraint($system) {
     //    
     function removeLastNum($name){
 
-        $k = strrpos($name," ");
+        $k = strrpos($name," "); //find last space
 
         if( $k>0 && is_numeric(substr($name, $k+1)) ){
             $name = substr($name,0,$k);
