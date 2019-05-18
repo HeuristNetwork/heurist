@@ -498,9 +498,17 @@ function hSvsEdit(args) {
                     
                     var filter = $dlg.find('#svs_Query').val();
                     if(filter.trim()!=''){
-                        var rules = $dlg.find('#svs_Rules').val(); //clean version of rules (without codes)
-
-                        var res = Hul.getJSON_HeuristQueryAndRules(filter, rules);
+                        
+                        var req = {q:filter, rules:$dlg.find('#svs_Rules').val()};
+                        
+                        if($dlg.find('#svs_RulesOnly').is(':checked')){
+                            req['rulesonly'] = 1;
+                        }     
+                        if($dlg.find('#svs_UGrpID')=='bookmark'){
+                            req['w'] = 'b';
+                        }     
+                        
+                        var res = Hul.hQueryStringify(req);
                         
                         var buttons = {};
                         buttons[window.hWin.HR('Copy')]  = function() {

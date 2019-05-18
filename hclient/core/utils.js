@@ -168,7 +168,8 @@ window.hWin.HEURIST4.util = {
     
     //
     // from object to query string
-    //
+    // JSON to URL
+    // hQueryComposeURL
     composeHeuristQueryFromRequest: function(query_request, encode){
             var query_string = 'db=' + window.hWin.HAPI4.database;
             
@@ -276,12 +277,10 @@ window.hWin.HEURIST4.util = {
             return null;
         }
         
-        if(typeof rules==='string'){
-            try{
-                rules = JSON.parse(rules);
-            }catch(ex){
-                return null;
-            }
+        rules = window.hWin.HEURIST4.util.isJSON(rules); //parses if string
+        
+        if(rules===false){
+            return null;
         }
         
         for(var k=0; k<rules.length; k++){
@@ -379,7 +378,8 @@ window.hWin.HEURIST4.util = {
     
     //
     // converts query string to object
-    //
+    // URL to JSON
+    // hQueryParseURL
     parseHeuristQuery: function(qsearch)
     {
         var domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '';
@@ -403,7 +403,8 @@ window.hWin.HEURIST4.util = {
                         qsearch = r.q;
                     }
                     domain = r.w?r.w:'all';
-                    primary_rt= r.primary_rt; 
+                    primary_rt = r.primary_rt; 
+                    rulesonly = r.rulesonly;
                 }
             }
             
@@ -414,7 +415,7 @@ window.hWin.HEURIST4.util = {
     },
 
     //
-    //
+    // returns json or false
     //
     isJSON: function(value){
         
@@ -434,41 +435,49 @@ window.hWin.HEURIST4.util = {
     
     //
     // get combination query and rules as json array for map query layer
+    // Returns current search request as stringified JSON
     //    
-    getJSON_HeuristQueryAndRules: function(filter, rules){
-
-        var res = '';
-        if(!window.hWin.HEURIST4.util.isempty(filter.trim())){
-            
-            var hasRules = !window.hWin.HEURIST4.util.isempty(rules);
-            if(hasRules){
-                res = '{"q":';
-            }
-
-            var r = window.hWin.HEURIST4.util.isJSON(filter);            
-
+    hQueryStringify: function(request){
+        
+        var res = {};
+        
+        if(window.hWin.HEURIST4.util.isempty(request.q)){
+            return '';
+        }else {
+            var r = window.hWin.HEURIST4.util.isJSON(request.q);
             if(r!==false){
                 if(r.facets) return ''; //faceted search not allowed for map queries
-                res += filter;
+                res['q'] = JSON.stringify(r);
             }else{
-                //this is not json query
-                if(hasRules){
-                    //escape backslash to avoid errors
-                    res += ('"'+filter.split('"').join('\\\"')+'"');
-                }else{
-                    res = filter;    
-                }
-                
-            }
-
-            if(hasRules){
-                res = res + ',"rules":'+rules+'}';
-            } else{
-                //res = res + '}';     
+                res['q'] = request.q;
             }
         }
         
-        return res;
+        if(!window.hWin.HEURIST4.util.isempty(request.rules)){
+            //cleanRules?
+            var r = window.hWin.HEURIST4.util.isJSON(request.rules);
+            if(r!==false){
+                if(r.facets) return ''; //faceted search not allowed for map queries
+                res['rules'] = JSON.stringify(r);
+            }else{
+                res['rules'] = request.rules;
+            }
+        }
+
+        if(!window.hWin.HEURIST4.util.isempty(request.w) && (request.w=='a' || request.w=='all')){
+                res['w'] = request.w;
+        }
+        
+        if(!(window.hWin.HEURIST4.util.isempty(request.w) || request.w=='a' || request.w=='all')){
+                res['w'] = request.w;
+        }
+        
+        if(request.rulesonly==1 || request.rulesonly==true){
+                res['rulesonly'] = 1;
+        }
+        
+        
+        return JSON.stringify(res);;
     },
     
     //

@@ -400,7 +400,7 @@ public static function importRecords($filename, $session_id){
                 
                 if(is_array($values) && @$values['dty_ID']>0){ //interpreatable format
                     $dty_ID = $values['dty_ID'];
-                    $values = array($values);
+                    $values = array($values['value']);
                 }
                 
                 //field id in target database
@@ -513,6 +513,7 @@ public static function importRecords($filename, $session_id){
             $out = recordSave(self::$system, $record, false);  //see db_records.php
 
             if ( @$out['status'] != HEURIST_OK ) {
+                //$origninal_RecID = $record_src['rec_ID'];
                 //error_log('NOT SAVED');
                 //error_log(print_r($record, true));
                 $is_rollback = true;

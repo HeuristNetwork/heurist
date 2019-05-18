@@ -83,6 +83,11 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListMenu.js"></script>
+
 
 <!--
 // WARNING: CHANGES MADE TO vis.js
@@ -158,11 +163,23 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         background-color:rgb(142, 169, 185);
     }
     
+    
     span.fancytree-node,
     span.fancytree-title,
     div.svs-contextmenu3 > span.ui-icon{
         vertical-align:bottom;
         padding-left:2px;
+    }
+    div.svs-contextmenu4{
+        cursor:pointer;
+        position:absolute;
+        right:7px;
+        width: 16;
+        height: 16;
+        margin-top: -16;
+        display: none;
+        background-position: 0 0; 
+        background-image: url(../../external/jquery.fancytree/skin-themeroller/loading.gif);
     }
     div.svs-contextmenu3{
         cursor:pointer;

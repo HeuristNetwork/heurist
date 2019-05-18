@@ -60,7 +60,7 @@ function hMapLayer2( _options ) {
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
 
-            _map_overlay = _addTiledImage();
+            _addTiledImage();
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
@@ -190,7 +190,8 @@ function hMapLayer2( _options ) {
                     _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                                 response, 
                                                 null, null,
-                                                _recordset.fld(options.rec_layer || _record, 'rec_Title') );
+                                                _recordset.fld(options.rec_layer || _record, 'rec_Title'),
+                                                options.preserveViewport );
                 }
             }
         );          
@@ -235,7 +236,8 @@ function hMapLayer2( _options ) {
                         _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                                         geojson_data, 
                                                         timeline_data, layer_style,
-                                                        _recordset.fld(options.rec_layer || _record, 'rec_Title') );
+                                                        _recordset.fld(options.rec_layer || _record, 'rec_Title'), //name for timeline
+                                                         options.preserveViewport );
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -267,6 +269,41 @@ function hMapLayer2( _options ) {
             }
 
         },
+        
+        
+        getBounds: function (format){
+
+            var bnd = options.mapwidget.mapping('getBounds', _nativelayer_id);
+            
+            if(!(bnd && bnd.isValid())) return null;
+
+            if(format=='wkt'){
+                var aCoords = [];
+                var sw = bnd.getSouthWest();
+                var nw = bnd.getNorthEast();
+
+                //move go util_geo?
+                function __formatPntWKT(pnt, d){
+                    if(isNaN(d)) d = 7;
+                    var lat = pnt.lat;
+                    lat = lat.toFixed(d);
+                    var lng = pnt.lng;
+                    lng = lng.toFixed(d);
+                    return lng + ' ' + lat;               
+                }            
+
+                aCoords.push(__formatPntWKT(sw));  
+                aCoords.push(__formatPntWKT( {lat:nw.lat, lng:sw.lng} ));  
+                aCoords.push(__formatPntWKT(nw));  
+                aCoords.push(__formatPntWKT( {lat:sw.lat, lng:nw.lng} ));  
+                aCoords.push(__formatPntWKT(sw));  
+                return "POLYGON ((" + aCoords.join(",") + "))"
+            }else{
+                return bnd;
+            }
+        },
+
+
 
         removeLayer: function(){
             if(_nativelayer_id>0)
@@ -276,6 +313,10 @@ function hMapLayer2( _options ) {
         applyStyle: function( newStyle ){
             if(_nativelayer_id>0)
                 options.mapwidget.mapping('applyStyle', _nativelayer_id, newStyle);
+        },
+        
+        getNativeId: function(){
+            return _nativelayer_id;
         }
         
     }

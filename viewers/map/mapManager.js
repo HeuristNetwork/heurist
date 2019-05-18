@@ -20,7 +20,7 @@
 
 L.Control.Manager = L.Control.extend({
     onAdd: function(map) {
-        var container = $('<div>').css({'width':'200px'});
+        var container = $('<div>').css({'width':'200px','overflow-y':'auto'});
         return container[0];
     },
 
@@ -56,6 +56,8 @@ function hMapManager( _options )
         
     mapDocuments = null, //hMapDocument for db map docs,  Note: mapdocument with index=0 is search results
     mapdoc_treeview = null,
+    
+    maxHeight = 9999999,
     
     basemaplayer =null;  //current basemap layer
     
@@ -111,6 +113,8 @@ function hMapManager( _options )
                     //replace all ui-icon-triangle-1-s to se
                     cdivs.find('.ui-icon-triangle-1-e').removeClass('ui-icon-triangle-1-se');
                     cdivs.find('.ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-se');
+                    
+                    that.setHeight();
 
                 }
             });
@@ -346,7 +350,9 @@ function hMapManager( _options )
                                 //          initId: "treeData",
                                 //cookieId: "fancytree-Cb3",
                                 //idPrefix: "fancytree-Cb3-"
-                            });        
+                            });     
+                            
+       that.setHeight();
     
     }
     
@@ -376,20 +382,31 @@ function hMapManager( _options )
                 +'<span class="ui-icon ui-icon-zoomin" title="Zoom to '+item.data.type+' extent"></span>'
                 +'<span class="ui-icon ui-icon-pencil" title="Edit '
                     +(item.data.type=='mapdocument' || mapdoc_id>0?(item.data.type+' record'):' symbology')+'"></span>'
-                +(item.data.type=='mapdocument' && mapdoc_id>0
-                    ?'<span class="ui-icon ui-icon-plus" title="Add new layer to mapdocument"></span>'
+                +( ((item.data.type=='mapdocument' && mapdoc_id>0) || mapdoc_id==0)
+                    ?('<span class="ui-icon ui-icon-plus" title="'
+                        + (mapdoc_id==0?'Save result set as layer/datasource records pair'
+                                      :'Add new layer to mapdocument') +'"></span>')
                     :'')    
                 + (((mapdoc_id>0 && recid==-1)||mapdoc_id==0)
                     ?'<span class="ui-icon ui-icon-close" title="Unload and remove from map"></span>':'')+
                 +'</div>').appendTo(parent_span);
 
+            $('<div class="svs-contextmenu4"/>').appendTo(parent_span);
+                
+                
             actionspan.find('.ui-icon').click(function(event){
                 var ele = $(event.target);
+                var parent_span = ele.parents('span.fancytree-node');
+                
+                function __in_porgress(){
+                    parent_span.find('.svs-contextmenu4').show();
+                    parent_span.find('.svs-contextmenu3').hide();
+                }
+
                 //timeout need to activate current node    
                 setTimeout(function(){                         
                     var recid = ele.parent('.svs-contextmenu3').attr('data-recid');
                     var mapdoc_id = ele.parent('.svs-contextmenu3').attr('data-mapdoc');
-                    
                     
                         if(ele.hasClass('ui-icon-zoomin')){
                             
@@ -406,14 +423,48 @@ function hMapManager( _options )
                             
                         }else if(ele.hasClass('ui-icon-plus')){ //add new layer to map document
                         
-                        
+                            __in_porgress();
+                            if(mapdoc_id>0){
+
+                                mapDocuments.selectLayerRecord(mapdoc_id, function(data){
+                                        parent_span.find('.svs-contextmenu4').hide();
+                                        if(data){
+                                            item.removeChildren();
+                                            item.addChildren( data );
+                                            setTimeout(function(){
+                                            $.each(item.children, function( idx, item_ch ){
+                                                _defineActionIcons( item_ch );
+                                                });},500);
+                                        }
+                                    });
+                                /*
+                                var dfd = new $.Deferred();
+                                mapDocuments.selectLayerRecord(mapdoc_id, dfd);
+                                $.when( dfd.promise() ).done(
+                                    function(data){
+                                        item.removeChildren();
+                                        item.addChildren( data );
+                                    }
+                                );
+                                */
+                            }else{
+                                mapDocuments.saveResultSetAsLayerRecord(recid, function(data){
+                                        ele.hide();
+                                        parent_span.find('.svs-contextmenu4').hide();
+                                });
+                            }
                             
                         }else if(ele.hasClass('ui-icon-pencil')){
                             
                                 if(mapdoc_id>0){
+
+                                    __in_porgress();
                                     //edit layer or mapdocument record
                                     window.hWin.HEURIST4.ui.openRecordEdit(recid>0?recid:mapdoc_id, null,
                                     {selectOnSave:true,
+                                     onClose: function(){ 
+                                         parent_span.find('.svs-contextmenu4').hide();
+                                     },
                                      onselect:function(event, data){
                                         if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                             var recset = data.selection;
@@ -444,6 +495,8 @@ function hMapManager( _options )
                                         }
                                         
                                         //render new symbology in legend
+                                        
+                                        //or reload map document tree
                                         
                                     });
                                 }
@@ -494,8 +547,10 @@ function hMapManager( _options )
                     }else{
                         node = $(event.target).parents('.fancytree-node');
                     }
-                    var ele = $(node).find('.svs-contextmenu3');
-                    ele.css({'display':'inline-block'});//.css('visibility','visible');
+                    if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
+                        var ele = $(node).find('.svs-contextmenu3');
+                        ele.css({'display':'inline-block'});//.css('visibility','visible');
+                    }
                 }
             );               
             $(parent_span).mouseleave(
@@ -520,6 +575,16 @@ function hMapManager( _options )
             _defineContent(groupID, data, grp_div.find('.ui-accordion-content'));
         },
         */
+        setHeight: function( val ){
+           
+           if(val>0) maxHeight  = val;
+            
+           var ele = options.container.find('.svs-acordeon:visible');
+           var h = 20;
+           $(ele).each(function(idx,item){h=h+$(item).height()});
+            
+           options.container.height( Math.min(h, maxHeight) );
+        },
         
         // params = [basemaps,search,mapdocuments|onedoc]
         //
@@ -563,14 +628,15 @@ function hMapManager( _options )
         // adds new layer to search results mapdoc
         // data - recordset, heurist query or json
         //
-        addLayerToSearchResults: function( data, dataset_name )
+        addSearchResult: function( data, dataset_name )
         {
-            mapDocuments.addLayer( 0, data, dataset_name );
+            mapDocuments.addSearchResult( 0, data, dataset_name );
             
             //refresh search results 
             var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
             _defineContent('search', null, grp_div.find('.ui-accordion-content'));
             //defineContent( 'search' );
+            setHeight();
         },
 
         //

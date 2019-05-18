@@ -1585,6 +1585,18 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
             return this.setRecord(recID, record);
         },
+
+        //
+        // direct copy record
+        //
+        addRecord2:function(recID, record){
+            var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
+            if(idx<0){ //add new
+                order.push(recID);
+                total_count = total_count+1;
+            }
+            records[recID] = record;
+        },
         
         //
         // add/replace record with given ID

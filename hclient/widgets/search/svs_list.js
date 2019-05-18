@@ -1873,9 +1873,9 @@ $.widget( "heurist.svs_list", {
         var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
         if(svs && !svs[_FACET]){
             var qsearch = svs[_QUERY];
-            var prms = Hul.parseHeuristQuery(qsearch);
+            var prms = Hul.parseHeuristQuery(qsearch); //url to json
             
-            var res = Hul.getJSON_HeuristQueryAndRules(prms.q, prms.rules);
+            var res = Hul.hQueryStringify(prms); //json to string
 
             if(!Hul.isempty(res)){
                         var dummy = document.createElement("input");

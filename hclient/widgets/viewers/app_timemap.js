@@ -211,7 +211,7 @@ $.widget( "heurist.app_timemap", {
             if(this.options.leaflet){ //LEAFLET
             
                 if(that.options.recordset){
-                    mapping.mapping('addDataset', that.options.recordset, 'Current query');
+                    mapping.mapping('addSearchResult', that.options.recordset, 'Current query');
                 //}else if(this.options.selection){
                 }
                 

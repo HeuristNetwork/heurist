@@ -369,10 +369,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         .css({'height':'16px', 'width':'16px'})
                         .click(function( event ) {
                             
-                                var filter = window.hWin.HEURIST4.current_query_request.q;
-                                var rules = window.hWin.HEURIST4.current_query_request.rules;
-                                
-                                var res = window.hWin.HEURIST4.util.getJSON_HeuristQueryAndRules(filter, rules);
+                                var res = window.hWin.HEURIST4.util.hQueryStringify(window.hWin.HEURIST4.current_query_request);
                                 
                                 $dlg.find('#svs_Query').val(res);
                         });

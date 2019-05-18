@@ -1,7 +1,7 @@
 /**
 * @todo for mapping+timeline
 
-Init standalone map (published) by query or mapdoc id in url  - 1 hr
++Init standalone map (published) by query or mapdoc id in url  - 1 hr
 +Filter timeline visible range to map - 1hr
 +Highlight selection on map 1-2hr
 
@@ -9,7 +9,7 @@ Cosmetics/workflow 2hr
 Scroll in map legend
 Render symbol colour in legend
 Publish button
-Zoom to entire mapdoc
++Zoom to entire mapdoc
 Add layer to mapdoc (open select record dialog from legend)
 Save current result set as layer+datasource records 
 
@@ -148,6 +148,8 @@ $.widget( "heurist.mapping", {
     
     timeline_items: {},
     timeline_groups: [], 
+    notimeline: false,
+    is_timeline_disabled:0,
 
     selected_rec_ids:[],
 
@@ -210,6 +212,7 @@ $.widget( "heurist.mapping", {
                 //global 
 //console.log('LAYOUT resize end');
                 //if(mapping) mapping.onWinResize();
+                that._adjustLegendHeight();
             }
             
         };
@@ -228,7 +231,7 @@ $.widget( "heurist.mapping", {
         layout_opts.south__onresize_end = function() {
             //if(mapping) mapping.setTimelineMinheight();
             //console.log('timeline resize end');
-            //_adjustLegendHeight();
+            that._adjustLegendHeight();
         };
 
         this.mylayout = $(this.options.element_layout).layout(layout_opts);
@@ -277,7 +280,8 @@ $.widget( "heurist.mapping", {
                 that.setFeatureVisibility(hide_rec_ids, false);
             }});
 
-        this.nativemap.setView([51.505, -0.09], 13); //@todo change to bookmarks
+        //LONDON this.nativemap.setView([51.505, -0.09], 13); //@todo change to bookmarks
+        this.nativemap.setView([20, 20], 1); //@todo change to bookmarks
         
         //4. INIT CONTROLS
         if(this.main_popup==null) this.main_popup = L.popup();
@@ -300,6 +304,8 @@ $.widget( "heurist.mapping", {
         this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element});
         
         this.updateLayout(this.options.layout_params);
+        
+        this._adjustLegendHeight();
         
     },
 
@@ -329,6 +335,13 @@ $.widget( "heurist.mapping", {
     },
     
     //-------
+    _adjustLegendHeight: function(){
+        var ele = $('#'+map_element_id);
+//console.log('rezize '+ele.height());
+        if(this.mapManager) this.mapManager.setHeight(ele.height()-50); //adjust legend height    
+    
+    },
+    
     
     //that.onInitComplete();
     //
@@ -395,9 +408,9 @@ $.widget( "heurist.mapping", {
     // data - recordset, heurist query or json
     // this method is invoked on global onserachfinish event in app_timemap
     //
-    addDataset: function(data, dataset_name) {
+    addSearchResult: function(data, dataset_name) {
         
-        this.mapManager.addLayerToSearchResults( data, dataset_name );
+        this.mapManager.addSearchResult( data, dataset_name );
     },
     
     //
@@ -497,7 +510,7 @@ $.widget( "heurist.mapping", {
     // adds geojson layer to map
     // returns nativemap id
     //
-    addGeoJson: function(geojson_data, timeline_data, layer_style, dataset_name){
+    addGeoJson: function(geojson_data, timeline_data, layer_style, dataset_name, preserveViewport){
 
 
         if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) || 
@@ -573,6 +586,9 @@ $.widget( "heurist.mapping", {
             //apply default style and fill markercluster
             this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style:{color: "#00b0f0"});
 
+            if(!preserveViewport){
+                   this.zoomToLayer(new_layer._leaflet_id);           
+            }
             
             return new_layer._leaflet_id;
         }        
@@ -680,6 +696,8 @@ $.widget( "heurist.mapping", {
             }
                 
             this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);          
+            
+            this._updatePanels()
     },
     
     //
@@ -713,25 +731,80 @@ $.widget( "heurist.mapping", {
     //
     //
     //
-    zoomToLayer: function(layer_id){
+    _mergeBounds: function(bounds){
+
+        var res = null;
+
+        for(var i=0; i<bounds.length; i++){
+            if(bounds[i]){
+
+                if(!(bounds[i] instanceof L.LatLngBounds)){
+                    if($.isArray(bounds[i]) && bounds[i].length>1 ){
+                        bounds[i] = L.latLngBounds(bounds[i]);
+                    }else{
+                        continue;
+                    }
+                }
+
+                if( bounds[i].isValid() ){
+                    if(res==null){
+                        res = bounds[i];
+                    }else{
+                        res.extend(bounds[i]);
+                        //bounds[i].getNorthWest());
+                        //res.extend(bounds[i].getSouthEast());
+                    } 
+                }
+            }
+        }
+
+        return res;
+
+    },
+
+    //
+    //
+    //
+    getBounds: function(layer_ids){
         
-        var affected_layer = this.all_layers[layer_id];
+        if(!$.isArray(layer_ids)){
+            layer_ids = [layer_ids];
+        }
         
-        if(affected_layer){
-            var bounds = affected_layer.getBounds();
+        var bounds = [];
+        
+        for(var i=0; i<layer_ids.length; i++){
             
-            if(window.hWin.HEURIST4.util.isArrayNotEmpty( this.all_markers[layer_id] ) && this.all_clusters[layer_id]){
-                var bounds2 = this.all_clusters[layer_id].getBounds();
-                if(bounds && bounds2){
-                    bounds.extend(bounds2.getNorthWest());
-                    bounds.extend(bounds2.getSouthEast());
-                }else if(bounds2){
-                    bounds = bounds2;
-                }    
+            var layer_id = layer_ids[i];
+            
+            var affected_layer = this.all_layers[layer_id];
+            if(affected_layer){
+                var bnd = affected_layer.getBounds()
+                bounds.push( bnd );
+                
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty( this.all_markers[layer_id] ) 
+                        && this.all_clusters[layer_id])
+                {
+                    bnd = this.all_clusters[layer_id].getBounds();
+                    bounds.push( bnd );
+                }
             }
             
-            if(bounds) this.nativemap.fitBounds(bounds);
         }
+        
+        bounds = this._mergeBounds(bounds);
+        
+        return bounds;
+    },
+    
+    //
+    //
+    //
+    zoomToLayer: function(layer_ids){
+        
+        var bounds = this.getBounds(layer_ids);
+        
+        if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);
         
     },
     
@@ -763,6 +836,7 @@ $.widget( "heurist.mapping", {
             if(this.removeTimelineGroup(layer_id)){
                 //update timeline
                 this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);
+                this._updatePanels()
             }
         }
     },
@@ -795,6 +869,8 @@ $.widget( "heurist.mapping", {
         var affected_layer = this.all_layers[layer_id];
         if(!affected_layer) return;
 
+//console.log('new style');
+        
         this._clearHighlightedMarkers();
 
         
@@ -969,7 +1045,7 @@ $.widget( "heurist.mapping", {
             }
         }
 
-        affected_layer.setStyle(function(feature){ that._stylerFunction(feature); });
+        affected_layer.setStyle(function(feature){ return that._stylerFunction(feature); });
         
     },
     
@@ -1085,6 +1161,9 @@ $.widget( "heurist.mapping", {
             use_style = window.hWin.HEURIST4.util.cloneJSON( use_style );
             use_style.color = '#ffff00';
         }
+        
+//console.log('styler '+(feature.properties?feature.properties.rec_ID:'')+'  '+use_style.color);
+        
         return use_style;
         
     },
@@ -1101,7 +1180,7 @@ $.widget( "heurist.mapping", {
         
         that.nativemap.eachLayer(function(top_layer){    
             if(top_layer instanceof L.LayerGroup){
-                top_layer.setStyle(function(feature) {that._stylerFunction(feature); });
+                top_layer.setStyle(function(feature) { return that._stylerFunction(feature); });
             }
         });
         
@@ -1192,7 +1271,7 @@ $.widget( "heurist.mapping", {
                                 var ele = layer.getElement();
                                 if(ele) ele.style.display = vis_val;
                           }else{
-                                layer.setStyle({display:vis_val});
+                                    layer.setStyle({display:vis_val});
                           }
                           */
                       }
@@ -1245,7 +1324,7 @@ $.widget( "heurist.mapping", {
     getNativemap: function(){
         return this.nativemap;
     },
-    
+
     //
     // show/hide layout panels and map controls
     // params: 
@@ -1285,10 +1364,10 @@ $.widget( "heurist.mapping", {
         
         //show/hide map or timeline
         var nomap = __parseval(params['nomap']);
-        var notimeline = __parseval(params['notimeline']);
+        this.notimeline = __parseval(params['notimeline']);
         
         var layout_opts = {};
-        if(notimeline){
+        if(this.notimeline){
             layout_opts.south__size = 0;
             layout_opts.south__spacing_open = 0;
             layout_opts.south__spacing_closed = 0;
@@ -1345,7 +1424,47 @@ $.widget( "heurist.mapping", {
         }
         
         // extent: fixed extent    
+    },
+    
+    
+    /**
+    * show/hide panels map and timeline
+    */
+    _updatePanels: function(){
+        
+        var ismap = true, no_time_data = (this.timeline_groups.length==0);
+        
+        if(this.is_timeline_disabled!==(this.notimeline || no_time_data)){
+
+            this.is_timeline_disabled=(this.notimeline || no_time_data);
+            
+            var layout_opts = {};
+            var th;
+            if(this.notimeline || no_time_data){
+                layout_opts.south__size = 0;
+                layout_opts.south__spacing_open = 0;
+                layout_opts.south__spacing_closed = 0;
+            }else {
+                th = Math.floor($(this.options.element_layout).height()*0.2);
+                layout_opts.south__size = th>200?200:th;
+                layout_opts.south__spacing_open = 7;
+                layout_opts.south__spacing_closed = 12;
+                layout_opts.center__minHeight = 30;
+                layout_opts.center__minWidth = 200;
+            }
+            var mylayout = $(this.options.element_layout).layout(layout_opts);
+            
+            if(this.notimeline || no_time_data){
+                mylayout.hide('south');
+            }else{
+                mylayout.show('south');
+                mylayout.sizePane('south', th)    
+            }
+            
+
+        }
     }
+    
     
     
 });

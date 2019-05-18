@@ -34,14 +34,17 @@ function hMapDocument( _options )
     
     RT_MAP_DOCUMENT = 0,
     RT_MAP_LAYER = 0,
+    DT_MAP_LAYER = 0,
     DT_DATA_SOURCE = 0,
     RT_QUERY_SOURCE = 0,
     DT_QUERY_STRING = 0,
     DT_SYMBOLOGY = 0, //@todo rename to DT_SYMBOLOGY
+    DT_GEO_OBJECT = 0,
+    DT_NAME = 0,
     
     map_documents = null, //recordset - all loaded documents
     map_documents_content = {}, //mapdoc_id=>recordset with all layers and datasources of document
-    //map_documents_layers = {};  //native map layers
+    
     _uniqueid = 1;   
     
     // Any time the widget is called with no arguments or with only an option hash, 
@@ -54,10 +57,13 @@ function hMapDocument( _options )
         
         RT_MAP_DOCUMENT = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'];
         RT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'];
+        DT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'];
         DT_DATA_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'];
         DT_QUERY_STRING = window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING'];
         RT_QUERY_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE'];
         DT_SYMBOLOGY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'];
+        DT_NAME      = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+        DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
         
         //_loadMapDocuments();
     }
@@ -210,7 +216,66 @@ function hMapDocument( _options )
         }//for
     }
 
+    //
+    // adds layer and datasource records to mapdocument recordset, adds map on map, refresh tree
+    //
+    function _addLayerRecord(mapdoc_id, rec_ids, callback){
+        
+            if(!(map_documents_content[mapdoc_id] && map_documents_content[mapdoc_id].isA("hRecordSet") )) return;
+            if(!rec_ids) return;
+            if(!$.isArray(rec_ids)) rec_ids = [rec_ids];
+        
+            var request = {
+                        q: {"ids":rec_ids.join(',')}, 
+                        rules:[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}], //data sources linked to layers
+                        w: 'a',
+                        detail: 'detail',
+                        source: 'map_document'};
+            //perform search        
+            window.hWin.HAPI4.RecordMgr.search(request,
+                function(response){
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        var resdata = new hRecordSet(response.data);
+                        
+                        //add to map_document recordset
+                        var idx, records = resdata.getRecords();
+                        for(idx in records){
+                            if(idx)
+                            {
+                                var record = records[idx];
+                                var recID  = resdata.fld(record, 'rec_ID');
+                                
+                                map_documents_content[mapdoc_id].addRecord2(recID, record);
+                                
+                                if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER)
+                                {
+                                    var datasource_recID = resdata.fld(record, DT_DATA_SOURCE);    
+                                    var datasource_record = resdata.getById( datasource_recID );
+                                    
+                                    //creates and add layer to nativemap
+                                    //returns mapLayer object
+                                    record['layer'] = new hMapLayer2({rec_layer: record, 
+                                                                      rec_datasource: datasource_record, 
+                                                                      mapdoc_recordset: resdata, //need to get fields
+                                                                      mapwidget: options.mapwidget});
+                                }
+                            }
+                        }//for
+                        
+                        if($.isFunction(callback)){
+                            callback.call(that, _getTreeData(mapdoc_id));
+                        }
+                        
+                    }else {
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        if($.isFunction(callback)) callback.call(that);
+                    }
 
+                }
+            );           
+        
+    }
 
     // get layer record, take symbology field and title 
     // open symbology editor
@@ -294,25 +359,28 @@ function hMapDocument( _options )
         
         
         //
-        // adds new layer to mapdoc
+        // adds search results or query as a new layer to mapdoc (usuallly "Search Results")
         // data - recordset, heurist query or json
         //
-        addLayer: function(mapdoc_id, data, dataset_name){
+        addSearchResult: function(mapdoc_id, data, dataset_name){
 
-            var curr_request;
+            var curr_request, original_heurist_query;
             
             if( (typeof data.isA == "function") && data.isA("hRecordSet") ){
                     
                     var recset = data;
                     
+                    original_heurist_query = recset.getRequest();
+                    
                     if(recset.length()<2001){ //limit query by id otherwise use current query
                         curr_request = { w:'all', q:'ids:'+recset.getIds().join(',') };
                     }else{
-                        curr_request = recset.getRequest();
+                        curr_request = original_heurist_query;
                     }            
                 
             }else if( window.hWin.HEURIST4.util.isObject(data)&& data['q']) {
                 
+                 original_heurist_query = data;
                  curr_request = data;
             }
                 
@@ -327,7 +395,7 @@ function hMapDocument( _options )
             
             //var _record = recset.getById(dataset_name);
             var _record;
-            if(search_res && search_res.length()>0){
+            if(search_res && search_res.length()>0){  //layer with such name already exists - replace
                 
                 var recID = search_res.getOrder();
                 recID = recID[0];
@@ -341,11 +409,15 @@ function hMapDocument( _options )
                 _record = recset.addRecord(_uniqueid, _record);
                 _uniqueid++;
             }
+            _record['original_heurist_query'] = original_heurist_query;
             
             recset.setFld(_record, 'layer',
                         new hMapLayer2({rec_datasource: _record, 
                                               mapdoc_recordset: recset, //need to get fields
-                                              mapwidget: options.mapwidget}));
+                                              mapwidget: options.mapwidget,
+                                              preserveViewport:(mapdoc_id!=0) })); //zoom to current search
+                                              
+                                              
             
         },
          
@@ -353,13 +425,6 @@ function hMapDocument( _options )
         {
             return _getTreeData( mapdoc_id );
         },
-        
-        //@todo
-        zoomToMapDocument: function(mapdoc_id){
-           console.log('todo zoom to maodoc '+mapdoc_id); 
-           //options.mapwidget.mapping('zoomToExtent', map_document_extent);  
-        },
-
         
         //
         // show/hide entire map document
@@ -422,13 +487,162 @@ function hMapDocument( _options )
         //         2) change title in tree and timeline
         editSymbology: function( mapdoc_id, rec_id, callback ){
             _editSymbology( mapdoc_id, rec_id, callback );    
-        }
+        },
+        
+        //
+        //
+        //
+        zoomToMapDocument: function(mapdoc_id){
 
+
+            var resdata = map_documents_content[mapdoc_id];
+            var ids = [];
+            if(resdata){
+                var idx, records = resdata.getRecords();
+                for(idx in records){
+                    if(idx)
+                    {
+                        var record = records[idx];
+                        if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER && record['layer']){
+                            ids.push((record['layer']).getNativeId());
+                        }
+                    }
+                }
+            }
+            if(ids.length>0)
+                options.mapwidget.mapping('zoomToLayer', ids);
+        },
+        
+        //
+        // opens record selector popup and adds selected layer to given mapdoc
+        //
+        selectLayerRecord: function(mapdoc_id, callback){
+            
+            var popup_options = {
+                            select_mode: 'select_single', //select_multi
+                            select_return_mode: 'recordset',
+                            edit_mode: 'popup',
+                            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
+                            title: window.hWin.HR('Select or create a layer record'),
+                            rectype_set: RT_MAP_LAYER,
+                            parententity: 0,
+                            
+                            onselect:function(event, data){
+                                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                        var recordset = data.selection;
+                                        var record = recordset.getFirstRecord();
+                                        var targetID = recordset.fld(record,'rec_ID');
+                                        
+                                        var request = {a: 'add',
+                                                    recIDs: mapdoc_id,
+                                                    dtyID:  DT_MAP_LAYER,
+                                                    val:    targetID};
+                                        
+                                        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                                                if(response.status == hWin.ResponseStatus.OK){
+                                                    //refresh treeview - add layer to mapdocument
+                                                    _addLayerRecord(mapdoc_id, targetID, callback);
+                                                }else{
+                                                    hWin.HEURIST4.msg.showMsgErr(response);
+                                                    if($.isFunction(callback)) callback.call(that);
+                                                }
+                                        });                                        
+                                     }else{
+                                        if($.isFunction(callback)) callback.call(that);
+                                     }
+                            }
+            };//popup_options
+
+                    
+            var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
+                {width: null,  //null triggers default width within particular widget
+                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+
+            popup_options.width = Math.max(usrPreferences.width,710);
+            popup_options.height = usrPreferences.height;
+            
+            window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+        },
+        
+        //
+        //
+        //
+        saveResultSetAsLayerRecord: function(rec_id, callback){
+            
+            var recset = map_documents_content[0];
+            if(!recset) return;
+            
+            var _record = recset.getById(rec_id);
+
+            var r_name =  recset.fld(_record, 'rec_Title'),
+                r_query = _record['original_heurist_query']; //recset.fld(_record, DT_QUERY_STRING),
+                r_style = recset.fld(_record, DT_SYMBOLOGY);
+                
+                
+            r_query = Hul.hQueryStringify(r_query);
+            if(r_style) r_style = JSON.stringify(r_style);
+            
+            if(window.hWin.HEURIST4.util.isempty( r_query )) return;
+            var bnd = _record['layer'].getBounds('wkt');
+            if(!bnd){
+                return;
+            }
+            
+            
+            var details = {};
+            details['t:'+DT_NAME] = [ r_name ];
+            details['t:'+DT_QUERY_STRING] = [ r_query ];
+            details['t:'+DT_GEO_OBJECT] = ['r '+bnd ];
+            
+            
+            
+            
+            
+            var request = {a: 'save',    //add new relationship record
+                        ID:0, //new record
+                        RecTypeID: RT_QUERY_SOURCE,
+                        //RecTitle: recset.fld(_record,'rec_Title'),
+                        details: details};
+            
+            
+            //save datasource record
+            window.hWin.HAPI4.RecordMgr.saveRecord(request, function(response){
+                    if(response.status == hWin.ResponseStatus.OK){
+                        var datasource_recID = response.data; //add rec id
+                        
+                        var details = {};
+                        details['t:'+DT_NAME] = [ r_name ];
+                        details['t:'+DT_SYMBOLOGY] = [ r_style ];
+                        details['t:'+DT_DATA_SOURCE] = [ datasource_recID ];
+                            
+                        var request = {a: 'save',    //add new relationship record
+                                    no_validation: true,
+                                    ID:0, //new record
+                                    RecTypeID: RT_MAP_LAYER,
+                                    details: details};
+                        
+                        window.hWin.HAPI4.RecordMgr.saveRecord(request, function(response){
+                            if(response.status == hWin.ResponseStatus.OK){
+                                //open new record editor
+                                window.hWin.HEURIST4.ui.openRecordEdit(response.data);
+                                window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Records saved'));
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                            if($.isFunction(callback)) callback.call(that);
+                        });
+                        
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        if($.isFunction(callback)) callback.call(that);
+                    }
+            });
+        }
+          
     }//end public methods
 
     _init( _options );
     return that;  //returns object
 };
 
-        
-        
+               
