@@ -282,9 +282,10 @@ function hMapManager( _options )
                                         if(data.node.data.type=='mapdocument')
                                             data.node.setSelected(true, {noEvents:true} );
                                         
-                                        $.each(data.node.children, function( idx, item ){
-                                            _defineActionIcons( item );
-                                    }) }, 500);                                           
+                                        //$.each(data.node.children, function( idx, item ){
+                                        //    _defineActionIcons( item );
+                                        //}) 
+                                    }, 500);                                           
                                 },
                                 select: function(e, data) {  //show/hide
                                     
@@ -345,6 +346,55 @@ function hMapManager( _options )
                                         data.node.toggleSelected();
                                         return false;
                                     }
+                                },
+                                renderNode: function(event, data) {
+                                    // Optionally tweak data.node.span
+                                    var item = data.node;
+                                    if(item.data.type=='layer'){
+                                        var rec_id = item.key;
+                                        var mapdoc_id = item.data.mapdoc_id;
+                                        
+                                        var style = mapDocuments.getSymbology( mapdoc_id, rec_id );
+                                        
+                                        if(style['rectypeIconUrl']){
+                                            var dcss = {'display':'inline-block', 'background-image':'url('+style['rectypeIconUrl']+')'};
+                                        }else{
+                                            
+                                            var dcss = {'display':'inline-block', 'background-image':'none'};
+                                            if(style['stroke']!==false){
+                                                
+                                                var opacity = style['opacity']>0?style['opacity']:1;
+                                                var weight = (style['weight']>0&&style['weight']<4)?style['weight']:3;
+                                                dcss['width']  = 16-weight*2; 
+                                                dcss['height'] = 16-weight*2;
+                                                
+                                                dcss['border'] = weight+'px solid '
+                                                                + window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
+                                                if ( style['opacity']>0 && style['opacity']<1 ) {
+                                                    dcss['-webkit-background-clip'] = 'padding-box'; //for Safari
+                                                    dcss['background-clip'] = 'padding-box'; //for IE9+, Firefox 4+, Opera, Chrome
+                                                }
+                                                
+                                            } else {
+                                                dcss['border'] = 'none';
+                                            }
+
+                                            if(style['fill']!==false){
+                                                var fillColor = style['fillColor']?style['fillColor']:style['color'];
+                                                var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
+                                                dcss['background-color'] = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
+                                            }else{
+                                                dcss['background'] = 'none';
+                                            }
+                                        }
+                                        var $span = $(item.span);
+                                        $span.find("> span.fancytree-icon")
+                                        .css(dcss);
+                                        
+                                            //backgroundImage: "url(skin-custom/customDoc2.gif)",
+                                            //backgroundPosition: "0 0"
+                                    }
+                                    _defineActionIcons( item );
                                 }
                                 // The following options are only required, if we have more than one tree on one page:
                                 //          initId: "treeData",
@@ -431,10 +481,10 @@ function hMapManager( _options )
                                         if(data){
                                             item.removeChildren();
                                             item.addChildren( data );
-                                            setTimeout(function(){
+                                            /*setTimeout(function(){
                                             $.each(item.children, function( idx, item_ch ){
                                                 _defineActionIcons( item_ch );
-                                                });},500);
+                                                });},500);*/
                                         }
                                     });
                                 /*
@@ -478,6 +528,8 @@ function hMapManager( _options )
                                                 //apply symbolgy on map
                                                 var layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
                                                 if(layer_rec) (layer_rec['layer']).applyStyle( symbology );
+                                                //render new symbology in legend
+                                                item.render(true);
                                             }
                                             
                                         }
@@ -495,8 +547,7 @@ function hMapManager( _options )
                                         }
                                         
                                         //render new symbology in legend
-                                        
-                                        //or reload map document tree
+                                        item.render(true);
                                         
                                     });
                                 }
@@ -636,7 +687,7 @@ function hMapManager( _options )
             var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
             _defineContent('search', null, grp_div.find('.ui-accordion-content'));
             //defineContent( 'search' );
-            setHeight();
+            that.setHeight();
         },
 
         //

@@ -2524,7 +2524,39 @@ window.hWin.HEURIST4.ui = {
         filename= filename.split(/[^a-zA-Z0-9\-\_\.]/gi).join('_');
         return filename;
     },
+
+    //
+    //
+    //
+    rgbToHex: function (r, g, b) {
+        function __componentToHex(c) {
+          var hex = c.toString(16);
+          return hex.length == 1 ? "0" + hex : hex;
+        }
+      return "#" + __componentToHex(r) + __componentToHex(g) + __componentToHex(b);
+    },
     
+    hexToRgb: function (hex) {
+      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    },
+    
+    hexToRgbStr: function (hex, opacity) {
+        var rgb = window.hWin.HEURIST4.ui.hexToRgb(hex);
+        if(rgb!=null){
+            if(opacity>0 && opacity<1){
+                return 'rgba('+rgb.r+','+rgb.g+','+rgb.b+','+opacity+')';
+            }else{
+                return 'rgb('+rgb.r+','+rgb.g+','+rgb.b+')';
+            }
+        }else{
+            return null;
+        }
+    },
     // returns hex rgb by name
     // see getColorFromTermValue  
     //

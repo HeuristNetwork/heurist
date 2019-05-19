@@ -66,19 +66,20 @@ Thematic mapping
 *     
 *   openMapDocument - opens given map document
 *   loadBaseMap
-    addDataset - loads geojson data based on heurist query, recordset or json to current search (see addGeoJson)
+    addSearchResult - loads geojson data based on heurist query, recordset or json to current search (see addGeoJson)
     addGeoJson - adds geojson layer to map, apply style and trigger timeline update
     addTileLayer - adds image tile layer to map
     addImageOverlay - adds image overlay to map
     updateTimelineData - add/replace timeline layer_data in this.timeline_items and triggers timelineRefresh
     applyStyle
+    getStyle
     
     setFeatureSelection - triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
     setFeatureVisibility - applies visibility for given set of heurist recIds (filter from timeline)
     
     _onLayerClick - map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
     _clearHighlightedMarkers - removes special "highlight" selection circle markers from map
-    _setStyleDefaultValues - assigns default values for style (size,color and marker type)
+    setStyleDefaultValues - assigns default values for style (size,color and marker type)
     _createMarkerIcon - creates marker icon for url(image) and fonticon (divicon)
     _stylerFunction - returns style for every path and polygone, either individual feature style of parent layer style.
     _getMarkersByRecordID - returns markers by heurist ids (for filter and highlight)
@@ -861,13 +862,29 @@ $.widget( "heurist.mapping", {
     },
     
     //
+    //
+    //
+    getStyle: function(layer_id) {
+        var affected_layer = this.all_layers[layer_id];
+        if(!affected_layer) return null;
+        var style = window.hWin.HEURIST4.util.isJSON(affected_layer.options.default_style);
+        if(!style){
+            return this.setStyleDefaultValues({});    
+        }else{
+            return style;
+        }
+    },
+    //
     // apply style for given layer
     // it takes style from options.default_style, each feature may have its own style that overwrites layer's one
     //
     applyStyle: function(layer_id, newStyle) {
         
         var affected_layer = this.all_layers[layer_id];
-        if(!affected_layer) return;
+        
+        if(!affected_layer || affected_layer instanceof L.ImageOverlay || affected_layer instanceof L.TileLayer){
+            return   
+        } 
 
 //console.log('new style');
         
@@ -900,7 +917,7 @@ $.widget( "heurist.mapping", {
         //var myIcon = new L.Icon.Default();
         
         // set default values -------       
-        style = this._setStyleDefaultValues( style );
+        style = this.setStyleDefaultValues( style );
         
         var myIcon = this._createMarkerIcon( style );
 
@@ -975,7 +992,7 @@ $.widget( "heurist.mapping", {
                 layer.feature.default_style = style;
                 
                 if(layer.feature.style){ //indvidual style per record
-                    markerStyle = that._setStyleDefaultValues(layer.feature.style);
+                    markerStyle = that.setStyleDefaultValues(layer.feature.style);
                     setIcon = that._createMarkerIcon( markerStyle );
                 }else{
                     //heurist layer common style
@@ -1095,10 +1112,14 @@ $.widget( "heurist.mapping", {
     //
     // assigns default values for style (size,color and marker type)
     //
-    _setStyleDefaultValues: function(style){
+    setStyleDefaultValues: function(style){
+        if(!style) style = {};
         if(!style.iconType || style.iconType=='default') style.iconType ='rectype';
         style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :((style.iconType=='circle')?9:18);
-        style.color = (style.color?style.color:'#0000ff');
+        style.color = (style.color?style.color:'#00b0f0');
+        style.weight = style.weight>0?style.weight:3;
+        style.opacity = style.opacity>0?style.opacity:1;
+        style.fillOpacity = style.fillOpacity>0?style.fillOpacity:0.2;
         return style;
     },        
     

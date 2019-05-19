@@ -157,13 +157,8 @@ function hMapDocument( _options )
                         var resdata = new hRecordSet(response.data);
                         
                         map_documents_content[mapdoc_id] = resdata;
-                        
-                        if(deferred){
-                            var treedata = _getTreeData(mapdoc_id);
-                            deferred.resolve( treedata ); //returns data t fancytree to render child layers for given mapdocument
-                        }
-                        
-                        _openMapDocument( mapdoc_id );
+
+                        _openMapDocument( mapdoc_id, deferred);
                         
                     }else {
                         map_documents_content[mapdoc_id] = 'error';
@@ -207,6 +202,7 @@ function hMapDocument( _options )
                     
                     //creates and add layer to nativemap
                     //returns mapLayer object
+                    record['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID');
                     record['layer'] = new hMapLayer2({rec_layer: record, 
                                                       rec_datasource: datasource_record, 
                                                       mapdoc_recordset: resdata, //need to get fields
@@ -214,6 +210,13 @@ function hMapDocument( _options )
                 }
             }
         }//for
+        
+        
+        if(deferred){
+            var treedata = _getTreeData(mapdoc_id);
+            deferred.resolve( treedata ); //returns data t fancytree to render child layers for given mapdocument
+        }
+                                
     }
 
     //
@@ -255,6 +258,7 @@ function hMapDocument( _options )
                                     
                                     //creates and add layer to nativemap
                                     //returns mapLayer object
+                                    record['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID');
                                     record['layer'] = new hMapLayer2({rec_layer: record, 
                                                                       rec_datasource: datasource_record, 
                                                                       mapdoc_recordset: resdata, //need to get fields
@@ -276,6 +280,32 @@ function hMapDocument( _options )
             );           
         
     }
+    
+    //
+    //
+    //
+    function _getSymbology( mapdoc_id, rec_id ){
+        
+        var _recset = map_documents_content[mapdoc_id];
+        var _record = _recset.getById( rec_id );
+        
+        if(!_record['source_rectype'] || _record['source_rectype'] == RT_QUERY_SOURCE){
+            
+            var layer_style = _recset.fld(_record, DT_SYMBOLOGY);
+            var layer_style = window.hWin.HEURIST4.util.isJSON(layer_style);
+            if(!layer_style){
+                if(_record['layer']){
+                    layer_style = (_record['layer']).getStyle();    
+                }else{
+                    layer_style = {};
+                }
+            } 
+        }else{
+            layer_style = {rectypeIconUrl:window.hWin.HAPI4.iconBaseURL + _record['source_rectype'] };  //+ '.png'
+        }
+        
+        return layer_style;
+    }
 
     // get layer record, take symbology field and title 
     // open symbology editor
@@ -288,8 +318,7 @@ function hMapDocument( _options )
         var _record = _recset.getById( rec_id );
         
         var layer_title = _recset.fld(_record, 'rec_Title');
-        var layer_style = _recset.fld(_record, DT_SYMBOLOGY);
-        if(!layer_style) layer_style = {};
+        var layer_style = _getSymbology(  mapdoc_id, rec_id );
 
         var current_value = layer_style;//affected_layer.options.default_style;
         ///console.log(affected_layer);                   
@@ -307,10 +336,9 @@ function hMapDocument( _options )
                 _recset.setFld(_record, 'rec_Title', new_value.sym_Name);
                 delete new_value.sym_Name;
             }
+            
             //update style
             _recset.setFld(_record, DT_SYMBOLOGY, new_value);
-            
-            
             (_record['layer']).applyStyle(new_value);
             
            //callback to update ui in mapManager
@@ -411,6 +439,7 @@ function hMapDocument( _options )
             }
             _record['original_heurist_query'] = original_heurist_query;
             
+            _record['source_rectype'] = RT_QUERY_SOURCE;
             recset.setFld(_record, 'layer',
                         new hMapLayer2({rec_datasource: _record, 
                                               mapdoc_recordset: recset, //need to get fields
@@ -480,6 +509,13 @@ function hMapDocument( _options )
             }
         },
         
+        // get layer record, take symbology field and title 
+        // open symbology editor
+        // on exit 1) call mapLayer.applyStyles
+        //         2) change title in tree and timeline
+        getSymbology: function( mapdoc_id, rec_id ){
+            return _getSymbology( mapdoc_id, rec_id );    
+        },
         
         // get layer record, take symbology field and title 
         // open symbology editor
@@ -579,8 +615,8 @@ function hMapDocument( _options )
                 r_style = recset.fld(_record, DT_SYMBOLOGY);
                 
                 
-            r_query = Hul.hQueryStringify(r_query);
-            if(r_style) r_style = JSON.stringify(r_style);
+            r_query = window.hWin.HEURIST4.util.hQueryStringify(r_query);
+            if(window.hWin.HEURIST4.util.isJSON(r_style)) r_style = JSON.stringify(r_style);
             
             if(window.hWin.HEURIST4.util.isempty( r_query )) return;
             var bnd = _record['layer'].getBounds('wkt');

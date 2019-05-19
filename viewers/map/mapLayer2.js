@@ -314,6 +314,14 @@ function hMapLayer2( _options ) {
             if(_nativelayer_id>0)
                 options.mapwidget.mapping('applyStyle', _nativelayer_id, newStyle);
         },
+
+        getStyle: function(){
+            if(_nativelayer_id>0){
+                return options.mapwidget.mapping('getStyle', _nativelayer_id);
+            }else{
+                return options.mapwidget.mapping('setStyleDefaultValues');
+            }
+        },
         
         getNativeId: function(){
             return _nativelayer_id;
