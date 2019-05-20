@@ -61,7 +61,7 @@ function editSymbology(current_value, needName, callback){
         fields: {'stub':0}}) :null;
         //Object.getOwnPropertyNames(current_value)
 
-
+        
     /*
     iconUrl: 'my-icon.png',
     iconSize: [38, 95],
@@ -95,8 +95,8 @@ function editSymbology(current_value, needName, callback){
                     {"key":"url","title":"Image"},
                     {"key":"iconfont","title":"Icon font"},
                     {"key":"circle","title":"Circle"},
-                    {"key":"rectype","title":"Record type icon"}, //change to thematic mapping
-                    {"key":"","title":"Default marker"}
+                    {"key":"rectype","title":"Record type icon"} //change to thematic mapping
+                    //{"key":"","title":"Default marker"}
                 ]
         }},
         {"dtID": "iconUrl",
@@ -104,14 +104,14 @@ function editSymbology(current_value, needName, callback){
                 "dty_Type":"url",
                 "rst_DisplayName": "Icon URL:",
                 "rst_DisplayWidth":40,
-                "rst_Display":"hidden"
+                "rst_Display":(current_value['iconType']=='url'?"visible":"hidden")
         }},
         {"dtID": "iconFont",
             "dtFields":{
                 "dty_Type":"freetext",
                 "rst_DisplayName": "Icon:",
                 "rst_DisplayWidth":40,
-                "rst_Display":"hidden",
+                "rst_Display":(current_value['iconType']=='iconfont'?"visible":"hidden"),
                 "rst_DefaultValue": "location",
                 "rst_DisplayHelpText": "Define name of icon from set: http://mkkeck.github.io/jquery-ui-iconfont/"
         }},

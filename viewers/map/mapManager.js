@@ -551,7 +551,7 @@ function hMapManager( _options )
                                     //         2) change title in tree and timeline
                                     mapDocuments.editSymbology(0, recid, function(new_title, new_style){
                                         //update layer title in legend and timeline
-                                        if(new_title){
+                                        if(new_title && item.title != new_title){
                                             item.title = new_title;
                                             parent_span.find('span.fancytree-title').text( new_title );
                                         }

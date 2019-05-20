@@ -229,6 +229,10 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         line-height: 22px !important;
         background-position: 3px !important;
     }
+    
+    .map_popup .detail, .map_popup .detail > a{
+        max-width: 200px;
+    }
 </style>
 
 <!-- Initializing -->

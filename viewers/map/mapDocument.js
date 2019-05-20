@@ -334,6 +334,10 @@ function hMapDocument( _options )
             {
                 new_title = new_value.sym_Name;
                 _recset.setFld(_record, 'rec_Title', new_value.sym_Name);
+
+                //update label in timeline                                                
+                options.mapwidget.mapping('updateTimelineLayerName', (_record['layer']).getNativeId(), new_value.sym_Name);
+                
                 delete new_value.sym_Name;
             }
             

@@ -652,9 +652,23 @@ $.widget( "heurist.mapping", {
             }
             });*/
 
+
+    updateTimelineLayerName: function(layer_id, new_dataset_name){
+
+        var group_idx = this.getTimelineGroup(layer_id);
+        if(group_idx>=0){
+            this.timeline_groups[group_idx].content = new_dataset_name;
+            
+            this.vistimeline.timeline('timelineUpdateGroupLabel', this.timeline_groups[group_idx]);
+        }
+        
+    },
+
     
     //
-    //
+    // add/replace layer time data to timeline_groups/timeline_items
+    //  layer_id - leaflet id
+    //  layer_data - timeline data from server
     //
     updateTimelineData: function(layer_id, layer_data, dataset_name){
       
@@ -665,11 +679,17 @@ $.widget( "heurist.mapping", {
                 var group_idx = this.getTimelineGroup(layer_id);
                 if(group_idx<0){
                     this.timeline_groups.push({ id:layer_id, content:dataset_name });        
+                    group_idx = this.timeline_groups.length-1;
                 }else{
                     this.timeline_groups[group_idx].content = dataset_name;
                 }
+                /*if(dataset_name=='Current query' && group_idx>0){ //swap
+                    var swap = this.timeline_groups[0];
+                    this.timeline_groups[0] = this.timeline_groups[group_idx];
+                    this.timeline_groups[group_idx] = swap;
+                }*/
                 
-                this.timeline_items[layer_id] = [];
+                this.timeline_items[layer_id] = []; //remove/rest previous data
                 
                 var that = this;
 
@@ -1317,11 +1337,13 @@ $.widget( "heurist.mapping", {
                 for(var idx in selected_markers){
 
                     var layer = selected_markers[idx];
-                    if(is_visible==false){
-                        that.all_clusters[layer.cluster_layer_id].removeLayer(layer);
-                    }else {
-                        if(!that.all_clusters[layer.cluster_layer_id].hasLayer(layer)){
-                            that.all_clusters[layer.cluster_layer_id].addLayer(layer);
+                    if(layer.cluster_layer_id>0 && that.all_clusters[layer.cluster_layer_id]){
+                        if(is_visible==false){
+                            that.all_clusters[layer.cluster_layer_id].removeLayer(layer);
+                        }else {
+                            if(!that.all_clusters[layer.cluster_layer_id].hasLayer(layer)){
+                                that.all_clusters[layer.cluster_layer_id].addLayer(layer);
+                            }
                         }
                     }
                 }

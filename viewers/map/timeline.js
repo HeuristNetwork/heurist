@@ -172,6 +172,17 @@ $.widget( "heurist.timeline", {
     },
 
     //
+    //
+    //    
+    timelineUpdateGroupLabel: function(timeline_group){
+      
+        var grp = this.vis_timeline.itemSet.groups[timeline_group.id];
+        grp.setData(timeline_group);
+        //grp.dom.inner
+        
+    },
+    
+    //
     // timelineRefresh (former loadVisTimeline) - reloads timeline component with new data
     //
     timelineRefresh: function(timeline_data, timeline_groups){
@@ -216,6 +227,13 @@ $.widget( "heurist.timeline", {
             var timeline_content = $(this.timeline_ele).find('.vis-itemset');
             timeline_content.hide();
             
+            this.vis_timeline.itemSet.setOptions({groupOrder:function (a, b) {
+                    var av = a['content'];
+                    var bv = b['content'];
+                    if(av=='Current query') return -1;
+                    if(bv=='Current query') return 1;
+                    return av > bv ? 1 : av < bv ? -1 : 0;
+                }});
             this.vis_timeline.setGroups(groups);
             this.vis_timeline.setItems(items);
             
