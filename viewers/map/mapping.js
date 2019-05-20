@@ -116,15 +116,14 @@ $.widget( "heurist.mapping", {
         element_map: 'map',
         element_timeline: 'timeline',
  
-        layout_params:{},
+        layout_params:{}, //various layout and behaviour settings
         
         // callbacks
         onselect: null,
         oninit: null,
-
-        //        
-        nativemap: null,
-        isMarkerClusterEnabled:true
+        
+        isEditAllowed: true,
+        isPublished: false
     },
     
     //reference to google or leaflet map
@@ -133,6 +132,7 @@ $.widget( "heurist.mapping", {
     nativemap: null,
     vistimeline: null,
     mapManager: null,
+    current_query_layer:null, //record from search results mapdoc
     
     //controls
     map_legend: null,
@@ -140,6 +140,7 @@ $.widget( "heurist.mapping", {
     map_bookmark: null,
     map_geocoder: null,
     map_print: null,
+    map_publish: null,
     main_popup: null,
 
     //storages
@@ -156,6 +157,11 @@ $.widget( "heurist.mapping", {
 
     myIconRectypes:{},  //storage for rectype icons by color and rectype id
 
+    //  settings
+    isMarkerClusterEnabled: true,
+    isEditAllowed: true,
+    
+    
     //base maps
     basemaplayer_name: null,
     basemaplayer: null,
@@ -211,7 +217,6 @@ $.widget( "heurist.mapping", {
             togglerContent_closed:  '<div class="ui-icon"></div>',
             onresize_end: function(){
                 //global 
-//console.log('LAYOUT resize end');
                 //if(mapping) mapping.onWinResize();
                 that._adjustLegendHeight();
             }
@@ -231,7 +236,6 @@ $.widget( "heurist.mapping", {
         */
         layout_opts.south__onresize_end = function() {
             //if(mapping) mapping.setTimelineMinheight();
-            //console.log('timeline resize end');
             that._adjustLegendHeight();
         };
 
@@ -301,7 +305,12 @@ $.widget( "heurist.mapping", {
         
         //print plugin
         this.map_print = L.control.browserPrint({ position: 'topleft' });//.addTo( this.nativemap );
-        
+        $(this.map_print).find('.browser-print-mode').css({padding: '2px 10px !important'}); //.v1 .browser-print-mode
+
+        //publish plugin
+        this.map_publish = L.control.publish({ position: 'topleft', mapwidget:this });//.addTo( this.nativemap );
+
+        //content for legend
         this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element});
         
         this.updateLayout(this.options.layout_params);
@@ -338,7 +347,6 @@ $.widget( "heurist.mapping", {
     //-------
     _adjustLegendHeight: function(){
         var ele = $('#'+map_element_id);
-//console.log('rezize '+ele.height());
         if(this.mapManager) this.mapManager.setHeight(ele.height()-50); //adjust legend height    
     
     },
@@ -350,7 +358,7 @@ $.widget( "heurist.mapping", {
     //    it is invoked on completion of hMapManager initialization - map is inited and all mapdocuments are loaded
     //
     onInitComplete:function(){
-        console.log('onInitComplete');
+//        console.log('onInitComplete');
         
         if($.isFunction(this.options.oninit)){
                 this.options.oninit.call(this, this.element);
@@ -362,8 +370,16 @@ $.widget( "heurist.mapping", {
     //
     //
     openMapDocument: function( mapdoc_id ) {
-        
         this.mapManager.openMapDocument( mapdoc_id );
+    },
+
+    //
+    // returns array of mapdocuments ids
+    // mode - all|loaded|visible
+    // 
+    getMapDocuments: function( mode ) 
+    {
+        return this.mapManager.getMapDocuments( mode );
     },
     
     //
@@ -410,8 +426,7 @@ $.widget( "heurist.mapping", {
     // this method is invoked on global onserachfinish event in app_timemap
     //
     addSearchResult: function(data, dataset_name) {
-        
-        this.mapManager.addSearchResult( data, dataset_name );
+        this.current_query_layer = this.mapManager.addSearchResult( data, dataset_name );
     },
     
     //
@@ -521,7 +536,7 @@ $.widget( "heurist.mapping", {
 
             var new_layer = L.geoJSON(geojson_data, {
                     default_style: null
-                    , layer_name: 'Current query'
+                    , layer_name: dataset_name
                     //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
                    /* 
                     , onEachFeature: function(feature, layer) {
@@ -531,7 +546,6 @@ $.widget( "heurist.mapping", {
                         feature.default_style = layer.options.default_style;
 
                         layer.on('click', function (event) {
-                            //console.log('onclick');                
                             that.vistimeline.timeline('setSelection', [feature.properties.rec_ID]);
 
                             that.setFeatureSelection([feature.properties.rec_ID]);
@@ -580,7 +594,9 @@ $.widget( "heurist.mapping", {
                 .addTo( this.nativemap );            
 
 
-            this.updateTimelineData(new_layer._leaflet_id, timeline_data, dataset_name);
+            if(!this.notimeline){
+                this.updateTimelineData(new_layer._leaflet_id, timeline_data, dataset_name);
+            }         
 
             this.all_layers[new_layer._leaflet_id] = new_layer;
             
@@ -886,8 +902,6 @@ $.widget( "heurist.mapping", {
             return   
         } 
 
-//console.log('new style');
-        
         this._clearHighlightedMarkers();
 
         
@@ -926,7 +940,7 @@ $.widget( "heurist.mapping", {
         affected_layer.options.default_style = style;
         
         
-        if(this.options.isMarkerClusterEnabled){
+        if(this.isMarkerClusterEnabled){
 
             var is_new_markercluster = window.hWin.HEURIST4.util.isnull(this.all_clusters[layer_id]);
             if(is_new_markercluster){
@@ -956,7 +970,7 @@ $.widget( "heurist.mapping", {
                     
                     layer.feature = feature;
                     
-                    if(that.options.isMarkerClusterEnabled){
+                    if(that.isMarkerClusterEnabled){
                         parent_layer.removeLayer( layer );  
                         layer.cluster_layer_id = layer_id;
                     }else{
@@ -1042,7 +1056,7 @@ $.widget( "heurist.mapping", {
                 
                 if(new_layer!=null){
                     that.all_markers[layer_id][idx] = new_layer; 
-                    if(!that.options.isMarkerClusterEnabled){
+                    if(!that.isMarkerClusterEnabled){
                         layer.parent_layer.addLayer(new_layer);
                         layer.parent_layer.removeLayer(layer);
                         layer.remove();
@@ -1055,7 +1069,7 @@ $.widget( "heurist.mapping", {
         });
      
         //add all markers to cluster
-        if(this.options.isMarkerClusterEnabled){
+        if(this.isMarkerClusterEnabled){
             this.all_clusters[layer_id].addLayers(this.all_markers[layer_id]);                                 
             if(is_new_markercluster){
                 this.all_clusters[layer_id].addTo( this.nativemap );
@@ -1075,7 +1089,6 @@ $.widget( "heurist.mapping", {
         if(layer && layer.feature){
             
             var  that = this;
-            //console.log('onclick');                
             that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
 
             that.setFeatureSelection([layer.feature.properties.rec_ID]);
@@ -1182,8 +1195,6 @@ $.widget( "heurist.mapping", {
             use_style = window.hWin.HEURIST4.util.cloneJSON( use_style );
             use_style.color = '#ffff00';
         }
-        
-//console.log('styler '+(feature.properties?feature.properties.rec_ID:'')+'  '+use_style.color);
         
         return use_style;
         
@@ -1300,7 +1311,7 @@ $.widget( "heurist.mapping", {
             });
             
             
-            if(this.options.isMarkerClusterEnabled){
+            if(this.isMarkerClusterEnabled){
                 
                 var selected_markers = this._getMarkersByRecordID(_selection);
                 for(var idx in selected_markers){
@@ -1341,11 +1352,6 @@ $.widget( "heurist.mapping", {
         
     },
     
-    //@todo remove - all actions with layer via this widget
-    getNativemap: function(){
-        return this.nativemap;
-    },
-
     //
     // show/hide layout panels and map controls
     // params: 
@@ -1383,13 +1389,18 @@ $.widget( "heurist.mapping", {
         
         if(!params) return;
         
+        
+        this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
+        this.options.isPublished = __parseval(params['published']);
+        this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
+        
         //show/hide map or timeline
         var nomap = __parseval(params['nomap']);
         this.notimeline = __parseval(params['notimeline']);
         
         var layout_opts = {};
         if(this.notimeline){
-            layout_opts.south__size = 0;
+            layout_opts.south__size = 200;
             layout_opts.south__spacing_open = 0;
             layout_opts.south__spacing_closed = 0;
         }else{
@@ -1411,10 +1422,16 @@ $.widget( "heurist.mapping", {
             layout_opts.north__size = 0;
         }
         //$(this.mylayout).layout(layout_opts);
-        $(this.options.element_layout).layout(layout_opts);
+        var mylayout = $(this.options.element_layout).layout(layout_opts);
+        if(this.notimeline){
+            mylayout.hide('south');
+        }
+        
     
         //map controls {all,none,zoom,bookmark,geocoder,print,publish,legend}
         var controls = __splitval(params['controls']);
+        controls.push('zoom'); //zoom is always visible
+        
         var that = this;
         function __controls(val){
             var is_visible = (controls.indexOf('all')>=0 || controls.indexOf(val)>=0);
@@ -1431,7 +1448,7 @@ $.widget( "heurist.mapping", {
         __controls('bookmark');
         __controls('geocoder');
         __controls('print');
-        //__controls('publish');
+        if(!this.options.isPublished) __controls('publish');
         //__controls('scale');
             
         //   legend: [basemaps,search,mapdocs|onedoc]

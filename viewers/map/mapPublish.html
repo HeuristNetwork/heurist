@@ -1,0 +1,36 @@
+<div id="map-embed-dialog" style="display:none">
+        <p>Embed this Map (plus timeline) in your own web page. Enclose within &lt;code&gt; &lt;/code&gt; for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).</p>
+        
+        <div style="border: 1px solid lightgray;border-radius:4px;padding:6px;">
+        <p><span style="min-width: 105px;display: inline-block;text-align: right;">Include:</span>
+            <label><input type="checkbox" id="m_query" checked>current query</label>&nbsp;
+            <label><input type="checkbox" id="m_mapdocs" checked>opened map documents</label></p>
+        <p><span style="min-width: 105px;display: inline-block;text-align: right;">Controls:</span>
+            <label><input type="checkbox" name="controls" value="legend" checked>legend</label>&nbsp;
+            <label><input type="checkbox" name="controls" value="bookmark">bookmark</label>&nbsp;
+            <label><input type="checkbox" name="controls" value="geocoder">geocoder</label>&nbsp;
+            <label><input type="checkbox" name="controls" value="print">print</label></p>
+        <p><span style="min-width: 105px;display: inline-block;text-align: right;">Visible in legends:</span>
+            <label><input type="checkbox" name="legend" value="basemaps">basemap</label>&nbsp;
+            <label><input type="checkbox" name="legend" value="search" checked>result set</label>&nbsp;
+            <label><input type="checkbox" name="legend" value="mapdocs">map documents</label></p>
+        <p><span style="min-width: 105px;display: inline-block;text-align: right;">Other settings:</span>
+            <label><input type="checkbox" id="basemap" checked>Use current basemap</label>&nbsp;
+            <label><input type="checkbox" id="editstyle">Allow modify symbology</label>&nbsp;
+            <label><input type="checkbox" id="notimeline">Hide timeline</label>
+            <label><input type="checkbox" id="nocluster">No markerclusters</label>
+        </p>    
+        </div>
+            
+        
+        <p style="padding:1em 0 1em 0;font-size:0.9em">Copy the following html code into your page where you want to place the map, or use the URL on its own. The map will be generated live from the database using the current search criteria whenever the map is loaded. Use the web-safe version if the readable version does not work</p>
+        <label style="font-size:0.9em">Readable code:</label>
+        <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
+        <label style="font-size:0.9em">Web-safe code:</label>
+        <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
+        <label style="font-size:0.9em">URL:</label>
+        <textarea id="code-textbox3" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
+        
+        <p style="padding-top:1em">Note: records will only appear on the map if they include geographic objects. You may get an empty or sparsely populated map if the search results do not contain map data. Records must have public status - private records will not appear on the map, which could therefore be empty. </p>
+        <p style="padding-top:1em"><button id="btnExportKML">Create KML for Google Earth</button></p>
+</div>

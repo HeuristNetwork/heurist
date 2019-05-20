@@ -20,8 +20,15 @@
 
 L.Control.Manager = L.Control.extend({
     onAdd: function(map) {
-        var container = $('<div>').css({'width':'200px','overflow-y':'auto'});
-        return container[0];
+        
+        var container = this._container = L.DomUtil.create('div','leaflet-bar');
+
+        L.DomEvent
+          .disableClickPropagation(container)
+          .disableScrollPropagation(container);
+        
+        $(container).css({'width':'200px','overflow-y':'auto'});
+        return container;
     },
 
     onRemove: function(map) {
@@ -70,7 +77,6 @@ function hMapManager( _options )
         options = $.extend(options, _options);
 
         options.container = $(options.container);
-        nativemap =  options.mapwidget.mapping('getNativemap');
         
         mapDocuments = hMapDocument( { mapwidget:options.mapwidget } ); 
         
@@ -189,7 +195,6 @@ function hMapManager( _options )
             
             mapDocuments.loadMapDocuments( function(resdata){
                         _refreshMapDocumentTree( resdata, mapdoc_treeview );
-                        
                         options.mapwidget.mapping('onInitComplete');
                     } );
             
@@ -426,18 +431,23 @@ function hMapManager( _options )
             
             var parent_span = item_li.children('span.fancytree-node');
             
+            var isEditAllowed = options.mapwidget.mapping('option','isEditAllowed');
+            
             var actionspan = $('<div class="svs-contextmenu3" '
                     +(mapdoc_id>=0?('" data-mapdoc="'+mapdoc_id+'"'):'')
                     +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
                 +'<span class="ui-icon ui-icon-zoomin" title="Zoom to '+item.data.type+' extent"></span>'
-                +'<span class="ui-icon ui-icon-pencil" title="Edit '
-                    +(item.data.type=='mapdocument' || mapdoc_id>0?(item.data.type+' record'):' symbology')+'"></span>'
-                +( ((item.data.type=='mapdocument' && mapdoc_id>0) || mapdoc_id==0)
+                + (isEditAllowed
+                   ?('<span class="ui-icon ui-icon-pencil" title="Edit '
+                    +(item.data.type=='mapdocument' || mapdoc_id>0?(item.data.type+' record'):' symbology')
+                    +'"></span>')
+                    :'')  
+                +( isEditAllowed && ((item.data.type=='mapdocument' && mapdoc_id>0) || mapdoc_id==0)
                     ?('<span class="ui-icon ui-icon-plus" title="'
                         + (mapdoc_id==0?'Save result set as layer/datasource records pair'
                                       :'Add new layer to mapdocument') +'"></span>')
                     :'')    
-                + (((mapdoc_id>0 && recid==-1)||mapdoc_id==0)
+                + (isEditAllowed && ((mapdoc_id>0 && recid==-1)||mapdoc_id==0)
                     ?'<span class="ui-icon ui-icon-close" title="Unload and remove from map"></span>':'')+
                 +'</div>').appendTo(parent_span);
 
@@ -661,18 +671,42 @@ function hMapManager( _options )
         },
         
         //
+        // select map document in treeview - it makes it visible or triggers loading of content
         //
         openMapDocument: function(mapdoc_id){
             
+            mapdoc_id = mapdoc_id.split(',');
+            
             var tree = mapdoc_treeview.fancytree("getTree");
+            var selected = 0;
 
             tree.visit(function(node){
-                if(node.key===mapdoc_id){
+                if( window.hWin.HEURIST4.util.findArrayIndex(node.key, mapdoc_id)>=0){
                     node.setSelected( true );
+                    selected++;
+                    if(selected==mapdoc_id.length) return false;
                 }
-                return false;
             });
             
+        },
+        
+        //
+        // returns list of mapdocuments ids
+        // mode - all|loaded|visible
+        // 
+        getMapDocuments: function( mode ) {
+            var tree = mapdoc_treeview.fancytree("getTree");
+            var res = [];
+            tree.visit(function(node){
+                if(node.data.type=='mapdocument'){
+                    if((mode=='visible'&& node.isSelected()) ||
+                       (mode=='loaded'&& node.hasChildren()) || (mode=='all'))
+                    {
+                        res.push(node.key);
+                    }
+                }
+            });
+            return res;
         },
 
         //
@@ -681,18 +715,19 @@ function hMapManager( _options )
         //
         addSearchResult: function( data, dataset_name )
         {
-            mapDocuments.addSearchResult( 0, data, dataset_name );
+            var record = mapDocuments.addSearchResult( 0, data, dataset_name );
             
             //refresh search results 
             var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
             _defineContent('search', null, grp_div.find('.ui-accordion-content'));
             //defineContent( 'search' );
             that.setHeight();
+            
+            return record;
         },
 
         //
         // switch base map layer
-        // @todo move work with nativemap to mapping.js
         //
         loadBaseMap: function( e ){
 

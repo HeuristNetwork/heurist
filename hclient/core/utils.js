@@ -216,6 +216,7 @@ window.hWin.HEURIST4.util = {
     },
 
     /* 
+                JSON to URL
     params:{
     q,
     w or domain,
@@ -232,7 +233,7 @@ window.hWin.HEURIST4.util = {
             var query, rules = params.rules;
             var query_to_save = [];
             
-            if(!(window.hWin.HEURIST4.util.isempty(params.w) || params.w=="all")){
+            if(!(window.hWin.HEURIST4.util.isempty(params.w) || params.w=='all' || params.w=='a')){
                 query_to_save.push('w='+params.w);
             }
             

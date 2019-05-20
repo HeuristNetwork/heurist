@@ -390,6 +390,8 @@ function hMapDocument( _options )
         // adds search results or query as a new layer to mapdoc (usuallly "Search Results")
         // data - recordset, heurist query or json
         //
+        // returns record to use in mapping widget
+        //
         addSearchResult: function(mapdoc_id, data, dataset_name){
 
             var curr_request, original_heurist_query;
@@ -430,7 +432,10 @@ function hMapDocument( _options )
                 _record = recset.getById(recID);
                 recset.setFld(_record, DT_QUERY_STRING, curr_request);
                 //remove previous result set from map
-                if(_record['layer']) _record['layer'].removeLayer();    
+                if(_record['layer']){
+                    _record['layer'].removeLayer();    
+                    delete _record['layer']; //clear
+                }
             }else{
                 _record = {rec_ID:_uniqueid,  rec_Title:dataset_name, rec_RecTypeID:RT_MAP_LAYER,  d:{}};
                 recset.setFld(_record, DT_QUERY_STRING, curr_request);
@@ -447,7 +452,7 @@ function hMapDocument( _options )
                                               preserveViewport:(mapdoc_id!=0) })); //zoom to current search
                                               
                                               
-            
+            return _record;
         },
          
         getTreeData: function( mapdoc_id )
@@ -487,6 +492,7 @@ function hMapDocument( _options )
                         var record = records[idx];
                         if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER && record['layer']){
                             (record['layer']).removeLayer();
+                            delete record['layer'];
                         }
                     }
                 }
@@ -503,7 +509,7 @@ function hMapDocument( _options )
                 var layer_rec = that.getLayer(mapdoc_id, rec_id);
                 if(layer_rec){
                     (layer_rec['layer']).removeLayer();
-                    
+                    delete layer_rec['layer']; 
                     (map_documents_content[mapdoc_id]).removeRecord( rec_id );
                 } 
             }
