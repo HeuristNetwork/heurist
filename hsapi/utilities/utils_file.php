@@ -43,7 +43,10 @@
     fileSave
     
     generate_thumbnail 
-    saveURLasFile       loadRemoteURLContent + fileSave
+    
+    saveURLasFile  loadRemoteURLContent + fileSave
+    @todo? fileRetrievePath   returns fullpath to file is storage, or to tempfile, 
+                   if it requires it extracts zip archive to tempfile or download remote url to tempfile
     
     getRelativePath
     folderRecurseCopy
@@ -773,7 +776,49 @@ function unzipArchive($zipfile, $destination, $entries=null){
         return false;
     }
 }
-    
+
+//
+// flatten zip archive - extract without structures 
+// returns list of files
+//
+function unzipArchiveFlat($zipfile, $destination){
+
+    if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
+        
+        $res = array();
+        $zip = new ZipArchive; 
+        if ( $zip->open( $zipfile ) === true) 
+        { 
+            for ( $i=0; $i < $zip->numFiles; $i++ ) 
+            { 
+                $entry = $zip->getNameIndex($i); 
+                if ( substr( $entry, -1 ) == '/' ) continue; // skip directories 
+                
+                $fp = $zip->getStream( $entry ); 
+                if (!$fp ) {
+                    throw new Exception('Unable to extract the file.'); 
+                }else{                
+                    $ofp = fopen($destination.basename($entry), 'w' ); 
+                    while ( ! feof( $fp ) ) 
+                        fwrite( $ofp, fread($fp, 8192) ); 
+                    
+                    fclose($fp); 
+                    fclose($ofp); 
+                    
+                    $res[] = $destination.basename($entry);
+                }
+            } 
+
+            $zip->close(); 
+            return $res;
+        } 
+        else {
+            return false; 
+        }
+    }else{
+        return false;
+    }
+}
         
 //-----------------------  LOAD REMOTE CONTENT (CURL)
 //

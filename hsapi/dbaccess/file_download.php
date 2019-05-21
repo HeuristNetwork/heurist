@@ -134,7 +134,8 @@ if($db){
         //if(strpos($remote_path,'global.adelaide.edu.au/v/style-guide2/includes/common/')>0){
             
             $system->initPathConstants($db);
-            $heurist_path = tempnam(HEURIST_FILESTORE_DIR, "_proxyremote_");        
+            
+            $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_proxyremote_");        
             downloadViaProxy($heurist_path, "text/html", $remote_path, false);
             unlink($heurist_path);
         //}

@@ -118,7 +118,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
 
         //remove remark to debug 
-        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.baseURL+"hsapi/controller/"+action+".php"; //+(new Date().getTime());
@@ -888,11 +888,26 @@ prof =Profile
 
             //
             // load kml in geojson format
+            // request
+            //  recID - record id that has reference to kml file or has kml snippet
+            //  simplify - reduce points
             //
             ,load_kml_as_geojson: function(request, callback){
                 request['format'] = 'geojson';
                 // start search
                 _callserver('record_kml', request, callback);    //standard search
+            }
+            
+            //
+            // load kml in geojson format
+            // request
+            //  recID - record id that has reference to shp file
+            //  simplify - reduce points
+            //
+            ,load_shp_as_geojson: function(request, callback){
+                request['format'] = 'geojson'; //or wkt
+                // start search
+                _callserver('record_shp', request, callback);    //standard search
             }
 
             /**

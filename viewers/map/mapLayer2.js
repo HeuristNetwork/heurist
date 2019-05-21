@@ -69,6 +69,8 @@ function hMapLayer2( _options ) {
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE']){
 
             _addKML();
+        }else {
+            _addSHP();
         }
     }
 
@@ -171,12 +173,37 @@ function hMapLayer2( _options ) {
     }
 
     //
+    // parses shp+dbf files and converts them to geojson 
+    //
+    function _addSHP() {
+
+        var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+        var rec_ID = _recordset.fld(_record, 'rec_ID');
+                    
+        request = {recID:rec_ID};             
+        //perform loading kml as geojson
+        window.hWin.HAPI4.RecordMgr.load_shp_as_geojson(request,
+            function(response){
+                if(response){
+                    _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                                                response, 
+                                                null, layer_style,
+                                                _recordset.fld(options.rec_layer || _record, 'rec_Title'),
+                                                options.preserveViewport );
+                }
+            }
+        );          
+    }
+    
+    
+    //
     // add kml
     // files
     // kmlSnippet
     //
     function _addKML() {
 
+        var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         var rec_ID = _recordset.fld(_record, 'rec_ID');
             
         //var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_kml.php?db='
@@ -189,7 +216,7 @@ function hMapLayer2( _options ) {
                 if(response){
                     _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                                 response, 
-                                                null, null,
+                                                null, layer_style,
                                                 _recordset.fld(options.rec_layer || _record, 'rec_Title'),
                                                 options.preserveViewport );
                 }

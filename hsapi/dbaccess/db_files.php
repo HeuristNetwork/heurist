@@ -397,7 +397,9 @@ function getPrevailBackgroundColor($filename){
 */
 function resolveFilePath($path){
 
-        if( $path && !file_exists($path) ){
+        if( $path ){
+            
+        if(!file_exists($path) ){
             chdir(HEURIST_FILESTORE_DIR);  // relatively db root
             $fpath = realpath($path);
             if(file_exists($fpath)){
@@ -423,8 +425,15 @@ function resolveFilePath($path){
                     }
                 }
             }
+        }else{
+            //current dir already set
+            $fpath = realpath($path);
+            if(file_exists($fpath)){
+                return $fpath;
+            }
         }
 
+        }
         return $path;
 }
 

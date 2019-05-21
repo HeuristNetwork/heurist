@@ -134,6 +134,6 @@ error_log('Cannot load remote kml file '.$url);
                 exit($kml);
             }
     }else{
-            exit(); //nothingh found
+            exit(); //nothing found
     }
 ?>

@@ -1109,23 +1109,46 @@ $.widget( "heurist.mapping", {
         if(layer && layer.feature){
             
             var  that = this;
-            that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
+            
+            if(layer.feature.properties.rec_ID>0){
+            
+                that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
 
-            that.setFeatureSelection([layer.feature.properties.rec_ID]);
-            if($.isFunction(that.options.onselect)){
-                that.options.onselect.call(that, [layer.feature.properties.rec_ID]);
-            }
-            //open popup
-            var popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
-            +layer.feature.properties.rec_ID+'&db='+window.hWin.HAPI4.database;
-
-            $.get(popupURL, function(responseTxt, statusTxt, xhr){
-                if(statusTxt == "success"){
-                    that.main_popup.setLatLng(event.latlng)
-                    .setContent(responseTxt) //'<div style="width:99%;">'+responseTxt+'</div>')
-                    .openOn(that.nativemap);
+                that.setFeatureSelection([layer.feature.properties.rec_ID]);
+                if($.isFunction(that.options.onselect)){
+                    that.options.onselect.call(that, [layer.feature.properties.rec_ID]);
                 }
-            });
+                //open popup
+                var popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
+                +layer.feature.properties.rec_ID+'&db='+window.hWin.HAPI4.database;
+
+                $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                    if(statusTxt == "success"){
+                        that.main_popup.setLatLng(event.latlng)
+                        .setContent(responseTxt) //'<div style="width:99%;">'+responseTxt+'</div>')
+                        .openOn(that.nativemap);
+                    }
+                });
+        
+            }else{
+                
+                    var sText = '';    
+                    for(var key in layer.feature.properties) {
+                        if(layer.feature.properties.hasOwnProperty(key) && key!='_deleted'){
+                               sText = sText 
+                                + '<div class="detailRow fieldRow" style="border:none 1px #00ff00;">'
+                                + '<div class="detailType">'+key+'</div><div class="detail truncate">'
+                                + window.hWin.HEURIST4.util.htmlEscape(layer.feature.properties[key])
+                                + '</div></div>';                
+                        }
+                    }
+                    if(sText!=''){
+                        sText = '<div class="map_popup">' + sText + '</div>';
+                        that.main_popup.setLatLng(event.latlng)
+                            .setContent(sText) 
+                            .openOn(that.nativemap);
+                    }
+            }
         
         }
     },
