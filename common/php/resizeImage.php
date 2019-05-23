@@ -162,7 +162,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             
             //$thumbnail_file = HEURIST_THUMB_DIR.'ulf_'.$file['ulf_ObfuscatedFileID'].'.png';
             
-            if(true || !extension_loaded('imagick')){
+            if(!extension_loaded('imagick')){
                 //print 'imagick not loaded<br>';
                 //print phpinfo();
                 //exit();
@@ -181,6 +181,8 @@ if (array_key_exists('ulf_ID', $_REQUEST))
                 $im = file_get_contents($thumbnail_file);
                 
             }else{
+//error_log('imagic loaded!!!');                        
+                
                 $im =  new Imagick($filename.'[0]'); 
                 $im->setImageFormat('png'); 
                 $im->thumbnail(200,200);
