@@ -2208,9 +2208,9 @@ console.log('onpaste');
                         
                         if(that.is_disabled) return;
                     
-                        var url = window.hWin.HAPI4.baseURL +
-                        'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database+
-                        '&wkt='+that.newvalues[$input.attr('id')]; //$input.val();
+                        var url = window.hWin.HAPI4.baseURL 
+                            +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database
+                            +'&wkt='+that.newvalues[$input.attr('id')]; //$input.val();
                        
                        var wkt_params = {'wkt': that.newvalues[$input.attr('id')] };
                         

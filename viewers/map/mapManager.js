@@ -252,162 +252,165 @@ function hMapManager( _options )
         }
                 
         tree_container.empty();        
+        
+        if($.isFunction('fancytree')){
      
-        tree_container.fancytree({  //addClass('tree-facets').
-                                //extensions: ["filter"],
-                                //            extensions: ["select"],
-                                checkbox: true,
-                                selectMode: 3,  // hierarchical multi-selection
-                                source: treedata,
-                                /*
-                                beforeSelect: function(event, data){
-                                    // A node is about to be selected: prevent this, for folder-nodes:
-                                    if( data.node.hasChildren() ){
-                                        return false;
-                                    }
-                                },*/
-                                lazyLoad: function(event, data){
-                                //load: function(forceReload){
-                                    //load content of mapdocument
-                                    var node = data.node;
-                                    var dfd = new $.Deferred();
-                                    data.result = dfd.promise();
-                                    mapDocuments.openMapDocument(node.key, dfd);
-                                    //return dfd.promise();
-                                    
-                                },
-                                expand: function(e, data){
-                                   
-                                },
-                                loadChildren: function(e, data){
-//
-//console.log('loaded '+data.node.title+'  '+data.node.children.length);
-                                    setTimeout(function(){
-                                        
-                                        if(data.node.data.type=='mapdocument')
-                                            data.node.setSelected(true, {noEvents:true} );
-                                        
-                                        //$.each(data.node.children, function( idx, item ){
-                                        //    _defineActionIcons( item );
-                                        //}) 
-                                    }, 500);                                           
-                                },
-                                select: function(e, data) {  //show/hide
-                                    
-                                    var node = data.node;
-                                    if(node.data.type=='mapdocument'){
-                                        //if not expanded, expand, it loads layers (opens mapdocument)
-                                        var mapdoc_id = node.key;
-                                        if(!node.isExpanded() && !mapDocuments.isLoaded(mapdoc_id)){
-                                            node.setExpanded(true);
-                                        }else{
-
-                                            mapDocuments.setMapDocumentVisibulity(mapdoc_id, node.isSelected());
+            tree_container.fancytree({  //addClass('tree-facets').
+                                    //extensions: ["filter"],
+                                    //            extensions: ["select"],
+                                    checkbox: true,
+                                    selectMode: 3,  // hierarchical multi-selection
+                                    source: treedata,
+                                    /*
+                                    beforeSelect: function(event, data){
+                                        // A node is about to be selected: prevent this, for folder-nodes:
+                                        if( data.node.hasChildren() ){
+                                            return false;
                                         }
-                                        //
-                                        //mapDocuments.openMapDocument(node.key, dfd);
-                                    }else if(node.data.type=='layer'){
+                                    },*/
+                                    lazyLoad: function(event, data){
+                                    //load: function(forceReload){
+                                        //load content of mapdocument
+                                        var node = data.node;
+                                        var dfd = new $.Deferred();
+                                        data.result = dfd.promise();
+                                        mapDocuments.openMapDocument(node.key, dfd);
+                                        //return dfd.promise();
                                         
-                                        var mapdoc_id = node.data.mapdoc_id;
-                                        if(mapdoc_id>=0){
-                                            var layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
-                                            if(layer_rec) (layer_rec['layer']).setVisibility( node.isSelected() );
-                                        } 
-                                    }
-                                    
-                                    
-                                    /* Get a list of all selected nodes, and convert to a key array:
-                                    var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
-                                    return node.key;
-                                    });
-                                    $("#echoSelection3").text(selKeys.join(", "));
-
-                                    // Get a list of all selected TOP nodes
-                                    var selRootNodes = data.tree.getSelectedNodes(true);
-                                    // ... and convert to a key array:
-                                    var selRootKeys = $.map(selRootNodes, function(node){
-                                    return node.key;
-                                    });
-                                    $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
-                                    $("#echoSelectionRoots3").text(selRootNodes.join(", "));
-                                    */
-                                },
-                                /*
-                                click: function(e, data){
-                                   if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                                       data.node.setExpanded(!data.node.isExpanded());
-                                       //treediv.find('.fancytree-expander').hide();
+                                    },
+                                    expand: function(e, data){
                                        
-                                   }else if( data.node.lazy) {
-                                       data.node.setExpanded( true );
-                                   }
-                                },
-                                */
-                                dblclick: function(e, data) {
-                                    data.node.toggleSelected();
-                                },
-                                keydown: function(e, data) {
-                                    if( e.which === 32 ) {
-                                        data.node.toggleSelected();
-                                        return false;
-                                    }
-                                },
-                                renderNode: function(event, data) {
-                                    // Optionally tweak data.node.span
-                                    var item = data.node;
-                                    if(item.data.type=='layer'){
-                                        var rec_id = item.key;
-                                        var mapdoc_id = item.data.mapdoc_id;
-                                        
-                                        var style = mapDocuments.getSymbology( mapdoc_id, rec_id );
-                                        
-                                        if(style['rectypeIconUrl']){
-                                            var dcss = {'display':'inline-block', 'background-image':'url('+style['rectypeIconUrl']+')'};
-                                        }else{
+                                    },
+                                    loadChildren: function(e, data){
+    //
+    //console.log('loaded '+data.node.title+'  '+data.node.children.length);
+                                        setTimeout(function(){
                                             
-                                            var dcss = {'display':'inline-block', 'background-image':'none'};
-                                            if(style['stroke']!==false){
-                                                
-                                                var opacity = style['opacity']>0?style['opacity']:1;
-                                                var weight = (style['weight']>0&&style['weight']<4)?style['weight']:3;
-                                                dcss['width']  = 16-weight*2; 
-                                                dcss['height'] = 16-weight*2;
-                                                
-                                                dcss['border'] = weight+'px solid '
-                                                                + window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
-                                                if ( style['opacity']>0 && style['opacity']<1 ) {
-                                                    dcss['-webkit-background-clip'] = 'padding-box'; //for Safari
-                                                    dcss['background-clip'] = 'padding-box'; //for IE9+, Firefox 4+, Opera, Chrome
-                                                }
-                                                
-                                            } else {
-                                                dcss['border'] = 'none';
-                                            }
-
-                                            if(style['fill']!==false){
-                                                var fillColor = style['fillColor']?style['fillColor']:style['color'];
-                                                var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
-                                                dcss['background-color'] = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
-                                            }else{
-                                                dcss['background'] = 'none';
-                                            }
-                                        }
-                                        var $span = $(item.span);
-                                        $span.find("> span.fancytree-icon")
-                                        .css(dcss);
+                                            if(data.node.data.type=='mapdocument')
+                                                data.node.setSelected(true, {noEvents:true} );
+                                            
+                                            //$.each(data.node.children, function( idx, item ){
+                                            //    _defineActionIcons( item );
+                                            //}) 
+                                        }, 500);                                           
+                                    },
+                                    select: function(e, data) {  //show/hide
                                         
-                                            //backgroundImage: "url(skin-custom/customDoc2.gif)",
-                                            //backgroundPosition: "0 0"
+                                        var node = data.node;
+                                        if(node.data.type=='mapdocument'){
+                                            //if not expanded, expand, it loads layers (opens mapdocument)
+                                            var mapdoc_id = node.key;
+                                            if(!node.isExpanded() && !mapDocuments.isLoaded(mapdoc_id)){
+                                                node.setExpanded(true);
+                                            }else{
+
+                                                mapDocuments.setMapDocumentVisibulity(mapdoc_id, node.isSelected());
+                                            }
+                                            //
+                                            //mapDocuments.openMapDocument(node.key, dfd);
+                                        }else if(node.data.type=='layer'){
+                                            
+                                            var mapdoc_id = node.data.mapdoc_id;
+                                            if(mapdoc_id>=0){
+                                                var layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
+                                                if(layer_rec) (layer_rec['layer']).setVisibility( node.isSelected() );
+                                            } 
+                                        }
+                                        
+                                        
+                                        /* Get a list of all selected nodes, and convert to a key array:
+                                        var selKeys = $.map(data.tree.getSelectedNodes(), function(node){
+                                        return node.key;
+                                        });
+                                        $("#echoSelection3").text(selKeys.join(", "));
+
+                                        // Get a list of all selected TOP nodes
+                                        var selRootNodes = data.tree.getSelectedNodes(true);
+                                        // ... and convert to a key array:
+                                        var selRootKeys = $.map(selRootNodes, function(node){
+                                        return node.key;
+                                        });
+                                        $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
+                                        $("#echoSelectionRoots3").text(selRootNodes.join(", "));
+                                        */
+                                    },
+                                    /*
+                                    click: function(e, data){
+                                       if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                                           data.node.setExpanded(!data.node.isExpanded());
+                                           //treediv.find('.fancytree-expander').hide();
+                                           
+                                       }else if( data.node.lazy) {
+                                           data.node.setExpanded( true );
+                                       }
+                                    },
+                                    */
+                                    dblclick: function(e, data) {
+                                        data.node.toggleSelected();
+                                    },
+                                    keydown: function(e, data) {
+                                        if( e.which === 32 ) {
+                                            data.node.toggleSelected();
+                                            return false;
+                                        }
+                                    },
+                                    renderNode: function(event, data) {
+                                        // Optionally tweak data.node.span
+                                        var item = data.node;
+                                        if(item.data.type=='layer'){
+                                            var rec_id = item.key;
+                                            var mapdoc_id = item.data.mapdoc_id;
+                                            
+                                            var style = mapDocuments.getSymbology( mapdoc_id, rec_id );
+                                            
+                                            if(style['rectypeIconUrl']){
+                                                var dcss = {'display':'inline-block', 'background-image':'url('+style['rectypeIconUrl']+')'};
+                                            }else{
+                                                
+                                                var dcss = {'display':'inline-block', 'background-image':'none'};
+                                                if(style['stroke']!==false){
+                                                    
+                                                    var opacity = style['opacity']>0?style['opacity']:1;
+                                                    var weight = (style['weight']>0&&style['weight']<4)?style['weight']:3;
+                                                    dcss['width']  = 16-weight*2; 
+                                                    dcss['height'] = 16-weight*2;
+                                                    
+                                                    dcss['border'] = weight+'px solid '
+                                                                    + window.hWin.HEURIST4.ui.hexToRgbStr(style['color'], opacity);
+                                                    if ( style['opacity']>0 && style['opacity']<1 ) {
+                                                        dcss['-webkit-background-clip'] = 'padding-box'; //for Safari
+                                                        dcss['background-clip'] = 'padding-box'; //for IE9+, Firefox 4+, Opera, Chrome
+                                                    }
+                                                    
+                                                } else {
+                                                    dcss['border'] = 'none';
+                                                }
+
+                                                if(style['fill']!==false){
+                                                    var fillColor = style['fillColor']?style['fillColor']:style['color'];
+                                                    var fillOpacity = style['fillOpacity']>0?style['fillOpacity']:0.2;
+                                                    dcss['background-color'] = window.hWin.HEURIST4.ui.hexToRgbStr(fillColor, fillOpacity);
+                                                }else{
+                                                    dcss['background'] = 'none';
+                                                }
+                                            }
+                                            var $span = $(item.span);
+                                            $span.find("> span.fancytree-icon")
+                                            .css(dcss);
+                                            
+                                                //backgroundImage: "url(skin-custom/customDoc2.gif)",
+                                                //backgroundPosition: "0 0"
+                                        }
+                                        _defineActionIcons( item );
                                     }
-                                    _defineActionIcons( item );
-                                }
-                                // The following options are only required, if we have more than one tree on one page:
-                                //          initId: "treeData",
-                                //cookieId: "fancytree-Cb3",
-                                //idPrefix: "fancytree-Cb3-"
-                            });     
+                                    // The following options are only required, if we have more than one tree on one page:
+                                    //          initId: "treeData",
+                                    //cookieId: "fancytree-Cb3",
+                                    //idPrefix: "fancytree-Cb3-"
+                                });     
                             
-       that.setHeight();
+        }
+        that.setHeight();
     
     }
     
@@ -677,16 +680,19 @@ function hMapManager( _options )
             
             mapdoc_id = mapdoc_id.split(',');
             
-            var tree = mapdoc_treeview.fancytree("getTree");
-            var selected = 0;
+            if($.isFunction('fancytree')){
+            
+                var tree = mapdoc_treeview.fancytree("getTree");
+                var selected = 0;
 
-            tree.visit(function(node){
-                if( window.hWin.HEURIST4.util.findArrayIndex(node.key, mapdoc_id)>=0){
-                    node.setSelected( true );
-                    selected++;
-                    if(selected==mapdoc_id.length) return false;
-                }
-            });
+                tree.visit(function(node){
+                    if( window.hWin.HEURIST4.util.findArrayIndex(node.key, mapdoc_id)>=0){
+                        node.setSelected( true );
+                        selected++;
+                        if(selected==mapdoc_id.length) return false;
+                    }
+                });
+            }
             
         },
         

@@ -402,7 +402,7 @@ window.hWin.HEURIST4.geo = {
     
     //
     // OLD WAY to parse coordinates from WKT to timemap or google
-    // it still in use in DH search
+    // it is still in use in DH search
     //
     parseCoordinates: function(type, wkt, format, google) {
 
@@ -595,7 +595,7 @@ window.hWin.HEURIST4.geo = {
     },//end parseCoordinates
 
     //
-    //
+    //  _format - google or timemap
     //    
     wktValueToShapes:function(wkt, typeCode, _format){
 

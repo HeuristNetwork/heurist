@@ -22,37 +22,67 @@
 define('PDIR','../../');  //need for proper path to js and css    
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/layout/jquery.layout-latest.js"></script>
-
         <!-- script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE&libraries=drawing,geometry"></script -->
 
+<link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.css" />
+<?php
+if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
+?>
+    <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/leaflet.css"/>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/leaflet.js"></script>
+    <script src="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.js"></script>
+<?php
+}else{
+?>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+       integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+       crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+       integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+       crossorigin=""></script>   
+    <!-- link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" /-->
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<?php
+}
+?>
+<!-- leaflet plugins -->
+<script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.min.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw-src.js"></script>
+<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
+<link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw.css">
+
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapping.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapManager.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapDocument.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapLayer2.js"></script>
         <script type="text/javascript" src="mapDraw.js"></script>
-        <script type="text/javascript" src="mapLayer.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/vector3d.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/latlon-ellipsoidal.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/utm.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/dms.js"></script>        
-        
-        <script type="text/javascript" src="<?php echo PDIR;?>external/js/wellknown.js"></script>
 
         <!-- Initializing -->
 
         <script type="text/javascript">
 
-            var mapping, menu_datasets, btn_datasets;
+            var mapping, initial_wkt, menu_datasets, btn_datasets;
 
             // Callback function on map initialization
             function onPageInit(success){
                 
                 if(!success) return;
 
-                // init helper (see utils.js)
+                /* init helper (see utils.js)
                 window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 
                             'Mapping Drawing Overview', 
                             '../../context_help/mapping_drawing.html #content');
+                */            
 
-
+                handleApiReady();
+/*
                 if (typeof window.hWin.google === 'object' && typeof window.hWin.google.maps === 'object') {
 console.log('google map api: already loaded')                    
                     handleApiReady();
@@ -62,30 +92,66 @@ console.log('load google map api')
                     +'&libraries=drawing,geometry&callback=handleApiReady');                                           
                     //AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE
                 }
-
+*/
             } //onPageInit
             
             function handleApiReady(){
-                var initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search);
+                
                 // Mapping data
-                mapping = new hMappingDraw('map_digitizer', initial_wkt);
+                //mapping = new hMappingDraw('map_digitizer', initial_wkt);
+                
+                var layout_params = {};
+                layout_params['notimeline'] = '1';
+                layout_params['nocluster'] = '1'
+            
+                layout_params['controls'] = 'legend,bookmark,geocoder,draw';
+                layout_params['legend'] = 'basemaps';
+                
+                initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search);
+        
+                mapping = $('#map_container').mapping({
+                    element_map: '#map_digitizer',
+                    layout_params:layout_params,
+                    oninit: onMapInit,
+                    ondrawstart: onMapDrawStart,
+                    ondrawend:  onMapDrawStart
+                });                
             }
             
             function assignParameters(params){
                 if(params && params['wkt']){
-                    var initial_wkt = params['wkt'];
-                    
-                    mapping.loadWKT(initial_wkt);
-                }else{
-                    mapping.clearAll();
+                    initial_wkt = params['wkt'];
                 }
+                onMapInit();
+            }            
+            function onMapInit(){
+                if(initial_wkt){ //params && params['wkt']
+                    mapping.mapping( 'drawLoadWKT', initial_wkt);
+                }else{
+                    mapping.mapping( 'drawClearAll' );
+                }
+            }
+            function onMapDrawStart(e){
+
+                var layers = e.layers;
+                layers.eachLayer(function (layer) {
+                    var gjson = layer.toGeoJSON(6);
+                    if(window.hWin.HEURIST4.util.isJSON(gjson)){
+                        $('#coords1').html(JSON.stringify(gjson))
+                    }
+                    console.log('finished');                                     
+                });
+
+            }
+            function onMapDrawEnd(e){
+                
             }
 
         </script>
         <style type="text/css">
             #map_container {
                 position: absolute;
-                top: 50px;
+                top: 0px;
                 left: 0px;
                 right: 200px;
                 bottom: 0px;
@@ -156,35 +222,6 @@ console.log('load google map api')
     <body style="overflow:hidden">
         <div style="height:100%; width:100%;">
 
-            <div id="mapToolbarDiv" style="height:50px;padding:1em 0.2em">
-                    
-                <div class="div-table-cell">
-                    <label>Find:</label>
-                    <input id="input_search" class="text ui-widget-content ui-corner-all" 
-                            style="max-width: 100px; min-width: 6em; width: 100px; margin-right:0.2em"/>
-                    <div id="btn_search_start"></div>
-                </div>
-                <div class="div-table-cell" style="padding-left: 2em;">
-                    <label for="sel_viewpoints">Zoom to extent</label>
-                    <select id="sel_viewpoints" class="text ui-widget-content ui-corner-all" style="max-width:200px"></select>
-                    <div id="btn_viewpoint_delete"></div>
-                    <div id="btn_viewpoint_save"></div>
-                </div>
-                <div class="div-table-cell" id="coords2" style="padding-left: 1em;">
-                </div>
-                
-                <div class="div-table-cell" style="padding-left: 2em;">
-                    <label for="sel_overlays">Background</label>
-                    <select id="sel_overlays" class="text ui-widget-content ui-corner-all" style="max-width:120px">
-                        <option>none</option>
-                    </select>
-                </div>
-            
-                <div style="position: absolute; right: 0.2em; top:1em;" class="map-inited">
-                    <button id="btn_help">Help</button>
-                </div>
-            </div>
-            
             <div id="map_container">
                 <div id="map_digitizer">Mapping</div>
             </div>

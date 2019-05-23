@@ -261,8 +261,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
             //   extent: fixed extent    
             layout_params['nomap'] = __gp('nomap');
             layout_params['notimeline'] = __gp('notimeline');
-            layout_params['nocluster'] = __gp('nocluster'); //@todo
-            layout_params['editstyle'] = __gp('editstyle'); //@todo
+            layout_params['nocluster'] = __gp('nocluster');
+            layout_params['editstyle'] = __gp('editstyle');
             layout_params['basemap'] = __gp('basemap');  //name of basemap
             layout_params['extent'] = __gp('extent'); //@todo
             
@@ -273,6 +273,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         }
         
         mapping = $('#mapping').mapping({
+            element_layout: '#mapping',
             element_map: '#map',
             layout_params:layout_params,
             oninit: onMapInit

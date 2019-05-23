@@ -112,7 +112,7 @@ $.widget( "heurist.mapping", {
     // default options
     options: {
         
-        element_layout: '#mapping',
+        element_layout: null,
         element_map: 'map',
         element_timeline: 'timeline',
  
@@ -121,6 +121,8 @@ $.widget( "heurist.mapping", {
         // callbacks
         onselect: null,
         oninit: null,
+        ondrawstart:null,
+        ondrawend:null,
         
         isEditAllowed: true,
         isPublished: false
@@ -142,6 +144,10 @@ $.widget( "heurist.mapping", {
     map_print: null,
     map_publish: null,
     main_popup: null,
+    main_draw: null,
+    
+    //
+    drawnItems: null,
 
     //storages
     all_layers: [],    // array of all loaded top layers
@@ -224,22 +230,25 @@ $.widget( "heurist.mapping", {
         };
 
         // Setting layout
-        layout_opts.center__minHeight = 30;
-        layout_opts.center__minWidth = 200;
-        layout_opts.north__size = 30;
-        layout_opts.north__spacing_open = 0;
-        /*
-        var th = Math.floor($(this.options.element_layout).height*0.2);
-        layout_opts.south__size = th>200?200:th;
-        layout_opts.south__spacing_open = 7;
-        layout_opts.south__spacing_closed = 12;
-        */
-        layout_opts.south__onresize_end = function() {
-            //if(mapping) mapping.setTimelineMinheight();
-            that._adjustLegendHeight();
-        };
+        if(this.options.element_layout)
+        {
+            layout_opts.center__minHeight = 30;
+            layout_opts.center__minWidth = 200;
+            layout_opts.north__size = 30;
+            layout_opts.north__spacing_open = 0;
+            /*
+            var th = Math.floor($(this.options.element_layout).height*0.2);
+            layout_opts.south__size = th>200?200:th;
+            layout_opts.south__spacing_open = 7;
+            layout_opts.south__spacing_closed = 12;
+            */
+            layout_opts.south__onresize_end = function() {
+                //if(mapping) mapping.setTimelineMinheight();
+                that._adjustLegendHeight();
+            };
 
-        this.mylayout = $(this.options.element_layout).layout(layout_opts);
+            this.mylayout = $(this.options.element_layout).layout(layout_opts);
+        }
         
         //2. INIT MAP
         if(this.options.element_map && this.options.element_map.indexOf('#')==0){
@@ -250,7 +259,7 @@ $.widget( "heurist.mapping", {
         
         $('#'+map_element_id).css('padding',0); //reset padding otherwise layout set it to 10px
         
-        this.nativemap = L.map( map_element_id, {zoomControl:false} )
+        this.nativemap = L.map( map_element_id, {zoomControl:false, tb_del:true} )
             .on('load', function(){ } );
 
         //init basemap layer        
@@ -271,19 +280,7 @@ $.widget( "heurist.mapping", {
         }).addTo( this.nativemap );       
 */        
         //3. INIT TIMELINE 
-        this.vistimeline = $(this.element).find('.ui-layout-south').timeline({
-            element_timeline: this.options.element_timeline,
-            onselect: function(selected_rec_ids){
-                that.setFeatureSelection(selected_rec_ids); //highlight on map
-                if($.isFunction(that.options.onselect)){ //trigger global event
-                    that.options.onselect.call(that, selected_rec_ids);
-                }
-            },                
-            onfilter: function(show_rec_ids, hide_rec_ids){
-                
-                that.setFeatureVisibility(show_rec_ids, true);
-                that.setFeatureVisibility(hide_rec_ids, false);
-            }});
+        //moved to updateLayout
 
         //LONDON this.nativemap.setView([51.505, -0.09], 13); //@todo change to bookmarks
         this.nativemap.setView([20, 20], 1); //@todo change to bookmarks
@@ -297,19 +294,6 @@ $.widget( "heurist.mapping", {
         //legend contains mapManager
         this.map_legend = L.control.manager({ position: 'topright' }).addTo( this.nativemap );
         
-        //bookmark plugin
-        this.map_bookmark = new L.Control.Bookmarks({ position: 'topleft' });//.addTo( this.nativemap );
-        
-        //geocoder plugin
-        this.map_geocoder = L.Control.geocoder({ position: 'topleft' });//.addTo( this.nativemap );
-        
-        //print plugin
-        this.map_print = L.control.browserPrint({ position: 'topleft' });//.addTo( this.nativemap );
-        $(this.map_print).find('.browser-print-mode').css({padding: '2px 10px !important'}); //.v1 .browser-print-mode
-
-        //publish plugin
-        this.map_publish = L.control.publish({ position: 'topleft', mapwidget:this });//.addTo( this.nativemap );
-
         //content for legend
         this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element});
         
@@ -655,6 +639,8 @@ $.widget( "heurist.mapping", {
 
     updateTimelineLayerName: function(layer_id, new_dataset_name){
 
+        if(this.notimeline) return;
+        
         var group_idx = this.getTimelineGroup(layer_id);
         if(group_idx>=0){
             this.timeline_groups[group_idx].content = new_dataset_name;
@@ -671,6 +657,8 @@ $.widget( "heurist.mapping", {
     //  layer_data - timeline data from server
     //
     updateTimelineData: function(layer_id, layer_data, dataset_name){
+        
+            if(this.notimeline) return;
       
             var titem, k, ts, iconImg;
 
@@ -870,7 +858,7 @@ $.widget( "heurist.mapping", {
             affected_layer.remove();
             this.all_layers[layer_id] = null;
             
-            if(this.removeTimelineGroup(layer_id)){
+            if(this.removeTimelineGroup(layer_id) && !this.notimeline){
                 //update timeline
                 this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);
                 this._updatePanels()
@@ -1283,7 +1271,7 @@ $.widget( "heurist.mapping", {
           
         //this.main_layer.remove();
         //this.main_layer.addTo( this.nativemap );
-        if (is_external===true) { //call from external source (app_timemap)
+        if (is_external===true && !this.notimeline) { //call from external source (app_timemap)
             this.vistimeline.timeline('setSelection', this.selected_rec_ids);
         }
         
@@ -1449,27 +1437,50 @@ $.widget( "heurist.mapping", {
             layout_opts.south__spacing_open = 0;
             layout_opts.south__spacing_closed = 0;
         }else{
-            var th = Math.floor($(this.options.element_layout).height()*0.2);
-            layout_opts.south__size = th>200?200:th;
             
-            if(nomap){
-                layout_opts.center__minHeight = 0;
-                layout_opts.south__spacing_open = 0;
-                layout_opts.south__spacing_closed = 0;
-            }else{
-                layout_opts.south__spacing_open = 7;
-                layout_opts.south__spacing_closed = 12;
-                layout_opts.center__minHeight = 30;
-                layout_opts.center__minWidth = 200;
+            if(!this.vistimeline){
+                this.vistimeline = $(this.element).find('.ui-layout-south').timeline({
+                    element_timeline: this.options.element_timeline,
+                    onselect: function(selected_rec_ids){
+                        that.setFeatureSelection(selected_rec_ids); //highlight on map
+                        if($.isFunction(that.options.onselect)){ //trigger global event
+                            that.options.onselect.call(that, selected_rec_ids);
+                        }
+                    },                
+                    onfilter: function(show_rec_ids, hide_rec_ids){
+                        
+                        that.setFeatureVisibility(show_rec_ids, true);
+                        that.setFeatureVisibility(hide_rec_ids, false);
+                    }});
+            }
+            
+            
+            if(this.options.element_layout){
+                var th = Math.floor($(this.options.element_layout).height()*0.2);
+                layout_opts.south__size = th>200?200:th;
+                
+                if(nomap){
+                    layout_opts.center__minHeight = 0;
+                    layout_opts.south__spacing_open = 0;
+                    layout_opts.south__spacing_closed = 0;
+                }else{
+                    layout_opts.south__spacing_open = 7;
+                    layout_opts.south__spacing_closed = 12;
+                    layout_opts.center__minHeight = 30;
+                    layout_opts.center__minWidth = 200;
+                }
             }
         }
-        if(__parseval(params['noheader'])){ //outdated
-            layout_opts.north__size = 0;
-        }
-        //$(this.mylayout).layout(layout_opts);
-        var mylayout = $(this.options.element_layout).layout(layout_opts);
-        if(this.notimeline){
-            mylayout.hide('south');
+        
+        if(this.options.element_layout){
+            if(__parseval(params['noheader'])){ //outdated
+                layout_opts.north__size = 0;
+            }
+            //$(this.mylayout).layout(layout_opts);
+            var mylayout = $(this.options.element_layout).layout(layout_opts);
+            if(this.notimeline){
+                mylayout.hide('south');
+            }
         }
         
     
@@ -1482,8 +1493,96 @@ $.widget( "heurist.mapping", {
             var is_visible = (controls.indexOf('all')>=0 || controls.indexOf(val)>=0);
             
             if(is_visible){
+                
+                if(!that['map_'+val])  //not yet created
+                {
+                    //not yet created
+                    if(val=='bookmark') //bookmark plugin
+                    that.map_bookmark = new L.Control.Bookmarks({ position: 'topleft' });
+                    
+                    if(val=='geocoder') //geocoder plugin
+                    that.map_geocoder = L.Control.geocoder({ position: 'topleft' });
+                    
+                    //print plugin
+                    if(val=='print'){
+                    that.map_print = L.control.browserPrint({ position: 'topleft' })
+                    $(that.map_print).find('.browser-print-mode').css({padding: '2px 10px !important'}); //.v1 .browser-print-mode
+                    }
+
+                    if(val=='publish') //publish plugin
+                    that.map_publish = L.control.publish({ position: 'topleft', mapwidget:this });//.addTo( this.nativemap );
+                    
+                    
+                    if(val=='draw') //draw plugin
+                    {
+                        that.drawnItems = L.featureGroup().addTo(that.nativemap);
+                        
+                        that.map_draw = new L.Control.Draw({
+                            position: 'topleft',
+                            edit: {
+                                featureGroup: that.drawnItems,
+                                poly: {
+                                    allowIntersection: false
+                                }
+                            },
+                            draw: {
+                                polygon: {
+                                    allowIntersection: false,
+                                    showArea: true,
+                                    shapeOptions: {
+                                        //color: '#bada55'
+                                    },
+                                    drawError: {
+                                        color: '#e1e100', // Color the shape will turn when intersects
+                                        message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+                                    },
+                                },
+                                polyline: {
+                                    shapeOptions: {
+                                        //color: '#f357a1',
+                                        weight: 4
+                                    }                                    
+                                },
+                                circlemarker: false,
+                                rectangle: {
+                                    shapeOptions: {
+                                        clickable: true
+                                    }
+                                }                                
+                            }
+                        }); 
+                        
+                        that.nativemap.tb_del = new L.EditToolbar.Delete(that.nativemap, {featureGroup: that.drawnItems});
+                        that.nativemap.tb_del.enable();
+
+                        /*                        
+                        L.Map.addInitHook('addHandler', 'tb_del', L.EditToolbar.Delete, {featureGroup: that.drawnItems});
+                        that.nativemap.tb_del.enable();
+                        */
+                        
+                        
+                        //adds  new shape to drawnItems
+                        that.nativemap.on(L.Draw.Event.CREATED, function (event) {
+                            var layer = event.layer;
+
+                            that.drawnItems.addLayer(layer);
+                        });        
+                        that.nativemap.on('draw:editstart', function (e) {
+                               if($.isFunction(that.options.ondrawstart)){
+                                   that.options.ondrawstart.apply(e);
+                               }
+                        });
+                        that.nativemap.on('draw:edited', function (e) {
+                               if($.isFunction(that.options.ondrawend)){
+                                   that.options.ondrawend.apply(e);
+                               }
+                        });                    
+                    }
+                    
+                }
+                
                 if(!that['map_'+val]._map) that['map_'+val].addTo(that.nativemap);
-            }else{
+            }else if(that['map_'+val]){
                 that['map_'+val].remove();
             }
 
@@ -1495,6 +1594,8 @@ $.widget( "heurist.mapping", {
         __controls('print');
         if(!this.options.isPublished) __controls('publish');
         //__controls('scale');
+        __controls('draw');
+        
             
         //   legend: [basemaps,search,mapdocs|onedoc]
         this.mapManager.updatePanelVisibility(__splitval(params['legend']));
@@ -1521,33 +1622,108 @@ $.widget( "heurist.mapping", {
 
             this.is_timeline_disabled=(this.notimeline || no_time_data);
             
-            var layout_opts = {};
-            var th;
-            if(this.notimeline || no_time_data){
-                layout_opts.south__size = 0;
-                layout_opts.south__spacing_open = 0;
-                layout_opts.south__spacing_closed = 0;
-            }else {
-                th = Math.floor($(this.options.element_layout).height()*0.2);
-                layout_opts.south__size = th>200?200:th;
-                layout_opts.south__spacing_open = 7;
-                layout_opts.south__spacing_closed = 12;
-                layout_opts.center__minHeight = 30;
-                layout_opts.center__minWidth = 200;
-            }
-            var mylayout = $(this.options.element_layout).layout(layout_opts);
+            if(this.options.element_layout){
             
-            if(this.notimeline || no_time_data){
-                mylayout.hide('south');
-            }else{
-                mylayout.show('south');
-                mylayout.sizePane('south', th)    
+                var layout_opts = {};
+                var th;
+                if(this.notimeline || no_time_data){
+                    layout_opts.south__size = 0;
+                    layout_opts.south__spacing_open = 0;
+                    layout_opts.south__spacing_closed = 0;
+                }else {
+                    th = Math.floor($(this.options.element_layout).height()*0.2);
+                    layout_opts.south__size = th>200?200:th;
+                    layout_opts.south__spacing_open = 7;
+                    layout_opts.south__spacing_closed = 12;
+                    layout_opts.center__minHeight = 30;
+                    layout_opts.center__minWidth = 200;
+                }
+                var mylayout = $(this.options.element_layout).layout(layout_opts);
+                
+                if(this.notimeline || no_time_data){
+                    mylayout.hide('south');
+                }else{
+                    mylayout.show('south');
+                    mylayout.sizePane('south', th)    
+                }
+                
             }
-            
 
         }
-    }
+    },
     
+    //draw routines
+    drawLoadWKT: function(wkt){
+        
+        if (! wkt) {
+            //wkt = decodeURIComponent(document.location.search);
+            return;
+        }
+        
+        //remove heurist prefix with type
+        var typeCode;
+        var matches = wkt.match(/\??(\S+)\s+(.*)/);
+        if (! matches) {
+            return;
+        }
+        if(matches.length>2){
+            typeCode = matches[1];
+            wkt = matches[2];
+        }else{
+            wkt = matches[1];
+        }        
+        
+        var gjson = parseWKT(wkt); //see wellknown.js
+        
+        if(gjson && gjson.coordinates){
+            
+            this.drawLoadJson(gjson);
+            
+        }        
+        
+    },
     
+    drawLoadJson: function( gjson){
+        
+            this.drawClearAll;
+            
+            var that = this;
+            
+            var l2 = L.geoJSON(gjson);
+            
+            function __addDrawItems(lg){
+                if(lg instanceof L.LayerGroup){
+                    lg.eachLayer(function (layer) {
+                        __addDrawItems(layer);    
+                    });
+                }else{
+                        that.nativemap.addLayer(lg);
+                        that.drawnItems.addLayer(lg);
+                        lg.editing.enable();
+                }                
+            }
+            __addDrawItems(l2);
+                
+
+            var bounds = this.drawnItems.getBounds();
+            if(!(bounds instanceof L.LatLngBounds)){
+                if($.isArray(bounds) && bounds.length>1 ){
+                    bounds = L.latLngBounds(bounds);
+                }
+            }
+            setTimeout(function(){
+                if(bounds && bounds.isValid()) that.nativemap.fitBounds(bounds);                
+            },300);        
+    },    
+    
+
+    drawClearAll: function(){
+        if(this.drawnItems) {
+            this.drawnItems.eachLayer(function (layer) {
+                layer.remove();
+            });
+            this.drawnItems.clearLayers();
+        }    
+    }    
     
 });
