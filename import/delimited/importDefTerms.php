@@ -62,13 +62,14 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
     <body class="ui-heurist-bg-light" style="overflow:hidden;">
 <div style="width:100%;height:60%;position:absolute;top:0">
 <div style="position:absolute;left:0;right:400px; height:100%;  border-right:1px lightgray solid" id="divStep1">
-    <div class="ent_header" style="height:5em;">
+    <div class="ent_header" style="height:8em;">
         <h2>Step 1</h2>
         <h2 style="padding-top:0.4em">Paste content in area below</h2>
-        <h2 style="position:absolute;bottom:3px;">or</h2>
         <input type="file" id="uploadFile" style="display:none">
-        <div id="btnUploadFile" style="position:absolute;bottom:0px;left:3em">Upload File</div>
-        <div style="position:absolute;bottom:0px;left:13em;">encoding: 
+      <div style="padding-top:4px">
+        <h2 style="display: inline-block">or</h2>
+        <div id="btnUploadFile">Upload File</div>
+        <div style="float:right">encoding: 
 <select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;font-size:0.9em">
 <option>UTF-8</option>
 <option>UTF-16</option>
@@ -143,10 +144,18 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
 <option>UHC</option>
 <option>ISO-2022-KR</option>
 <option>CP866</option>
-                    </select></div>        
+                    </select>
+       </div>
+    </div>          
+    <div class="heurist-helper1" style="padding-top: 9px;">
+Separate term hierarchy levels with a period ( . ) eg. "History.Medieval.Late". 
+<br/>If supplying optional standard code, description and semantic URI, 
+separate term and each of these values with comma or tab.
+    </div>                                    
+                    
     </div>
     <textarea id="sourceContent" rows="0" cols="0" class="ent_content_full" 
-    style="top:5em;width:100%;resize:none;padding:0.5em;border:none"></textarea>
+    style="top:8em;width:100%;resize:none;padding:0.5em;border:2px solid lightblue;"></textarea>
     
     
 </div>
@@ -188,7 +197,7 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
             <div style="padding-top:1em;">
                 <input id="csv_header" 
                     style="margin:1em 0.5em 0 0"
-                    class="text ui-widget-content ui-corner-all" type="checkbox" value="1" checked>
+                    class="text ui-widget-content ui-corner-all" type="checkbox" value="1">
                 <label for="csv_header">Labels in line 1</label>
             </div>
     </fieldset>            

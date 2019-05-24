@@ -193,7 +193,9 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                 
                     <div style="border: black; border-style: solid; border-width:thin; padding:10px;">
                     
-                        <h2 style="margin-left:5px; margin-top:0px; margin-bottom:10px;border-style:none;display:inline-block">Edit selected term / vocabulary</h2>
+                        <h2 style="margin-left:5px; margin-top:0px; margin-bottom:10px;border-style:none;display:inline-block">
+                            Edit selected term / vocabulary
+                        </h2>
                         <div id="div_SaveMessage" style="text-align: center; display:none;color:#0000ff;width:140px;">
                             <b>term saved successfully!</b>
                         </div>
@@ -233,6 +235,50 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                             </div>
 
                         </div>
+
+                        <div  class="dtyField" style="border-radius:4px;border:1px solid gray;margin:15px 105;width:350px">
+
+                            <div id='div_btnAddChild' style="width:100%;font-style:bold;color:black;text-align:center;font-size:smaller">
+                                <input type="button" value="+ Add Child" id="btnAddChild"
+                                         title="Add a child term (a term hierarchichally below the current vocabulary or term)"
+                                         value=""
+                                         onClick="{editTerms.doAddChild(false)}"/>
+                                <input type="button" value="Import" id="btnImport"
+                                    title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"
+                                    onClick="{editTerms.doImport(false)}"/>
+                                <input type="button" value="Export" id="btnExport"
+                                    title="EXPORT this vocabulary to a text file"
+                                    onClick="{editTerms.doExport(false)}"/>
+                                <!-- <input id="btnSetParent" type="button" value="Move"
+                                style="display:none;margin-left:20px;"
+                                title="Change the parent" onClick="{editTerms.selectParent()}"/>
+                                <input id="btnMerge" type="button" value="Merge"
+                                style="display:none;"
+                                title="Merge this term with another term and update all records to reference the new term"
+                                onClick="{editTerms.mergeTerms()}"/> -->
+                                <input id="btnDelete" type="button" value="Delete"
+                                    title="Delete this term (if unused in database)"
+                                    onClick="{editTerms.doDelete()}" />
+                                <br><br>
+                            </div>
+
+                            <span id = "Saved" style="display:none;"><input type="button" value="Saved..." id="btnSaved"
+                                style="border-radius: 6px; background-color:gray;margin-left:5px;font-style: bold !important;  color:black; display:none;"
+                                title=" "/></span>
+
+                            <input type="button" value="Save changes to this term" id="btnSave" class="btn_Save save-disabled" 
+                                style="margin-left:42px;font-style: bold !important; color:black;"
+                                title=" "
+                                onClick="{editTerms.doSave()}"/>
+                           
+                           <label class="heurist-helper2">also saves optional information below</label>
+                                                                                         
+                        </div>
+
+                        <h2 style="margin-left:5px; margin-top:0px; margin-bottom:10px;border-style:none;">
+                            Optional information
+                        </h2>
+                        
 
                         <div class="dtyField">
                             <label class="dtyLabel" style="vertical-align: top;">Description of term</label>
@@ -312,48 +358,7 @@ style="height:100px;width:100px;border:gray;cursor: pointer; vertical-align: mid
                             </div>
                         </div>
 
-
-
-                        <!--
-                         These buttons are hidden now. They are replaced by action icons in treeview (see __defineActionIcons)
-                         Either this section of code will be removed or restored in next months
-                        -->
-                        <div style="display:inline-block; margin-top:15px;width:90%;">
-                            <span style="visibility:hidden;display:none;">
-                            <input type="button" value="Import" id="btnImport"
-                                title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"
-                                onClick="{editTerms.doImport(false)}"/>
-                            <input type="button" value="Export" id="btnExport"
-                                title="EXPORT this vocabulary to a text file"
-                                onClick="{editTerms.doExport(false)}"/>
-                            <!-- <input id="btnSetParent" type="button" value="Move"
-                            style="display:none;margin-left:20px;"
-                            title="Change the parent" onClick="{editTerms.selectParent()}"/>
-                            <input id="btnMerge" type="button" value="Merge"
-                            style="display:none;"
-                            title="Merge this term with another term and update all records to reference the new term"
-                            onClick="{editTerms.mergeTerms()}"/> -->
-                            <input id="btnDelete" type="button" value="Delete"
-                                title="Delete this term (if unused in database)"
-                                onClick="{editTerms.doDelete()}" />
-                            </span>
-
-                            <span id = "Saved" style="display:none;"><input type="button" value="Saved..." id="btnSaved"
-                                style="border-radius: 6px; background-color:gray;margin-left:5px;font-style: bold !important;  color:black; display:none;"
-                                title=" "/></span>
-
-                            <input type="button" value="Save changes to this term" id="btnSave" class="btn_Save save-disabled" 
-                                style="margin-left:105px;font-style: bold !important; color:black;"
-                                title=" "
-                                onClick="{editTerms.doSave()}"/>
-
-                            <div id='div_btnAddChild' style="margin-left:20px;text-align: right; font-style: bold; colour:black;">
-                                    <input type="button" value="+ Add Child" id="btnAddChild"
-                                         title="Add a child term (a term hierarchichally below the current vocabulary or term)"
-                                         value=""
-                                         onClick="{editTerms.doAddChild(false)}"/>
-                            </div>
-                        </div>
+ 
                         <!--
                         <div style="float:right; text-align: right;">
                         </div>

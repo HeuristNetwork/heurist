@@ -209,7 +209,8 @@ function hImportDefTerms(_trm_ParentTermID) {
                         
             //HEADER FIELDS            
             var headers = [], ifrom=0;
-            if( $('#csv_header').is(':checked') ){
+            if( $('#csv_header').is(':checked') ){ 
+                
                 for(i=0;i<_parseddata.length;i++){
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                         
@@ -317,6 +318,22 @@ function hImportDefTerms(_trm_ParentTermID) {
                             if(response.status == window.hWin.ResponseStatus.OK){
 
                                 _parseddata = response.data;
+                                
+                                if (!$('#csv_header').is(':checked')) {
+                                    var firstline_without_quotes = false;
+                                    var pos = content.indexOf($('#csv_enclosure').val()==2?'"':"'");
+
+                                    for(var i=0; i<_parseddata.length; i++){
+                                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
+                                            var len = _parseddata[i].join(',').length;
+                                            firstline_without_quotes = pos>len;
+                                            break;
+                                        }
+                                    }
+                                    if(firstline_without_quotes){
+                                        $('#csv_header').prop('checked', true);  
+                                    } 
+                                }
                                 
                                 _redrawPreviewTable();
                                 
