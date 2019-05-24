@@ -519,6 +519,8 @@ window.hWin.HEURIST4.util = {
         
         if(allowempty && $.isArray(a) && a.length==0){
             return true;   
+        }else if($.isPlainObject(a)){
+            return (a['type']=='Feature' || a['type']=='FeatureCollection');
         }else{
             return (window.hWin.HEURIST4.util.isArrayNotEmpty(a) && (a[0]['type']=='Feature' || a[0]['type']=='FeatureCollection'));
         }

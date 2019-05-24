@@ -68,7 +68,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <script type="text/javascript">
 
-            var mapping, initial_wkt, menu_datasets, btn_datasets;
+            var mapping, initial_wkt, menu_datasets, btn_datasets, zoom_with_delay = true;
 
             // Callback function on map initialization
             function onPageInit(success){
@@ -113,39 +113,142 @@ console.log('load google map api')
                     element_map: '#map_digitizer',
                     layout_params:layout_params,
                     oninit: onMapInit,
-                    ondrawstart: onMapDrawStart,
-                    ondrawend:  onMapDrawStart
+                    ondrawstart: onMapDraw,
+                    ondrawend:  onMapDraw
                 });                
+                
+                //initialize buttons
+                $('#save-button').button().on({click:function()
+                {
+                    
+                    var gjson = mapping.mapping( 'drawGetJson');
+                    
+                    gjson = window.hWin.HEURIST4.util.isJSON(gjson);
+                            
+                    if(gjson===false || !window.hWin.HEURIST4.util.isGeoJSON(gjson)){
+                        window.hWin.HEURIST4.msg.showMsgDlg('You have to draw a shape');    
+                    }else{
+                        var res = stringifyMultiWKT(gjson);
+                        
+                        if(res==''){
+                            window.hWin.HEURIST4.msg.showMsgDlg('Cannot convert GeoJSON to WKT. '
+                            +'Please click "Get Geometry", copy and send GeoJSON to development team');    
+                            return;
+                        }
+                        
+                        //type code is not required for new code. this is for backward capability
+                        var typeCode = 'm';
+                        if(res.indexOf('GEOMETRYCOLLECTION')<0 && res.indexOf('MULTI')<0){
+                            if(res.indexOf('LINESTRING')>=0){
+                                typeCode = 'l';
+                            }else if(res.indexOf('POLYGON')>=0){
+                                typeCode = 'pl';
+                            }else {
+                                typeCode = 'p';
+                            }
+                            
+                        }
+                        window.close({type:typeCode, wkt:res});    
+                    }
+
+                }});
+                
+                $('#delete-all-button').button().on({click:function(){
+                       mapping.mapping( 'drawClearAll' );
+                }});
+                $('#cancel-button').button().on({click:function(){
+                       window.close();
+                }});
+                // paste geojson -> map
+                $('#load-geometry-button').button().click(function(){
+
+                    var titleYes = window.hWin.HR('Yes'),
+                    titleNo = window.hWin.HR('No'),
+                    buttons = {};
+                    
+                    var $dlg;
+
+                    buttons[titleYes] = function() {
+                        mapping.mapping( 'drawLoadJson', $dlg.find('#geodata_textarea').val());
+                        $dlg.dialog( "close" );
+                    };
+                    buttons[titleNo] = function() {
+                        $dlg.dialog( "close" );
+                    };
+
+                    $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
+                        element: document.getElementById( "get-set-coordinates" ),
+                        resizable:false,
+                        width:690, height:400,
+                        title:window.hWin.HR('Paste or upload geo data'),
+                        buttons:buttons    
+                    });
+
+                });
+                // load from map -> geojson
+                $('#get-geometry-button').button().click(function(){
+
+                    var res = mapping.mapping( 'drawGetJson' );
+                    if(window.hWin.HEURIST4.util.isGeoJSON(res)){
+                        $('#geodata_textarea').val(JSON.stringify(res));    
+                    }else{
+                        $('#geodata_textarea').val('');
+                    }
+                    
+                    var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
+                        element: document.getElementById( "get-set-coordinates" ),
+                        resizable: false,
+                        width:690, height:400,
+                        title:window.hWin.HR('Copy the result')
+                    });
+                });
             }
             
+            //
+            // called from showDialog
+            //
             function assignParameters(params){
+                
+                zoom_with_delay = false;
+                
                 if(params && params['wkt']){
                     initial_wkt = params['wkt'];
+                }else{
+                    initial_wkt = null;
                 }
                 onMapInit();
-            }            
+            } 
+                       
             function onMapInit(){
+                
                 if(initial_wkt){ //params && params['wkt']
                     mapping.mapping( 'drawLoadWKT', initial_wkt);
+               
+//console.log('zoom '+zoom_with_delay);
+                    if(zoom_with_delay){
+                        setTimeout(function(){ mapping.mapping( 'drawZoomTo' ); }, 3000);
+                    }
+                    
+                    
                 }else{
                     mapping.mapping( 'drawClearAll' );
                 }
             }
-            function onMapDrawStart(e){
 
-                var layers = e.layers;
-                layers.eachLayer(function (layer) {
-                    var gjson = layer.toGeoJSON(6);
-                    if(window.hWin.HEURIST4.util.isJSON(gjson)){
-                        $('#coords1').html(JSON.stringify(gjson))
-                    }
-                    console.log('finished');                                     
-                });
-
-            }
-            function onMapDrawEnd(e){
+            //
+            // event listener on start and end of draw 
+            //
+            function onMapDraw(e){
+//console.log('finished');     
+                var res = mapping.mapping( 'drawGetJson',  e);
+                if(window.hWin.HEURIST4.util.isGeoJSON(res)){
+                    $('#coords1').text(JSON.stringify(res));
+                }else{
+                    $('#coords1').text('');
+                }
                 
             }
+            
 
         </script>
         <style type="text/css">
@@ -241,7 +344,7 @@ console.log('load google map api')
                 <div style="padding-top:20px">
                     <button id="delete-all-button">Clear all</button>
                 </div> 
-                <div>
+                <div style="display:none">
                     <button id="delete-button">Clear Selected</button>
                 </div> 
                 <div>

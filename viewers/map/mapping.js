@@ -1490,7 +1490,8 @@ $.widget( "heurist.mapping", {
         
         var that = this;
         function __controls(val){
-            var is_visible = (controls.indexOf('all')>=0 || controls.indexOf(val)>=0);
+            var is_visible = (controls.indexOf('all')>=0  
+                                || controls.indexOf(val)>=0);
             
             if(is_visible){
                 
@@ -1562,19 +1563,20 @@ $.widget( "heurist.mapping", {
                         
                         
                         //adds  new shape to drawnItems
-                        that.nativemap.on(L.Draw.Event.CREATED, function (event) {
-                            var layer = event.layer;
-
+                        that.nativemap.on(L.Draw.Event.CREATED, function (e) {
+                            var layer = e.layer;
                             that.drawnItems.addLayer(layer);
+                            
+                            that.options.ondrawend.call(that, e);
                         });        
                         that.nativemap.on('draw:editstart', function (e) {
                                if($.isFunction(that.options.ondrawstart)){
-                                   that.options.ondrawstart.apply(e);
+                                   that.options.ondrawstart.call(that, e);
                                }
                         });
                         that.nativemap.on('draw:edited', function (e) {
                                if($.isFunction(that.options.ondrawend)){
-                                   that.options.ondrawend.apply(e);
+                                   that.options.ondrawend.call(that, e);
                                }
                         });                    
                     }
@@ -1594,7 +1596,7 @@ $.widget( "heurist.mapping", {
         __controls('print');
         if(!this.options.isPublished) __controls('publish');
         //__controls('scale');
-        __controls('draw');
+        if(controls.indexOf('draw')>=0) __controls('draw');
         
             
         //   legend: [basemaps,search,mapdocs|onedoc]
@@ -1683,9 +1685,18 @@ $.widget( "heurist.mapping", {
         
     },
     
+//{"type":"LineString","coordinates":[[-0.140634,51.501877],[-0.130785,51.525804],[-0.129325,51.505243],[-0.128982,51.5036]]}}    
+    
     drawLoadJson: function( gjson){
         
-            this.drawClearAll;
+            this.drawClearAll();
+            
+            gjson = window.hWin.HEURIST4.util.isJSON(gjson);
+            
+            if(gjson===false){
+                window.hWin.HEURIST4.msg.showMsgFlash('GeoJSO is not valid');    
+                return;
+            }
             
             var that = this;
             
@@ -1703,19 +1714,25 @@ $.widget( "heurist.mapping", {
                 }                
             }
             __addDrawItems(l2);
-                
+            
+            this.drawZoomTo();
 
+    },    
+
+    drawZoomTo: function(){
+        
             var bounds = this.drawnItems.getBounds();
             if(!(bounds instanceof L.LatLngBounds)){
                 if($.isArray(bounds) && bounds.length>1 ){
                     bounds = L.latLngBounds(bounds);
                 }
             }
-            setTimeout(function(){
-                if(bounds && bounds.isValid()) that.nativemap.fitBounds(bounds);                
-            },300);        
-    },    
-    
+            if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);                
+            
+            //setTimeout(function(){
+            //},300);        
+        
+    },
 
     drawClearAll: function(){
         if(this.drawnItems) {
@@ -1724,6 +1741,37 @@ $.widget( "heurist.mapping", {
             });
             this.drawnItems.clearLayers();
         }    
-    }    
+    },
+    
+    drawGetJson: function( e ){
+    
+        var res_gjson = []; //reset
+        
+        function __to_gjson( layer ){
+            var gjson = layer.toGeoJSON(6);
+            if(window.hWin.HEURIST4.util.isJSON(gjson)){
+                res_gjson.push(gjson);
+            }        
+        }
+        
+        if(e){
+            var layers = e.layers;
+            if(layers){
+                layers.eachLayer(__to_gjson);
+            }else if(e.layer) {
+               __to_gjson(e.layer);
+            }
+        }else if(this.drawnItems) {
+            this.drawnItems.eachLayer(__to_gjson);
+        } 
+        
+        if(res_gjson.length==1){
+            res_gjson = res_gjson[0];
+        }else if (res_gjson.length>1) {
+            res_gjson = {"type": "FeatureCollection", "features": res_gjson};
+        }
+        
+        return res_gjson;
+    }
     
 });
