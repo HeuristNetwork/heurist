@@ -121,7 +121,8 @@ $.widget( "heurist.mapping", {
         // callbacks
         onselect: null,
         oninit: null,
-        ondrawstart:null,
+        ondraw_addstart:null,
+        ondraw_editstart:null,
         ondrawend:null,
         
         isEditAllowed: true,
@@ -1569,9 +1570,14 @@ $.widget( "heurist.mapping", {
                             
                             that.options.ondrawend.call(that, e);
                         });        
+                        that.nativemap.on('draw:drawstart', function (e) {
+                               if($.isFunction(that.options.ondraw_addstart)){
+                                   that.options.ondraw_addstart.call(that, e);
+                               }
+                        });
                         that.nativemap.on('draw:editstart', function (e) {
-                               if($.isFunction(that.options.ondrawstart)){
-                                   that.options.ondrawstart.call(that, e);
+                               if($.isFunction(that.options.ondraw_editstart)){
+                                   that.options.ondraw_editstart.call(that, e);
                                }
                         });
                         that.nativemap.on('draw:edited', function (e) {
@@ -1677,10 +1683,12 @@ $.widget( "heurist.mapping", {
         
         var gjson = parseWKT(wkt); //see wellknown.js
         
-        if(gjson && gjson.coordinates){
+        if(gjson && (gjson.coordinates || gjson.geometries)){
             
             this.drawLoadJson(gjson);
             
+        }else{
+            this.drawClearAll();
         }        
         
     },
@@ -1721,23 +1729,26 @@ $.widget( "heurist.mapping", {
                     if(lg instanceof L.Polygon){
                         
                         var coords = lg.getLatLngs();
-console.log('poly');                        
-console.log(coords);                        
+
                         if(coords.length>0 && coords[0] instanceof L.LatLng ){
                             coords.push(coords[0]);
                             __addDrawItem(new L.Polygon(coords));
                         }else{
-                            for(var i=0;i<coords.length;i++){
-                                  coords[i].push(coords[i][0]);
-                                  __addDrawItem(new L.Polygon(coords[i]));
+                            if($.isArray(coords) && coords.length==1) coords = coords[0];
+                            if(coords.length>0 && coords[0] instanceof L.LatLng ){
+                                coords.push(coords[0]);
+                                __addDrawItem(new L.Polygon(coords));
+                            }else{
+                                for(var i=0;i<coords.length;i++){
+                                      coords[i].push(coords[i][0]);
+                                      __addDrawItem(new L.Polygon(coords[i]));
+                                }
                             }
                         }
                         
                         
                     }else if(lg instanceof L.Polyline){
                         var coords = lg.getLatLngs();
-console.log('line');                        
-console.log(coords);                        
                         if(coords.length>0 && coords[0] instanceof L.LatLng ){
                             __addDrawItem(new L.Polyline(coords));
                         }else{
@@ -1748,9 +1759,9 @@ console.log(coords);
                         
                     }else{ 
 
-                        lg.editing.enable();
                         that.nativemap.addLayer(lg);
                         that.drawnItems.addLayer(lg);
+                        lg.editing.enable();
                     }
                         
                 }                
@@ -1786,6 +1797,39 @@ console.log(coords);
             });
             this.drawnItems.clearLayers();
         }    
+    },
+
+    //
+    //
+    //
+    drawGetWkt: function( show_warning ){
+        
+        var res = '', msg = null;
+                    
+        var gjson = mapping.mapping( 'drawGetJson');
+        
+        gjson = window.hWin.HEURIST4.util.isJSON(gjson);
+                
+        if(gjson===false || !window.hWin.HEURIST4.util.isGeoJSON(gjson)){
+            msg = 'You have to draw a shape';
+        }else{
+            var res = stringifyMultiWKT(gjson);
+            
+            if(window.hWin.HEURIST4.util.isempty(res)){
+                msg = 'Cannot convert GeoJSON to WKT. '
+                +'Please click "Get Geometry", copy and send GeoJSON to development team';
+            }
+        }
+        
+        if(msg!=null){
+            if(show_warning){
+                    window.hWin.HEURIST4.msg.showMsgDlg(msg);    
+            }else{
+                    res = msg;
+            }
+        }
+        
+        return res;
     },
     
     //

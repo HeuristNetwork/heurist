@@ -114,29 +114,18 @@ console.log('load google map api')
                     element_map: '#map_digitizer',
                     layout_params:layout_params,
                     oninit: onMapInit,
-                    ondrawstart: onMapDraw,
+                    ondraw_addstart: onMapDrawAdd,
+                    ondraw_editstart: onMapDraw,
                     ondrawend:  onMapDraw
                 });                
                 
                 //initialize buttons
                 $('#save-button').button().on({click:function()
                 {
+
+                    var res = mapping.mapping( 'drawGetWkt', true);
                     
-                    var gjson = mapping.mapping( 'drawGetJson');
-                    
-                    gjson = window.hWin.HEURIST4.util.isJSON(gjson);
-                            
-                    if(gjson===false || !window.hWin.HEURIST4.util.isGeoJSON(gjson)){
-                        window.hWin.HEURIST4.msg.showMsgDlg('You have to draw a shape');    
-                    }else{
-                        var res = stringifyMultiWKT(gjson);
-                        
-                        if(res==''){
-                            window.hWin.HEURIST4.msg.showMsgDlg('Cannot convert GeoJSON to WKT. '
-                            +'Please click "Get Geometry", copy and send GeoJSON to development team');    
-                            return;
-                        }
-                        
+                    if( !window.hWin.HEURIST4.util.isempty(res) ){    
                         //type code is not required for new code. this is for backward capability
                         var typeCode = 'm';
                         if(res.indexOf('GEOMETRYCOLLECTION')<0 && res.indexOf('MULTI')<0){
@@ -176,6 +165,8 @@ console.log('load google map api')
                     buttons[titleNo] = function() {
                         $dlg.dialog( "close" );
                     };
+                    $('#get-coordinates-helper').hide();
+                    $('#set-coordinates-helper').show();
 
                     $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                         element: document.getElementById( "get-set-coordinates" ),
@@ -188,21 +179,44 @@ console.log('load google map api')
                 });
                 // load from map -> geojson
                 $('#get-geometry-button').button().click(function(){
-
-                    var res = mapping.mapping( 'drawGetJson' );
-                    if(window.hWin.HEURIST4.util.isGeoJSON(res)){
-                        $('#geodata_textarea').val(JSON.stringify(res));    
-                    }else{
-                        $('#geodata_textarea').val('');
-                    }
+                    
+                    $('#get-coordinates-helper').show();
+                    $('#set-coordinates-helper').hide();
+                    
+                    $('#get-coord-wkt').change();
                     
                     var $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                         element: document.getElementById( "get-set-coordinates" ),
                         resizable: false,
                         width:690, height:400,
                         title:window.hWin.HR('Copy the result')
+                
                     });
                 });
+                
+                $('input[name="get-coord-format"]').on({change:function(e){
+                        
+                       var is_checked = $(e.target).is(':checked');
+                       var el_name = $(e.target).attr('id');
+console.log(el_name+'  '+is_checked);
+                       var el_text = $(e.target).parents('#get-set-coordinates').find('#geodata_textarea');
+
+
+                       if(el_name=='get-coord-wkt' && is_checked){
+                           
+                            var res = mapping.mapping( 'drawGetWkt', false);
+                            el_text.val(res);    
+                           
+                       }else{
+                            var res = mapping.mapping( 'drawGetJson' );
+                            if(window.hWin.HEURIST4.util.isGeoJSON(res)){
+                                el_text.val(JSON.stringify(res));    
+                            }else{
+                                el_text.val('');
+                            }
+                       }
+                }});
+                
             }
             
             //
@@ -219,10 +233,18 @@ console.log('load google map api')
                 }
                 onMapInit();
             } 
-                       
+            
+            //
+            //
+            //           
             function onMapInit(){
                 
                 if(initial_wkt){ //params && params['wkt']
+                
+                    if(initial_wkt.indexOf('GEOMETRYCOLLECTION')>=0 || initial_wkt.indexOf('MULTI')>=0){
+                        $('#cbAllowMulti').prop('checked',true);
+                    }
+                
                     mapping.mapping( 'drawLoadWKT', initial_wkt);
                
 //console.log('zoom '+zoom_with_delay);
@@ -232,6 +254,16 @@ console.log('load google map api')
                     
                     
                 }else{
+                    $('#cbAllowMulti').prop('checked',false);
+                    mapping.mapping( 'drawClearAll' );
+                }
+            }
+            
+            //
+            // users adds new draw item
+            //
+            function onMapDrawAdd(e){
+                if(!$('#cbAllowMulti').is(':checked')){
                     mapping.mapping( 'drawClearAll' );
                 }
             }
@@ -331,14 +363,14 @@ console.log('load google map api')
             </div>
 
             <div id="rightpanel">
-
+                <!--
                 <label style="display:inline-block;">Draw color:</label>
                 <div style="width:auto !important;display:inline-block;height: 14px" id="color-palette"></div>
-
+                -->
                 
                 <div style="padding-top:20px">
-                    <label>Select shape to draw</label><br>
-                    <label>Click to add points</label><br><br>
+                    <!-- <label>Select shape to draw</label><br>
+                    <label>Click to add points</label><br><br> -->
                     <label><input type="checkbox" id="cbAllowMulti">Allow multiple objects</label><br><br>
                     <button id="save-button" style="font-weight:bold">Save</button>
                 </div> 
@@ -358,7 +390,7 @@ console.log('load google map api')
                     <button id="get-geometry-button">Get Geometry</button>
                 </div> 
                 
-                <div style="bottom:30;position: absolute;height:160px">
+                <div style="bottom:30;position: absolute;height:160px;display:none">
                     <div id="coords_hint" style="padding:0 4px 2px 4px"></div>    
                     <textarea id="coords1">Click on the map. The code for the selected shape you create will be presented here.</textarea>
                     <button id="apply-coords-button" style="margin-top:10px">Apply Coordinates</button>
@@ -368,11 +400,14 @@ console.log('load google map api')
         
         <div id="get-set-coordinates" style="display: none;">
             <!--
-            
-            
             -->
-            <div>
-                <label>Paste geo data in supported format (GeoJSON,.....)</label>
+            <div id="set-coordinates-helper">
+                <label>Paste geo data in supported format (GeoJSON or WKT)</label>
+            </div>
+            <div id="get-coordinates-helper">
+                <label>Select format: </label>
+                <label><input type="radio" name="get-coord-format" id="get-coord-json" checked="true">GeoJSON</label>
+                <label><input type="radio" name="get-coord-format" id="get-coord-wkt">WKT</label>
             </div>
             <textarea cols="" rows="" id="geodata_textarea"
                 style="position:absolute;top:2em;bottom:0;width:97%;resize:none"></textarea>
