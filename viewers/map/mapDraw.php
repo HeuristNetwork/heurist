@@ -49,6 +49,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.min.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw-src.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet/leaflet.circle.topolygon-src.js"></script>
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw.css">
 

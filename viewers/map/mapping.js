@@ -1687,6 +1687,9 @@ $.widget( "heurist.mapping", {
     
 //{"type":"LineString","coordinates":[[-0.140634,51.501877],[-0.130785,51.525804],[-0.129325,51.505243],[-0.128982,51.5036]]}}    
     
+    //
+    // json -> map - adds draw items to map
+    //
     drawLoadJson: function( gjson){
         
             this.drawClearAll();
@@ -1708,9 +1711,48 @@ $.widget( "heurist.mapping", {
                         __addDrawItems(layer);    
                     });
                 }else{
+                    
+                    function __addDrawItem(item){
+                            that.nativemap.addLayer(item);                        
+                            that.drawnItems.addLayer(item);
+                            item.editing.enable();
+                    }
+                    
+                    if(lg instanceof L.Polygon){
+                        
+                        var coords = lg.getLatLngs();
+console.log('poly');                        
+console.log(coords);                        
+                        if(coords.length>0 && coords[0] instanceof L.LatLng ){
+                            coords.push(coords[0]);
+                            __addDrawItem(new L.Polygon(coords));
+                        }else{
+                            for(var i=0;i<coords.length;i++){
+                                  coords[i].push(coords[i][0]);
+                                  __addDrawItem(new L.Polygon(coords[i]));
+                            }
+                        }
+                        
+                        
+                    }else if(lg instanceof L.Polyline){
+                        var coords = lg.getLatLngs();
+console.log('line');                        
+console.log(coords);                        
+                        if(coords.length>0 && coords[0] instanceof L.LatLng ){
+                            __addDrawItem(new L.Polyline(coords));
+                        }else{
+                            for(var i=0;i<coords.length;i++){
+                                  __addDrawItem(new L.Polyline(coords[i]));
+                            }
+                        }
+                        
+                    }else{ 
+
+                        lg.editing.enable();
                         that.nativemap.addLayer(lg);
                         that.drawnItems.addLayer(lg);
-                        lg.editing.enable();
+                    }
+                        
                 }                
             }
             __addDrawItems(l2);
@@ -1734,6 +1776,9 @@ $.widget( "heurist.mapping", {
         
     },
 
+    //
+    // remove all drawn items fromm map
+    // 
     drawClearAll: function(){
         if(this.drawnItems) {
             this.drawnItems.eachLayer(function (layer) {
@@ -1743,12 +1788,30 @@ $.widget( "heurist.mapping", {
         }    
     },
     
+    //
+    // returns current drawn items as geojson
+    //
     drawGetJson: function( e ){
     
         var res_gjson = []; //reset
         
         function __to_gjson( layer ){
-            var gjson = layer.toGeoJSON(6);
+            
+            if(layer instanceof L.Circle){
+               //L.Circle.toPolygon(layer, 40, this.nativemap)
+               var points = layer.toPolygon(40, this.nativemap);
+               lr = L.polygon(points);
+               
+            /*}else if(layer instanceof L.Rectangle){
+               
+               var points = layer.toPolygon(40, this.nativemap);
+               lr = L.polygon(points);
+            */    
+            }else{ 
+                lr = layer;
+            }
+            
+            var gjson = lr.toGeoJSON(6);
             if(window.hWin.HEURIST4.util.isJSON(gjson)){
                 res_gjson.push(gjson);
             }        
