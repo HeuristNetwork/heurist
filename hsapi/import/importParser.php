@@ -940,7 +940,7 @@ public static function simpleCsvParser($params){
         //remove spaces
         $content = trim(preg_replace('/([\s])\1+/', ' ', $content));
         
-        $lines = str_getcsv($content, $lb); 
+        $lines = str_getcsv($content, $lb, '¢'); 
         
         foreach($lines as &$Row) {
              $row = str_getcsv($Row, $csv_delimiter , $csv_enclosure); //parse the items in rows    
