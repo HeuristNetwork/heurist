@@ -43,12 +43,24 @@ function doLogin(isforsed){
         var $dlg = login_dialog;
 
         //load login dialogue
-        $dlg.load(window.hWin.HAPI4.baseURL + "hclient/widgets/profile/profile_login.html?t="+window.hWin.HEURIST4.util.random(), function(){ 
+        $dlg.load(window.hWin.HAPI4.baseURL + "hclient/widgets/profile/profile_login.html?t="
+                            +window.hWin.HEURIST4.util.random(), 
+            function(){ 
 
             //find all labels and apply localization
             $dlg.find('label').each(function(){
                 $(this).html(window.hWin.HR($(this).html()));
             });
+            
+            //fill databse owner information
+            $dlg.find('#span-owner-name').text(window.hWin.HAPI4.sysinfo.dbowner_name);
+            $dlg.find('#span-owner-org').text(window.hWin.HEURIST4.util.isempty(window.hWin.HAPI4.sysinfo.dbowner_org)
+                    ?'N/A':window.hWin.HAPI4.sysinfo.dbowner_org);
+            $dlg.find('#span-owner-email').html('<a href="mailto:'
+                    +window.hWin.HAPI4.sysinfo.dbowner_email+'">'+window.hWin.HAPI4.sysinfo.dbowner_email+'</a>');
+            
+            $dlg.find('#span-reccount').text(window.hWin.HAPI4.sysinfo.db_total_records+' records');
+            
 
             if(false){
                 //init captcha

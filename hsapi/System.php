@@ -837,6 +837,7 @@ error_log(print_r($_REQUEST, true));
                     "db_version_req"=>HEURIST_MIN_DBVERSION,
                     
                     "dbowner_name"=>@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'],
+                    "dbowner_org"=>@$dbowner['ugr_Organisation'],
                     "dbowner_email"=>@$dbowner['ugr_eMail'],
                     "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
