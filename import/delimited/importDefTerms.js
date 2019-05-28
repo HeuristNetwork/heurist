@@ -32,7 +32,7 @@ function hImportDefTerms(_trm_ParentTermID) {
     trm_ParentChildren= [];
     
     function _init(_trm_ParentTermID){
-    
+                                           
         trm_ParentTermID = _trm_ParentTermID;
 
         if(trm_ParentTermID>0){
@@ -482,7 +482,7 @@ function hImportDefTerms(_trm_ParentTermID) {
                 'a'          : 'batch',
                 'entity'     : 'defTerms',
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'fields'     : _prepareddata                     
+                'fields'     : JSON.stringify(_prepareddata)                     
                 };
                 
                 var that = this;                                                

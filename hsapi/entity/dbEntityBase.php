@@ -586,6 +586,11 @@ class DbEntityBase
     //
     protected function prepareRecords(){
         //fields contains record data
+        if(is_string($this->data['fields'])){
+            $this->data['fields'] = json_decode($this->data['fields'], true);
+        }
+        
+        
         if(!is_array(@$this->data['fields']) || count($this->data['fields'])<1){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Missed 'fields' parameter. Fields are not defined");
                 return false;    
