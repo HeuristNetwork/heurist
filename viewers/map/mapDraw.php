@@ -143,6 +143,12 @@ console.log('load google map api')
 
                 }});
                 
+                $('#style-button').button().on({click:function(){
+                    
+                        mapping.mapping( 'drawSetStyle');
+                }});
+                
+                
                 $('#delete-all-button').button().on({click:function(){
                        mapping.mapping( 'drawClearAll' );
                 }});
@@ -367,6 +373,9 @@ console.log(el_name+'  '+is_checked);
                 <label style="display:inline-block;">Draw color:</label>
                 <div style="width:auto !important;display:inline-block;height: 14px" id="color-palette"></div>
                 -->
+                <div>
+                    <button id="style-button">Set style</button>
+                </div>
                 
                 <div style="padding-top:20px">
                     <!-- <label>Select shape to draw</label><br>

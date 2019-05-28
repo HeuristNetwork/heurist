@@ -253,7 +253,7 @@ function hMapManager( _options )
                 
         tree_container.empty();        
         
-        if($.isFunction('fancytree')){
+        if($.isFunction($('body').fancytree)){
      
             tree_container.fancytree({  //addClass('tree-facets').
                                     //extensions: ["filter"],
@@ -680,7 +680,7 @@ function hMapManager( _options )
             
             mapdoc_id = mapdoc_id.split(',');
             
-            if($.isFunction('fancytree')){
+            if($.isFunction($('body').fancytree)){
             
                 var tree = mapdoc_treeview.fancytree("getTree");
                 var selected = 0;

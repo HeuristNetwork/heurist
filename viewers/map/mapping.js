@@ -149,6 +149,14 @@ $.widget( "heurist.mapping", {
     
     //
     drawnItems: null,
+    //deffau draw style
+    map_draw_style: {color: '#3388ff',
+             weight: 4,
+             opacity: 0.5,
+             fill: true, //fill: false for polyline
+             fillColor: null, //same as color by default
+             fillOpacity: 0.2},
+    
 
     //storages
     all_layers: [],    // array of all loaded top layers
@@ -1519,6 +1527,41 @@ $.widget( "heurist.mapping", {
                     {
                         that.drawnItems = L.featureGroup().addTo(that.nativemap);
                         
+                          /*
+                        L.Edit.PolyVerticesEdit = L.Edit.PolyVerticesEdit.extend(
+                           {
+                                    icon: new L.DivIcon({
+                                      iconSize: new L.Point(8, 8),
+                                      className: 'leaflet-div-icon leaflet-editing-icon',
+                                    }),
+                                    touchIcon: new L.DivIcon({
+                                        iconSize: new L.Point(12, 12), //was 20
+                                        className: 'leaflet-div-icon leaflet-editing-icon leaflet-touch-icon'
+                                    })
+                          });            
+                        L.Edit.Poly = L.Edit.Poly.extend(
+                           {
+                                    icon: new L.DivIcon({
+                                      iconSize: new L.Point(8, 8),
+                                      className: 'leaflet-div-icon leaflet-editing-icon',
+                                    }),
+                                    touchIcon: new L.DivIcon({
+                                        iconSize: new L.Point(12, 12), //was 20
+                                        className: 'leaflet-div-icon leaflet-editing-icon leaflet-touch-icon'
+                                    })
+                          });            
+                        L.Draw.Polyline = L.Draw.Polyline.extend(
+                           {
+                                    icon: new L.DivIcon({
+                                      iconSize: new L.Point(8, 8),
+                                      className: 'leaflet-div-icon leaflet-editing-icon',
+                                    }),
+                                    touchIcon: new L.DivIcon({
+                                        iconSize: new L.Point(12, 12), //was 20
+                                        className: 'leaflet-div-icon leaflet-editing-icon leaflet-touch-icon'
+                                    })
+                          });            
+                          */
                         that.map_draw = new L.Control.Draw({
                             position: 'topleft',
                             edit: {
@@ -1879,6 +1922,48 @@ $.widget( "heurist.mapping", {
         }
         
         return res_gjson;
+    },
+    
+    
+    //
+    // set draw style
+    //
+    drawSetStyle: function(){
+
+         var that = this;
+        
+         var current_value = this.map_draw_style;
+         window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_value, 2, function(new_style){
+            
+            that.map_draw_style = new_style; 
+             
+            that.map_draw.setDrawingOptions({
+                polygon: {shapeOptions: new_style},
+                rectangle: {shapeOptions:new_style},
+                circle: {shapeOptions:new_style}
+            });                
+            
+            var new_style2 = window.hWin.HEURIST4.util.cloneJSON(new_style);
+            new_style2.fill = false;
+                            
+            that.map_draw.setDrawingOptions({
+                polyline: {shapeOptions:new_style2},
+            });
+
+            that.drawnItems.eachLayer(function (layer) {
+                if(layer instanceof L.Polyline ){
+                      layer.setStyle(new_style2);
+                }else if(layer instanceof L.Polygon ){
+                      layer.setStyle(new_style);
+                }
+            });
+
+            
+            
+         });
+
     }
+                       
+    
     
 });

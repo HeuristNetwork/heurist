@@ -17,7 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function editSymbology(current_value, needName, callback){
+function editSymbology(current_value, mode_edit, callback){
 
     var edit_dialog = null;
     
@@ -82,7 +82,7 @@ function editSymbology(current_value, needName, callback){
                 "dty_Type":"freetext",
                 //"rst_RequirementType":"required",                        
                 "rst_DisplayName":"Name:",
-                "rst_Display": needName?"visible":"hidden"
+                "rst_Display": (mode_edit===true)?"visible":"hidden"
         }},
 
         {"dtID": "iconType",
@@ -91,6 +91,7 @@ function editSymbology(current_value, needName, callback){
                 "rst_DisplayName": "Icon source:",
                 "rst_DefaultValue": "y",
                 "rst_DisplayHelpText": "Define type and source of icon",
+                "rst_Display": (mode_edit!=2)?"visible":"hidden",
                 "rst_FieldConfig":[
                     {"key":"url","title":"Image"},
                     {"key":"iconfont","title":"Icon font"},
@@ -104,7 +105,7 @@ function editSymbology(current_value, needName, callback){
                 "dty_Type":"url",
                 "rst_DisplayName": "Icon URL:",
                 "rst_DisplayWidth":40,
-                "rst_Display":(current_value['iconType']=='url'?"visible":"hidden")
+                "rst_Display":(mode_edit!=2 && current_value['iconType']=='url'?"visible":"hidden")
         }},
         {"dtID": "iconFont",
             "dtFields":{
@@ -113,12 +114,14 @@ function editSymbology(current_value, needName, callback){
                 "rst_DisplayWidth":40,
                 "rst_Display":(current_value['iconType']=='iconfont'?"visible":"hidden"),
                 "rst_DefaultValue": "location",
+                "rst_Display": (mode_edit!=2)?"visible":"hidden",
                 "rst_DisplayHelpText": "Define name of icon from set: http://mkkeck.github.io/jquery-ui-iconfont/"
         }},
         {"dtID": "iconSize",
             "dtFields":{
                 "dty_Type":"integer",
-                "rst_DisplayName": "Icon size:"
+                "rst_DisplayName": "Icon size:",
+                "rst_Display": (mode_edit!=2)?"visible":"hidden"
                 //"rst_DefaultValue": 18,
         }},
 
@@ -126,12 +129,13 @@ function editSymbology(current_value, needName, callback){
             "dtFields":{
                 "dty_Type":"enum",
                 "rst_DisplayName": "Stroke:",
-                "rst_DefaultValue": "y",
+                "rst_DefaultValue": "1",
                 "rst_DisplayHelpText": "Whether to draw stroke along the path. Set it to false to disable borders on polygons or circles.",
                 "rst_FieldConfig":[
                     {"key":"0","title":"No"},
-                    {"key":"","title":"Yes"}
-                ]
+                    {"key":"1","title":"Yes"}
+                ],
+                "rst_Display": (mode_edit!=2)?"visible":"hidden"
         }},
         {"dtID": "color",
             "dtFields":{
@@ -163,11 +167,12 @@ function editSymbology(current_value, needName, callback){
                 "dty_Type":"enum",
                 "rst_DisplayName": "Fill:",
                 "rst_DisplayHelpText": "Whether to fill the path with color. Set it to false to disable filling on polygons or circles.",
-                "rst_DefaultValue": "y",
+                "rst_DefaultValue": "1",
                 "rst_FieldConfig":[
                     {"key":"0","title":"No"},
-                    {"key":"","title":"Yes"}
-                ]
+                    {"key":"1","title":"Yes"}
+                ],
+                "rst_Display": (mode_edit!=2)?"visible":"hidden",
         }},
         {"dtID": "fillColor",
             "dtFields":{
@@ -223,7 +228,7 @@ function editSymbology(current_value, needName, callback){
     //
     edit_dialog = popup_dlg.dialog({
         autoOpen: true,
-        height: 600,
+        height: (mode_edit==2)?300:600,
         width:  740,
         modal:  true,
         title: window.hWin.HR('Define Symbology'),
