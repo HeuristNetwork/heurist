@@ -35,16 +35,16 @@
 <div id="div_sel_access" style="min-width: 600px;" class="input">
     <div class="header" style="padding: 10px 16px 0 16px;"><label>Record is viewable by:</label></div>
     
-    <div class="detailRow" style="padding-bottom:1em;">
+    <div class="detailRow access-hidden" style="padding-bottom:1em;">
         <label><input type="radio" name="rb_Access" value="hidden" id="rb_Access-hidden">
         User or group specified above</label>
     </div>
-    <div class="detailRow" style="padding-bottom:1em;">
+    <div class="detailRow" style="padding-bottom:1em;display:none">
         <!-- <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable-group"></label> -->
-        Members of the following groups can also view the record(s)
     </div>
-    <div class="detailRow" style="padding-bottom:1em;">
-        <div id="sel_AccessGroups"  style="padding: 0.2em;min-width: 600px;display:none" class="input"></div>
+    <div class="detailRow access-hidden" style="padding-bottom:1em;">
+        Members of the following groups can also view the record(s)
+        <div id="sel_AccessGroups"  style="padding: 0.2em;min-width:800px;display:none" class="input"></div>
     </div>
 </div>
 
