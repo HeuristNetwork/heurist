@@ -1703,8 +1703,32 @@ $.widget( "heurist.mapping", {
         }
     },
     
-    //draw routines
-    drawLoadWKT: function(wkt){
+//----------------------- draw routines ----------------------    
+    
+    //
+    //  detects format and calls appropriate method
+    // 
+    drawLoadGeometry: function(data){
+
+        if (!data) {
+            return;   
+        }
+        
+        gjson = window.hWin.HEURIST4.util.isJSON(data);
+
+        if(gjson===false){
+            this.drawLoadWKT(data, false);        
+        }else{
+            this.drawLoadJson(gjson, false);
+        }
+        
+        
+    }
+    
+    //
+    //
+    //
+    drawLoadWKT: function(wkt, force_clear){
         
         if (! wkt) {
             //wkt = decodeURIComponent(document.location.search);
@@ -1727,11 +1751,11 @@ $.widget( "heurist.mapping", {
         var gjson = parseWKT(wkt); //see wellknown.js
         
         if(gjson && (gjson.coordinates || gjson.geometries)){
-            
-            this.drawLoadJson(gjson);
-            
-        }else{
+            this.drawLoadJson(gjson, force_clear);
+        }else if(force_clear){
             this.drawClearAll();
+        }else{
+             window.hWin.HEURIST4.msg.showMsgFlash('It appears that WKT is not recognized'); 
         }        
         
     },
@@ -1741,17 +1765,19 @@ $.widget( "heurist.mapping", {
     //
     // json -> map - adds draw items to map
     //
-    drawLoadJson: function( gjson){
+    drawLoadJson: function( gjson, force_clear ){
         
-            this.drawClearAll();
-            
             gjson = window.hWin.HEURIST4.util.isJSON(gjson);
+
+            if(gjson!==false || force_clear){
+                this.drawClearAll();    
+            } 
             
             if(gjson===false){
-                window.hWin.HEURIST4.msg.showMsgFlash('GeoJSO is not valid');    
+                window.hWin.HEURIST4.msg.showMsgFlash('GeoJSON is not valid');    
                 return;
             }
-            
+
             var that = this;
             
             var l2 = L.geoJSON(gjson);

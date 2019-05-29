@@ -144,11 +144,8 @@ console.log('load google map api')
                 }});
                 
                 $('#style-button').button().on({click:function(){
-                    
                         mapping.mapping( 'drawSetStyle');
                 }});
-                
-                
                 $('#delete-all-button').button().on({click:function(){
                        mapping.mapping( 'drawClearAll' );
                 }});
@@ -165,7 +162,7 @@ console.log('load google map api')
                     var $dlg;
 
                     buttons[titleYes] = function() {
-                        mapping.mapping( 'drawLoadJson', $dlg.find('#geodata_textarea').val());
+                        mapping.mapping( 'drawLoadGeometry', $dlg.find('#geodata_textarea').val());
                         $dlg.dialog( "close" );
                     };
                     buttons[titleNo] = function() {
@@ -251,7 +248,7 @@ console.log(el_name+'  '+is_checked);
                         $('#cbAllowMulti').prop('checked',true);
                     }
                 
-                    mapping.mapping( 'drawLoadWKT', initial_wkt);
+                    mapping.mapping( 'drawLoadWKT', initial_wkt, true);
                
 //console.log('zoom '+zoom_with_delay);
                     if(zoom_with_delay){
