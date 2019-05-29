@@ -1,4 +1,3 @@
-
 /**
 * editTerms.js: Support file for editTerms.php
 *
@@ -1437,7 +1436,7 @@ function EditTerms() {
     function _import(isRoot) {
 
         if(isRoot || !Hul.isnull(_currentNode)){
-
+            
             var term_id = (isRoot)?0:_currentNode.data.id;
             var term_label = (isRoot)?'root vocabulary':_currentNode.data.label;
 
@@ -1472,10 +1471,17 @@ function EditTerms() {
                 + ' added.', null, 'Terms imported');
             window.hWin.HEURIST4.terms = context.terms;
             
+            
+            var tree = $treediv.fancytree("getTree");
+            
             var res = context.result,
-            ind,
-            parentNode = (context.parent===0)?_currTreeView.getRoot():_currentNode, //??????
+            ind, parentNode,
+            mainParentNode = (context.parent===0)?tree.getRoot():_findNodeById(context.parent);  //_currentNode, //??????
             fi = window.hWin.HEURIST4.terms.fieldNamesToIndex;
+            
+            parentNode = mainParentNode;
+            
+            window.hWin.HEURIST4.terms = context.terms;
             
             var added_nodes = [];
 
@@ -1528,7 +1534,9 @@ function EditTerms() {
                 }//for
                 
             
-                parentNode.setExpanded(true);    
+                //mainParentNode.render(true);
+                mainParentNode.setActive(true);
+                mainParentNode.setExpanded(true);    
                 /*var _temp = _currentNode;
                 _onNodeClick(_currentNode);
                 _parentNode = _temp;

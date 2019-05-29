@@ -236,9 +236,9 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
                         </div>
 
-                        <div  class="dtyField" style="border-radius:4px;border:1px solid gray;margin:15px 105;width:350px">
+                        <div  class="dtyField" style="border:none;margin:15px 105;width:350px">
 
-                            <div id='div_btnAddChild' style="width:100%;font-style:bold;color:black;text-align:center;font-size:smaller">
+                            <div id='div_btnAddChild' style="width:100%;font-style:bold;color:black;font-size:smaller">
                                 <input type="button" value="+ Add Child" id="btnAddChild"
                                          title="Add a child term (a term hierarchichally below the current vocabulary or term)"
                                          value=""
@@ -263,11 +263,11 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                             </div>
 
                             <span id = "Saved" style="display:none;"><input type="button" value="Saved..." id="btnSaved"
-                                style="border-radius: 6px; background-color:gray;margin-left:5px;font-style: bold !important;  color:black; display:none;"
+                                style="border-radius: 6px; background-color:gray;font-style: bold !important;  color:black; display:none;"
                                 title=" "/></span>
 
                             <input type="button" value="Save changes to this term" id="btnSave" class="btn_Save save-disabled" 
-                                style="margin-left:42px;font-style: bold !important; color:black;"
+                                style="font-style: bold !important; color:black;"
                                 title=" "
                                 onClick="{editTerms.doSave()}"/>
                            

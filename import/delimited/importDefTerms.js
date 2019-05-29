@@ -304,6 +304,8 @@ function hImportDefTerms(_trm_ParentTermID) {
                 //$(recordList).resultList('updateResultSet', new hRecordSet());
             }else{
             
+                        window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
+                
                         var request = { content: content,
                                         csv_delimiter: $('#csv_delimiter').val(),
                                         csv_enclosure: $('#csv_enclosure').val(),
@@ -314,6 +316,8 @@ function hImportDefTerms(_trm_ParentTermID) {
 
                         window.hWin.HAPI4.doImportAction(request, function( response ){
 
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
                             //that.loadanimation(false);
                             if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -477,6 +481,7 @@ function hImportDefTerms(_trm_ParentTermID) {
         
         if(_prepareddata.length<1) return;
         
+            window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
     
             var request = {
                 'a'          : 'batch',
@@ -489,6 +494,8 @@ function hImportDefTerms(_trm_ParentTermID) {
                 //that.loadanimation(true);
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        
                         if(response.status == window.hWin.ResponseStatus.OK){
 
                             var recIDs = response.data;
