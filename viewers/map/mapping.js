@@ -1723,7 +1723,7 @@ $.widget( "heurist.mapping", {
         }
         
         
-    }
+    },
     
     //
     //
@@ -1743,7 +1743,9 @@ $.widget( "heurist.mapping", {
         }
         if(matches.length>2){
             typeCode = matches[1];
-            wkt = matches[2];
+            if( (['m','pl','l','c','r']).indexOf(typeCode)>=0 ){
+                wkt = matches[2];    
+            }
         }else{
             wkt = matches[1];
         }        
