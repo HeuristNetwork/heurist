@@ -718,6 +718,7 @@ function hMapManager( _options )
         //
         // adds new layer to search results mapdoc
         // data - recordset, heurist query or json
+        // it sends request to server and obtain geojson to be passed to mapping.addGeoJson
         //
         addSearchResult: function( data, dataset_name )
         {
@@ -732,6 +733,23 @@ function hMapManager( _options )
             return record;
         },
 
+        //
+        // converts given recordset to geojson and pass it to to mapping.addGeoJson
+        //
+        addRecordSet: function(recset, dataset_name) {
+            
+            var record = mapDocuments.addRecordSet( 0, recset, dataset_name );
+            
+            //refresh search results 
+            var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
+            _defineContent('search', null, grp_div.find('.ui-accordion-content'));
+            //defineContent( 'search' );
+            that.setHeight();
+            
+            return record;
+            
+        },
+        
         //
         // switch base map layer
         //

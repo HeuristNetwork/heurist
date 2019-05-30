@@ -69,7 +69,7 @@ function hMapDocument( _options )
     }
     
     //
-    // loads all map documents from server, init treeview and stores recordset in map_documents 
+    // loads all map documents from server
     //
     function _loadMapDocuments( onRefreshList ){
         
@@ -114,7 +114,7 @@ function hMapDocument( _options )
                 {
                     var record = records[idx];
                     
-                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER){
+                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER){ //ignore sources
                         var recID  = resdata.fld(record, 'rec_ID'),
                         recName = resdata.fld(record, 'rec_Title');
                         
@@ -202,7 +202,7 @@ function hMapDocument( _options )
                     
                     //creates and add layer to nativemap
                     //returns mapLayer object
-                    record['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID');
+                    record['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID');  //for icon in legend
                     record['layer'] = new hMapLayer2({rec_layer: record, 
                                                       rec_datasource: datasource_record, 
                                                       mapdoc_recordset: resdata, //need to get fields
@@ -258,7 +258,7 @@ function hMapDocument( _options )
                                     
                                     //creates and add layer to nativemap
                                     //returns mapLayer object
-                                    record['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID');
+                                    record['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID'); //for icon in legend
                                     record['layer'] = new hMapLayer2({rec_layer: record, 
                                                                       rec_datasource: datasource_record, 
                                                                       mapdoc_recordset: resdata, //need to get fields
@@ -282,7 +282,7 @@ function hMapDocument( _options )
     }
     
     //
-    //
+    //  returns sybology for given layer of map document
     //
     function _getSymbology( mapdoc_id, rec_id ){
         
@@ -290,6 +290,7 @@ function hMapDocument( _options )
         var _record = _recset.getById( rec_id );
         
         if(!_record['source_rectype'] || _record['source_rectype'] == RT_QUERY_SOURCE){
+            //for query of recordset symbology is stored in details
             
             var layer_style = _recset.fld(_record, DT_SYMBOLOGY);
             var layer_style = window.hWin.HEURIST4.util.isJSON(layer_style);
@@ -394,6 +395,9 @@ function hMapDocument( _options )
         // adds search results or query as a new layer to mapdoc (usuallly "Search Results")
         // data - recordset, heurist query or json
         //
+        // mapdoc_id - target map document
+        // data - record set or heurist query
+        //
         // returns record to use in mapping widget
         //
         addSearchResult: function(mapdoc_id, data, dataset_name){
@@ -451,14 +455,76 @@ function hMapDocument( _options )
             _record['source_rectype'] = RT_QUERY_SOURCE;
             recset.setFld(_record, 'layer',
                         new hMapLayer2({rec_datasource: _record, 
-                                              mapdoc_recordset: recset, //need to get fields
-                                              mapwidget: options.mapwidget,
-                                              preserveViewport:(mapdoc_id!=0) })); //zoom to current search
+                                        mapdoc_recordset: recset, //need to get fields
+                                        mapwidget: options.mapwidget,
+                                        preserveViewport:(mapdoc_id!=0) })); //zoom to current search
                                               
                                               
             return _record;
         },
+        
+        
+        //
+        // adds arbitrary recorset
+        // it is used in DH and EN when recordset is generated and prepared in custom way on client side
+        // it converts given recordset to geojson and pass it to to mapping.addGeoJson
+        //
+        // mapdoc_id - target map document
+        // recordset - record set
+        //
+        // returns record to use in mapping widget
+        //
+        addRecordSet: function(mapdoc_id, recordset, dataset_name){
+
+            if( (typeof recordset.isA == "function") && recordset.isA("hRecordSet") ){
+                    
+            }
+                
+            if(!map_documents_content[mapdoc_id]){
+                map_documents_content[mapdoc_id] = new hRecordSet(); //create new recordset
+            }
+            
+            var recset = map_documents_content[mapdoc_id];
+            
+            //dataset_name is unique within mapdoc
+            var search_res = recset.getSubSetByRequest({'rec_Title':('='+dataset_name)}); 
+            
+            //var _record = recset.getById(dataset_name);
+            var _record;
+            if(search_res && search_res.length()>0){  //layer with such name already exists - replace
+                
+                var recID = search_res.getOrder();
+                recID = recID[0];
+                _record = recset.getById(recID);
+                recset.setFld(_record, DT_QUERY_STRING, 'N/A');
+                //remove previous result set from map
+                if(_record['layer']){
+                    _record['layer'].removeLayer();    
+                    delete _record['layer']; //clear
+                }
+            }else{
+                _record = {rec_ID:_uniqueid,  rec_Title:dataset_name, rec_RecTypeID:RT_MAP_LAYER,  d:{}};
+                recset.setFld(_record, DT_QUERY_STRING, 'N/A');
+                _record = recset.addRecord(_uniqueid, _record);
+                _uniqueid++;
+            }
+            
+            _record['source_rectype'] = RT_QUERY_SOURCE;  //for icon in legend
+            recset.setFld(_record, 'layer',
+                        new hMapLayer2({recordset: recordset,
+                                        rec_datasource: _record, 
+                                        mapdoc_recordset: recset, //need to get fields
+                                        mapwidget: options.mapwidget,
+                                        preserveViewport:(mapdoc_id!=0) })); //zoom to current search
+                                              
+                                              
+            return _record;
+        },        
          
+         
+        //
+        //
+        // 
         getTreeData: function( mapdoc_id )
         {
             return _getTreeData( mapdoc_id );
@@ -560,7 +626,9 @@ function hMapDocument( _options )
         },
         
         //
-        // opens record selector popup and adds selected layer to given mapdoc
+        // Add new layer record to map document
+        //
+        // Opens record selector popup and adds selected layer to given mapdoc
         //
         selectLayerRecord: function(mapdoc_id, callback){
             
@@ -611,7 +679,7 @@ function hMapDocument( _options )
         },
         
         //
-        //
+        //  saves current result set as layer+dataset records
         //
         saveResultSetAsLayerRecord: function(rec_id, callback){
             
@@ -639,10 +707,6 @@ function hMapDocument( _options )
             details['t:'+DT_NAME] = [ r_name ];
             details['t:'+DT_QUERY_STRING] = [ r_query ];
             details['t:'+DT_GEO_OBJECT] = ['r '+bnd ];
-            
-            
-            
-            
             
             var request = {a: 'save',    //add new relationship record
                         ID:0, //new record

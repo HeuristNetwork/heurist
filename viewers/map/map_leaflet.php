@@ -246,6 +246,14 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         
         if(!success) return;
         
+        
+        var lt = window.hWin.HAPI4.sysinfo['layout'];
+        if(lt=='Beyond1914' || lt=='UAdelaide'){
+                $("head").append($('<link rel="stylesheet" type="text/css" href="'
+                    +window.hWin.HAPI4.baseURL+'hclient/widgets/expertnation/expertnation.css?t='+(new Date().getTime())+'">'));
+        }        
+        
+        
         function __gp(name){
             return window.hWin.HEURIST4.util.getUrlParameter(name, location.search)
         }

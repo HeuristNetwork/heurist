@@ -51,7 +51,8 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
-$is_production = !$is_map_popup && @$_REQUEST['ll']=='WebSearch';
+$layout_name = @$_REQUEST['ll'];
+$is_production = !$is_map_popup && $layout_name=='WebSearch';
 
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 
@@ -400,7 +401,20 @@ if ($bkm_ID>0 || $rec_id>0) {
             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
             .$rec_id.' and not rec_FlagTemporary');
         }
+    
+        if( $layout_name=='Beyond1914' || $layout_name=='UAdelaide' ){
             
+            exit('<div style="display: inline-block; overflow: auto; max-height: 369px; max-width: 260px;">'
+                    .'<div class="bor-map-infowindow">'
+                        .'<div class="bor-map-infowindow-heading">'.$bibInfo['rec_Title'].'</div>'
+                        .'<a href="'
+                        .HEURIST_BASE_URL.'place/'.$rec_id.'/a" '
+                        .'onclick="{window.hWin.enResolver(event);}" class="bor-button bor-map-button">See connections</a>'
+                    .'</div></div>'); 
+                                      
+        }
+    
+        
 	        print '<div data-recid="'.$bibInfo['rec_ID'].'" style="font-size:0.8em">';
                 print_details($bibInfo);
 	        print '</div>';

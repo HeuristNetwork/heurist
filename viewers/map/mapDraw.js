@@ -1,13 +1,5 @@
 /**
-* Class to work with OS Timemap.js and Vis timeline. 
-* It allows initialization of mapping and timeline controls and fills data for these controls
-* 
-* @param _map - id of map element container 
-* @param _timeline - id of timeline element
-* @param _basePath - need to specify path to timemap assets (images)
-* #param mylayout - layout object that contains map and timeline
-* @returns {Object}
-* @see editing_input.js
+* Class to work with Leaflet Draw
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

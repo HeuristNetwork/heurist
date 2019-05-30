@@ -407,6 +407,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                         has_linked_places.push(geodata[m].recID); //one person can be linked to several places
                                         
                                     }else{
+                                        //this is usual geo
                                         if($.isArray(shapes)){
                                             if($.isArray(shape)){
                                                 shapes = shapes.concat(shape);                                            
@@ -598,6 +599,247 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     }//end _toTimemap
 
 
+    /**
+    * Converts recordSet to GeoJSON
+    * 
+        * geoType 
+        * 0, undefined - all
+        * 1 - main geo only (no links)
+        * 2 - rec_Shape only (coordinates defined in field rec_Shape)
+    */
+    function _toGeoJSON(filter_rt, geoType){
+
+        var aitems = [], titems = [];
+        var item, titem, shape, idx, 
+            min_date = Number.MAX_VALUE, 
+            max_date = Number.MIN_VALUE;
+        var mapenabled = 0,
+            timeenabled = 0;
+            
+        var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
+        
+        var localIds = window.hWin.HAPI4.sysinfo['dbconst'];
+        var DT_SYMBOLOGY_POINTMARKER = localIds['DT_SYMBOLOGY_POINTMARKER']; //3-1091
+        var DT_SYMBOLOGY_COLOR = localIds['DT_SYMBOLOGY_COLOR']; //3-1037;
+        var DT_BG_COLOR = localIds['DT_BG_COLOR']; //3-1037;
+        var DT_OPACITY = localIds['DT_OPACITY']; //3-1090;
+        var DT_SYMBOLOGY = localIds['DT_SYMBOLOGY']; //3-1092;
+        
+        //make bounding box for map datasource transparent and unselectable
+        var disabled_selection = [localIds['RT_TILED_IMAGE_SOURCE'],
+                                    localIds['RT_GEOTIFF_SOURCE'],
+                                    localIds['RT_KML_SOURCE'],
+                                    localIds['RT_MAPABLE_QUERY'],
+                                    localIds['RT_SHP_SOURCE']];
+                                    
+        var geofields = [], timefields = [];
+        
+        var dty_ids = _getDetailsFieldTypes(); 
+        
+        if(!isnull(dty_ids) && window.hWin.HEURIST4){
+
+            //detect geo and time fields from recordset        
+            var dtype_idx = window.hWin.HEURIST4.detailtypes.typedefs['fieldNamesToIndex']['dty_Type'];
+            
+            for (var i=0; i<dty_ids.length; i++) {
+                var dtype = window.hWin.HEURIST4.detailtypes.typedefs[dty_ids[i]]['commonFields'][dtype_idx];
+                if(dtype=='date' || dtype=='year'){
+                    timefields.push(dty_ids[i]);
+                }else if(dtype=='geo'){
+                    geofields.push(dty_ids[i]);
+                }
+            }
+        }
+        
+        var linkedPlaceRecId = {}; //placeID => array of records that refers to this place (has the same coordinates)
+        //linkedRecs - records linked to this place
+        //shape - coordinates
+        //item - item object to be added to timemap 
+        var linkedPlaces = {};//placeID => {linkedRecIds, shape, item}
+        
+        var tot = 0;
+        
+        //{"geojson":[]}
+        var res_geo = [];
+        var res_time = [];
+        
+        
+        function __getGeoJsonFeature(record, extended, simplify){
+                 
+            var rec_ID = _getFieldValue(record, 'rec_ID');
+            
+            var res = {type:'Feature', id: rec_ID, properties: _getAllFields(record), geometry:null};
+
+                       
+            //time --------------------------           
+            var k, m, dates = [], startDate=null, endDate=null, dres=null, singleFieldName;
+                for(k=0; k<timefields.length; k++){
+                    var datetime = _getFieldValues(record, timefields[k]);
+                    if(!isnull(datetime)){   
+                        var m, res = [];
+                        for(m=0; m<datetime.length; m++){
+                            if(timefields[k]==DT_START_DATE){
+                                startDate = datetime[m];
+                                if(singleFieldName==null){
+                                     singleFieldName = window.hWin.HEURIST4.detailtypes.names[timefields[k]];
+                                }    
+                            }else if(timefields[k]==DT_END_DATE){
+                                endDate  = datetime[m]; 
+                            }else{
+                                dres = window.hWin.HEURIST4.util.parseDates(datetime[m]);
+                                if(dres){
+                                    dates.push(dres);
+                                    singleFieldName = window.hWin.HEURIST4.detailtypes.names[timefields[k]];
+                                }     
+                            }
+                        }
+                    }
+                }
+                
+                if(startDate==null && endDate!=null){
+                    if(dres==null){
+                        startDate = endDate;    
+                        endDate = null;
+                    }else{
+                        startDate = dres[0];
+                    }
+                }
+                
+                //need to verify date and convert from Temporal
+                dres = window.hWin.HEURIST4.util.parseDates(startDate, endDate);
+                if(dres){
+                    dates.push(dres);
+                }
+                var timevalues = [];
+                for(k=0; k<dates.length; k++){
+                        
+                        if(true || timeenabled<MAXITEMS){
+                     
+                            dres = dates[k];
+                            
+                            var date_start = (dres[0]==null)?dres[1]:dres[0];
+                            var date_end = null;
+                            if(dres[1] && date_start!=dres[1]){
+                                date_end = dres[1];
+                            }
+                            if(date_start==null) date_start = '';
+                            if(date_end==null) date_end = '';
+                            timevalues.push([date_start, '', '', date_end, '']);
+                                
+                        }
+                        timeenabled++;
+                }                      
+                if(timevalues.length>0){
+                    res['when'] = {timespans:timevalues};    
+                }
+            //END time --------------------------
+ 
+                       
+            //geo -----------------------           
+            var recShape = _getFieldValue(record, 'rec_Shape');  //additional shapes - special field created on client side
+            
+                var geovalues = [];  
+                if(recShape && geoType!=1){  //geoType==1 from geo fields only, ignore recShape
+                    //console.log(record);
+                    //console.log(shapes);
+                    geovalues = [recShape];
+                }
+                
+                var has_linked_places = [];
+                
+                if(geoType!=2){ //get coordinates from geo fields geoType==2 form recShape only - ignore native geo coords   
+                    
+                    var k, m, i, j;
+                    for(k=0; k<geofields.length; k++){
+                        
+                        var geodata = _getFieldGeoValue(record, geofields[k]);
+                        if(geodata){
+                            for(m=0; m<geodata.length; m++){
+                                
+                                var geo_json = parseWKT(geodata[m].wkt);
+                                //var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[m].wkt, geodata[m].geotype, 'timemap' );
+
+                                if(geo_json){ //main shape
+                                    geovalues.push(geo_json);
+                                    /*    
+                                    //recID is place record ID - add it as separate item
+                                    if(geodata[m].recID>0){ //reference to linked place record
+                                        if(!linkedPlaceRecId[geodata[m].recID]){
+                                            linkedPlaceRecId[geodata[m].recID] = [];
+                                        }else{
+                                            //to avoid dark fill for several polygones on the same spot
+                                            fillOpacity_thisRec = 0.001;
+                                        }
+                                        linkedPlaceRecId[geodata[m].recID].push(recID); //this recID linked to place
+                                        
+                                        if(linkedPlaces[geodata[m].recID]){
+                                            //place already defined - 
+                                            linkedPlaces[geodata[m].recID]['linkedRecs'].push(recID);
+                                        }else{
+                                            linkedPlaces[geodata[m].recID] = {linkedRecs:[recID], shape:geo_json};
+                                                                                //art $.isArray(shape)?shape:[shape]}
+                                        }
+                                        has_linked_places.push(geodata[m].recID); //one person can be linked to several places
+                                        
+                                    }else{
+                                        geovalues.push(geo_json);
+                                    }
+                                    */
+                                }
+                            }
+                        }
+                        
+                    }//for geo fields
+                }else{
+                    recID = recID + "_link"; //for DH
+                }
+                                               
+                //disable selection for map source databaset bboxes
+                var is_disabled = (window.hWin.HEURIST4.util.findArrayIndex(recTypeID, disabled_selection)>=0);
+                
+                if(geovalues.length>1){
+                    res['geometry'] = {type:'GeometryCollection', geometries:geovalues};
+                }else if(geovalues.length==1){
+                    res['geometry'] = geovalues[0];
+                }else{
+                    //res['geometry'] = [];
+                }
+                
+                var symbology = _getFieldValue(record, DT_SYMBOLOGY);
+                symbology = window.hWin.HEURIST4.util.isJSON(symbology);
+                if(symbology){
+                    res['style'] = symbology;
+                }
+            
+        }//end __getGeoJsonFeature
+        
+        
+        for(idx in records){
+            if(idx)
+            {
+                var record = records[idx];
+
+                var recTypeID   = Number(_getFieldValue(record, 'rec_RecTypeID'));
+                if(filter_rt && recTypeID!=filter_rt) continue;
+                
+                var feature = __getGeoJsonFeature($record, 2, true);
+                if(feature['when']){
+                            res_time.push({rec_ID: feature.id, 
+                                            when: feature['when']['timespans'], 
+                                            rec_RecTypeID: feature.properties.rec_RecTypeID, 
+                                            rec_Title: feature.properties.rec_Title});
+                            feature['when'] = null;
+                            delete feature['when'];
+                }
+                if(!feature['geometry']) continue;
+                res_geo.push(feature);
+            }
+        }//for records    
+        
+        return {geojson:res_geo, timeline:res_time};
+                
+    }//end _toTimemap
+    
    
     // some important id for record and detail types in local values
     var RT_RELATION = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'], //1
@@ -782,6 +1024,28 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 return null;   
             }
         }
+    }
+
+    /**
+    * return record as proper json (with field names rather than indexes
+    *     
+    * @param record
+    * @param fldname
+    */
+    function _getAllFields(record){
+        
+        var res = {};
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(fields)){
+        
+            for(var idx in fields)
+            if(idx>-1){
+                res[fields[idx]] = record[fields[idx]];
+            }
+            res['d'] = window.hWin.HEURIST4.util.cloneJSON(record['d']); 
+        }else{
+            res = window.hWin.HEURIST4.util.cloneJSON(record);
+        }
+        return res;
     }
 
     
@@ -1526,6 +1790,10 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * 1 - main geo only
         * 2 - rec_Shape only
         */
+        toGeoJSON: function(filter_rt, geoType){
+            return _toGeoJSON(filter_rt, geoType);
+        },
+        
         toTimemap: function(dataset_name, filter_rt, symbology, geoType){
             return _toTimemap(dataset_name, filter_rt, symbology, geoType);
         },

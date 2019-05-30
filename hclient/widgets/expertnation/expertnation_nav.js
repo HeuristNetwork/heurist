@@ -61,6 +61,7 @@ $.widget( "heurist.expertnation_nav", {
     DT_START_DATE: 10, //window.hWin.HAPI4.sysinfo['dbconst']['DT_START_DATE'], //10
     DT_END_DATE: 11, //window.hWin.HAPI4.sysinfo['dbconst']['DT_END_DATE'], //11
     DT_ORDER: 261, //window.hWin.HAPI4.sysinfo['dbconst']['DT_ORDER'],
+    DT_SYMBOLOGY:190, //window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'],
 
     DT_GEO: 28,
     DT_PARENT_PERSON: 16,
@@ -209,7 +210,7 @@ $.widget( "heurist.expertnation_nav", {
 
             //assign map for iframes
             $('.mapframe').prop('src', window.hWin.HAPI4.baseURL+
-                'viewers/map/map.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&header=off&legend=off');
+                'viewers/map/map_leaflet.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&controls=none&nocluster=1');
 
         }
 
@@ -1086,14 +1087,14 @@ $.widget( "heurist.expertnation_nav", {
 
             //mapping
             if(mapids.length>0){
-                var map_recset = that.recset.getSubSetByIds(mapids);
+                var map_recset = that.recset.getSubSetByIds(mapids); //get only map enabled
                 map_recset.setMapEnabled();
 
                 //reset description of place - since one place connected with many persons
                 if(entType=='place'){
                     var idx, records = map_recset.getRecords();
                     for(idx in records){
-                        map_recset.setFld(records[idx], 'rec_Description', '');
+                        map_recset.setFld(records[idx], 'rec_Info', '');
                     }
                 }
 
@@ -1108,12 +1109,17 @@ $.widget( "heurist.expertnation_nav", {
                 $('#cp_mapframe_container').show();
                 var interval = setInterval(function(){
                     var mapping = $('#cp_mapframe')[0].contentWindow.mapping;
+                    if(mapping && mapping.mapping){
+                        mapping.mapping('addSearchResult', map_recset, 'Current query');
+                        clearInterval(interval);
+                    }
+                    /* old way gooogle
                     if(mapping && mapping.map_control){
                         mapping.map_control.addRecordsetLayer(params);
                         clearInterval(interval);
                     }else{
                         //console.log('wait for map loading');
-                    }
+                    }*/
                     },500);
 
 
@@ -2141,12 +2147,17 @@ $.widget( "heurist.expertnation_nav", {
                 $('#p_mapframe_container').show();
                 var interval = setInterval(function(){
                     var mapping = $('#p_mapframe')[0].contentWindow.mapping;
+                    if(mapping && mapping.mapping){
+                        mapping.mapping('addSearchResult', map_recset, 'Current query');
+                        clearInterval(interval);
+                    }
+                    /*  old google way
                     if(mapping && mapping.map_control){
                         mapping.map_control.addRecordsetLayer(params);
                         clearInterval(interval);
                     }else{
                         //console.log('wait for map loading');
-                    }
+                    } */
                     },500);
 
             }else{
@@ -2408,9 +2419,12 @@ $.widget( "heurist.expertnation_nav", {
             if(place_rec){
 
                 if(description){
-                    this.recset.setFld(place_rec, 'rec_Description', 
-                        '<div class="bor-map-infowindow-heading">'+description+'</div>'+
-                        '<div class="bor-map-infowindow-description">'+place.names[i]+'</div>'
+                    this.recset.setFld(place_rec, 'rec_Info',   //was 'rec_Description'
+                    '<div style="display: inline-block; overflow: auto; max-height: 369px; max-width: 260px;">'
+                    +'<div class="bor-map-infowindow">'
+                       + '<div class="bor-map-infowindow-heading">'+description+'</div>'
+                       + '<div class="bor-map-infowindow-description">'+place.names[i]+'</div>'
+                    +'</div></div>'
                     );   
                 }    
                 this.recset.setFld(place_rec, 'rec_Title', place.names[i]);
@@ -2423,7 +2437,9 @@ $.widget( "heurist.expertnation_nav", {
                     icon = 'place';
                 }
                 var iconPath = window.hWin.HAPI4.baseURL + 'hclient/widgets/expertnation/assets/markers/';
-                this.recset.setFld(place_rec, 'rec_Icon', iconPath+icon+'.png');   
+                //this.recset.setFld(place_rec, 'rec_Icon', iconPath+icon+'.png');   
+                this.recset.setFld(place_rec, this.DT_SYMBOLOGY,
+                 '{"iconType":"url","iconUrl":"'+iconPath+icon+'.png","iconSize":"22"}');
 
                 //console.log(place.names[i]+'  '+description+'   '+iconPath+icon+'.png')                                
 

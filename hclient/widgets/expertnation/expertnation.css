@@ -5770,7 +5770,7 @@ html {
   *line-height: 36px;
   /* IE7 */
   background-color: #ce1126;
-  color: white; }
+  color: white !important; }
   .bor-button:not([dummy]) {
     line-height: auto;
     /* NOT IE7/IE8 */ }

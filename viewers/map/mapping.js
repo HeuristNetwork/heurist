@@ -67,6 +67,7 @@ Thematic mapping
 *   openMapDocument - opens given map document
 *   loadBaseMap
     addSearchResult - loads geojson data based on heurist query, recordset or json to current search (see addGeoJson)
+    addRecordSet - converts recordset to geojson
     addGeoJson - adds geojson layer to map, apply style and trigger timeline update
     addTileLayer - adds image tile layer to map
     addImageOverlay - adds image overlay to map
@@ -421,6 +422,17 @@ $.widget( "heurist.mapping", {
     addSearchResult: function(data, dataset_name) {
         this.current_query_layer = this.mapManager.addSearchResult( data, dataset_name );
     },
+
+    //
+    // Adds layer to searchResults mapdoc
+    // recset - recordset to be converted to geojson
+    // it is used in DH and EN where recordset is generated and prepared in custom way on client side
+    //
+    addRecordSet: function(recset, dataset_name) {
+        //it is not piblish recordset since it is prepared localy 
+        this.current_query_layer = null;
+        this.mapManager.addRecordSet( recset, dataset_name );
+    },
     
     //
     // adds image tile layer to map
@@ -519,8 +531,14 @@ $.widget( "heurist.mapping", {
     // adds geojson layer to map
     // returns nativemap id
     //
-    addGeoJson: function(geojson_data, timeline_data, layer_style, dataset_name, preserveViewport){
-
+    addGeoJson: function(options){
+            
+            var geojson_data = options.geojson_data,
+                timeline_data = options.timeline_data,
+                layer_style = options.layer_style,
+                //popup_template = options.popup_template,
+                dataset_name = options.dataset_name,
+                preserveViewport = options.preserveViewport;
 
         if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) || 
             window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data)){
@@ -587,6 +605,14 @@ $.widget( "heurist.mapping", {
                 .addTo( this.nativemap );            
 
 
+            /* not implemented - idea was store template in mapdocument and excute is on _onLayerClick    
+            if(popup_template){
+                new_layer.eachLayer( function(child_layer){ 
+                        child_layer.feature.popup_template = popup_template;
+                });
+            } 
+            */   
+                
             if(!this.notimeline){
                 this.updateTimelineData(new_layer._leaflet_id, timeline_data, dataset_name);
             }         
@@ -930,19 +956,7 @@ $.widget( "heurist.mapping", {
             //new style is not defined and layer already has default one - no need action
             return;
         }
-/*        
-        if(newStyle){
-            affected_layer.options.default_style = newStyle;
-            affected_layer.eachLayer(function(layer){
-                layer.feature.default_style = newStyle;
-            });  
-        }else if(affected_layer.options.default_style){
-            //new style is not defined and layer already has default one - no need action
-            return;
-        }
-        var style = affected_layer.options.default_style;
-*/
-        
+   
         //update markers only if style has been changed
         //var marker_style = null;
         //var myIcon = new L.Icon.Default();
@@ -1100,6 +1114,9 @@ $.widget( "heurist.mapping", {
     //
     // map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
     //
+    // content of popup can be retrieved by rec_ID via renderRecordData.php script
+    // field rec_Info can have url, content or be calculated field (function)
+    // 
     _onLayerClick: function(event){
         
         var layer = (event.target);
@@ -1115,17 +1132,33 @@ $.widget( "heurist.mapping", {
                 if($.isFunction(that.options.onselect)){
                     that.options.onselect.call(that, [layer.feature.properties.rec_ID]);
                 }
-                //open popup
-                var popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
-                +layer.feature.properties.rec_ID+'&db='+window.hWin.HAPI4.database;
-
-                $.get(popupURL, function(responseTxt, statusTxt, xhr){
-                    if(statusTxt == "success"){
-                        that.main_popup.setLatLng(event.latlng)
-                        .setContent(responseTxt) //'<div style="width:99%;">'+responseTxt+'</div>')
-                        .openOn(that.nativemap);
+                
+                var popupURL;
+                var info = layer.feature.properties.rec_Info; //popup info may be already prepared
+                if(info){
+                    if(info.indexOf('http://')==0 || info.indexOf('https://')==0){
+                        popupURL =  info; //load content from url
                     }
-                });
+                }else{
+                    popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
+                            +layer.feature.properties.rec_ID
+                            +'&db='+window.hWin.HAPI4.database+'&ll='
+                            +window.hWin.HAPI4.sysinfo['layout'];
+                }                
+                //open popup
+                if(popupURL){
+                    $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                        if(statusTxt == "success"){
+                            that.main_popup.setLatLng(event.latlng)
+                            .setContent(responseTxt) //'<div style="width:99%;">'+responseTxt+'</div>')
+                            .openOn(that.nativemap);
+                        }
+                    });
+                }else{
+                    that.main_popup.setLatLng(event.latlng)
+                            .setContent(info) //'<div style="width:99%;">'+responseTxt+'</div>')
+                            .openOn(that.nativemap);
+                }
         
             }else{
                 

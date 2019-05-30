@@ -56,7 +56,12 @@ function hMapLayer2( _options ) {
         if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] 
            || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
                
-            _addQueryLayer();
+               
+             if(options.recordset){
+                _addRecordSet(); //convert recordset to geojson    
+             }else{
+                _addQueryLayer();     
+             }  
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
 
@@ -69,7 +74,8 @@ function hMapLayer2( _options ) {
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE']){
 
             _addKML();
-        }else {
+            
+        }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE']){
             _addSHP();
         }
     }
@@ -135,24 +141,6 @@ function hMapLayer2( _options ) {
     }
     
     //
-    // return extent in leaflet format
-    //
-    function _getBoundingBox(){
-        
-         var geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
-         if(geodata && geodata[0]){
-            var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[0].wkt, geodata[0].geotype, 'google' );
-            if(shape && shape._extent){
-                var extent = shape._extent;
-                return [[extent.ymin,extent.xmin],[extent.ymax,extent.xmax]];
-            }
-         }else{
-             return null;
-         }
-        
-    }
-
-    //
     // add image
     //
     function _addImage(){
@@ -186,10 +174,12 @@ function hMapLayer2( _options ) {
             function(response){
                 if(response){
                     _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
-                                                response, 
-                                                null, layer_style,
-                                                _recordset.fld(options.rec_layer || _record, 'rec_Title'),
-                                                options.preserveViewport );
+                                {geojson_data: response,
+                                timeline_data: null,
+                                layer_style: layer_style,
+                                dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),
+                                preserveViewport:options.preserveViewport });
+                    
                 }
             }
         );          
@@ -215,10 +205,11 @@ function hMapLayer2( _options ) {
             function(response){
                 if(response){
                     _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
-                                                response, 
-                                                null, layer_style,
-                                                _recordset.fld(options.rec_layer || _record, 'rec_Title'),
-                                                options.preserveViewport );
+                                {geojson_data: response,
+                                timeline_data: null,
+                                layer_style: layer_style,
+                                dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),
+                                preserveViewport:options.preserveViewport });
                 }
             }
         );          
@@ -231,6 +222,9 @@ function hMapLayer2( _options ) {
     function _addQueryLayer(){
 
         var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+        //var layer_popup_template = 'Hello! this is tempalte for map popup';
+        //_recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
+        
         var query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
         var request = window.hWin.HEURIST4.util.parseHeuristQuery(query);
 
@@ -260,11 +254,15 @@ function hMapLayer2( _options ) {
                     if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
                         || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
                     {
+                                                         
                         _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
-                                                        geojson_data, 
-                                                        timeline_data, layer_style,
-                                                        _recordset.fld(options.rec_layer || _record, 'rec_Title'), //name for timeline
-                                                         options.preserveViewport );
+                                    {geojson_data: geojson_data,
+                                    timeline_data: timeline_data,
+                                    layer_style: layer_style,
+                                    //popup_template: layer_popup_template,
+                                    dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
+                                    preserveViewport:options.preserveViewport });
+                                                         
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
@@ -275,6 +273,57 @@ function hMapLayer2( _options ) {
 
     }
 
+    
+    //
+    // recordset layer
+    //
+    function _addRecordSet(){
+        
+        var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+        //var layer_popup_template = 'Hello! this is tempalte for map popup';
+        //_recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
+        
+        var data = options.recordset.toGeoJSON();
+
+        var geojson_data = data['geojson'];
+        var timeline_data = data['timeline'];   
+
+        if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
+            || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
+        {
+                                             
+            _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                        {geojson_data: geojson_data,
+                        timeline_data: timeline_data,
+                        layer_style: layer_style,
+                        //popup_template: layer_popup_template,
+                        dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
+                        preserveViewport:options.preserveViewport });
+                                             
+        }else {
+            window.hWin.HEURIST4.msg.showMsgErr(response);
+        }
+    }
+    
+    //
+    // return extent in leaflet format (for tiler and image layers)
+    //
+    function _getBoundingBox(){
+        
+         var geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
+         if(geodata && geodata[0]){
+            var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[0].wkt, geodata[0].geotype, 'google' );
+            if(shape && shape._extent){
+                var extent = shape._extent;
+                return [[extent.ymin,extent.xmin],[extent.ymax,extent.xmax]];
+            }
+         }else{
+             return null;
+         }
+        
+    }
+
+    
     //public members
     var that = {
         getClass: function () {return _className;},
