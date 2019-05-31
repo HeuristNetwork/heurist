@@ -15,6 +15,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 
 require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
+require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 //require_once(dirname(__FILE__).'/../../records/woot/woot.php');
 
 class ReportRecord {
@@ -445,6 +446,16 @@ class ReportRecord {
                                 $dtname2 = $dtname."_originalvalue";
                                 $value['geo']['recid'] = $recID;
                                 $arres = array_merge($arres, array($dtname2=>$value['geo']));
+                                
+                                $geom = geoPHP::load($value['geo']['wkt'], 'wkt');
+                                if(!$geom->isEmpty()){
+                                    $geojson_adapter = new GeoJSON();                                     
+                                    $json = $geojson_adapter->write($geom, true); 
+                                }
+                                if(!$json) $json = array();
+                                $dtname2 = $dtname."_geojson";
+                                $arres = array_merge($arres, array($dtname2=>$json));
+                                
 
                                 $res = $value['geo']['wkt'];
                                 break; //only one geo location at the moment
