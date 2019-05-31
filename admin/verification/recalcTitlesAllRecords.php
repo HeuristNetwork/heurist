@@ -208,7 +208,7 @@ ob_start();
 
                     print '<hr>';
 
-                    print '<br/>&nbsp;<br/><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
+                    print '<br/><br/><b>DONE</b><br/><br/><a target=_blank href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
                     '&w=all&q=ids:'.join(',', array_keys($updates)).'">Click to view updated records</a><br/>&nbsp;<br/>';
                 }
                 if(count($blanks)>0){

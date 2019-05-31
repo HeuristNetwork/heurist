@@ -56,8 +56,6 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
     }else if($parent_id==null){
         $local_message = "Parent vocabulary is not defined";
     }else if(@$_REQUEST['process']=="action"){
-        
-        
 
         if(@$_REQUEST['name']==null || $_REQUEST['name']==""){
             $local_message = "<div class='ui-state-error'>Term (label) is mandatory - you cannot have a term without a label representing the term</div>";
@@ -270,7 +268,16 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
                     </div>
 <?php        
     }
+    if($local_message==''){
 ?>
+                    <div style="float:right; padding-left:30px;">
+                        <button id="btnSaveAndClose" onClick="{window.close('') }"  tabindex="0"
+                            title="Close this window">
+                            Cancel
+                        </button>
+                       &nbsp;&nbsp;
+                    </div>
+<?php }else{ ?>        
                     <div style="float:right; padding-left:30px;">
                         <button id="btnSaveAndClose" onClick="{submitAndClose();}"  tabindex="0"
                             title="Close this window and return to the selection of the vocabulary and terms for this field">
@@ -278,6 +285,9 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
                         </button>
                        &nbsp;&nbsp;
                     </div>
+<?php        
+    }
+?>
                     <div style="float:right; text-align: right; padding-right:20px;">
                         <button id="btnSave" onClick="{document.forms[0].submit()}" style="font-weight:bold !important; color:black; "
                             title="Add <?=($parent_id==0?"top-level vocabulary":"the term to the current vocabulary")?>">

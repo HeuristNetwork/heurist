@@ -701,7 +701,7 @@ function EditRecStructure() {
                                                         
                         // Terms - enums and relmarkers
                         '<div class="input-row" Xstyle="display:none"><div class="input-header-cell">Vocabulary (terms):</div>'+
-                            '<div class="input-cell" title="The lsit of terms available for selection as values for this field">'+
+                            '<div class="input-cell" title="Select vocabulary">'+
                                 '<select id="selVocab" Xclass="initially-dis" style="width:300px"/>'+
                                 '<input id="ed_dty_JsonTermIDTree" type="hidden"/>'+
                                 '<input id="ed_dty_TermIDTreeNonSelectableIDs" type="hidden"/>'+
@@ -709,6 +709,14 @@ function EditRecStructure() {
                                     '<a href="#" onClick="onAddVocabulary()">add a vocabulary</a>'+
                                 '</span>'+
                             '</div></div>'+
+                            
+                        //PREVIEW Terms - enums and relmarkers
+                        '<div class="input-row"><div class="input-header-cell">Preview:</div>'+
+                        '<div class="input-cell" title="Preview of terms available for selection as values for this field">'+
+                        '<span class="input-cell" id="termsPreview" class="dtyValue"></span>'+
+                        //'<span class="input-cell" style="margin:0 10px">&nbsp;&nbsp;to change click "Edit Base Field Definition"</span>'+
+                        '</div></div>'+
+                            
 
                         // Pointer target types - pointers and relmarkers   ed_dty_PtrTargetRectypeIDs
                         '<div class="input-row" style="display:none"><div class="input-header-cell">Target entity type:</div>'+
@@ -837,9 +845,9 @@ function EditRecStructure() {
                         '</div>'+
                         '</div>'+
 
-                        // Terms - enums and relmarkers
-                        '<div class="input-row"><div class="input-header-cell">Terms list:</div>'+
-                        '<div class="input-cell" title="The lsit of terms available for selection as values for this field">'+
+                        //PREVIEW Terms - enums and relmarkers
+                        '<div class="input-row"><div class="input-header-cell">Terms list preview:</div>'+
+                        '<div class="input-cell" title="The list of terms available for selection as values for this field">'+
                         '<input id="ed'+rst_ID+'_rst_FilteredJsonTermIDTree" type="hidden"/>'+
                         '<input id="ed'+rst_ID+'_rst_TermIDTreeNonSelectableIDs" type="hidden"/>'+
                         '<span class="input-cell" id="termsPreview" class="dtyValue"></span>'+
@@ -3622,8 +3630,6 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
         disabledTerms = '';
     }
 
-    if(!Hul.isnull(allTerms)) {
-        //remove old combobox
         var el_sel;
         /* = Dom.get(_id);
         var parent = el_sel.parentNode;
@@ -3631,13 +3637,19 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
         */
 
         var parent1 = document.getElementById("termsPreview"),
-        parent2 = document.getElementById("termsDefault_"+rst_ID);
+        parent2 = document.getElementById("termsDefault_"+rst_ID); //default value
 
         function __recreate(parent, onchangehandler, bgcolor, _defvalue, isdefselector){
             var i;
+            
+            $(parent).empty();
+                              /*
             for (i = 0; i < parent.children.length; i++) {
                 parent.removeChild(parent.childNodes[0]);
-            }
+            }                   */
+
+            if(!Hul.isnull(allTerms)) {
+                //remove old combobox
             
             //el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, datatype, _defvalue, isdefselector);
             el_sel = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
@@ -3664,12 +3676,15 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
                    //onchangehandler();
                 
             }});
-            el_menu.hSelect('menuWidget').css('max-height',100);
+            el_menu.hSelect('menuWidget').css({background:bgcolor, 'max-height':100});
+            $('#'+el_sel.id+'-button').css({background:bgcolor});
+            
+            }
         }//end __recreate
 
         __recreate(parent1, _preventSel, "#cccccc", null, false);
-        __recreate(parent2, _setDefTermValue, "#ffffff", defvalue, true);
-    }
+        if(parent2) __recreate(parent2, _setDefTermValue, "#ffffff", defvalue, true);
+    
 }
 
 /**
@@ -3814,14 +3829,17 @@ function onDetTypeChange()
 {
     var dty_Type = document.getElementById("ed_dty_Type").value;
     var ele1 = $("#ed_dty_JsonTermIDTree").parents('.input-row');
+    var ele1a = $("#termsPreview").parents('.input-row');
     var ele2 = $("#ed_dty_PtrTargetRectypeIDs").parents('.input-row');
     
     if(dty_Type=='enum' || dty_Type=='relmarker'){
         ele1.show();
+        ele1a.show();
         $("#ed_dty_JsonTermIDTree").val('');
         _recreateTermsVocabSelector(dty_Type);
     }else{
         ele1.hide();
+        ele1a.hide();
         $("#ed_dty_JsonTermIDTree").val('');
     }
     if(dty_Type=='resource' || dty_Type=='relmarker'){
@@ -3897,10 +3915,19 @@ function _recreateTermsVocabSelector(datatype, toselect)  {
             el_menu.hSelect({change: function(event, data){
                    var selval = data.item.value;
                    document.getElementById("ed_dty_JsonTermIDTree").value =  selval;
+                   recreateTermsPreviewSelector('', datatype,
+                            selval,
+                            '', null);
+                   
             }});
         el_menu.hSelect('menuWidget').css('max-height',100);
         el_menu.hSelect("refresh"); 
-}
+
+        recreateTermsPreviewSelector('', datatype,
+                            '',
+                            '', null);
+        
+}                                          
 
 //
 //

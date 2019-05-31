@@ -191,7 +191,7 @@ $processed_count = 0;
 
                 print '<script type="text/javascript">update_counts2('.$i.','.count($updates).')</script>'."\n";
 
-                print '<hr><br/>';
+                print '<hr><br/><b>DONE</b><br/><br/>';
 
                 print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q=ids:'
                 .implode(',', array_keys($updates)).'&db='.HEURIST_DBNAME.'">Click to view updated records</a><br/>&nbsp;<br/>';
@@ -211,7 +211,7 @@ $processed_count = 0;
 
         <div style="color: green;padding-top:10px;">
             If the titles of other record types depend on these titles,
-            you should run Database administration > Utilities > Rebuild Titles to rebuild all record titles in the database
+            you should run Management > Rebuild record titles to rebuild all record titles in the database
         </div>
     </body>
 

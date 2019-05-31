@@ -509,10 +509,10 @@ P {color:#333333;font-size:11px;line-height:21px;}
 H2 i {font-size:inherit;}
 
 /******* links and id-specific styles ********/
-/******* links and id-specific styles ********/
-A:link {color:#6A7C99;text-decoration: none;}
-A:visited {color:#6A7C99;text-decoration: none;}
-A:active {color:#6A7C99;text-decoration: none;}
+/******* links and id-specific styles was #6A7C99********/
+A:link {color:#2080C0;text-decoration: none;}
+A:visited {color:#2080C0;text-decoration: none;}
+A:active {color:#2080C0;text-decoration: none;}
 A:hover {text-decoration: underline;}
 img a:link {border: none;}
 #home-link a {color:#FFFFFF;text-decoration:none;text-shadow:0 3px 3px rgba(0, 0, 0, 0.5);text-transform:uppercase;font-size: 24px;}
