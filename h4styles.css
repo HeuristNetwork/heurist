@@ -1788,7 +1788,7 @@ P {
     line-height: 21px;
 }
 A:link {
-    text-decoration: none;
+    text-decoration: underline;
 }
 A:hover {
     text-decoration: underline;

@@ -3295,7 +3295,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             + 'the incoming rows against existing data records.</div><br/><br/>'
             + '<button style="float:right" onclick="{$(\'.sel_disamb\').val(-1);}">Set all to Create New</button>'
             + '<br/><br/>'
-            + '<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>Source</th><th>Count</th><th>Records in Heurist</th></tr>';
+            + '<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>&nbsp;</th><th>Rows affected</th><th>Records in Heurist</th></tr>';
 
             
             var buttons = {};
@@ -3338,8 +3338,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 var recIds = Object.keys(disamb);
                         
                 s = s + '<tr><td>'+keyvalue+'</td><td>'
-                + '<a href="#" onclick="{window.hWin.HEURIST4.util.findObjInFrame(\'importRecordsCSV\').showImportLineInPopup(\''+disambig_imp_id+'\');}">view</a>'
-                +'</td><td>'+recIds.length+'</td><td>'+
+                + '<a href="#" '
+                + 'style="text-decoration:underline;color:blue" '
+                + ' onclick="{window.hWin.HEURIST4.util.findObjInFrame(\'importRecordsCSV\').showImportLineInPopup(\''+disambig_imp_id+'\');}">'
+                + 'view <span class="ui-icon ui-icon-popup"></a>'
+                + '</td><td>'+recIds.length+'</td><td>'+
                         '<select class="sel_disamb" data-key="'+i+'">';                
 
                 for(j=0;j<recIds.length;j++){
@@ -3348,7 +3351,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 s = s + '<option value="-1">[create new record] None of these</option>';
                 s = s + '</select>&nbsp;'
                 + '<a href="#" onclick="{window.open(\''+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                + '&q=ids:' + recIds.join(',') + '\', \'_blank\');}">view records</a></td></tr>';
+                + '&q=ids:' + recIds.join(',') + '\', \'_blank\');}">view records <span class="ui-icon ui-icon-extlink"></a></td></tr>';
             }
             
             s = s + '</table><br><br>'
