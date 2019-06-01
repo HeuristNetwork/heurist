@@ -32,7 +32,9 @@ $entities = array(
 'rectypes'=>'DefRecTypes',
 'users'=>'SysUsers',
 'groups'=>'SysGroups',
-'records'=>'Records'
+'records'=>'Records',
+'login'=>'System',
+'logout'=>'System'
 );
 //  http://127.0.0.1/h5-ao/api/fieldgroups/?db=osmak_5
 //records 
@@ -82,27 +84,54 @@ if($method=='save' || $method=='add'){
     
 }
 
-
-
 // throw new RuntimeException('Unauthorized - authentication failed', 401);
-
-//action
-$_REQUEST['entity'] = $entities[$requestUri[2]];
-$_REQUEST['a'] = $method;
-$_REQUEST['restapi'] = 1; //set http response code
-
-if(@$requestUri[3]!=null){
-  $_REQUEST['recID'] = $requestUri[3];  
-} 
-
-if($_REQUEST['entity']=='Records'){
-    if($method=='search'){
-        include '../../hsapi/controller/record_output.php';
-    }else{
-        exitWithError('Method Not Allowed', 405);
+if ($entities[$requestUri[2]]=='System') {
+    
+    include '../System.php';
+    
+    $system = new System();
+    if( ! $system->init($_REQUEST['db']) ){
+        //get error and response
+        $system->error_exit_api(); //exit from script
     }
-}else{
-    include '../../hsapi/controller/entityScrud.php';
+    
+    if($requestUri[2]==='login'){
+        
+        if(!$system->login(@$_REQUEST['fields']['login'], @$_REQUEST['fields']['password'], 'shared'))
+        {
+            $system->error_exit_api();
+        }else{
+                    $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+                    $session_id = session_id();
+                    $time = time() + 24*60*60;     //day
+                    $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );
+        }
+        
+    }else if($requestUri[2]==='logout'){
+        $system->logout();
+    }
+
+}
+else
+{
+    //action
+    $_REQUEST['entity'] = $entities[$requestUri[2]];
+    $_REQUEST['a'] = $method;
+    $_REQUEST['restapi'] = 1; //set http response code
+
+    if(@$requestUri[3]!=null){
+      $_REQUEST['recID'] = $requestUri[3];  
+    } 
+
+    if($_REQUEST['entity']=='Records'){
+        if($method=='search'){
+            include '../../hsapi/controller/record_output.php';
+        }else{
+            exitWithError('Method Not Allowed', 405);
+        }
+    }else{
+        include '../../hsapi/controller/entityScrud.php';
+    }
 }
 exit();
 //header("HTTP/1.1 " . $status . " " . $this->requestStatus($status));

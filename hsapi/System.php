@@ -1249,8 +1249,9 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                     $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
                     $session_id = session_id();
                     $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );
-if($time==0)                    
-error_log('login '.$session_type.'  '.$session_id);                
+
+//if($time==0)                    
+//error_log('login '.$session_type.'  '.$session_id);                
                     
                     if(!$cres){
                         
