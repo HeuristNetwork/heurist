@@ -73,6 +73,62 @@ L.control.publish = function(opts) {
     return new L.Control.Publish(opts);
 }
 
+//HELP control
+
+L.Control.Help = L.Control.extend({
+    
+    _container: null,
+    _mapwidget: null,
+    
+    initialize: function(options) {
+
+        options = options || {};
+        
+        L.Util.setOptions(this, options);
+        
+        this._mapwidget = options.mapwidget;
+        
+        L.Control.prototype.initialize.call(this, this.options);
+    },
+
+    
+    onAdd: function(map) {
+        
+        var container = this._container = L.DomUtil.create('div','leaflet-bar');
+
+        L.DomEvent
+          .disableClickPropagation(container)
+          .disableScrollPropagation(container);
+        
+        $('<a>').attr('title', window.hWin.HR('Help'))
+            .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
+            .addClass('ui-icon ui-icon-help')
+            .appendTo(container);
+        
+        window.hWin.HEURIST4.ui.initHelper(container, null, 
+                window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content',
+                { my: "center center", at: "center center", of: $(window.hWin.document).find('body') },true);
+        
+        /*L.DomEvent
+            .on(container, 'click', this._onClick, this);*/
+        
+        return container;
+    },
+
+    onRemove: function(map) {
+        // Nothing to do here
+    },
+    
+    _onClick: function(map) {
+       //show help popup 
+       //this.mapPublish.openPublishDialog();
+    }
+});
+
+L.control.help = function(opts) {
+    return new L.Control.Help(opts);
+}
+
 
 //        
 // create accordion with 3(4) panes

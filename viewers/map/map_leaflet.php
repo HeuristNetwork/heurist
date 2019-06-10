@@ -55,7 +55,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 ?>
 <!-- leaflet plugins -->
 <script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
-<script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.min.js"></script>
+<script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.js"></script>
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
 <script src="<?php echo PDIR;?>external/leaflet/leaflet.browser.print.min.js"></script>
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/markercluster/MarkerCluster.css">
@@ -195,8 +195,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         padding-left:10px;
         */
         display:none;
-        background:white;
-        color:#95A7B7;
+        background:lightgray;
+        color:black;/*#95A7B7;*/
         border-radius:2px;
     }
     span.fancytree-node{
@@ -258,15 +258,16 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
             return window.hWin.HEURIST4.util.getUrlParameter(name, location.search)
         }
         
-        var layout_params = {}
+        var layout_params = null;
         is_init_here = __gp('noinit')!='1';
-        if(is_init_here){ 
+        if(is_init_here){    //take parameters from url 
             // params: 
             //   nomap, notimeline
             //   controls: [all,none,zoom,bookmark,geocoder,print,publish,legend]
             //   legend: [basemaps,search,mapdocs|onedoc]
             //   basemap: name of initial basemap
             //   extent: fixed extent    
+            layout_params = {};
             layout_params['nomap'] = __gp('nomap');
             layout_params['notimeline'] = __gp('notimeline');
             layout_params['nocluster'] = __gp('nocluster');

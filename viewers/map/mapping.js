@@ -145,9 +145,11 @@ $.widget( "heurist.mapping", {
     map_geocoder: null,
     map_print: null,
     map_publish: null,
-    main_popup: null,
-    main_draw: null,
+    map_draw: null,
+    map_help: null,
     
+    //popup element
+    main_popup: null,
     //
     drawnItems: null,
     //deffau draw style
@@ -175,6 +177,7 @@ $.widget( "heurist.mapping", {
 
     //  settings
     isMarkerClusterEnabled: true,
+    markerClusterGridSize: 50,
     isEditAllowed: true,
     
     
@@ -975,7 +978,8 @@ $.widget( "heurist.mapping", {
 
             var is_new_markercluster = window.hWin.HEURIST4.util.isnull(this.all_clusters[layer_id]);
             if(is_new_markercluster){
-                this.all_clusters[layer_id] = L.markerClusterGroup({showCoverageOnHover:false});
+                this.all_clusters[layer_id] = L.markerClusterGroup({showCoverageOnHover:false, 
+                                                    maxClusterRadius:this.markerClusterGridSize});
             }else{
                 this.all_clusters[layer_id].clearLayers() 
             }
@@ -1439,6 +1443,7 @@ $.widget( "heurist.mapping", {
     updateLayout: function( params ){
         
         function __parseval(val){
+            if(val===false || val===true) return val;
             if(!window.hWin.HEURIST4.util.isempty(val)){
                 val = val.toLowerCase();
                 return !(val==0 || val=='off' || val=='no' || val=='n');
@@ -1462,9 +1467,16 @@ $.widget( "heurist.mapping", {
             return res;
         }
         
-        if(!params) return;
+        if(window.hWin.HEURIST4.util.isempty(params)){
+            //this is not publish take params
+            params = {};
+            params['nocluster'] = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)!=1);
+            params['controls'] = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'all');
+            
+            this.markerClusterGridSize = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 50));
+        }
         
-        
+        //maxClusterRadius
         this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
         this.options.isPublished = __parseval(params['published']);
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
@@ -1540,22 +1552,30 @@ $.widget( "heurist.mapping", {
                 if(!that['map_'+val])  //not yet created
                 {
                     //not yet created
-                    if(val=='bookmark') //bookmark plugin
-                    that.map_bookmark = new L.Control.Bookmarks({ position: 'topleft' });
-                    
-                    if(val=='geocoder') //geocoder plugin
-                    that.map_geocoder = L.Control.geocoder({ position: 'topleft' });
-                    
+                    if(val=='bookmark'){ //bookmark plugin
+                        that.map_bookmark = new L.Control.Bookmarks({ position: 'topleft', 
+                            //formPopup:{templateOptions: {submitTextCreate:'add'}},
+                            bookmarkTemplate: '<li class="{{ itemClass }}" data-id="{{ data.id }}">' +
+                              '<span class="{{ removeClass }}">&times;</span>' +
+                              '<span class="{{ nameClass }}">{{ data.name }}</span>' +
+                              //'<span class="{{ coordsClass }}">{{ data.coords }}</span>' +
+                              '</li>'
+                        });
+                    }else
+                    if(val=='geocoder'){ //geocoder plugin
+                        that.map_geocoder = L.Control.geocoder({ position: 'topleft' });
+                    }else
                     //print plugin
                     if(val=='print'){
-                    that.map_print = L.control.browserPrint({ position: 'topleft' })
-                    $(that.map_print).find('.browser-print-mode').css({padding: '2px 10px !important'}); //.v1 .browser-print-mode
-                    }
-
-                    if(val=='publish') //publish plugin
-                    that.map_publish = L.control.publish({ position: 'topleft', mapwidget:this });//.addTo( this.nativemap );
-                    
-                    
+                        that.map_print = L.control.browserPrint({ position: 'topleft' })
+                        $(that.map_print).find('.browser-print-mode').css({padding: '2px 10px !important'}); //.v1 .browser-print-mode
+                    }else
+                    if(val=='publish'){ //publish plugin
+                        that.map_publish = L.control.publish({ position: 'topleft', mapwidget:that });
+                    }else
+                    if(val=='help'){ //publish plugin
+                        that.map_help = L.control.help({ position: 'topleft', mapwidget:that });
+                    }else
                     if(val=='draw') //draw plugin
                     {
                         that.drawnItems = L.featureGroup().addTo(that.nativemap);
@@ -1679,6 +1699,7 @@ $.widget( "heurist.mapping", {
         if(!this.options.isPublished) __controls('publish');
         //__controls('scale');
         if(controls.indexOf('draw')>=0) __controls('draw');
+        __controls('help');
         
             
         //   legend: [basemaps,search,mapdocs|onedoc]

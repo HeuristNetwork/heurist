@@ -1,5 +1,5 @@
 /**
-* map_control.js - manage layers and proejcts
+* mapManager.js - manage layers and proejcts
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -25,9 +25,12 @@ L.Control.Manager = L.Control.extend({
 
         L.DomEvent
           .disableClickPropagation(container)
-          .disableScrollPropagation(container);
+          .disableScrollPropagation(container);              
         
-        $(container).css({'width':'200px','overflow-y':'auto'});
+        $(container)
+            .css({'width':'200px','overflow-y':'auto'})
+            .resizable({ghost:true,handles:'w',minWidth:250, maxWidth:500,
+                        stop:function(event, ui){ $(ui.element).css({left:0}); }});
         return container;
     },
 
@@ -80,15 +83,15 @@ function hMapManager( _options )
         
         mapDocuments = hMapDocument( { mapwidget:options.mapwidget } ); 
         
-        $('<div>').attr('grpid','basemaps').addClass('svs-acordeon')
-                .append( _defineHeader('Base Maps', 'basemaps'))
-                .append( _defineContent('basemaps') ).appendTo(options.container);        
-        $('<div>').attr('grpid','search').addClass('svs-acordeon')
+        $('<div>').attr('grpid','search').addClass('svs-acordeon outline_suppress')
                 .append( _defineHeader('Result Sets', 'search'))
                 .append( _defineContent('search') ).appendTo(options.container);
-        $('<div>').attr('grpid','mapdocs').addClass('svs-acordeon')
+        $('<div>').attr('grpid','mapdocs').addClass('svs-acordeon outline_suppress')
                 .append( _defineHeader('Map Documents', 'mapdocs'))
                 .append( _defineContent('mapdocs') ).appendTo(options.container);
+        $('<div>').attr('grpid','basemaps').addClass('svs-acordeon outline_suppress')
+                .append( _defineHeader('Base Maps', 'basemaps'))
+                .append( _defineContent('basemaps') ).appendTo(options.container);        
         
         //init list of accordions
         var keep_status = window.hWin.HAPI4.get_prefs('map_control_status');
@@ -147,7 +150,7 @@ function hMapManager( _options )
         
         var $header = $('<h3 grpid="'+domain+'" class="hasmenu">' + sIcon + '<span style="vertical-align:top;">'
             + name + '</span>')
-            .css({color:'rgb(142, 169, 185)'}).addClass('tree-accordeon-header');
+            .css({color:'rgb(142, 169, 185)'}).addClass('tree-accordeon-header outline_suppress');
 
         /*    
         if('dbs'!=domain){
@@ -155,6 +158,34 @@ function hMapManager( _options )
             $header.contextmenu(context_opts);
         }
         */
+        
+         if(domain=='mapdocs'){
+             
+            var append_link = $('<a title="create new map document">',{href:'#'})
+                .html('<span class="ui-icon ui-map-document"></span>')
+                .css({height:'14px',float:'right',width: '16px',background: 'none'})
+                .click(function(event){
+                    
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    
+                    //edit layer or mapdocument record
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null,
+                    {selectOnSave:true,
+                     onClose: function(){ 
+                         //parent_span.find('.svs-contextmenu4').hide();
+                     },
+                     onselect:function(event, data){
+                        if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                            
+                            _addToMapDocumentTree( data.selection );
+                            
+                        }
+                    },
+                    new_record_params:{rt:window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']}
+                    });
+                    
+                }).appendTo($header);
+        }
 
         return $header
 
@@ -214,7 +245,35 @@ function hMapManager( _options )
         
     }
     
-    
+    //
+    // adds new mapdoc entry in mapdoc tree
+    //
+    function _addToMapDocumentTree( resdata ){
+        
+            if(resdata==null){
+
+                var $res = {};  
+                $res['key'] = 1236;
+                $res['title'] = 'TTTTTTEST';
+                $res['type'] = 'mapdocument';
+                $res['lazy'] = true;
+                    
+            }else{
+
+            var rec = resdata.getFirstRecord();
+        
+            var $res = {};  
+            $res['key'] = resdata.fld(rec, 'rec_ID');
+            $res['title'] = resdata.fld(rec, 'rec_Title');
+            $res['type'] = 'mapdocument';
+            $res['lazy'] = true;
+        
+            }
+            
+            var tree = mapdoc_treeview.fancytree("getTree");
+            tree.getRootNode().addChildren( [$res] ).setSelected(true);
+        
+    }
     
     //
     // it is invoked on retieve of map document list 
@@ -251,9 +310,12 @@ function hMapManager( _options )
             treedata = resdata;
         }
                 
-        tree_container.empty();        
+        tree_container.empty();    
         
-        if($.isFunction($('body').fancytree)){
+        
+        if(treedata.length>0){    
+        
+            if($.isFunction($('body').fancytree)){
      
             tree_container.fancytree({  //addClass('tree-facets').
                                     //extensions: ["filter"],
@@ -410,6 +472,11 @@ function hMapManager( _options )
                                 });     
                             
         }
+        
+        
+        }else{
+            tree_container.html('<span style="font-style:italic">none</span>');
+        }
         that.setHeight();
     
     }
@@ -439,19 +506,28 @@ function hMapManager( _options )
             var actionspan = $('<div class="svs-contextmenu3" '
                     +(mapdoc_id>=0?('" data-mapdoc="'+mapdoc_id+'"'):'')
                     +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
-                +'<span class="ui-icon ui-icon-zoomin" title="Zoom to '+item.data.type+' extent"></span>'
+                +'<span class="ui-icon ui-icon-arrow-4-diag" title="Zoom to '+item.data.type+' extent"></span>'
                 + (isEditAllowed
-                   ?('<span class="ui-icon ui-icon-pencil" title="Edit '
-                    +(item.data.type=='mapdocument' || mapdoc_id>0?(item.data.type+' record'):' symbology')
+                   ?('<span class="ui-icon ui-icon-pencil" title="'
+                    + ((mapdoc_id>0) 
+                        ?(item.data.type=='mapdocument'?'Modify the map document':'Change symbology and behaviour of map layer')
+                        :'Change symbology')
                     +'"></span>')
-                    :'')  
-                +( isEditAllowed && ((item.data.type=='mapdocument' && mapdoc_id>0) || mapdoc_id==0)
-                    ?('<span class="ui-icon ui-icon-plus" title="'
-                        + (mapdoc_id==0?'Save result set as layer/datasource records pair'
-                                      :'Add new layer to mapdocument') +'"></span>')
-                    :'')    
+                    :'')                                                              //arrowstop-1-s
+                + (isEditAllowed && (item.data.type=='mapdocument' && mapdoc_id>0)
+                    ?('<span class="ui-icon ui-map-layer" title="Add map layer">'
+                        +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
+                        +'</span>')
+                    :( (isEditAllowed && mapdoc_id==0)
+                        ?'<span class="ui-icon ui-icon-arrowstop-1-s" title="Save result set as layer"></span>'
+                        :''))
+                    
+                    
+                        
                 + (isEditAllowed && ((mapdoc_id>0 && recid==-1)||mapdoc_id==0)
-                    ?'<span class="ui-icon ui-icon-close" title="Unload and remove from map"></span>':'')+
+                    ?'<span class="ui-icon ui-icon-trash" title="'
+                    +(item.data.type=='mapdocument'?'Delete map document':'Remove map layer')
+                    +'"></span>':'')+
                 +'</div>').appendTo(parent_span);
 
             $('<div class="svs-contextmenu4"/>').appendTo(parent_span);
@@ -471,7 +547,7 @@ function hMapManager( _options )
                     var recid = ele.parent('.svs-contextmenu3').attr('data-recid');
                     var mapdoc_id = ele.parent('.svs-contextmenu3').attr('data-mapdoc');
                     
-                        if(ele.hasClass('ui-icon-zoomin')){
+                        if(ele.hasClass('ui-icon-arrow-4-diag')){
                             
                             if(recid>0){
                                 
@@ -564,7 +640,7 @@ function hMapManager( _options )
                                         
                                     });
                                 }
-                        }else if(ele.hasClass('ui-icon-close')){
+                        }else if(ele.hasClass('ui-icon-trash')){
                             
                             //mapdocument - remove from map and unload from memory
                             if(mapdoc_id>0){

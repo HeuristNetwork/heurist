@@ -1404,7 +1404,8 @@ function print_linked_details($bib, $link_cnt) {
     ?>
         <div class=detailRow>
             <div class=detailType>Referenced by</div>
-            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkedto:<?=$bib['rec_ID']?>" onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
+            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkedto:<?=$bib['rec_ID']?>" 
+                    onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
                 <!--  <br> <i>Search = linkedto:<?=$bib['rec_ID']?> <br>(returns records pointing TO this record)</i> -->
             </div>
         </div>
@@ -1421,7 +1422,7 @@ function print_linked_details($bib, $link_cnt) {
                         .'<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$row['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$row['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif"></div>';
                         
                 print '<div style="display: table-cell;vertical-align:top;'
-                .($is_map_popup?'max-width:490px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a></div>';
+                .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'.htmlspecialchars($row['rec_Title']).'</a></div>';
                 
             print '</div>';
         }
