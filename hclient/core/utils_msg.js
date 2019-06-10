@@ -41,6 +41,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     showMsgErr: function(response, needlogin, ext_options){
         var msg = '';
         var dlg_title = null;
+        var show_login_dlg = false;
+        
         if(typeof response === "string"){
             msg = response;
         }else{
@@ -89,7 +91,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 response.sysmsg = (window.hWin.HAPI4.currentUser['ugr_ID']==0)?0:1;
 
                 if(msg=='' || (needlogin && response.sysmsg==0)){
-                    msg = msg + 'It appears you are not logged in or your session has been experied. You have to re-login';
+                    msg = msg + 'It appears you are not logged in or your session has expired. Please reload the page to log in again';
+                    show_login_dlg = true;
                 }else if(response.sysmsg==0){
                     msg = msg + 'You must be logged in';    
                 }else{ 
@@ -127,9 +130,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         buttons[window.hWin.HR('OK')]  = function() {
                     var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                     $dlg.dialog( "close" );
-                    if(response.status==window.hWin.ResponseStatus.REQUEST_DENIED && needlogin){
-                            //window.hWin.HAPI4.setCurrentUser(null);
-                            //$(top.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
+                    if(show_login_dlg){
+                            window.hWin.HAPI4.setCurrentUser(null);
+                            $(top.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
                     }
                 }; 
         window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons, dlg_title, ext_options);

@@ -1371,8 +1371,9 @@ $.widget( "heurist.svs_list", {
             var context_opts = this._getAddContextMenu(groupID);
 
             var append_link = $("<a>",{href:'#'})
-                .html('<span class="ui-icon ui-icon-plus hasmenu" style="display:inline-block; vertical-align: bottom"></span>'+
-                '<span class="hasmenu">add</span>')
+                .html('<span class="ui-icon ui-icon-plus hasmenu" '
+                    +' style="display:inline-block; vertical-align: bottom"></span>'
+                    +'<span class="hasmenu">add</span>')
                 .click(function(event){
                     append_link.contextmenu('open', append_link.find('span.ui-icon') );
                     //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
