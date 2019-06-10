@@ -37,7 +37,6 @@
         $mysqli = $system->get_mysqli();
 
         if ( $system->get_user_id()<1 && !(@$_REQUEST['a']=='s'&&@$_REQUEST['Captcha']) ) {
-            
             $response = $system->addError(HEURIST_REQUEST_DENIED);
 
         }else{

@@ -1533,8 +1533,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }else{
                     window.hWin.HAPI4.RecordMgr.addRecord( that.options.new_record_params,
                         function(response){ 
-                            response.is_insert=true; 
-                            that._initEditForm_step4(response); //it returns full record data
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    response.is_insert=true; 
+                                    that._initEditForm_step4(response); //it returns full record data
+                                }else{
+                                    that.closeDialog();
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                }
                         });
                 }
             }
