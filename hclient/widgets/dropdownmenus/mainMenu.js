@@ -938,6 +938,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             prefs['searchQueryInBrowser'] = window.hWin.HAPI4.get_prefs_def('searchQueryInBrowser', 1);
             prefs['mapcluster_on'] = window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1);
             
+            
+            var map_controls = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'bookmark,geocoder,selector,print');
+            map_controls = map_controls.split(',');
+            prefs['mctrl_bookmark'] = 0;prefs['mctrl_geocoder'] = 0;prefs['mctrl_selector'] = 0;prefs['mctrl_print'] = 0;
+            for(var i=0;i<map_controls.length;i++){
+                prefs['mctrl_'+map_controls[i]] = 1;
+            }
 
             //from prefs to ui
             allFields.each(function(){
@@ -960,17 +967,24 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
                 var request = {};
                 var val;
+                var map_controls = [];
 
                 allFields.each(function(){
                     if(this.type=="checkbox"){
-                        request[this.id] = this.checked?"1":"0";
+                        if(this.id.indexOf('mctrl_')<0){
+                            request[this.id] = this.checked?"1":"0";
+                        }else if(this.checked){
+                            map_controls.push(this.value);
+                        }
                     }else{
                         request[this.id] = $(this).val();
                     }
                 });
+                request['mapcontrols'] = map_controls.length==0?'none':map_controls.join(',');
+                
                 request.layout_theme = currentTheme; //themeSwitcher.getSelected();//    getCurrentTheme();
                 //$('#layout_theme').themeswitcher.
-
+                
                 //save preferences in session
                 window.hWin.HAPI4.SystemMgr.save_prefs(request,
                     function(response){
@@ -988,7 +1002,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                 prefs['mapcluster_count'] != request['mapcluster_count'] ||   
                                 prefs['mapcluster_zoom'] != request['mapcluster_zoom'] ||
                                 prefs['deriveMapLocation'] != request['deriveMapLocation'] || 
-                                prefs['mapSelectTools'] != request['mapSelectTools']);
+                                prefs['mapcontrols'] != request['mapcontrols']);
                                 
                             //check help toggler and bookmark search - show/hide
                             window.hWin.HEURIST4.ui.applyCompetencyLevel(request['userCompetencyLevel']);
