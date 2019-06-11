@@ -939,9 +939,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             prefs['mapcluster_on'] = window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1);
             
             
-            var map_controls = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'bookmark,geocoder,selector,print');
+            var map_controls = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'bookmark,geocoder,selector,print,publish');
             map_controls = map_controls.split(',');
-            prefs['mctrl_bookmark'] = 0;prefs['mctrl_geocoder'] = 0;prefs['mctrl_selector'] = 0;prefs['mctrl_print'] = 0;
+            prefs['mctrl_bookmark'] = 0;prefs['mctrl_geocoder'] = 0;
+            prefs['mctrl_selector'] = 0;prefs['mctrl_print'] = 0;
+            prefs['mctrl_publish'] = 0;
             for(var i=0;i<map_controls.length;i++){
                 prefs['mctrl_'+map_controls[i]] = 1;
             }

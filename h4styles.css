@@ -1215,6 +1215,7 @@ ul.fancytree-container ul{
 .svs-acordeon{
     border-bottom: #8ea9b9 1px solid;
     font-size: 0.97em;
+    margin-left: 7px;
 }
 .svs-acordeon > h3 > .ui-accordion-header-icon{
     top:40% !important;

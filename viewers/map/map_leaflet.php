@@ -233,6 +233,10 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     .map_popup .detail, .map_popup .detail > a{
         max-width: 200px;
     }
+    
+    .v1 .browser-print-mode{
+        padding: 3px 10px;
+    }
 </style>
 
 <!-- Initializing -->
@@ -356,7 +360,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <div id="mapping" style="min-height:1px;height:100%; width:100%;cursor:progress">
         <!-- Map -->
         <div class="ui-layout-center">
-                <div id="map" style="width:100%; height:100%" class="ui-layout-content">Mapping</div>
+                <div id="map" style="width:100%; height:100%" class="ui-layout-content"><span id="map-loading">Mapping...</span></div>
                 <div id="map_empty_message" style="width:100%; height:100%;margin:7px;display: none;">There are no spatial objects to plot on map</div>
             
         </div>

@@ -1307,7 +1307,7 @@ $.widget( "heurist.mapping", {
                 var radius = iconSize/2+3;
                 //iconSize = ((layer instanceof L.CircleMarker) ?(iconSize+2) :(iconSize/2+4));
                 
-                var new_layer = L.circleMarker(layer.getLatLng(), {color:'#ffff00'} );    
+                var new_layer = L.circleMarker(layer.getLatLng(), {color:'rgba(255,255,0,0.3)'} );    
                 new_layer.setRadius(radius);
                 new_layer.addTo( this.nativemap );
                 new_layer.bringToBack();
@@ -1468,10 +1468,11 @@ $.widget( "heurist.mapping", {
         }
         
         if(window.hWin.HEURIST4.util.isempty(params)){
-            //this is not publish take params
+            //this is not publish take params from preferences
             params = {};
             params['nocluster'] = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)!=1);
             params['controls'] = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'all');
+            params['controls'] = params['controls']+',legend'; //is always visible for non-published maps
             
             this.markerClusterGridSize = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 50));
         }
@@ -1711,6 +1712,8 @@ $.widget( "heurist.mapping", {
         }else{
             this.mapManager.loadBaseMap( 0 );  
         }
+        
+        $('#'+map_element_id).find('#map-loading').empty();
         
         // extent: fixed extent    
     },

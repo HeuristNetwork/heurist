@@ -26,14 +26,17 @@ L.Control.Manager = L.Control.extend({
         L.DomEvent
           .disableClickPropagation(container)
           .disableScrollPropagation(container);              
-        
+
         $(container)
-            .css({'width':'200px','overflow-y':'auto'})
+            //.css({'width':'200px','overflow-y':'auto'})
             .resizable({ghost:true,handles:'w',minWidth:250, maxWidth:500,
-                        stop:function(event, ui){ $(ui.element).css({left:0}); }});
+                        stop:function(event, ui){ $(ui.element).css({left:0}); }})
+            .resizable( "disable" );
+
+                        
         return container;
     },
-
+    
     onRemove: function(map) {
         // Nothing to do here
     }
@@ -61,13 +64,18 @@ function hMapManager( _options )
     options = {
         container:null,  //@todo all ui via mapcontrol
         mapwidget:null,   
-        visible_panels:null 
+        visible_panels:null
     },
         
     mapDocuments = null, //hMapDocument for db map docs,  Note: mapdocument with index=0 is search results
     mapdoc_treeview = null,
+    btn_expand = null,
+    btn_collapse = null,
     
     maxHeight = 9999999,
+    
+    isExpanded = false,
+    keepWidth = 200,
     
     basemaplayer =null;  //current basemap layer
     
@@ -81,6 +89,23 @@ function hMapManager( _options )
 
         options.container = $(options.container);
         
+        options.container.css({border: '2px solid rgba(0,0,0,0.2)','background-clip': 'padding-box'}); 
+        
+        btn_expand = $('<a>').attr('title', window.hWin.HR('Map Legend'))
+            .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
+            .addClass('ui-icon ui-icon-list')
+            .on({click: _onExpand })
+            .appendTo(options.container);
+
+        btn_collapse = $('<a>').attr('title', 'Minimize legend')
+            .css({'width':'16px','height':'16px','z-index':1001,float:'right',background:'none'})
+            .addClass('ui-icon ui-icon-carat-1-ne')
+            .on({click: _onCollapse }).hide()
+            .appendTo(options.container);
+        
+        options.container.find('.ui-resizable-handle')
+            .append($('<span class="ui-icon ui-icon-carat-1-w" style="height:100%;color:gray;left:-3px;font-size:10px;">'));
+        
         mapDocuments = hMapDocument( { mapwidget:options.mapwidget } ); 
         
         $('<div>').attr('grpid','search').addClass('svs-acordeon outline_suppress')
@@ -92,7 +117,7 @@ function hMapManager( _options )
         $('<div>').attr('grpid','basemaps').addClass('svs-acordeon outline_suppress')
                 .append( _defineHeader('Base Maps', 'basemaps'))
                 .append( _defineContent('basemaps') ).appendTo(options.container);        
-        
+                
         //init list of accordions
         var keep_status = window.hWin.HAPI4.get_prefs('map_control_status');
         if(!keep_status) {
@@ -135,7 +160,7 @@ function hMapManager( _options )
         //that.loadBaseMap(0);
         
         options.container.addClass('ui-widget-content')
-            .css({'margin-right':'5px',border:'1px solid gray',padding:'4px','font-size':'0.97em'});
+            .css({'margin-right':'5px','font-size':'0.97em'});
             
         that.updatePanelVisibility();
     }
@@ -348,8 +373,14 @@ function hMapManager( _options )
     //console.log('loaded '+data.node.title+'  '+data.node.children.length);
                                         setTimeout(function(){
                                             
-                                            if(data.node.data.type=='mapdocument')
+                                            if(data.node.data.type=='mapdocument'){
                                                 data.node.setSelected(true, {noEvents:true} );
+                                                //enable buttons
+                                                var btns = $(data.node.li).find('.svs-contextmenu3');
+                                                btns.find('span.ui-icon-arrow-4-diag').css({color:'black'});    
+                                                btns.find('span.ui-icon-trash').css({color:'black'});
+                                            }
+                                                
                                             
                                             //$.each(data.node.children, function( idx, item ){
                                             //    _defineActionIcons( item );
@@ -489,7 +520,7 @@ function hMapManager( _options )
         var item_li = $(item.li), 
             recid = item.key, 
             mapdoc_id = 0;
-        
+            
         if($(item).find('.svs-contextmenu3').length==0){
             
             if(item.data.type=='layer'){
@@ -506,7 +537,9 @@ function hMapManager( _options )
             var actionspan = $('<div class="svs-contextmenu3" '
                     +(mapdoc_id>=0?('" data-mapdoc="'+mapdoc_id+'"'):'')
                     +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
-                +'<span class="ui-icon ui-icon-arrow-4-diag" title="Zoom to '+item.data.type+' extent"></span>'
+                +'<span class="ui-icon ui-icon-arrow-4-diag" '
+                    +((item.data.type=='mapdocument')?'style="color:gray"':'')
+                    +' title="Zoom to '+item.data.type+' extent"></span>'
                 + (isEditAllowed
                    ?('<span class="ui-icon ui-icon-pencil" title="'
                     + ((mapdoc_id>0) 
@@ -521,12 +554,11 @@ function hMapManager( _options )
                     :( (isEditAllowed && mapdoc_id==0)
                         ?'<span class="ui-icon ui-icon-arrowstop-1-s" title="Save result set as layer"></span>'
                         :''))
-                    
-                    
                         
                 + (isEditAllowed && ((mapdoc_id>0 && recid==-1)||mapdoc_id==0)
-                    ?'<span class="ui-icon ui-icon-trash" title="'
-                    +(item.data.type=='mapdocument'?'Delete map document':'Remove map layer')
+                    ?'<span class="ui-icon ui-icon-trash" '
+                    +((item.data.type=='mapdocument')?'style="color:gray"':'')
+                    +' title="'+(item.data.type=='mapdocument'?'Delete map document':'Remove map layer')
                     +'"></span>':'')+
                 +'</div>').appendTo(parent_span);
 
@@ -544,8 +576,8 @@ function hMapManager( _options )
 
                 //timeout need to activate current node    
                 setTimeout(function(){                         
-                    var recid = ele.parent('.svs-contextmenu3').attr('data-recid');
-                    var mapdoc_id = ele.parent('.svs-contextmenu3').attr('data-mapdoc');
+                    var recid = ele.parents('.svs-contextmenu3').attr('data-recid');
+                    var mapdoc_id = ele.parents('.svs-contextmenu3').attr('data-mapdoc');
                     
                         if(ele.hasClass('ui-icon-arrow-4-diag')){
                             
@@ -698,6 +730,27 @@ function hMapManager( _options )
             );
         }
     }
+    
+    function _onExpand(){
+        isExpanded = true;
+        btn_expand.hide();
+        btn_collapse.show();
+        options.container.css({'width':keepWidth,'overflow-y':'auto',padding:'4px'}).resizable( "enable" );
+        that.updatePanelVisibility();
+        that.setHeight();
+    }
+
+    function _onCollapse(){
+        isExpanded = false;
+        keepWidth = options.container.width();
+        btn_expand.show();
+        btn_collapse.hide();
+        options.container.css({'width':'22px','height':'22px','overflow-y':'hidden','overflow-x':'hidden',padding:'1px'})
+            .resizable( "disable" );
+        that.updatePanelVisibility();
+    }
+
+    
 
     //public members
     var that = {
@@ -716,14 +769,22 @@ function hMapManager( _options )
         },
         */
         setHeight: function( val ){
+            
+           if(isExpanded){
+               
+               if(val>0) maxHeight  = val;
+                
+               var ele = options.container.find('.svs-acordeon:visible');
+               var h = 20;
+               $(ele).each(function(idx,item){h=h+$(item).height()});
+                
+               options.container.height( Math.min(h, maxHeight) );
+               
+           }else{
+               options.container.height( 22 );
+               options.container.width( 22 );
+           }
            
-           if(val>0) maxHeight  = val;
-            
-           var ele = options.container.find('.svs-acordeon:visible');
-           var h = 20;
-           $(ele).each(function(idx,item){h=h+$(item).height()});
-            
-           options.container.height( Math.min(h, maxHeight) );
         },
         
         // params = [basemaps,search,mapdocuments|onedoc]
@@ -743,9 +804,16 @@ function hMapManager( _options )
                     ele.hide();
                 }
             }
-            __set('basemaps');            
-            __set('search');            
-            __set('mapdocs');            
+            
+            if(isExpanded){
+                __set('basemaps');            
+                __set('search');            
+                __set('mapdocs'); 
+                options.container.find('.ui-resizable-handle').show();
+            }else{
+                options.container.children('div').hide(); 
+            }       
+        
             //__set('onedoc');            
         },
         
@@ -844,7 +912,7 @@ function hMapManager( _options )
             options.mapwidget.mapping('loadBaseMap', idx);
             options.container.find('input[data-mapindex="'+idx+'"]').attr('checked',true);
         }
-
+        
     }
 
     _init( _options );
