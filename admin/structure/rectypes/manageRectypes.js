@@ -97,7 +97,11 @@ function RectypeManager() {
         
         tabView.addTab(new YAHOO.widget.Tab({
                     id: "newGroup",
-                    label: "<label title='Create new group, edit or delete an existing group' style='font-style:bold'> +/- </label>",
+                    label: '<label title="Create new group" style="font-style:bold;">'
+                    +'<a href="#" style="border: none;background: none;vertical-align: baseline;height:20px"'
+                                +' onClick="rectypeManager.doGroupEdit(-1)">'
+                                +'<span class="ui-icon ui-icon-circle-plus" style="font-size:10px;padding-top:16px;"/>&nbsp;</a>'
+                    +'</label>',
                     content:
                     ('<div id="formGroupEditor">'+
                         '<style>#formGroupEditor .input-row .input-header-cell {vertical-align: baseline;}</style>'+
@@ -210,7 +214,10 @@ function RectypeManager() {
 
         tabView.addTab(new YAHOO.widget.Tab({
                     id: grpID,
-                    label: "<label title='Drag tab to reposition. Use [+/-] tab to add, rename or delete tabs'>"+grpName+"</label>",
+                    label: "<label title='Drag tab to reposition. Use [+/-] tab to add, rename or delete tabs'>"
+                            +grpName+'</label><a href="#" style="border: none;background: none;vertical-align: baseline;"'
+                            +' onClick="rectypeManager.doGroupEdit('
+                            +grpID+')"><span class="ui-icon ui-icon-pencil" style="font-size: 10px"/></a>',      
                     content:
                     ('<div><br>&nbsp;&nbsp;<b><span id="grp'+grpID+'_Desc">'
                         + grpDescription + '</span></b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + 
@@ -1306,15 +1313,22 @@ function RectypeManager() {
     //
     // managing goups
     //
-    function _doGroupSave()
+    function _doGroupSave(grpData, maincallback)
     {
         if(_needToSaveFirst()) { return; }
 
-        var sel = Dom.get('edGroupId'),
-        name = Dom.get('edName').value.replace(/^\s+|\s+$/g, ''), //trim
-        description = Dom.get('edDescription').value.replace(/^\s+|\s+$/g, ''), //trim
-        grpID = sel.options[sel.selectedIndex].value,
-        grp; //object in HEURIST
+        var grp,grpID,name,description;
+
+        if(grpData){
+            grpID = grpData.grpID;
+            name = grpData.name.replace(/^\s+|\s+$/g, ''); //trim
+            description = grpData.description.replace(/^\s+|\s+$/g, ''); //trim
+        }else{
+            var sel = Dom.get('edGroupId');
+            grpID = sel.options[sel.selectedIndex].value
+            name = Dom.get('edName').value.replace(/^\s+|\s+$/g, ''); //trim
+            description = Dom.get('edDescription').value.replace(/^\s+|\s+$/g, ''); //trim
+        }
 
         if(Hul.isempty(name)){
             alert('Group name is required');
@@ -1354,9 +1368,13 @@ function RectypeManager() {
         //var str = YAHOO.lang.JSON.stringify(orec);
 
         //make this tab active
-        function _updateOnSaveGroup(response){
+        function __updateOnSaveGroup(response){
             
             if(response.status == window.hWin.ResponseStatus.OK){
+                
+                    if($.isFunction(maincallback)){
+                        maincallback.call();
+                    }
                 
                     var ind;
                     _refreshClientStructure(response.data);
@@ -1380,7 +1398,11 @@ function RectypeManager() {
                             if(!Hul.isnull(ind) && Number(_groups[ind].value)===Number(grpID)){
                                 var tab = tabView.getTab(ind);
                                 var el = tab._getLabelEl();
-                                el.innerHTML = "<label title='"+description+"'>"+name+"</label>";
+                                el.innerHTML = "<label title='"+description+"'>"+name+"</label>"
+                                +'<a href="#" style="border: none;background: none;vertical-align: baseline;"'
+                                +' onClick="rectypeManager.doGroupEdit('
+                                +grpID+')"><span class="ui-icon ui-icon-pencil" style="font-size: 10px"/></a>';
+                                
                                 _groups[ind].text = name;
                                 $('#grp'+grpID+'_Desc').text(description);
                                 
@@ -1399,7 +1421,7 @@ function RectypeManager() {
         if(!$.isEmptyObject(orec)){
 
             var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
-            var callback = _updateOnSaveGroup;
+            var callback = __updateOnSaveGroup;
 
             var request = {method:'saveRTG', db:window.hWin.HAPI4.database, data:orec };
                 
@@ -1486,16 +1508,70 @@ function RectypeManager() {
         var request = {method:'saveRTG', db:window.hWin.HAPI4.database, data:orec };
         window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
     }
+    
+    //
+    //
+    //
+    function _doGroupEdit(grpID){
+        
+        var popele = $('#formGroupEditor2');
+        var edName = popele.find('#edName');
+        var edDescription = popele.find('#edDescription');
+        var $dlg_pce = null;
+        
+        if(grpID<0){
+            edName.val('');
+            edDescription.val('');
+        }else{
+            var grp = window.hWin.HEURIST4.rectypes.groups[window.hWin.HEURIST4.rectypes.groups.groupIDToIndex[grpID]];
+            edName.val(window.hWin.HEURIST4.rectypes.groups[window.hWin.HEURIST4.rectypes.groups.groupIDToIndex[grpID]].name);
+            edDescription.val(window.hWin.HEURIST4.rectypes.groups[window.hWin.HEURIST4.rectypes.groups.groupIDToIndex[grpID]].description);
+        }
+        
+        var btns = [
+                {text:window.hWin.HR('Save'),
+                      click: function() { 
+                      
+                      _doGroupSave({grpID:grpID, name:edName.val(), description:edDescription.val()}, function(){
+                        $dlg_pce.dialog('close');     
+                      });
+                      
+                }},
+                {text:window.hWin.HR('Delete'),
+                      click: function() { 
+                      
+                      _doGroupDelete(grpID, function(){
+                        $dlg_pce.dialog('close');     
+                      });
+                      
+                }},
+                {text:window.hWin.HR('Cancel'),
+                      click: function() { $dlg_pce.dialog('close'); }}
+        ];          
+        
+        
+        $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
+            window:  window.hWin, //opener is top most heurist window
+            title: window.hWin.HR(grpID<0?'Create':'Edit')+' '+window.hWin.HR('record type group'),
+            width: 700,
+            height: 200,
+            element:  popele[0],
+            resizable: false,
+            buttons: btns
+        });
+        
+    }
 
     //
     //
     //
-    function _doGroupDelete(){
+    function _doGroupDelete(grpID, maincallback){
 
-        if(_needToSaveFirst()) { return; }
-
-        var sel = Dom.get('edGroupId');
-        var grpID = sel.options[sel.selectedIndex].value;
+        if(!(grpID>0)){
+            if(_needToSaveFirst()) { return; }
+            var sel = Dom.get('edGroupId');
+            grpID = sel.options[sel.selectedIndex].value;
+        }
 
         if(grpID<0) { return; }
 
@@ -1515,6 +1591,10 @@ function RectypeManager() {
                     function _updateAfterDeleteGroup(response) {
                         
                         if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            if($.isFunction(maincallback)){
+                                maincallback.call();
+                            }
                             
                             //remove tab from tab view and select 0 index
                             var id = _groups[ind].value;
@@ -1598,6 +1678,7 @@ function RectypeManager() {
         editDetailType: _editDetailType,
         duplicateType: function(rectypeID){ _duplicateType( rectypeID ); },
         doGroupSave: function(){ _doGroupSave(); },
+        doGroupEdit: function(grpID){ _doGroupEdit(grpID); },
         doGroupDelete: function(){ _doGroupDelete(); },
         doGroupCancel: function(){ _doGroupCancel(); },
         hasChanges: function(){ return  (_updatesCnt>0); },
