@@ -169,6 +169,9 @@ define('CONTACT_SYSADMIN', 'contact your <a href=mailto:'.HEURIST_MAIL_TO_ADMIN.
 //
 define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 
+//Expose all relationship vocabularies as options for term fields.
+define("HEURIST_UNITED_TERMS", true);
+
 //---------------------------------
 
 /** RECORD TYPE DEFINITIONS */

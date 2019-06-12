@@ -276,7 +276,7 @@ function DetailTypeEditor() {
         //sort array 
         vocabs.sort(function(a,b){ return a.title<b.title?-1:1; });
 
-        for(var idx in vocabs) { // For every term in first levet of tree
+        for(var idx in vocabs) { // For every term in first level of tree
             if(vocabs[idx]){
                 window.hWin.HEURIST4.ui.addoption(el_sel, vocabs[idx].key, vocabs[idx].title);
                 if(Number(vocabs[idx].key)==vocabId){

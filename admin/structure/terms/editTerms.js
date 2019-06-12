@@ -1920,6 +1920,7 @@ function EditTerms() {
 
     //
     //Method to define the content of fancyTreeView
+    //
     function  _defineContentTreeView(){
         //
 
@@ -1943,6 +1944,8 @@ function EditTerms() {
                 //var nodeIndex = tv.getNodeCount()+1;
 
                 var arTerm = termsByDomainLookup[termid];
+                
+                if(_currentDomain!=arTerm[fi.trm_Domain]) continue;
 
                 var term = {};//new Object();
                 term.id = termid;

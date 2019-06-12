@@ -486,17 +486,23 @@ function dbs_GetRectypeConstraint($system) {
             'enum' => array()),
             'commonFieldNames' => array_slice(__getTermColNames(), 1),
             'fieldNamesToIndex' => __getColumnNameToIndex(array_slice(__getTermColNames(), 1)));
-            
+        
+        //add special field - flag - has image    
         $terms['fieldNamesToIndex']['trm_HasImage'] = count($terms['commonFieldNames']);
         array_push($terms['commonFieldNames'],'trm_HasImage');        
-            
+        
         if($res){
             $lib_dir = HEURIST_FILESTORE_ROOT. $system->dbname() . '/term-images/';  //HEURIST_FILESTORE_DIR . 'term-images/';
             
             while ($row = $res->fetch_row()) {
-                $terms['termsByDomainLookup'][$row[9]][$row[0]] = array_slice($row, 1);
                 $hasImage = file_exists($lib_dir.$row[0].'.png');
-                array_push($terms['termsByDomainLookup'][$row[9]][$row[0]], $hasImage);
+                $domain = $row[9];
+                array_push($row, $hasImage);
+                
+                if($domain=='relation' && HEURIST_UNITED_TERMS){
+                    $terms['termsByDomainLookup']['enum'][$row[0]] = array_slice($row, 1);
+                }
+                $terms['termsByDomainLookup'][$domain][$row[0]] = array_slice($row, 1);
             }
             
             $res->close();
@@ -917,8 +923,12 @@ function dbs_GetRectypeConstraint($system) {
     */
     function __getTermTree($system, $termDomain, $matching = 'exact') { // termDomain can be empty, 'reltype' or 'enum' or any future term use domain defined in the trm_Domain enum
         $mysqli = $system->get_mysqli();
-
-        $whereClause = "a.trm_Domain " . ($matching == 'prefix' ? " like '" . $termDomain . "%' " : ($matching == 'postfix' ? " like '%" . $termDomain . "' " : "='" . $termDomain . "'"));
+        
+        if($termDomain=='enum' && HEURIST_UNITED_TERMS){
+            $whereClause = '1=1';    
+        }else{
+            $whereClause = "a.trm_Domain " . ($matching == 'prefix' ? " like '" . $termDomain . "%' " : ($matching == 'postfix' ? " like '%" . $termDomain . "' " : "='" . $termDomain . "'"));
+        }
         $query = "select a.trm_ID as pID, b.trm_ID as cID
         from defTerms a
         left join defTerms b on a.trm_ID = b.trm_ParentTermID
