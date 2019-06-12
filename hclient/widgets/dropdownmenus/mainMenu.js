@@ -22,6 +22,7 @@ $.widget( "heurist.mainMenu", {
 
     // default options
     options: {
+        host_logo:null
     },
     
     menues:{},
@@ -73,13 +74,17 @@ $.widget( "heurist.mainMenu", {
             }
         });
 
-        
+
         this.divProfileMenu = $( "<div>")
         .css({'float':'right', 'margin-top':'1em' })  //one rows 'padding-right':'2em', 
         //.css({'position':'absolute', 'right':10, 'padding-right':'2em', 'padding-top':'1em' })  //one rows
         //.addClass('logged-in-only')
         .appendTo(this.element);
         
+        
+        if(this.options.host_logo){
+            $(this.options.host_logo).css({'float':'right'}).appendTo( this.element );
+        }
         
         this.div_dbname = $( "<div>")
             //.css({'float':'right', 'margin-top':'1.2em', 'padding-right':'2em' })
@@ -359,7 +364,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS);
         $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART);
-
+        
+        this.div_logo.remove();
+        this.divMainMenu.remove();
         /* remove generated elements
         this.btn_Admin.remove();
         this.btn_Profile.remove();
