@@ -1223,9 +1223,10 @@
                 $fres->close();
                 
                 if($total_count_rows*10>$memory_limit){
-                    return $system->addError(HEURIST_SYSTEM_CONFIG, 
-                        'Search query produces '.$total_count_rows.' records. Memory limit does not allow to retrieve all of them.'
-                         .' Please filter to a smaller set of results.');
+                    return $system->addError(HEURIST_ACTION_BLOCKED, 
+                        'Search query produces '.$total_count_rows
+                            .' records. Memory limit does not allow to retrieve all of them.'
+                            .' Please filter to a smaller set of results.');
                 }
                 
 
@@ -1328,7 +1329,18 @@
                             $rectypes[$row[4]]=1;
                         }
                         
-                    }
+                        if(count($order)>5000){
+                            $mem_used = memory_get_usage();
+                            if($mem_used>$memory_limit-104857600){ //100M
+                            
+                                return $system->addError(HEURIST_ACTION_BLOCKED, 
+                                    'Search query produces '.$total_count_rows
+                                        .' records. Memory limit does not allow to retrieve all of them.'
+                                        .' Please filter to a smaller set of results.');
+                            }
+                        }                           
+                        
+                    }//load headers
                     $res->close();
                     
                     //LOAD DETAILS
