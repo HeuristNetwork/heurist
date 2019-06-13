@@ -73,6 +73,16 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
     font-weight: bold;
     font-size: 1.4em;
 }
+.yui-nav .selected a{
+    background: #edf5ff !important;
+    color: blue !important;
+    font-weight:bold !important;
+    border: 1.5px solid blue !important;
+    border-bottom: none !important;
+}
+.yui-skin-sam .yui-navset .yui-nav{
+    border: none !important;
+}
 </style>
 
         <script type="text/javascript" src="manageRectypes.js"></script>
@@ -134,11 +144,15 @@ if(@$_REQUEST['popup']!=1){
 </div>
 
 <div id="formGroupEditor2" style="display:none">
-    <div class="input-row required"><div class="input-header-cell" style="display:inline-block;text-align:right;width:100px">Name: </div>
-    <div class="input-cell" style="display: inline-block"><input id="edName" style="width:150px"/></div></div>
+    <div class="input-row required">
+        <div class="input-header-cell" style="display:inline-block;text-align:right;width:100px">Name: </div>
+        <div class="input-cell" style="display: inline-block"><input id="edName" style="width:150px"/></div>
+    </div>
     <br>
-    <div class="input-row required"><div class="input-header-cell"  style="display:inline-block;vertical-align: top;text-align:right;width:100px;">Description: </div>
-    <div class="input-cell" style="display: inline-block"><textarea id="edDescription" style="width:500px" rows="2"></textarea></div></div>
+    <div class="input-row required">
+        <div class="input-header-cell"  style="display:inline-block;vertical-align: top;text-align:right;width:100px;">Description: </div>
+        <div class="input-cell" style="display: inline-block"><textarea id="edDescription" style="width:500px" rows="2"></textarea></div>
+    </div>
 </div>
 
 </body>

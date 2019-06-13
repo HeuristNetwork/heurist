@@ -69,7 +69,7 @@ function RectypeManager() {
     _initRecID;
 
     var tabView = new YAHOO.widget.TabView();
-
+    
 
     //
     //
@@ -95,13 +95,13 @@ function RectypeManager() {
         }//for groups
 
         
-        tabView.addTab(new YAHOO.widget.Tab({
+        var tab0 = new YAHOO.widget.Tab({
                     id: "newGroup",
-                    label: '<label title="Create new group" style="font-style:bold;">'
-                    +'<a href="#" style="border: none;background: none;vertical-align: baseline;height:20px"'
-                                +' onClick="rectypeManager.doGroupEdit(-1)">'
-                                +'<span class="ui-icon ui-icon-circle-plus" style="font-size:10px;padding-top:16px;"/>&nbsp;</a>'
-                    +'</label>',
+                    label: //'<label title="Create new group" style="font-style:bold;">'
+                    '<a href="#" style="border: none;background: none;vertical-align: baseline;height:20px"'
+                                +' onClick="rectypeManager.doGroupEdit(event, -1)">'
+                                +'<span class="ui-icon ui-icon-circle-plus" style="font-size:10px;padding-top:16px;border: none !important;"/>&nbsp;</a>',
+                    //+'</label>',
                     content:
                     ('<div id="formGroupEditor">'+
                         '<style>#formGroupEditor .input-row .input-header-cell {vertical-align: baseline;}</style>'+
@@ -117,7 +117,20 @@ function RectypeManager() {
 
                         '</div></div>'+
                         '</div>')
-            }));
+            });
+    
+            tabView.addTab(tab0);
+            /*
+            tab0.addListener('click', function(event){
+                    rectypeManager.doGroupEdit(event, -1)
+            });        
+            tab0.addListener('beforeContentChange', function suppressChange(e) {
+                return false; // prevents content change
+            });
+            */
+    
+
+
         
         
         
@@ -128,6 +141,14 @@ function RectypeManager() {
         _rolloverInfo = new HintDiv('inforollover', 260, 170, '<div id="inforollover2"></div>');
 
         tabView.appendTo("modelTabs");
+        //event <{oldValue: any, newValue: any}>
+        tabView.addListener('beforeActiveIndexChange', function suppressChange(e) {
+                var tab = tabView.getTab(e.newValue);
+                return tab.get('id')!='newGroup';
+        });
+        
+        
+        $('#modelTabs').find('.yui-content').css({border:'1px solid blue !important'});
 
 
         /*		var bookmarkedTabViewState = YAHOO.util.History.getBookmarkedState("tabview");
@@ -215,8 +236,8 @@ function RectypeManager() {
         tabView.addTab(new YAHOO.widget.Tab({
                     id: grpID,
                     label: "<label title='Drag tab to reposition. Use [+/-] tab to add, rename or delete tabs'>"
-                            +grpName+'</label><a href="#" style="border: none;background: none;vertical-align: baseline;"'
-                            +' onClick="rectypeManager.doGroupEdit('
+                            +grpName+'</label><a href="#" style="border: none !important;background: none;vertical-align: baseline;"'
+                            +' onClick="rectypeManager.doGroupEdit(event, '
                             +grpID+')"><span class="ui-icon ui-icon-pencil" style="font-size: 10px"/></a>',      
                     content:
                     ('<div><br>&nbsp;&nbsp;<b><span id="grp'+grpID+'_Desc">'
@@ -1399,8 +1420,8 @@ function RectypeManager() {
                                 var tab = tabView.getTab(ind);
                                 var el = tab._getLabelEl();
                                 el.innerHTML = "<label title='"+description+"'>"+name+"</label>"
-                                +'<a href="#" style="border: none;background: none;vertical-align: baseline;"'
-                                +' onClick="rectypeManager.doGroupEdit('
+                                +'<a href="#" style="border: none;background:none !important;vertical-align: baseline;"'
+                                +' onClick="rectypeManager.doGroupEdit(event, '
                                 +grpID+')"><span class="ui-icon ui-icon-pencil" style="font-size: 10px"/></a>';
                                 
                                 _groups[ind].text = name;
@@ -1512,7 +1533,7 @@ function RectypeManager() {
     //
     //
     //
-    function _doGroupEdit(grpID){
+    function _doGroupEdit(event, grpID){
         
         var popele = $('#formGroupEditor2');
         var edName = popele.find('#edName');
@@ -1520,6 +1541,7 @@ function RectypeManager() {
         var $dlg_pce = null;
         
         if(grpID<0){
+            window.hWin.HEURIST4.util.stopEvent(event);
             edName.val('');
             edDescription.val('');
         }else{
@@ -1678,7 +1700,7 @@ function RectypeManager() {
         editDetailType: _editDetailType,
         duplicateType: function(rectypeID){ _duplicateType( rectypeID ); },
         doGroupSave: function(){ _doGroupSave(); },
-        doGroupEdit: function(grpID){ _doGroupEdit(grpID); },
+        doGroupEdit: function(event, grpID){ _doGroupEdit(event, grpID); },
         doGroupDelete: function(){ _doGroupDelete(); },
         doGroupCancel: function(){ _doGroupCancel(); },
         hasChanges: function(){ return  (_updatesCnt>0); },
