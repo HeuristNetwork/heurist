@@ -417,7 +417,7 @@
     *
     * @return array of direct and reverse links (record id, relation type (termid), detail id)
     */
-    function recordSearchRelated($system, $ids, $direction=0){
+    function recordSearchRelated($system, $ids, $direction=0, $need_headers=true){
 
         if(!@$ids){
             return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
@@ -506,22 +506,26 @@
         }
         
         //find all rectitles and record types for main recordset AND all related records
-        if(!is_array($ids)){
-            $ids = explode(',',$ids);
-        }
-        $ids = array_merge($ids, $rel_ids);  
-              
-        $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID, rec_OwnerUGrpID, rec_NonOwnerVisibility from Records '
-        .' WHERE rec_ID IN ('.implode(',',$ids).')';
-        $res = $mysqli->query($query);
-        if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error on search related. Query ".$query, $mysqli->error);
-        }else{
+        if($need_headers){
             
-                while ($row = $res->fetch_row()) {
-                    $headers[$row[0]] = array($row[1], $row[2], $row[3], $row[4]);   
-                }
-                $res->close();
+            if(!is_array($ids)){
+                $ids = explode(',',$ids);
+            }
+            $ids = array_merge($ids, $rel_ids);  
+                  
+            $query = 'SELECT rec_ID, rec_Title, rec_RecTypeID, rec_OwnerUGrpID, rec_NonOwnerVisibility from Records '
+            .' WHERE rec_ID IN ('.implode(',',$ids).')';
+            $res = $mysqli->query($query);
+            if (!$res){
+                return $system->addError(HEURIST_DB_ERROR, "Search query error on search related. Query ".$query, $mysqli->error);
+            }else{
+                
+                    while ($row = $res->fetch_row()) {
+                        $headers[$row[0]] = array($row[1], $row[2], $row[3], $row[4]);   
+                    }
+                    $res->close();
+            }
+            
         }
         
         $response = array("status"=>HEURIST_OK,
@@ -1799,7 +1803,7 @@ $loop_cnt++;
         $details = array();
         if($res){
         while ($rd = $res->fetch_assoc()) {
-            // skip all invalid value
+            // skip all invalid values
             if (( !$rd["dty_Type"] === "file" && $rd["dtl_Value"] === null ) ||
                 (($rd["dty_Type"] === "enum" || $rd["dty_Type"] === "relationtype") && !$rd["dtl_Value"])) {
                 continue;

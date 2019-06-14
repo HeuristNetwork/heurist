@@ -102,6 +102,14 @@ require_once(dirname(__FILE__)."/initPage.php");
                 KML <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
         </div>
 
+        <div id="menu-export-gephi" style="padding-left:5px;">
+            <button class="export-button">GEPHI</button>
+            <a href="#" oncontextmenu="return false;" 
+                data-logaction="exp_GEPHI"
+                data-action="menu-export-gephi"
+                title="Generate GEPHI for current set of search results (current query + expansion)">
+                GEPHI <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
+        </div>
 
         <!--
 

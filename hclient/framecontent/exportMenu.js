@@ -238,6 +238,8 @@ function hexportMenu() {
             _exportRecords('json',true,false,true);  //all, multifile
         }else if(action == "menu-export-geojson-multifile"){ 
             _exportRecords('geojson',true,false,true);  //all, multifile
+        }else if(action == "menu-export-gephi"){ 
+            _exportRecords('gephi',true,false,false); 
         }else if(action == "menu-export-kml"){
             _exportKML(true);
         }else if(action == "menu-export-rss"){

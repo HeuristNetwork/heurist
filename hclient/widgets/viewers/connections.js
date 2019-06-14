@@ -296,7 +296,7 @@ $.widget( "heurist.connections", {
                         relationName = window.hWin.HEURIST4.terms.termsByDomainLookup['relation'][trmID][0];
                     }
 
-                    // Link check
+                    // Link check  - both source and target must be in main result set (nodes)
                     if(source !== undefined && nodes[source] !== undefined && target !== undefined && nodes[target] !== undefined) { 
                         // Construct link
                         var link = {source: nodes[source],

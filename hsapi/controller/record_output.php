@@ -677,7 +677,7 @@ function output_CSV($system, $data, $params){
 // output records as json or xml 
 //
 // $parmas 
-//    format - json|geojson|xml
+//    format - json|geojson|xml|gephi
 //    defs  0|1  include database definitions
 //    file  0|1
 //    zip   0|1
@@ -716,6 +716,10 @@ function output_Records($system, $data, $params){
         $system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');
         return false;
     }   
+    //to store gephi links
+    $gephi_links_dest = null;
+    $fd_links = null;
+    $links_cnt = 0;
     
     //OPEN BRACKETS
     if($params['format']=='geojson'){
@@ -737,6 +741,70 @@ function output_Records($system, $data, $params){
         
     }else if($params['format']=='json'){
         fwrite($fd, '{"heurist":{"records":[');         
+    }else if($params['format']=='gephi'){
+
+        $gephi_links_dest = tempnam(HEURIST_SCRATCH_DIR, "links");    
+        //$fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
+        $fd_links = fopen($gephi_links_dest, 'w');  //less than 1MB in memory otherwise as temp file 
+        if (false === $fd_links) {
+            $system->addError(HEURIST_SYSTEM_CONFIG, 'Failed to create temporary file in scratch folder');
+            return false;
+        }   
+
+        
+        $dt = '2019-06-13';//(new Date()).toISOString().split('T')[0];
+/*
+        $gephi_header = 
+'<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"'
+    .' xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">'
+    ."<meta lastmodifieddate=\"{$dt}\">"
+        .'<creator>HeuristNetwork.org</creator>'
+        .'<description>Visualisation export</description>'
+    .'</meta>'
+    .'<graph mode="static" defaultedgetype="directed">'
+        .'<attributes class="node">'
+            .'<attribute id="0" title="name" type="string"/>'
+            .'<attribute id="1" title="image" type="string"/>'
+            .'<attribute id="2" title="rectype" type="string"/>'
+            .'<attribute id="3" title="count" type="float"/>'
+        .'</attributes>'
+        .'<attributes class="edge">'
+            .'<attribute id="0" title="relation-id" type="float"/>'
+            .'<attribute id="1" title="relation-name" type="string"/>'
+            .'<attribute id="2" title="relation-image" type="string"/>'
+            .'<attribute id="3" title="relation-count" type="float"/>'
+        .'</attributes>'
+        .'<nodes>';
+*/
+//although anyURI is defined it is not recognized by gephi v0.92
+
+        $gephi_header = <<<XML
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+    <meta lastmodifieddate="{$dt}">
+        <creator>HeuristNetwork.org</creator>
+        <description>Visualisation export</description>
+    </meta>
+    <graph mode="static" defaultedgetype="directed">
+        <attributes class="node">
+            <attribute id="0" title="name" type="string"/>
+            <attribute id="1" title="image" type="string"/>
+            <attribute id="2" title="rectype" type="string"/>
+            <attribute id="3" title="count" type="float"/>
+            <attribute id="4" title="url" type="string"/>
+        </attributes>
+        <attributes class="edge">
+            <attribute id="0" title="relation-id" type="float"/>
+            <attribute id="1" title="relation-name" type="string"/>
+            <attribute id="2" title="relation-image" type="string"/>
+            <attribute id="3" title="relation-count" type="float"/>
+        </attributes>
+        <nodes>
+XML;
+
+        $gephi_header = '<?xml version="1.0" encoding="UTF-8"?>'.$gephi_header;
+
+        fwrite($fd, $gephi_header);     
     }else{
         fwrite($fd, '<?xml version="1.0" encoding="UTF-8"?><heurist><records>');     
     }
@@ -751,7 +819,7 @@ function output_Records($system, $data, $params){
     
         $recID = $records[$idx];
         $idx++;
-        $record = recordSearchByID($system, $recID, true);
+        $record = recordSearchByID($system, $recID, ($params['format']!='gephi') );
         
         $rty_ID = $record['rec_RecTypeID'];
         
@@ -786,6 +854,36 @@ function output_Records($system, $data, $params){
                 fwrite($fd, $comma.json_encode($record)); //as is
             }
             $comma = ',';
+        }else if($params['format']=='gephi'){ 
+            
+            $name   = htmlspecialchars($record['rec_Title']);                               
+            $image  = htmlspecialchars(HEURIST_ICON_SCRIPT.$rty_ID);
+            $recURL = htmlspecialchars(HEURIST_BASE_URL.'recID='.$recID.'&fmt=html&db='.HEURIST_DBNAME);                               
+                               
+            $gephi_node = <<<XML
+<node id="{$recID}" label="{$name}">                               
+    <attvalues>
+    <attvalue for="0" value="{$name}"/>
+    <attvalue for="1" value="{$image}"/>
+    <attvalue for="2" value="{$rty_ID}"/>
+    <attvalue for="3" value="0"/>
+    <attvalue for="4" value="{$recURL}"/>
+    </attvalues>
+</node>
+XML;
+            fwrite($fd, $gephi_node);
+            
+            $links = recordSearchRelated($system, $recID, 0, false);
+            if($links['status']==HEURIST_OK){
+                if(@$links['data']['direct'])
+                    fwrite($fd_links, _composeGephiLinks($records, $links['data']['direct'], $links_cnt));
+                if(@$links['data']['reverse'])
+                    fwrite($fd_links, _composeGephiLinks($records, $links['data']['reverse'], $links_cnt));
+            }else{
+                return false;
+            }
+            
+             
         }else{
             $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><record/>');
             array_to_xml($record, $xml);
@@ -812,6 +910,16 @@ function output_Records($system, $data, $params){
             //@todo xml for api
             fwrite($fd, ']}');             
         }
+    }else if($params['format']=='gephi'){
+    
+        fwrite($fd, '</nodes>');
+        
+        fwrite($fd, '<edges>'.file_get_contents($gephi_links_dest).'</edges>');
+        
+        fwrite($fd, '</graph></gexf>');
+        
+        fclose($fd_links);
+    
     }else{
             //json or xml 
     
@@ -1505,4 +1613,68 @@ function getJsonFeature($record, $mode){
     return $res;
 }
 
+/**
+* returns xml string with gephi links
+* 
+* @param mixed $records - array of record ids to limit output only for links in this array
+* @param mixed $links - array of relations produced by recordSearchRelated
+*/
+function _composeGephiLinks(&$records, &$links, &$links_cnt){
+    
+
+    global $system, $defRecTypes, $defDetailtypes, $defTerms;
+
+    if($defTerms==null) {
+            $defTerms = dbs_GetTerms($system);
+            $defTerms = new DbsTerms($system, $defTerms);
+    }
+    
+    if($defDetailtypes==null) $defDetailtypes = dbs_GetDetailTypes($system, null, 2);
+    $idx_dname = $defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
+    
+    
+   $edges = ''; 
+    
+   if($links){
+       
+        foreach ($links as $link){
+            $source = $link->recID;
+            $target = $link->targetID;
+            $dtID = $link->dtID;
+            $trmID = $link->trmID;
+            $relationName = "Floating relationship";
+            $relationID = 0;
+        
+            if(in_array($source, $records) && in_array($target, $records)){
+                
+                    if($dtID > 0) {
+                        //type = window.hWin.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
+                        $relationName = $defDetailtypes['typedefs'][$dtID]['commonFields'][$idx_dname];
+                        $relationID = $dtID;
+                    }else if($trmID > 0) {
+                        $relationName = $defTerms->getTermLabel($trmID, true);
+                        $relationID = $trmID;
+                    }
+                    
+                    $relationName  = htmlspecialchars($relationName);                               
+                    //$image = htmlspecialchars(HEURIST_TERM_URL.$trmID.'.png');
+                    //<attvalue for="2" value="{$image}"/>
+                    $links_cnt++; 
+                                       
+                    $edges = $edges.<<<XML
+<edge id="{$links_cnt}" source="{$source}" target="{$target}" weight="1">                               
+    <attvalues>
+    <attvalue for="0" value="{$relationID}"/>
+    <attvalue for="1" value="{$relationName}"/>
+    <attvalue for="3" value="1"/>
+    </attvalues>
+</edge>
+XML;
+                    
+                    
+            }   
+        }//for
+   }
+   return $edges;         
+}
 ?>
