@@ -60,7 +60,6 @@ function hSvsEdit(args) {
             //svs_query.parent().show();
             //svs_ugrid.parent().show();
 
-
             var selObj = svs_ugrid.get(0);
             window.hWin.HEURIST4.ui.createUserGroupsSelect(selObj, null, 
                 [{key:'bookmark', title:window.hWin.HR('My Bookmarks (private)')},
@@ -96,9 +95,9 @@ function hSvsEdit(args) {
                                     ?squery  //overwrite (used in save fixed order)
                                     : ($.isArray(request.q)?JSON.stringify(request.q):request.q) );
                                     
-                var rules = window.hWin.HEURIST4.util.cleanRules( request.rules );                                                        
-                svs_rules.val( rules==null?'':JSON.stringify(rules) );
-                svs_rules_full.val( rules==null?'':request.rules );
+                var crules = window.hWin.HEURIST4.util.cleanRules( request.rules );                                                        
+                svs_rules.val( crules==null?'':JSON.stringify(crules) );
+                svs_rules_full.val( crules==null?'':request.rules );
                 svs_rules_only.prop('checked', (request.rulesonly==1 || request.rulesonly==true));
                 svs_notes.val( request.notes );
                 svs_viewmode.val( request.viewmode );
@@ -127,9 +126,11 @@ function hSvsEdit(args) {
                 } else if( squery && (squery.q || squery.rules) ) {
 
                     svs_query.val( window.hWin.HEURIST4.util.isempty(squery)?'': ($.isArray(squery.q)?JSON.stringify(squery.q):squery.q) );
-                    svs_rules.val( JSON.stringify(window.hWin.HEURIST4.util.cleanRules( squery.rules )) );
+                    
+                    var crules = window.hWin.HEURIST4.util.cleanRules( squery.rules );                                                        
+                    svs_rules.val( crules==null?'':JSON.stringify(crules) );
                     var rules = window.hWin.HEURIST4.util.isArray(squery.rules)?JSON.stringify(squery.rules):squery.rules;
-                    svs_rules_full.val( rules );
+                    svs_rules_full.val( rules==null?'':rules );
 
                 } else if(!window.hWin.HEURIST4.util.isempty(squery)){
                     svs_query.val( squery );
@@ -185,13 +186,13 @@ function hSvsEdit(args) {
     //
     //
     //
-    function _editRules(ele_rules, squery, groupID) {
+    function _editRules(ele_rules, ele_rules_full, squery, groupID) {
 
        var that = this;
 
         var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
-        if(!window.hWin.HEURIST4.util.isnull(ele_rules)){
-            url = url + '&rules=' + encodeURIComponent(ele_rules.val());
+        if(!window.hWin.HEURIST4.util.isnull(ele_rules_full)){
+            url = url + '&rules=' + encodeURIComponent(ele_rules_full.val());
         }
 
         window.hWin.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
@@ -199,7 +200,7 @@ function hSvsEdit(args) {
                 if(!window.hWin.HEURIST4.util.isempty(res)) {
 
                     if(res.mode == 'save') {
-                        if(window.hWin.HEURIST4.util.isnull(ele_rules)){ //call from resultListMenu - create new rule
+                        if(window.hWin.HEURIST4.util.isnull(ele_rules_full)){ //call from resultListMenu - create new rule
 
                              //replace rules
                              if(!window.hWin.HEURIST4.util.isObject(squery)){
@@ -211,7 +212,11 @@ function hSvsEdit(args) {
                             //mode, groupID, svsID, squery, callback
                             _showDialog('saved', groupID, null, squery ); //open new dialog
                         }else{
-                            ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
+                            ele_rules_full.val( JSON.stringify(res.rules) ); //assign new rules
+                            
+                            var crules = window.hWin.HEURIST4.util.cleanRules( res.rules );                                                        
+                            ele_rules.val( crules==null?'':JSON.stringify(crules) );
+
                         }
                     }
                 }
@@ -322,7 +327,7 @@ function hSvsEdit(args) {
 
             if(window.hWin.HEURIST4.util.isnull(squery)) squery = {};
              squery.q = ''; // from rule builder we always save pure query only
-             _editRules(null, squery, groupID);
+             _editRules(null, null, squery, groupID);
 
         }else if(null == edit_dialog){
             //create new dialog
@@ -345,7 +350,7 @@ function hSvsEdit(args) {
                 .css({'height':'16px', 'width':'16px'})
                 .click(function( event ) {
                     //that.
-                    _editRules( $dlg.find('#svs_Rules2'), '', groupID );
+                    _editRules( $dlg.find('#svs_Rules'), $dlg.find('#svs_Rules2'), '', groupID );
                 });
 
                 $dlg.find("#svs_Rules_clear")
