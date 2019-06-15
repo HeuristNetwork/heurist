@@ -215,7 +215,7 @@ function output_Data($params, $stream=null, $tmpfile=null){
         if(@$params['zip']==1){
             //as zip file
             $zipname = 'Export_'.$system->dbname().'_'.date("YmdHis").'.zip';
-            $destination = tempnam(HEURIST_SCRATCH_DIR, "zip");
+            $destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "zip");
             
             $zip = new ZipArchive();
             if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
@@ -709,7 +709,7 @@ function output_Records($system, $data, $params){
     $error_log = array();
     $error_log[] = 'Total rec count '.count($records);
 
-    $tmp_destination = tempnam(HEURIST_SCRATCH_DIR, "exp");    
+    $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");    
     //$fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
     $fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
     if (false === $fd) {
@@ -743,7 +743,7 @@ function output_Records($system, $data, $params){
         fwrite($fd, '{"heurist":{"records":[');         
     }else if($params['format']=='gephi'){
 
-        $gephi_links_dest = tempnam(HEURIST_SCRATCH_DIR, "links");    
+        $gephi_links_dest = tempnam(HEURIST_SCRATCHSPACE_DIR, "links");    
         //$fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
         $fd_links = fopen($gephi_links_dest, 'w');  //less than 1MB in memory otherwise as temp file 
         if (false === $fd_links) {
@@ -1265,7 +1265,7 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
     }else{
     
         $zipname = $temp_name.'_'.date("YmdHis").'.zip';
-        $destination = tempnam(HEURIST_SCRATCH_DIR, "zip");
+        $destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "zip");
         
         $zip = new ZipArchive();
         if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
