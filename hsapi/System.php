@@ -819,6 +819,7 @@ error_log(print_r($_REQUEST, true));
             //host organization logo and url
             $d1 = dirname(HEURIST_DIR); //base installation folder
             
+            $host_url = null;
             $host_logo = $d1.'/organisation_logo.jpg';
             if(file_exists($host_logo)){
                 $d2 = dirname(HEURIST_BASE_URL);

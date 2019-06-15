@@ -751,8 +751,8 @@ function output_Records($system, $data, $params){
             return false;
         }   
 
-        
-        $dt = '2019-06-13';//(new Date()).toISOString().split('T')[0];
+        $t2 = new DateTime($value);
+        $dt = $t2->format('Y-m-d');
 /*
         $gephi_header = 
 '<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"'
