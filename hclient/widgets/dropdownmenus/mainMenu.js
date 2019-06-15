@@ -80,11 +80,21 @@ $.widget( "heurist.mainMenu", {
         //.css({'position':'absolute', 'right':10, 'padding-right':'2em', 'padding-top':'1em' })  //one rows
         //.addClass('logged-in-only')
         .appendTo(this.element);
-        
-        
-        if(this.options.host_logo){
-            $(this.options.host_logo).css({'float':'right'}).appendTo( this.element );
-        }
+
+        //dashboard button                
+        this.btn_dashboward = $('<div>').button({label:'Open dashboard'})
+            .css({'float':'right', margin:'0.7em'})
+            .addClass('ui-heurist-header2')
+            .appendTo( this.element )
+            .click(
+                function(){
+                    that.btn_dashboward.hide();
+                    window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
+                        {onClose:function(){
+                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                        }  });}
+            ); 
+
         
         this.div_dbname = $( "<div>")
             //.css({'float':'right', 'margin-top':'1.2em', 'padding-right':'2em' })
@@ -154,7 +164,7 @@ $.widget( "heurist.mainMenu", {
 
         this.divMainMenuItems = $('<ul>')
                 .addClass('horizontalmenu')
-                .css({'float':'left', 'padding-right':'4em'})
+                .css({'float':'left', 'padding-right':'4em', 'margin-top': '1.5em'})
                 .appendTo( this.divMainMenu );
 
         /* new entityfeatures*/
@@ -195,19 +205,17 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 }*/
             
 
-        //dashboard button                
-        this.btn_dashboward = $('<div>').button({label:'Open dashboard'})
-            .css({})
-            .addClass('ui-heurist-header2')
-            .appendTo( this.divMainMenu )
-            .click(
-                function(){
-                    that.btn_dashboward.hide();
-                    window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
-                        {onClose:function(){
-                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
-                        }  });}
-            ); 
+        //host logo and link    
+        if(window.hWin.HAPI4.sysinfo.host_logo){
+            
+            $('<div style="height:40px;background:lightgray;padding:0 4px;float:right;">'
+                +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
+                +'" target="_blank" style="text-decoration: none;color: black;">'
+                        +'<label>hosted by: </label>'
+                        +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
+                        +'" height="40" align="center"></a></div>')
+            .appendTo( this.divMainMenu );
+        }
         
         // LISTENERS --------------------------------------------------
         $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,

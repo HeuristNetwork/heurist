@@ -815,6 +815,24 @@ error_log(print_r($_REQUEST, true));
                     }
                 }
             }
+            
+            //host organization logo and url
+            $d1 = dirname(HEURIST_DIR); //base installation folder
+            
+            $host_logo = $d1.'/organisation_logo.jpg';
+            if(file_exists($host_logo)){
+                $d2 = dirname(HEURIST_BASE_URL);
+                $host_logo = $d2.'/organisation_logo.jpg';
+                $host_url = $d1.'/organisation_url.txt';
+                if(file_exists($host_url)){
+                    $host_url = file_get_contents($host_url);   
+                }else{
+                    $host_url = null;
+                }
+            }else{
+                $host_logo = null;    
+            }
+            
 
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
             $lastCode_VersionOnServer = $this->get_last_code_and_db_version();
@@ -847,6 +865,8 @@ error_log(print_r($_REQUEST, true));
                     "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
                     'max_post_size'=>get_php_bytes('post_max_size'),
                     'max_file_size'=>get_php_bytes('upload_max_filesize'),
+                    'host_logo'=>$host_logo,
+                    'host_url'=>$host_url,
                     
                     'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), 
                     'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15), //delete for db statistics

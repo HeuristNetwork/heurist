@@ -114,11 +114,7 @@ var cfg_layouts = [
         north_pane:{ dropable:false, dragable:false, 
                 css:{position:'absolute', top:0,left:0,height:'8em',right:0, 
                      'min-width':'75em'}, 
-            apps:[{appid:'heurist_mainMenu', hasheader:false, css:{height:'100%', border:'solid'}, 
-                options:{host_logo:'<a href="https://sydney.edu.au/"target="_blank" '+
-                'style="background:lightgray;padding: 0 4px;text-decoration: none;color: black;margin:1em 2em">'
-                        +'<label>hosted by: </label>'
-                        +'<img src="hclient/assets/sydney-logo.png" height="40" align="center"></a>'} }] 
+            apps:[{appid:'heurist_mainMenu', hasheader:false, css:{height:'100%', border:'solid'}}] 
         },
         center_pane:{ dockable:false, dropable:false, dragable:false, 
                 css:{position:'absolute', top:'8em',left:0,bottom:0,right:0},
