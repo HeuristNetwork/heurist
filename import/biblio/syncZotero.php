@@ -386,6 +386,9 @@ if($step=="1"){  //first step - info about current status
     $isFailure = false;
     
     $mysqli = $system->get_mysqli();
+    
+    //$tmp_destination = HEURIST_SCRATCH_DIR.'zotero.xml';
+    //$fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
 
     while ($start<$totalitems){
 
@@ -397,6 +400,8 @@ if($step=="1"){  //first step - info about current status
                 'limit'=>$fetch, 'order'=>'dateAdded', 'sort'=>'asc' ));
         }
 
+//fwrite($fd, $items);        
+        
         $zdata = simplexml_load_string($items);
 
         if($zdata===false){
@@ -472,6 +477,7 @@ if($step=="1"){  //first step - info about current status
                 $mapping_dt = $mapping_rt[$itemtype];
 
                 $recordType = $mapping_dt["h3rectype"];
+                
                 foreach ($content as $zkey => $value){
 
                     if(!$value) continue;
@@ -548,6 +554,8 @@ if($step=="1"){  //first step - info about current status
                     $key = @$mapping_dt[$zkey];
                     $resource_rt_id = null;
                     $resource_dt_id = null;
+                    
+//print '<br>'.$zkey.'  ->'.$key.'   '.$value;                   
 
                     if($key){
 
@@ -604,7 +612,7 @@ if($step=="1"){  //first step - info about current status
 
                 $new_recid = null;
                 if(count($details)<1){
-                    print "<div style='color:red'>Warning: zotero id $zotero_itemid is skiiped. Details are not defined</div>";
+                    print "<div style='color:red'>Warning: zotero id $zotero_itemid: no data recorded in Zotero for this entry</div>";
                 }else{
                     //DEBUG echo print_r($details, true);
                     $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, true);
@@ -629,7 +637,8 @@ if($step=="1"){  //first step - info about current status
 
     }// end of while loop
 
-
+//fclose($fd);        
+    
     print "<div><br>Added: ".$cnt_added."</div>";
     print "<div>Updated: ".$cnt_updated."</div>";
     if($cnt_ignored>0){
@@ -919,7 +928,7 @@ function createResourceRecord($mysqli, $record_type, $recdetails){
     }
 
     $query = "";
-    $details = "";
+    $details = array();
     $dcnt = 1;
     $recource_recid = null; //returned value
 
@@ -979,10 +988,10 @@ function createResourceRecord($mysqli, $record_type, $recdetails){
             }
             //query to search similar record
 
-            $details["t:".$dt_id] = $value;
+            $details['t:'.$dt_id] = $value;
             foreach($value as $idx=>$val){
                 $query = $query." and r.rec_Id=d$dcnt.dtl_recId and d$dcnt.dtl_DetailTypeID=".$dt_id.
-                " and d$dcnt.dtl_Value='".mysql_escape_string($val)."'";
+                " and d$dcnt.dtl_Value='".$mysqli->real_escape_string($val)."'";
                 $dcnt++;
             }
         }
@@ -1139,7 +1148,7 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
             $new_recid = intval($out['data']);
 
             if($is_echo){
-                print '['.($new_recordID==$recId?"Updated":"Added")."&nbsp;Id&nbsp".$new_recid.']<br>';
+                print '['.($new_recid==$recId?"Updated":"Added")."&nbsp;Id&nbsp".$new_recid.']<br>';
             }
 
 
