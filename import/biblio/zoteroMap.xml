@@ -294,8 +294,8 @@
 
 
         <typeMap zType="document" cslType="document" h3id ="3-117">
-            <field label="Title" value="title"/>
-            <field label="Abstract" value="abstract"/>
+            <field label="Title" value="title" h3id = "2-1"/>
+            <field label="Abstract" value="abstractNote" h3id= "2-3"/>
             <field label="Date" value="date" h3id = "2-9"/>
             <field label="Language" value="language"/>
             <field label="Short Title" value="shortTitle" h3id = "2-2"/>

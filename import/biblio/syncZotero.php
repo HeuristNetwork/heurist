@@ -376,8 +376,23 @@ if($step=="1"){  //first step - info about current status
     // 1) start loop: fetch items by 100
     $cnt_updated = 0;
     $cnt_added = 0;
+
+    //not recognized zotero entries (rectypes)
     $cnt_ignored = 0;
     $arr_ignored = array();
+    
+    //ignored zote entries since no keys are mapped
+    $cnt_empty = 0;
+    $arr_empty = array();
+
+    //not recognized zotero keys (fields)
+    $cnt_notmapped = 0;
+    $arr_notmapped = array();
+
+    //detail type not found in this databse
+    $cnt_notfound = 0;
+    $arr_notfound = array();
+
 
     $start = 0;
     $fetch = min($_REQUEST['cnt'],100);
@@ -419,8 +434,7 @@ if($step=="1"){  //first step - info about current status
             if($entry->getName()=="entry"){
 
                 $zotero_itemid = strval(findXMLelement($entry, "zapi", "key"));
-
-
+                
                 // 2) get content of item if itemType is supported
                 $itemtype = strval(findXMLelement($entry, "zapi", "itemType"));
                 $itemtitle = strval(findXMLelement($entry, null, "title"));
@@ -474,13 +488,17 @@ if($step=="1"){  //first step - info about current status
                 $unresolved_records = array();
                 $details = array();
 
+                //find heurist record type mapped to zotero entry
                 $mapping_dt = $mapping_rt[$itemtype];
-
                 $recordType = $mapping_dt["h3rectype"];
+                
+                $is_empty_zotero_entry = true;
                 
                 foreach ($content as $zkey => $value){
 
                     if(!$value) continue;
+                    
+                    $is_empty_zotero_entry = false;
 
                     if($zkey == "creators"){
 
@@ -551,12 +569,12 @@ if($step=="1"){  //first step - info about current status
                         $rec_URL = $value;
                     }
 
+                    //find heurist field type mapped to zotero key
                     $key = @$mapping_dt[$zkey];
                     $resource_rt_id = null;
                     $resource_dt_id = null;
                     
 //print '<br>'.$zkey.'  ->'.$key.'   '.$value;                   
-
                     if($key){
 
                         if(is_array($key)){ //reference to record pointer
@@ -565,7 +583,15 @@ if($step=="1"){  //first step - info about current status
                             $detail_id = $key;
                         }
 
-                        if(!@$alldettypes['typedefs'][$detail_id]) continue;
+                        if(!@$alldettypes['typedefs'][$detail_id] && $zkey != 'url'){
+                            //field id not found in this db
+                            $msg = $itemtype.'.'.$zkey.' -> '.$detail_id;
+                            if(!in_array($msg, $arr_notfound)){
+                                array_push($arr_notfound, $msg);
+                                $cnt_notfound++;
+                            }
+                            continue;  
+                        } 
 
                         $dt_type = $alldettypes['typedefs'][$detail_id]['commonFields'][$fi_dettype];
 
@@ -605,14 +631,24 @@ if($step=="1"){  //first step - info about current status
 
                         //debug print $key."  ".$value."<br/>";
 
+                    }else if(!($zkey == 'url' || $zkey=='key')){
+                            if(!in_array($itemtype.'.'.$zkey, $arr_notmapped)){
+                                array_push($arr_notmapped, $itemtype.'.'.$zkey); 
+                                $cnt_notmapped++;
+                            }
                     }
                 }//for fields in content
 
-
-
                 $new_recid = null;
-                if(count($details)<1){
+                
+                if($is_empty_zotero_entry){
+                    
                     print "<div style='color:red'>Warning: zotero id $zotero_itemid: no data recorded in Zotero for this entry</div>";
+                    
+                }else if(count($details)<1){
+                    //no one zotero key has proper mapping to heurist fields
+                    array_push($arr_empty, $zotero_itemid);
+                    $cnt_empty++;
                 }else{
                     //DEBUG echo print_r($details, true);
                     $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, true);
@@ -641,13 +677,35 @@ if($step=="1"){  //first step - info about current status
     
     print "<div><br>Added: ".$cnt_added."</div>";
     print "<div>Updated: ".$cnt_updated."</div>";
-    if($cnt_ignored>0){
-        print "<div>Ignored: ".$cnt_ignored."</div>";
-        print "<br><div style='color:red'><b>Zotero items ignored:</b><br></div>";
-        print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_ignored).'</div>';
-    }
-    if($cnt_ignored>0 || $isFailure){
-        print '<span><br>Please '.CONTACT_HEURIST_TEAM.' - to provide a mapping for each of the undefined record types.</span>';
+    
+    $tot_erros = $cnt_ignored + $cnt_notmapped + $cnt_empty + $cnt_notfound;
+    
+    if($tot_erros>0){
+        print '<div style="color:red">';
+        if($cnt_ignored>0){
+            print '<br>Zotero entries that are not mapped to Heurist record types: '.$cnt_ignored;
+            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_ignored).'</div>';
+        }
+        if($cnt_notmapped>0){
+            print '<br>Zotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
+            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_notmapped).'</div>';
+        }
+        if($cnt_empty>0){
+            print '<br>Zotero entries ignored because there are not properly mapped keys: '.$cnt_empty;
+            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_empty).'</div>';
+        }
+        if($cnt_notfound>0){
+            print '<br>Zotero keys are mapped to field types that are not found this database: '.$cnt_notfound;
+            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_notfound).'</div>';
+        }
+        print '</div>';
+    
+        print '<span><br>Please '.CONTACT_HEURIST_TEAM.' - to request a mapping for each of the undefined record types.</span>';
+        
+        print '<script>window.hWin.HEURIST4.msg.showMsgErr("Warning: '.$tot_erros
+            .' errors were encountered. Please scan the log to see what problems have been encountered. '
+            .'Since we depend on a third party things can change, which may throw out our synchronisation. '
+            .'Please submit a bug report (Settings > Bug report) if you think there is something wrong with the Zotero import.");</script>';
     }
 
     if(count($unresolved_pointers)>0){
