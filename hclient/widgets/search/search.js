@@ -781,9 +781,11 @@ $.widget( "heurist.search", {
             
             function __onSelectRectypeFilter(event, data){
                    var selval = data.item.value;
-                   that.select_rectype_filter.val(selval);
-                   that.input_search.val('t:'+selval);
-                   that._doSearch(true);
+                   if(selval>0){
+                       that.select_rectype_filter.val(selval);
+                       that.input_search.val('t:'+selval);
+                       that._doSearch(true);
+                   }
                    return false;
             }            
             
