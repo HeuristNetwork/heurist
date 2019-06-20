@@ -102,22 +102,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <script type="text/javascript" src="<?php echo PDIR;?>external/vis/dist/vis.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/vis/dist/vis.css" />
 
-
-<!--
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/select_imagelib.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editSymbology.js"></script>
-
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
-<link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
--->
-<!-- Shape file converting 
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/shapefile/stream.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/shapefile/shapefile.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>external/js/shapefile/dbf.js"></script>
--->
-
 <style>
     .ui-map-document { background-image: url('<?php echo PDIR;?>hclient/assets/mapdocument.png') !important;}
     .ui-map-layer { background-image: url('<?php echo PDIR;?>hclient/assets/maplayer.png') !important;}
