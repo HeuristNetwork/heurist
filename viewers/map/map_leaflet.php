@@ -353,7 +353,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <div class="ui-layout-north" id="mapToolbarDiv" style="display: block !important; height: 30px; z-index:999;">
 
             <span id="map-settingup-message" style="padding-left:1em;line-height:2em;color:red">
-                EXPERIMENTAL
+                Setting up map ...
             </span>
 
             <div id="map_limit_warning" style="border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold; color:red; padding:8px; display:none;">
