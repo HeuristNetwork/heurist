@@ -843,6 +843,8 @@ window.hWin.HEURIST4.ui = {
                      return Number(window.hWin.HEURIST4.rectypes.counts[a])<Number(window.hWin.HEURIST4.rectypes.counts[b])?1:-1;
                 })
             }
+            
+            var isEmpty = true;
         
             for (var idx in rectypeList)
             {
@@ -853,6 +855,7 @@ window.hWin.HEURIST4.ui = {
                     {
                         if(useCounts && window.hWin.HEURIST4.rectypes.counts[rectypeID]<1) continue;
                         
+                        isEmpty = false;
                        
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
                         
@@ -869,6 +872,11 @@ window.hWin.HEURIST4.ui = {
                     }
                 }
             }
+            
+            if(useCounts && isEmpty){
+                window.hWin.HEURIST4.ui.addoption(selObj, 0, 'No records in the database')
+            }
+            
         }else{  //show rectypes separated by groups
         
             for (index in rectypes.groups){
