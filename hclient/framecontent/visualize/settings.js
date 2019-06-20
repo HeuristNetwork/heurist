@@ -194,22 +194,20 @@ function handleSettingsInUI() {
 
     
     $("#entityColor")
-        .addClass('ui-icon ui-icon-bullet')
-        .css({'font-size':'3.5em','color':getSetting(setting_entitycolor)})
-        .colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
-                
+        //.addClass('ui-icon ui-icon-bullet')
+        //.css({'font-size':'3.5em','color':getSetting(setting_entitycolor)})
+        .val(getSetting(setting_entitycolor))
+        .colorpicker({
+                        hideButton: false, //show button right to input
+                        showOn: "button",
+                        val:getSetting(setting_entitycolor)})
+        .on('change.color', function(event, color){
+            if(color){
                 putSetting(setting_entitycolor, color);
                 $(".background").attr("fill", color);
-                
-                $(el).css('color', color);
-                $(el).colpickHide();
-                
-                visualizeData();//tick();
-            }});
-    
+                visualizeData();
+            }
+        });
     //------------ LINKS ----------
 
     //$("input[name='linksMode'][value='" +getSetting(setting_linetype)+ "']").attr("checked", true);
@@ -250,38 +248,50 @@ function handleSettingsInUI() {
     $("#linksPathColor")
         //.addClass('ui-icon ui-icon-loading-status-circle')
         .css({'font-size':'1.8em','font-weight':'bold','color':getSetting(setting_linecolor)})
-        .colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
-                
+        .click(function(e){
+                window.hWin.HEURIST4.util.stopEvent(e);
+                $("#linksPathColor_inpt").colorpicker("showPalette");
+        });
+        
+    $("#linksPathColor_inpt")
+        .val(getSetting(setting_linecolor))
+        .colorpicker({
+                        hideButton: true, //show button right to input
+                        showOn: "both",
+                        val:getSetting(setting_linecolor)})
+        .on('change.color', function(event, color){
+            if(color){
                 putSetting(setting_linecolor, color);
-                //d3.selectAll("path").attr("stroke", color);
-                //d3.selectAll("polyline.link").attr("stroke", color);
                 $(".bottom-lines.link").attr("stroke", color);
+                $('#linksPathColor').css('color', color);
                 visualizeData();
-                
-                $(el).css('color', color);
-                $(el).colpickHide();
-            }});
+            }
+        });
+        
     $("#linksMarkerColor")
         .addClass('ui-icon ui-icon-triangle-1-e')
         .css({'color':getSetting(setting_markercolor)})
-        .colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
-                
+        .click(function(e){
+                window.hWin.HEURIST4.util.stopEvent(e);
+                $("#linksMarkerColor_inpt").colorpicker("showPalette");
+        });
+        
+    $("#linksMarkerColor_inpt")
+        .val(getSetting(setting_markercolor))
+        .colorpicker({
+                        hideButton: true, //show button right to input
+                        showOn: "focus",
+                        val:getSetting(setting_markercolor)})
+        .on('change.color', function(event, color){
+            if(color){
                 putSetting(setting_markercolor, color);
-                //d3.selectAll("marker").attr("fill", color);
                 $("marker").attr("fill", color);
+                $('#linksMarkerColor').css('color', color);
                 visualizeData();
-                
-                $(el).css('color', color);
-                $(el).colpickHide();
-            }});
+            }
+        });
     
-
+    
     //------------ LABELS ----------
     
     putSetting(setting_labels, 'on'); //always on
@@ -325,6 +335,7 @@ function handleSettingsInUI() {
         if(isLabelVisible) visualizeData();    
     });    
 
+    /* hidden in current version
     $("#textColor")
         //.addClass('ui-icon ui-icon-loading-status-circle')
         .css({'display':'inline-block','cursor':'pointer','font-size':'1em','font-weight':'bold',
@@ -342,7 +353,7 @@ function handleSettingsInUI() {
                 $(el).css('color', color);
                 $(el).colpickHide();
             }});
-
+    */
 
     
     if(settings.isDatabaseStructure){
@@ -550,286 +561,3 @@ function setLinkMode(formula) {
     visualizeData();
     _syncUI();
 }
-
-//-----------------------
-
-/* OLD JJ CODE
-function handleLineType() {
-    if(settings.showLineType) {
-        // Set line type setting in UI
-        $("#linetype option[value='" +getSetting(setting_linetype)+ "']").attr("selected", true);
-        
-        // Listens to linetype selection changes
-        $("#linetype").change(function(e) {
-            putSetting(setting_linetype, $("#linetype").val());
-            visualizeData();
-        });
-    }else{
-        $("#linetypeContainer").remove();
-    }
-}
-
-function handleLineLength() {
-    if(settings.showLineLength) {
-        // Set line length setting in UI
-        $("#linelength").val(getSetting(setting_linelength));
-        
-        // Listen to line length changes
-        $("#linelength").change(function() {
-            putSetting(setting_linelength, $(this).val());
-            visualizeData();
-        });
-    }else{
-        $("#linelengthContainer").remove();
-    }
-}
-        
-function handleLineWidth() {
-    if(settings.showLineWidth) {
-        // Set line width setting in UI
-        $("#linewidth").val(getSetting(setting_linewidth));
-        
-        // Listen to line width changes
-        $("#linewidth").change(function() {
-            putSetting(setting_linewidth, $(this).val());
-            visualizeData();
-        });
-    }else{
-        $("#linewidthContainer").remove();
-    }
-}
-
-function handleLineColor() {
-    if(settings.showLineColor) {
-        // Set line color setting in UI
-        $("#linecolor").css("background-color", getSetting(setting_linecolor));
-
-        // Listen to 'line color' selection changes
-        $('#linecolor').colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
-                
-                putSetting(setting_linecolor, color);
-                $(".bottom-lines.link").attr("stroke", color);
-        
-                $(el).css('background-color', color);
-                $(el).colpickHide();
-            }
-        });
-    }else{
-        $("#linecolorContainer").remove();
-    }
-}
-        
-function handleMarkerColor() {
-    if(settings.showMarkerColor) {
-        // Set marker color in UI
-        $("#markercolor").css("background-color", getSetting(setting_markercolor));
-        
-        // Listen to 'marker color' selection changes
-        $('#markercolor').colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
-                
-                putSetting(setting_markercolor, color);
-                $("marker").attr("fill", color);
-                
-                $(el).css('background-color', color);
-                $(el).colpickHide();
-            }
-        });
-    }else{
-        $("#markercolorContainer").remove();
-    }
-}
-
-function handleEntityRadius() {
-    if(settings.showEntityRadius) {
-        // Set entity radius setting in UI
-        $("#entityradius").val(getSetting(setting_entityradius));
-        
-        // Listen to line width changes
-        $("#entityradius").change(function() {
-            putSetting(setting_entityradius, $(this).val());
-            visualizeData();
-        });
-    }else{
-        $("#entityradiusContainer").remove();
-    }
-}
-
-function handleEntityColor() {
-    if(settings.showEntityColor) {
-        // Set count color in UI
-        $("#entitycolor").css("background-color", getSetting(setting_entitycolor));
-
-        // Listen to 'count color' selection changes
-        $('#entitycolor').colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
-                
-                putSetting(setting_entitycolor, color);
-                $(".background").attr("fill", color);
-                
-                $(el).css('background-color', color);
-                $(el).colpickHide();
-            }
-        });
-    }else{
-        $("#entitycolorSettings").remove();
-    }
-}
-
-function handleLabels() {
-    if(settings.showLabels) {
-        // Set checkbox value
-        if(getSetting(setting_labels) == "false") {
-            $("#labelCheckBox").prop("checked", false);
-        }
-        
-        // Listen to changes
-        $("#labelCheckBox").change(function(e) {
-            putSetting(`setting_labels`, $(this).is(':checked'));
-            visualizeData();
-        });
-    }else{
-        $("#labelCheckBox").remove();
-    }   
-}
-
-function handleTextSize() {
-    if(settings.showFontSize) {
-        // Set font size setting in UI
-        $("#fontsize").val(parseInt(getSetting(setting_fontsize)));
-        
-        // Listen to font size changes
-        $("#fontsize").change(function() {
-            putSetting(setting_fontsize, $(this).val()+"px");
-            $(".node text").css("font-size", getSetting(setting_fontsize), "important");
-            $(".node text").each(function() {
-                this.style.setProperty("font-size", getSetting(setting_fontsize), "important"); 
-            });
-      
-        });
-    }else{
-        $("#fontsizeContainer").remove();
-    }
-}
-
-function handleTextLength() {
-    if(settings.showTextLength) {
-        // Set text length in UI
-        $("#textlength").val(getSetting(setting_textlength));
-        
-        // Listen to text length changes
-        $("#textlength").change(function() {
-            putSetting(setting_textlength, $(this).val());
-            visualizeData();
-        });
-    }else{
-        $("#textlengthContainer").remove();
-    }
-}
-
-function handleTextColor() {
-    if(settings.showTextColor) {
-        // Set text color in UI
-        $("#textcolor").css("background-color", getSetting(setting_textcolor));
-
-        // Listen to 'count color' selection changes
-        $('#textcolor').colpick({
-            layout: 'hex',
-            onSubmit: function(hsb, hex, rgb, el) {
-                var color = "#"+hex; 
-                
-                putSetting(setting_textcolor, color);
-                $(".namelabel").attr("fill", color);
-                
-                $(el).css('background-color', color);
-                $(el).colpickHide();
-            }
-        });
-    }else{
-        $("#textcolorContainer").remove();
-    }
-}
-
-function handleFormula() {
-    if(settings.showFormula) {
-        // Set formula setting in UI
-        $("#formula option[value='" +getSetting(setting_formula)+ "']").attr("selected", true); 
-
-        // Listen to formula changes
-        $("#formula").change(function() {
-            putSetting(setting_formula, $(this).val());
-            visualizeData();
-        });
-    }else{
-        $("#formulaContainer").remove();
-    }
-}
-
-function handleFisheye() {
-    if(settings.showFishEye) {
-        // Set fish eye setting in UI
-        if(getSetting(setting_fisheye) === "true") {
-            $("#fisheye").prop("checked", true);
-        }
-        
-        // Listen to fisheye changes
-        $("#fisheye").change(function(e) {
-            putSetting(setting_fisheye, $(this).is(':checked'));
-            visualizeData();
-        });
-    }else{
-        $("#fisheyeContainer").remove();
-    }
-}
-
-
-function handleGravity() {
-    if(settings.showGravity) {
-        // Set gravity setting in UI
-        $("#gravity option[value='" +getSetting(setting_gravity)+ "']").attr("selected", true);
-
-        // Listen to gravity changes
-        $("#gravity").change(function() {
-            var gravity = $(this).val();
-            putSetting(setting_gravity,  gravity);
-            
-            // Update gravity impact on nodes
-            svg.selectAll(".node").attr("fixed", function(d, i) {
-                if(gravity == "aggressive") {
-                    d.fixed = false;
-                    return false;
-                }else{
-                    d.fixed = true;
-                    return true;
-                }
-            });
-            
-            visualizeData();
-        });
-    }else{
-        $("#gravityContainer").remove();
-    }
-}
-        
-function handleAttraction() {
-    if(settings.showAttraction) {
-        // Set attraction setting in UI
-        $("#attraction").val(getSetting(setting_attraction));
-        
-        // Listen to attraction changes
-        $("#attraction").change(function() {
-            putSetting(setting_attraction, $(this).val());
-            visualizeData();
-        });
-    }else{
-        $("#attractionContainer").remove();
-    }
-}
-*/

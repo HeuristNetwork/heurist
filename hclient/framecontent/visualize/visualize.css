@@ -56,7 +56,7 @@
 .colorblock {
     cursor: pointer;
     display: inline-block;
-    width: 18px;
+    /* width: 18px; */
     height: 18px;
     border: none; /*1px solid black; */
     vertical-align: middle;

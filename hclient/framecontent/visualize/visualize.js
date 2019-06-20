@@ -32,7 +32,7 @@
 * - jQuery          http://jquery.com/
 * - D3              http://d3js.org/
 * - D3 fisheye      https://github.com/d3/d3-plugins/tree/master/fisheye
-* - Colpick         http://colpick.com/plugin
+* - Colpicker       https://github.com/evoluteur/colorpicker
 *
 * Objects must have at least the following properties:
 * - id

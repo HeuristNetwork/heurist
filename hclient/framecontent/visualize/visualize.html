@@ -78,7 +78,9 @@
         <div id="setDivNodes" class="toolbar-section advanced" 
             style="display:none;padding-left:15px; min-width:190px">
             <label>Nodes</label>
-            <div id="entityColor" class="colorblock" style="margin-left:10px"  title="Color of nodes"></div>
+            <div class="colorblock" style="margin-left:10px;width:auto; title="Color of nodes"">
+                <input id="entityColor" style="width:0px;border:none"/></div>
+                
             <div id="setNodesMode" style="display:inline-block">
                 <button id="nodesMode0" name="nodesMode" value="linear" 
                     title="radius of nodes changes linearly">lin</button>
@@ -95,9 +97,10 @@
             style="display:none;border-left: solid 1px gray; min-width:214px;padding-right: 10px;">
             <label>Links</label>
 
-            <div id="linksPathColor" class="colorblock" title="Color of links" style="margin-left:10px">/</div>
+            <div id="linksPathColor" class="colorblock" title="Color of links" style="margin-left:10px">/<input id="linksPathColor_inpt" style="width:0px;border:none"/></div>
+            
             <div id="linksMarkerColor" class="colorblock" title="Color of markers/arrows on links"></div>
-
+            <div style="display:inline-block;width:0"><input id="linksMarkerColor_inpt" style="width:0px;border:none;"/></div>
             <div id="setLinksMode" style="display:inline-block">
                 <button id="linksMode0" name="linksMode" value="straight" 
                     title="link shape is straight">straight</button>
