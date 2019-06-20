@@ -452,70 +452,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             return btns;
     },    
     
-            
-/*    
-    //
-    //
-    //
-    _initEditorOnly: function(){
-        
-            //load detail type for given id
-            if(this.options.dty_ID>0){
-                    var request = {};
-                    request['dty_ID']  = this.options.dty_ID;
-                    request['a']          = 'search'; //action
-                    request['entity']     = this.options.entity.entityName;
-                    request['details']    = 'full';
-                    request['request_id'] = window.hWin.HEURIST4.util.random();
-                    
-                    //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
-
-                    var that = this;                                                
-                    
-                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                        function(response){
-                            if(response.status == window.hWin.ResponseStatus.OK){
-                                var recset = new hRecordSet(response.data);
-                                if(recset.length()>0){
-                                    that.updateRecordList(null, {recordset:recset});
-                                    that.addEditRecord( recset.getOrder()[0] );
-                                }
-                                else {
-                                    //nothing found - add new bookmark
-                                    that.addEditRecord(-1);
-                                }                            
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response);
-                                that.closeEditDialog();
-                            }
-                        });        
-                        
-            }else{
-                this.addEditRecord(-1);
-            }
-    },
-    
-    //overwritten    
-    _recordListGetFullData:function(arr_ids, pageno, callback){
-
-        var request = {
-                'a'          : 'search',
-                'entity'     : this.options.entity.entityName,
-                'details'    : 'list',
-                'pageno'     : pageno,
-                'db'         : this.options.database  
-                
-        };
-        var dty_DetailTypeGroupID = this.searchForm.find('#input_search_group').val();
-        if(dty_DetailTypeGroupID>0){
-            request['dty_DetailTypeGroupID'] = dty_DetailTypeGroupID;
-        }
-        
-        
-        request[this.options.entity.keyField] = arr_ids;
-        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
-    },
-*/    
+     
     //-----
     //
     // adding group ID value for new field type

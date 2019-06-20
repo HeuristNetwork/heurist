@@ -29,6 +29,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     
     is_new_icons: true,
 
+    usrPreferences:{},
+    defaultPrefs:{
+        width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+        height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
+        groups:'tab', //'list','select'
+//'id','ccode','addrec','filter','count','group','icon','edit','editstr','name',description','show','duplicate','fields','status'        
+        fields:['editstr','name'] 
+        },
+    
     //
     //                                                  
     //    
@@ -55,7 +64,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         this.options.height = 640;
 
         if(this.options.edit_mode=='editonly'){
-            this.options.edit_mode = 'editonly';
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
             this.options.width = 790;
@@ -171,25 +179,33 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.recordList.resultList( this.options.recordList );
         }
 
-        // init search header
-        this.options.onInitCompleted = function(){
+        this.searchFormList = this.element.find('.searchForm-list');
+        if(this.searchFormList.length>0){
+            this.options.searchFormList =  this.searchFormList;
+        }
+        this.options.ui_params = this.getUiPreferences();
+        this.options.onInitCompleted =  function(){
             that._loadData();
-        };
+            that.changeUI(event, that.options.ui_params);    
+        }
+        
         this.searchForm.searchDefRecTypes(this.options);
         
         if(this.options.use_cache){
            
             //if there are many widgets need to use base searchentityonfilter
            this._on( this.searchForm, {
-                "searchdefrectypesonfilter": this.filterRecordList  
+                "searchdefrectypesonfilter": this.filterRecordList,
+                "searchdefrectypesonuichange": this.changeUI  //grouping, visible columns  
            });
         }else{
             this._on( this.searchForm, {
                 "searchdefrectypesonresult": this.updateRecordList,
                 "searchdefrectypesonadd": function() { this.addEditRecord(-1); },
-                "searchdefrectypesonuichange": this.changeUI,  //grouping, visible columns
+                "searchdefrectypesonuichange": this.changeUI  //grouping, visible columns
                 });
         }
+        
         
         
         return true;
@@ -351,52 +367,11 @@ console.log(response);
         return this._cachedRecordset;
     },
     
-    //
-    //
-    //
-    _initEditorOnly: function(){
-        
-            //load user for given record id
-            if(this.options.rty_ID>0){
-                    var request = {};
-                    request['rty_ID']  = this.options.rty_ID;
-                    request['a']          = 'search'; //action
-                    request['entity']     = this.options.entity.entityName;
-                    request['details']    = 'full';
-                    request['request_id'] = window.hWin.HEURIST4.util.random();
-                    
-                    //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
-
-                    var that = this;                                                
-                    
-                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                        function(response){
-                            if(response.status == window.hWin.ResponseStatus.OK){
-                                var recset = new hRecordSet(response.data);
-                                if(recset.length()>0){
-                                    that.updateRecordList(null, {recordset:recset});
-                                    that.addEditRecord( recset.getOrder()[0] );
-                                }
-                                else {
-                                    //nothing found - add new bookmark
-                                    that.addEditRecord(-1);
-                                }                            
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response);
-                                that.closeEditDialog();
-                            }
-                        });        
-                        
-            }else{
-                this.addEditRecord(-1);
-            }
-    }
-
     //----------------------
     //
     //
     //
-    , _recordListItemRenderer:function(recordset, record){
+    _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
@@ -540,7 +515,8 @@ console.log(response);
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         // close on addition of new record in select_single mode    
-        if(this._currentEditID<0 && this.options.select_mode=='select_single'){
+        //this._currentEditID<0 && 
+        if(this.options.select_mode=='select_single'){
             
                 this._selection = new hRecordSet();
                 //{fields:{}, order:[recID], records:[fieldvalues]});
@@ -571,5 +547,54 @@ console.log(response);
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },
+    
+    getUiPreferences:function(){
+        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
+        /*if(this.usrPreferences.width<600) this.usrPreferences.width=600;
+        if(this.usrPreferences.height<300) this.usrPreferences.height=300;
+        if (this.usrPreferences.width>this.defaultPrefs.width) this.usrPreferences.width=this.defaultPrefs.width;
+        if (this.usrPreferences.height>this.defaultPrefs.height) this.usrPreferences.height=this.defaultPrefs.height;*/
+        return this.usrPreferences;
+    },
+    
+    saveUiPreferences:function(new_params){
+        
+        if(new_params){
+            var params = this.getUiPreferences();
+            
+            params['fields'] = new_params['fields']; 
+            params['groups'] = new_params['groups']; 
+        
+            window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
+        }
+        return true;
+    },
+    
+    //
+    // update ui and call save prefs
+    //
+    changeUI: function( event, params ){
+        
+        if(this.options.edit_mode=='editonly') return;
+        
+        params['tabheight'] = this.searchForm.searchDefRecTypes('changeUI');
+        
+        var iheight = 40+(params['tabheight']>0?params['tabheight']:0);
+        
+        this.searchForm.css({'height':iheight});
+        this.recordList.css({'top':iheight});     
+
+        if(params['groups']=='list'){
+            this.recordList.css({'left':'171px'});
+            this.searchFormList.css({'top':this.recordList.css('top')}).show();
+        }else{
+            this.searchFormList.hide();
+            this.recordList.css('left',0);
+        }
+        
+        
+        this.saveUiPreferences( params );
+        
+    }
     
 });

@@ -780,7 +780,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else 
         if(action == "menu-profile-info"){
             window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', 
-                {edit_mode:'editonly', usr_ID: window.hWin.HAPI4.currentUser['ugr_ID']});
+                {edit_mode:'editonly', rec_ID: window.hWin.HAPI4.currentUser['ugr_ID']});
         }else 
         if(action == "menu-profile-users"){ //for admin only
             window.hWin.HEURIST4.ui.showEntityDialog('sysUsers');

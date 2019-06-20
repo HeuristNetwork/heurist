@@ -78,10 +78,14 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
     color: blue !important;
     font-weight:bold !important;
     border: 1.5px solid blue !important;
-    border-bottom: none !important;
+    border-bottom: 1px solid #edf5ff !important;
 }
 .yui-skin-sam .yui-navset .yui-nav{
     border: none !important;
+}
+.banner > h2{
+    text-transform: uppercase;
+    padding: 10px 16px;   
 }
 </style>
 
@@ -114,13 +118,13 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 <?php
 if(@$_REQUEST['popup']!=1){
 ?>    
-            <div class="banner"><h2>Record Type and Field definitions</h2></div>
+            <div class="banner"><h2>Record (Entity) Types</h2></div>
 <?php
 }
 ?>    
-            <div id="page-inner" style="top:20;">
+            <div id="page-inner" style="top:20px;">
             
-                <h4 style="line-height:2ex;padding:5px 0">Use this function to build and extend your database by adding and modifying record (entity) types. 
+                <h4 style="line-height:2ex;padding:15px 0">Use this function to build and extend your database by adding and modifying record (entity) types. 
                 <br/>Allows the re-use of existing fields for consistency across entity types, as well as the creation of entirely new fields. 
                 <br/>New databases are pre-populated with a range of useful record types and term (category) vocabularies.</h4>
                 <!--
