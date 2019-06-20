@@ -91,7 +91,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 response.sysmsg = (window.hWin.HAPI4.currentUser['ugr_ID']==0)?0:1;
 
                 if(msg=='' || (needlogin && response.sysmsg==0)){
-                    msg = msg + 'It appears you are not logged in or your session has expired. Please reload the page to log in again';
+                    msg = msg + top.HR('Session expired');
                     show_login_dlg = true;
                 }else if(response.sysmsg==0){
                     msg = msg + 'You must be logged in';    

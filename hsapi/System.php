@@ -806,7 +806,7 @@ error_log(print_r($_REQUEST, true));
             if($this->current_User && @$this->current_User['ugr_ID']>0){
                 foreach ($_SESSION as $db=>$session){
 
-                    $user_id = @$_SESSION[$db]['ugr_ID'] ?$_SESSION[$db]['ugr_ID'] :@$_SESSION[$db.'.heurist']['user_id'];
+                    $user_id = @$_SESSION[$db]['ugr_ID']; // ?$_SESSION[$db]['ugr_ID'] :@$_SESSION[$db.'.heurist']['user_id'];
                     if($user_id == $this->current_User['ugr_ID']){
                         if(strpos($db, HEURIST_DB_PREFIX)===0){
                             $db = substr($db,strlen(HEURIST_DB_PREFIX));
@@ -817,14 +817,11 @@ error_log(print_r($_REQUEST, true));
             }
             
             //host organization logo and url
-            $d1 = dirname(HEURIST_DIR); //base installation folder
-            
+            $host_logo = realpath(dirname(__FILE__)."/../../organisation_logo.jpg");
             $host_url = null;
-            $host_logo = $d1.'/organisation_logo.jpg';
             if(file_exists($host_logo)){
-                $d2 = dirname(HEURIST_BASE_URL);
-                $host_logo = $d2.'/organisation_logo.jpg';
-                $host_url = $d1.'/organisation_url.txt';
+                $host_logo = HEURIST_BASE_URL.'?logo=host';
+                $host_url = realpath(dirname(__FILE__)."/../../organisation_url.txt");
                 if(file_exists($host_url)){
                     $host_url = file_get_contents($host_url);   
                 }else{
@@ -1079,14 +1076,14 @@ error_log(print_r($_REQUEST, true));
         if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes 
             session_id($_COOKIE['heurist-sessionid']);
             @session_start();
-            
+
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
                 $time = time() + 30*24*60*60;
                 $session_id = $_COOKIE['heurist-sessionid'];
-                $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https ); 
+                $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https ); //start_my_session
 if($cres==false){                    
-    error_log('CANNOT UPDATE COOKIE '.$session_id);                
+    error_log('CANNOT UPDATE COOKIE '.$session_id.'   '.$this->dbname_full);                
 }
             }
             
@@ -1094,7 +1091,7 @@ if($cres==false){
         } else {   //session does not exist - create new one and save on cookies
             @session_start();
             //$session_id = session_id();
-            //setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https ); //create new session
+            //setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https ); //create new session - REM
         }
         
 //        @session_start();
@@ -1125,7 +1122,7 @@ if($cres==false){
     private function login_verify( $user ){
         
         $reload_user_from_db = false; 
-        $h3session = $this->dbname_full.'.heurist';
+        //$h3session = $this->dbname_full.'.heurist';
         
         if( is_array($user) ){  //user info already found (see login) - need reset session
             $reload_user_from_db = true;            
@@ -1136,6 +1133,7 @@ if($cres==false){
             
             $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
             
+            /*
             if(!$userID){ //in h4 or h5 session user not found
                 // vsn 3 backward capability  - restore user id from old session
                 $userID = @$_SESSION[$h3session]['user_id'];
@@ -1143,7 +1141,7 @@ if($cres==false){
                     $_SESSION[$this->dbname_full]['keepalive'] = @$_SESSION[$h3session]['keepalive'];
                     $reload_user_from_db = true;
                 }
-            }
+            }*/
         }
         
         $islogged = ($userID != null);
@@ -1178,13 +1176,14 @@ if($cres==false){
                 $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
                 
                 
-                //vsn 3 backward capability
+                /* vsn 3 backward capability
                 $_SESSION[$h3session]['cookie_version'] = 1;
                 $_SESSION[$h3session]['user_id']       = $userID;
                 $_SESSION[$h3session]['user_name']     = $_SESSION[$this->dbname_full]['ugr_Name'];
                 $_SESSION[$h3session]['user_realname'] = $_SESSION[$this->dbname_full]['ugr_FullName'];
                 $_SESSION[$h3session]['user_access']   = $_SESSION[$this->dbname_full]['ugr_Groups'];
                 $_SESSION[$h3session]['keepalive']     = @$_SESSION[$this->dbname_full]['keepalive'];
+                */
                 
                 
                 //remove semaphore file
@@ -1209,7 +1208,7 @@ if($cres==false){
                 $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
                 $time = time() + 30*24*60*60;
                 $session_id = session_id();
-                $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https ); 
+                $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );  - REM
 if($cres==false){                    
 error_log('CANNOT UPDATE COOKIE '.$session_id);                
 }
@@ -1269,7 +1268,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                     //update cookie expire time
                     $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
                     $session_id = session_id();
-                    $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );
+                    $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );  //login
 
 //if($time==0)                    
 //error_log('login '.$session_type.'  '.$session_id);                
@@ -1312,7 +1311,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
 
         //clear     
         $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-        $cres = setcookie('heurist-sessionid', "", time() - 3600, '/', '', $is_https);
+        //$session_id = session_id();
+        $cres = setcookie('heurist-sessionid', '', time() - 3600, '/', '', $is_https);  //logout
         $this->current_User = null;
         session_destroy();
         
