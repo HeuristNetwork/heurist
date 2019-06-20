@@ -30,7 +30,7 @@ if [ -z $1 ]
 # Test download package is valid before we get half way and can't find it ...
 if ! curl -fs --range 0-100 https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null; then
         echo "The version parameter you supplied does not point to a Heurist installation package"
-        echo "Please check for the latest version at https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION"
+        echo "Please check for the latest version at HeuristNetwork.org/installation"
         echo "The parameter should be eg. h5.2.1.beta as given - DO NOT include the url path or .tar.bz2"
         echo "If you are not the root user, supply 'sudo' as the second argument eg.  "
         echo

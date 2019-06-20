@@ -42,7 +42,7 @@ if [ $rc -ne 0 ]
      then
         echo -e "\n\n"
         echo "The version parameter you supplied does not point to a Heurist installation package"
-        echo "Please check for the latest version at https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION"
+        echo "Please check for the latest version at HeuristNetwork.org/installation"
         echo "The parameter should be eg. h5.2.1.beta as given - DO NOT include the url path or .tar.bz2"
         exit
      fi
