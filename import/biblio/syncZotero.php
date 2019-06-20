@@ -626,6 +626,12 @@ if($step=="1"){  //first step - info about current status
                             }
 
                         }else{
+                            
+                            if($dt_type=='freetext' || $dt_type=='blocktext'){
+                                $value = html_entity_decode($value);
+                                //$val = htmlspecialchars_decode($val);
+                            }
+                            
                             $details["t:".$detail_id] = array("0"=>$value);
                         }
 
