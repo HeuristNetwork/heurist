@@ -194,7 +194,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 // The defined list of file extensions for FieldHelper indexing.
                 // For the moment keep this in as a restriction on file types which can be uploaded
                 // Unlike indexing, we add the user-defined set to the default set
-                $mediaExts = "jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff, ".
+                $mediaExts = "pdf,jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff, ".
                     "mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,htm,html,xhtml,ppt,pptx,zip,gzip,tar,"
                     .$mediaExts; // default set to allow
                 $mediaExts = implode(',',array_unique(explode(',',$mediaExts)));

@@ -33,7 +33,7 @@ function getMediaFolders($mysqli) {
     
     // The defined list of file extensions for FieldHelper indexing.
     if($row1[1]==null){
-        $mediaExts = "jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,".
+        $mediaExts = "pdf,jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,".
         "aif,aiff,mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,".
         "htm,html,xhtml,ppt,pptx,zip,gzip,tar";
     }else{
