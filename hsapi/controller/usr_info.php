@@ -40,20 +40,24 @@
         if( $res>0 ){ //if logged id verify that session info (especially groups) is up to date
             //if exists file with userid it means need to reload system info
             $reload_user_from_db = (@$_SESSION[$system->dbname_full()]['need_refresh']==1);
+            
             $const_toinit = true;
-            if(!$reload_user_from_db){
+            if(!$reload_user_from_db){ //check for flag file to force update user (user rights can be changed by admin)
                 $const_toinit = false;
                 $system->initPathConstants(@$_REQUEST['db']);  
                 $fname = HEURIST_FILESTORE_DIR.$res;
                 $reload_user_from_db = file_exists($fname);
             }
-                
+            
             if($reload_user_from_db){
                 $system->init(@$_REQUEST['db'], false, $const_toinit); //session and constant are defined already
                 $res = $system->getCurrentUserAndSysInfo();
             }else{
                 $res = true;
             }
+        }else{
+            //logged off
+            $res = array("currentUser"=>array('ugr_ID'=>0,'ugr_FullName'=>'Guest'));
         }
     
     }else if($action=='usr_log'){
@@ -68,7 +72,7 @@
         }
         
         
-    } else if (false && $action == "save_prefs"){ //save preferences into session (without db)
+    } else if (false && $action == "save_prefs"){ //NOT USED save preferences into session (without db)
 
         if($system->verify_credentials(@$_REQUEST['db'])>0){
             user_setPreferences($system, $_REQUEST);

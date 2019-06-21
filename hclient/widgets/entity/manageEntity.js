@@ -174,6 +174,7 @@ $.widget( "heurist.manageEntity", {
                 '<div class="ent_wrapper">'
                         +'<div class="ent_wrapper" style="width:320px">'
                         +    '<div class="ent_header searchForm"/>'     
+                        +    '<div class="ent_content_full searchForm-list" style="display:none;width:170px"/>'
                         +    '<div class="ent_content_full recordList"/>'
                         +'</div>'
                         +'<div class="ent_wrapper" style="left:321px">'
@@ -603,6 +604,47 @@ $.widget( "heurist.manageEntity", {
     _recordListHeaderRenderer:function(){
         //TO EXTEND        
         return '';
+    },
+    
+    //
+    //
+    //
+    _initEditorOnly: function(){
+        
+            //load user for given record id
+            if(this.options.rec_ID>0){
+                    var request = {};
+                    request[this.options.entity.tablePrefix+'_ID']  = this.options.rec_ID;
+                    request['a']          = 'search'; //action
+                    request['entity']     = this.options.entity.entityName;
+                    request['details']    = 'full';
+                    request['request_id'] = window.hWin.HEURIST4.util.random();
+                    
+                    //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
+
+                    var that = this;                                                
+                    
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                        function(response){
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                var recset = new hRecordSet(response.data);
+                                if(recset.length()>0){
+                                    that.updateRecordList(null, {recordset:recset});
+                                    that.addEditRecord( recset.getOrder()[0] );
+                                }
+                                else {
+                                    //nothing found - add new bookmark
+                                    that.addEditRecord(-1);
+                                }                            
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                                that.closeEditDialog();
+                            }
+                        });        
+                        
+            }else{
+                this.addEditRecord(-1);
+            }
     },
     
     //

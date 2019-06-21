@@ -321,7 +321,7 @@ class DbSysUsers extends DbEntityBase
                         
                         $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $group_role);
                         
-                        $fname = HEURIST_FILESTORE_DIR.$ugr_ID;
+                        $fname = HEURIST_FILESTORE_DIR.$ugr_ID;   //save special semaphore file to trigger user refresh for other users
                         fileSave('X',$fname);  //add to group ???
                     }
                     

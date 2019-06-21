@@ -129,7 +129,7 @@ $.widget( "heurist.app_timemap", {
         // init map on frame load
         this._on( this.mapframe, {
                 load: function(){
-                    //that.loadanimation(false);
+                    that.loadanimation(false);
                     this.recordset_changed = true;
                     this._refresh();
                 }
@@ -154,6 +154,8 @@ $.widget( "heurist.app_timemap", {
             if( this.mapframe.attr('src') ){  //frame already loaded
                 this._initmap();
             }else {
+                
+                this.loadanimation(true);
                 
                 var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
                 if(mapdocument>0){

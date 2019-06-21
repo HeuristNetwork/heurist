@@ -277,7 +277,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         function ___set_menu_item_visibility(idx, item, is_showhide){
 
-                var lvl = $(item).attr('data-user-admin-status'); //level of access by workgroup membership
+                var lvl_user = $(item).attr('data-user-admin-status'); //level of access by workgroup membership
                 
                 var lvl_exp = $(item).attr('data-user-experience-level');  //level by ui experience
                 
@@ -285,9 +285,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 
                 var item = $(item).is('li')?$(item):$(item).parent();
                 
-                if(lvl>=0){
-                    //@todo lvl=1 is_admin
-                    is_visible = (lvl_exp!=3) && window.hWin.HAPI4.has_access(lvl);
+                if(lvl_user>=0){
+                    //@todo lvl_user=1 is_admin
+                    is_visible = (lvl_exp!=3) && window.hWin.HAPI4.has_access(lvl_user);
                     var elink = $(item).find('a');
                     if(is_showhide){
                         if(is_visible){
@@ -557,7 +557,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         if(link && link.attr('data-nologin')!='1'){
             //check if login
-            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});
+            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});  //not used
         }else{
             window.hWin.HEURIST4.msg.showDialog(url, options);
         }        
@@ -780,7 +780,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else 
         if(action == "menu-profile-info"){
             window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', 
-                {edit_mode:'editonly', usr_ID: window.hWin.HAPI4.currentUser['ugr_ID']});
+                {edit_mode:'editonly', rec_ID: window.hWin.HAPI4.currentUser['ugr_ID']});
         }else 
         if(action == "menu-profile-users"){ //for admin only
             window.hWin.HEURIST4.ui.showEntityDialog('sysUsers');

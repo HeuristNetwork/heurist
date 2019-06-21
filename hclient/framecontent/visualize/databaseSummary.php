@@ -112,8 +112,8 @@ A:link {
         <script type="text/javascript" src="<?php echo PDIR;?>external/d3/fisheye.js"></script>
 
         <!-- Colpick -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/colpick/colpick.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/colpick/colpick.css">
+        <script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
+        <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
         <!-- Visualize plugin -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/visualize/settings.js"></script>

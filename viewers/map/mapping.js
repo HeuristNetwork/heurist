@@ -1706,6 +1706,8 @@ $.widget( "heurist.mapping", {
         //   legend: [basemaps,search,mapdocs|onedoc]
         this.mapManager.updatePanelVisibility(__splitval(params['legend']));
         
+        $('#map-settingup-message').text('EXPERIMENTAL');
+        
         // basemap: name of initial basemap
         if(params['basemap']){
             this.mapManager.loadBaseMap( params['basemap'] );  

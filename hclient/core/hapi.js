@@ -363,7 +363,9 @@ function hAPI(_db, _oninit) { //, _currentUser
                         if(response.data.currentUser) {
                             window.hWin.HAPI4.setCurrentUser(response.data.currentUser);   
                             //trigger global event ON_CREDENTIALS
-                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+                            if(response.data.currentUser.ugr_ID>0){
+                                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
+                            }
                         }
                     
                         //since currentUser is up-to-date - use client side method
@@ -374,7 +376,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                 }
                 
                 //MODE1 verify locally only
-                if(true){
+                if(false){
                     __verify(); //verification on server temporarely disabled
                 
                 }else{

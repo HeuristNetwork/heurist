@@ -26,6 +26,12 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
 
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
+        
+        if(this.options.edit_mode=='editonly'){
+            //this.options.select_mode = 'manager';
+            this.options.layout_mode = 'editonly';
+            this.options.width = 600;
+        }else
         if(this.options.select_mode!='manager'){
             this.options.edit_mode = 'none';
             this.options.width = 300;
@@ -51,6 +57,11 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
 
         if(!this._super()){
             return false;
+        }
+
+        if(this.options.edit_mode=='editonly'){
+            this._initEditorOnly();
+            return;
         }
 
         var that = this;
@@ -134,6 +145,29 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             this.recordList.resultList('updateResultSet', data.recordset, data.request);
             this._selectAndEditFirstInRecordset(data.recordset);
         }
+    },
+    
+    //
+    // update list after save (refresh)
+    //
+    _afterSaveEventHandler: function( recID, fieldvalues ){
+        
+console.log('>>>>>');        
+        
+        if(this.options.edit_mode=='editonly'){
+            
+                //this.options.select_return_mode='recordset';
+            
+                this._selection = new hRecordSet();
+                //{fields:{}, order:[recID], records:[fieldvalues]});
+                this._selection.addRecord(recID, fieldvalues);
+                this._currentEditID = null;
+                this._selectAndClose();
+                //this.closeDialog(true); //force to avoid warning
+                return;        
+        }
+                
+        this._super( recID, fieldvalues );
     },
     
     //

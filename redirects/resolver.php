@@ -37,7 +37,6 @@
 // TODO: write /redirects/resolver.php as an XML feed with parameterisation for a human-readable view
 // TODO: the following is a temporary redirect to viewRecord.php which renders a human-readable form
 
-
 $recid = null;         
 if(@$_REQUEST['recID']){
     $recid = $_REQUEST['recID'];    

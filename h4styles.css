@@ -537,9 +537,13 @@ display: none;
 height: 16px;
 width: 16px;
 float: right;
-}*/
-
-
+#selectable .ui-selecting { background: #FECA40; }
+}
+.ui-selecting{
+    border-color: #62A7F8;
+}
+, .ui-selected
+*/
 div .selected, div .selected:hover{
     background: -moz-linear-gradient(center top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent;
     background: -webkit-gradient(linear, left top, left bottom, from(#E6F8FD), to(#BEE4F8));

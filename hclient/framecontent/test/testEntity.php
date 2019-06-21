@@ -48,6 +48,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypes.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefRecTypes.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypeGroups.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypes.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefDetailTypes.js"></script>
 
@@ -132,8 +133,9 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         $btn_datepicker.on( { click: function(){$datepicker.datepicker( "show" ); }} );
                         $('#inputdiv').find('.ui-datepicker-trigger').hide();
                 
-                //open at once testEntity(true);
-                testEditSymbology();
+                //open at once 
+                testEntity(true);
+                //testEditSymbology();
             }
 
             function testImportStruc(){
@@ -428,12 +430,12 @@ print $targetPath.'<br>';
                             <option value="SysUsers" >Users +</option>
                             <option value="SysGroups">Workgroups +</option>
                             <option value="UsrTags">Tags +</option>
-                            <option value="RecUploadedFiles" selected>Uploaded Files +</option>
+                            <option value="RecUploadedFiles">Uploaded Files +</option>
                             <option value="UsrReminders" >Reminders</option>
                             <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
                             <option value="Records">Saved Searches</option>
-                            <option value="DefRecTypes">Record Types</option>
+                            <option value="DefRecTypes" selected>Record Types</option>
                             <option value="DefRecTypeGroups">Record Type Groups+</option>
                             <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
@@ -492,7 +494,7 @@ print $targetPath.'<br>';
                     <button onclick="testTags()">embedded select tags</button>
                     <button onclick="testImportStruc()">Import structure</button>
                     
-                    <button onclick="testEditSymbology()">Edit symbology</button>
+                    <!-- button onclick="testEditSymbology()">Edit symbology</button -->
                 </div>
                 
             </div>

@@ -22,6 +22,7 @@ regional['en'] = {
     'Design database': 'Design database',
     'Import data': 'Import data',
     'Please log in':'Please Log in or Register to use all features of Heurist.',
+    'Session expired':'It appears you are not logged in or your session has expired. Please reload the page to log in again',
     'Please contact to register':'Please contact database owner to register and use all features of Heurist.',
     'My Searches':'My Filters',
     'My Bookmarks':'My Bookmarks',

@@ -90,6 +90,15 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             this.element.find('#input_sort_type_div').hide();
         }
         
+        
+        this.btn_ui_config = this.element.find('#btn_ui_config')
+                //.css({'width':'6em'})
+                .button({label: window.hWin.HR("Configure UI"), showLabel:false, 
+                        icon:"ui-icon-gear", iconPosition:'end'});
+        if(this.btn_ui_config){
+            this._on( this.btn_ui_config, {
+                    click: this.configureUI });
+        }
        
         if($.isFunction(this.options.onInitCompleted)){
             this.options.onInitCompleted.call();
@@ -98,8 +107,112 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         //this.startSearch();            
     },  
     
+    configureUI: function(){
+
+        var that = this;
+
+        var popele = that.element.find('#div_ui_config');
+        
+        popele.find('#input_ui_group').val(this.options.ui_params['groups']);
+        
+        popele.find( ".toggles" ).controlgroup( {
+            direction: "vertical"
+        } ).sortable();       
+        
+        popele.find('.ui-checkboxradio-icon').css('color','black');
+
+        popele.find('input[type="checkbox"]').prop('checked', '');
+        $(this.options.ui_params['fields']).each(function(idx,val){
+            popele.find('input[name="'+val+'"]').prop('checked', 'checked');    
+        });
+        popele.find( ".toggles" ).controlgroup('refresh');
+        
+        var $dlg_pce = null;
+
+        var btns = [
+            {text:window.hWin.HR('Apply'),
+                click: function() { 
+                    
+                    var fields = [];
+                    popele.find('input[type="checkbox"]:checked').each(function(idx,item){
+                        fields.push($(item).attr('name'));
+                    })
+                    
+                    //get new parameters
+                    var params = { 
+                        groups: popele.find( '#input_ui_group' ).val(),
+                        fields: fields
+                    };
+                    
+                    that.options.ui_params = params;
+                    //trigger event to redraw list
+                    that._trigger( "onuichange", null, params );
+                   
+                    $dlg_pce.dialog('close'); 
+            }},
+            {text:window.hWin.HR('Cancel'),
+                click: function() { $dlg_pce.dialog('close'); }}
+        ];            
+
+        $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
+            window:  window.hWin, //opener is top most heurist window
+            title: window.hWin.HR('Configure User Interface'),
+            width: 420,
+            height: 550,
+            element:  popele[0],
+            //resizable: false,
+            buttons: btns
+        });
+
+
+
+    },
+
     //
     //
+    //
+    changeUI: function(){
+        
+        var params = this.options.ui_params;
+        
+        var sel_group = this.element.find('#sel_group');
+        var tabheight = 0;
+        
+        if(params['groups']=='tab'){
+            sel_group.show();
+            tabheight = sel_group.height();
+        }else{
+            sel_group.hide();
+        }
+        if(params['groups']=='select'){
+            this.element.find('#div_search_group').show();            
+        }else{
+            //that.element.find('#div_search_group').hide();
+        
+            //activate tab of list according to selected group
+            var grpid =  this.input_search_group.val();
+            
+            if(grpid=='any'){
+                //select first after "any groupd"
+                //this.input_search_group.val(this.input_search_group.first('option').attr('value')).change();
+                this.input_search_group[0].selectedIndex = 1;
+                this.input_search_group.change();
+                grpid =  this.input_search_group.val();
+            }
+            
+            var tab = this.selectGroup.find('li[data-grp="'+grpid+'"]');
+            var tabidx = this.selectGroup.find('ul').children().index(tab);
+            this.selectGroup.tabs('option','active', tabidx);
+            
+            this.searchList.find('li').removeClass('ui-state-active');
+            this.searchList.find('li[value="'+grpid+'"]').addClass('ui-state-active');
+        }
+        
+        return tabheight;
+    },
+    
+    //
+    //  recreate groups listings - selector, tab and list
     //
     reloadGroupSelector: function (rectypes){
         
@@ -108,6 +221,109 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         window.hWin.HEURIST4.ui.createRectypeGroupSelect(this.input_search_group[0],
                                             [{key:'any',title:'any group'}], rectypes);
         this._on(this.input_search_group,  { change:this.startSearch });
+        
+
+        this.searchList = null;
+        if(this.options.searchFormList){
+            this.options.searchFormList.empty();
+            this.searchList = $('<ol>').css({'list-style-type': 'none'}).appendTo(this.options.searchFormList)
+        }
+        
+        this.selectGroup = this.element.find('#sel_group');
+        
+        this.selectGroup.empty();
+        var ul = $('<ul>').appendTo(this.selectGroup);
+        var that = this;
+
+        
+        this.input_search_group.find('option').each(function(idx,item){
+            if(idx>0){
+                var grpid = $(item).attr('value');
+                $('<li data-grp="'+grpid+'"><a href="#grp'+grpid+'">'+$(item).text()
+                            +'</a><span class="ui-icon ui-icon-pencil" title="Edit Group" '
+                            +'style="vertical-align: -webkit-baseline-middle;visibility:hidden;font-size:0.8em"/></li>')
+                            .appendTo(ul);
+                $('<div id="grp'+grpid+'"/>').appendTo(that.selectGroup);
+                
+                if(that.searchList!=null){
+                    $('<li class="ui-widget-content" value="'+grpid+'"><span style="width:133px;display:inline-block">'+$(item).text()
+                            +'</span><span class="ui-icon ui-icon-pencil" '
+                            +' title="Edit Group" style="display:none;float:right;font-size:0.8em;position:relative"/></li>')  
+                        .css({margin: '2px', padding: '0.2em', cursor:'pointer'}) 
+                        .appendTo(that.searchList);    
+                }
+            }
+        });//end each
+        
+        this.selectGroup.tabs();
+        this.selectGroup.find('ul').css({'background':'none','border':'none'});
+        this.selectGroup.css({'background':'none','border':'none',bottom:'20px'});
+        this.selectGroup.find('li').hover(function(event){
+                var ele = $(event.target);
+                if(!ele.is('li')) ele = ele.parent();
+                ele.find('.ui-icon-pencil').css('visibility','visible');
+            }, function(event){
+                var ele = $(event.target);
+                if(!ele.is('li')) ele = ele.parent();
+                ele.find('.ui-icon-pencil').css('visibility','hidden'); //parent().
+            });
+
+        
+        this._on( this.selectGroup, { tabsactivate: function(event, ui){
+            //var active = this.selectGroup.tabs('option','active');
+            //console.log(ui.newTab.attr('data-grp'));
+            this.input_search_group.val( ui.newTab.attr('data-grp') ).change();
+        }  });
+
+        
+        this._on( this.selectGroup.find('.ui-icon-pencil'), {
+            click: function(event){
+                window.hWin.HEURIST4.ui.showEntityDialog('defRecTypeGroups', 
+                    {edit_mode:'editonly', rec_ID: $(event.target).parent().attr('data-grp'), //select_mode:'single', 
+                    onselect:function(event, data){
+console.log(data);                        
+                        /*
+                        $('#selected_div').empty();
+                        var s = 'Selected ';
+                        if(data && data.selection)
+                        for(i in data.selection){
+                            if(i>=0)
+                                s = s+data.selection[i]+'<br>';
+                        }
+                        $('#selected_div').html(s);
+                        */
+                    }                    
+                    } );
+            }
+        });
+        
+        if(this.searchList!=null){
+            
+            this.searchList.find('li').hover(function(event){
+                var ele = $(event.target);
+                if(!ele.is('li')) ele = ele.parent();
+                ele.addClass('ui-state-hover');
+                ele.find('.ui-icon-pencil').show();
+            }, function(event){
+                var ele = $(event.target);
+                if(!ele.is('li')) ele = ele.parent();
+                ele.removeClass('ui-state-hover');
+                ele.find('.ui-icon-pencil').hide();
+            });
+            
+            //sortable().
+            this.searchList.selectable( {selected: function( event, ui ) {
+                    that.searchList.find('li').removeClass('ui-state-active');
+                    $(ui.selected).addClass('ui-state-active');
+                    that.input_search_group.val( $(ui.selected).attr('value') ).change();
+                }}).css({width:'100%',height:'100%'});
+            
+            /*
+            this._on( searchList, { change: function(event){
+                this.input_search_group.val( $(event.target).val() ).change();
+            }});
+            */
+        }
         
     },
     

@@ -37,6 +37,13 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] ){
 }else if (@$_REQUEST['file'] || @$_REQUEST['thumb'] || @$_REQUEST['rurl']){
     header( 'Location: hsapi/dbaccess/file_download.php?'.$_SERVER['QUERY_STRING'] );
     return;
+}else if (@$_REQUEST['logo']){
+    $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.jpg");
+    if(file_exists($host_logo)){
+        header("Content-type: image/jpg");
+        readfile($host_logo);
+        return;
+    }
 }
 
 

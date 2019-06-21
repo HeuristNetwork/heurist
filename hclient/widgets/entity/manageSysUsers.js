@@ -320,45 +320,8 @@ console.log('ON_CRED???');
 
         
         return true;
-    },
-    
-    _initEditorOnly: function(){
-        
-            //load user for given record id
-            if(this.options.usr_ID>0){
-                    var request = {};
-                    request['ugr_ID']  = this.options.usr_ID;
-                    request['a']          = 'search'; //action
-                    request['entity']     = this.options.entity.entityName;
-                    request['details']    = 'full';
-                    request['request_id'] = window.hWin.HEURIST4.util.random();
-                    
-                    //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
-
-                    var that = this;                                                
-                    
-                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                        function(response){
-                            if(response.status == window.hWin.ResponseStatus.OK){
-                                var recset = new hRecordSet(response.data);
-                                if(recset.length()>0){
-                                    that.updateRecordList(null, {recordset:recset});
-                                    that.addEditRecord( recset.getOrder()[0] );
-                                }
-                                else {
-                                    //nothing found - add new bookmark
-                                    that.addEditRecord(-1);
-                                }                            
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response);
-                                that.closeEditDialog();
-                            }
-                        });        
-                        
-            }else{
-                this.addEditRecord(-1);
-            }
     }
+    
 
     //----------------------
     //

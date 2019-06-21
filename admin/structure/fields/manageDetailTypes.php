@@ -71,6 +71,20 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 .yui-dt-highlighted{
 	cursor:auto !important;
 }
+.yui-nav .selected a{
+    background: #edf5ff !important;
+    color: blue !important;
+    font-weight:bold !important;
+    border: 1.5px solid blue !important;
+    border-bottom: 1px solid #edf5ff !important;
+}
+.yui-skin-sam .yui-navset .yui-nav{
+    border: none !important;
+}
+.banner > h2{
+    text-transform: uppercase;
+    padding: 10px 16px;   
+}
 		</style>
         
         <script src="manageDetailTypes.js"></script>
@@ -106,11 +120,11 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 <?php
 if(@$_REQUEST['popup']!=1){
 ?>    
-	<div class="banner"><h2>Manage Field Types</h2></div>
+	<div class="banner"><h2>Field (Record Detail) Types</h2></div>
 <?php
 }
 ?>    
-	<div id="page-inner">
+	<div id="page-inner" style="top:35px;">
 
 <!--   height:auto; max-height:500px;
 				<div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges"
