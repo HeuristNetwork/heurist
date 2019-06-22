@@ -202,8 +202,8 @@ function hMapPublish( _options )
         }
         
         //parameters for controls
-        layout_params['notimeline'] = $(popupelement).find("#notimeline").is(':checked');
-        layout_params['nocluster'] = $(popupelement).find("#nocluster").is(':checked');
+        layout_params['notimeline'] = !$(popupelement).find("#use_timeline").is(':checked');
+        layout_params['nocluster'] = !$(popupelement).find("#use_cluster").is(':checked');
         layout_params['editstyle'] = $(popupelement).find("#editstyle").is(':checked');
         //layout_params['extent'] =  @todo
         if($(popupelement).find("#basemap").is(':checked') && options.mapwidget.basemaplayer_name!='MapBox'){//MapBox is default
