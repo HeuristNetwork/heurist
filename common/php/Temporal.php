@@ -428,14 +428,14 @@ function temporalToSimpleRange($value){
 
     $is_greg_or_julian = ((!@$tDate["CLD"]) || 
                             strtolower($tDate["CLD"])=='gregorian' || strtolower(@$tDate["CLD"])=='julian');
+    $res = null;
     
     switch ($tDate["TYP"]){
             case 's'://simple
             case 'f'://fuzzy
                 if (@$tDate['DAT']){
-                    $res = array(removeLeadingYearZeroes($tDate['DAT'], $is_greg_or_julian, true),'','','','');
-                }else{
-                    $res = null;
+                    $res = removeLeadingYearZeroes($tDate['DAT'], $is_greg_or_julian, true);
+                    if($res!=null) $res = array($res,'','','','');
                 }
                 break;
             case 'c'://carbon
@@ -443,8 +443,10 @@ function temporalToSimpleRange($value){
                 break;
             case 'p'://probability range
                 $res = array('','','','','');            
+                $is_valid = false;
                 if (@$tDate['PDB']){
                     $res[0] = removeLeadingYearZeroes($tDate['PDB'], $is_greg_or_julian, true); 
+                    $is_valid = $is_valid || ($res[0]!=null && $res[0]!='');
                 }
                 if (@$tDate['TPQ']){
                     $res[1] = removeLeadingYearZeroes($tDate['TPQ'], $is_greg_or_julian, true); 
@@ -454,8 +456,10 @@ function temporalToSimpleRange($value){
                 }
                 if (@$tDate['PDE']){
                     $res[3] = removeLeadingYearZeroes($tDate['PDE'], $is_greg_or_julian, true); 
+                    $is_valid = $is_valid || ($res[3]!=null && $res[3]!='');
                 }
                 break;
+                if(!$is_valid) $res = null;
     }
     
     return $res;  
