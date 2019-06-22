@@ -78,10 +78,11 @@ external/php/phpZotero.php (114-121) support proxy settings
 
             
             
-2019-06-19 UploadHandler.php: 
+2019-06-19 ../external_h5/UploadHandler.php, search for "Artem Osmakov": 
         limited upload to Heurist File storage and allowed types are
-        jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff,            
+        pdf,jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff,            
         mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,dbf,shx,htm,html,xhtml,ppt,pptx,zip,gzip,tar
+        Also add to end of the invalid file type message: "Please ask Heurist team to add if required."
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
