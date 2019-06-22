@@ -215,7 +215,7 @@ function executeSmartyTemplate($system, $params){
     
     //verify that template has new features
     //need to detect $heurist->getRecord - if it is not found this is old version - show error message
-    if(strpos($content, '$heurist->getRecord(')===false){
+    if(false && strpos($content, '$heurist->getRecord(')===false){
             
            $error = '<p>To improve performance we have made some small changes to the report template specifications (July 2016).</p>'. 
                     '<p>Please edit the report and add  <b>{$r = $heurist->getRecord($r)}</b><br/>'
