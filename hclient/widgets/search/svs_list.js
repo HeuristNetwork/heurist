@@ -1917,7 +1917,7 @@ $.widget( "heurist.svs_list", {
         this.embed_dialog.find("#code-textbox3").val(query);
         
         this.embed_dialog.find("#code-textbox").val('<iframe src=\'' + query +
-        '\' width="100%" height="700"" frameborder="0"></iframe>');
+        '\' width="100%" height="700" frameborder="0"></iframe>');
         
         window.hWin.HEURIST4.msg.showElementAsDialog({
             element: this.embed_dialog[0],
