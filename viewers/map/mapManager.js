@@ -295,6 +295,7 @@ function hMapManager( _options )
         
             }
             
+            mapdoc_treeview.find('.empty_msg').remove();
             var tree = mapdoc_treeview.fancytree("getTree");
             tree.getRootNode().addChildren( [$res] ).setSelected(true);
         
@@ -338,9 +339,7 @@ function hMapManager( _options )
         tree_container.empty();    
         
         
-        if(treedata.length>0){    
-        
-            if($.isFunction($('body').fancytree)){
+        if($.isFunction($('body').fancytree)){
      
             tree_container.fancytree({  //addClass('tree-facets').
                                     //extensions: ["filter"],
@@ -505,8 +504,8 @@ function hMapManager( _options )
         }
         
         
-        }else{
-            tree_container.html('<span style="font-style:italic">none</span>');
+        if(treedata.length==0){    
+            tree_container.append('<span class="empty_msg" style="font-style:italic">none</span>');
         }
         that.setHeight();
     
@@ -845,8 +844,8 @@ function hMapManager( _options )
         // mode - all|loaded|visible
         // 
         getMapDocuments: function( mode ) {
-            var tree = mapdoc_treeview.fancytree("getTree");
             var res = [];
+            var tree = mapdoc_treeview.fancytree("getTree");
             tree.visit(function(node){
                 if(node.data.type=='mapdocument'){
                     if((mode=='visible'&& node.isSelected()) ||

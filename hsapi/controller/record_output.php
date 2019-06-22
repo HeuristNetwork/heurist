@@ -1461,10 +1461,10 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
                         $date_start = temporalToSimple($value);
                     }else if($dty_ID==DT_END_DATE){
                         $date_end = temporalToSimple($value);
-                    }else{
+                    }else if($value!=null){
                         //parse temporal
                         $ta = temporalToSimpleRange($value);
-                        if($value!=null) $timevalues[] = $ta;
+                        if($ta!=null) $timevalues[] = $ta;
                     }
                 }else if($dty_ID==DT_SYMBOLOGY){
                     $symbology = json_decode($value,true);                    
