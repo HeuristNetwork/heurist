@@ -208,9 +208,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         //host logo and link    
         if(window.hWin.HAPI4.sysinfo.host_logo){
             
-            $('<div style="height:40px;background:lightgray;padding:0 4px;float:right;">'
+            $('<div style="height:40px;background:none;padding-left:4px;float:right;">'
                 +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
-                +'" target="_blank" style="text-decoration: none;color: black;">'
+                +'" target="_blank" style="text-decoration: none;">'
                         +'<label>hosted by: </label>'
                         +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
                         +'" height="40" align="center"></a></div>')
