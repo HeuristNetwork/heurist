@@ -173,11 +173,13 @@ define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 define("HEURIST_UNITED_TERMS", true);
 
 //---------------------------------
+// update in parallel in jquery-file-upload/server/php/Uploadhandler.php
+define('HEURIST_ALLOWED_EXT', 
+'jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff,pdf,'
+.'mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,htm,html,xhtml,ppt,pptx,zip,gzip,tar');
+
 
 /** RECORD TYPE DEFINITIONS */
-
-// NOTE: These duplicate those in initialise.php
-
 $rtDefines = array(
     // Standard core record types (HeuristCoreDefinitions: DB = 2)
     'RT_RELATION' => array(2, 1),
