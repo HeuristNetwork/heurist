@@ -116,6 +116,7 @@ function hAPI(_db, _oninit) { //, _currentUser
             request.notes = null; //unset to reduce traffic
         }
 
+        //window.hWin.HEURIST4.ui.onInactiveReset();
 
         //remove remark to debug 
         request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
@@ -327,7 +328,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                     return; 
                 }
                 
-                function __verify(){
+                function __verify( is_expired ){
                     
                         if(window.hWin.HAPI4.has_access(requiredLevel)){ 
                               callback( password_entered );  
@@ -347,6 +348,8 @@ function hAPI(_db, _oninit) { //, _currentUser
                                     sGrpName = ' "'+window.hWin.HAPI4.sysinfo.db_usergroups[requiredLevel]+'"';
                                } 
                                response.message += ' as administrator of group #'+requiredLevel+sGrpName;
+                            }else if(requiredLevel==0 && is_expired){
+                               response.message = ''; 
                             }
                             
                             window.hWin.HEURIST4.msg.showMsgErr(response, true);
@@ -360,8 +363,16 @@ function hAPI(_db, _oninit) { //, _currentUser
                             window.hWin.HAPI4.sysinfo = response.data.sysinfo;
 //!!!!  assign baseURL window.hWin.HAPI4.baseURL = window.hWin.HAPI4.sysinfo['baseURL'];
                         }
+
+                        var is_expired = false;
                         if(response.data.currentUser) {
+                            
+                            var old_id = window.hWin.HAPI4.user_id();
+                            
                             window.hWin.HAPI4.setCurrentUser(response.data.currentUser);   
+                            
+                            is_expired = (old_id>0 && window.hWin.HAPI4.user_id()==0);
+                            
                             //trigger global event ON_CREDENTIALS
                             if(response.data.currentUser.ugr_ID>0){
                                 $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
@@ -369,7 +380,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                         }
                     
                         //since currentUser is up-to-date - use client side method
-                        __verify();
+                        __verify( is_expired );
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response, true);
                     }
@@ -1152,15 +1163,32 @@ prof =Profile
         * @param user
         */
         setCurrentUser: function(user){
+            
             if(user){
-                //window.hWin.HEURIST4.ui.onInactiveStart(3000, function(){console.log('inactive');});
-                
                 that.currentUser = user;
             }else{
-                //window.hWin.HEURIST4.ui.onInactiveReset( true );
-                
                 that.currentUser = _guestUser;
             }
+
+            if(that.currentUser['ugr_ID']>0){
+                var lt = window.hWin.HAPI4.sysinfo['layout'];
+                if(!(lt=='Beyond1914' ||  lt=='UAdelaide' ||
+                    lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
+
+                    window.hWin.HEURIST4.ui.onInactiveStart(300000, function(){  //5 minutes 
+                        //check that still logged in
+                        window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
+                            //ok we are still loggen in
+                            window.hWin.HEURIST4.ui.onInactiveReset(); //start again    
+                        }, 0);
+                        
+                    });
+                }
+            }else{
+                //terminate completely
+                window.hWin.HEURIST4.ui.onInactiveReset( true );
+            }
+            
             if(window.hWin.HEURIST4.rectypes) window.hWin.HEURIST4.rectypes.counts = null;
         },
         
