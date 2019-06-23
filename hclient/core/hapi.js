@@ -1153,10 +1153,15 @@ prof =Profile
         */
         setCurrentUser: function(user){
             if(user){
+                //window.hWin.HEURIST4.ui.onInactiveStart(3000, function(){console.log('inactive');});
+                
                 that.currentUser = user;
             }else{
+                //window.hWin.HEURIST4.ui.onInactiveReset( true );
+                
                 that.currentUser = _guestUser;
             }
+            if(window.hWin.HEURIST4.rectypes) window.hWin.HEURIST4.rectypes.counts = null;
         },
         
         currentUserRemoveGroup: function(groupID, isfinal){

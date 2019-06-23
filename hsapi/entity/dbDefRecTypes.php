@@ -371,16 +371,81 @@ class DbDefRecTypes extends DbEntityBase
     }    
     
     //
+    // returns where conditions for record ownership/visibility
+    //
+    private function _getRecordOwnerConditions($ugr_ID){
+        
+        $from = '';
+        $wg_ids = array();
+        if($ugr_ID>0){
+            
+            $currentUser = $this->system->getCurrentUser();
+            
+            if($currentUser['ugr_ID']==$ugr_ID){
+                if(@$currentUser['ugr_Groups']){
+                    $wg_ids = array_keys($currentUser['ugr_Groups']);
+                    array_push($wg_ids, $ugr_ID);
+                }else{
+                    $wg_ids = $this->system->get_user_group_ids();    
+                }
+            }
+        }
+        array_push($wg_ids, 0); // be sure to include the generic everybody workgroup    
+        
+        $where2 = '';
+        $where2_conj = '';
+        if($ugr_ID!=2){ //by default always exclude "hidden" for not database owner
+                    //$where2 = '(not r0.rec_NonOwnerVisibility="hidden")';
+                
+                $where2 = '(r0.rec_NonOwnerVisibility in ("public","pending"))';
+                if ($ugr_ID>0){ //logged in
+                    
+                        //if there is entry for record in usrRecPermissions current user must be member of allowed groups
+                        $from = ' LEFT JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID ';
+                        
+                        $where2 = $where2
+                            .' or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in ('
+                            .join(',', $wg_ids).')))';
+                }
+                    
+                $where2_conj = ' or ';
+        }else{
+            $wg_ids = array(); //all groups for admin    
+        }        
+        if($ugr_ID>0 && count($wg_ids)>0){
+            $where2 = '( '.$where2.$where2_conj.'r0.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+        }
+        return array($from, '(not r0.rec_FlagTemporary)'.($where2?' and ':'').$where2);
+    }
+    
+    //
     //
     //
     public function counts(){
 
         $res = null;
                 
-        if(@$this->data['mode']=='record_count'){
-            $query = 'SELECT d.rty_ID, count(r.rec_ID) FROM defRecTypes d '
-            .'LEFT OUTER JOIN Records r ON r.rec_RectypeID=d.rty_ID AND r.rec_FlagTemporary=0'
-            .' GROUP BY d.rty_ID';
+        if(@$this->data['mode']=='record_count')
+        {
+            
+            $query = 'SELECT r0.rec_RecTypeID, count(r0.rec_ID) FROM Records r0 ';
+/*        
+        LEFT OUTER JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID  
+WHERE
+ (not r0.rec_FlagTemporary) and ( (r0.rec_NonOwnerVisibility in ("public","pending")) 
+ or (r0.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in (14,0))) 
+ or r0.rec_OwnerUGrpID in (14,0) ) GROUP BY r0.rec_RecTypeID            
+            $query = 'SELECT d.rty_ID, count(r0.rec_ID) FROM defRecTypes d ';
+            $where = ' LEFT OUTER JOIN Records r0 ON r0.rec_RectypeID=d.rty_ID AND ';
+*/              
+            if(@$this->data['ugr_ID']>=0){
+                $conds = $this->_getRecordOwnerConditions($this->data['ugr_ID']);
+                $query = $query . $conds[0];
+                $where = $where . $conds[1];      
+            }else{
+                $where = $where . '(not r0.rec_FlagTemporary)';
+            }
+            $query = $query . ' WHERE '.$where . ' GROUP BY r0.rec_RecTypeID';
           
            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
         }

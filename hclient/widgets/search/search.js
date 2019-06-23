@@ -815,7 +815,8 @@ $.widget( "heurist.search", {
                         var request = {
                                 'a'       : 'counts',
                                 'entity'  : 'defRecTypes',
-                                'mode'    : 'record_count'
+                                'mode'    : 'record_count',
+                                'ugr_ID'  : window.hWin.HAPI4.user_id()
                                 };
                                 
                         window.hWin.HAPI4.EntityMgr.doRequest(request, 
