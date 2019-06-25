@@ -817,7 +817,8 @@ window.hWin.HEURIST4.ui = {
                             && !window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.rectypes.counts));
         var useGroups = (options.useGroups!==false);
         var useIds = (options.useIds===true);
-
+        var useCheckboxes = (options.useCheckboxes===true);
+ 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
         useHtmlSelect = (useHtmlSelect===true);
@@ -846,7 +847,7 @@ window.hWin.HEURIST4.ui = {
                      if(isNaN(window.hWin.HEURIST4.rectypes.counts[a])) window.hWin.HEURIST4.rectypes.counts[a] = 0;
                      if(isNaN(window.hWin.HEURIST4.rectypes.counts[b])) window.hWin.HEURIST4.rectypes.counts[b] = 0;
                      return Number(window.hWin.HEURIST4.rectypes.counts[a])<Number(window.hWin.HEURIST4.rectypes.counts[b])?1:-1;
-                })
+                });
             }
             
             var isEmpty = true;
@@ -943,6 +944,11 @@ window.hWin.HEURIST4.ui = {
                         }
                         if(useIds){
                             $(opt).attr('entity-id', rectypeID);
+                        }
+                        if(useCheckboxes){
+                            var r = window.hWin.HEURIST4.util.findArrayIndex(rectypeID, options.marked);
+                            $(opt).attr('rt-checkbox', (r>=0)?1:0);
+                            $(opt).attr('data-id', rectypeID);
                         }
                         
                         
@@ -2669,6 +2675,14 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     }
     if( $(item.element).hasClass('required')) {
         wrapper.addClass('required');  
+    }
+    
+    var rt_checkbox = item.element.attr( "rt-checkbox" );
+    if(rt_checkbox>=0){
+        $('<span style="float:left;padding-right:2px" '
+                + ' data-id="'+item.element.attr( 'data-id' )
+                + '" class="rt-checkbox ui-icon ui-icon-check-'+(rt_checkbox==1?'on':'off')+'"/>')
+          .appendTo( wrapper );    
     }
     
     var icon_url = item.element.attr( "icon-url" );

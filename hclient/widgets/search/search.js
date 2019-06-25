@@ -34,6 +34,8 @@ $.widget( "heurist.search", {
         btn_visible_newrecord: true, //show add record button
         btn_visible_save: false,
 
+        btn_entity_filter: true,
+        
         // before this widget was generic, however search on main page became very distinctive and got
         // lot of additional ui comonents. thus, we have the specific search widget and this one remains for main ui
         // for dialog mode - remove into separate widget
@@ -49,7 +51,10 @@ $.widget( "heurist.search", {
     _total_count_of_curr_request: 0, //total count for current request (main and rules) - NOT USED
 
     query_request:null,
+    
+    buttons_by_entity:[], //
 
+    
     // the constructor
     _create: function() {
 
@@ -118,6 +123,60 @@ $.widget( "heurist.search", {
             sz_search_padding = '20px';
         }
 
+        //------------------------------------------- filter by entities
+        var is_vis = (window.hWin.HAPI4.get_prefs_def('entity_btn_on','0')=='1');
+        
+        this.div_entity_btns   = $('<div>').addClass('heurist-entity-filter-buttons')
+                                .css({ 'float':'left','padding':'5px '+sz_search_padding,
+                                    'visibility':is_vis?'visible':'hidden',
+                                    'height':is_vis?'auto':'10px'})
+                                .appendTo( this.element );
+        //quick filter by entity
+        this.btns_by_entity = $('<button>').button({label: window.hWin.HR("Show list of entities to filter"), 
+                showLabel:false, icon:'ui-icon-gear'})
+        .css({'font-size':'0.9em'})        
+        .appendTo(this.div_entity_btns);
+        
+        this.btns_by_entity_options = {select_name:'select_btns_by_entity', 
+                useIcons: true, useCounts:true, useGroups:true, useCheckboxes:true, 
+                ancor: this.btns_by_entity, 
+                marked: this.buttons_by_entity,
+                onmarker: function (ele){
+                    var is_checked = !ele.hasClass('ui-icon-check-on');
+                    var rty_ID = ele.attr('data-id');
+                    
+                    ele.removeClass('ui-icon-check-'+(is_checked?'off':'on'))
+                        .addClass('ui-icon-check-'+(is_checked?'on':'off'));                    
+                    
+                    var idx = window.hWin.HEURIST4.util.findArrayIndex(rty_ID, this.buttons_by_entity);
+                    if(is_checked){
+                        if(idx<0) this.buttons_by_entity.push(rty_ID);    
+                    }else{
+                        if(idx>=0) this.buttons_by_entity.splice(idx, 1);    
+                    }
+                    this._redraw_buttons_by_entity();
+                },
+                onselect: function __onSelectRectypeFilter(event, data){
+                               var selval = data.item.value;
+                               if(selval>0){
+                                   that.select_rectype_filter.val(selval);
+                                   that.input_search.val('t:'+selval);
+                                   that._doSearch(true);
+                               }
+                               return false;
+                           }};            
+        
+        if(!this.select_btns_by_entity){
+            this._openSelectRectypeFilter(this.btns_by_entity_options, true);
+        }
+        
+        this._on( this.btns_by_entity, {  click: function(){
+                this._openSelectRectypeFilter( this.btns_by_entity_options );
+                return false;
+        } });
+
+         
+        //------------------------------------------- filter inputs                        
 
         // Search functions container
         //'height':'100%', 'float':'left'   , 'min-width':sz_search
@@ -153,7 +212,7 @@ $.widget( "heurist.search", {
 
         
         this.input_search = $( "<textarea>" )
-        .css({'margin-top': '20px','margin-right':'0.2em', 'height':'2.5em', 'max-height':'6.6em', //'height':'2.5em', 'max-height':'67px', 
+        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'6.6em', //'height':'2.5em', 'max-height':'67px', 
             'max-width':sz_input, 'padding':'0.4em', 
             'min-width':'10em', 'width':sz_input, 'padding-right':'18px' }) 
         .addClass("text ui-widget-content ui-corner-all")
@@ -177,14 +236,31 @@ $.widget( "heurist.search", {
             window.open('context_help/advanced_search.html','_blank');
         } });
         
-        
+        //quick filter by entity
         this.filter_by_entity = $('<span title="Show list of entities to filter">'
         +'entity types <span class="ui-icon ui-icon-triangle-1-s"></span></span>')                                          //
         .css({'text-decoration':'none','color':'gray','padding-left':'16px','outline':0, cursor:'pointer'})
         .appendTo(div_search_help_links);
         
+        this.filter_by_entity_options = {select_name:'select_rectype_filter', 
+                useIcons: true, useCounts:true, useGroups:false, 
+                ancor:this.filter_by_entity, 
+                onselect: function __onSelectRectypeFilter(event, data){
+                               var selval = data.item.value;
+                               if(selval>0){
+                                   that.select_rectype_filter.val(selval);
+                                   that.input_search.val('t:'+selval);
+                                   that._doSearch(true);
+                               }
+                               return false;
+                           }};            
+        
+        if(!this.select_rectype_filter){
+            this._recreateSelectRectypeFilter(this.filter_by_entity_options);
+        }
+        
         this._on( this.filter_by_entity, {  click: function(){
-                this._openSelectRectypeFilter();
+                this._openSelectRectypeFilter( this.filter_by_entity_options );
                 return false;
         } });
         
@@ -367,7 +443,7 @@ $.widget( "heurist.search", {
 
         var linkGear = $('<a>',{href:'#', 
         title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
-        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-65px','height':'18px','opacity':'0.5','margin-top': '0.2em'})
+        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-65px','opacity':'0.5','margin-top': '0.6em'})
         .addClass('ui-icon ui-icon-filter-form') //was ui-icon-gear
         .appendTo(this.div_buttons);
         this._on( linkGear, {  click: this.showSearchAssistant });
@@ -582,6 +658,9 @@ $.widget( "heurist.search", {
             + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(e, data) { that._onSearchGlobalListener(e, data) } );
             
+            
+        this.div_search.find('.div-table-cell').css('vertical-align','top');
+
         this._refresh();
 
         /* search on load
@@ -594,6 +673,82 @@ $.widget( "heurist.search", {
         }*/
 
     }, //end _create
+             
+    //
+    //
+    //
+    _redraw_buttons_by_entity: function(is_init){
+        
+        if(is_init===true){
+            this.buttons_by_entity = window.hWin.HAPI4.get_prefs_def('entity_filter_btns','');
+            
+            if(window.hWin.HEURIST4.util.isempty(this.buttons_by_entity)){
+                //get 5 top most used rectypes
+                this.buttons_by_entity = [];
+                var sorted = [];
+                for(var rty_ID in window.hWin.HEURIST4.rectypes.counts)
+                if(rty_ID>0){
+                    sorted.push({'id':rty_ID, 'cnt':window.hWin.HEURIST4.rectypes.counts[rty_ID]});
+                }
+                sorted.sort(function(a,b){
+                     return Number(a['cnt'])<Number(b['cnt'])?1:-1;
+                });
+                for(var idx=0; idx<sorted.length && idx<5; idx++){
+                    this.buttons_by_entity.push(sorted[idx]['id']);    
+                }
+            }else{
+                this.buttons_by_entity = this.buttons_by_entity.split(',');    
+            }
+            
+            
+            
+        }
+        
+        
+        this.div_entity_btns.find('.entity-filter-button').remove();
+        
+        var idx=0;
+        while(idx<this.buttons_by_entity.length){
+            
+            var rty_ID = this.buttons_by_entity[idx];
+            
+            if(rty_ID>0 && window.hWin.HEURIST4.rectypes.names[rty_ID]) {           
+            
+                $('<button>').button({label: '<span class="truncate" style="max-width:100px;display:inline-block;">'
+                        + window.hWin.HEURIST4.rectypes.names[rty_ID] + '</span>'
+                        + ((window.hWin.HEURIST4.rectypes.counts[rty_ID]>0)
+                           ?'<span style="float:right;font-size:0.8em;padding:2px">('+window.hWin.HEURIST4.rectypes.counts[rty_ID]+')</span>':''), 
+                    showLabel:true})  //icon:window.hWin.HAPI4.iconBaseURL + rty_ID + '.png'
+                    .attr('data-id', rty_ID)
+                    .css({'font-size':'0.9em'})        
+                    .addClass('entity-filter-button')
+                    .insertBefore(this.btns_by_entity); //appendTo(this.div_entity_btns);
+                
+                this._on( this.div_entity_btns.find('.entity-filter-button'), {  click: function(e){
+                       var selval = $(e.target).is('button')?$(e.target):$(e.target).parent('button');
+                       selval = selval.attr('data-id');
+                       if(selval>0){
+                           this.select_rectype_filter.val(selval);
+                           this.input_search.val('t:'+selval);
+                           this._doSearch(true);
+                       }
+                } });
+            
+                idx++;
+            }else{
+                //remove wrong(removed) rectypes
+                is_init = false;
+                this.buttons_by_entity.splice(idx,1);
+            }
+            
+        }//for
+        
+        if(is_init!==true){
+            //save in user preferences
+            window.hWin.HAPI4.save_pref('entity_filter_btns', this.buttons_by_entity.join(','));
+        }
+            
+    },
 
     
    //
@@ -727,26 +882,9 @@ $.widget( "heurist.search", {
             this.select_rectype_addrec.hSelect('hideOnMouseLeave', this.btn_select_rt);
 
         }
+        
         if(!this.select_rectype_filter){
-            
-            /*
-            this.select_rectype_filter_grp = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, {useIcons: true});
-            if(this.select_rectype_filter_grp.hSelect("instance")!=undefined){
-                this.select_rectype_filter_grp.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
-            }
-            var that = this;
-            
-            function __onSelectRectypeFilter(event, data){
-                   var selval = data.item.value;
-                   //that.select_rectype_filter.val(selval);
-                   that.input_search.val('t:'+selval);
-                   that._doSearch(true);
-                   return false;
-            }            
-            
-            this.select_rectype_filter_grp.hSelect({change: __onSelectRectypeFilter});
-            */
-            this._recreateSelectRectypeFilter();
+            this._recreateSelectRectypeFilter( this.filter_by_entity_options );
         }
             
         var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
@@ -767,44 +905,65 @@ $.widget( "heurist.search", {
        
         this._showhide_input_prompt();
     },
-    
-    _recreateSelectRectypeFilter: function(){
+
+    //
+    //
+    //
+    _recreateSelectRectypeFilter: function(opts){
             var that = this;
 
             var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
             
-            this.select_rectype_filter = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, 
-                        {useIcons: true, useCounts:true, useGroups:false, useIds: (exp_level<2), });
-            if(this.select_rectype_filter.hSelect("instance")!=undefined){
-                this.select_rectype_filter.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
+            var select_rectype = opts['select_name'];
+            
+            opts.useIds = (exp_level<2);
+            
+            this[select_rectype] = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, opts);
+                        
+            if(this[select_rectype].hSelect("instance")!=undefined){
+                var menu = this[select_rectype].hSelect( "menuWidget" );
+                menu.css({'max-height':'450px'});                        
             }
             
-            function __onSelectRectypeFilter(event, data){
-                   var selval = data.item.value;
-                   if(selval>0){
-                       that.select_rectype_filter.val(selval);
-                       that.input_search.val('t:'+selval);
-                       that._doSearch(true);
-                   }
-                   return false;
-            }            
             
-            this.select_rectype_filter.hSelect({change: __onSelectRectypeFilter});
-            this.select_rectype_filter.hSelect('hideOnMouseLeave', this.filter_by_entity);
+            this[select_rectype].hSelect({change: opts.onselect});
+            this[select_rectype].hSelect('hideOnMouseLeave', opts.ancor);
     },
     
-    _openSelectRectypeFilter: function(){
+    _openSelectRectypeFilter: function( opts, is_init ){
+        
+                var select_rectype = opts['select_name'];
         
                 var that = this;
                 function __openSelect(){
                     
-                    that.select_rectype_filter.hSelect('open');
-                    that.select_rectype_filter.val(-1);
-                    that.select_rectype_filter.hSelect('menuWidget')
-                        .position({my: "left top", at: "left+10 bottom", of: that.filter_by_entity });
+                    that[select_rectype].hSelect('open');
+                    that[select_rectype].val(-1);
+                    that[select_rectype].hSelect('menuWidget')
+                        .position({my: "left top", at: "left+10 bottom-4", of: opts['ancor']});
             
-                    var ele = $(that.select_rectype_filter.hSelect('menuWidget')[0]);
+                    var menu = $(that[select_rectype].hSelect('menuWidget'));
+                    var ele = $(menu[0]);
                     ele.scrollTop(0);        
+                   
+                    if(opts.useCheckboxes && $.isFunction(opts.onmarker)){
+                        var spans = menu.find('span.rt-checkbox');
+                        that._off(spans,'click');
+                        that._on(spans,{'click':function(e){
+                            if($(event.target).is('span')){
+                                opts.onmarker.call(that, $(event.target) );
+                                window.hWin.HEURIST4.util.stopEvent(e);
+                            }}});
+                        /*
+                        menu.find('span.rt-checkbox').click(function(e){
+                            if($(event.target).is('span')){
+                                opts.onmarker.call(that, $(event.target) );
+                                window.hWin.HEURIST4.util.stopEvent(e);
+                            }
+                        });
+                        */
+                    }
+                    
                 }
             
                 if(!window.hWin.HEURIST4.rectypes.counts ||
@@ -825,9 +984,17 @@ $.widget( "heurist.search", {
                     
                                     window.hWin.HEURIST4.rectypes.counts = response.data;
                                     
-                                    that._recreateSelectRectypeFilter();
+                                    if(is_init==true){ //it applicable for entity filter buttons
+                                        that._redraw_buttons_by_entity(true);
+                                        opts.marked = that.buttons_by_entity;
+                                    }                                    
                                     
-                                    __openSelect();
+                                    that._recreateSelectRectypeFilter( opts );
+                                    
+                                    if(is_init!==true){
+                                        __openSelect();    
+                                    }
+                                    
                         
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -839,6 +1006,9 @@ $.widget( "heurist.search", {
                     __openSelect();
                 }    
     },
+        
+
+
 
     _showAdvancedAssistant: function(){
         //call Heurist vsn 3 search builder

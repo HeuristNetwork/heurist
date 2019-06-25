@@ -1028,6 +1028,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                 $('.heurist-bookmark-search').css('display',
                                     (request['bookmarks_on']=='1')?'inline-block':'none');
                             }
+                            if(prefs['entity_btn_on'] != request['entity_btn_on']){
+                                var is_vis = (request['entity_btn_on']=='1');
+                                $('.heurist-entity-filter-buttons').css({'visibility':
+                                    is_vis?'visible':'hidden',
+                                    'height':is_vis?'auto':'10px'});
+                            }
                             
                             $.each(request, function(key,value){
                                 window.hWin.HAPI4.currentUser['ugr_Preferences'][key] = value;    

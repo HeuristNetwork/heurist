@@ -311,7 +311,7 @@ $.widget( "heurist.svs_list", {
     //
     _saveTreeData: function( groupToSave, treeData, callback ){
 
-        var isPersonal = (groupToSave=="all" || groupToSave=="bookmark");
+        var isPersonal = (groupToSave=="all" || groupToSave=="bookmark" || groupToSave=="entity");
 
         if(!treeData){
             treeData = {};
@@ -345,7 +345,7 @@ $.widget( "heurist.svs_list", {
     },
 
     //
-    // redraw accordeon - list of workgroups, all, bookmarked
+    // redraw accordeon - list of workgroups, all, bookmarked, entity
     //
     _updateAccordeon: function(){
 
@@ -391,7 +391,7 @@ $.widget( "heurist.svs_list", {
                         //it returns null if leaf is not found
                         function __cleandata(data, level){
 
-                            if(level==0){ //this is top level  data['all'] && data['bookmark']
+                            if(level==0){ //this is top level  data['all'] && data['bookmark'] && data['entity']
                                 for(groupID in data){
                                     data[groupID] = __cleandata(data[groupID], level+1);
                                     if(data[groupID].was_cleaned==true){
@@ -476,7 +476,7 @@ $.widget( "heurist.svs_list", {
             this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'bookmark').addClass('svs-acordeon')
-                .addClass('heurist-bookmark-search')
+                .addClass('heurist-bookmark-search')  //need tp find from preferences
                 .css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
                 .append( this._defineHeader(window.hWin.HR('My Bookmarks'), 'bookmark'))
                 .append( this._defineContent('bookmark') ) );
@@ -488,6 +488,14 @@ $.widget( "heurist.svs_list", {
                 .append( this._defineHeader(window.hWin.HR('My Searches'), 'all'))
                 .append( this._defineContent('all') ));
 
+            this.helper_btm.before(
+                $('<div>')
+                .attr('grpid',  'entity').addClass('svs-acordeon')
+                //.addClass('heurist-bookmark-search')
+                .css('display', (window.hWin.HAPI4.get_prefs('entity_btn_on')=='1')?'block':'none')
+                .append( this._defineHeader(window.hWin.HR('Entity filters'), 'entity'))
+                .append( this._defineContent('entity') ) );
+                
                 
             var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
             for (var groupID in groups)
@@ -771,7 +779,7 @@ $.widget( "heurist.svs_list", {
 
     _defineHeader: function(name, domain){
 
-        if(domain=='all' || domain=='bookmark'){
+        if(domain=='all' || domain=='bookmark' || domain=='entity'){
             sIcon = 'user';
         }else if(domain=='dbs'){
             sIcon = 'database';
@@ -1029,7 +1037,7 @@ $.widget( "heurist.svs_list", {
                             
                             var newGroupID = node.tree.options.groupID;
                             var oldGroupID = mod_node.tree.options.groupID;
-                            var newGroupID_for_db = (newGroupID=='all' || newGroupID=='bookmark')
+                            var newGroupID_for_db = (newGroupID=='all' || newGroupID=='bookmark'|| newGroupID=='entity')
                                         ? window.hWin.HAPI4.currentUser.ugr_ID :newGroupID; 
 
 //console.log('move '+mod_node.key+'  '+mod_node.title+' from '+oldGroupID
@@ -1517,6 +1525,7 @@ $.widget( "heurist.svs_list", {
             treeData = {
                 all: { title: window.hWin.HR('My Searches'), folder: true, expanded: true, children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'all') },
                 bookmark:{ title: window.hWin.HR('My Bookmarks'), folder: true, expanded: true, children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'bookmark') }
+                //@todo entity:{ title: window.hWin.HR('Entity filters'), folder: true, expanded: true, children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'entity') }
             };
             if(window.hWin.HAPI4.is_admin()){
                 treeData['guests'] = { title: window.hWin.HR('Searches for guests'), folder: true, expanded: false, children: this._define_SVSlist(0) };
@@ -1547,7 +1556,7 @@ $.widget( "heurist.svs_list", {
     //
     /**
     * create list of saved searches for given user/group
-    * domain - all or bookmark
+    * domain - all or bookmark or entity
     */
     _define_SVSlist: function(ugr_ID, domain){
 
@@ -1556,15 +1565,23 @@ $.widget( "heurist.svs_list", {
         var res = [];
 
         //add predefined searches
-        if(ugr_ID == window.hWin.HAPI4.currentUser.ugr_ID){  //if current user domain may be all or bookmark
+        if(ugr_ID == window.hWin.HAPI4.currentUser.ugr_ID){  //if current user domain may be all or bookmark or entity
 
-            domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
+            if(domain=='entity'){
+                //push rectypes with top most record count
+                //@todo
+                res.push( { title:'Places', folder:false, url:'?q=t:12'} );
+                
+            }else{
+        
+                domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
-            var s_all = "?w="+domain+"&q=sortby:-m after:\"1 week ago\"&label=Recent changes";
-            var s_recent = "?w="+domain+"&q=sortby:-m&label=All records";
+                var s_all = "?w="+domain+"&q=sortby:-m after:\"1 week ago\"&label=Recent changes";
+                var s_recent = "?w="+domain+"&q=sortby:-m&label=All records";
 
-            res.push( { title: window.hWin.HR('Recent changes'), folder:false, url: s_all}  );
-            res.push( { title: window.hWin.HR('All (date order)'), folder:false, url: s_recent}  );
+                res.push( { title: window.hWin.HR('Recent changes'), folder:false, url: s_all}  );
+                res.push( { title: window.hWin.HR('All (date order)'), folder:false, url: s_recent}  );
+            }
         }
 
         //_NAME = 0, _QUERY = 1, _GRPID = 2

@@ -428,7 +428,7 @@ class DbDefRecTypes extends DbEntityBase
         if(@$this->data['mode']=='record_count')
         {
             
-            $query = 'SELECT r0.rec_RecTypeID, count(r0.rec_ID) FROM Records r0 ';
+            $query = 'SELECT r0.rec_RecTypeID, count(r0.rec_ID) as cnt FROM Records r0 ';
 /*        
         LEFT OUTER JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID  
 WHERE
@@ -445,7 +445,7 @@ WHERE
             }else{
                 $where = $where . '(not r0.rec_FlagTemporary)';
             }
-            $query = $query . ' WHERE '.$where . ' GROUP BY r0.rec_RecTypeID';
+            $query = $query . ' WHERE '.$where . ' GROUP BY r0.rec_RecTypeID'; // ORDER BY cnt DESC
           
            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
         }
