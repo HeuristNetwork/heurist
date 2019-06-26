@@ -78,26 +78,29 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         this.input_sort_type = this.element.find('#input_sort_type');
         this._on(this.input_sort_type,  { change:this.startSearch });
            
-        this.reloadGroupSelector();
                       
         if( this.options.import_structure ){
             //this.element.find('#div_show_already_in_db').css({'display':'inline-block'});    
             this.chb_show_already_in_db = this.element.find('#chb_show_already_in_db');
             this._on(this.chb_show_already_in_db,  { change:this.startSearch });
+            
+            this.options.simpleSearch = true;
         }
         if( this.options.simpleSearch){
             this.element.find('#div_search_group').hide();
             this.element.find('#input_sort_type_div').hide();
-        }
+        }else{
+            this.reloadGroupSelector();
         
         
-        this.btn_ui_config = this.element.find('#btn_ui_config')
-                //.css({'width':'6em'})
-                .button({label: window.hWin.HR("Configure UI"), showLabel:false, 
-                        icon:"ui-icon-gear", iconPosition:'end'});
-        if(this.btn_ui_config){
-            this._on( this.btn_ui_config, {
-                    click: this.configureUI });
+            this.btn_ui_config = this.element.find('#btn_ui_config')
+                    //.css({'width':'6em'})
+                    .button({label: window.hWin.HR("Configure UI"), showLabel:false, 
+                            icon:"ui-icon-gear", iconPosition:'end'});
+            if(this.btn_ui_config){
+                this._on( this.btn_ui_config, {
+                        click: this.configureUI });
+            }
         }
        
         if($.isFunction(this.options.onInitCompleted)){
@@ -108,7 +111,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
     },  
     
     configureUI: function(){
-
+        
         var that = this;
 
         var popele = that.element.find('#div_ui_config');
@@ -172,6 +175,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
     //
     //
     changeUI: function(){
+        
+        if( this.options.simpleSearch) return;
         
         var params = this.options.ui_params;
         
