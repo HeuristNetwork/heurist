@@ -1802,7 +1802,7 @@ $.widget( "heurist.mapping", {
         }
         if(matches.length>2){
             typeCode = matches[1];
-            if( (['m','pl','l','c','r']).indexOf(typeCode)>=0 ){
+            if( (['m','pl','l','c','r','p']).indexOf(typeCode)>=0 ){
                 wkt = matches[2];    
             }
         }else{

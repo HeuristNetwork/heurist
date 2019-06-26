@@ -29,7 +29,7 @@ function hMapLayer2( _options ) {
         //mapwidget:              
         //mapdoc_recordset: // recordset to retrieve values from rec_layer and rec_datasource
         
-        //rec_layer:       // record of type Heurist layer, it is needed for symbology
+        //rec_layer:       // record of type Heurist layer, it is needed for symbology and min/max zoom
         //rec_datasource:  // record of type map dataseource
 
         preserveViewport: true  

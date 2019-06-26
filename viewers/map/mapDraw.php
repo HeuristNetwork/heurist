@@ -251,6 +251,7 @@ console.log(el_name+'  '+is_checked);
                     mapping.mapping( 'drawLoadWKT', initial_wkt, true);
                
 //console.log('zoom '+zoom_with_delay);
+
                     if(zoom_with_delay){
                         setTimeout(function(){ mapping.mapping( 'drawZoomTo' ); }, 3000);
                     }
