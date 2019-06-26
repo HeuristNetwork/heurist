@@ -210,7 +210,8 @@ $.widget( "heurist.expertnation_nav", {
 
             //assign map for iframes
             $('.mapframe').prop('src', window.hWin.HAPI4.baseURL+
-                'viewers/map/map_leaflet.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&controls=none&nocluster=1');
+                'viewers/map/map.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&header=off&legend=off');
+                //'viewers/map/map_leaflet.php?ll='+window.hWin.HAPI4.sysinfo['layout']+'&db=ExpertNation&controls=none&nocluster=1');
 
         }
 
@@ -1094,6 +1095,7 @@ $.widget( "heurist.expertnation_nav", {
                 if(entType=='place'){
                     var idx, records = map_recset.getRecords();
                     for(idx in records){
+                        map_recset.setFld(records[idx], 'rec_Description', ''); //google way
                         map_recset.setFld(records[idx], 'rec_Info', '');
                     }
                 }
@@ -1109,17 +1111,19 @@ $.widget( "heurist.expertnation_nav", {
                 $('#cp_mapframe_container').show();
                 var interval = setInterval(function(){
                     var mapping = $('#cp_mapframe')[0].contentWindow.mapping;
+                    /* leaflet way
                     if(mapping && mapping.mapping){
                         mapping.mapping('addSearchResult', map_recset, 'Current query');
                         clearInterval(interval);
                     }
-                    /* old way gooogle
+                    */
+                    // gooogle way
                     if(mapping && mapping.map_control){
                         mapping.map_control.addRecordsetLayer(params);
                         clearInterval(interval);
                     }else{
                         //console.log('wait for map loading');
-                    }*/
+                    }
                     },500);
 
 
@@ -2147,17 +2151,19 @@ $.widget( "heurist.expertnation_nav", {
                 $('#p_mapframe_container').show();
                 var interval = setInterval(function(){
                     var mapping = $('#p_mapframe')[0].contentWindow.mapping;
+                    /* lealet way
                     if(mapping && mapping.mapping){
                         mapping.mapping('addSearchResult', map_recset, 'Current query');
                         clearInterval(interval);
                     }
-                    /*  old google way
+                    */
+                    // google way
                     if(mapping && mapping.map_control){
                         mapping.map_control.addRecordsetLayer(params);
                         clearInterval(interval);
                     }else{
                         //console.log('wait for map loading');
-                    } */
+                    } 
                     },500);
 
             }else{
@@ -2419,13 +2425,20 @@ $.widget( "heurist.expertnation_nav", {
             if(place_rec){
 
                 if(description){
-                    this.recset.setFld(place_rec, 'rec_Info',   //was 'rec_Description'
+                    // google way
+                    this.recset.setFld(place_rec, 'rec_Description',
+                        '<div class="bor-map-infowindow-heading">'+description+'</div>'+
+                        '<div class="bor-map-infowindow-description">'+place.names[i]+'</div>'
+                    );
+                    /* leaflet way
+                    this.recset.setFld(place_rec, 'rec_Info',   
                     '<div style="display: inline-block; overflow: auto; max-height: 369px; max-width: 260px;">'
                     +'<div class="bor-map-infowindow">'
                        + '<div class="bor-map-infowindow-heading">'+description+'</div>'
                        + '<div class="bor-map-infowindow-description">'+place.names[i]+'</div>'
                     +'</div></div>'
                     );   
+                    */
                 }    
                 this.recset.setFld(place_rec, 'rec_Title', place.names[i]);
                 //'<div class="bor-map-infowindow-heading">'+description+'</div>'+
@@ -2437,8 +2450,8 @@ $.widget( "heurist.expertnation_nav", {
                     icon = 'place';
                 }
                 var iconPath = window.hWin.HAPI4.baseURL + 'hclient/widgets/expertnation/assets/markers/';
-                //this.recset.setFld(place_rec, 'rec_Icon', iconPath+icon+'.png');   
-                this.recset.setFld(place_rec, this.DT_SYMBOLOGY,
+                this.recset.setFld(place_rec, 'rec_Icon', iconPath+icon+'.png'); // google way  
+                this.recset.setFld(place_rec, this.DT_SYMBOLOGY,  //leaflet way
                  '{"iconType":"url","iconUrl":"'+iconPath+icon+'.png","iconSize":"22"}');
 
                 //console.log(place.names[i]+'  '+description+'   '+iconPath+icon+'.png')                                
