@@ -429,6 +429,7 @@ class DbDefRecTypes extends DbEntityBase
         {
             
             $query = 'SELECT r0.rec_RecTypeID, count(r0.rec_ID) as cnt FROM Records r0 ';
+            $where = '';
 /*        
         LEFT OUTER JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID  
 WHERE

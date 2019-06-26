@@ -124,7 +124,7 @@ $.widget( "heurist.search", {
         }
 
         //------------------------------------------- filter by entities
-        var is_vis = (window.hWin.HAPI4.get_prefs_def('entity_btn_on','0')=='1');
+        var is_vis = (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
         
         this.div_entity_btns   = $('<div>').addClass('heurist-entity-filter-buttons')
                                 .css({ 'float':'left','padding':'5px '+sz_search_padding,

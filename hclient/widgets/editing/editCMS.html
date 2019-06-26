@@ -1,0 +1,38 @@
+<div class="ent_wrapper main_cms">
+    <div class="ui-layout-center preview ui-heurist-bg-light">
+        <iframe id="web_preview" style="overflow:none !important;width:100% !important"></iframe>
+    </div>
+    <div class="ui-layout-west ui-heurist-bg-light">
+        <div class="ent_wrapper cms">
+            <div class="ent_header" style="height:13em;font-size:0.8em">
+                <fieldset>
+                        <div>
+                            <div class="header" style="min-width:80px; width:80px;">
+                                <label for="web_Name">Website title</label>
+                            </div>
+                            <input type="text" name="web_Name" id="web_Name" class="text ui-widget-content ui-corner-all"
+                                maxlength="64" size="64" style="width:180px" />
+                            <div style="Xwidth: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+                                The title of the website, will appear in browser toolbar, specify the name of the current database with #Database Name#
+                            </div>
+                        </div>
+                
+                        <div>
+                            <div class="header" style="min-width:80px; width:80px;">
+                                <label for="web_Theme">Theme</label>
+                            </div>
+                            <select name="web_Theme" id="web_Theme" class="text ui-widget-content ui-corner-all"></select>
+                            <div style="font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+                                Style of website
+                            </div>
+                        </div>
+                        <div style="display: block;text-align: center;">
+                            <div id="btn_edit_home" style="display:inline-block;">Edit Home Page</div>
+                            <div id="btn_refresh" style="display:inline-block;">Refresh</div>
+                        </div>
+                </fieldset>
+            </div>
+            <div class="ent_content_full" id="web_tree" style="top:13em;border-top:1px solid lightgray"></div>
+        </div>
+    </div>
+</div>

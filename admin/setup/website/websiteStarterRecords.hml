@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='UTF-8'?>
 <hml xmlns="http://heuristnetwork.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://heuristnetwork.org/reference/scheme_hml.xsd">
     <database id="99">Heurist_Construction_Zone</database>
     <query w="all" depth="0" q="t:51 OR t:52 OR t:53" db="Heurist_Construction_Zone"/>

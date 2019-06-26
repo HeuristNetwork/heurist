@@ -184,6 +184,7 @@ $.widget( "heurist.mainMenu", {
         if(__include('Structure')) this._initMenu('Structure', 0);
         if(__include('Verify')) this._initMenu('Verify', 0);
         if(__include('Import')) this._initMenu('Import', 0);
+        if(__include('Website')) this._initMenu('Website', 0);
         if(__include('Export')) {
             this._initMenu('Export', 2, null, 3); //invisible in main menu   
             //this.menues['btn_Export'].hide();
@@ -466,7 +467,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         .load(
             window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu'+name+'.html',
           function(){    //add ?t=+(new Date().getTime()) to avoid cache in devtime
-         
+          
             that.menues['menu_'+name].find('.list-menu-only').hide();
          
             that.menues['menu_'+name].addClass('menu-or-popup')
@@ -652,6 +653,16 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     }
                 });
 
+        }else 
+        if(action == "menu-cms-create"){
+            
+            window.hWin.HEURIST4.ui.showEditCMSDialog( -1 );
+            
+        }else 
+        if(action == "menu-cms-edit"){
+            
+            window.hWin.HEURIST4.ui.showEditCMSDialog( 1283 );
+            
         }else 
         if(action == "menu-database-properties"){
             
@@ -952,7 +963,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             prefs['userCompetencyLevel'] = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
             prefs['searchQueryInBrowser'] = window.hWin.HAPI4.get_prefs_def('searchQueryInBrowser', 1);
             prefs['mapcluster_on'] = window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1);
-            
+            prefs['entity_btn_on'] = window.hWin.HAPI4.get_prefs_def('entity_btn_on', 1);
             
             var map_controls = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'bookmark,geocoder,selector,print,publish');
             map_controls = map_controls.split(',');

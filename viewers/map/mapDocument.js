@@ -42,6 +42,9 @@ function hMapDocument( _options )
     DT_GEO_OBJECT = 0,
     DT_NAME = 0,
     
+    DT_MINIMUM_MAP_ZOOM = 0, //bounds for mapoc and visibility for layers
+    DT_MAXIMUM_MAP_ZOOM = 0,
+    
     map_documents = null, //recordset - all loaded documents
     map_documents_content = {}, //mapdoc_id=>recordset with all layers and datasources of document
     
@@ -64,6 +67,9 @@ function hMapDocument( _options )
         DT_SYMBOLOGY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'];
         DT_NAME      = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+        DT_MINIMUM_MAP_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_MAP_ZOOM'];
+        DT_MAXIMUM_MAP_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_MAP_ZOOM'];
+        
         
         //_loadMapDocuments();
     }
@@ -141,10 +147,11 @@ function hMapDocument( _options )
     //    
     function _loadMapDocumentContent(mapdoc_id, deferred){
 
-//{"any":[{"ids":11},{"all":{"t":"25","linkedfrom":11}}]}        
+//{"any":[{"ids":mapdoc_id},{"all":{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id}}]},    //mapdoc and layer linked to given mapdoc     
+//{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id},  //layers linked to given mapdoc
         
             var request = {
-                        q: {"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id},  //layers linked to given mapdoc
+                        q:{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id},  //layers linked to given mapdoc
                         rules:[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}], //data sources linked to layers
                         w: 'a',
                         detail: 'detail',
@@ -193,10 +200,11 @@ function hMapDocument( _options )
             if(idx)
             {
                 var record = records[idx];
+                var recID  = resdata.fld(record, 'rec_ID');
                 
                 if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER){
-                    var recID  = resdata.fld(record, 'rec_ID'),
-                        datasource_recID = resdata.fld(record, DT_DATA_SOURCE);    
+                    
+                    var datasource_recID = resdata.fld(record, DT_DATA_SOURCE);    
 
                     var datasource_record = resdata.getById( datasource_recID );
                     
@@ -207,6 +215,17 @@ function hMapDocument( _options )
                                                       rec_datasource: datasource_record, 
                                                       mapdoc_recordset: resdata, //need to get fields
                                                       mapwidget: options.mapwidget});
+                }else if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_DOCUMENT){
+                         
+                    
+                    var record2 = getLayer(recID); //from map_documents
+                    record2['d'] = record['d'];
+                    resdata.fld(record, DT_MINIMUM_MAP_ZOOM);
+                    resdata.fld(record, DT_MAXIMUM_MAP_ZOOM);
+                    resdata.removeRecord(recID);
+                    
+                    //get min and max zoom
+                    
                 }
             }
         }//for
@@ -214,7 +233,7 @@ function hMapDocument( _options )
         
         if(deferred){
             var treedata = _getTreeData(mapdoc_id);
-            deferred.resolve( treedata ); //returns data t fancytree to render child layers for given mapdocument
+            deferred.resolve( treedata ); //returns data to fancytree to render child layers for given mapdocument
         }
                                 
     }

@@ -274,7 +274,7 @@ function hImportRecords(_max_upload_size) {
     function _importRecords(){
 
             //$('#divStep2').hide();
-            session_id = Math.round((new Date()).getTime()/1000);
+            session_id = Math.round((new Date()).getTime()/1000);  //for progress
         
             var request = { action: 'import_records',
                 filename: upload_file_name,
@@ -288,7 +288,7 @@ function hImportRecords(_max_upload_size) {
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
                         _hideProgress(3);
-                        $('#spanRecCount2').text(response.data);
+                        $('#spanRecCount2').text(response.data.count_imported);
                         //window.hWin.HEURIST4.msg.showMsgDlg('Imported '+response.data+' records');
                     }else{
                         _hideProgress(2);

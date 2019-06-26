@@ -55,7 +55,11 @@ private static function readDataFile($filename, $type=null, $validate=true){
    
    $data=null;
     try{
-        $filename = HEURIST_SCRATCH_DIR.$filename;
+        if(strpos($filename,'websiteStarterRecords')===0){
+            $filename = HEURIST_DIR.'admin/setup/website/'.$filename;
+        }else{
+            $filename = HEURIST_SCRATCH_DIR.$filename;    
+        }
         
         if(!file_exists($filename)){
             
@@ -520,6 +524,7 @@ public static function importRecords($filename, $session_id){
                 break;
             }
             
+            //source rec id => target rec id
             $records_corr[$record_src['rec_ID']] = $out['data']; //new record id
             
             $execution_counter++;
@@ -577,8 +582,10 @@ public static function importRecords($filename, $session_id){
         }else{
                 $mysqli->commit();
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
-                $res = $cnt_imported;
-                
+                $res = array('count_imported'=>$cnt_imported);
+                if(count($records_corr)<1000){
+                    $res['ids'] = array_values($records_corr);    
+                }
         }
             
         if($session_id!=null){//finish

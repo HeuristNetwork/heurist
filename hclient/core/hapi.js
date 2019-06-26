@@ -1175,7 +1175,7 @@ prof =Profile
                 if(!(lt=='Beyond1914' ||  lt=='UAdelaide' ||
                     lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
 
-                    window.hWin.HEURIST4.ui.onInactiveStart(300000, function(){  //5 minutes 
+                    window.hWin.HEURIST4.ui.onInactiveStart(5000, function(){  //300000 5 minutes 
                         //check that still logged in
                         window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                             //ok we are still loggen in

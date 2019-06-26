@@ -62,6 +62,9 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
             .save-disabled, #btnSave.save-disabled:hover{
                 color:lightgray !important;
             }
+            span.fancytree-node{
+                font-weight:bold !important;
+            }
 
             /* it allows scroll on DnD */
             ul.fancytree-container {
@@ -77,49 +80,10 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
                 background-color: rgb(142, 169, 185); 
             }
             */
-            span.fancytree-node,
-            span.fancytree-title,
-            div.svs-contextmenu3 > span.ui-icon{
-                vertical-align:bottom;
-                padding-left:2px;
-            }
-            div.svs-contextmenu3{
-                cursor:pointer;
-                position:absolute;
-                right:5px;
-                /*min-width: 80px;*/
-                /*
-                color: white !important;
-                visibility: hidden;
-                float:right;
-                padding-left:10px;
-                */
-                padding:3px;
-                display:none;
-                background:white;
-                color:#95A7B7;
-                border-radius:2px;
-            }
-            span.fancytree-node{
-                min-width: 300px;
-                padding:2px !important;
-            }
             #term_tree{
                  background:none;
                  border:none;
             }
-            span.fancytree-node {
-                border: none !important;
-                font-weight:bold !important;
-                display: block;
-                width:100%;
-            }
-            
-            span.fancytree-node.fancytree-active{
-                background: #95A7B7 !important;
-                color: white !important;
-            }
-            
             
         /*
         width":"100%","height":"100%

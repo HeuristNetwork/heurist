@@ -1759,8 +1759,11 @@ window.hWin.HEURIST4.ui = {
 
     //
     // important manageRecords.js and selectRecords.js must be loaded
-    // if callback is defined it returns added/edited record as recordset
-    //             
+    // 
+    // rec_ID - record to edit
+    // query_request - returns set of records that can be edit in bunch (next/prev buttons)
+    // popup_options['onselect'] - define function that accepts added/edited record as recordset
+    // 
     openRecordEdit:function(rec_ID, query_request, popup_options){
         
         /*
@@ -2371,6 +2374,14 @@ window.hWin.HEURIST4.ui = {
         //todo optionally load dynamically editSymbology.js
         editSymbology(current_value, needName, callback);
     },
+
+    //
+    // show record action dialog
+    //
+    showEditCMSDialog: function( home_page_record_id, main_callback ){
+        //todo optionally load dynamically editCMS.js
+        editCMS(  home_page_record_id, main_callback );
+    },
     
     //
     // show record action dialog
@@ -2628,6 +2639,8 @@ window.hWin.HEURIST4.ui = {
   //
   //
   onInactiveStart: function(ms, cb){
+      return; //DISABLED
+      
       if(!window.hWin.HEURIST4.ui.wait_timeout){
           if(!isNaN(ms) && Number(ms)>0){
              window.hWin.HEURIST4.wait_terminated = false;

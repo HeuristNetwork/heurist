@@ -80,6 +80,11 @@ if($database_url!=null){ //redirect to resolver for another database
     $redirect = $database_url.'&recID='.$recid.'&fmt'.$format;
 }else if($format=='html'){
     $redirect = '../viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
+    
+}else if($format=='web' || $format=='website'){
+    
+    $redirect = '../viewers/record/websiteRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
+    
 }else if($format=='edit'){
     //todo include resolver recordSearchReplacement
     $redirect = '../hclient/framecontent/recordEdit.php?'.$_SERVER['QUERY_STRING'];

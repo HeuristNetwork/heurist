@@ -244,7 +244,11 @@ $rtDefines = array(
     'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
 
     //Web content
-    'RT_WEB_CONTENT' => array(1147, 25)
+    'RT_WEB_CONTENT' => array(1147, 25),
+    
+    'RT_CMS_HOME' => array(99, 51),  
+    'RT_CMS_MENU' => array(99, 52),  
+    'RT_CMS_PAGE' => array(99, 53)  
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -346,7 +350,12 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_DBF_FILE' => array(3, 1070),
     'DT_SHX_FILE' => array(3, 1071),
 
-    'DT_EXTRACTED_TEXT' => array(2, 652)  //for pdf parser
+    'DT_EXTRACTED_TEXT' => array(2, 652),  //for pdf parser
+    
+    'DT_CMS_TOP_MENU' => array(99, 742),  
+    'DT_CMS_MENU' => array(99, 761),  
+    'DT_CMS_PAGE' => array(99, 945),
+    'DT_CMS_KEYWORDS' => array(99, 948)  
 
 ); //TODO: add email magic numbers
 

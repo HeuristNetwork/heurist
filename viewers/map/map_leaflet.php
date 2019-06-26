@@ -148,60 +148,18 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         background-color:rgb(142, 169, 185);
     }
     
-    
-    span.fancytree-node,
-    span.fancytree-title,
-    div.svs-contextmenu3 > span.ui-icon{
-        vertical-align:bottom;
-        padding-left:2px;
-    }
-    div.svs-contextmenu4{
-        cursor:pointer;
-        position:absolute;
-        right:7px;
-        width: 16;
-        height: 16;
-        margin-top: -16;
-        display: none;
-        background-position: 0 0; 
-        background-image: url(../../external/jquery.fancytree/skin-themeroller/loading.gif);
-    }
-    div.svs-contextmenu3{
-        cursor:pointer;
-        position:absolute;
-        right:7px;
-        margin: 1px;
-        padding: 2 2 0 2;
-        /*
-        color: white !important;
-        visibility: hidden;
-        float:right;
-        padding-left:10px;
-        */
-        display:none;
-        background:lightgray;
-        color:black;/*#95A7B7;*/
-        border-radius:2px;
-    }
-    span.fancytree-node{
-        min-width: 300px;
-        padding:2px !important;
-    }
     #term_tree{
          background:none;
          border:none;
     }
-    span.fancytree-node {
-        border: none !important;
-        display: block;
-        width:100%;
+
+    div.svs-contextmenu3{
+        right:7px;
+        display:none;
+        background:lightgray;
+        color:black;/*#95A7B7;*/
     }
-    
-    span.fancytree-node.fancytree-active{
-        background: #95A7B7 !important;
-        color: white !important;
-    } 
-    
+
     leaflet-control-browser-print{
         width: 22px !important;
         height: 22px !important;

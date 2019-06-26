@@ -568,7 +568,7 @@ function hMapManager( _options )
                 var ele = $(event.target);
                 var parent_span = ele.parents('span.fancytree-node');
                 
-                function __in_porgress(){
+                function __in_progress(){
                     parent_span.find('.svs-contextmenu4').show();
                     parent_span.find('.svs-contextmenu3').hide();
                 }
@@ -593,7 +593,7 @@ function hMapManager( _options )
                             
                         }else if(ele.hasClass('ui-icon-plus')){ //add new layer to map document
                         
-                            __in_porgress();
+                            __in_progress();
                             if(mapdoc_id>0){
 
                                 mapDocuments.selectLayerRecord(mapdoc_id, function(data){
@@ -628,7 +628,7 @@ function hMapManager( _options )
                             
                                 if(mapdoc_id>0){
 
-                                    __in_porgress();
+                                    __in_progress();
                                     //edit layer or mapdocument record
                                     window.hWin.HEURIST4.ui.openRecordEdit(recid>0?recid:mapdoc_id, null,
                                     {selectOnSave:true,
