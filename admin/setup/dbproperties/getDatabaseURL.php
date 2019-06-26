@@ -100,7 +100,10 @@ function __replaceToLastServe($url){
     if($url!=null){
         if(strpos($url, 'http://heurist.sydney.edu.au')>=0){
             $url = str_replace( 'http://heurist.sydney.edu.au', HEURIST_MAIN_SERVER, $url);
+        }else if(strpos($url, 'http:///heuristplus.sydney.edu.au')>=0 || strpos($url, 'http://heuristplus.sydney.edu.au')>=0){
+            $url = str_replace( 'http://', 'https://', $url);    
         }
+         
      }
     return $url;
 }
