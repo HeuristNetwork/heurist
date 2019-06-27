@@ -24,7 +24,7 @@ showElementAsDialog
 
 createAlertDiv - return error-state html with alert icon 
 
-bringCoverallToFront - show loading icon and lock all screen
+bringCoverallToFront - show loading icon and lock all screen (curtain)
 sendCoverallToBack
 
 */
@@ -751,6 +751,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                 msg+'</div>';
     },
     
+    //curtain
     bringCoverallToFront: function(ele) {
         if (!  window.hWin.HEURIST4.msg.coverall ) {
             window.hWin.HEURIST4.msg.coverall = 

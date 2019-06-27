@@ -33,7 +33,6 @@ function editCMS(home_page_record_id, main_callback){
         +'You may contact ian.johnson@sydney.edu.au if you want to test out this function prior to release in mid July 2019.');
         return;
      }
-
     var edit_dialog = null;
     
     var popup_dlg = $('#heurist-dialog-editCMS');
@@ -46,40 +45,15 @@ function editCMS(home_page_record_id, main_callback){
     }
     
     var edit_buttons = [
-        {text:window.hWin.HR('Cancel'), 
+        {text:window.hWin.HR('Close'), 
             id:'btnRecCancel',
             css:{'float':'right'}, 
             click: function() { 
                 edit_dialog.dialog('close'); 
-        }},
-        {text:window.hWin.HR('Save'),
-            id:'btnRecSave',
-            css:{'visibility':'hidden', 'float':'right'},  
-            click: function() { 
-                /*
-                var res = _editing_symbology.getValues(); //all values
-                //remove empty values
-                var propNames = Object.getOwnPropertyNames(res);
-                for (var i = 0; i < propNames.length; i++) {
-                    var propName = propNames[i];
-                    if (window.hWin.HEURIST4.util.isempty(res[propName])) {
-                        delete res[propName];
-                    }
-                }
-                if(res['iconType']=='circle'){
-                    res['radius'] = (res['iconSize']>0?res['iconSize']:8);
-                }
-                _editing_symbology.setModified(false);
-                */
-                edit_dialog.dialog('close');
-                
-                if($.isFunction(main_callback)){
-                    main_callback.call(this, res);
-                }
-
         }}
-    ];                
+    ];
 
+    //
     //
     //
     edit_dialog = popup_dlg.dialog({
@@ -116,65 +90,71 @@ function editCMS(home_page_record_id, main_callback){
 
         buttons: edit_buttons
     });                
-              
-    
+
+
     var layout_opts =  {
-                    applyDefaultStyles: true,
-                    togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
-                    togglerContent_closed:  '<div class="ui-icon ui-icon-triangle-1-e"></div>',
-                    west:{
-                        size: 300, //this.usrPreferences.summary_width
-                        maxWidth:600,
-                        spacing_open:6,
-                        spacing_closed:16,  
-                        togglerAlign_open:'center',
-                        togglerAlign_closed:'top',
-                        togglerLength_closed:16,  //makes it square
-                        initClosed:false, //(this.usrPreferences.summary_closed==true || this.usrPreferences.summary_closed=='true'),
-                        slidable:false,   //otherwise it will be over center and autoclose
-                        contentSelector: '.cms'    
-                    },
-                    center:{
-                        minWidth:400,
-                        contentSelector: '.preview'    
-                    }
-                };    
-    
+        applyDefaultStyles: true,
+        togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
+        togglerContent_closed:  '<div class="ui-icon ui-icon-triangle-1-e"></div>',
+        west:{
+            size: 300, //this.usrPreferences.summary_width
+            maxWidth:600,
+            spacing_open:6,
+            spacing_closed:16,  
+            togglerAlign_open:'center',
+            togglerAlign_closed:'top',
+            togglerLength_closed:16,  //makes it square
+            initClosed:false, //(this.usrPreferences.summary_closed==true || this.usrPreferences.summary_closed=='true'),
+            slidable:false,   //otherwise it will be over center and autoclose
+            contentSelector: '.cms'    
+        },
+        center:{
+            minWidth:400,
+            contentSelector: '.preview'    
+        }
+    };    
+
     popup_dlg.load(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editCMS.html', 
         function(){
             $(popup_dlg.find('.main_cms')).layout( layout_opts );
         }
     );
-    
+
+
+
     //
     if(home_page_record_id<0){
         //create new set of records - website template
-        
-            var session_id = Math.round((new Date()).getTime()/1000); //for progress
-        
-            var request = { action: 'import_records',
-                filename: 'websiteStarterRecords2.hml',
-                //session: session_id,
-                id: window.hWin.HEURIST4.util.random()
-            };
+        window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
+        window.hWin.HEURIST4.msg.showMsgFlash('Creating the set of website records', 10000);
+
+        var session_id = Math.round((new Date()).getTime()/1000); //for progress
+
+        var request = { action: 'import_records',
+            filename: 'websiteStarterRecords2.hml',
+            //session: session_id,
+            id: window.hWin.HEURIST4.util.random()
+        };
+
+        window.hWin.HAPI4.doImportAction(request, function( response ){
             
-            window.hWin.HAPI4.doImportAction(request, function( response ){
-                    
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        $('#spanRecCount2').text(response.data.count_imported);
-                        
-                        _initWebSiteEditor({q:{"ids":response.data.ids}}); 
-                        
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                        edit_dialog.dialog('close');
-                    }
-                });
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
         
+            if(response.status == window.hWin.ResponseStatus.OK){
+                $('#spanRecCount2').text(response.data.count_imported);
+
+                _initWebSiteEditor( { q:"ids:"+response.data.ids.join(',') } );
+
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                edit_dialog.dialog('close');
+            }
+        });
+
     }else{
-        
         _initWebSiteEditor();
     }
+
 
     //  
     // search all website records: home, menu, pages
@@ -185,9 +165,12 @@ function editCMS(home_page_record_id, main_callback){
             if(window.hWin.HEURIST4.util.isnull(request))
             {
                 request = {q:{"ids":home_page_record_id},
-                    rules: [{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_HOME+'-'+DT_CMS_TOP_MENU,   //top menu
+                    rules: [{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_HOME+'-'+DT_CMS_TOP_MENU, //top menu
                         "levels":[{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_MENU,  //other menu
-                            "levels":[{"query":'t:'+RT_CMS_PAGE+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_PAGE}]}]}]};  //pages                
+                            "levels":[{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_MENU, 
+                                "levels":[{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_MENU}]  }]}]}]};  
+                            
+                            //{"query":'t:'+RT_CMS_PAGE+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_PAGE} pages no need
             }
         
             request['detail'] = 'detail';
@@ -218,7 +201,7 @@ function editCMS(home_page_record_id, main_callback){
                                         $res['expanded'] = true;
                                         
                                         var menuitems2 = resdata.values(menu_rec, DT_CMS_MENU);
-console.log($res);                                        
+//console.log($res);                                        
                                         $res['children'] = __getTreeData(menuitems[m], menuitems2);
                                       
                                         resitems.push($res);
@@ -238,26 +221,41 @@ console.log($res);
                                     home_page_record_id  = resdata.fld(record, 'rec_ID');
                                     popup_dlg.find('#web_Name').val(resdata.fld(record, DT_NAME));
                                     
-                                    if(!popup_dlg.find('#btn_edit_home').button('instance'))
-                                    popup_dlg.find('#btn_edit_home').button({icon:'ui-icon-pencil'}).click(function(){
-                                        //openRecordEdit
-                                        window.hWin.HEURIST4.ui.openRecordEdit(home_page_record_id, null,
-                                        {selectOnSave:true, edit_obstacle: false, onselect: 
-                                                function(event, res){
-                                                    if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
-                                                        //refresh everything
-                                                        _initWebSiteEditor();
-                                                    }
-                                                }}
-                                            );
-                                    });
-                                    
                                     var btn_refresh = popup_dlg.find('#btn_refresh');
                                     if(!btn_refresh.button('instance')){
+                                    
+                                        popup_dlg.find('#btn_edit_home').button({icon:'ui-icon-pencil'}).click(function(){
+                                            //openRecordEdit
+                                            window.hWin.HEURIST4.ui.openRecordEdit(home_page_record_id, null,
+                                            {selectOnSave:true, edit_obstacle: false, onselect: 
+                                                    function(event, res){
+                                                        if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
+                                                            //refresh everything
+                                                            _initWebSiteEditor();
+                                                        }
+                                                    }}
+                                                );
+                                        });
+                                    
+                                        //add new root menu
+                                        popup_dlg.find('#btn_add_menu').button({icon:'ui-icon-menu',showLabel:false}).click(function(){
+                                                selectMenuRecord(home_page_record_id, function(){
+                                                    _initWebSiteEditor();
+                                                });
+                                        });
+                                    
                                         btn_refresh.button({icon:'ui-icon-refresh'}).click(function(){
                                             popup_dlg.find('#web_preview').attr('src', window.hWin.HAPI4.baseURL+
                                                 '?fmt=web&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id);
                                         });
+                                        
+                                        //open preview in new tab
+                                        popup_dlg.find('#btn_preview').button({icon:'ui-icon-extlink',showLabel:false}).click(function(){
+                                                var url = window.hWin.HAPI4.baseURL+
+                                                    '?fmt=web&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id
+                                                window.open(url, '_blank');
+                                        });
+                                        
                                     }
                                     btn_refresh.click();
                                     
@@ -335,14 +333,6 @@ console.log($res);
                                                  onselect:function(event, data){
                                                     if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                                         _initWebSiteEditor();
-                                                        /*var recset = data.selection;
-                                                        var rec = recset.getFirstRecord();
-                                                        recset.fld(rec, 'rec_ID');
-                                                        item.title = 
-                                                        parent_span.find('span.fancytree-title').text( item.title );
-                                                        item.removeChildren();
-                                                        item.addChildren();
-                                                        */
                                                     }
                                                 }});
                                                 
@@ -440,14 +430,6 @@ console.log($res);
                                             //remove from old parent
                                             
                                             //add to new parent and save order
-                                            
-                                            /*
-                                            data.otherNode
-                                                
-                                                menu_id = item.key, 
-                                                page_id = item.data.page_id,
-                                                is_top = (item.data.parent_id==home_page_record_id);
-                                            */    
                                     }
                                 },
                                 edit:{
@@ -585,6 +567,5 @@ console.log($res);
         });                                        
         
     }
-    
-                
-}//end editCMS
+   
+}

@@ -88,7 +88,7 @@ $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 
 
 $topmenu = $rec['details'][DT_CMS_TOP_MENU];
-$menu_content = __getMenuContent($rec['rec_ID'], $topmenu);
+$menu_content = __getMenuContent($rec['rec_ID'], $topmenu, 0);
 
 //
 //
@@ -126,7 +126,7 @@ function __getValue(&$menu_rec, $id){
 //
 // create menu
 //
-function __getMenuContent($parent_id, $menuitems)
+function __getMenuContent($parent_id, $menuitems, $lvl)
 {
     global $system;
 
@@ -138,15 +138,15 @@ function __getMenuContent($parent_id, $menuitems)
                 
                 $page_id = __getValue($menu_rec,DT_CMS_PAGE);
               
-                $res = $res.'<li><a href="#" data-pageid="'.@$page_id['id']
+                $res = $res.'<li><a href="#" style="padding:2px 1em" data-pageid="'.@$page_id['id']
                                 .'" title="'.htmlspecialchars(__getValue($menu_rec,DT_SHORT_SUMMARY)).'">'
                                 .htmlspecialchars(__getValue($menu_rec,DT_NAME)).'</a>';
                 
                 $menuitems2 = @$menu_rec['details'][DT_CMS_MENU];
                 if(count($menuitems2)>0){                          
-                    $sub = __getMenuContent($rd['id'], $menuitems2);
+                    $sub = __getMenuContent($rd['id'], $menuitems2, $lvl+1);
                     if($sub!='')
-                        $res = $res. '<ul style="min-width:200px">'.$sub.'</ul>';
+                        $res = $res. '<ul style="min-width:200px"'.($lvl==0?' class="level-1"':'').'>'.$sub.'</ul>';
                 }
                 $res = $res. '</li>';
     }
@@ -181,7 +181,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
   <script>
 $( function() {
-    $( "#main-menu > ul" ).addClass('horizontalmenu').menu({position:{ my: "left top", at: "left+40 bottom" }});
+    $( "#main-menu > ul" ).addClass('horizontalmenu').menu( {position:{ my: "left top", at: "left+20 bottom" }} );
 
     $('#main-menu').find('a').click(function(event){
 
@@ -226,8 +226,8 @@ $( function() {
 </head>
 <body>
     <div id="main-header">
-	    <div id="main-banner" style="width:100%;min-height:80px"><img src="<?php print $image_banner; ?>"></div>
-	    <div id="main-menu" style="width:100%;min-height:40px"><ul><?php print $menu_content; ?></ul></div>
+	    <div id="main-banner" style="width:100%;min-height:80px;"><img style="max-height:80px" src="<?php print $image_banner; ?>"></div>
+	    <div id="main-menu" style="width:100%;min-height:40px;padding:4px 0"><ul><?php print $menu_content; ?></ul></div>
     </div>
     <div id="main-content"><?php print __getValue($rec, DT_EXTENDED_DESCRIPTION);?></div>
     <div id="main-foooter">Footer</div>

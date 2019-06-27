@@ -661,7 +661,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else 
         if(action == "menu-cms-edit"){
             
-            window.hWin.HEURIST4.ui.showEditCMSDialog( 1283 );
+            that._select_CMS_Home();
             
         }else 
         if(action == "menu-database-properties"){
@@ -1207,5 +1207,50 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             }
         );
 
-    }
+    },
+    
+    //
+    //
+    //                
+    _select_CMS_Home: function (){
+        
+        var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+        if(!(RT_CMS_HOME>0)){
+            window.hWin.HEURIST4.msg.showMsgDlg('This function is still in development. You will need record types '
+                +'99-51, 99-52 and 99-53 which will be made available as part of Heurist_Reference_Set. '
+                +'You may contact ian.johnson@sydney.edu.au if you want to test out this function prior to release in mid July 2019.');
+            return;
+        }
+        
+        
+        var popup_options = {
+                        select_mode: 'select_single', //select_multi
+                        select_return_mode: 'recordset',
+                        edit_mode: 'popup',
+                        selectOnSave: true, //it means that select popup will be closed after add/edit is completed
+                        title: window.hWin.HR('Select or create a website home record'),
+                        rectype_set: RT_CMS_HOME,
+                        parententity: 0,
+                        
+                        onselect:function(event, data){
+                                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                    var recordset = data.selection;
+                                    window.hWin.HEURIST4.ui.showEditCMSDialog( recordset.getOrder()[0] );
+                                 }
+                        }
+        };//popup_options
+
+                
+        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
+            {width: null,  //null triggers default width within particular widget
+             height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+
+        popup_options.width = Math.max(usrPreferences.width,710);
+        popup_options.height = usrPreferences.height;
+        
+        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+        
+    }            
+            
+
 });
