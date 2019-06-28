@@ -1834,7 +1834,7 @@ $.widget( "heurist.editing_input", {
                                             window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
                                             recordset.fld(record,'ulf_ObfuscatedFileID'));
                                         */
-                                        $input.change();
+                                        //if(newvalue.ulf_OrigFileName) $input.change();
                                     }
                                 
                              }//data
@@ -2432,6 +2432,10 @@ console.log('onpaste');
                     window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
                         value.ulf_ObfuscatedFileID);
                         
+                this.newvalues[ele.attr('id')] = value;
+                 
+                ele.change();
+                
             }else{
                  //call server for file details
                  var recid = ($.isPlainObject(value))?value.ulf_ID :value;
@@ -2450,11 +2454,11 @@ console.log('onpaste');
                                         var recordset = new hRecordSet(response.data);
                                         var record = recordset.getFirstRecord();
                                         if(record){
-                                        var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
+                                            var newvalue = {ulf_ID: recordset.fld(record,'ulf_ID'),
                                                         ulf_ExternalFileReference: recordset.fld(record,'ulf_ExternalFileReference'),
                                                         ulf_OrigFileName: recordset.fld(record,'ulf_OrigFileName'),
                                                         ulf_ObfuscatedFileID: recordset.fld(record,'ulf_ObfuscatedFileID')};
-                                                        that._findAndAssignTitle(ele, newvalue, selector_function);
+                                            that._findAndAssignTitle(ele, newvalue, selector_function);
                                         }
                                 }
                             });

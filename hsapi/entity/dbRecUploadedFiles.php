@@ -390,7 +390,7 @@ class DbRecUploadedFiles extends DbEntityBase
                     $file2['ulf_ObfuscatedFileID'] = $nonce;
                     
                     if(!@$record['ulf_ExternalFileReference'] && !@$record['ulf_FileName']){
-                        if($record['ulf_OrigFileName']=='mbtiles'){
+                        if($record['ulf_MimeExt']=='mbtiles'){
                             $this->records[$rec_idx]['ulf_FileName'] = 'ulf_'.$ulf_ID.'.mbtiles'; 
                         }else{
                             $this->records[$rec_idx]['ulf_FileName'] = 'ulf_'.$ulf_ID.'_'.$record['ulf_OrigFileName']; 

@@ -2245,7 +2245,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                    changed_element.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE']){
                        
                       //check extension - only mbtiles allowed
-                      console.log(changed_element.getValues());
+//console.log(changed_element.getValues());
                       
                       var val = changed_element.getValues();
                       if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty(val[0])){
