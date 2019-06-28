@@ -127,7 +127,7 @@ $.widget( "heurist.search", {
         var is_vis = (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
         
         this.div_entity_btns   = $('<div>').addClass('heurist-entity-filter-buttons')
-                                .css({ 'float':'left','padding':'5px '+sz_search_padding,
+                                .css({ 'display':'block','padding':'5px '+sz_search_padding,
                                     'visibility':is_vis?'visible':'hidden',
                                     'height':is_vis?'auto':'10px'})
                                 .appendTo( this.element );
@@ -500,8 +500,6 @@ $.widget( "heurist.search", {
             .click( function(){ 
                 window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
                     if(that.select_rectype_addrec.val()>0){
-                        
-                        
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                             {new_record_params:{RecTypeID:that.select_rectype_addrec.val()}});
                     }else{
@@ -680,21 +678,31 @@ $.widget( "heurist.search", {
     _redraw_buttons_by_entity: function(is_init){
         
         if(is_init===true){
+            //get from preferences
             this.buttons_by_entity = window.hWin.HAPI4.get_prefs_def('entity_filter_btns','');
             
             if(window.hWin.HEURIST4.util.isempty(this.buttons_by_entity)){
-                //get 5 top most used rectypes
                 this.buttons_by_entity = [];
-                var sorted = [];
-                for(var rty_ID in window.hWin.HEURIST4.rectypes.counts)
-                if(rty_ID>0){
-                    sorted.push({'id':rty_ID, 'cnt':window.hWin.HEURIST4.rectypes.counts[rty_ID]});
-                }
-                sorted.sort(function(a,b){
-                     return Number(a['cnt'])<Number(b['cnt'])?1:-1;
-                });
-                for(var idx=0; idx<sorted.length && idx<5; idx++){
-                    this.buttons_by_entity.push(sorted[idx]['id']);    
+                
+                if(true){
+                    //get 5 from first group
+                    var rectypes = window.hWin.HEURIST4.rectypes.groups[0].allTypes;
+                    for(var m=0; m<rectypes.length && m<5; m++){
+                        this.buttons_by_entity.push(rectypes[m]);
+                    }
+                }else{
+                    //get 5 top most used rectypes
+                    var sorted = [];
+                    for(var rty_ID in window.hWin.HEURIST4.rectypes.counts)
+                    if(rty_ID>0){
+                        sorted.push({'id':rty_ID, 'cnt':window.hWin.HEURIST4.rectypes.counts[rty_ID]});
+                    }
+                    sorted.sort(function(a,b){
+                         return Number(a['cnt'])<Number(b['cnt'])?1:-1;
+                    });
+                    for(var idx=0; idx<sorted.length && idx<5; idx++){
+                        this.buttons_by_entity.push(sorted[idx]['id']);    
+                    }
                 }
             }else{
                 this.buttons_by_entity = this.buttons_by_entity.split(',');    
@@ -716,12 +724,13 @@ $.widget( "heurist.search", {
             
                 $('<button>').button({label: '<span class="truncate" style="max-width:100px;display:inline-block;">'
                         + window.hWin.HEURIST4.rectypes.names[rty_ID] + '</span>'
-                        + ((window.hWin.HEURIST4.rectypes.counts[rty_ID]>0)
-                           ?'<span style="float:right;font-size:0.8em;padding:2px">('+window.hWin.HEURIST4.rectypes.counts[rty_ID]+')</span>':''), 
+                        + '<span style="float:right;font-size:0.8em;padding:2px">('
+                        +  ((window.hWin.HEURIST4.rectypes.counts[rty_ID]>0)?window.hWin.HEURIST4.rectypes.counts[rty_ID]:0)
+                        +')</span>', 
                     showLabel:true})  //icon:window.hWin.HAPI4.iconBaseURL + rty_ID + '.png'
                     .attr('data-id', rty_ID)
                     .css({'font-size':'0.9em'})        
-                    .addClass('entity-filter-button')
+                    .addClass('entity-filter-button ui-state-active')
                     .insertBefore(this.btns_by_entity); //appendTo(this.div_entity_btns);
                 
                 this._on( this.div_entity_btns.find('.entity-filter-button'), {  click: function(e){

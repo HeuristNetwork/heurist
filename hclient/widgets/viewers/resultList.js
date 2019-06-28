@@ -910,6 +910,8 @@ $.widget( "heurist.resultList", {
                 .appendTo(this.div_content);
             
         }else{
+
+            var that = this;
         
             var $emptyres = $('<div>')
             .css('padding','1em')
@@ -937,8 +939,8 @@ $.widget( "heurist.resultList", {
                         $emptyres.find('.acc2').accordion({active:false});
 
                          //logged in and current search was by bookmarks
-                        if(window.hWin.HAPI4.currentUser.ugr_ID>0 && this._query_request){
-                            var domain = this._query_request.w
+                        if(window.hWin.HAPI4.currentUser.ugr_ID>0 && that._query_request){
+                            var domain = that._query_request.w
                             if((domain=='b' || domain=='bookmark')){
                                 var $al = $('<a href="#">')
                                 .text(window.hWin.HR('Click here to search the whole database'))
@@ -946,6 +948,25 @@ $.widget( "heurist.resultList", {
                                 this._on(  $al, {
                                     click: this._doSearch4
                                 });
+                            }
+                            var q = that._query_request.q, rt = 0;
+                            if ($.isPlainObject(q) && Object.keys(q).length==1 && !q['t']){
+                                rt = q['t'];
+                            }else if (q.indexOf('t:')==0){
+                                  q = q.split(':');
+                                  if(window.hWin.HEURIST4.util.isNumber(q[1])){
+                                      rt = q[1];
+                                  }
+                            }
+                            if(rt>0 && window.hWin.HEURIST4.rectypes.names[rt]){
+                                $('<span style="padding: 0 10px;font-weight:bold">('+window.hWin.HEURIST4.rectypes.pluralNames[rt]+')</span>')
+                                    .appendTo($emptyres.find('.not-found2'));
+                                $('<div>').button({label:'Add '+window.hWin.HEURIST4.rectypes.names[rt], icon:'ui-icon-plusthick'})
+                                    .click(function(){
+                                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                                            {new_record_params:{RecTypeID:rt}});                                        
+                                    })
+                                    .appendTo($emptyres.find('.not-found2'));
                             }
                         }
                     
