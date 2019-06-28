@@ -354,14 +354,14 @@ class DbRecUploadedFiles extends DbEntityBase
 
     // there are 3 ways
     // 1) add for local files - via register
-    // 2) remote - save as usual the ndefine ulf_ObfuscatedFileID and ulf_FileName
-    // 3) updatate just parent:save
+    // 2) remote - save as usual and define ulf_ObfuscatedFileID and ulf_FileName
+    // 3) update just parent:save
     //
     public function save(){
 
         $ret = parent::save(); 
 /*
-        if($ret!==false){
+        if($ret!==false){                                 
             //treat thumbnail image
             foreach($this->records as $record){
                 if(in_array(@$record['trm_ID'], $ret)){
@@ -390,7 +390,11 @@ class DbRecUploadedFiles extends DbEntityBase
                     $file2['ulf_ObfuscatedFileID'] = $nonce;
                     
                     if(!@$record['ulf_ExternalFileReference'] && !@$record['ulf_FileName']){
-                        $this->records[$rec_idx]['ulf_FileName'] = 'ulf_'.$ulf_ID.'_'.$record['ulf_OrigFileName']; 
+                        if($record['ulf_OrigFileName']=='mbtiles'){
+                            $this->records[$rec_idx]['ulf_FileName'] = 'ulf_'.$ulf_ID.'.mbtiles'; 
+                        }else{
+                            $this->records[$rec_idx]['ulf_FileName'] = 'ulf_'.$ulf_ID.'_'.$record['ulf_OrigFileName']; 
+                        }
                         $file2['ulf_FileName'] = $this->records[$rec_idx]['ulf_FileName']; 
                     }
 
@@ -650,7 +654,7 @@ class DbRecUploadedFiles extends DbEntityBase
                 $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
                 
                 $this->setData($fileinfo);
-                $ret = $this->save();   //it returns ulf_ID
+                $ret = $this->save();   //copies temp from scratch to file_upload it returns ulf_ID
                 
                 //unlink($tmp_name);
                 

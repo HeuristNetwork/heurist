@@ -175,7 +175,7 @@ define("HEURIST_UNITED_TERMS", true);
 //---------------------------------
 // update in parallel in jquery-file-upload/server/php/Uploadhandler.php
 define('HEURIST_ALLOWED_EXT', 
-'jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff,pdf,'
+'jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff,pdf,mbtiles,'
 .'mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,htm,html,xhtml,ppt,pptx,zip,gzip,tar');
 
 
@@ -240,7 +240,7 @@ $rtDefines = array(
     'RT_SHP_SOURCE' => array(3, 1017),
     'RT_GEOTIFF_SOURCE' => array(3, 1018),
     'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
-    'RT_MAP_LAYER' => array(3, 1020),
+    'RT_MAP_LAYER' => array(3, 1020),     
     'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
 
     //Web content

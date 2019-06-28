@@ -907,8 +907,13 @@ window.hWin.HEURIST4.util = {
         // (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
         // filename.split('.').pop();
         //filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
-        var res = filename.match(/\.([^\./\?]+)($|\?)/);
-        return (res && res.length>1)?res[1]:'';
+        if(filename){
+            var res = filename.match(/\.([^\./\?]+)($|\?)/);
+            return (res && res.length>1)?res[1]:'';
+        }else{
+            return '';
+        }
+        
     },
     
     //

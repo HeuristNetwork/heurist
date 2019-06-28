@@ -1789,8 +1789,6 @@ $.widget( "heurist.editing_input", {
                             
                         $input.css({'min-wdith':'22ex'});
 
-                        var ptrset = that.f('rst_PtrFilteredIDs');
-
                         var __show_select_dialog = null;
                         /* 2017-11-08 no more buttons
                         var $btn_rec_search_dialog = $( "<span>", {title: "Click to search and select"})
@@ -2688,7 +2686,7 @@ console.log('onpaste');
             
             //show error message on init                    
             //value is not allowed
-            if(!window.hWin.HEURIST4.util.isnull(value) && $input.val()!=value){
+            if(window.hWin.HEURIST4.util.isNumber(value) && $input.val()!=value){
                 
                 var terms = window.hWin.HEURIST4.terms;
                 var termLookup = terms.termsByDomainLookup[this.detailType];
@@ -2952,6 +2950,9 @@ console.log('onpaste');
         return this.inputs;
     },
 
+    //
+    //
+    //
     validate: function(){
 
         if (this.options.dtFields.rst_Display=='hidden' ||
@@ -3023,7 +3024,9 @@ console.log('onpaste');
         return (errorMessage=='');
     },
 
-    
+    //
+    //
+    //
     focus: function(){
         if(this.inputs && this.inputs.length>0){
             $(this.inputs[0]).focus();   

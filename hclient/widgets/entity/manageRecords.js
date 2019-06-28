@@ -2239,18 +2239,41 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             mode = isChanged?'visible':'hidden';
             
             if(isChanged && changed_element){
-                //if this is parent-child pointer AUTOSAVE
-                var parententity = changed_element.f('rst_CreateChildIfRecPtr');                
-                if(parententity==1){
-                    //get values without validation
-                    var fields = this._editing.getValues(false);
-                    var that = this;
-                    fields['no_validation'] = 1; //do not validate required fields
-                    this._saveEditAndClose( fields, function(){ //save without validation
-                        that._editing.setModified(true); //restore flag after autosave
-                        that.onEditFormChange();
-                    });
-                    return;                    
+                
+                //special case for tiled image map source - if file is mbtiles - assign tiler url 
+                if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE'] && 
+                   changed_element.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE']){
+                       
+                      //check extension - only mbtiles allowed
+                      console.log(changed_element.getValues());
+                      
+                      var val = changed_element.getValues();
+                      if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty(val[0])){
+                            var ext = window.hWin.HEURIST4.util.getFileExtension(val[0]['ulf_OrigFileName']);
+                            if(ext=='mbtiles'){
+                                var ulf_ID = val[0]['ulf_ID'];
+                                var url =  window.hWin.HAPI4.baseURL + 'mbtiles.php?/' + window.hWin.HAPI4.database + '/ulf_'+ulf_ID;
+                                this._editing.setFieldValueByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL'], url);
+                                this._editing.setFieldValueByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_LAYER_SCHEMA'], 'zoomify'); //2-550
+                                this._editing.setFieldValueByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE'], 'image/png'); //2-540
+                            }
+                      }
+                      
+                    
+                }else{
+                    //if this is parent-child pointer AUTOSAVE
+                    var parententity = changed_element.f('rst_CreateChildIfRecPtr');                
+                    if(parententity==1){
+                        //get values without validation
+                        var fields = this._editing.getValues(false);
+                        var that = this;
+                        fields['no_validation'] = 1; //do not validate required fields
+                        this._saveEditAndClose( fields, function(){ //save without validation
+                            that._editing.setModified(true); //restore flag after autosave
+                            that.onEditFormChange();
+                        });
+                        return;                    
+                    }
                 }
             }
         }

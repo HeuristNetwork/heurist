@@ -486,6 +486,7 @@ function hEditing(_options) {
         
     //
     // returns array of input elements for given field
+    // fieldName is rec_XXX or dty_ID
     // 
     function _getInputs(fieldName){
         var ele = _getFieldByName(fieldName);
@@ -542,6 +543,17 @@ function hEditing(_options) {
         //
         getFieldByName:function(fieldName){
             return _getFieldByName(fieldName);
+        },
+
+        //
+        //
+        //
+        setFieldValueByName:function(fieldName, value){
+            var ele = _getFieldByName(fieldName);
+            if(ele && ele.editing_input('instance')){
+                ele.editing_input('setValue', $.isArray(value)?value:[value]);
+                ele.editing_input('isChanged', true);
+            }
         },
         
         //
