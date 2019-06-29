@@ -58,13 +58,14 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapManager.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapDocument.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapLayer2.js"></script>
-        <script type="text/javascript" src="mapDraw.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/vector3d.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/latlon-ellipsoidal.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/utm.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/geodesy-master/dms.js"></script>        
 
+        <script type="text/javascript" src="mapDraw.js"></script>        
+        
         <!-- Initializing -->
 
         <script type="text/javascript">
@@ -143,6 +144,9 @@ console.log('load google map api')
 
                 }});
                 
+                $('#view-button').button().click(function(){
+                       mapping.mapping('getSetMapBounds', true);
+                });
                 $('#style-button').button().on({click:function(){
                         mapping.mapping( 'drawSetStyle');
                 }});
@@ -170,6 +174,7 @@ console.log('load google map api')
                     };
                     $('#get-coordinates-helper').hide();
                     $('#set-coordinates-helper').show();
+                    $('#geodata_textarea').css({top:'6em'});
 
                     $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({window:top, 
                         element: document.getElementById( "get-set-coordinates" ),
@@ -185,6 +190,7 @@ console.log('load google map api')
                     
                     $('#get-coordinates-helper').show();
                     $('#set-coordinates-helper').hide();
+                    $('#geodata_textarea').css({top:'2em'});
                     
                     $('#get-coord-wkt').change();
                     
@@ -252,6 +258,7 @@ console.log(el_name+'  '+is_checked);
                
 //console.log('zoom '+zoom_with_delay);
 
+
                     if(zoom_with_delay){
                         setTimeout(function(){ mapping.mapping( 'drawZoomTo' ); }, 3000);
                     }
@@ -260,6 +267,12 @@ console.log(el_name+'  '+is_checked);
                 }else{
                     $('#cbAllowMulti').prop('checked',false);
                     mapping.mapping( 'drawClearAll' );
+                    
+                    //zoom to saved extent
+                    if(zoom_with_delay){
+                        setTimeout(function(){ mapping.mapping('getSetMapBounds', false); }, 3000);
+                    }
+                    
                 }
             }
             
@@ -372,15 +385,16 @@ console.log(el_name+'  '+is_checked);
                 <div style="width:auto !important;display:inline-block;height: 14px" id="color-palette"></div>
                 -->
                 <div>
+                    <label><input type="checkbox" id="cbAllowMulti">Allow multiple objects</label><br><br>
                     <button id="style-button">Set style</button>
                 </div>
-                
-                <div style="padding-top:20px">
-                    <!-- <label>Select shape to draw</label><br>
-                    <label>Click to add points</label><br><br> -->
-                    <label><input type="checkbox" id="cbAllowMulti">Allow multiple objects</label><br><br>
-                    <button id="save-button" style="font-weight:bold">Save</button>
+                <div>
+                    <button id="load-geometry-button">Add Geometry</button>
                 </div> 
+                <div>
+                    <button id="get-geometry-button">Get Geometry</button>
+                </div> 
+                
                 <div style="padding-top:20px">
                     <button id="delete-all-button">Clear all</button>
                 </div> 
@@ -390,12 +404,19 @@ console.log(el_name+'  '+is_checked);
                 <div>
                     <button id="cancel-button">Cancel</button>
                 </div>
+                
                 <div style="padding-top:20px">
-                    <button id="load-geometry-button">Add Geometry</button>
+                    <button id="view-button">Remember view</button>
+                </div>
+                <div style="padding-top:20px">
+                    <button id="save-button" style="font-weight:bold;font-size:1.1em">Save</button>
                 </div> 
-                <div>
-                    <button id="get-geometry-button">Get Geometry</button>
-                </div> 
+                
+                <div style="position:absolute;bottom:5;text-align:left;padding:10px;">
+                    Add markers by selecting a drawing tool on the left<br><br>
+                    Specific coordinates can be entered using Add Geometry
+                </div>
+                
                 
                 <div style="bottom:30;position: absolute;height:160px;display:none">
                     <div id="coords_hint" style="padding:0 4px 2px 4px"></div>    
@@ -409,7 +430,12 @@ console.log(el_name+'  '+is_checked);
             <!--
             -->
             <div id="set-coordinates-helper">
-                <label>Paste geo data in supported format (GeoJSON or WKT)</label>
+                <label>Paste geo data as Simple points, GeoJSON or WKT</label>
+                <div class="heurist-helper1" style="padding:5px 0">
+                    WKT:  Point (x y)   Linestring (x1 y1, x2 y2, x3 y3)   Polygon ((x1 y1, x2 y2, x3 y3)) see 
+                    <a href="https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry" target="_blank">wikipedia</a> for more.<br>
+                    Simple points can be represented as: Y X or Y,X. Coordinates in decimal lat/long or UTM (first easting then northing)<br>
+                </div>
             </div>
             <div id="get-coordinates-helper">
                 <label>Select format: </label>

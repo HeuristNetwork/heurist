@@ -507,6 +507,12 @@ $.widget( "heurist.mapping", {
                 });    
                 
             new_layer = new MapTilerLayer(layer_url, layer_options).addTo(this.nativemap);  
+
+            /*            
+              layer_url = 'http://127.0.0.1/h5-ao/external/php/tileserver.php?/index.json?/c:/xampp/htdocs/HEURIST_FILESTORE/tileserver/mapa/{z}/{x}/{y}.png';
+              new_layer = new HeuristTilerLayer(layer_url,
+               layer_options).addTo(this.nativemap);         
+            */
                 
         }else{
             new_layer = new HeuristTilerLayer(layer_url, layer_options).addTo(this.nativemap);             
@@ -868,6 +874,34 @@ $.widget( "heurist.mapping", {
         var bounds = this.getBounds(layer_ids);
         
         if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);
+        
+    },
+
+    //
+    // save map bounds in usr prefs/resore and set map
+    //    
+    getSetMapBounds: function(is_set){
+        
+        if(is_set){
+            var bounds = this.nativemap.getBounds();
+            window.hWin.HAPI4.save_pref('map_saved_extent', bounds.toBBoxString());
+        }else{
+            var bounds = window.hWin.HAPI4.get_prefs_def('map_saved_extent', null);
+            
+            if(bounds){
+                //'southwest_lng,southwest_lat,northeast_lng,northeast_lat'
+                bounds = bounds.split(',');
+                if(bounds.length==4){
+                    var corner1 = L.latLng(bounds[1], bounds[0]),
+                        corner2 = L.latLng(bounds[3], bounds[2]);
+                    bounds = L.latLngBounds(corner1, corner2);            
+                    if(bounds && bounds.isValid){
+                            this.nativemap.fitBounds(bounds);  
+                    } 
+                }
+            }
+            
+        }
         
     },
     
@@ -1776,12 +1810,27 @@ $.widget( "heurist.mapping", {
         gjson = window.hWin.HEURIST4.util.isJSON(data);
 
         if(gjson===false){
-            this.drawLoadWKT(data, false);        
+            //wkt or simple points
+            if(data.indexOf('POINT')>=0 || data.indexOf('LINE')>=0 || data.indexOf('POLY')>=0){
+                this.drawLoadWKT(data, false);
+            }else {
+                this.drawLoadSimplePoints(data); //parses, UTM to LatLng and converts to WKT 
+            }         
         }else{
             this.drawLoadJson(gjson, false);
         }
         
         
+    },
+
+    //
+    // requires mapDraw.js - called from doigitizer only
+    //
+    drawLoadSimplePoints: function(sCoords, type, UTMzone){
+        
+        var that = this;
+        
+        simplePointsToWKT(sCoords, type, UTMzone, function(wkt){ that.drawLoadWKT(wkt, false); });
     },
     
     //
@@ -1816,7 +1865,7 @@ $.widget( "heurist.mapping", {
         }else if(force_clear){
             this.drawClearAll();
         }else{
-             window.hWin.HEURIST4.msg.showMsgFlash('It appears that WKT is not recognized'); 
+            window.hWin.HEURIST4.msg.showMsgFlash('The text entered is not valid WKT'); 
         }        
         
     },
@@ -1835,7 +1884,7 @@ $.widget( "heurist.mapping", {
             } 
             
             if(gjson===false){
-                window.hWin.HEURIST4.msg.showMsgFlash('GeoJSON is not valid');    
+                window.hWin.HEURIST4.msg.showMsgFlash('The text entered is not valid GeoJSON');    
                 return;
             }
 

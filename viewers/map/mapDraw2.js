@@ -563,7 +563,7 @@ function hMappingDraw(_mapdiv_id, _initial_wkt) {
     //        
     function _parseManualEntry(sCoords, type, UTMzone){
 
-        var s = sCoords.replace(/[\b\t\n\v\f\r]/g, ' ');
+        var s = sCoords.replace(/[\b\t\n\v\f\r]/g, ' '); //remove invisible service chars
         s = s.replace("  "," ").trim();
         var arc = s.split(" ");  
         var coords = []; //Array of LatLngLiteral

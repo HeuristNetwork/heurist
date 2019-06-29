@@ -26,6 +26,8 @@ wktValueToDescription
 
 parseCoordinates - old way for DH
 
+simplePointsToWKT -  coordinate pairs to WKT
+
 */
 
 if (!window.hWin.HEURIST4){
@@ -759,6 +761,5 @@ window.hWin.HEURIST4.geo = {
         
     }
     
-     
 }
 }
