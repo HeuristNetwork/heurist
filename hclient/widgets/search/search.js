@@ -1065,6 +1065,7 @@ $.widget( "heurist.search", {
                     if(!window.hWin.HEURIST4.util.isempty(qs) && qs.length<10000){
                         that.input_search.val(qs);
                         that.options.search_domain = data.w;
+                        that.query_request = data;
                         that._refresh();
                     }
                 }
@@ -1211,6 +1212,8 @@ $.widget( "heurist.search", {
             request.w  = this.options.search_domain;
             request.detail = 'detail';
             request.source = this.element.attr('id');
+            
+            this.query_request = request;
 
             window.hWin.HAPI4.SearchMgr.doSearch( this, request );
 
@@ -1235,6 +1238,27 @@ $.widget( "heurist.search", {
             var inpt = $(this.input_search).offset();
             popup.css({'left': inpt.left, 'top':inpt.top+$(this.input_search).height()+3 });
             //popup.position({my: "left top+3", at: "left bottom", of: this.input_search })
+                
+            // assign value to rectype selector if previous search was by rectypes
+            if(this.query_request){
+                var q = this.query_request.q, rt = 0;
+                if ($.isPlainObject(q) && Object.keys(q).length==1 && !q['t']){
+                    rt = q['t'];
+                }else if (q.indexOf('t:')==0){
+                      q = q.split(':');
+                      if(window.hWin.HEURIST4.util.isNumber(q[1])){
+                          rt = q[1];
+                      }
+                }
+                if(rt>0 && window.hWin.HEURIST4.rectypes.names[rt]){
+                    var sel = popup.find("#sa_rectype");
+                    sel.val(rt);
+                    if(sel.hSelect("instance")!=undefined){
+                        sel.hSelect("refresh"); 
+                    }
+                }
+            }
+            
 
             popup.show( "blind", {}, 500 );
 
