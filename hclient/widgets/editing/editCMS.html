@@ -7,18 +7,18 @@
             <div class="ent_header" style="height:14em;font-size:0.8em">
                 <fieldset>
                         <div>
-                            <div class="header" style="min-width:80px; width:80px;">
-                                <label for="web_Name">Website title</label>
+                            <div class="header" style="min-width:40px; width:40px;">
+                                <label for="web_Name">Title</label>
                             </div>
                             <input type="text" name="web_Name" id="web_Name" class="text ui-widget-content ui-corner-all"
-                                maxlength="64" size="64" style="width:180px" />
+                                maxlength="64" size="64" style="width:100%" />
                             <div style="Xwidth: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
                                 The title of the website, will appear in browser toolbar, specify the name of the current database with #Database Name#
                             </div>
                         </div>
                 
                         <div>
-                            <div class="header" style="min-width:80px; width:80px;">
+                            <div class="header" style="min-width:40px; width:40px;">
                                 <label for="web_Theme">Theme</label>
                             </div>
                             <select name="web_Theme" id="web_Theme" class="text ui-widget-content ui-corner-all"></select>
@@ -28,17 +28,24 @@
                         </div>
                         <div style="display: block;text-align: center;">
                             <div id="btn_edit_home" style="display:inline-block;">Edit Home Page</div>
-                            <div id="btn_add_menu" style="display:inline-block;">Add new root menu item</div>
                             <div id="btn_refresh" style="display:inline-block;">Refresh</div>
-                            <div id="btn_preview" style="display:inline-block;">Open preview in new tab</div>
+                            <div id="btn_preview" style="display:inline-block;">Preview website</div>
                         </div>
                 </fieldset>
                 
-                <div class="heurist-helper1">
-                    Dblclick or F2 to edit menu name inline. DnD to reorder menu (@todo)
+                <div style="border-top:1px solid lightgray">
+                   <div style="padding:10px 18px;height:26px;">
+                       <h3 style="float:left;">Menus</h3>
+                       <a href="#" id="btn_add_menu" style="float:left;padding:0 30px">Add top level</a>
+                       <div class="heurist-helper1" style="float:left;;padding-top:2px" title="Select menu item and Dblclick (or F2) to edit menu title in place. Drag and drop to reorder menu">
+                            drag to reorder
+                        </div>
+                   </div>
                 </div>
             </div>
-            <div class="ent_content_full" id="web_tree" style="top:14em;border-top:1px solid lightgray"></div>
+            <div class="ent_content" id="web_tree" style="top:14em">
+            </div>
+            <div class="ent_footer" id="web_link" style="text-align:center;border-top: 1px lightgray solid;height:35px"></div>
         </div>
     </div>
 </div>

@@ -19,21 +19,28 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-if( @$_REQUEST['recID'] || @$_REQUEST['recid'] ){
+if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_REQUEST)){
+    
+    $recid = 0;
     if(@$_REQUEST['recID']){
         $recid = $_REQUEST['recID'];    
     }elseif(@$_REQUEST['recid']){
         $recid = $_REQUEST['recid'];        
+    }elseif(@$_REQUEST['id']){
+        $recid = $_REQUEST['id'];                
     }
     if(@$_REQUEST['fmt']){
         $format = $_REQUEST['fmt'];    
     }elseif(@$_REQUEST['format']){
         $format = $_REQUEST['format'];        
+    }else if (array_key_exists('website', $_REQUEST)) {
+        $format = 'website';
     }else{
         $format = 'xml';
     }
     header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format);
     return;
+    
 }else if (@$_REQUEST['file'] || @$_REQUEST['thumb'] || @$_REQUEST['rurl']){
     header( 'Location: hsapi/dbaccess/file_download.php?'.$_SERVER['QUERY_STRING'] );
     return;

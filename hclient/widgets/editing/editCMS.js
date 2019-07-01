@@ -53,13 +53,15 @@ function editCMS(home_page_record_id, main_callback){
         }}
     ];
 
+    var body = $(this.document).find('body');
+    var dim = {h:body.innerHeight(), w:body.innerWidth()},
     //
     //
     //
     edit_dialog = popup_dlg.dialog({
         autoOpen: true,
-        height: 600,
-        width:  1200,
+        height: dim.h*0.95,
+        width:  dim.w*0.95,
         modal:  true,
         title: window.hWin.HR('Define Website'),
         resizeStop: function( event, ui ) {//fix bug
@@ -97,7 +99,8 @@ function editCMS(home_page_record_id, main_callback){
         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
         togglerContent_closed:  '<div class="ui-icon ui-icon-triangle-1-e"></div>',
         west:{
-            size: 300, //this.usrPreferences.summary_width
+            size: 400, //this.usrPreferences.summary_width
+            minWidth:360,
             maxWidth:600,
             spacing_open:6,
             spacing_closed:16,  
@@ -238,7 +241,7 @@ function editCMS(home_page_record_id, main_callback){
                                         });
                                     
                                         //add new root menu
-                                        popup_dlg.find('#btn_add_menu').button({icon:'ui-icon-menu',showLabel:false}).click(function(){
+                                        popup_dlg.find('#btn_add_menu').click(function(){
                                                 selectMenuRecord(home_page_record_id, function(){
                                                     _initWebSiteEditor();
                                                 });
@@ -246,16 +249,18 @@ function editCMS(home_page_record_id, main_callback){
                                     
                                         btn_refresh.button({icon:'ui-icon-refresh'}).click(function(){
                                             popup_dlg.find('#web_preview').attr('src', window.hWin.HAPI4.baseURL+
-                                                '?fmt=web&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id);
+                                                'viewers/record/websiteRecord.php?edit=1&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id);
                                         });
                                         
+                                        var url = window.hWin.HAPI4.baseURL+
+                                                    '?website&db='+window.hWin.HAPI4.database+'&id='+home_page_record_id
+                                                    
                                         //open preview in new tab
-                                        popup_dlg.find('#btn_preview').button({icon:'ui-icon-extlink',showLabel:false}).click(function(){
-                                                var url = window.hWin.HAPI4.baseURL+
-                                                    '?fmt=web&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id
+                                        popup_dlg.find('#btn_preview').button({icon:'ui-icon-extlink'}).click(function(){
                                                 window.open(url, '_blank');
                                         });
                                         
+                                        $('#web_link').html('<br><a href="'+url+'" target="_blank">'+url+'</a>');
                                     }
                                     btn_refresh.click();
                                     
