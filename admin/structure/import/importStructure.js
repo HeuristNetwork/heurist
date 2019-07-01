@@ -426,7 +426,7 @@ $.widget( "heurist.importStructure", {
     //
     // init manageDefRecTypes widget on panel_rty
     //
-    _loadRecordTypesForDb: function(db_ids){
+    _loadRecordTypesForDb: function(db_ids, skip_pass){
 
         var that = this;
         var panel_dbs = this.element.find('#panel_dbs');
@@ -438,6 +438,13 @@ $.widget( "heurist.importStructure", {
         var sDB   = db_ids.fld(record, 'rec_Title');
 
         if(this._selectedDB != sDB_ID){
+            
+            if(sDB_ID==99 && skip_pass!==true){ //special case - password protect db 99 - heurist construction site
+                window.hWin.HAPI4.SystemMgr.verify_credentials( 
+                    function(){that._loadRecordTypesForDb( db_ids, true )},1,'ServerFunctions'); //db admin and pwd protected
+               return;     
+            }
+            
 
             this._selectedDB = sDB_ID;
 /*
