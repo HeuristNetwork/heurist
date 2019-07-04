@@ -126,8 +126,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/editing/rec_relation.js"></script>
         -->
 
-        <!-- move to profile.js dynamic load -->
-        <script type="text/javascript" src="external/js/themeswitchertool.js"></script>
+        <!-- move to profile.js dynamic load
+        <script type="text/javascript" src="external/jquery-ui-themeswitcher/jquery.ui.themeswitcher.js"></script>
+         -->
 
         <!-- edit entity (load dynamically?) -->        
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/select_imagelib.js"></script>

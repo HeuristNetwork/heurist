@@ -224,7 +224,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     }
     
 
-    var onAboutInit, onPageInit;
+    var onAboutInit, onPageInit, isHapiInited = false;
 
 
     // if hAPI is not defined in parent(top most) window we have to create new instance
@@ -261,6 +261,10 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     // Callback function on hAPI initialization
     function onHapiInit(success)
     {
+        //if(isHapiInited) return;
+        
+        isHapiInited = true;
+        
         if(success) // Successfully initialized system
         {
             applyTheme();

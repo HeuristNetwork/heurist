@@ -162,17 +162,44 @@ function hLayout(args) {
     }
     
     /**
+    *  Creates "free" layout from html elements attributes heurist-app-id and heurist-app-options
+    */
+    function _getLayoutParams($container){
+        
+        var eles = $container.find('div[heurist-app-id]');
+        
+        var layout = {id:'Dynamic', type:'free'};
+        
+        var is_layout = false;
+        
+        for(var i=0; i<eles.length; i++){
+            var ele = $(eles[i]);
+            var app_id = ele.attr('heurist-app-id');
+            if(_appGetWidgetById(app_id)!=null){
+                var opts = window.hWin.HEURIST4.util.isJSON(ele.attr('heurist-app-options'));
+                
+                layout[ele.attr("id")] = {dropable:false, apps:[{appid:app_id, hasheader:false, 
+                        options:opts!=false?opts:null }]};    
+                        
+                is_layout = true;
+            }
+        }
+        
+        return is_layout ?layout :null;
+    }
+    
+    /**
     * Main funtion that inits all stuff
     *
     * layoutid to be loaded (see layouts in layout_default.js)
-    * containerid - container div id
+    * $container - base dic layout will be created on
     *
     * this function
     * 1) creates panes (see ext/layout)
     * 2) inits layout container
     * 3) adds tabs/apps to pane
     */
-    function _appInitAll(layoutid, containerid){
+    function _appInitAll(layoutid, $container){
 
     //--------------------------------------------
     var grid_min_size = 200;
@@ -409,6 +436,7 @@ function hLayout(args) {
 
         //find main container and load template
         if(layout['template']){
+               $container.empty();
                $container.hide();
                $container.load(layout['template'], function(){ 
                     layout['template'] = null; 
@@ -719,8 +747,13 @@ function hLayout(args) {
 
             app.widget = $content;
 
-            //this is debug mode to init widgets
-            // app javascript are loaded in index.php header
+            if($.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded
+            
+                manage_dlg = $content[app.widgetname]( options );
+            }else{
+                
+                
+/*            
             if(app.widgetname=='resultList'){
                 //DEBUG
                 widget = $content.resultList( options );
@@ -753,19 +786,19 @@ function hLayout(args) {
             }else if(app.widgetname=='expertnation_nav'){
                    widget = $content.expertnation_nav( options );
             }else
-                    {
+*/            
                         //this is normal way of widget initialization
                         // script is loaded dynamically and init function is widget name
 
 
-                        $.getScript(app.script, function() {  //+'?t='+(new Date().getTime())
+                        $.getScript( window.hWin.HAPI4.baseURL + app.script, function() {  //+'?t='+(new Date().getTime())
                             if($.isFunction($content[app.widgetname])){
                                 $content[app.widgetname]( options );   //call function
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr('Widget '+app.widgetname+' not loaded. Verify your configuration');
                             }
                         });
-                    }
+            }
 
 
         }else if (app.url2) {
@@ -1025,7 +1058,13 @@ function hLayout(args) {
         return res;
     }
     
-        var layout = layoutGetById(layoutid);
+    var layout = null;
+    if($.isPlainObject(layoutid) && layoutid['type'] &&  layoutid['id']){
+        layout = layoutid;
+        layoutid = layout['id'];
+    }else{
+        layout = layoutGetById(layoutid);
+    }
     
     //**********************************************************
 
@@ -1043,8 +1082,7 @@ function hLayout(args) {
         }
         
 
-        var $container = $(containerid);
-        $container.empty();
+        //var $container = $(containerid);
         
         //add style to header
         if(!Hul.isempty(layout.cssfile)){
@@ -1060,7 +1098,8 @@ function hLayout(args) {
         
 
         if(Hul.isempty(layout.type) || layout.type=='cardinal'){
-
+            
+            $container.empty();
             _initLayoutCardinal(layout, $container);
 
         }else { //}if(layout.type=='free'){
@@ -1180,7 +1219,27 @@ function hLayout(args) {
         
         appInitAll: function(layoutid, containerid){
             _containerid = containerid
-            _appInitAll(layoutid, containerid);
+            var $container = $(containerid);
+            _appInitAll(layoutid, $container);
+        },
+        
+        //
+        // 
+        //
+        appInitFromContainer: function( document, containerid ){
+            _containerid = containerid;
+            var $container;
+            if(document){
+                $container = $(document.body).find(containerid);
+            }else{
+                $container = $(containerid);
+            }
+            //create layout based on heurist-app-id and heurist-app-options
+            var layout = _getLayoutParams($container); 
+            if(layout){
+                _appInitAll(layout, $container); 
+            }
+                
         },
 
         putAppOnTop: function( widgetname ){
