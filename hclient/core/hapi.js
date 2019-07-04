@@ -511,7 +511,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
             ,user_log: function(activity, suplementary){
                 
-                if($.isFunction(gtag)){
+                if(gtag && $.isFunction(gtag)){ //google log function
 /*                    
 Category
 Action
@@ -850,7 +850,9 @@ prof =Profile
             ,search: function(request, callback){
 
 
-                if(!$.isFunction(callback)){   //@todo - remove all this stuff since it is implemented in SearchMgr
+                if(!$.isFunction(callback)){   
+                    // it happens only of calback function is not set
+                    // remove all this stuff since callback function is always defined
 
                     if(!request.increment || window.hWin.HEURIST4.util.isnull(request.id)){
                         request.id = window.hWin.HEURIST4.util.random();
@@ -870,12 +872,9 @@ prof =Profile
 
                             window.hWin.HEURIST4.msg.showMsgErr(response);
 
-                            if(!window.hWin.HEURIST4.util.isnull(document)){
-                                document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
-                            }
                         }
                         if(!window.hWin.HEURIST4.util.isnull(document)){
-                            document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, [ resdata ]);  //gloal app event
+                                document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {resultset:resdata}); //global app event
                         }
                     }
                 }
@@ -1147,8 +1146,6 @@ prof =Profile
             ON_CREDENTIALS: 'ON_CREDENTIALS', //login, logout, change user role, sysinfo (change sysIdentification) 
             ON_REC_SEARCHSTART: "ON_REC_SEARCHSTART",
             ON_REC_SEARCH_FINISH: "ON_REC_SEARCH_FINISH",
-            ON_REC_SEARCHRESULT: "ON_REC_SEARCHRESULT",
-            //ON_REC_SEARCHTERMINATE: "ON_REC_SEARCHTERMINATE",
             ON_REC_PAGESET: "ON_REC_PAGESET",
             ON_REC_SELECT: "ON_REC_SELECT",
             ON_LAYOUT_RESIZE: "ON_LAYOUT_RESIZE",
@@ -1403,8 +1400,7 @@ prof =Profile
 
         EntityMgr: new hEntityMgr(),
 
-        //@todo - assign it later since we may have different search managers - incremental, partial...
-        //SearchMgr: new hSearchIncremental(), //class that responsible for search and incremental loading of result
+        //assign it later since we may have different search managers - incremental, partial...
         SearchMgr: null, //class that responsible for search and incremental loading of result
 
         LayoutMgr: null,

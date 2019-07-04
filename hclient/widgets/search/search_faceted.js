@@ -105,7 +105,8 @@ $.widget( "heurist.search_faceted", {
         params: {},
         ispreview: false,
         showclosebutton: true,
-        onclose: null
+        onclose: null,
+        search_realm: null
     },
 
     cached_counts:[], //stored results of get_facets by stringified query index
@@ -174,6 +175,9 @@ $.widget( "heurist.search_faceted", {
         $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, 
         
         function(e, data) {
+            
+            if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
+            if(data.reset) return; //ignore
 
             if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
             
@@ -189,9 +193,10 @@ $.widget( "heurist.search_faceted", {
                 
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                 
-                if(data && data.queryid()==current_query_request_id) {
+                var recset = data.recordset;
+                if(recset && recset.queryid()==current_query_request_id) {
                       //search from this widget
-                      that._currentRecordset = data;
+                      that._currentRecordset = recset;
                       that._isInited = false;
                       that._recalculateFacets(-1);       
                 }         
@@ -457,7 +462,7 @@ $.widget( "heurist.search_faceted", {
     //
     ,doReset: function(){
 
-        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
+        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
         
         var facets = this.options.params.facets;
 
@@ -687,7 +692,7 @@ $.widget( "heurist.search_faceted", {
     }
 
     ,doClose: function(){
-        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ null ]);  //global app event to clear views
+        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
         this._trigger( "onclose");
     }
 

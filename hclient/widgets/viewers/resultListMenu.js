@@ -26,7 +26,8 @@ $.widget( "heurist.resultListMenu", {
         // callbacks
         show_searchmenu:false,
         menu_class:null,
-        resultList:null  //reference to parent
+        resultList: null,  //reference to parent
+        search_realm: null
     },
 
     _query_request: {}, //keep current query request
@@ -53,7 +54,10 @@ $.widget( "heurist.resultListMenu", {
         this._initMenu('Collected');
         this._initMenu('Recode');
         this._initMenu('Shared');
-        if(this.options.resultList) this._initMenu('Reorder');
+        if(this.options.resultList){
+            this._initMenu('Reorder');  
+            this.options.search_realm = this.options.resultList.resultList('option', 'search_realm');
+        } 
         //this._initMenu('Experimental',0);
         //this._initMenu('Layout');
         this.divMainMenuItems.menu();
@@ -71,30 +75,27 @@ $.widget( "heurist.resultListMenu", {
                  +window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '
                  +window.hWin.HAPI4.Event.ON_REC_SELECT; //+'  competency'
 
-        /*window.hWin.HAPI4.Event.ON_CREDENTIALS;
-        if(this.options.isapplication){
-        sevents = sevents + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT;
-        }*/
-
         $(window.hWin.document).on(sevents, function(e, data) {
 
             if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS){
 
                 that._refresh();
-            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){
 
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
-                if(data) {
+                if(data && !data.reset && that._isSameRealm(data)) {
                     that._query_request = jQuery.extend({}, data); //keep current query request
                 }
 
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
-                if(data && data.source!=that.element.attr('id')) {
-                    if(data) data = data.selection;
-                    that._selection = window.hWin.HAPI4.getSelection(data, false);
-                    
+                if(data && data.source!=that.element.attr('id') && that._isSameRealm(data)) {
+
+                    if(data.reset){
+                        that._selection = null;
+                    }else{
+                        that._selection = window.hWin.HAPI4.getSelection(data.selection, false);
+                    }
                     window.hWin.HAPI4.currentRecordsetSelection = that.getSelectionIds();
                 }
             }
@@ -109,6 +110,14 @@ $.widget( "heurist.resultListMenu", {
 
     }, //end _create
 
+    //
+    //
+    //
+    _isSameRealm: function(data){
+        return !this.options.search_realm || (data && this.options.search_realm==data.search_realm);
+    },
+
+    
     // Any time the widget is called with no arguments or with only an option hash,
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
@@ -547,12 +556,14 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
     selectAll: function(){
         this._selection = window.hWin.HAPI4.getSelection('all', false);
-        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, {selection:"all", source:this.element.attr('id')} );
+        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+            {selection:"all", source:this.element.attr('id'), search_realm:this.options.search_realm} );
     },
 
     selectNone: function(){
         this._selection = null;
-        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, {selection:null, source:this.element.attr('id')} );
+        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+            {selection:null, source:this.element.attr('id'), search_realm:this.options.search_realm} );
     },
 
     selectShow: function(){

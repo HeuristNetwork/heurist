@@ -74,6 +74,8 @@ $.widget( "heurist.resultList", {
         entityName:'records',   //records by default
         
         recordDiv_class:null,  //additional class for recordDiv
+        
+        search_realm:  null  //accepts search/selection events from elements of the same realm only
     },
 
 
@@ -116,7 +118,7 @@ $.widget( "heurist.resultList", {
         {
             this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS + " " + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE;
             if(this.options.isapplication){
-                this._events = this._events + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
+                this._events = this._events 
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH;
@@ -135,34 +137,29 @@ $.widget( "heurist.resultList", {
                     }
                     that._refresh();
 
-                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
-
-                    that.loadanimation(false);
-
-                    if(that._query_request!=null && data && data.queryid()==that._query_request.id) {
-                        
-                        if(that._query_request.viewmode){
-                            that.applyViewMode( that._query_request.viewmode );
-                        }
-                        
-
-                        that._renderRecordsIncrementally(data); //hRecordSet
-                    }
-
-                    //@todo show total number of records ???
-
-
-                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
+                }else 
+                if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART)
+                {
+                    
+                    //accept events from the same realm only
+                    if(!that._isSameRealm(data)) return;
 
                     that.span_pagination.hide();
                     that.span_info.hide();
 
                     that.setSelected(null);
                     $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
-                        {selection:null, source:that.element.attr('id')} );
+                        {selection:null, source:that.element.attr('id'), search_realm:that.options.search_realm} );
 
-                    if(data){
-
+                    if(data.reset){
+                        
+                        //fake restart
+                        that._clearAllRecordDivs('');
+                        //that.loadanimation(true);
+                        that._renderStartupMessageComposedFromRecord();
+                        
+                    }else{
+                        
                         if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
                             //new search from outside
                             var new_title;
@@ -195,22 +192,20 @@ $.widget( "heurist.resultList", {
 
                         that._query_request = data;  //keep current query request
 
-                    }else{ //fake restart
-                        that._clearAllRecordDivs('');
-                        //that.loadanimation(true);
-
-                        that._renderStartupMessageComposedFromRecord();
                     }
 
                     that._renderSearchInfoMsg(null);
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
-                    that._showHideOnWidth();
-                    that._renderPagesNavigator();
-                    that._renderSearchInfoMsg(data);
+                    //accept events from the same realm only
+                    if(!that._isSameRealm(data)) return;
+                    
+                    that.loadanimation(false);
+                    
+                    var recset = data.recordset;
 
-                    if(data==null){
+                    if(recset==null){
 
                         var recID_withStartupInfo = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');
                         if(recID_withStartupInfo>0){
@@ -224,48 +219,65 @@ $.widget( "heurist.resultList", {
 
                         if(that.btn_search_save){
                             that.btn_search_save.hide();
-                            //that.btn_search_save_withorder.hide();
                         } 
-                    }else{
+                    }else if(that._query_request!=null && recset.queryid()==that._query_request.id) {
+                        
+                        //it accepts only results that has the same query id as it was set in ON_REC_SEARCHSTART
+                        
+                            
+                        if(that._query_request.viewmode){
+                                that.applyViewMode( that._query_request.viewmode );
+                        }
+
+                        that._renderRecordsIncrementally(recset); //hRecordSet
+                        
                         if(that.btn_search_save) {
                             that.btn_search_save.show();
                             if(that.search_save_hint.attr('show_hint')==1){
                                 that.search_save_hint.show('fade',{},1000);
                                 setTimeout(function(){that.search_save_hint.hide('slide', {}, 6000);}, 5000);    
                             }
-                            
-                            //that.btn_search_save_withorder.show();
-                            //setTimeout(function(){that.search_save_hint.hide('puff');},3000);
                         }
                     }
+                    
+                    that._showHideOnWidth();
+                    that._renderPagesNavigator();
+                    that._renderSearchInfoMsg(recset);
+                    
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
                     //this selection is triggered by some other app - we have to redraw selection
-                    if(data && data.source!=that.element.attr('id')) {
-                        that.setSelected(data.selection);
+                    if(data && data.source!=that.element.attr('id') && that._isSameRealm(data)) {
+                        
+                        if(data.reset){
+                            that.setSelected(null);
+                        }else{
+                            that.setSelected(data.selection);    
+                        }
+                        
+                        
                     }
                 }
                 //that._refresh();
             });
 
         }
-        /*
-        if(this.options.isapplication){
-        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
-        that.option("recordset", data); //hRecordSet
-        that._refresh();
-        });
-        }
-        */
 
         this._init_completed = true;
 
         this._refresh();
 
         this._renderStartupMessageComposedFromRecord();
-
+    
     }, //end _create
+    
+    //
+    //
+    //
+    _isSameRealm: function(data){
+        return !this.options.search_realm || (data && this.options.search_realm==data.search_realm);
+    },
 
     //
     //
@@ -1489,7 +1501,8 @@ $.widget( "heurist.resultList", {
 
         if(this.options.isapplication){
             var selected_ids = this.getSelected( true );
-            $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, {selection:selected_ids, source:this.element.attr('id')} );
+            $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                {selection:selected_ids, source:this.element.attr('id'), search_realm:this.options.search_realm} );
         }else{
             var selected_recs = this.getSelected( false );
             this._trigger( "onselect", null, selected_recs );
@@ -1613,9 +1626,9 @@ $.widget( "heurist.resultList", {
 
     //
     // alternative info function that is invoked ONLY ONCE on search finish
+    // see EN
     //
     _renderSearchInfoMsg: function(){
-
 
     },
 

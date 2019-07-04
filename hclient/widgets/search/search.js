@@ -31,21 +31,16 @@ $.widget( "heurist.search", {
 
         isloginforced:true,
 
-        btn_visible_newrecord: true, //show add record button
-        btn_visible_save: false,
-
-        btn_entity_filter: true,
+        btn_visible_newrecord: true, // show add record button
+        btn_visible_save: false,     // save search popup button
+        btn_entity_filter: true,     // show buttons: filter by entity
         
-        // before this widget was generic, however search on main page became very distinctive and got
-        // lot of additional ui comonents. thus, we have the specific search widget and this one remains for main ui
-        // for dialog mode - remove into separate widget
-        isrectype: false,  // show rectype selector
-        rectype_set: null, // comma separated list of rectypes, if not defined - all rectypes
-
         isapplication:true,  // send and recieve the global events
         // callbacks
         onsearch: null,  //on start search
-        onresult: null   //on search result
+        onresult: null,   //on search result
+        
+        search_realm:  null  //accepts search/selection events from elements of the same realm only
     },
 
     _total_count_of_curr_request: 0, //total count for current request (main and rules) - NOT USED
@@ -60,12 +55,7 @@ $.widget( "heurist.search", {
 
         var that = this;
 
-
-        /*if(!$.isFunction( hSearchIncremental )){        //jquery.fancytree-all.min.js
-        $.getScript(window.hWin.HAPI4.baseURL+'hclient/core/search_incremental.js', function(){ that._create(); } );
-        return;
-        }*/
-        this.element.css({'height':'7.88em', 'min-width':'1100px'});//'border-bottom':'1px solid lightgray'
+        this.element.css({'height':'10.88em','min-width':'1100px'});//'border-bottom':'1px solid lightgray'
         if(window.hWin.HAPI4.sysinfo['layout']!='H4Default' && window.hWin.HAPI4.sysinfo['layout']!='H5Default'){
             this.element.addClass('ui-heurist-header1'); //dark navy bg - used long ago in original layout - to remove
         }else{
@@ -124,17 +114,17 @@ $.widget( "heurist.search", {
         }
 
         //------------------------------------------- filter by entities
-        var is_vis = (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
+        var is_vis = this.options.btn_entity_filter && (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
         
         this.div_entity_btns   = $('<div>').addClass('heurist-entity-filter-buttons')
-                                .css({ 'display':'block','padding':'5px '+sz_search_padding,
+                                .css({ 'display':'block','padding':'10px '+sz_search_padding,
                                     'visibility':is_vis?'visible':'hidden',
                                     'height':is_vis?'auto':'10px'})
                                 .appendTo( this.element );
         //quick filter by entity
         this.btns_by_entity = $('<button>').button({label: window.hWin.HR("Show list of entities to filter"), 
                 showLabel:false, icon:'ui-icon-gear'})
-        .css({'font-size':'0.9em'})        
+        .css({'font-size':'1.1em'})        
         .appendTo(this.div_entity_btns);
         
         this.btns_by_entity_options = {select_name:'select_btns_by_entity', 
@@ -223,9 +213,11 @@ $.widget( "heurist.search", {
             change: this._showhide_input_prompt
             });
         
-        window.hWin.HEURIST4.util.setDisabled(this.input_search, true);
+        //disable because of initial search
+        if(this.options.btn_visible_newrecord)
+            window.hWin.HEURIST4.util.setDisabled(this.input_search, true); 
         
-        var div_search_help_links = $('<div>').css('padding-top','6px').appendTo(this.div_search_input);
+        var div_search_help_links = $('<div>').css('padding-top','15px').appendTo(this.div_search_input);
 
         var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
         +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')                
@@ -455,18 +447,6 @@ $.widget( "heurist.search", {
 
         this.search_assistant = null;
 
-        if(this.options.isrectype){
-
-            $("<label>for&nbsp;</label>").appendTo( this.div_search );
-
-            this.select_rectype = $( "<select>" )
-            .addClass('text ui-corner-all ui-widget-content') 
-            .css('width','auto')
-            .css('max-width','200px')
-            //.val(value)
-            .appendTo( this.div_search );
-        }
-        
         // Info button - moved after search buttons
         this.div_buttons = $('<div>')
         .addClass('div-table-cell')
@@ -651,7 +631,6 @@ $.widget( "heurist.search", {
         });
         $(window.hWin.document).on(
             window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-            + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
             + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(e, data) { that._onSearchGlobalListener(e, data) } );
@@ -713,6 +692,8 @@ $.widget( "heurist.search", {
         }
         
         
+        this._off( this.div_entity_btns.find('.entity-filter-button'), 'click');
+        
         this.div_entity_btns.find('.entity-filter-button').remove();
         
         var idx=0;
@@ -722,18 +703,18 @@ $.widget( "heurist.search", {
             
             if(rty_ID>0 && window.hWin.HEURIST4.rectypes.names[rty_ID]) {           
             
-                $('<button>').button({label: '<span class="truncate" style="max-width:100px;display:inline-block;">'
+                var btn = $('<button>').button({label: '<span class="truncate" style="max-width:100px;display:inline-block;">'
                         + window.hWin.HEURIST4.rectypes.names[rty_ID] + '</span>'
                         + '<span style="float:right;font-size:0.8em;padding:2px">('
                         +  ((window.hWin.HEURIST4.rectypes.counts[rty_ID]>0)?window.hWin.HEURIST4.rectypes.counts[rty_ID]:0)
                         +')</span>', 
                     showLabel:true})  //icon:window.hWin.HAPI4.iconBaseURL + rty_ID + '.png'
                     .attr('data-id', rty_ID)
-                    .css({'font-size':'0.9em'})        
+                    .css({'font-size':'0.9em','margin-right':'6px'})        
                     .addClass('entity-filter-button ui-state-active')
                     .insertBefore(this.btns_by_entity); //appendTo(this.div_entity_btns);
                 
-                this._on( this.div_entity_btns.find('.entity-filter-button'), {  click: function(e){
+                this._on( btn, {  click: function(e){
                        var selval = $(e.target).is('button')?$(e.target):$(e.target).parent('button');
                        selval = selval.attr('data-id');
                        if(selval>0){
@@ -822,7 +803,7 @@ $.widget( "heurist.search", {
     _setOption: function( key, value ) {
         this._super( key, value );
 
-        if(key=='rectype_set' || key=='search_domain'){
+        if(key=='search_domain'){
             this._refresh();
         }
     },
@@ -852,14 +833,9 @@ $.widget( "heurist.search", {
 
         this.btn_search_domain.css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'inline-block':'none');
 
-        if(this.select_rectype){ 
-            this.select_rectype.empty();
-            window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rectype.get(0), 
-                        this.options.rectype_set, 
-                        !this.options.rectype_set, false);
-                        
-        }
-        if(!this.select_rectype_addrec){ //add record selctor
+        if(this.options.btn_visible_newrecord){
+        
+            if(!this.select_rectype_addrec){ //add record selctor
 
             this.select_rectype_addrec = window.hWin.HEURIST4.ui.createRectypeSelect();
             if(this.select_rectype_addrec.hSelect("instance")!=undefined){
@@ -892,26 +868,28 @@ $.widget( "heurist.search", {
 
         }
         
+            var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+            if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+                add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
+            }
+            if(add_rec_prefs.length<4){
+                add_rec_prefs.push(''); //visibility groups
+            }
+            
+            if(add_rec_prefs[0]>0) {
+                this.select_rectype_addrec.val(add_rec_prefs[0]); 
+                var opt = this.select_rectype_addrec.find('option[value="'+add_rec_prefs[0]+'"]');
+                this.btn_add_record.button({label: 'Add '+opt.text()});
+            }
+           
+            this.setOwnerAccessButtonLabel( add_rec_prefs );
+           
+        }
+        
         if(!this.select_rectype_filter){
             this._recreateSelectRectypeFilter( this.filter_by_entity_options );
         }
             
-        var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-        if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
-            add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
-        }
-        if(add_rec_prefs.length<4){
-            add_rec_prefs.push(''); //visibility groups
-        }
-        
-        if(add_rec_prefs[0]>0) {
-            this.select_rectype_addrec.val(add_rec_prefs[0]); 
-            var opt = this.select_rectype_addrec.find('option[value="'+add_rec_prefs[0]+'"]');
-            this.btn_add_record.button({label: 'Add '+opt.text()});
-        }
-       
-        this.setOwnerAccessButtonLabel( add_rec_prefs );
-       
         this._showhide_input_prompt();
     },
 
@@ -1012,6 +990,10 @@ $.widget( "heurist.search", {
                         });
 
                 }else{
+                    if(!this[select_rectype]){
+                        this._recreateSelectRectypeFilter( opts );
+                    }
+                    
                     __openSelect();
                 }    
     },
@@ -1042,16 +1024,31 @@ $.widget( "heurist.search", {
         }});
     },
 
+    //
+    //
+    //
+    _isSameRealm: function(data){
+        return !this.options.search_realm || (data && this.options.search_realm==data.search_realm);
+    },
+    
 
     _onSearchGlobalListener: function(e, data){
 
         var that = this;
 
-        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
+        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART)
+        {
 
+            //accept events from the same realm only
+            if(!that._isSameRealm(data)) return;
+            
             //data is search query request
+            if(data.reset){
+                that.input_search.val('');
+                that.input_search.change();
+            }else            
             //topids not defined - this is not rules request
-            if(data!=null && window.hWin.HEURIST4.util.isempty(data.topids) && data.apply_rules!==true){
+            if(window.hWin.HEURIST4.util.isempty(data.topids) && data.apply_rules!==true){
 
                 //request is from some other widget (outside)
                 if(data.source!=that.element.attr('id')){
@@ -1073,7 +1070,7 @@ $.widget( "heurist.search", {
                 var is_keep = window.hWin.HAPI4.get_prefs('searchQueryInBrowser');
                 is_keep = (is_keep==1 || is_keep==true || is_keep=='true');
                 
-                if(is_keep){
+                if(is_keep && !this.options.search_realm){
                     var qs = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true);
                     if(qs && qs.length<2000){
                         window.history.pushState("object or string", "Title", location.pathname+'?'+qs );
@@ -1082,19 +1079,15 @@ $.widget( "heurist.search", {
                 
                 that.input_search.change();
 
-            }else if(data==null){
-                that.input_search.val('');
-                that.input_search.change();
             }
             
 
             //ART that.div_search.css('display','none');
-
-        }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){ //get new chunk of data from server
-
-
         }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
+            //accept events from the same realm only
+            if(!that._isSameRealm(data)) return;
+        
             window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
             //AAAA 
             if(this.input_search.is(':visible')) {
@@ -1212,6 +1205,7 @@ $.widget( "heurist.search", {
             request.w  = this.options.search_domain;
             request.detail = 'detail';
             request.source = this.element.attr('id');
+            request.search_realm = this.options.search_realm;
             
             this.query_request = request;
 
@@ -1618,7 +1612,6 @@ $.widget( "heurist.search", {
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS
           +' '+window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
         $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-          + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT
           + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
           + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
 
@@ -1631,7 +1624,6 @@ $.widget( "heurist.search", {
         this.menu_search_domain.remove();
         this.input_search.remove();
         this.input_search_prompt.remove();
-        if(this.select_rectype) this.select_rectype.remove();
 
         this.div_search_as_user.remove();
         this.div_search_as_guest.remove();

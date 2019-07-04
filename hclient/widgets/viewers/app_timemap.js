@@ -31,7 +31,8 @@ $.widget( "heurist.app_timemap", {
         eventbased:true,
         tabpanel:false,  //if true located on tabcontrol need top:30
         
-        leaflet: false
+        leaflet: false,
+        search_realm:  null  //accepts search/selection events from elements of the same realm only
     },
 
     _events: null,
@@ -87,18 +88,24 @@ $.widget( "heurist.app_timemap", {
                     }
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
-
+                    
+                    //accept events from the same realm only
+                    if(!that._isSameRealm(data)) return;
+                    
                     that.recordset_changed = true;
-                    that.option("recordset", data); //hRecordSet
+                    that.option("recordset", data.recordset); //hRecordSet
                     that._refresh();
                     that.loadanimation(false);
 
                     // Search start
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
+                    //accept events from the same realm only
+                    if(!that._isSameRealm(data)) return;
+                    
                     that.option("recordset", null);
                     that.option("selection", null);
-                    if(data && data.q!='')  {
+                    if(data && !data.reset && data.q!='')  {
                         that.loadanimation(true);
                     }else{
                         that.recordset_changed = true;
@@ -109,14 +116,16 @@ $.widget( "heurist.app_timemap", {
                     // Record selection
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
-                    if(data){
-                        if(data.source!=that.element.attr('id')) { //selection happened somewhere else
-                            //console.log("_doVisualizeSelection");
+                    //accept events from the same realm only
+                    if(that._isSameRealm(data) && data.source!=that.element.attr('id')) { //selection happened somewhere else
+                        //console.log("_doVisualizeSelection");
+                        if(data.reset){
+                            that.option("selection",  null);
+                        }else{
                             that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
                         }
-                    }else{
-                        that.option("selection",  null);
                     }
+                    
                 }else if (e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
                     that._refresh();
 
@@ -146,6 +155,14 @@ $.widget( "heurist.app_timemap", {
 
     }, //end _create
 
+    
+    //
+    //
+    //
+    _isSameRealm: function(data){
+        return !this.options.search_realm || (data && this.options.search_realm==data.search_realm);
+    },
+    
     /* private function */
     _refresh: function(){
 
@@ -164,7 +181,24 @@ $.widget( "heurist.app_timemap", {
                 
                 var url = window.hWin.HAPI4.baseURL + 'viewers/map/map'+
                     (this.options.leaflet?'_leaflet':'')+'.php?db='+window.hWin.HAPI4.database;
+                    
                 if(this.options.layout){
+                    
+/* see map_leaflet.php                    
+            layout_params['nomap'] = __gp('nomap');
+            layout_params['notimeline'] = __gp('notimeline');
+            layout_params['nocluster'] = __gp('nocluster');
+            layout_params['editstyle'] = __gp('editstyle');
+            layout_params['basemap'] = __gp('basemap');  //name of basemap
+            layout_params['extent'] = __gp('extent'); //@todo
+            
+            layout_params['controls'] = __gp('controls'); //cs list of visible controls
+            layout_params['legend'] = __gp('legend'); //cs list of visible panels
+            
+            mapdocument
+*/                    
+                    
+                    
                     if( this.options.layout.indexOf('timeline')<0 )
                         url = url + '&notimeline=1';
                     if( this.options.layout.indexOf('header')<0 )
@@ -221,17 +255,8 @@ $.widget( "heurist.app_timemap", {
                
                     mapping.mapping('option','onselect',function(selected ) {
                             $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
-                                                { selection:selected, source:that.element.attr('id') } );
+                                    { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
                         });
-/*
-                    this._on( mapping, {
-                        "mappingonselect": function( event, selected ) {
-console.log('onselet triggered 2');                             
-                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
-                                                { selection:selected, source:that.element.attr('id') } );
-                        }
-                    });                    
-*/                
                 }
                 
                 this.map_inited = true;
@@ -244,7 +269,7 @@ console.log('onselet triggered 2');
                     this.options.startup,    //map document on load
                     function(selected){  //callback if something selected on map
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
-                            { selection:selected, source:that.element.attr('id') } );
+                            { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
                     },
                     function(){ //callback function on native map init completion
     console.log('call addRecordsetLayer on map complete init');

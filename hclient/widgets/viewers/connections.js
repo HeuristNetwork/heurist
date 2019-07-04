@@ -25,7 +25,8 @@ $.widget( "heurist.connections", {
     options: {
         title: '',
         recordset: null,
-        selection: null //list of record ids
+        selection: null, //list of record ids
+        search_realm:  null  //accepts search/selection events from elements of the same realm only
     },
 
     _events: null,
@@ -43,12 +44,15 @@ $.widget( "heurist.connections", {
                         'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center'})
                    .appendTo( this.element );
                    
-        this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.framecontent );
+        this.graphframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'}).appendTo( this.framecontent );
 
 
         //-----------------------     listener of global events
-        this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS + ' ' 
-            + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT;
+        this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS
+            + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH 
+            + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
+            + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
+            + ' ' + window.hWin.HAPI4.Event.ON_SYSTEM_INITED;
 
         $(this.document).on(this._events, function(e, data) {
             
@@ -57,40 +61,51 @@ $.widget( "heurist.connections", {
                 if(!window.hWin.HAPI4.has_access()){ //logout
                     that.recordset_changed = true;
                     that.option("recordset", null);
+                    that._refresh();
                 }
-                that._refresh();
+                
 
             // Search results
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
+                //accept events from the same realm only
+                if(!that._isSameRealm(data)) return;
+                
                 //find all relation within given result set
                 that.recordset_changed = true;
-                that._getRelations( data );
+                that.option("recordset", data.recordset); //hRecordSet
+                that._refresh();
                 
-                //that.option("recordset", data); //hRecordSet
+                //!!!! move that._getRelations( data.recordset );
                 //that.loadanimation(false);
 
             // Search start
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
+                //accept events from the same realm only
+                if(!that._isSameRealm(data)) return;
+                
                 that.option("recordset", null);
                 that.option("selection", null);
-                if(data && data.q!=''){
+                if(data && !data.reset && data.q!=''){
                     that.loadanimation(true);
                 }else{
                     that.recordset_changed = true;
                     that._refresh();
                 }
-                
-                //???? that._refresh();
-              
             // Record selection  
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
                 
-                if(data && data.source!=that.element.attr('id')) { //selection happened somewhere else
+                if(that._isSameRealm(data) && data.source!=that.element.attr('id')) { //selection happened somewhere else
                   
-                    that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
+                    if(data.reset){
+                        that.option("selection",  null);
+                    }else{
+                        that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
+                    }
                 }            
+            }else if (e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
+                    that._refresh();
             }
         });
 
@@ -102,7 +117,7 @@ $.widget( "heurist.connections", {
             }
         });
         
-        this.dosframe.on('load', function(){
+        this.graphframe.on('load', function(){
                 that._refresh();
         });
         
@@ -131,10 +146,11 @@ $.widget( "heurist.connections", {
         //refesh if element is visible only - otherwise it costs much resources        
         if( this.element.is(':visible') && this.recordset_changed) {
         
-            if(this.dosframe.attr('src')!==this.options.url){
+            if( window.hWin.HEURIST4.util.isempty(this.graphframe.attr('src')) || this.graphframe.attr('src')!==this.options.url)
+            {
                 
                 this.options.url = window.hWin.HAPI4.baseURL + 'hclient/framecontent/visualize/springDiagram.php?db=' + window.hWin.HAPI4.database;
-                this.dosframe.attr('src', this.options.url);
+                this.graphframe.attr('src', this.options.url);
               
             // Content loaded already    
             }else{
@@ -178,18 +194,25 @@ $.widget( "heurist.connections", {
         var that = this;
 
         // remove generated elements
-        this.dosframe.remove();
+        this.graphframe.remove();
         this.framecontent.remove();
     },
     
     loadanimation: function(show){
         if(show){
-            //this.dosframe.hide();
+            //this.graphframe.hide();
             this.framecontent.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.framecontent.css('background','none');
-            //this.dosframe.show();
+            //this.graphframe.show();
         }
+    },
+    
+    //
+    //
+    //
+    _isSameRealm: function(data){
+        return !this.options.search_realm || (data && this.options.search_realm==data.search_realm);
     },
     
     /**
@@ -209,34 +232,32 @@ $.widget( "heurist.connections", {
                 return;
         }
         
-        var that = this; 
+        var that2 = this; 
         //get first MAXITEMS records and send their IDS to server to get related record IDS
         var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
         var records_ids = recordset.getIds(MAXITEMS);
 //console.log('was '+recordset.getIds().length+'  send for '+records_ids.length);        
         if(records_ids.length>0){
             
-            var callback = function(response)
+            window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, function(response)
             {
                 var resdata = null;
                 if(response.status == window.hWin.ResponseStatus.OK){
                     // Store relationships
 //console.log("Successfully retrieved relationship data!", response.data);
-                    that.option("relations", response.data);
+                    that2.option("relations", response.data);
                     
                     // Parse response to spring diagram format
-                    var data = that._parseData(records_ids, response.data);
-                    that._doVisualize(data);
+                    var data = that2._parseData(records_ids, response.data);
+                    that2._doVisualize(data);
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
                 
-                that.option("recordset", recordset); //hRecordSet
-                that.loadanimation(false);
+                that2.option("recordset", recordset); //hRecordSet
+                that2.loadanimation(false);
                 
-            }
-
-            window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
+            });
         }
     }
     
@@ -262,13 +283,15 @@ $.widget( "heurist.connections", {
             var i;
             for(i=0;i<records_ids.length;i++) {
                 var recId = records_ids[i];
-                var node = {id: parseInt(recId),
-                            name: relations.headers[recId][0],  //record title   records[id][5]
-                            image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  //rectype id  records[id][4]
-                            count: 0,
-                            depth: 1
-                           };
-                nodes[recId] = node;
+                if(relations.headers[recId]){
+                    var node = {id: parseInt(recId),
+                                name: relations.headers[recId][0],  //record title   records[id][5]
+                                image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  //rectype id  records[id][4]
+                                count: 0,
+                                depth: 1
+                               };
+                    nodes[recId] = node;
+                }
             }
             
             
@@ -332,12 +355,12 @@ $.widget( "heurist.connections", {
     , _doVisualize: function (data) {
         //console.log("Visualize called in connections.js");
         
-        if( !window.hWin.HEURIST4.util.isnull(this.dosframe) && this.dosframe.length > 0 ){
+        if( !window.hWin.HEURIST4.util.isnull(this.graphframe) && this.graphframe.length > 0 ){
             var that = this;
-            this.dosframe[0].contentWindow.showData(data, this.options.selection, 
+            this.graphframe[0].contentWindow.showData(data, this.options.selection, 
                     function(selected){
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
-                        { selection:selected, source:that.element.attr('id') } );
+                        { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
                     },
                     function(selected){
                         that._getRelations(that.options.recordset);
@@ -360,11 +383,11 @@ $.widget( "heurist.connections", {
             this.option("selection", selection);
             
             if(!this.element.is(':visible')
-                || window.hWin.HEURIST4.util.isnull(this.dosframe) || this.dosframe.length < 1){
+                || window.hWin.HEURIST4.util.isnull(this.graphframe) || this.graphframe.length < 1){
                     return;
             }
             
-            this.dosframe[0].contentWindow.showSelection(this.options.selection);
+            this.graphframe[0].contentWindow.showSelection(this.options.selection);
     }    
 
 });

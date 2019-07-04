@@ -92,12 +92,16 @@ function hSearchMinimal() {
 
             _query_request = request; //keep for search in current result
         
+        
+            //window.hWin.HEURIST4.current_query_request,  window.hWin.HAPI4.currentRecordset !!!!! @todo get rid these global vars 
+            // they are used in old parts: smarty, diagram
             
             //clone - to use mainMenu.js
             window.hWin.HEURIST4.current_query_request = jQuery.extend(true, {}, request); //the only place where this values is assigned - it is used in mainMenu.js
 
             window.hWin.HAPI4.currentRecordset = null;
             if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
+console.log("START SEARCH "+request.id);                
                 $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
             }
 
@@ -113,34 +117,28 @@ function hSearchMinimal() {
     function _onSearchResult(response){
 
             var recordset = null;
-            if(response.status == window.hWin.ResponseStatus.OK){
+            if(_query_request!=null && response.queryid==_query_request.id) {
 
-                if(_query_request!=null && response.data.queryid==_query_request.id) {
+                if(response.status == window.hWin.ResponseStatus.OK){
 
-                    if(response.data  && response.data.memory_warning){
-                           window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
-                    }
-                    
-                    recordset = new hRecordSet(response.data);
-                    
-                    recordset.setRequest( window.hWin.HEURIST4.util.cloneJSON(_query_request) );
-                    
+                        if(response.data  && response.data.memory_warning){
+                               window.hWin.HEURIST4.msg.showMsgErr(response.data.memory_warning); 
+                        }
+                        
+                        recordset = new hRecordSet(response.data);
+                        
+                        recordset.setRequest( window.hWin.HEURIST4.util.cloneJSON(_query_request) );
 
-                    window.hWin.HAPI4.currentRecordset = recordset;
-                    _searchCompleted( false );
+                        window.hWin.HAPI4.currentRecordset = recordset;
+                        
+
+                }else{
+                    //erorr - trigger event with empty resultset
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
-
-            }else{
-
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-
-                if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){ 
-                    $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
-                }
+                _searchCompleted( false, recordset );
             }
-            if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
-                $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, [ recordset ]);  //gloal app event
-            }    
+            
     }
     
 
@@ -148,18 +146,17 @@ function hSearchMinimal() {
     * 
     * 
     */
-    function _searchCompleted( is_terminate ){
+    function _searchCompleted( is_terminate, recordset ){
 
             if(_query_request!=null && is_terminate){
-                _query_request.id = window.hWin.HEURIST4.util.random();
+                //change query id to arbitrary - it prevents further actions
+                _query_request.id = window.hWin.HEURIST4.util.random(); 
             }
             
             if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){ 
-                if(window.hWin.HAPI4.currentRecordset){ // && window.hWin.HAPI4.currentRecordset.length()>0)
-                    $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, [ window.hWin.HAPI4.currentRecordset ]); //global app event
-                }else{
-                    $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null); //global app event
-                }
+                
+                $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, 
+                            {search_realm:_query_request.search_realm, recordset:recordset}); //global app event
             }
     }
 

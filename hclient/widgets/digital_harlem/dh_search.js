@@ -218,7 +218,7 @@ $.widget( "heurist.dh_search", {
                             }, 3000);
                         }else{
                             //trigger search finish to init some widgets
-                            $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
+                            $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null} );   
                         }
                         
                     }

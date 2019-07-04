@@ -41,7 +41,10 @@ function hSearchMinimalDigitalHarlem() {
     function _init( ) {
     }
 
+    //
     // search with callback - used in map_overlay for addQueryLayer
+    // this saerch does not trigger global events
+    //
     function _doSearchWithCallback( request, callback ){
 
         request.getrelrecs = 1;
@@ -70,14 +73,6 @@ function hSearchMinimalDigitalHarlem() {
                 window.hWin.HEURIST4._time_debug = new Date().getTime() / 1000;
 
                 callback( final_recordset, original_recordset );
-
-                // 7. trigger creation of the separate tab t display result set
-                //@todo - change to special DH events
-
-                /*
-                if(!window.hWin.HEURIST4.util.isnull(originator.document)){
-                $(originator.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, [ final_recordset ]);  //gloal app event
-                }*/
 
         });
 
@@ -123,19 +118,13 @@ function hSearchMinimalDigitalHarlem() {
                     //that.res_div_progress.hide();
                     if(originator && !window.hWin.HEURIST4.util.isnull(originator.document) ) { // && recordset.length()>0){
                         //global app event - in dh faceted search listens it
-                        $(originator.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, [ original_recordset ]);
+                        $(originator.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:original_recordset});
 
                         //call dh_search to show add button
                         var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('dh_search');
                         if(app1 && app1.widget){
                             $(app1.widget).dh_search('updateResultSet', final_recordset);
                         }
-
-                        /*call result list to fill with results
-                        var app2 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('resultList');
-                        if(app2 && app2.widget){
-                        $(app2.widget).resultList('updateResultSet', final_recordset);
-                        }*/
 
                     }
                 }
@@ -148,7 +137,7 @@ function hSearchMinimalDigitalHarlem() {
     }
 
 
-
+    // NOT USED
     // this version searches main query only (without rules and relationships) and then updateResultSet in dh_search.js
     // Ian does not want it (b/c it does not properly render the result set)
     function _doSearch_2steps( originator, request ){
@@ -189,7 +178,7 @@ function hSearchMinimalDigitalHarlem() {
                 }
 
                 if(originator && !window.hWin.HEURIST4.util.isnull(originator.document) && recordset.length()>0){
-                    $(originator.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, [ recordset ]); //global app event
+                    $(originator.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:recordset}); //global app event
                 }
 
 

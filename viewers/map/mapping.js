@@ -1364,7 +1364,7 @@ $.widget( "heurist.mapping", {
         
         var selected_markers = [];
         
-        if(_selection.length>0)
+        if(_selection && _selection.length>0)
         for(var layer_id in this.all_markers) {
             if(this.all_markers.hasOwnProperty(layer_id)){
                     var markers = this.all_markers[layer_id];

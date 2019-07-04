@@ -196,7 +196,7 @@ $.widget( "heurist.svs_list", {
             that._refresh();
         });
         $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
-            if(data && !data.increment){
+            if(data && !data.increment && !data.reset){
                 that.currentSearch = Hul.cloneJSON(data);
             }
         });

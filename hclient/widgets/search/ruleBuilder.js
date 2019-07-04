@@ -137,48 +137,6 @@ $.widget( "heurist.ruleBuilder", {
             this._on( this.btn_add_next_level, {click: function( event ){ this._addChildRule(null); }});
 
 
-        // TODO: remove big block of debug or old code -----------------------     listener of global events
-        /*var sevents = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT;
-
-        $(this.document).on(sevents, function(e, data) {
-
-        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
-
-        that._query_request = data;  //keep current query request
-
-        }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
-
-        if(data) data = data.selection;
-
-        if(data && (typeof data.isA == "function") && data.isA("hRecordSet") ){
-        that._selection = data;
-        }else{
-        that._selection = null
-        }
-
-        }
-        //that._refresh();
-        });*/
-
-        /* cannot bind event handler for parent document - need to be triggered directly
-        if(window.hWin && window.hWin.document)
-        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
-
-        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){
-        //that.option("recordset", data); //hRecordSet
-        alert('1111');s
-        }
-        });
-
-        $(window.hWin.parent.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT, function(e, data) {
-
-        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT){
-        //that.option("recordset", data); //hRecordSet
-        alert('22222');s
-        }
-        });
-        */
-
         this._initRules();
 
         //this._onSelectRectype();
@@ -270,10 +228,6 @@ $.widget( "heurist.ruleBuilder", {
     //
     // custom, widget-specific, cleanup.
     _destroy: function() {
-
-        //$(this.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT);
-        if(parent && parent.document)
-            $(parent.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHRESULT);
 
         // remove generated elements
         this.select_source_rectype.remove();

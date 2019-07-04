@@ -138,7 +138,7 @@ var cfg_layouts = [
                     {appid:'heurist_resultList', hasheader:true, name:'List', layout_id:'list',
                             css:{'background-color':'white','font-size':'14px'}, 
                             options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
-                            show_inner_header: true,show_url_as_link:true} },  //search result
+                            show_inner_header: true, show_url_as_link:true} },  //search result
                     {appid:'heurist_Map', layout_id:'map', options:{layout:['map','timeline'],tabpanel:true}, 
                                     css:{'background-color':'white'} } //mapping
                 ]
@@ -162,10 +162,10 @@ var cfg_layouts = [
     },
         
     {id:'SearchAnalyze2', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
-        north:{size:'8em', resizable:false, overflow:'hidden',
+        north:{size:'11em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'heurist_Search', hasheader:false, 
-                css:{position:'absolute', top:0, left:0, right:0,
+                css:{position:'absolute', top:0, left:0, right:0,bottom:0,
                 border:'none', 'background':'white', 'min-width':'75em'}, 
             options:{has_paginator:false, btn_visible_newrecord:true} }, 
         ]},

@@ -143,6 +143,7 @@
             }
             if($isok){
                 $response = recordSearch($system, $_REQUEST);
+                $response['queryid'] = @$_REQUEST['id'];
             }
         
         }
