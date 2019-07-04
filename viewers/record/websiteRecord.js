@@ -1,9 +1,12 @@
-function onHapiInit(success){   
+function onPageInit(success){   
 
     if(!success){
         window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
         return;
     }
+    
+    //cfg_widgets is from layout_defaults=.js 
+    window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
     var current_pageid = $('#main-content').attr('data-homepageid'),
         was_modified = false,
@@ -88,7 +91,10 @@ function onHapiInit(success){
             if(pageid>0){
                 current_pageid = pageid;
                 $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                    +'&fmt=web&recid='+pageid);
+                    +'&fmt=web&recid='+pageid, function()
+                    {
+                            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
+                    });
             }
             
             __alignButtons();
@@ -98,6 +104,9 @@ function onHapiInit(success){
     
     setTimeout(function(){
         __alignButtons();
+        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
+        
+        $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
     },1500);
     
     $('#btn_inline_editor')
@@ -171,9 +180,11 @@ function onHapiInit(success){
     //
     //
     function __alignButtons(){
-        var itop = $('#main-header').height()-10;
-        $('#btn_inline_editor').css({top:itop});
-        $('body').css('padding-top', itop+30);
+        var itop = $('#main-header')[0].scrollHeight;
+        $('#btn_inline_editor').css({top:itop-15});
+        //$('body').css('padding-top', itop+30);
+        $('#main-header').css('height',itop+20);
+        $('#main-content').css('top',itop+10);
     }    
-    
+ 
 }

@@ -159,6 +159,9 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
      
  },
  
+ //
+ // data is recordset
+ //
  _renderSearchInfoMsg: function(data){
      
     this._super( data ); 

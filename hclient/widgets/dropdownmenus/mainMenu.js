@@ -952,12 +952,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             var allFields = $dlg.find('input,select');
 
             var currentTheme = prefs['layout_theme'];
+            /* @todo later
             var themeSwitcher = $("#layout_theme").themeswitcher(
                 {initialText: currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1),
                 currentTheme:currentTheme,
                 onSelect: function(){
                     currentTheme = this.currentTheme;
             }});
+            */
 
             //default            
             prefs['userCompetencyLevel'] = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);

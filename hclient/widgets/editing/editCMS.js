@@ -25,6 +25,7 @@ function editCMS(home_page_record_id, main_callback){
      DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
      DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
      DT_CMS_PAGE  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'],
+     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
      DT_NAME      = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
      
      if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && RT_CMS_PAGE>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0 && DT_CMS_PAGE>0)){
@@ -119,7 +120,7 @@ function editCMS(home_page_record_id, main_callback){
 
     popup_dlg.load(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editCMS.html', 
         function(){
-            $(popup_dlg.find('.main_cms')).layout( layout_opts );
+            //$(popup_dlg.find('.main_cms')).layout( layout_opts );
         }
     );
 
@@ -134,7 +135,7 @@ function editCMS(home_page_record_id, main_callback){
         var session_id = Math.round((new Date()).getTime()/1000); //for progress
 
         var request = { action: 'import_records',
-            filename: 'websiteStarterRecords2.hml',
+            filename: 'websiteStarterRecords.hml',
             //session: session_id,
             id: window.hWin.HEURIST4.util.random()
         };
@@ -223,10 +224,23 @@ function editCMS(home_page_record_id, main_callback){
                                     
                                     home_page_record_id  = resdata.fld(record, 'rec_ID');
                                     popup_dlg.find('#web_Name').val(resdata.fld(record, DT_NAME));
-                                    
+                                    //var currentTheme = resdata.fld(record, DT_CMS_THEME);
+                                    //if(!currentTheme) currentTheme = 'heurist';  
+                                    //popup_dlg.find('#web_Theme').val(currentTheme);
+
                                     var btn_refresh = popup_dlg.find('#btn_refresh');
                                     if(!btn_refresh.button('instance')){
                                     
+                                        /*    
+                                        var themeSwitcher = popup_dlg.find("#web_Theme").themeswitcher(
+                                            {imageLocation: "external/jquery-theme-switcher/images/",
+                                            initialText: currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1),
+                                            currentTheme: currentTheme,
+                                            onSelect: function(){
+                                                currentTheme = this.currentTheme;
+                                        }});
+                                        */
+                                        
                                         popup_dlg.find('#btn_edit_home').button({icon:'ui-icon-pencil'}).click(function(){
                                             //openRecordEdit
                                             window.hWin.HEURIST4.ui.openRecordEdit(home_page_record_id, null,
@@ -260,7 +274,7 @@ function editCMS(home_page_record_id, main_callback){
                                                 window.open(url, '_blank');
                                         });
                                         
-                                        $('#web_link').html('<br><a href="'+url+'" target="_blank">'+url+'</a>');
+                                        $('#web_link').html('<b>Website URL:</b><a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
                                     }
                                     btn_refresh.click();
                                     
