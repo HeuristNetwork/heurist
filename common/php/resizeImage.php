@@ -185,7 +185,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
                 
                 $im =  new Imagick($filename.'[0]'); 
                 $im->setImageFormat('png'); 
-                $im->thumbnail(200,200);
+                $im->thumbnailImage(200,200);
 
                 if ($standard_thumb) {
                     // store to database
