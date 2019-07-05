@@ -159,6 +159,21 @@ function editCMS(home_page_record_id, main_callback){
         _initWebSiteEditor();
     }
 
+    //
+    //
+    //
+    function _editHomePageRecord()
+    {
+        window.hWin.HEURIST4.ui.openRecordEdit(home_page_record_id, null,
+            {selectOnSave:true, edit_obstacle: false, onselect: 
+                function(event, res){
+                    if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
+                        //refresh everything
+                        _initWebSiteEditor();
+                    }
+            }}
+        );
+    }
 
     //  
     // search all website records: home, menu, pages
@@ -242,16 +257,7 @@ function editCMS(home_page_record_id, main_callback){
                                         */
                                         
                                         popup_dlg.find('#btn_edit_home').button({icon:'ui-icon-pencil'}).click(function(){
-                                            //openRecordEdit
-                                            window.hWin.HEURIST4.ui.openRecordEdit(home_page_record_id, null,
-                                            {selectOnSave:true, edit_obstacle: false, onselect: 
-                                                    function(event, res){
-                                                        if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
-                                                            //refresh everything
-                                                            _initWebSiteEditor();
-                                                        }
-                                                    }}
-                                                );
+                                            _editHomePageRecord();
                                         });
                                     
                                         //add new root menu
@@ -260,6 +266,18 @@ function editCMS(home_page_record_id, main_callback){
                                                     _initWebSiteEditor();
                                                 });
                                         });
+                                        
+                                        var preview_frame = popup_dlg.find('#web_preview');
+                                        preview_frame.on({load:function(){
+                                            var d = $(preview_frame[0].contentWindow.document);
+                                            d.find( "#main-banner > a").click(function(event){
+                                                    _editHomePageRecord();
+                                            });
+                                            d.find( "#btn_inline_editor2").click(function(event){
+                                                    _editHomePageRecord();
+                                            });
+                                        }});
+
                                     
                                         btn_refresh.button({icon:'ui-icon-refresh'}).click(function(){
                                             popup_dlg.find('#web_preview').attr('src', window.hWin.HAPI4.baseURL+

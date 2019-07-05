@@ -66,7 +66,7 @@ if($rec==null){
 }
 
 if($rec['rec_RecTypeID']!=RT_CMS_HOME && $rec['rec_RecTypeID']!=RT_CMS_PAGE){
-    $message = 'Record #'.$rec_id.' is not allowed record type';
+    $message = 'Record #'.$rec_id.' is not allowed record type. Expecting Website Home Page';
     include ERROR_REDIR;
     exit();
 }
@@ -205,7 +205,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
     
 <?php
-$edit_Available = true;//(@$_REQUEST['edit']==1);
+$edit_Available = (@$_REQUEST['edit']==1);
 if($edit_Available){
 ?>
     <script src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>
@@ -220,9 +220,16 @@ function onPageInit(success)
 {
         
     if(!success) return;
+    
+    window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));
+    
+    //cfg_widgets is from layout_defaults=.js 
+    window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
+    
 
     $( "#main-menu > ul" ).addClass('horizontalmenu').menu( {position:{ my: "left top", at: "left+20 bottom" }} );
 
+    $('#main-menu').show();
     $('#main-menu').find('a').click(function(event){
 
         var pageid = $(event.target).attr('data-pageid');
@@ -232,11 +239,17 @@ function onPageInit(success)
     });
     
     setTimeout(function(){
-        var itop = $('#main-header')[0].scrollHeight;
-        $('#main-header').css('height',itop+20);
-        $('#main-content').css('top',itop+10);
+        /*var itop = $('#main-header')[0].scrollHeight;
+        $('#main-header').css('height',itop-10);
+        $('#main-content').css('top',itop+10);*/
+        
+        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
+        
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
+        
+        window.hWin.HEURIST4.msg.sendCoverallToBack();
     },1500);
+    $('#btn_inline_editor2').hide();
     $('#btn_inline_editor').hide();
     
 }
@@ -319,16 +332,21 @@ body{
 </head>
 <body>
     <div class="ent_wrapper">
-    <div id="main-header" class="ent_header">
-	    <div id="main-banner" style="width:100%;min-height:80px;">
+    <div id="main-header" class="ent_header" style="background:rgb(112,146,190);height:140px">
+	    <div id="main-banner" style="float:left;min-height:80px;">
         <?php print $image_banner?'<img style="max-height:80px" src="'.$image_banner.'">'
-            :'<div style="display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image</div>';?>
+            :'<a href="#" style="text-decoration:none;"><div style="text-align:center;display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image<br><span style="font-size:10px;">click to edit</span></div></a>';?>
         </div>
-	    <div id="main-menu" style="width:100%;min-height:40px;padding:4px 0"><ul><?php print $menu_content; ?></ul></div>
-        <div id="btn_inline_editor" style="display:none;">Edit inline</div>
-        <div id="btn_inline_cancel" style="display:none;">Close editor</div>
+        <div id="main-title" style="float:left;font-size:1.4em;padding: 35px 0 0 20px;vertical-align:middle;font-weight:bold">
+            <?php print __getValue($rec, DT_NAME);?>
+        </div>
+	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;font-weight:bold !important">
+            <ul><?php print $menu_content; ?></ul>
+        </div>
+        <a href="#" id="btn_inline_editor2" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page headers</a>
+        <a href="#" id="btn_inline_editor" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page content</a>
     </div>
-    <div id="main-content" class="tinymce-body ent_content" data-homepageid="<?php print $rec_id;?>">
+    <div id="main-content" class="tinymce-body ent_content" data-homepageid="<?php print $rec_id;?>" style="top:141px">
         <?php print __getValue($rec, DT_EXTENDED_DESCRIPTION);?>
     </div>
     <div id="main-foooter" class="ent_footer">

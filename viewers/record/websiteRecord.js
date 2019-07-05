@@ -5,6 +5,8 @@ function onPageInit(success){
         return;
     }
     
+    window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));
+    
     //cfg_widgets is from layout_defaults=.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
@@ -57,11 +59,12 @@ function onPageInit(success){
                        if(was_modified){
                            
                             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                                'Web page content has been modified. Save before close?',
-                                {'Yes':function(){__saveChanges( true );$dlg.dialog('close');},
-                                    'No':function(){__hideEditor();$dlg.dialog('close');}},
-                                'Confirm');
-                            $dlg.parents('.ui-dialog').css('font-size','0.9em');    
+                                '<br>Web page content has been modified',
+                                {'Save':function(){__saveChanges( true );$dlg.dialog('close');},
+                                  'Cancel':function(){$dlg.dialog('close');},
+                                   'Abandon changes':function(){__hideEditor();$dlg.dialog('close');}},
+                                'Content modified');
+                            $dlg.parents('.ui-dialog').css('font-size','1.2em');    
                        }else{
                             //restore previous content 
                             __hideEditor();      
@@ -74,14 +77,23 @@ function onPageInit(success){
 
     };
     
-    
     $( "#main-menu > ul" ).addClass('horizontalmenu').menu( {position:{ my: "left top", at: "left+20 bottom" }} );
-
+    $('#main-menu').show()
     $('#main-menu').find('a').click(function(event){
 
         if(was_modified){ //!$('#btn_inline_editor').is(':visible'))
             
-            window.hWin.HEURIST4.msg.showMsgFlash('Save changes before load other page');
+            //window.hWin.HEURIST4.msg.showMsgFlash('Web page content has been modified. Save changes before load other page');
+            
+            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                '<br>Web page content has been modified',
+                    {'Save':function(){__saveChanges( true );$dlg.dialog('close');},
+                        'Cancel':function(){$dlg.dialog('close');},
+                        'Abandon changes':function(){__hideEditor();$dlg.dialog('close');}},
+                                'Content modified');
+            $dlg.parents('.ui-dialog').css('font-size','1.2em');    
+            
+            //'Web page content has been modified. Save before close?','Content modified'
             
         }else{
             __hideEditor();
@@ -107,23 +119,37 @@ function onPageInit(success){
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
         
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
+        
+        window.hWin.HEURIST4.msg.sendCoverallToBack();
+        
     },1500);
+
     
     $('#btn_inline_editor')
-            .button({icon:'ui-icon-pencil'})
-            .css({position:'absolute', right:'40px', top:'40px', 'font-size':'0.8em'})
+            //.button({icon:'ui-icon-pencil'})
+            .css({position:'absolute', right:'40px', top:'40px', 'font-size':'1.1em'})
             //.position({my:'right bottom', at:'right top', of:'#main-content'})
             .click(function( event ){
                 
                 $('#btn_inline_editor').hide();
-                var h = $('body').innerHeight()-$('#main-header').height()-110;
-                $('#main-content').css('height', h);
+                //var h = $('body').innerHeight()-$('#main-header').height()-110;
+                //$('#main-content').css('height', h);
                 last_save_content = $('#main-content').html(); 
                 tinymce.init(inlineEditorConfig);
+                $('.mce-tinymce').css({position:'absolute',top:$('#main-content').css('top'),bottom:$('#main-content').css('bottom')});
+                /*setTimeout(function(){
+                    $('.mce-tinymce').css({position:'absolute',top:$('#main-content').css('top'), bottom:$('#main-content').css('bottom')});    
+                },500);*/
+                
                 
             })
             .show();
 
+    $('#btn_inline_editor2')
+            .css({position:'absolute', right:'40px', top:'10px', 'font-size':'1.1em'}).show();
+            
+         
+         
     //
     //
     //
@@ -180,11 +206,11 @@ function onPageInit(success){
     //
     //
     function __alignButtons(){
-        var itop = $('#main-header')[0].scrollHeight;
-        $('#btn_inline_editor').css({top:itop-15});
-        //$('body').css('padding-top', itop+30);
-        $('#main-header').css('height',itop+20);
-        $('#main-content').css('top',itop+10);
+        var itop = $('#main-header').height(); //[0].scrollHeight;
+        $('#btn_inline_editor').css({top:itop-30});
+        
+        //$('#main-header').css('height',itop-10);
+        //$('#main-content').css('top',itop+10);
     }    
  
 }
