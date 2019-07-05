@@ -876,9 +876,9 @@ XML;
             $links = recordSearchRelated($system, $recID, 0, false);
             if($links['status']==HEURIST_OK){
                 if(@$links['data']['direct'])
-                    fwrite($fd_links, _composeGephiLinks($records, $links['data']['direct'], $links_cnt));
+                    fwrite($fd_links, _composeGephiLinks($records, $links['data']['direct'], $links_cnt, 'direct'));
                 if(@$links['data']['reverse'])
-                    fwrite($fd_links, _composeGephiLinks($records, $links['data']['reverse'], $links_cnt));
+                    fwrite($fd_links, _composeGephiLinks($records, $links['data']['reverse'], $links_cnt, 'reverse'));
             }else{
                 return false;
             }
@@ -1466,7 +1466,7 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
                         $ta = temporalToSimpleRange($value);
                         if($ta!=null) $timevalues[] = $ta;
                     }
-                }else if($dty_ID==DT_SYMBOLOGY){
+                }else if(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
                     $symbology = json_decode($value,true);                    
                 }
                 $val = $value;
@@ -1619,7 +1619,7 @@ function getJsonFeature($record, $mode){
 * @param mixed $records - array of record ids to limit output only for links in this array
 * @param mixed $links - array of relations produced by recordSearchRelated
 */
-function _composeGephiLinks(&$records, &$links, &$links_cnt){
+function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction){
     
 
     global $system, $defRecTypes, $defDetailtypes, $defTerms;
@@ -1638,8 +1638,14 @@ function _composeGephiLinks(&$records, &$links, &$links_cnt){
    if($links){
        
         foreach ($links as $link){
-            $source = $link->recID;
-            $target = $link->targetID;
+            if($direction=='direct'){
+                $source =  $link->recID;
+                $target =  $link->targetID;
+            }else{
+                $source = $link->sourceID;
+                $target = $link->recID;
+            }
+            
             $dtID = $link->dtID;
             $trmID = $link->trmID;
             $relationName = "Floating relationship";
