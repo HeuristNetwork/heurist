@@ -1111,6 +1111,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     display: inline-block;
     float: left;
     width: auto;
+    font-weight: n;
 }
 
 
@@ -1299,6 +1300,7 @@ div > .svs-contextmenu {
                 border: none !important;
                 display: block;
                 width:100%;
+                cursor: pointer;
             }
             span.fancytree-node.fancytree-active{
                 background: #95A7B7 !important;

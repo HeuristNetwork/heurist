@@ -25,14 +25,16 @@ $.widget( "heurist.app_timemap", {
     options: {
         recordset: null,
         selection: null, //list of record ids
+        
         layout:null, //['header','map','timeline']
         startup:0,         //map document loaded on map init
-        autoupdate:true,   //update content on global search events   ON_REC_SEARCHSTART (clear) and ON_REC_SEARCH_FINISH (add data)
+        
         eventbased:true,
         tabpanel:false,  //if true located on tabcontrol need top:30
         
         leaflet: false,
-        search_realm:  null  //accepts search/selection events from elements of the same realm only
+        search_realm:  null,  //accepts search/selection events from elements of the same realm only
+        init_at_once: false
     },
 
     _events: null,
@@ -69,13 +71,9 @@ $.widget( "heurist.app_timemap", {
 
             this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
-            + ' ' + window.hWin.HAPI4.Event.ON_SYSTEM_INITED;
-
-            if(this.options.autoupdate){
-                this._events = this._events
-                + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
-                + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART;
-            }
+            + ' ' + window.hWin.HAPI4.Event.ON_SYSTEM_INITED
+            + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
+            + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART;
 
             $(this.document).on(this._events, function(e, data) {
 
@@ -150,8 +148,10 @@ $.widget( "heurist.app_timemap", {
                 that._refresh();
             }
         });
-
-        //this._refresh();
+        
+        if(this.options.init_at_once){
+            this._refresh();  
+        }
 
     }, //end _create
 
@@ -171,7 +171,7 @@ $.widget( "heurist.app_timemap", {
             if( this.mapframe.attr('src') ){  //frame already loaded
                 this._initmap();
             }else {
-                
+
                 this.loadanimation(true);
                 
                 var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
@@ -207,6 +207,7 @@ $.widget( "heurist.app_timemap", {
                 url = url + '&noinit=1'; //to init map here
 
                 (this.mapframe).attr('src', url);
+console.log('>>>>>>>>>>>init map '+url);                                
             }
         }
 

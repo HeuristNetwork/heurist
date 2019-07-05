@@ -26,7 +26,8 @@ $.widget( "heurist.connections", {
         title: '',
         recordset: null,
         selection: null, //list of record ids
-        search_realm:  null  //accepts search/selection events from elements of the same realm only
+        search_realm:  null,  //accepts search/selection events from elements of the same realm only
+        init_at_once: false
     },
 
     _events: null,
@@ -110,6 +111,10 @@ $.widget( "heurist.connections", {
         });
 
         
+        this.graphframe.on('load', function(){
+                that._refresh();
+        });
+        
         // Refreshing
         this.element.on("myOnShowEvent", function(event){
             if( event.target.id == that.element.attr('id')){
@@ -117,9 +122,9 @@ $.widget( "heurist.connections", {
             }
         });
         
-        this.graphframe.on('load', function(){
-                that._refresh();
-        });
+        if(this.options.init_at_once){
+            this._refresh();  
+        }
         
         
     }, //end _create
@@ -177,6 +182,10 @@ $.widget( "heurist.connections", {
                         this._doVisualize(data);
                     
                     }
+                }else if(this.graphframe[0] && this.graphframe[0].contentWindow 
+                        && $.isFunction(this.graphframe[0].contentWindow.showData)){
+                    //clear
+                    this.graphframe[0].contentWindow.showData(null);
                 }
                 
             }
@@ -364,7 +373,6 @@ $.widget( "heurist.connections", {
                     },
                     function(selected){
                         that._getRelations(that.options.recordset);
-                        //$(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null);
                     }
             );
             this.recordset_changed = false;

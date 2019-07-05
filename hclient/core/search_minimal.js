@@ -101,7 +101,6 @@ function hSearchMinimal() {
 
             window.hWin.HAPI4.currentRecordset = null;
             if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
-console.log("START SEARCH "+request.id);                
                 $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
             }
 
@@ -155,7 +154,7 @@ console.log("START SEARCH "+request.id);
             
             if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){ 
                 
-                $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, 
+                $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH,   //_searchCompleted
                             {search_realm:_query_request.search_realm, recordset:recordset}); //global app event
             }
     }
@@ -163,7 +162,7 @@ console.log("START SEARCH "+request.id);
     //
     // apply rules to existed result set
     //
-    function _doApplyRules( originator, rules, rulesonly ){
+    function _doApplyRules( originator, rules, rulesonly, search_realm ){
         
         if(window.hWin.HAPI4.currentRecordset && window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.currentRecordset.getMainSet())){
         
@@ -171,6 +170,7 @@ console.log("START SEARCH "+request.id);
                             q: 'ids:'+window.hWin.HAPI4.currentRecordset.getMainSet().join(','),
                             rules: rules,
                             rulesonly: rulesonly,
+                            search_realm: search_realm,
                             w: _query_request?_query_request.w:'a'};
         
             _doSearch( originator, request );
@@ -197,8 +197,8 @@ console.log("START SEARCH "+request.id);
         },
  
         // apply rules to existing result set
-        doApplyRules:function( originator, rules, rulesonly ){
-            return _doApplyRules( originator, rules, rulesonly );
+        doApplyRules:function( originator, rules, rulesonly, search_realm ){
+            return _doApplyRules( originator, rules, rulesonly, search_realm );
         },
         
         doStop: function(){

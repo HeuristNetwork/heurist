@@ -225,10 +225,16 @@ function onPageInit(success){
         //
         //
         function showData(data, selectedRecordsIds, onSelectEvent, onRefreshData) {
-                // Processing...
-                if(data && data.nodes && data.links)
-                console.log("showData called inside springDiagram nodes:"+data.nodes.length+'  edges:'+data.links.length);
-                $("#d3svg").html('<text x="25" y="25" fill="black">Buiding graph ...</text>');
+               // Processing...
+               //if(data && data.nodes && data.links)
+               // console.log("showData called inside springDiagram nodes:"+data.nodes.length+'  edges:'+data.links.length);
+               
+               if(data && data.nodes){
+                   $("#d3svg").html('<text x="25" y="25" fill="black">Buiding graph ...</text>');
+               }else{
+                   $("#d3svg").html('<text x="25" y="25" fill="black">No data for graph</text>');
+                   return;
+               }
 
                 // Custom data parsing
                 function getData(data) {

@@ -182,6 +182,7 @@ function hLayout(args) {
                         options:opts!=false?opts:null }]};    
                         
                 is_layout = true;
+                
             }
         }
         
@@ -509,57 +510,64 @@ function hLayout(args) {
     function layoutInitPane(layout, $container, pos, bg_color){
 
             if(layout[pos]){
+                
+                var cardinal_panes = ['north','east','west','center','south'];
+                var $pane_content;
 
                 var lpane = layout[pos];
-
+                
                 var $pane = $container.find('.ui-layout-'+pos);
-
                 $pane.empty();
 
-                var $pane_content = $(document.createElement('div'));
-                $pane_content.attr('id','content_'+pos).addClass('ui-layout-content')
-                    .appendTo($pane);
+                if(cardinal_panes.indexOf(pos)>=0){
+
+                    $pane_content = $(document.createElement('div'));
+                    $pane_content.attr('id','content_'+pos).addClass('ui-layout-content')
+                        .appendTo($pane);
+                        
+                    if(bg_color)    {
+                        $pane_content.css('background-color', bg_color);
+                    }
+
+                    if(lpane.dropable){
+                        $pane_content.addClass('pane_dropable');
+                    }
                     
-                if(bg_color)    {
-                    $pane_content.css('background-color', bg_color);
-                }
+                    //create tabs and their children apps
+                    if(lpane.tabs){
+                        $.each(lpane.tabs, function(idx, tabb){
+                            appCreateTabControl($pane_content, tabb.apps, tabb);
+                        });
+                    }
 
-                if(lpane.dropable){
-                    $pane_content.addClass('pane_dropable');
-                }
+                    //create standalone apps
+                    if(lpane.apps){
 
-                //create tabs and their children apps
-                if(lpane.tabs){
-                    $.each(lpane.tabs, function(idx, tabb){
-                        appCreateTabControl($pane_content, tabb.apps, tabb);
-                    });
-                }
+                        $.each(lpane.apps, function(idx, app){
+                            if(app.dockable){
+                                appCreateTabControl($pane_content, app, null);
+                            }else{
+                                appCreatePanel($pane_content, app, true, true);
+                            }
+                        });
+                    }
 
-                //create standalone apps
-                if(lpane.apps){
-
-                    $.each(lpane.apps, function(idx, app){
-                        if(app.dockable){
-                            appCreateTabControl($pane_content, app, null);
-                        }else{
-                            appCreatePanel($pane_content, app, true);
-                        }
-                    });
-                }
-
-                //init all tabs on current pane
-                var containment_sel = '.ui-layout-'+pos+' > .ui-layout-content';
-                var $tabs = $( containment_sel+' > .tab_ctrl' ).tabs({
-                    activate: function(event ,ui){                 
-                        var action_id = $(ui.newTab[0]).attr('data-logaction');
-                        if(action_id && window.hWin && window.hWin.HAPI4){
-                            window.hWin.HAPI4.SystemMgr.user_log(action_id);
-                        }
-                        //console.log(ui.newTab.index());
-                    }}
-                );
+                    //init all tabs on current pane
+                    var containment_sel = '.ui-layout-'+pos+' > .ui-layout-content';
+                    var $tabs = $( containment_sel+' > .tab_ctrl' ).tabs({
+                        activate: function(event ,ui){                 
+                            var action_id = $(ui.newTab[0]).attr('data-logaction');
+                            if(action_id && window.hWin && window.hWin.HAPI4){
+                                window.hWin.HAPI4.SystemMgr.user_log(action_id);
+                            }
+                            //console.log(ui.newTab.index());
+                        }}
+                    );
                 
-                
+                }else{
+                    $pane_content = $container.find('.ui-layout-'+pos);
+                    appCreatePanel($pane_content, lpane.apps[0], true, false);
+                }
                 
                 appInitFeatures(containment_sel);
                 
@@ -644,22 +652,31 @@ function hLayout(args) {
     *
     * $container - pane in layout
     * app - tab or app - entry from layout array - need for ui parameters
-    * needcontent - load and create widget/libk at once (for standalone app only)
+    * needcontent - load and create widget/link at once (for standalone app only)
     */
-    function appCreatePanel($pane_content, app, needcontent){
+    function appCreatePanel($pane_content, app, needcontent, is_cardinal_layout){
 
         app_counter++;
 
-        var $d = $(document.createElement('div'));
-        $d.attr('id', 'pnl_'+app_counter)  //.css('border','solid')
-            .appendTo($pane_content);
+        var $d;
         
-        if(app.dragable){
-            $d.addClass('dragable');
+        //is_cardinal_layout = true;
+        
+        if( true || is_cardinal_layout ){
+            $d = $(document.createElement('div'));
+            $d.attr('id', 'pnl_'+app_counter)  //.css('border','solid')
+                .appendTo($pane_content);
+            
+            if(app.dragable){
+                $d.addClass('dragable');
+            }
+            if(app.resizable){
+                $d.addClass('resizable');
+            }
+        }else{
+            $d = $pane_content;
         }
-        if(app.resizable){
-            $d.addClass('resizable');
-        }
+        
 
         if(needcontent){ //for standalone application laod content at once
 
@@ -685,12 +702,15 @@ function hLayout(args) {
             $.each(app.css, function(key, value){
                 $d.css(key, value);
             });
-        }else if(app.resizable) {
-            $d.css('width', '98%');
-            $d.css('height', '98%');
-        }else {
-            $d.css('width', '99.999%');
-            $d.css('height', '99.999%');
+        }else if( is_cardinal_layout ) 
+        {
+            if(app.resizable) {
+                $d.css('width', '98%');
+                $d.css('height', '98%');
+            }else {
+                $d.css('width', '99.999%');
+                $d.css('height', '99.999%');
+            }
         }
 
         return $d;

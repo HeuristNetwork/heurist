@@ -386,7 +386,7 @@ top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDat
                         }, 3000);
                     }else{
                         //trigger search finish to init some widgets
-                        $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, null );   
+                        $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null} );   
                     }
                 }
                 //if database is empty show welcome screen

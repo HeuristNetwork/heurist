@@ -25,8 +25,6 @@ function hSvsEdit(args) {
     edit_dialog = null,
     callback_method;
 
-    const _NAME = 0, _QUERY = 1, _GRPID = 2;
-
     /**
     * Initialization
     */

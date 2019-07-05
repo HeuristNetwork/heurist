@@ -19,9 +19,6 @@
 
 var Hul = window.hWin.HEURIST4.util;
 
-//constants
-const _NAME = 0, _QUERY = 1, _GRPID = 2, _FACET = 3;
-
 $.widget( "heurist.svs_list", {
 
     // default options
@@ -50,7 +47,7 @@ $.widget( "heurist.svs_list", {
     // the constructor
     // create filter+button and div for tree
     _create: function() {
-
+        
         this._setOptionFromUrlParam('allowed_UGrpID', 'groupID');
         this._setOptionFromUrlParam('allowed_svsIDs', 'searchIDs');
         if(window.hWin.HAPI4.has_access() && this.options.buttons_mode){
@@ -1688,13 +1685,19 @@ $.widget( "heurist.svs_list", {
                     this.search_faceted.show();
                     this.search_tree.hide();
 
-                    var noptions= { query_name:qname, params:facet_params,
+                    var noptions= { query_name:qname, params:facet_params, search_realm:this.options.search_realm,
                         onclose:function(event){
                             that.search_faceted.hide();
                             that.search_tree.show();
                             that._adjustAccordionTop();
                     }};
-
+                    
+                    if(!$.isFunction($('body')['search_faceted'])){
+                        $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/search/search_faceted.js', function() {
+                            that.doSearch( qname, qsearch, isfaceted, ele );
+                        });
+                        return;
+                    }else
                     if(this.search_faceted.html()==''){ //not created yet
                         this.search_faceted.search_faceted( noptions );
                     }else{
@@ -1726,7 +1729,7 @@ $.widget( "heurist.svs_list", {
                     }
                     
                     //target is required
-                    if(! window.hWin.HAPI4.SearchMgr.doApplyRules( this, request.rules, request.rulesonly ) ){
+                    if(! window.hWin.HAPI4.SearchMgr.doApplyRules( this, request.rules, request.rulesonly, this.options.search_realm ) ){
                         window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('RuleSets require an initial search result as a starting point.'),
                             3000, window.hWin.HR('Warning'), ele);
                     }else{
@@ -1742,6 +1745,7 @@ $.widget( "heurist.svs_list", {
                     request.detail = 'detail';
                     request.source = this.element.attr('id');
                     request.qname = qname;
+                    request.search_realm = this.options.search_realm;
                     
                     window.hWin.HAPI4.SystemMgr.user_log('search_Record_savedfilter');
 

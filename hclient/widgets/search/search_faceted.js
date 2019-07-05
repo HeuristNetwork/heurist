@@ -90,6 +90,10 @@ viewport - collapse facet to limit count of items
 rectypes[0] 
 */
 
+/*
+requires:
+editing_input
+*/
 $.widget( "heurist.search_faceted", {
 
     _MIN_DROPDOWN_CONTENT: 50,//0, //min number in dropdown selector, otherwise facet values are displayed in explicit list
@@ -121,6 +125,14 @@ $.widget( "heurist.search_faceted", {
     // the widget's constructor
     _create: function() {
 
+        var that = this;
+        
+        if(!$.isFunction($('body')['editing_input'])){
+            $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/editing/editing_input.js', function() {
+                that._create();
+            });
+            return;
+        }
         // Sets up element to apply the ui-state-focus class on focus.
         //this._focusable($element);   
 
@@ -169,7 +181,6 @@ $.widget( "heurist.search_faceted", {
         .css({"overflow-y":"auto","overflow-x":"hidden","height":"100%"}) //"font-size":"0.9em",
         .appendTo( this.facets_list_container );
 
-        var that = this;
         var current_query_request_id;
         
         $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, 
@@ -885,7 +896,8 @@ $.widget( "heurist.search_faceted", {
                             rules: this.options.params.rules,
                             viewmode: this.options.params.ui_viewmode,
                             //to keep info what is primary record type in final recordset
-                            primary_rt: this.options.params.rectypes[0] 
+                            primary_rt: this.options.params.rectypes[0],
+                            search_realm: this.options.search_realm
                             }; //, facets: facets
                             
             if(this.options.ispreview){
