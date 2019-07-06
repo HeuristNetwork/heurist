@@ -1376,7 +1376,7 @@ background: #8ea9b9
 .ent_header{top:0;height:2.2em; padding:0.2em 0.5em;} /* border-bottom:lightgray solid 1px; background-color:#faa;, .ent_content_full*/
 .ent_content{top:2.8em;bottom:3.5em; overflow-y:auto;}
 
-.ent_content_full{position:absolute; top:2.8em;bottom:0; left:0;right:1px;overflow-y:auto}
+.ent_content_full{position:absolute;top:2.8em;bottom: 0;left:0;right: 1;overflow-y:auto;}
 .ent_footer{bottom:0px; height:2.6em}
 
 .ent_wrapper.editor{

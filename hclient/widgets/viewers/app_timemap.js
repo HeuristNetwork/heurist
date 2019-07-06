@@ -207,7 +207,6 @@ $.widget( "heurist.app_timemap", {
                 url = url + '&noinit=1'; //to init map here
 
                 (this.mapframe).attr('src', url);
-console.log('>>>>>>>>>>>init map '+url);                                
             }
         }
 

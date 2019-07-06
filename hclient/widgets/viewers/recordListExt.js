@@ -61,14 +61,14 @@ $.widget( "heurist.recordListExt", {
             if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS)
             {
                 if(!window.hWin.HAPI4.has_access()){ //logout
-                    that.option("recordset", null);  
+                    that.options.recordset = null;
                     that._refresh();
                 }
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ 
 
                 if(!that._isSameRealm(data)) return;
                 
-                that.option( "recordset", data.recordset ); //hRecordSet
+                that.options.recordset = data.recordset; //hRecordSet
                 that._refresh();
                 that.loadanimation(false);
 
@@ -78,8 +78,8 @@ $.widget( "heurist.recordListExt", {
                 
                 if(data && !data.reset){
                     that._query_request = jQuery.extend(true, {}, data);  //keep current query request (clone)
-                    that.option("recordset", null);
-                    that.option("selection", null);
+                    that.options.selection = null;
+                    that.options.recordset = null;
                     if(data.q!=''){
                         that.loadanimation(true);
                     }
@@ -91,9 +91,12 @@ $.widget( "heurist.recordListExt", {
                 //selection happened somewhere else
                 if(that.options.is_single_selection && that._isSameRealm(data) && data.source!=that.element.attr('id')){
                     if(data.reset){
-                        that.option("selection",  null);
+                        //that.option("selection",  null);
+                        that.options.selection = null;
                     }else{
-                        that.option("selection", window.hWin.HAPI4.getSelection(data.selection, true) );
+                        var sel = window.hWin.HAPI4.getSelection(data.selection, true)
+                        that.options.selection = sel;
+                        //that.option("selection", sel);
                     }
                     that._refresh();
                 }

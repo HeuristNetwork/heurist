@@ -33,7 +33,8 @@ function hLayout(args) {
      var widgetinstances = [], //@todo array of all inited widgets 
          widgets = [],
          layouts = [],  //json description of layout
-         _containerid;
+         _containerid,
+         _is_container_layout = false;
          
     /**
     * Initialization
@@ -547,7 +548,7 @@ function hLayout(args) {
                             if(app.dockable){
                                 appCreateTabControl($pane_content, app, null);
                             }else{
-                                appCreatePanel($pane_content, app, true, true);
+                                appCreatePanel($pane_content, app, true);
                             }
                         });
                     }
@@ -566,7 +567,7 @@ function hLayout(args) {
                 
                 }else{
                     $pane_content = $container.find('.ui-layout-'+pos);
-                    appCreatePanel($pane_content, lpane.apps[0], true, false);
+                    appCreatePanel($pane_content, lpane.apps[0], true);
                 }
                 
                 appInitFeatures(containment_sel);
@@ -654,7 +655,7 @@ function hLayout(args) {
     * app - tab or app - entry from layout array - need for ui parameters
     * needcontent - load and create widget/link at once (for standalone app only)
     */
-    function appCreatePanel($pane_content, app, needcontent, is_cardinal_layout){
+    function appCreatePanel($pane_content, app, needcontent){
 
         app_counter++;
 
@@ -662,7 +663,7 @@ function hLayout(args) {
         
         //is_cardinal_layout = true;
         
-        if( true || is_cardinal_layout ){
+        if(!_is_container_layout ){
             $d = $(document.createElement('div'));
             $d.attr('id', 'pnl_'+app_counter)  //.css('border','solid')
                 .appendTo($pane_content);
@@ -702,7 +703,7 @@ function hLayout(args) {
             $.each(app.css, function(key, value){
                 $d.css(key, value);
             });
-        }else if( is_cardinal_layout ) 
+        }else if(!_is_container_layout ) 
         {
             if(app.resizable) {
                 $d.css('width', '98%');
@@ -1244,10 +1245,12 @@ function hLayout(args) {
         },
         
         //
-        // 
+        // get layout priperties from attributes and init free layout
         //
         appInitFromContainer: function( document, containerid ){
+            
             _containerid = containerid;
+            _is_container_layout = true;
             var $container;
             if(document){
                 $container = $(document.body).find(containerid);

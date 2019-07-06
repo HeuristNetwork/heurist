@@ -136,10 +136,12 @@ function onPageInit(success){
                 //$('#main-content').css('height', h);
                 last_save_content = $('#main-content').html(); 
                 tinymce.init(inlineEditorConfig);
-                $('.mce-tinymce').css({position:'absolute',top:$('#main-content').css('top'),bottom:$('#main-content').css('bottom')});
-                /*setTimeout(function(){
-                    $('.mce-tinymce').css({position:'absolute',top:$('#main-content').css('top'), bottom:$('#main-content').css('bottom')});    
-                },500);*/
+                setTimeout(function(){
+                    $('.mce-tinymce').css({position:'absolute',
+                        top:140,  //
+                        bottom:20 //$('#main-content').css('bottom')
+                    });    
+                },500);
                 
                 
             })

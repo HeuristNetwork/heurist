@@ -61,7 +61,7 @@ $.widget( "heurist.connections", {
                 
                 if(!window.hWin.HAPI4.has_access()){ //logout
                     that.recordset_changed = true;
-                    that.option("recordset", null);
+                    that.options.recordset = null;
                     that._refresh();
                 }
                 
@@ -72,13 +72,16 @@ $.widget( "heurist.connections", {
                 //accept events from the same realm only
                 if(!that._isSameRealm(data)) return;
                 
+                //that.recordset_changed = true;
+                //that._getRelations( data );
+                
+                
                 //find all relation within given result set
                 that.recordset_changed = true;
-                that.option("recordset", data.recordset); //hRecordSet
+                that.options.relations = null;
+                that.options.recordset = data.recordset; //hRecordSet
                 that._refresh();
                 
-                //!!!! move that._getRelations( data.recordset );
-                //that.loadanimation(false);
 
             // Search start
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
@@ -86,8 +89,10 @@ $.widget( "heurist.connections", {
                 //accept events from the same realm only
                 if(!that._isSameRealm(data)) return;
                 
-                that.option("recordset", null);
-                that.option("selection", null);
+                that.options.relations = null;
+                that.options.recordset = null;
+                that.options.selection = null;
+
                 if(data && !data.reset && data.q!=''){
                     that.loadanimation(true);
                 }else{
@@ -100,7 +105,7 @@ $.widget( "heurist.connections", {
                 if(that._isSameRealm(data) && data.source!=that.element.attr('id')) { //selection happened somewhere else
                   
                     if(data.reset){
-                        that.option("selection",  null);
+                        that.options.selection = null;
                     }else{
                         that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
                     }
@@ -234,11 +239,10 @@ $.widget( "heurist.connections", {
         
         if(window.hWin.HEURIST4.util.isnull(recordset)) return;
 
-        this.option("relations", null);
+        this.options.relations = null;
         
         if(!this.element.is(':visible')){
-                this.option("recordset", recordset);
-                return;
+            return;
         }
         
         var that2 = this; 
@@ -388,7 +392,7 @@ $.widget( "heurist.connections", {
 
             if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
 
-            this.option("selection", selection);
+            this.options.selection = selection;
             
             if(!this.element.is(':visible')
                 || window.hWin.HEURIST4.util.isnull(this.graphframe) || this.graphframe.length < 1){
