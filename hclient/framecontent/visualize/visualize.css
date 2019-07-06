@@ -133,7 +133,7 @@
 
 /** SVG */
 #d3svg {
-    border: 1px dashed white;
+    /* border: 1px dashed #423896; */
 }
 
 /** Record hover */

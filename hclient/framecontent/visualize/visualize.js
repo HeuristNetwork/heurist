@@ -483,6 +483,7 @@ var lines = svg.append("svg:g").selectAll("path")
     }
     */
     
+    
     /*var gravity = getSetting(setting_gravity);
     svg.selectAll(".node")
        .attr("fixed", function(d, i) {
@@ -540,6 +541,10 @@ function addContainer() {
     var scale = getSetting(setting_scale,1);
     var translateX = getSetting(setting_translatex,0);
     var translateY = getSetting(setting_translatey,0);
+
+translateX = 0;
+translateY = 0;
+scale = 0.5;
     
     var s ='';
     if(isNaN(translateX) || isNaN(translateY) ||  translateX==null || translateY==null ||
@@ -549,12 +554,11 @@ function addContainer() {
         translateY = 0;
     }
     s = "translate("+translateX+", "+translateY+")";    
-    if(!(isNaN(scale) || scale==null || Math.abs(scale)==Infinity)){
+    if(!(isNaN(scale) || scale==null || Math.abs(scale)==Infinity || scale < 0.09) ){
         s = s + "scale("+scale+")";
     }
-    
+
     //s = "translate(1,1)scale(1)";    
-    
     // Append zoomable container       
     var container = svg.append("g")
                        .attr("id", "container")
@@ -568,6 +572,7 @@ function addContainer() {
                     
     return container;
 }
+
 
 /**
 * Called after a zoom-event takes place.
@@ -611,9 +616,6 @@ console.log('B '+d3.event.translate);
     }
     
     var scale = d3.event.scale; //Math.pow(d3.event.scale,0.75);
-    
-//console.log( 'trans='+d3.event.translate );
-//console.log( 'scale='+scale );
     
     //keep current setting Scale
     if(!isNaN(d3.event.scale) && isFinite(d3.event.scale)&& scale!=0){
@@ -676,7 +678,6 @@ function zoomBtn(zoom_in){
 
     zoom.scale(target_scale)
         .translate([x,y]);    
-   
     var transform = "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")";   
     onZoom(transform);
 }
