@@ -167,7 +167,7 @@ function hLayout(args) {
     */
     function _getLayoutParams($container){
         
-        var eles = $container.find('div[heurist-app-id]');
+        var eles = $container.find('div[data-heurist-app-id]');
         
         var layout = {id:'Dynamic', type:'free'};
         
@@ -175,9 +175,12 @@ function hLayout(args) {
         
         for(var i=0; i<eles.length; i++){
             var ele = $(eles[i]);
-            var app_id = ele.attr('heurist-app-id');
+            var app_id = ele.attr('data-heurist-app-id');
             if(_appGetWidgetById(app_id)!=null){
-                var opts = window.hWin.HEURIST4.util.isJSON(ele.attr('heurist-app-options'));
+                var opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-heurist-app-options'));
+                if(!opts){
+                    opts = window.hWin.HEURIST4.util.isJSON(ele.find('span').text());
+                }
                 
                 layout[ele.attr("id")] = {dropable:false, apps:[{appid:app_id, hasheader:false, 
                         options:opts!=false?opts:null }]};    

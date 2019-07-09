@@ -203,7 +203,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         function __gp(name){
             return window.hWin.HEURIST4.util.getUrlParameter(name, location.search)
         }
-        
+console.log('onPageInit');
         var layout_params = null;
         is_init_here = __gp('noinit')!='1';
         if(is_init_here){    //take parameters from url 
@@ -221,8 +221,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
             layout_params['basemap'] = __gp('basemap');  //name of basemap
             layout_params['extent'] = __gp('extent'); //@todo
             
-            layout_params['controls'] = __gp('controls'); //cs list of visible controls
-            layout_params['legend'] = __gp('legend'); //cs list of visible panels
+            layout_params['controls'] = __gp('controls'); //comma separated list of visible controls
+            layout_params['legend'] = __gp('legend'); //comma separated list of visible panels
             
             layout_params['published'] = '1';
         }

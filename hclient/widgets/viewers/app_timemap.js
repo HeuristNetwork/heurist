@@ -34,7 +34,10 @@ $.widget( "heurist.app_timemap", {
         
         leaflet: false,
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
-        init_at_once: false
+        init_at_once: false,
+        
+        layout_params:null, //params to be passed to map
+        mapdocument:null
     },
 
     _events: null,
@@ -182,31 +185,40 @@ $.widget( "heurist.app_timemap", {
                 var url = window.hWin.HAPI4.baseURL + 'viewers/map/map'+
                     (this.options.leaflet?'_leaflet':'')+'.php?db='+window.hWin.HAPI4.database;
                     
-                if(this.options.layout){
-                    
-/* see map_leaflet.php                    
-            layout_params['nomap'] = __gp('nomap');
-            layout_params['notimeline'] = __gp('notimeline');
-            layout_params['nocluster'] = __gp('nocluster');
-            layout_params['editstyle'] = __gp('editstyle');
-            layout_params['basemap'] = __gp('basemap');  //name of basemap
-            layout_params['extent'] = __gp('extent'); //@todo
+                if(this.options.layout_params){
             
-            layout_params['controls'] = __gp('controls'); //cs list of visible controls
-            layout_params['legend'] = __gp('legend'); //cs list of visible panels
-            
-            mapdocument
-*/                    
+                    for(var key in this.options.layout_params)
+                        url = url + '&'+key + '=' + this.options.layout_params[key];
                     
+                    /*layout_params['nomap'] = __gp('nomap');
+                    layout_params['notimeline'] = __gp('notimeline');
+                    layout_params['nocluster'] = __gp('nocluster');
+                    layout_params['editstyle'] = __gp('editstyle');
+                    layout_params['basemap'] = __gp('basemap');  //name of basemap
+                    layout_params['extent'] = __gp('extent'); //@todo
                     
-                    if( this.options.layout.indexOf('timeline')<0 )
-                        url = url + '&notimeline=1';
-                    if( this.options.layout.indexOf('header')<0 )
-                        url = url + '&noheader=1';
+                    layout_params['controls'] = __gp('controls'); //cs list of visible controls
+                    layout_params['legend'] = __gp('legend'); //cs list of visible panels
+                    */
+                    
+                }else{
+                    if(this.options.layout){
+                        //old version
+                        if( this.options.layout.indexOf('timeline')<0 )
+                            url = url + '&notimeline=1';
+                                                    
+                        if( this.options.layout.indexOf('header')<0 )
+                            url = url + '&noheader=1';
+                    }
+                    url = url + '&noinit=1'; //to init map here
                 }
-                url = url + '&noinit=1'; //to init map here
-
+                
+                if(this.options.mapdocument>0){
+                    url = url + '&mapdocument='+this.options.mapdocument; 
+                }
+                
                 (this.mapframe).attr('src', url);
+                
             }
         }
 

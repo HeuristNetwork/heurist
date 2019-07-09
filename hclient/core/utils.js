@@ -1099,6 +1099,6 @@ $.getMultiScripts = function(arr, path) {
     return $.when.apply($, _arr);
 }
 
-//constants for saved searches
+//constants for saved searches\
 const _NAME = 0, _QUERY = 1, _GRPID = 2, _FACET = 3;
 

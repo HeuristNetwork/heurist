@@ -323,10 +323,6 @@ body{
     height:20px;
     padding-top: 10px;
 }
-#main-content{
-    bottom:20px;
-    padding: 5px;
-}
 </style>
     
 </head>
@@ -346,8 +342,15 @@ body{
         <a href="#" id="btn_inline_editor2" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page headers</a>
         <a href="#" id="btn_inline_editor" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page content</a>
     </div>
-    <div id="main-content" class="tinymce-body ent_content" data-homepageid="<?php print $rec_id;?>" style="top:141px">
-        <?php print __getValue($rec, DT_EXTENDED_DESCRIPTION);?>
+    <div class="ent_content" style="top:141px;bottom:20px;padding: 5px;">
+        <div id="main-content" data-homepageid="<?php print $rec_id;?>" style="height:100%;">
+            <?php print __getValue($rec, DT_EXTENDED_DESCRIPTION);?>
+        </div>
+<?php        
+if($edit_Available){        
+        print '<textarea class="tinymce-body" style="width:100%;height:100%;display:none">'.__getValue($rec, DT_EXTENDED_DESCRIPTION).'</textarea>';
+}
+?>        
     </div>
     <div id="main-foooter" class="ent_footer">
         <a href="http://HeuristNetwork.org" target="_blank" style="text-decoration:none;" 

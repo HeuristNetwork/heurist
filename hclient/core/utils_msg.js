@@ -145,12 +145,14 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     showMsgDlgUrl: function(url, buttons, title, options){
 
+        var $dlg;
         if(url){
-            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+            $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
             $dlg.load(url, function(){
                 window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title, options);
             });
         }
+        return $dlg;
     },
     
     //
@@ -776,6 +778,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     // MAIN method
     // buttons - callback function or objects of buttons for dialog option
     // title - either string for title, or object {title:, yes: ,no, cancel, }
+    // ext_options:
     //
     showMsgDlg: function(message, buttons, labels, ext_options, isPopupDlg){
 
@@ -883,6 +886,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(ext_options){
            if(ext_options.options){
                 $.extend(options, ext_options.options);
+           }else if( $.isPlainObject(ext_options) ){
+                $.extend(options, ext_options);
            }
            if(ext_options.my && ext_options.at && ext_options.of){
                options.position = {my:ext_options.my, at:ext_options.at, of:ext_options.of};
