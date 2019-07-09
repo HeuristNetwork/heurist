@@ -43,12 +43,17 @@
            $res = $dbRecDetails->detailsAddChild();
             
         }else         
+        if(is_array(@$_REQUEST['actions'])){
+        
+            $res = $dbRecDetails->multiAction();
+        
+        }else         
         if(@$_REQUEST['a'] == 'add'){
 
             $res = $dbRecDetails->detailsAdd();
 
         }else if(@$_REQUEST['a'] == 'replace'){ //returns
-
+        
             $res = $dbRecDetails->detailsReplace();
 
         }else if(@$_REQUEST['a'] == 'delete'){

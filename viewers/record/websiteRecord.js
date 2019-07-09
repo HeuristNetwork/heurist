@@ -47,14 +47,14 @@ function onPageInit(success){
             */
             
             editor.addButton('customAddWidget', { //since v5 .ui.registry
-                  text: 'Add Widget',
+                  text: 'Add DB retrieval',
                   onclick: function (_) {  //since v5 onAction
                         __addWidget();
                   }
                 });
                             
             editor.addButton('customSaveButton', { //since v5 .ui.registry
-                  icon: 'ui-icon-arrowstop-1-s',
+                  icon: 'save',
                   text: 'Save changes',
                   onclick: function (_) {  //since v5 onAction
                         __saveChanges(false);
@@ -89,7 +89,7 @@ function onPageInit(success){
     
     $( "#main-menu > ul" ).addClass('horizontalmenu').menu( {position:{ my: "left top", at: "left+20 bottom" }} );
     $('#main-menu').show()
-    $('#main-menu').find('a').click(function(event){  //load new page
+    $('#main-menu').find('a').addClass('truncate').click(function(event){  //load new page
 
         var pageid = $(event.target).attr('data-pageid');
 
@@ -248,6 +248,7 @@ function onPageInit(success){
     //
     function __alignButtons(){
         var itop = $('#main-header').height(); //[0].scrollHeight;
+        $('#btn_inline_editor2').css({top:itop-70});
         $('#btn_inline_editor').css({top:itop-30});
         
         //$('#main-header').css('height',itop-10);
@@ -378,7 +379,9 @@ function onPageInit(success){
         {
            open: function(){
                //init elements on dialog open
-               $dlg.find('#widgetName').on({change:function( event ){
+               var $select = $dlg.find('#widgetName');
+               window.hWin.HEURIST4.ui.initHSelect($select[0], false);
+               $select.on({change:function( event ){
                    var val = $(event.target).val();
                    $dlg.find('div[class^="heurist_"]').hide();    
                    var dele = $dlg.find('div.'+val+'');

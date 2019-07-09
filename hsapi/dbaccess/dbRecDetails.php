@@ -76,6 +76,12 @@ class DbRecDetails
        }
     }
 
+    //
+    //
+    //
+    function  setData($data){
+        $this->data = $data;    
+    }
     
     public function getReport(){
         return $this->result_data;
@@ -431,13 +437,62 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         return $this->result_data;        
     }
 
+    //
+    //
+    //
+    public function multiAction(){
+        
+        $main_data = $this->data['actions'];
+        
+        $mysqli = $this->system->get_mysqli();
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+        
+        foreach ($main_data as $action_data) {
+                
+            $this->setData($action_data);
+
+            if(@$this->data['a'] == 'add'){
+
+                $res = $this->detailsAdd();
+                
+            }else if(@$this->data['a'] == 'replace'){ //returns
+            
+                $res = $this->detailsReplace();
+                
+            }else if(@$this->data['a'] == 'delete'){
+                
+                $res = $this->detailsDelete();
+            }
+            
+            if($res===false){
+                break;   
+            }else{
+                if(!@$this->result_data['processed']) $this->result_data['processed'] = 0;
+                $this->result_data['processed'] = $this->result_data['processed'] 
+                    +(@$res['processed']>0?$res['processed']:0);
+            }
+        }
+        
+        if($res===false){
+            $mysqli->rollback();
+            $res_data = $res;
+        }else{
+            $mysqli->commit();
+            $res_data = $this->result_data;
+        }
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+        
+        return $res_data;
+        
+    }
+        
     /**
     * Replace detail value for given set of records and detail type and values
     * sVal - search value to replace otherwise replace all values 
     * rVal - new value
     */
-    public function detailsReplace(){
-
+    public function detailsReplace()
+    {
         if (!@$this->data['rVal']){
             $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed");
             return false;
@@ -454,7 +509,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         $mysqli = $this->system->get_mysqli();
 
-        if(!@$this->data['sVal']){  
+        if(!@$this->data['sVal']){    //value to be replaced
             $searchClause = '1=1';
             $replace_all_occurences = true;  
         }else{
@@ -519,7 +574,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     $newVal = $this->data['rVal'];
                 }
          
-                $dtl['dtl_ID'] = $dtlID;
+                $dtl['dtl_ID'] = $dtlID;  //detail type id
                 $dtl['dtl_Value'] = $newVal;
                 $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
             
@@ -556,7 +611,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             }
                     
             
-        }//for recors
+        }//for records
         
         //update record title
         foreach ($processedRecIDs as $recID){

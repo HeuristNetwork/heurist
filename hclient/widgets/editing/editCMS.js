@@ -191,6 +191,8 @@ function editCMS(home_page_record_id, main_callback){
                             
                             //{"query":'t:'+RT_CMS_PAGE+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_PAGE} pages no need
             }
+            
+            var orig_site_name = '';
         
             request['detail'] = 'detail';
             //perform search        
@@ -238,7 +240,23 @@ function editCMS(home_page_record_id, main_callback){
                                 if(resdata.fld(record, 'rec_RecTypeID')== RT_CMS_HOME){
                                     
                                     home_page_record_id  = resdata.fld(record, 'rec_ID');
-                                    popup_dlg.find('#web_Name').val(resdata.fld(record, DT_NAME));
+                                    orig_site_name = resdata.fld(record, DT_NAME);
+                                    popup_dlg.find('#web_Name').val(orig_site_name)
+                                    .off('blur')
+                                    .on({blur:function(event){
+                                        var newval = $(event.target).val();
+                                        if(newval.trim()!='' && newval!=orig_site_name){
+                                            var request = {a: 'replace',
+                                                        recIDs: home_page_record_id,
+                                                        dtyID: DT_NAME,
+                                                        rVal: newval};
+                                            window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                                                if(response.status == hWin.ResponseStatus.OK){
+                                                    window.hWin.HEURIST4.msg.showMsgFlash('saved');
+                                                }
+                                            });
+                                        }
+                                    }});
                                     //var currentTheme = resdata.fld(record, DT_CMS_THEME);
                                     //if(!currentTheme) currentTheme = 'heurist';  
                                     //popup_dlg.find('#web_Theme').val(currentTheme);
@@ -327,6 +345,7 @@ function editCMS(home_page_record_id, main_callback){
                                     //add,edit menu,edit page,remove
                                     var actionspan = $('<div class="svs-contextmenu3" data-parentid="'
                                           +item.data.parent_id+'" data-menuid="'+menu_id+'" data-pageid="'+page_id+'" >'
+                                          +menu_id
                                         +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
                                         +'<span class="ui-icon ui-icon-menu" title="Edit menu record"></span>'
                                         +'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
@@ -457,16 +476,61 @@ function editCMS(home_page_record_id, main_callback){
                                     dragEnter: function(node, data) {
                                         //data.otherNode - dragging node
                                         //node - target node
-                                        return node.folder ?true :["before", "after"];
+                                        return true; //node.folder ?['over'] :["before", "after"];
                                     },
                                     dragDrop: function(node, data) {
-                                            //data.otherNode - dragging node
-                                            //node - target node
-                                            data.otherNode.moveTo(node, data.hitMode);
-                                            
-                                            //remove from old parent
-                                            
-                                            //add to new parent and save order
+                                        //data.otherNode - dragging node
+                                        //node - target node
+                                        var source_parent = data.otherNode.parent.key;//data.otherNode.data.parent_id;
+                                        if(!(source_parent>0))
+                                            source_parent = home_page_record_id;
+
+                                        data.otherNode.moveTo(node, data.hitMode);
+
+                                        var target_parent = data.otherNode.parent.key;
+                                        if(!(target_parent>0))
+                                            target_parent = home_page_record_id;
+                                        data.otherNode.data.parent_id = target_parent;
+                                        
+                                        var request = {actions:[]};
+
+                                        if(source_parent!=target_parent){
+                                        //remove from source
+                                        request.actions.push(
+                                            {a: 'delete',
+                                                recIDs: source_parent,
+                                                dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                                sVal:data.otherNode.key});
+
+                                        }
+                                        //return;
+                                        //change order in target
+                                        request.actions.push(
+                                            {a: 'delete',
+                                                recIDs: target_parent,
+                                                dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
+
+                                        for (var i=0; i<data.otherNode.parent.children.length; i++){
+
+                                            var menu_node = data.otherNode.parent.children[i];
+                                            request.actions.push(
+                                                {a: 'add',
+                                                    recIDs: target_parent,
+                                                    dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                                    val:menu_node.key}                                                   
+                                            );
+                                        }                    
+
+                                        window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
+                                        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                                                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                                if(response.status == hWin.ResponseStatus.OK){
+                                                    window.hWin.HEURIST4.msg.showMsgFlash('saved');
+                                                }else{
+                                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                                }
+                                        });                                        
+
                                     }
                                 },
                                 edit:{

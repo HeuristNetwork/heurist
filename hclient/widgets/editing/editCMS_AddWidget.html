@@ -3,22 +3,22 @@
         <div class="header"><label for="widgetName">Select widget:</label></div>
         <select name="widgetName" id="widgetName" class="text ui-widget-content ui-corner-all" style="min-width:300px"
             title="">
-            <option value="heurist_Search">Search with query builder/Filter by entities</option>
-            <option value="heurist_SearchTree">Saved searches list/Faceted searches</option>
-            <option value="heurist_resultList">Result List</option>
-            <option value="heurist_Map">Map and Timeline</option>
-            <option value="heurist_Graph">Diagram / Graph</option>
-            <option value="heurist_resultListExt">Smarty output</option>
+            <option value="heurist_Search">Search field (with standard query builder)</option>
+            <option value="heurist_SearchTree">Saved searches (simple & facet searches)</option>
+            <option value="heurist_resultList">Search results (list or thumbnails)</option>
+            <option value="heurist_Map">Map and timeline</option>
+            <option value="heurist_Graph">Network graph</option>
+            <option value="heurist_resultListExt">Custom report</option>
         </select>
     </div>
     <div>
-        <div class="header"><label>CSS:</label></div>
-        <input id="widgetCss" value="height:400;width:600;border:2px solid red;position:relative"/>
+        <div class="header" style="vertical-align:top"><label>CSS:</label></div>
+        <textarea id="widgetCss" rows="5" style="width:300px">height:400;width:600;border:2px solid gray;position:relative;</textarea>
     </div>
     
     <div  class="heurist_Search">
-        <div class="header"><label>Show filter by entity buttons</label></div>
-        <input name="btn_entity_filter" type="checkbox"/>
+        <!--<div class="header"><label>Show filter by entity buttons</label></div>-->
+        <input name="btn_entity_filter" type="hidden" value="false"/>
         <input name="btn_visible_newrecord" type="hidden" value="false"/>
         <input name="isloginforced" type="hidden" value="false"/>
     </div>
