@@ -48,8 +48,11 @@ $.widget( "heurist.svs_list", {
     // create filter+button and div for tree
     _create: function() {
         
-        this._setOptionFromUrlParam('allowed_UGrpID', 'groupID');
-        this._setOptionFromUrlParam('allowed_svsIDs', 'searchIDs');
+        
+        if(!this.options.allowed_UGrpID)
+            this._setOptionFromUrlParam('allowed_UGrpID', 'groupID');
+        if(!this.options.allowed_svsIDs)
+            this._setOptionFromUrlParam('allowed_svsIDs', 'searchIDs');
         if(window.hWin.HAPI4.has_access() && this.options.buttons_mode){
             this._setOptionFromUrlParam('treeview_mode','treeViewLoggedIn', 'bool');
             if(this.options.treeview_mode){
@@ -58,6 +61,9 @@ $.widget( "heurist.svs_list", {
         }
 
         var that = this;
+        
+        this.element.css({'overflow-y':'auto'});
+        this.element.parent().css({'overflow':'hidden'});
         
         //panel to show list of saved filters
         this.search_tree = $( "<div>" ).css({'height':'100%'}).appendTo( this.element );

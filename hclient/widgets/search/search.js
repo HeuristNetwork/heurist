@@ -55,12 +55,13 @@ $.widget( "heurist.search", {
 
         var that = this;
 
-        this.element.css({'height':'10.88em','min-width':'1100px'});//'border-bottom':'1px solid lightgray'
-        if(window.hWin.HAPI4.sysinfo['layout']!='H4Default' && window.hWin.HAPI4.sysinfo['layout']!='H5Default'){
+        //this.element.css({border:'2px solid green','background-color':'lightgreen'});
+        if(false && window.hWin.HAPI4.sysinfo['layout']!='H4Default' && window.hWin.HAPI4.sysinfo['layout']!='H5Default'){
             this.element.addClass('ui-heurist-header1'); //dark navy bg - used long ago in original layout - to remove
         }else{
             this.element.addClass('ui-widget-content');
         }
+        this.element.css({height:'100%',height:'100%'});
 
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
@@ -187,7 +188,7 @@ $.widget( "heurist.search", {
 */
 
         // Search field
-        this.div_search_input = $('<div>')
+        this.div_search_input = $('<div>').css({'width':'100%'})
         .addClass('div-table-cell')
         .appendTo( this.div_search );
 
@@ -203,8 +204,8 @@ $.widget( "heurist.search", {
         
         this.input_search = $( "<textarea>" )
         .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'6.6em', //'height':'2.5em', 'max-height':'67px', 
-            'max-width':sz_input, 'padding':'0.4em', 
-            'min-width':'10em', 'width':sz_input, 'padding-right':'18px' }) 
+            'padding':'0.4em', 
+            'min-width':'10em', 'width':'100%', 'padding-right':'18px' })  //was width:sz_input, 'max-width':sz_input,  
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
         
@@ -296,7 +297,7 @@ $.widget( "heurist.search", {
         //
         // search/filter buttons - may be Search or Bookmarks according to settings and whether logged in
         //
-        this.div_search_as_guest = $('<div>')
+        this.div_search_as_guest = $('<div>').css({'min-width':'14em'})
         .addClass('div-table-cell logged-out-only')
         .appendTo( this.div_search );
 
@@ -305,7 +306,7 @@ $.widget( "heurist.search", {
         .addClass('ui-heurist-btn-header1')
         .button({label: window.hWin.HR("filter"), iconPosition: 'end', icon:"ui-icon-search"});
 
-        this.div_search_as_user = $('<div>')
+        this.div_search_as_user = $('<div>').css({'min-width':'14em'})
         .addClass('div-table-cell logged-in-only')
         .css({'padding-right': '10px'})
         .appendTo( this.div_search );
@@ -463,7 +464,7 @@ $.widget( "heurist.search", {
             .appendTo( this.element );
             */
             
-            this.div_add_record = $('<div>')
+            this.div_add_record = $('<div>').css({'min-width':'31em'})
             .addClass('div-table-cell logged-in-only')
             .appendTo( this.div_search );
 
