@@ -121,43 +121,43 @@ function editCMS(home_page_record_id, main_callback){
     popup_dlg.load(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editCMS.html', 
         function(){
             //$(popup_dlg.find('.main_cms')).layout( layout_opts );
+            //
+            if(home_page_record_id<0){
+                //create new set of records - website template
+                window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
+                window.hWin.HEURIST4.msg.showMsgFlash('Creating the set of website records', 10000);
+
+                var session_id = Math.round((new Date()).getTime()/1000); //for progress
+
+                var request = { action: 'import_records',
+                    filename: 'websiteStarterRecords.hml',
+                    //session: session_id,
+                    id: window.hWin.HEURIST4.util.random()
+                };
+
+                window.hWin.HAPI4.doImportAction(request, function( response ){
+                    
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        $('#spanRecCount2').text(response.data.count_imported);
+
+                        _initWebSiteEditor( { q:"ids:"+response.data.ids.join(',') } );
+
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        edit_dialog.dialog('close');
+                    }
+                });
+
+            }else{
+                _initWebSiteEditor();
+            }
         }
     );
 
 
 
-    //
-    if(home_page_record_id<0){
-        //create new set of records - website template
-        window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
-        window.hWin.HEURIST4.msg.showMsgFlash('Creating the set of website records', 10000);
-
-        var session_id = Math.round((new Date()).getTime()/1000); //for progress
-
-        var request = { action: 'import_records',
-            filename: 'websiteStarterRecords.hml',
-            //session: session_id,
-            id: window.hWin.HEURIST4.util.random()
-        };
-
-        window.hWin.HAPI4.doImportAction(request, function( response ){
-            
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-        
-            if(response.status == window.hWin.ResponseStatus.OK){
-                $('#spanRecCount2').text(response.data.count_imported);
-
-                _initWebSiteEditor( { q:"ids:"+response.data.ids.join(',') } );
-
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-                edit_dialog.dialog('close');
-            }
-        });
-
-    }else{
-        _initWebSiteEditor();
-    }
 
     //
     //

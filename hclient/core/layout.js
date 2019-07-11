@@ -177,7 +177,7 @@ function hLayout(args) {
             var ele = $(eles[i]);
             var app_id = ele.attr('data-heurist-app-id');
             if(_appGetWidgetById(app_id)!=null){
-                var opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-heurist-app-options'));
+                var opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-heurist-app-options')); //old way
                 if(!opts){
                     opts = window.hWin.HEURIST4.util.isJSON(ele.find('span').text());
                 }

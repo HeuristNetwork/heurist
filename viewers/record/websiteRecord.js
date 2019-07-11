@@ -45,11 +45,14 @@ function onPageInit(success){
                 was_modified = true;  
             });
             */
+            editor.on('init', function(e) {
+                __initWidgetEditLinks(null);
+            });
             
             editor.addButton('customAddWidget', { //since v5 .ui.registry
                   text: 'Add DB retrieval',
                   onclick: function (_) {  //since v5 onAction
-                        __addWidget();
+                        __addEditWidget();
                   }
                 });
                             
@@ -68,13 +71,13 @@ function onPageInit(success){
                        var edited_content = __getEditorContent();
                        if( edited_content!=null && last_save_content != edited_content ){ //was_modified
                            
-                            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                            var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
                                 '<br>Web page content has been modified',
-                                {'Save':function(){__saveChanges( true, 0 );$dlg.dialog('close');},
-                                  'Cancel':function(){$dlg.dialog('close');},
-                                   'Abandon changes':function(){__hideEditor();$dlg.dialog('close');}},
+                                {'Save':function(){__saveChanges( true, 0 );$dlg2.dialog('close');},
+                                  'Cancel':function(){$dlg2.dialog('close');},
+                                   'Abandon changes':function(){__hideEditor();$dlg2.dialog('close');}},
                                 'Content modified');
-                            $dlg.parents('.ui-dialog').css('font-size','1.2em');    
+                            $dlg2.parents('.ui-dialog').css('font-size','1.2em');    
                        }else{
                             //restore previous content 
                             __hideEditor();      
@@ -98,13 +101,13 @@ function onPageInit(success){
             
             //window.hWin.HEURIST4.msg.showMsgFlash('Web page content has been modified. Save changes before load other page');
             
-            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+            var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
                 '<br>Web page content has been modified',
-                    {'Save':function(){__saveChanges( true, pageid );$dlg.dialog('close');},
-                        'Cancel':function(){$dlg.dialog('close');},
-                        'Abandon changes':function(){__hideEditor(pageid);$dlg.dialog('close');}},
+                    {'Save':function(){__saveChanges( true, pageid );$dlg2.dialog('close');},
+                        'Cancel':function(){$dlg2.dialog('close');},
+                        'Abandon changes':function(){$dlg2.dialog('close');__hideEditor(pageid);}},
                                 'Content modified');
-            $dlg.parents('.ui-dialog').css('font-size','1.2em');    
+            $dlg2.parents('.ui-dialog').css('font-size','1.2em');    
             
         }else{
             __hideEditor( pageid );
@@ -141,8 +144,6 @@ function onPageInit(success){
                         bottom:20 //$('#main-content').css('bottom')
                     });    
                 },500);*/
-                
-                
             })
             .show();
 
@@ -255,6 +256,32 @@ function onPageInit(success){
         //$('#main-content').css('top',itop+10);
     }    
     
+    //
+    // assign events for edit remove links on widget placeholder in timymce editor
+    //
+    function __initWidgetEditLinks(widgetid){
+
+            var eles;
+            if(widgetid==null){
+                eles = tinymce.activeEditor.dom.select('div.mceNonEditable');
+            }else{
+                eles = tinymce.activeEditor.dom.get( widgetid );
+                eles = [eles];
+            }
+                
+            $(eles).each(function(idx, ele){
+                $(ele).find('a.edit').click(function(event){
+                    var wid = $(event.target).parent().attr('id');
+                    __addEditWidget( wid );                    
+                });
+                $(ele).find('a.remove').click(function(event){  
+                    window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',function(){
+                        var wid = $(event.target).parent().attr('id');
+                        tinymce.activeEditor.dom.remove( wid );
+                    });
+                });
+            })
+    }
          
     //
     // defines widget to be inserted (heurist-app-id) and its options (heurist-app-options)
@@ -264,7 +291,7 @@ function onPageInit(success){
     //define search realm,  init query or savedsearch id
     //select specific options
     //returns div
-    function __addWidget(){
+    function __addEditWidget( widgetid_edit ){
         
         var $dlg, buttons = {};
             
@@ -276,8 +303,9 @@ function onPageInit(success){
             }
             return val;
         }
-        
-        function __prepareWidgetDiv(){
+
+
+        function __prepareWidgetDiv( widgetid ){
             //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
             
             var widget_name = $dlg.find('#widgetName').val();
@@ -349,19 +377,91 @@ function onPageInit(success){
                 widget_options = widget_options+key+':'+opts[key]+';'                
             }*/
             
-            var content = '<div id="mywidget_'+window.hWin.HEURIST4.util.random()+'" class="mceNonEditable" '
+            var content = '<div id="'+widgetid+'" class="mceNonEditable" '
                 +' data-heurist-app-id="'+widget_name
                 + '" style="'+ widget_Css+'" '
                 //+ ' data-heurist-app-options="'+ widget_options + '"'
-                + '> Config for ' + widget_name+' <span style="font-style:italic">'+widget_options+'</span></div>';
+                + '> Placeholder for ' + widget_name 
+                + ' <br><a href="#" class="edit">edit</a>&nbsp;&nbsp;<a href="#" class="remove">remove</a>'
+                + ' <span style="font-style:italic">'+widget_options+'</span></div>';
                 
             return content; 
         }
-                
-        buttons[window.hWin.HR('Add')]  = function() {
+        
+        function __restoreValuesInUI( widgetid ){
+            //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+            var ele = $(tinymce.activeEditor.dom.get( widgetid ));
             
-                    var  content = __prepareWidgetDiv();            
-                    tinymce.activeEditor.insertContent(content);
+            var widget_name = ele.attr('data-heurist-app-id');
+            $dlg.find('#widgetName').val( widget_name ); //selector
+            $dlg.find('#widgetCss').val( ele[0].dataset.mceStyle );
+            
+            var opts = window.hWin.HEURIST4.util.isJSON(ele.find('span').text());
+            
+            if(opts!==false){
+            
+                if(widget_name=='heurist_Map'){
+                    
+                    if(opts.layout_params){
+                        $dlg.find("#use_timeline").prop('checked', !opts.layout_params.notimeline);    
+                        $dlg.find("#use_cluster").prop('checked', !opts.layout_params.nocluster);    
+                        $dlg.find("#editstyle").prop('checked', opts.layout_params.editstyle);    
+                        var ctrls = (opts.layout_params.controls)?opts.layout_params.controls.split(','):[];
+                        $dlg.find('input[name="controls"]').each(
+                            function(idx,item){$(item).prop('checked',ctrls.indexOf($(item).val())>=0);}
+                        );
+                        var legend = (opts.layout_params.legend)?opts.layout_params.legend.split(','):[];
+                        if(legend.length>0)
+                        $dlg.find('input[name="legend"]').each(
+                            function(idx,item){$(item).prop('checked',legend.indexOf($(item).val())>=0);}
+                        );
+                        
+                    }
+                    if(opts['mapdocument']>0){
+                        $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
+                    }
+
+                }else{
+                
+                    $dlg.find('div.'+widget_name+' input').each(function(idx, item){
+                        item = $(item);
+                        if(item.attr('type')=='checkbox'){
+                            item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
+                        }else if(item.attr('type')=='radio'){
+                            item.prop('checked', item.val()==opts[item.attr('name')]);
+                        }else if(item.val()!=''){
+                            item.val( opts[item.attr('name')] );
+                        }
+                    });
+                    $dlg.find('div.'+widget_name+' select').each(function(idx, item){
+                        item = $(item);
+                        item.val( opts[item.attr('name')] );
+                    });
+                    
+                    if(widget_name=='heurist_resultListExt'){
+                        if(opts['template']){
+                            $dlg.find('select[name="template"]').attr('data-template', opts['template']);        
+                        }
+                    }
+                }
+                
+            }
+        } //end __restoreValuesInUI
+        
+                
+        buttons[window.hWin.HR(window.hWin.HEURIST4.util.isempty(widgetid_edit)?'Add':'Save')]  = function() {
+            
+                    var widgetid = 'mywidget_'+window.hWin.HEURIST4.util.random();
+                    var  content = __prepareWidgetDiv( widgetid );            
+                    
+                    if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){
+                        var ele = $(content).appendTo($('body'));
+                        tinymce.activeEditor.dom.replace( ele[0], tinymce.activeEditor.dom.get(widgetid_edit) );
+                    }else{
+                        tinymce.activeEditor.insertContent(content);
+                        __initWidgetEditLinks(widgetid);
+                    }
+            
             
                     //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                     $dlg.dialog( "close" );
@@ -378,8 +478,13 @@ function onPageInit(success){
                 buttons, 'Add Heurist Widget to your Web Page', 
         {
            open: function(){
+               
                //init elements on dialog open
                var $select = $dlg.find('#widgetName');
+               if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){
+                   //fill values for edit
+                   __restoreValuesInUI(widgetid_edit);
+               }
                window.hWin.HEURIST4.ui.initHSelect($select[0], false);
                $select.on({change:function( event ){
                    var val = $(event.target).val();
@@ -411,7 +516,11 @@ function onPageInit(success){
                                             opts.push({key:resdata.fld(record, 'rec_ID'), title:resdata.fld(record, 'rec_Title')});
                                         }
                                     }//for
+                                    
                                     window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
+                                    if($select.attr('data-mapdocument')>0){
+                                        $select.val( $select.attr('data-mapdocument') );
+                                    }
                                     window.hWin.HEURIST4.ui.initHSelect($select[0], false);
                                     
                                 }else {
@@ -439,7 +548,12 @@ function onPageInit(success){
                                         opts.push({key:context[i].filename, title:context[i].name});
                                     } // for
                                 }
+                                
+                                
                                 window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
+                                if($select.attr('data-template')){
+                                    $select.val( $select.attr('data-template') );
+                                }
                                 window.hWin.HEURIST4.ui.initHSelect($select[0], false);
                                 
                             });
@@ -448,7 +562,13 @@ function onPageInit(success){
                    
                    
                }}).change();
-           }  
+               
+               if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){
+                   window.hWin.HEURIST4.util.setDisabled($select[0], true);
+               }
+               
+               
+           }  //end open event
         });
         
         
