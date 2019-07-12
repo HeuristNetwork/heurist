@@ -23,6 +23,7 @@ function onPageInit(success){
         //statusbar: true,
         resize: 'both',
         entity_encoding:'raw',
+        inline_styles: true,
 
         plugins: [
             'advlist autolink lists link image media preview textcolor', //anchor charmap print 
@@ -99,8 +100,6 @@ function onPageInit(success){
        var edited_content = __getEditorContent();
        if( edited_content!=null && last_save_content != edited_content ){ //was_modified
             
-            //window.hWin.HEURIST4.msg.showMsgFlash('Web page content has been modified. Save changes before load other page');
-            
             var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
                 '<br>Web page content has been modified',
                     {'Save':function(){__saveChanges( true, pageid );$dlg2.dialog('close');},
@@ -110,7 +109,7 @@ function onPageInit(success){
             $dlg2.parents('.ui-dialog').css('font-size','1.2em');    
             
         }else{
-            __hideEditor( pageid );
+            __hideEditor( pageid ); //hide current editor and loads new page
         }
     });
 
@@ -134,7 +133,9 @@ function onPageInit(success){
                 
                 $('#btn_inline_editor').hide();
                 
+                $('#main-content').parent().css('overflow-y','hidden');
                 $('#main-content').hide();
+                $('#edit_mode').val(1).click();
                 $('.tinymce-body').show();
                 last_save_content = $('.tinymce-body').val();  //keep value to restore
                 tinymce.init(inlineEditorConfig);
@@ -154,12 +155,19 @@ function onPageInit(success){
     function __loadPageById( pageid ){
         
         if(pageid>0){
+            window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));
+            
+            
+            //var ele = $('#main-content').find('div[widgetid="heurist_Search"]');
+            //if(ele.length>0 && ele.search('instance')) ele.search('destroy');
+            
             current_pageid = pageid;
             $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 +'&fmt=web&recid='+pageid, function()
                 {
                         $('.tinymce-body').val($('#main-content').html());
                         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
                 });
         }
         
@@ -241,6 +249,8 @@ function onPageInit(success){
             was_modified = false;    
             $('.tinymce-body').hide();
             $('#main-content').show();
+            $('#main-content').parent().css('overflow-y','auto');
+            $('#edit_mode').val(0).click();
             
     }
     
@@ -263,7 +273,7 @@ function onPageInit(success){
 
             var eles;
             if(widgetid==null){
-                eles = tinymce.activeEditor.dom.select('div.mceNonEditable');
+                eles = tinymce.activeEditor.dom.select('.mceNonEditable'); //div.
             }else{
                 eles = tinymce.activeEditor.dom.get( widgetid );
                 eles = [eles];
@@ -276,7 +286,7 @@ function onPageInit(success){
                 });
                 $(ele).find('a.remove').click(function(event){  
                     window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',function(){
-                        var wid = $(event.target).parent().attr('id');
+                        var wid = $(event.target).parents('.mceNonEditable').attr('id');
                         tinymce.activeEditor.dom.remove( wid );
                     });
                 });
@@ -309,7 +319,7 @@ function onPageInit(success){
             //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
             
             var widget_name = $dlg.find('#widgetName').val();
-            var widget_Css = $dlg.find('#widgetCss').val();
+            var widgetCss = $dlg.find('#widgetCss').val();
             
             var opts = {};
             
@@ -379,11 +389,11 @@ function onPageInit(success){
             
             var content = '<div id="'+widgetid+'" class="mceNonEditable" '
                 +' data-heurist-app-id="'+widget_name
-                + '" style="'+ widget_Css+'" '
-                //+ ' data-heurist-app-options="'+ widget_options + '"'
-                + '> Placeholder for ' + widget_name 
-                + ' <br><a href="#" class="edit">edit</a>&nbsp;&nbsp;<a href="#" class="remove">remove</a>'
-                + ' <span style="font-style:italic">'+widget_options+'</span></div>';
+                + '" style="'+ widgetCss+'" '
+                + '>'
+                + 'Placeholder for ' + widget_name 
+                + ' <br><a href="#" class="edit">edit</a>&nbsp;&nbsp;<a href="#" class="remove">remove</a>'//+widgetCss
+                + ' <span style="font-style:italic;display:none">'+widget_options+'</span></div>';
                 
             return content; 
         }
@@ -485,12 +495,30 @@ function onPageInit(success){
                    //fill values for edit
                    __restoreValuesInUI(widgetid_edit);
                }
+               var is_initial_set = ($dlg.find('#widgetCss').val()=='');
+               
                window.hWin.HEURIST4.ui.initHSelect($select[0], false);
                $select.on({change:function( event ){
                    var val = $(event.target).val();
                    $dlg.find('div[class^="heurist_"]').hide();    
                    var dele = $dlg.find('div.'+val+'');
                    dele.show();
+                   
+                   if(is_initial_set){
+                       s = 'border:2px solid gray;';
+                       if(val=='heurist_resultList'){
+                           s = s + 'position:relative;';
+                       }
+                       if(val=='heurist_Search'){
+                            s = s + 'height:100px;width:600px;';        
+                       }else if(val=='heurist_SearchTree'){
+                            s = s + 'height:600px;width:150px;';        
+                       }else{
+                            s = s + 'height:600px;width:600px;';        
+                       }
+                       $dlg.find('#widgetCss').val(s);
+                   }
+                   
                    
                    if(val=='heurist_Map' && 
                     dele.find('select[name="mapdocument"]').find('options').length==0){

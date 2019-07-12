@@ -94,14 +94,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
         
         //-----------------
-        var sh = 7;
-        if(hasSearchForm){
-            if(this.options.parententity){
-                sh = 10;  
-                this.searchForm.height((sh+2.5)+'em').css('border','none');    
-            }else{
-                this.searchForm.height((sh+4.5)+'em').css('border','none');    
-                sh++;
+        var sh = 0;
+        if(hasSearchForm && this.searchForm.is(':visible')){
+            sh = 9;
+            if(hasSearchForm){
+                if(this.options.parententity){
+                    sh = 12;  
+                    this.searchForm.height((sh+2.5)+'em').css('border','none');    
+                }else{
+                    this.searchForm.height((sh+4.5)+'em').css('border','none');    
+                    sh++;
+                }
             }
         }
         this.recordList.css('top', sh+'em');
@@ -144,10 +147,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         this.searchForm.css({'height':iheight+'em'});
         this.recordList.css({'top':iheight+0.4+'em'});
 */        
-        this.recordList.resultList({
-                searchfull:null,
-                renderer:true //use default renderer but custom onaction see _onActionListener
-        }); //use default recordList renderer
+        this.recordList.resultList(
+            this.options.resultList
+                ?this.options.resultList
+                :{
+                    searchfull:null,
+                    renderer:true //use default renderer but custom onaction see _onActionListener
+                }); //use default recordList renderer
         
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});

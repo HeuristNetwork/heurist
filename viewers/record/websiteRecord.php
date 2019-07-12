@@ -343,8 +343,15 @@ body{
 	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;font-weight:bold !important">
             <ul><?php print $menu_content; ?></ul>
         </div>
+<?php        
+if($edit_Available){        
+    ?>        
         <a href="#" id="btn_inline_editor2" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page headers</a>
         <a href="#" id="btn_inline_editor" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page content</a>
+        <input id="edit_mode" type="hidden"/>
+<?php        
+}
+    ?>        
     </div>
     <div class="ent_content" style="top:141px;bottom:30px;padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" style="height:100%;">

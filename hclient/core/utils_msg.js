@@ -147,9 +147,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
         var $dlg;
         if(url){
-            $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+            var isPopupDlg = options && options.isPopupDlg;
+            var $dlg = isPopupDlg?window.hWin.HEURIST4.msg.getPopupDlg():window.hWin.HEURIST4.msg.getMsgDlg();
             $dlg.load(url, function(){
-                window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title, options);
+                window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title, options, isPopupDlg);
             });
         }
         return $dlg;
@@ -719,11 +720,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     autoOpen:(options['autoOpen']!==false),
                     width : dim.w,
                     height: dim.h,
-                    modal: true,
+                    modal: (options.modal!==false),
                     resizable: (options.resizable!==false),
                     //draggable: false,
                     title: options["title"],
                     buttons: options["buttons"],
+                    open: options.open,
                     beforeClose: options.beforeClose,
                     close: function(event, ui){
                         
@@ -740,6 +742,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             };
             $dlg.dialog(opts);
 
+            if(options.borderless){
+                $dlg.css('padding',0);
+                $dlg.parent() //s(".ui-dialog")
+                      .css("border", "0 none")
+                      .find(".ui-dialog-titlebar").remove();
+            }
+            
             return $dlg;
     },
 
@@ -787,8 +796,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             return;
         }
 
-        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-        var isPopup = false; //bigger and resizable
+        var $dlg = isPopupDlg?window.hWin.HEURIST4.msg.getPopupDlg():window.hWin.HEURIST4.msg.getMsgDlg();
 
         if(message!=null){
             
@@ -809,11 +817,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     $dlg.html(message);
                 }
 
-                isPopup = true;
-
             }else{
+                
                 $dlg.empty();
-                isPopup = false;
+                
                 if(isobj){
                     $dlg.append(message);
                 }else{
@@ -868,7 +875,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             closeOnEscape: true,
             buttons: buttons
         };
-        if(isPopup){
+        if(isPopupDlg){
 
             options.open = function(event, ui){
                 $dlg.scrollTop(0);

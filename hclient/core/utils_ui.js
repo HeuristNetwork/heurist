@@ -1398,10 +1398,12 @@ window.hWin.HEURIST4.ui = {
         //var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
         ////depth>1 || (optgroup==null && depth>0
         
+        selObj = $(selObj);
+            
         //for usual HTML select we have to add spaces for indent
         if(useHtmlSelect){
             
-            $(selObj).find('option').each(
+            selObj.find('option').each(
                 function(idx, item){
                     var opt = $(item);
                     var depth = parseInt(opt.attr('depth'));
@@ -1414,11 +1416,10 @@ window.hWin.HEURIST4.ui = {
             
         }else{
             
-            
-            var parent_ele = $(selObj).parents('.ui-dialog');
+            var parent_ele = selObj.parents('.ui-dialog');
             if(!parent_ele || parent_ele.length==0) {
                 
-                parent_ele = $(selObj).parents('.selectmenu-parent'); //add special class to some top most div 
+                parent_ele = selObj.parents('.selectmenu-parent'); //add special class to some top most div 
                 
                 /*
                 var sel = $(selObj)[0];
@@ -1432,11 +1433,16 @@ window.hWin.HEURIST4.ui = {
                 if(parent_ele.length==0)
                 */
                     if(!parent_ele || parent_ele.length==0) {
-                        parent_ele = $(selObj).parent();   
+                        parent_ele = selObj.parent();   
                     }
             }
             
-            var menu = $(selObj).hSelect(       
+            if(selObj.hSelect("instance")!=undefined){
+                selObj.hSelect("destroy"); 
+            }
+            
+
+            var menu = selObj.hSelect(       
               { style: 'dropdown',
                 position:{collision: "flip"},
                 appendTo: parent_ele,
@@ -1448,13 +1454,13 @@ window.hWin.HEURIST4.ui = {
                 },*/
                 change: function( event, data ) {
     
-                        $(selObj).val(data.item.value);//change value for underlaying html select
-                        $(selObj).trigger('change');
+                        selObj.val(data.item.value);//change value for underlaying html select
+                        selObj.trigger('change');
                 },
                 open: function(event, ui){
                     //console.log(menu.hSelect( "menuWidget" ).width());
                     //increase width of dropdown to avoid word wrap
-                    var wmenu = menu.hSelect( "menuWidget" );
+                    var wmenu = $(event.target).hSelect( "menuWidget" );  //was menu
                     wmenu.width( wmenu.width()+20 ); 
                     var wmenu_div = wmenu.parent('div.ui-selectmenu-menu');
                     var pos = wmenu_div.position().top;
@@ -1472,10 +1478,10 @@ window.hWin.HEURIST4.ui = {
               });
                 
                 
-            var dwidth = $(selObj).css('width');    
+            var dwidth = selObj.css('width');    
             if(dwidth=='0px' || (dwidth.indexOf('px')>0 && parseFloat(dwidth)<21)) dwidth = 'auto';
             
-            var dminwidth = $(selObj).css('min-width');    
+            var dminwidth = selObj.css('min-width');    
             if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '10em';
 
             menu.hSelect( "menuWidget" ).css( {'padding':0,'background':'#F4F2F4','zIndex':9999999 });
@@ -1484,7 +1490,7 @@ window.hWin.HEURIST4.ui = {
             menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF',
                 width:(dwidth?dwidth:'auto'),'min-width':dminwidth }); //,'min-width':'16em''#F4F2F4'
         }
-        return $(selObj);
+        return selObj;
     },           
     
     //

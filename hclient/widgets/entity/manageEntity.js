@@ -167,7 +167,6 @@ $.widget( "heurist.manageEntity", {
                     +'</div>'
                     +'<div class="ent_content_full editForm" style="left:251px"/>'
                 +'</div>';
-
         }else if(this.options.layout_mode=='short'){ //the same as above, short toolbar above edit on right side
         
             layout = 
@@ -182,6 +181,13 @@ $.widget( "heurist.manageEntity", {
                         +    '<div class="ent_content_full editForm" style="top:0"/>'
                         +'</div>'
                 +'</div>';
+                
+        }else if(this.options.layout_mode=='listonly'){
+
+            layout = '<div class="ent_wrapper">'
+                                +    '<div class="searchForm" style="display:none;"/>'     
+                                +    '<div class="ent_content_full recordList" style="top:0"/>'
+                            +'</div>'
 
         }else if(this.options.layout_mode=='tabbed'){ //for terms
         

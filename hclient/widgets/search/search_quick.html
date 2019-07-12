@@ -21,37 +21,37 @@
 
 <fieldset class="ui-heurist-header1">
     <div>
-        <div class="header_narrow"><label for="sa_rectype">Record type</label></div>
-        <select name="sa_rectype" id="sa_rectype" class="text ui-widget-content ui-corner-all" 
+        <div class="header_narrow"><label>Record type</label></div>
+        <select class="text ui-widget-content ui-corner-all sa_rectype" 
                 style="min-width:220px" tabindex="-1"></select>
     </div>
     <div>
-        <div class="header_narrow"><label for="sa_fieldtype">Field</label></div>
-        <select name="sa_fieldtype" id="sa_fieldtype" class="text ui-widget-content ui-corner-all" style="min-width:220px"></select>
+        <div class="header_narrow"><label>Field</label></div>
+        <select class="text ui-widget-content ui-corner-all sa_fieldtype" style="min-width:220px"></select>
     </div>
-    <div id="fld_coord" style="display:none">
-        <div class="header_narrow"><label for="sa_fieldvalue">More than</label></div>
-        <input type="text" name="sa_coord1" id="sa_coord1" class="text ui-widget-content ui-corner-all" style="max-width:110px" />
+    <div class="fld_coord" style="display:none">
+        <div class="header_narrow"><label>More than</label></div>
+        <input type="text" id="sa_coord1" class="text ui-widget-content ui-corner-all sa_coord1" style="max-width:110px" />
         <label>&nbsp;&nbsp;Less than</label>
-        <input type="text" name="sa_coord2" id="sa_coord2"  class="text ui-widget-content ui-corner-all" style="max-width:110px"/>
+        <input type="text" id="sa_coord2"  class="text ui-widget-content ui-corner-all sa_coord2" style="max-width:110px"/>
     </div>
-    <div id="fld_contain">
-        <div class="header_narrow"><label for="sa_fieldvalue">Contains</label></div>
-        <input type="text" name="sa_fieldvalue" id="sa_fieldvalue" class="text ui-widget-content ui-corner-all" />
-        <label><input type="checkbox" name="sa_negate" id="sa_negate" style="vertical-align: -3px;margin-left:2em" />Negate</label>
+    <div class="fld_contain">
+        <div class="header_narrow"><label>Contains</label></div>
+        <input type="text" class="text ui-widget-content ui-corner-all sa_fieldvalue" />
+        <label><input type="checkbox" class="sa_negate" id="sa_negate" style="vertical-align: -3px;margin-left:2em" />Negate</label>
     </div>
-    <div id="fld_enum">
-        <div class="header_narrow"><label for="sa_termvalue">Is</label></div>
-        <select name="sa_termvalue" id="sa_termvalue" class="text ui-widget-content ui-corner-all" style="min-width:220px"></select>
-        <label><input type="checkbox" name="sa_negate2" id="sa_negate2" style="vertical-align: -3px;margin-left:2em" />Negate</label>
-    </div>
-    <div>
-        <div class="header_narrow"><label for="sa_sortby">Sort by</label></div>
-        <select name="sa_sortby" id="sa_sortby" class="text ui-widget-content ui-corner-all" style="min-width:220px"></select>
+    <div class="fld_enum">
+        <div class="header_narrow"><label>Is</label></div>
+        <select class="text ui-widget-content ui-corner-all sa_termvalue" style="min-width:220px"></select>
+        <label><input type="checkbox" class="sa_negate2" id="sa_negate2" style="vertical-align: -3px;margin-left:2em" />Negate</label>
     </div>
     <div>
-        <div class="header_narrow"><label for="sa_sortasc">Sort direction</label></div>
-        <select name="sa_sortasc" id="sa_sortasc" class="text ui-widget-content ui-corner-all" style="min-width:220px">
+        <div class="header_narrow"><label>Sort by</label></div>
+        <select class="text ui-widget-content ui-corner-all sa_sortby" style="min-width:220px"></select>
+    </div>
+    <div>
+        <div class="header_narrow"><label>Sort direction</label></div>
+        <select class="text ui-widget-content ui-corner-all sa_sortasc" style="min-width:220px">
             <option value="0">Ascending (A..Z, 1..9)</option>
             <option value="1">Descending (Z..A, 9..1)</option>
         </select>
@@ -61,6 +61,6 @@
         <input type="checkbox" name="sa_sortasc" id="sa_sortasc" class="ui-widget-content ui-corner-all" />
     </div> -->
     <br />
-    <span id="btns" style="width:100%"></span>
+    <span class="btns" style="width:100%"></span>
     <br />
 </fieldset>

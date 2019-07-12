@@ -1,10 +1,17 @@
+<div class="heurist-helper1" style="padding:5px;">
+        Add a search widget + one or more display widgets - they will be 
+        linked to operate together.<br>To position widgets insert it in table cells or 
+        if you are familiar with CSS use "display" property.
+</div>
+
 <fieldset style="padding:0">
+    
     <div>
         <div class="header"><label for="widgetName">Select widget:</label></div>
-        <select name="widgetName" id="widgetName" class="text ui-widget-content ui-corner-all" style="min-width:300px"
+        <select name="widgetName" id="widgetName" class="text ui-widget-content ui-corner-all" style="min-width:400px"
             title="">
             <option value="heurist_Search">Search field (with standard query builder)</option>
-            <option value="heurist_SearchTree">Saved searches (simple & facet searches)</option>
+            <option value="heurist_SearchTree">Saved searches (simple &amp; facet searches)</option>
             <option value="heurist_resultList">Search results (list or thumbnails)</option>
             <option value="heurist_Map">Map and timeline</option>
             <option value="heurist_Graph">Network graph</option>
@@ -13,7 +20,7 @@
     </div>
     <div>
         <div class="header" style="vertical-align:top"><label>CSS:</label></div>
-        <textarea id="widgetCss" rows="5" style="width:300px">height:400;width:600;border:2px solid gray;position:relative;</textarea>
+        <textarea id="widgetCss" rows="5" style="width:400px"></textarea>
     </div>
     
     <div  class="heurist_Search">
@@ -79,7 +86,7 @@
     <!-- mapping -->    
     <div class="heurist_Map">
         <div class="header"><label>Map document:</label></div>
-        <select name="mapdocument" class="text ui-widget-content ui-corner-all" title="">
+        <select name="mapdocument" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
         </select>
     </div>
     
@@ -120,7 +127,7 @@
     <!-- diagram -->    
     <div class="heurist_resultListExt">
         <div class="header"><label>Template:</label></div>
-        <select name="template" class="text ui-widget-content ui-corner-all" title="">
+        <select name="template" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
         </select>
     </div>
     

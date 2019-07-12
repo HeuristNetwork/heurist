@@ -138,7 +138,12 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
     //
     startSearch: function(){
         
-        this.element.find('#row_parententity_helper2').hide();
+        var ele = this.element.find('#row_parententity_helper2')
+        if(ele.is(':visible')){
+            this.element.height('12em');
+            ele.hide();
+        }
+            
 
         this._super();
 

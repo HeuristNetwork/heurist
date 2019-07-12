@@ -656,7 +656,15 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else 
         if(action == "menu-cms-create"){
             
-            window.hWin.HEURIST4.ui.showEditCMSDialog( -1 );
+            var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+            if(RT_CMS_HOME>0 && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]>0){
+            
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    'You already have a website. Are you sure you want to create an additional site?',
+                    function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+            }else{
+                window.hWin.HEURIST4.ui.showEditCMSDialog( -1 );
+            }
             
         }else 
         if(action == "menu-cms-edit"){
@@ -1224,6 +1232,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             return;
         }
         
+        if(window.hWin.HEURIST4.rectypes.counts && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]==1){
+
+            window.hWin.HEURIST4.ui.showEditCMSDialog( 0 ); //load the only entry at once
+            return;
+        }
         
         var popup_options = {
                         select_mode: 'select_single', //select_multi
@@ -1233,6 +1246,23 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         title: window.hWin.HR('Select or create a website home record'),
                         rectype_set: RT_CMS_HOME,
                         parententity: 0,
+                        title: 'Select Website',
+                        
+                        layout_mode: 'listonly',
+                        width:500, height:400,
+                        
+                        resultList:{
+                            show_toolbar: false,
+                            view_mode:'list',
+                            searchfull:null,
+                            renderer:function(recordset, record){
+                                var recID = recordset.fld(record, 'rec_ID')
+                                var recTitle = recordset.fld(record, 'rec_Title'); 
+                                var recTitle_strip_all = window.hWin.HEURIST4.util.htmlEscape(recTitle);
+                                var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'+recTitle_strip_all+'</div>';
+                                return html;
+                            }
+                        },
                         
                         onselect:function(event, data){
                                  if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
@@ -1241,14 +1271,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                  }
                         }
         };//popup_options
-
-                
-        var usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
-            {width: null,  //null triggers default width within particular widget
-             height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-
-        popup_options.width = Math.max(usrPreferences.width,710);
-        popup_options.height = usrPreferences.height;
         
         window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
         

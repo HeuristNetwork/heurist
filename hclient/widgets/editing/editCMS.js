@@ -36,15 +36,6 @@ function editCMS(home_page_record_id, main_callback){
      }
     var edit_dialog = null;
     
-    var popup_dlg = $('#heurist-dialog-editCMS');
-    
-    if(popup_dlg.length>0){
-        popup_dlg.empty();
-    }else{
-        popup_dlg = $('<div id="heurist-dialog-editCMS">')
-            .appendTo( $(window.hWin.document).find('body') );
-    }
-    
     var edit_buttons = [
         {text:window.hWin.HR('Close'), 
             id:'btnRecCancel',
@@ -59,7 +50,8 @@ function editCMS(home_page_record_id, main_callback){
     //
     //
     //
-    edit_dialog = popup_dlg.dialog({
+/*    
+    var dlg_opts = {
         autoOpen: true,
         height: dim.h*0.95,
         width:  dim.w*0.95,
@@ -68,31 +60,31 @@ function editCMS(home_page_record_id, main_callback){
         resizeStop: function( event, ui ) {//fix bug
             //that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
         },
-        beforeClose: function(){
-            //show warning in case of modification
-            if(false && _editing_symbology.isModified()){
-                var $dlg, buttons = {};
-                buttons['Save'] = function(){ 
-                    edit_dialog.parent().find('#btnRecSave').click();
-                    $dlg.dialog('close'); 
-                }; 
-                buttons['Ignore and close'] = function(){ 
-                    //!!!! _editing_symbology.setModified(false);
-                    edit_dialog.dialog('close'); 
-                    $dlg.dialog('close'); 
-                };
-
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                    'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
-                    buttons,
-                    {title:'Confirm',yes:'Save',no:'Ignore and close'});
-                return false;   
-            }
-            return true;
+        close: function( event, ui ){
+             //popup_dlg.dialog('destroy');   
         },
 
         buttons: edit_buttons
-    });                
+    };                
+    
+    var popup_dlg = $('#heurist-dialog-editCMS');
+    
+    if(popup_dlg.length>0){
+        popup_dlg.empty();
+    }else{
+        popup_dlg = $('<div id="heurist-dialog-editCMS">')
+            .appendTo( $(window.hWin.document).find('body') );
+    }
+    edit_dialog = popup_dlg.dialog(dlg_opts);
+    popup_dlg.load(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editCMS.html', 
+    );
+*/    
+    
+    edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editCMS.html',
+                edit_buttons,window.hWin.HR('Define Website'),
+                {open:onDialogInit, width:dim.w*0.95, height:dim.h*0.95, isPopupDlg:true, close:function(){
+                    edit_dialog.empty();//dilaog('destroy');
+                }});
 
 
     var layout_opts =  {
@@ -118,10 +110,9 @@ function editCMS(home_page_record_id, main_callback){
         }
     };    
 
-    popup_dlg.load(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editCMS.html', 
-        function(){
-            //$(popup_dlg.find('.main_cms')).layout( layout_opts );
-            //
+
+    function onDialogInit(){
+
             if(home_page_record_id<0){
                 //create new set of records - website template
                 window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
@@ -154,9 +145,6 @@ function editCMS(home_page_record_id, main_callback){
                 _initWebSiteEditor();
             }
         }
-    );
-
-
 
 
     //
@@ -183,7 +171,8 @@ function editCMS(home_page_record_id, main_callback){
         
             if(window.hWin.HEURIST4.util.isnull(request))
             {
-                request = {q:{"ids":home_page_record_id},
+                request = {q:(home_page_record_id>0 ?{"ids":home_page_record_id}:{'t:':RT_CMS_HOME}),
+                    limit: 1,
                     rules: [{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_HOME+'-'+DT_CMS_TOP_MENU, //top menu
                         "levels":[{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_MENU,  //other menu
                             "levels":[{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_MENU, 
@@ -241,7 +230,7 @@ function editCMS(home_page_record_id, main_callback){
                                     
                                     home_page_record_id  = resdata.fld(record, 'rec_ID');
                                     orig_site_name = resdata.fld(record, DT_NAME);
-                                    popup_dlg.find('#web_Name').val(orig_site_name)
+                                    edit_dialog.find('#web_Name').val(orig_site_name)
                                     .off('blur')
                                     .on({blur:function(event){
                                         var newval = $(event.target).val();
@@ -259,13 +248,13 @@ function editCMS(home_page_record_id, main_callback){
                                     }});
                                     //var currentTheme = resdata.fld(record, DT_CMS_THEME);
                                     //if(!currentTheme) currentTheme = 'heurist';  
-                                    //popup_dlg.find('#web_Theme').val(currentTheme);
+                                    //edit_dialog.find('#web_Theme').val(currentTheme);
 
-                                    var btn_refresh = popup_dlg.find('#btn_refresh');
+                                    var btn_refresh = edit_dialog.find('#btn_refresh');
                                     if(!btn_refresh.button('instance')){
                                     
                                         /*    
-                                        var themeSwitcher = popup_dlg.find("#web_Theme").themeswitcher(
+                                        var themeSwitcher = edit_dialog.find("#web_Theme").themeswitcher(
                                             {imageLocation: "external/jquery-theme-switcher/images/",
                                             initialText: currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1),
                                             currentTheme: currentTheme,
@@ -274,19 +263,20 @@ function editCMS(home_page_record_id, main_callback){
                                         }});
                                         */
                                         
-                                        popup_dlg.find('#btn_edit_home').button({icon:'ui-icon-pencil'}).click(function(){
+                                        edit_dialog.find('#btn_edit_home').button({icon:'ui-icon-pencil'}).click(function(){
                                             _editHomePageRecord();
                                         });
                                     
                                         //add new root menu
-                                        popup_dlg.find('#btn_add_menu').click(function(){
+                                        edit_dialog.find('#btn_add_menu').click(function(){
                                                 selectMenuRecord(home_page_record_id, function(){
                                                     _initWebSiteEditor();
                                                 });
                                         });
                                         
-                                        var preview_frame = popup_dlg.find('#web_preview');
+                                        var preview_frame = edit_dialog.find('#web_preview');
                                         preview_frame.on({load:function(){
+                                            //find elements in preview that opens home page record editor
                                             var d = $(preview_frame[0].contentWindow.document);
                                             d.find( "#main-banner > a").click(function(event){
                                                     _editHomePageRecord();
@@ -294,11 +284,23 @@ function editCMS(home_page_record_id, main_callback){
                                             d.find( "#btn_inline_editor2").click(function(event){
                                                     _editHomePageRecord();
                                             });
+                                            //
+                                            d.find( "#edit_mode").on({click:function(event){
+                                                    if($(event.target).val()==1){
+                                                        $('<div>').addClass('coverall-div-bare')
+                                                            .css({'zIndex':9999999999,background:'rgba(0,0,0,0.6)'})
+                                                            .appendTo(edit_dialog.find('.ui-layout-west'));
+                                                    }else{
+                                                        edit_dialog.find('.ui-layout-west').find('.coverall-div-bare').remove();
+                                                    }
+                                            }});
+                                            
                                         }});
 
-                                    
+                                        //reload preview
                                         btn_refresh.button({icon:'ui-icon-refresh'}).click(function(){
-                                            popup_dlg.find('#web_preview').attr('src', window.hWin.HAPI4.baseURL+
+                                            //load new content to iframe
+                                            edit_dialog.find('#web_preview').attr('src', window.hWin.HAPI4.baseURL+
                                                 'viewers/record/websiteRecord.php?edit=1&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id);
                                         });
                                         
@@ -306,7 +308,7 @@ function editCMS(home_page_record_id, main_callback){
                                                     '?website&db='+window.hWin.HAPI4.database+'&id='+home_page_record_id
                                                     
                                         //open preview in new tab
-                                        popup_dlg.find('#btn_preview').button({icon:'ui-icon-extlink'}).click(function(){
+                                        edit_dialog.find('#btn_preview').button({icon:'ui-icon-extlink'}).click(function(){
                                                 window.open(url, '_blank');
                                         });
                                         
@@ -322,7 +324,7 @@ function editCMS(home_page_record_id, main_callback){
                         }//for records
                         
                         //init treeview ---------------------
-                        var tree_element = popup_dlg.find('#web_tree');
+                        var tree_element = edit_dialog.find('#web_tree');
                         
                         if(tree_element.fancytree('instance')){
                             
@@ -345,7 +347,7 @@ function editCMS(home_page_record_id, main_callback){
                                     //add,edit menu,edit page,remove
                                     var actionspan = $('<div class="svs-contextmenu3" data-parentid="'
                                           +item.data.parent_id+'" data-menuid="'+menu_id+'" data-pageid="'+page_id+'" >'
-                                          +menu_id
+                                          //+menu_id
                                         +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
                                         +'<span class="ui-icon ui-icon-menu" title="Edit menu record"></span>'
                                         +'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
@@ -668,5 +670,6 @@ function editCMS(home_page_record_id, main_callback){
         });                                        
         
     }
-   
+    
 }
+   
