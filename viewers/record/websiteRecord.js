@@ -31,10 +31,10 @@ function onPageInit(success){
             'media table contextmenu paste help noneditable'  //insertdatetime  wordcount save
         ],      
         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-        toolbar: ['formatselect | bold italic forecolor backcolor  | media image link customHeuristMedia | align | bullist numlist outdent indent | table | removeformat | help | customAddWidget customSaveButton customCloseButton' ],  
+        toolbar: ['formatselect | bold italic forecolor backcolor  | media image link | align | bullist numlist outdent indent | table | removeformat | help | customHeuristMedia | customAddWidget customSaveButton customCloseButton' ],  
         content_css: [
             '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
-            //,'//www.tinymce.com/css/codepen.min.css'
+            //,'//www.tinymce.com/css/codepen.`min.css'
         ],                    
         powerpaste_word_import: 'clean',
         powerpaste_html_import: 'clean',
@@ -324,7 +324,8 @@ function onPageInit(success){
         var popup_options = {
                             isdialog: true,
                             select_mode: 'select_single',
-                            //edit_addrecordfirst: true, //show editor atonce
+                            edit_addrecordfirst: false, //show editor atonce
+                            selectOnSave: true,
                             select_return_mode:'recordset', //ids or recordset(for files)
                             filter_group_selected:null,
                             //filter_groups: this.configMode.filter_group,
@@ -336,9 +337,12 @@ function onPageInit(success){
                                         var recordset = data.selection;
                                         var record = recordset.getFirstRecord();
                                         
-                                        var content = '<a href="#>'+recordset.fld(record,'ulf_OrigFileName')+'</a>';
+                                        var thumbURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                                                +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
                                         
-                                        tinymce.activeEditor.insertContent(content);
+                                        var playerTag = recordset.fld(record,'ulf_PlayerTag');
+                                        
+                                        tinymce.activeEditor.insertContent( playerTag );
                                     }
                                 
                              }//data

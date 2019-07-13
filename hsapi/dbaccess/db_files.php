@@ -534,6 +534,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 //
 // output the appropriate html tag to view media content
 //
+//
 function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null){ 
 
     $result = '';    

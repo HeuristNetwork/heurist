@@ -150,6 +150,14 @@
                         "dty_Role":"virtual",
                         "rst_Display":"readonly"
                     }
+                },
+                {
+                    "dtID": "ulf_PlayerTag",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_Display":"hidden",
+                        "dty_Role":"virtual"
+                    }
                 }
      ]
 }

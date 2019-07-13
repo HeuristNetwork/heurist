@@ -388,6 +388,7 @@ class DbEntitySearch
 
     //
     //
+    // $calculatedFields - is function that returns array of fieldnames or calculate and adds values of this field to result row
     //
     public function execute($query, $is_ids_only, $entityName, $calculatedFields=null){        
         
@@ -435,6 +436,10 @@ class DbEntitySearch
                     foreach($_flds as $fld){
                         array_push($fields, $fld->name);
                     }
+                    //add calculated fields
+                    if($calculatedFields!=null){
+                        $fields = $calculatedFields($fields); //adds names of calulated fields
+                    }
 
                     $records = array();
                     $order = array();
@@ -443,7 +448,7 @@ class DbEntitySearch
                     while ($row = $res->fetch_row())// && (count($records)<$chunk_size) ) {  //3000 maxim allowed chunk
                     {
                         if($calculatedFields!=null){
-                            $row = $calculatedFields($fields, $row);  
+                            $row = $calculatedFields($fields, $row); //adds values
                         }
                         
                         $records[$row[0]] = $row;

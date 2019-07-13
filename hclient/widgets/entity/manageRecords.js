@@ -2209,7 +2209,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                             }else if(afterAction=='close'){
 
                                 that._currentEditID = null;
-                                /*A123  remarked since onselect triggered in onClose event 
+                                /*A123  remarked since 
+                                 triggered in onClose event 
                                 if(that.options.selectOnSave==true){
                                     that.selectedRecords(that._currentEditRecordset);
                                     that._selectAndClose();

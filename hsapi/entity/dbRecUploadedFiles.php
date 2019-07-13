@@ -92,7 +92,7 @@ class DbRecUploadedFiles extends DbEntityBase
         if($needMimeType){
             array_push($where, "(fxm_MimeType like '$value%')");
         }
-        if($needMimeType || @$this->data['details']=='full'){
+        if($needMimeType || @$this->data['details']=='full' || @$this->data['details']=='list'){
             array_push($where, "(fxm_Extension=ulf_MimeExt)");
             array_push($from_table, 'defFileExtToMimetype');
         }
@@ -118,6 +118,8 @@ class DbRecUploadedFiles extends DbEntityBase
         
         $needRelations = false;
         $needCheck = false;
+        $needCalcFields = false;
+        $calculatedFields = null;
         
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
@@ -131,13 +133,15 @@ class DbRecUploadedFiles extends DbEntityBase
         }else if(@$this->data['details']=='list'){
 
             //$this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference, ulf_ObfuscatedFileID';
-            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_FilePath';
+            $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_FilePath,fxm_MimeType';
+            $needCalcFields = true;
             
         }else if(@$this->data['details']=='full'){
 
             $this->data['details'] = 'ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Description,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType';
             //$this->data['details'] = implode(',', $this->fields );
             $needRelations = true;
+            $needCalcFields = true;
         }else{
             $needCheck = true;
         }
@@ -153,7 +157,35 @@ class DbRecUploadedFiles extends DbEntityBase
         }
 
         $is_ids_only = (count($this->data['details'])==1);
-            
+         
+        if($needCalcFields){
+            //compose player html tag
+            $calculatedFields = function ($fields, $row=null) {
+                
+                    if($row==null){
+                        array_push($fields, 'ulf_PlayerTag');
+                        return $fields;   
+                    }else{
+
+                        $idx = array_search('ulf_ObfuscatedFileID', $fields);
+                        if($idx!==false){
+                            $fileid = $row[$idx]; 
+                            $mimeType=null;
+                            $external_url=null;
+                            $idx = array_search('fxm_MimeType', $fields);
+                            if($idx!==false) $mimeType = $row[$idx]; 
+                            $idx = array_search('ulf_ExternalFileReference', $fields);
+                            if($idx!==false) $external_url = $row[$idx]; 
+                            array_push($row, fileGetPlayerTag($fileid, $mimeType, null, $external_url));    
+                        }else{
+                            array_push($row, '');
+                        }
+                        
+                        return $row;
+                    }
+            };
+        }  
+        
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
@@ -167,18 +199,8 @@ class DbRecUploadedFiles extends DbEntityBase
          
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
-        $calculatedFields = null;
-        /*compose thumbnail and url fields
-        $calculatedFields = function ($fields, $row) {
-            $idx = array_search('ulf_OrigFileName', $fields);
-            if($idx!==false){
-                $row[$idx] = 'AAAA'.$row[$idx]; 
-            }
-            return $row;
-        };
-        */
         
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName'], $calculatedFields);
+         $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName'], $calculatedFields);
         
         //find related records 
         if($needRelations && !(is_bool($result) && $result==false) && count($result['order'])>0 ){

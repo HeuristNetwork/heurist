@@ -470,7 +470,7 @@ $.widget( "heurist.search", {
             .appendTo( this.element );
             */
             
-            this.div_add_record = $('<div>').css({'min-width':'31em'})
+            this.div_add_record = $('<div>').css({'min-width':'36em'})
             .addClass('div-table-cell logged-in-only')
             .appendTo( this.div_search );
 
@@ -478,7 +478,7 @@ $.widget( "heurist.search", {
             this.btn_add_record = $( "<button>", {
                 title: "Click to select a record type and create a new record (entity) in the database"
             })
-            .css({'min-width':'110px','margin-left':'4em','font-size':'1.3em','max-width':'250px'})
+            .css({'min-width':'110px','font-size':'1.3em','max-width':'250px'})
             //.addClass('logged-in-only')
             //.addClass('ui-heurist-btn-header1')
             .appendTo( this.div_add_record )
