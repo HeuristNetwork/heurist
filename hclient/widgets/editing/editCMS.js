@@ -279,6 +279,7 @@ function editCMS(home_page_record_id, main_callback){
                                             //find elements in preview that opens home page record editor
                                             var d = $(preview_frame[0].contentWindow.document);
                                             d.find( "#main-banner > a").click(function(event){
+                                                if(d.find( "#btn_inline_editor2").is(':visible'))
                                                     _editHomePageRecord();
                                             });
                                             d.find( "#btn_inline_editor2").click(function(event){

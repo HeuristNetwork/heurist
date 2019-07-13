@@ -973,7 +973,7 @@ error_log(print_r($_REQUEST, true));
         $current_user_grps = $this->get_user_group_ids();
         $ugs = prepareIds($ugs, true); //include zero
         foreach ($ugs as $ug){
-            if ($ug==0 || in_array($ug, $current_user_grps)){
+            if ($ug==0 || (is_array($current_user_grps) && in_array($ug, $current_user_grps)) ){
                 return true;   
             }
         }

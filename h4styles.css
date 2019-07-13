@@ -230,7 +230,8 @@ input.Temporal, .list_div {
 
 /* INPUT FORM ----------------------------------   */
 fieldset {
-    padding:10px; border:0;
+    padding:10px;
+    border:0;
 }
 
 fieldset > div, .input-row{
@@ -1371,7 +1372,7 @@ background: #8ea9b9
     padding: 1em 1em .3em .4em;
 }
 
-.ent_wrapper{position:absolute;top:0;bottom:0;left:0;right:1px;overflow:hidden;}
+.ent_wrapper{position:absolute;top:0;bottom:0;left:0;right: 1px;overflow:hidden;}
 .ent_header, .ent_footer, .ent_content, .ent_content_full{position:absolute; left:0; right:1px;}
 .ent_header{top:0;height:2.2em; padding:0.2em 0.5em;} /* border-bottom:lightgray solid 1px; background-color:#faa;, .ent_content_full*/
 .ent_content{top:2.8em;bottom:3.5em; overflow-y:auto;}

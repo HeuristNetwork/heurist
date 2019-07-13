@@ -31,7 +31,7 @@ function onPageInit(success){
             'media table contextmenu paste help noneditable'  //insertdatetime  wordcount save
         ],      
         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-        toolbar: ['formatselect | bold italic forecolor backcolor  | media image link | align | bullist numlist outdent indent | table | removeformat | help | customAddWidget customSaveButton customCloseButton' ],  
+        toolbar: ['formatselect | bold italic forecolor backcolor  | media image link customHeuristMedia | align | bullist numlist outdent indent | table | removeformat | help | customAddWidget customSaveButton customCloseButton' ],  
         content_css: [
             '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
             //,'//www.tinymce.com/css/codepen.min.css'
@@ -47,8 +47,18 @@ function onPageInit(success){
             });
             */
             editor.on('init', function(e) {
+                last_save_content = __getEditorContent();//keep value to restore
                 __initWidgetEditLinks(null);
             });
+            
+            editor.addButton('customHeuristMedia', {
+                  icon: 'image',
+                  text: 'Add Heurist Media resource',
+                  onclick: function (_) {  //since v5 onAction
+                        __addHeuristMedia();
+                  }
+                });
+            
             
             editor.addButton('customAddWidget', { //since v5 .ui.registry
                   text: 'Add DB retrieval',
@@ -74,9 +84,13 @@ function onPageInit(success){
                            
                             var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
                                 '<br>Web page content has been modified',
-                                {'Save':function(){__saveChanges( true, 0 );$dlg2.dialog('close');},
+                                {'Save':function(){__saveChanges( true, 0 );
+                                    var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                                    $dlg2.dialog('close');},
                                   'Cancel':function(){$dlg2.dialog('close');},
-                                   'Abandon changes':function(){__hideEditor();$dlg2.dialog('close');}},
+                                   'Abandon changes':function(){__hideEditor();
+                                    var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                                    $dlg2.dialog('close');}},
                                 'Content modified');
                             $dlg2.parents('.ui-dialog').css('font-size','1.2em');    
                        }else{
@@ -102,9 +116,15 @@ function onPageInit(success){
             
             var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
                 '<br>Web page content has been modified',
-                    {'Save':function(){__saveChanges( true, pageid );$dlg2.dialog('close');},
-                        'Cancel':function(){$dlg2.dialog('close');},
-                        'Abandon changes':function(){$dlg2.dialog('close');__hideEditor(pageid);}},
+                    {'Save':function(){__saveChanges( true, pageid );
+                        var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                        $dlg2.dialog('close');},
+                        'Cancel':function(){
+                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg2.dialog('close');},
+                        'Abandon changes':function(){
+                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg2.dialog('close');__hideEditor(pageid);}},
                                 'Content modified');
             $dlg2.parents('.ui-dialog').css('font-size','1.2em');    
             
@@ -132,13 +152,15 @@ function onPageInit(success){
             .click(function( event ){
                 
                 $('#btn_inline_editor').hide();
+                $('#btn_inline_editor2').hide();
                 
                 $('#main-content').parent().css('overflow-y','hidden');
                 $('#main-content').hide();
                 $('#edit_mode').val(1).click();
                 $('.tinymce-body').show();
-                last_save_content = $('.tinymce-body').val();  //keep value to restore
+                //last_save_content = $('.tinymce-body').val();  //keep value to restore
                 tinymce.init(inlineEditorConfig);
+                
                 /*setTimeout(function(){
                     $('.mce-tinymce').css({position:'absolute',
                         top:140,  //
@@ -230,6 +252,7 @@ function onPageInit(success){
             
             tinymce.remove('.tinymce-body');
             $('#btn_inline_editor').show();
+            $('#btn_inline_editor2').show();
             
             if(new_pageid>0){
                 __loadPageById( new_pageid );   
@@ -292,7 +315,40 @@ function onPageInit(success){
                 });
             })
     }
-         
+    
+    //
+    // browse for heurist uploaded/registered files/resources and add player link
+    //         
+    function __addHeuristMedia(){
+        
+        var popup_options = {
+                            isdialog: true,
+                            select_mode: 'select_single',
+                            //edit_addrecordfirst: true, //show editor atonce
+                            select_return_mode:'recordset', //ids or recordset(for files)
+                            filter_group_selected:null,
+                            //filter_groups: this.configMode.filter_group,
+                            onselect:function(event, data){
+
+                             if(data){
+                                
+                                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                        var recordset = data.selection;
+                                        var record = recordset.getFirstRecord();
+                                        
+                                        var content = '<a href="#>'+recordset.fld(record,'ulf_OrigFileName')+'</a>';
+                                        
+                                        tinymce.activeEditor.insertContent(content);
+                                    }
+                                
+                             }//data
+
+                            }
+                        };//popup_options        
+        
+        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
+    }
+
     //
     // defines widget to be inserted (heurist-app-id) and its options (heurist-app-options)
     //      
@@ -404,7 +460,8 @@ function onPageInit(success){
             
             var widget_name = ele.attr('data-heurist-app-id');
             $dlg.find('#widgetName').val( widget_name ); //selector
-            $dlg.find('#widgetCss').val( ele[0].dataset.mceStyle );
+            if(ele[0].dataset)
+                $dlg.find('#widgetCss').val( ele[0].dataset.mceStyle );
             
             var opts = window.hWin.HEURIST4.util.isJSON(ele.find('span').text());
             
@@ -435,7 +492,9 @@ function onPageInit(success){
                 
                     $dlg.find('div.'+widget_name+' input').each(function(idx, item){
                         item = $(item);
-                        if(item.attr('type')=='checkbox'){
+                        if(item.attr('type')=='hidden'){
+                            
+                        }else if(item.attr('type')=='checkbox'){
                             item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
                         }else if(item.attr('type')=='radio'){
                             item.prop('checked', item.val()==opts[item.attr('name')]);
@@ -505,14 +564,14 @@ function onPageInit(success){
                    dele.show();
                    
                    if(is_initial_set){
-                       s = 'border:2px solid gray;';
+                       s = 'border:2px solid gray;background: none;';
                        if(val=='heurist_resultList'){
                            s = s + 'position:relative;';
                        }
                        if(val=='heurist_Search'){
                             s = s + 'height:100px;width:600px;';        
                        }else if(val=='heurist_SearchTree'){
-                            s = s + 'height:600px;width:150px;';        
+                            s = s + 'height:600px;width:230px;position:relative;';        
                        }else{
                             s = s + 'height:600px;width:600px;';        
                        }

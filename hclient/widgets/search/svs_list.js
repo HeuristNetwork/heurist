@@ -62,6 +62,11 @@ $.widget( "heurist.svs_list", {
 
         var that = this;
         
+        if(this.element.parent().attr('data-heurist-app-id')){
+            //this is publication
+            this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
+        }
+        
         this.element.css({'overflow-y':'auto'});
         this.element.parent().css({'overflow':'hidden'});
         

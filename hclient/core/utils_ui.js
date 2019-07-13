@@ -2778,8 +2778,6 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         });
       
   },
-  
-
 });
 
 $.fn.sideFollow = function(dtime) {
