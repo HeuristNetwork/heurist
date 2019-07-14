@@ -980,16 +980,16 @@ div .selected_last{
 
 /* dashboard */
 .thumbs .dashboard.recordDiv .recordTitle {
-    left: 82px;
+    left: 92px;
 }
 .thumbs .dashboard.recordDiv .recordDescription {
     text-overflow: ellipsis;
-    left: 82px;
+    left: 92px;
     bottom: 2px;
 }
 .thumbs .dashboard.recordDiv, .thumbs .dashboard.recordDiv:hover {
     height: 80px; /* 114, 440 */
-    width: 380px;
+    width: 370px;
 }
 .thumbs3 .dashboard.recordDiv:hover {
     height:180px;
@@ -1004,7 +1004,7 @@ div .selected_last{
     box-shadow: none !important;
     border: none;
     background: none !important;
-    margin:10px 5px !important;
+    margin:10px 5px 10px 20px !important;
     outline: none;
     outline-style:none;
 }

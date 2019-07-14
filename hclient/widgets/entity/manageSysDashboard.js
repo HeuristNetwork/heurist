@@ -239,7 +239,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
              //this.searchForm.hide();
              //this.recordList.css({'top': 0});
             this.searchForm.css({'height': '7.4em'});
-            this.recordList.css({'top': '4.4em'});
+            this.recordList.css({'top': '5.4em'});
             
             this.searchForm.find('#view_mode').show();
             this.searchForm.find('#edit_mode').hide();
@@ -417,7 +417,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         +'</div>';
 
         var html = '<div class="recordDiv landscape'+(this.options.isViewMode?' dashboard outline_suppress':'')
-        +'" id="rd'+recID+'" recid="'+recID+'" style="cursor:pointer">'
+        +'" id="rd'+recID+'" recid="'+recID+'" style="cursor:pointer;">'
         + html_thumb;
         
         
