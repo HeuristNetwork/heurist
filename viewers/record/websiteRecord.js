@@ -10,25 +10,31 @@ function onPageInit(success){
     //cfg_widgets is from layout_defaults=.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
-    var current_pageid = $('#main-content').attr('data-homepageid'),
+    var home_pageid = $('#main-content').attr('data-homepageid'),
+        current_pageid = home_pageid,
         was_modified = false, //was modified and saved - on close need to reinit widgets
         last_save_content = null;
 
     var inlineEditorConfig = {
         selector: '.tinymce-body',
+        //fixed_toolbar_container: '#main-header',
         menubar: false,
         inline: false,
         branding: false,
         elementpath: false,
         //statusbar: true,
-        resize: 'both',
+        resize: false,
+        //autoresize_on_init: false,
+        //height: 300, //'100%',  //they said that this is entire height (including toolbar) alas it sets height of iframe only
+        //max_height: 300,
         entity_encoding:'raw',
         inline_styles: true,
 
         plugins: [
-            'advlist autolink lists link image media preview textcolor', //anchor charmap print 
+            'advlist autolink lists link image media preview', //anchor charmap print 
             'searchreplace visualblocks code fullscreen',
-            'media table contextmenu paste help noneditable'  //insertdatetime  wordcount save
+            'media table  paste help noneditable contextmenu textcolor'  
+//since v5 they are built in to the core: contextmenu textcolor
         ],      
         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
         toolbar: ['formatselect | bold italic forecolor backcolor  | media image link | align | bullist numlist outdent indent | table | removeformat | help | customHeuristMedia | customAddWidget customSaveButton customCloseButton' ],  
@@ -49,19 +55,24 @@ function onPageInit(success){
             editor.on('init', function(e) {
                 last_save_content = __getEditorContent();//keep value to restore
                 __initWidgetEditLinks(null);
+                
+                //adjust height
+                var itop = $('.mce-top-area').height()>0?$('.mce-top-area').height():68;
+                $('.mce-edit-area > iframe').height( $('.tinymce-body').height() - itop );
             });
             
             editor.addButton('customHeuristMedia', {
                   icon: 'image',
-                  text: 'Add Heurist Media resource',
-                  onclick: function (_) {  //since v5 onAction
+                  text: 'Add Media',
+                  onclick: function (_) {  //since v5 onAction in v4 onclick
                         __addHeuristMedia();
                   }
                 });
             
             
             editor.addButton('customAddWidget', { //since v5 .ui.registry
-                  text: 'Add DB retrieval',
+                  icon: 'plus',
+                  text: 'Add database widget',
                   onclick: function (_) {  //since v5 onAction
                         __addEditWidget();
                   }
@@ -69,35 +80,17 @@ function onPageInit(success){
                             
             editor.addButton('customSaveButton', { //since v5 .ui.registry
                   icon: 'save',
-                  text: 'Save changes',
-                  onclick: function (_) {  //since v5 onAction
+                  text: 'Save',
+                  onclick: function (_) {  //since v5 onAction in v4 onclick
                         __saveChanges(false);
                   }
                 });            
 
             editor.addButton('customCloseButton', {
-                  text: 'Close editor',
+                  icon: 'close',
+                  text: 'Close',
                   onclick: function (_) {
-                       //check that changed
-                       var edited_content = __getEditorContent();
-                       if( edited_content!=null && last_save_content != edited_content ){ //was_modified
-                           
-                            var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
-                                '<br>Web page content has been modified',
-                                {'Save':function(){__saveChanges( true, 0 );
-                                    var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                                    $dlg2.dialog('close');},
-                                  'Cancel':function(){$dlg2.dialog('close');},
-                                   'Abandon changes':function(){__hideEditor();
-                                    var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                                    $dlg2.dialog('close');}},
-                                'Content modified');
-                            $dlg2.parents('.ui-dialog').css('font-size','1.2em');    
-                       }else{
-                            //restore previous content 
-                            __hideEditor();      
-                       }
-                       
+                      __iniLoadPageById(0); 
                   }
                 });            
             
@@ -110,27 +103,12 @@ function onPageInit(success){
     $('#main-menu').find('a').addClass('truncate').click(function(event){  //load new page
 
         var pageid = $(event.target).attr('data-pageid');
+        __iniLoadPageById( pageid);
 
-       var edited_content = __getEditorContent();
-       if( edited_content!=null && last_save_content != edited_content ){ //was_modified
-            
-            var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
-                '<br>Web page content has been modified',
-                    {'Save':function(){__saveChanges( true, pageid );
-                        var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                        $dlg2.dialog('close');},
-                        'Cancel':function(){
-                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                            $dlg2.dialog('close');},
-                        'Abandon changes':function(){
-                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                            $dlg2.dialog('close');__hideEditor(pageid);}},
-                                'Content modified');
-            $dlg2.parents('.ui-dialog').css('font-size','1.2em');    
-            
-        }else{
-            __hideEditor( pageid ); //hide current editor and loads new page
-        }
+    });
+    //reload home
+    $( "#main-banner > a").click(function(event){
+        __iniLoadPageById( home_pageid);
     });
 
     
@@ -159,6 +137,7 @@ function onPageInit(success){
                 $('#edit_mode').val(1).click();
                 $('.tinymce-body').show();
                 //last_save_content = $('.tinymce-body').val();  //keep value to restore
+                //inlineEditorConfig.height = $('.tinymce-body').height();
                 tinymce.init(inlineEditorConfig);
                 
                 /*setTimeout(function(){
@@ -173,6 +152,34 @@ function onPageInit(success){
     $('#btn_inline_editor2')
             .css({position:'absolute', right:'40px', top:'10px', 'font-size':'1.1em'}).show();
             
+
+    //
+    //        
+    //            
+    function __iniLoadPageById( pageid ){                    
+     
+       var edited_content = __getEditorContent();
+       if( edited_content!=null && last_save_content != edited_content ){ //was_modified
+            
+            var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
+                '<br>Web page content has been modified',
+                    {'Save':function(){__saveChanges( true, pageid );
+                        var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                        $dlg2.dialog('close');},
+                        'Cancel':function(){
+                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg2.dialog('close');},
+                        'Abandon changes':function(){
+                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg2.dialog('close');__hideEditor(pageid);}},
+                                'Content modified');
+            $dlg2.parents('.ui-dialog').css('font-size','1.2em');    
+            
+        }else{
+            __hideEditor( pageid ); //hide current editor and loads new page
+        }
+        
+    }
             
     function __loadPageById( pageid ){
         
@@ -185,7 +192,7 @@ function onPageInit(success){
             
             current_pageid = pageid;
             $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                +'&fmt=web&recid='+pageid, function()
+                +'&field=1&recid='+pageid, function()
                 {
                         $('.tinymce-body').val($('#main-content').html());
                         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );

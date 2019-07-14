@@ -65,12 +65,6 @@ if($rec==null){
     exit();
 }
 
-if($rec['rec_RecTypeID']!=RT_CMS_HOME && $rec['rec_RecTypeID']!=RT_CMS_PAGE){
-    $message = 'Record #'.$rec_id.' is not allowed record type. Expecting Website Home Page';
-    include ERROR_REDIR;
-    exit();
-}
-
 $hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' ||
     ($system->get_user_id()>0 && $rec['rec_NonOwnerVisibility'] !== 'hidden') ||    //visible for logged 
     $system->is_member($rec['rec_OwnerUGrpID']) );   //owner
@@ -82,8 +76,14 @@ if(!$hasAccess){
     exit();
 } 
 
-if($rec['rec_RecTypeID']==RT_CMS_PAGE){
+if(@$_REQUEST['field']){
     print __getValue($rec, DT_EXTENDED_DESCRIPTION);
+    exit();
+}
+
+if($rec['rec_RecTypeID']!=RT_CMS_HOME && $rec['rec_RecTypeID']!=RT_CMS_PAGE){
+    $message = 'Record #'.$rec_id.' is not allowed record type. Expecting Website Home Page';
+    include ERROR_REDIR;
     exit();
 }
 
@@ -209,7 +209,12 @@ $edit_Available = (@$_REQUEST['edit']==1);
 if($edit_Available){
 ?>
     <script src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>
+    <!--
+    <script src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
+    <script src="<?php echo PDIR;?>external/tinymce5/jquery.tinymce.min.js"></script>
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js"></script>
     <script src="<?php echo PDIR;?>external/tinymce/jquery.tinymce.min.js"></script>
+    -->
     <script src="websiteRecord.js"></script>
     <?php
 }else{
@@ -234,7 +239,7 @@ function onPageInit(success)
 
         var pageid = $(event.target).attr('data-pageid');
         if(pageid>0){
-              $('#main-content').empty().load("<?php print HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&fmt=web&recid='?>"+pageid,
+              $('#main-content').empty().load("<?php print HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&field='.DT_EXTENDED_DESCRIPTION.'&recid='?>"+pageid,
               function(){
                   window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
               });
@@ -254,6 +259,13 @@ function onPageInit(success)
     },1500);
     $('#btn_inline_editor2').hide();
     $('#btn_inline_editor').hide();
+    
+    $( "#main-banner > a").click(function(event){
+              $('#main-content').empty().load("<?php print HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&field='.DT_EXTENDED_DESCRIPTION.'&recid='.$rec_id?>",
+              function(){
+                  window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
+              });
+    });
     
 }
 </script>
@@ -334,11 +346,13 @@ body{
     <div class="ent_wrapper">
     <div id="main-header" class="ent_header" style="background:rgb(112,146,190);height:140px">
 	    <div id="main-banner" style="float:left;min-height:80px;">
+            <a href="#" style="text-decoration:none;">
         <?php print $image_banner?'<img style="max-height:80px" src="'.$image_banner.'">'
-            :'<a href="#" style="text-decoration:none;"><div style="text-align:center;display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image<br><span style="font-size:10px;">click to edit</span></div></a>';?>
+            :'<div style="text-align:center;display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image</div>';?>
+            </a>
         </div>
-        <div id="main-title" style="float:left;font-size:1.4em;padding: 35px 0 0 20px;vertical-align:middle;font-weight:bold">
-            <?php print __getValue($rec, DT_NAME);?>
+        <div id="main-title" style="float:left;padding: 35px 0 0 20px;vertical-align:middle;">
+            <h2><?php print __getValue($rec, DT_NAME);?></h2>
         </div>
 	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;font-weight:bold !important">
             <ul><?php print $menu_content; ?></ul>
@@ -353,13 +367,13 @@ if($edit_Available){
 }
     ?>        
     </div>
-    <div class="ent_content" style="top:141px;bottom:30px;padding: 5px;">
-        <div id="main-content" data-homepageid="<?php print $rec_id;?>" style="height:100%;">
+    <div class="ent_content" style="top:145px;bottom:34px;padding: 5px;">
+        <div id="main-content" data-homepageid="<?php print $rec_id;?>" style="position:absolute;left:0;right:0;top:0;bottom:0;">
             <?php print __getValue($rec, DT_EXTENDED_DESCRIPTION);?>
         </div>
 <?php        
 if($edit_Available){        
-        print '<textarea class="tinymce-body" style="width:100%;height:100%;display:none">'.__getValue($rec, DT_EXTENDED_DESCRIPTION).'</textarea>';
+        print '<textarea class="tinymce-body" style="position:absolute;width:99.9%;top:0;bottom:0;display:none">'.__getValue($rec, DT_EXTENDED_DESCRIPTION).'</textarea>';
 }
 ?>        
     </div>

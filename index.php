@@ -35,6 +35,8 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         $format = $_REQUEST['format'];        
     }else if (array_key_exists('website', $_REQUEST)) {
         $format = 'website';
+    }else if (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) {
+        $format = 'web&field='.$_REQUEST['field'];
     }else{
         $format = 'xml';
     }
