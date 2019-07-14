@@ -74,6 +74,9 @@ class DbRecDetails
        if($this->session_id!=null){
             mysql__update_progress($system->get_mysqli(), $this->session_id, true, '0,1');
        }
+       
+       //refresh list of current user groups
+       $this->system->get_user_group_ids(null, true);
     }
 
     //
@@ -113,7 +116,7 @@ class DbRecDetails
     //
     private function _validateParamsAndCounts()
     {
-        if (!( $this->system->get_user_id()>0 )) {
+        if (!( $this->system->get_user_id()>0 )) { //not logged in
             $this->system->addError(HEURIST_REQUEST_DENIED);
             return false;
         }
@@ -224,10 +227,10 @@ class DbRecDetails
                     
                     $passedValues++;
                     
-                    if(!($row[3]>0)){
+                    if(!($row[3]>0)){  //rec_RecTypeID
                         array_push($childNotFound, $row[0]);
                     }else
-                    if(in_array($row[2], $groups)){
+                    if(in_array($row[2], $groups)){  //rec_OwnerUGrpID
                         if($allow_multi_parent || !@$childRecords[$row[1]]){
                             
                             $toProcess[] = $row;  //parent_id,child_id,0,child_rectype,child_title

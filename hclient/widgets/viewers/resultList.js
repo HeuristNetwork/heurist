@@ -78,7 +78,8 @@ $.widget( "heurist.resultList", {
         search_realm:  null  //accepts search/selection events from elements of the same realm only
     },
 
-
+    _is_publication:false, //this is CMS publication - take css from parent
+    
     _query_request: null, //keep current query request
 
     _events: null,                                                   
@@ -109,7 +110,14 @@ $.widget( "heurist.resultList", {
             this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
         }
 
-        this.element.addClass('ui-heurist-bg-light');
+        this._is_publication  = this.element.parent().attr('data-heurist-app-id');
+        
+        if(this._is_publication){
+            //this is CMS publication - take css from parent
+            this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
+        }else{
+            this.element.addClass('ui-heurist-bg-light');
+        }
 
         this._initControls();
 
@@ -296,10 +304,6 @@ $.widget( "heurist.resultList", {
         header.parent().parent().css({'background':'none','border':'none'});
         } */
 
-        //set background to none ???? if inner header visible 
-        this.element.parent().css({'background':'none','border':'none'});
-        this.element.parent().parent().css({'background':'none','border':'none'});
-
         //------------------------------------------       
 
         this.div_coverall = $( "<div>" )                
@@ -348,15 +352,27 @@ $.widget( "heurist.resultList", {
         // -------------------------------------------
 
         this.div_toolbar = $( "<div>" )
-        .addClass('div-result-list-toolbar ent_header ui-heurist-bg-light')
+        .addClass('div-result-list-toolbar ent_header')
         .css({'width':'100%'})
         .appendTo( this.element );
 
         this.div_content = $( "<div>" )
-        .addClass('div-result-list-content ent_content_full ui-heurist-bg-light')
+        .addClass('div-result-list-content ent_content_full')
         //.css({'border-top':'1px solid #cccccc'})  //,'padding-top':'1em'
         .css({'overflow-y':'scroll'})
         .appendTo( this.element );
+        
+        if(this._is_publication){
+            this.div_toolbar.css({'background':'none'});
+            this.div_content.css({'background':'none'});
+        }else{
+            //set background to none ???? if inner header visible 
+            this.element.parent().css({'background':'none','border':'none'});
+            this.element.parent().parent().css({'background':'none','border':'none'});
+
+            this.div_toolbar.addClass('ui-heurist-bg-light');
+            this.div_content.addClass('ui-heurist-bg-light');
+        }
 
 
         this.div_loading = $( "<div>" )

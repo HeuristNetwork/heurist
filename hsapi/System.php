@@ -887,7 +887,9 @@ error_log(print_r($_REQUEST, true));
                     "help"=>HEURIST_HELP,
                     "version"=>HEURIST_VERSION,
                     "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
-                    "baseURL"=>HEURIST_BASE_URL)
+                    "baseURL"=>HEURIST_BASE_URL),
+                    'host_logo'=>$host_logo,
+                    'host_url'=>$host_url
             );
 
         }

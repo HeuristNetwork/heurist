@@ -1479,7 +1479,7 @@ window.hWin.HEURIST4.ui = {
                 
                 
             var dwidth = selObj.css('width');    
-            if(dwidth=='0px' || (dwidth.indexOf('px')>0 && parseFloat(dwidth)<21)) dwidth = 'auto';
+            if(!dwidth || dwidth=='0px' || (dwidth.indexOf('px')>0 && parseFloat(dwidth)<21)) dwidth = 'auto';
             
             var dminwidth = selObj.css('min-width');    
             if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '10em';

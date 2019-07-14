@@ -61,7 +61,7 @@ $.widget( "heurist.search", {
         var that = this;
         
         if(this.element.parent().attr('data-heurist-app-id')){
-            //this is publication
+            //this is CMS publication - take bg from parent
             this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
         }else
         //this.element.css({border:'2px solid green','background-color':'lightgreen'});
@@ -229,19 +229,19 @@ $.widget( "heurist.search", {
             window.hWin.HEURIST4.util.setDisabled(this.input_search, true); 
             
         
-        var div_search_help_links = $('<div>').css('padding-top','15px').appendTo(this.div_search_input);
-
-        var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
-        +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')                
-        .css({'text-decoration':'none','color':'gray', 'outline':0, cursor:'pointer'})
-        .appendTo(div_search_help_links);
-        
-        this._on( link, {  click: function(){
-            window.open('context_help/advanced_search.html','_blank');
-        } });
-        
         //quick filter by entity
         if(this.options.menu_entity_filter){
+            var div_search_help_links = $('<div>').css('padding-top','15px').appendTo(this.div_search_input);
+
+            var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
+            +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')                
+            .css({'text-decoration':'none','color':'gray', 'outline':0, cursor:'pointer'})
+            .appendTo(div_search_help_links);
+            
+            this._on( link, {  click: function(){
+                window.open('context_help/advanced_search.html','_blank');
+            } });
+        
             this.filter_by_entity = $('<span title="Show list of entities to filter">'
             +'entity types <span class="ui-icon ui-icon-triangle-1-s"></span></span>')                                          //
             .css({'text-decoration':'none','color':'gray','padding-left':'16px','outline':0, cursor:'pointer'})

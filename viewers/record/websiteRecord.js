@@ -385,7 +385,9 @@ function onPageInit(success){
         function __prepareWidgetDiv( widgetid ){
             //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
             
-            var widget_name = $dlg.find('#widgetName').val();
+            var sel = $dlg.find('#widgetName');
+            var widget_name = sel.val();
+            var widget_title = sel.find('option:selected').attr('data-name');
             var widgetCss = $dlg.find('#widgetCss').val();
             
             var opts = {};
@@ -458,8 +460,9 @@ function onPageInit(success){
                 +' data-heurist-app-id="'+widget_name
                 + '" style="'+ widgetCss+'" '
                 + '>'
-                + 'Placeholder for ' + widget_name 
-                + ' <br><a href="#" class="edit">edit</a>&nbsp;&nbsp;<a href="#" class="remove">remove</a>'//+widgetCss
+                + '<div style="padding:10px">Heurist '+widget_title
+                //+ 'Placeholder for ' + widget_name 
+                + ' widget</div><a href="#" class="edit" style="padding:0 10px">edit</a>&nbsp;&nbsp;<a href="#" class="remove">remove</a>'//+widgetCss
                 + ' <span style="font-style:italic;display:none">'+widget_options+'</span></div>';
                 
             return content; 
@@ -471,7 +474,7 @@ function onPageInit(success){
             
             var widget_name = ele.attr('data-heurist-app-id');
             $dlg.find('#widgetName').val( widget_name ); //selector
-            if(ele[0].dataset)
+            if(ele  && ele[0].dataset)
                 $dlg.find('#widgetCss').val( ele[0].dataset.mceStyle );
             
             var opts = window.hWin.HEURIST4.util.isJSON(ele.find('span').text());
@@ -575,14 +578,12 @@ function onPageInit(success){
                    dele.show();
                    
                    if(is_initial_set){
-                       s = 'border:2px solid gray;background: none;';
-                       if(val=='heurist_resultList'){
-                           s = s + 'position:relative;';
-                       }
+                       s = 'border:2px solid gray;background:white;position:relative;';
+
                        if(val=='heurist_Search'){
                             s = s + 'height:100px;width:600px;';        
                        }else if(val=='heurist_SearchTree'){
-                            s = s + 'height:600px;width:230px;position:relative;';        
+                            s = s + 'height:600px;width:230px;';        
                        }else{
                             s = s + 'height:600px;width:600px;';        
                        }
