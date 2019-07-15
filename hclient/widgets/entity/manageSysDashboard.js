@@ -39,7 +39,9 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
 
         this.options.height = (isNaN(this.options.height) || this.options.height<815)?900:this.options.height;                    
         
-        //window.hWin.
+        this.options.title = 'Dashboard';
+        
+        /*
         var fit_to_layout = $('div[layout_id="FAP2"]');
         if(fit_to_layout.length>0){
             this.options.position = {my: "left top", at:'left top+20', of:fit_to_layout};
@@ -48,6 +50,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             //this.options.width = fit_to_layout.width()-40;
             this.options.height = fit_to_layout.height()-40;
         }
+        */
         
         this.options.isViewMode = true;
         
@@ -184,16 +187,17 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     _adjustHeight: function(){
         
 
-        var h = 500;
+        var h = 600;
         if(this.options.isViewMode){
             var recordset = this.recordList.resultList('getRecordSet');
             if(recordset){
                 var len = recordset.length();
                 //set height to fit number of entries   
-                var h = 100 + Math.ceil(len/3) * 100;
-                h = (h<300)?300:(h>500?500:h);                                  
+                var h = 100 + Math.ceil(len/3) * 120;
+                h = (h<300)?300:(h>600?600:h);                                  
             }
         }
+console.log(h);        
         this._as_dialog.dialog('option', 'height', h);                                    
         
     },
@@ -243,7 +247,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             
             this.searchForm.find('#view_mode').show();
             this.searchForm.find('#edit_mode').hide();
-            this._as_dialog.parent().find('.ui-dialog-titlebar').hide();
+            //this._as_dialog.parent().find('.ui-dialog-titlebar').hide();
             
             this.recordList.resultList('option', 'sortable', false);
             this.recordList.resultList('option','view_mode','thumbs');
@@ -261,7 +265,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
 
             this.searchForm.find('#view_mode').hide();
             this.searchForm.find('#edit_mode').show();
-            this._as_dialog.parent().find('.ui-dialog-titlebar').show();
+            //this._as_dialog.parent().find('.ui-dialog-titlebar').show();
             
             this.recordList.resultList('option','view_mode','list');
             

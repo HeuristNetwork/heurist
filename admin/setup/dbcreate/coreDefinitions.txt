@@ -2074,24 +2074,17 @@
 
  
 
- 
-
 -- Dashboard entries
 
 -- `dsh_ID`,`dsh_Order`,`dsh_Label`,`dsh_Description`,`dsh_Enabled`,`dsh_ShowIfNoRecords`,`dsh_CommandToRun`,`dsh_Parameters`
 
->>StartData>> ('1','1','Add a Person','Adds a Person record, editable and viewable by any logged in user','y','y', 'action-AddRecord','{\"RecTypeID\":\"10\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"viewable\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
-('2','2','Add a Place','Adds a Place record, editable by any logged in user, publicly viewable','y','y', 'action-AddRecord','{\"RecTypeID\":\"12\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"public\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
-('3','6','Quick filter builder','Simple form to build a single criterion search/filter','y','y', 'action-CreateFilter',''),
-('4','4','Persons search','Run a saved filter to retrieve all Persons in the database','y','y', 'action-SearchById','29'),
-('5','10','Set your preferences','Set your preferences for page length, startup filter, map clustering and other behaviours','y','y', 'menu-profile-preferences',''),
-('6','9','Structure editing','Define or modify entity types, fields and vocabularies','y','y', 'menu-structure-rectypes',''),
-('7','8','Browse templates','Borrow structure (entity types, fields, vocabularies) from templates and other users\' databases','y','y', 'menu-structure-import',''),
-('9','11','Export CSV file','Exports a selection of fields for the current database susbset to a CSV file','y','y', 'menu-export-csv',''),
-('10','7','Import CSV/TSV file','Imports a spreadsheet CSV file, normalising multiple entity types','y','y', 'menu-import-csv',''),
-('11','3','Add a new record','Add a new record selecting record (entity) type and access rights','y','y', 'menu-import-add-record',''),
-('12','12','Archive database','Create a single self-documenting file containing all data (XML, SQL, original uploads and documentation of Heurist structures and SQL queries)','y','y', 'menu-manage-archive',''),
-('13','5','Place search','Run a saved filter to retrieve all Places in the database','y','y', 'action-Search','t:12'),
+>>StartData>> ('1','3','Add a Person','Adds a Person record, editable and viewable by any logged in user. You can also do this through the Add record button on the main page.','y','y', 'action-AddRecord','{\"RecTypeID\":\"10\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"viewable\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
+('4','6','Persons search','Run a saved filter to retrieve all Persons in the database (you can also use the buttons above the filter field on the main page or the quick filter builder).','y','y', 'action-SearchById','29'),
+('5','7','Set your preferences','Set your preferences for experience level, page length, startup filter, map clustering and other behaviours.','y','y', 'menu-profile-preferences',''),
+('6','4','Structure editor','Use the structure editor to (re)configure your database. You can add new entity types or modify existing ones, add and modify field definitions and relationships, choose vocabularies and add terms.','y','y', 'menu-structure-rectypes',''),
+('7','1','Browse templates','Save a heap of time (and promote compatibility) by borrowing structure definitions selectively from other users, then customise them to your needs with the structure editor.','y','y', 'menu-structure-import',''),
+('10','5','Import spreadsheet CSV file','Imports a spreadsheet saved as a CSV file, extracting, matching and linking multiple entity types.','y','y', 'menu-import-csv',''),
+('11','2','Add a new record','Add a new record selecting record (entity) type and access rights. The record opens in the editor.','y','y', 'menu-import-add-record',''),
 >>EndData>>
 
  

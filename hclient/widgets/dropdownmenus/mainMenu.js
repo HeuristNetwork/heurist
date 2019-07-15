@@ -82,13 +82,19 @@ $.widget( "heurist.mainMenu", {
         .appendTo(this.element);
 
         //dashboard button                
-        this.btn_dashboward = $('<div>').button({label:'Open dashboard'})
+        this.btn_dashboard = $('<div>').button({label:'Open dashboard'})
             .css({'float':'right', margin:'0.7em'})
             .addClass('ui-heurist-header2')
             .appendTo( this.element )
             .click(
                 function(){
-                    that.btn_dashboward.hide();
+                    that.btn_dashboard.hide();
+                    
+                   var params = 
+                        {viewmode: 'thumbs', showonstartup: 1 };
+                    window.hWin.HAPI4.save_pref('prefs_sysDashboard', params);     
+                    
+                    
                     window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
                         {onClose:function(){
                             $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
@@ -360,9 +366,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         
         if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0){
-            this.btn_dashboward.show();  
+            this.btn_dashboard.show();  
         }else{
-            this.btn_dashboward.hide();  
+            this.btn_dashboard.hide();  
         }
     },
 
