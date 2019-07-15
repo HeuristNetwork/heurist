@@ -1857,7 +1857,7 @@ $loop_cnt++;
                 case "separator":    // this should never happen since separators are not saved as details, skip if it does
                 case "relmarker":    // relmarkers are places holders for display of relationships constrained in some way
                 default:
-                    continue;
+                    break;
             }
 
             if ($detailValue) {

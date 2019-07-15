@@ -75,7 +75,7 @@ if (array_key_exists('remove', $_REQUEST)) {
 	}
 }
 
-if (array_key_exists('clear', $_REQUEST)) {
+if (array_key_exists('clear', $_REQUEST) || !$collection) {
 	$collection = array();
 }
 

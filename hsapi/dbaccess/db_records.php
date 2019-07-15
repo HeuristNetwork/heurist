@@ -1640,7 +1640,7 @@
                     case "separator":
                     case "relmarker":
                     default:
-                        continue;    //noop since separators and relmarker have no detail values
+                        break;    //noop since separators and relmarker have no detail values
                 } //switch
 
         
