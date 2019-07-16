@@ -1,5 +1,5 @@
 /**
-* filename: explanation
+* filename: leaflet layers
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -310,16 +310,9 @@ function hMapLayer2( _options ) {
     //
     function _getBoundingBox(){
         
-         var geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
-         if(geodata && geodata[0]){
-            var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[0].wkt, geodata[0].geotype, 'google' );
-            if(shape && shape._extent){
-                var extent = shape._extent;
-                return [[extent.ymin,extent.xmin],[extent.ymax,extent.xmax]];
-            }
-         }else{
-             return null;
-         }
+        return window.hWin.HEURIST4.geo.getWktBoundingBox(
+                _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'])
+                );
         
     }
 

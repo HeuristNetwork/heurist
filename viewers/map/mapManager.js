@@ -48,9 +48,9 @@ L.control.manager = function(opts) {
 
 
 //        
-// create accordion with 3(4) panes
-// load prededifned list of base layers
-// call refresh map documents
+// creates accordion with 3(4) panes
+// loads prededifned list of base layers
+// calls refresh map documents
 //        
 //$.widget( "heurist.mapmanager", {
     
@@ -318,12 +318,14 @@ function hMapManager( _options )
                 {
                     var record = records[idx];
                     var recID  = resdata.fld(record, 'rec_ID'),
-                    recName = resdata.fld(record, 'rec_Title');
+                    recName = resdata.fld(record, 'rec_Title'),
+                    extent = resdata.fld(record, DT_GEO_OBJECT); //initial extent
                     
                     var $res = {};  
                     $res['key'] = recID;
                     $res['title'] = recName;
                     $res['type'] = 'mapdocument';
+                    $res['extent'] = extent;
                     $res['lazy'] = true;
 
                     treedata.push($res);
@@ -360,6 +362,7 @@ function hMapManager( _options )
                                         var node = data.node;
                                         var dfd = new $.Deferred();
                                         data.result = dfd.promise();
+                                        mapDocuments.zoomToMapDocument(node.key);
                                         mapDocuments.openMapDocument(node.key, dfd);
                                         //return dfd.promise();
                                         
@@ -393,10 +396,10 @@ function hMapManager( _options )
                                             //if not expanded, expand, it loads layers (opens mapdocument)
                                             var mapdoc_id = node.key;
                                             if(!node.isExpanded() && !mapDocuments.isLoaded(mapdoc_id)){
-                                                node.setExpanded(true);
+                                                node.setExpanded(true); //load content - init lazy load - see lazyLoad ->  mapDocuments.openMapDocument
                                             }else{
 
-                                                mapDocuments.setMapDocumentVisibulity(mapdoc_id, node.isSelected());
+                                                mapDocuments.setMapDocumentVisibility(mapdoc_id, node.isSelected());
                                             }
                                             //
                                             //mapDocuments.openMapDocument(node.key, dfd);
@@ -537,7 +540,7 @@ function hMapManager( _options )
                     +(mapdoc_id>=0?('" data-mapdoc="'+mapdoc_id+'"'):'')
                     +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
                 +'<span class="ui-icon ui-icon-arrow-4-diag" '
-                    +((item.data.type=='mapdocument')?'style="color:gray"':'')
+                    +((item.data.type=='mapdocument' && !item.data.extent)?'style="color:gray"':'')
                     +' title="Zoom to '+item.data.type+' extent"></span>'
                 + (isEditAllowed
                    ?('<span class="ui-icon ui-icon-pencil" title="'

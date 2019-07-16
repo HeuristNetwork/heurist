@@ -595,6 +595,23 @@ window.hWin.HEURIST4.geo = {
         }
 
     },//end parseCoordinates
+    
+    //
+    // geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
+    //    
+    getWktBoundingBox: function(geodata){
+      
+         if(geodata && geodata[0]){
+            var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[0].wkt, geodata[0].geotype, 'google' );
+            if(shape && shape._extent){
+                var extent = shape._extent;
+                return [[extent.ymin,extent.xmin],[extent.ymax,extent.xmax]];
+            }
+         }else{
+             return null;
+         }
+        
+    },
 
     //
     //  _format - google or timemap

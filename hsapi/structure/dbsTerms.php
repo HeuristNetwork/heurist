@@ -236,7 +236,7 @@ class DbsTerms
                     return $childs;
                 }else if(count($childs)>0){
                     $res = $this->findChildren($parent_id, $childs);
-                    if(count($res)>0){
+                    if(is_array($res) && count($res)>0){
                         return $res;
                     }
                 }

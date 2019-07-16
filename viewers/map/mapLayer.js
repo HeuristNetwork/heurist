@@ -1,5 +1,5 @@
 /**
-* filename: explanation
+* filename: google overlay
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

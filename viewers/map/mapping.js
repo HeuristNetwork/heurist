@@ -832,7 +832,7 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    //
+    //  get summary bunds for set of layers
     //
     getBounds: function(layer_ids){
         
@@ -878,7 +878,7 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    // save map bounds in usr prefs/resore and set map
+    // get or save map bounds in usr prefs/resore and set map
     //    
     getSetMapBounds: function(is_set){
         
@@ -902,6 +902,20 @@ $.widget( "heurist.mapping", {
             }
             
         }
+        
+    },
+    
+    //
+    //
+    //
+    zoomToBounds: function(bounds){
+        
+            if(bounds && !(bounds instanceof L.LatLngBounds)){
+                if($.isArray(bounds) && bounds.length>1 ){
+                    bounds = L.latLngBounds(bounds);
+                }
+            }
+            if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);                
         
     },
     
@@ -1954,16 +1968,9 @@ $.widget( "heurist.mapping", {
     drawZoomTo: function(){
         
             var bounds = this.drawnItems.getBounds();
-            if(!(bounds instanceof L.LatLngBounds)){
-                if($.isArray(bounds) && bounds.length>1 ){
-                    bounds = L.latLngBounds(bounds);
-                }
-            }
-            if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);                
             
-            //setTimeout(function(){
-            //},300);        
-        
+            this.zoomToBounds(bounds);
+            
     },
 
     //

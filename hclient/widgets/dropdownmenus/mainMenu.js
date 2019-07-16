@@ -61,7 +61,7 @@ $.widget( "heurist.mainMenu", {
         this._on( this.div_logo, {
             click: function(event){
                 if($(event.target).is('span.ui-icon-alert')){
-                    window.hWin.HEURIST4.msg.showMsgDlg(
+                    window.hWin.HEURIST4.msg.showMsgDlg(                    
                     "Your server is running Heurist version "+window.hWin.HAPI4.sysinfo['version']+" The current stable version of Heurist (version "
                     +window.hWin.HAPI4.sysinfo.version_new+") is available from <a target=_blank href='https://github.com/HeuristNetwork/heurist'>GitHub</a> or "
                     +"<a target=_blank href='http://HeuristNetwork.org'>HeuristNetwork.org</a>. We recommend updating your copy of the software if the sub-version has changed "
@@ -215,9 +215,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         //host logo and link    
         if(window.hWin.HAPI4.sysinfo.host_logo){
             
-            $('<div style="height:40px;background:none;padding-left:4px;float:right;">'
+            $('<div style="height:40px;background:none;padding-left:4px;float:right;color:white">'
                 +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
-                +'" target="_blank" style="text-decoration: none;">'
+                +'" target="_blank" style="text-decoration: none;color:white;">'
                         +'<label>hosted by: </label>'
                         +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
                         +'" height="40" align="center"></a></div>')

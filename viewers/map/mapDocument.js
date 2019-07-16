@@ -85,7 +85,7 @@ function hMapDocument( _options )
         
             var request = {
                         q: 't:'+RT_MAP_DOCUMENT,w: 'a',
-                        detail: 'header',
+                        detail: [DT_GEO_OBJECT,DT_MINIMUM_MAP_ZOOM,DT_MAXIMUM_MAP_ZOOM], //'header',
                         source: 'map_document'};
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
@@ -216,15 +216,16 @@ function hMapDocument( _options )
                                                       mapdoc_recordset: resdata, //need to get fields
                                                       mapwidget: options.mapwidget});
                 }else if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_DOCUMENT){
-                         
-                    
+                    //this section to be removed - we searches for layers and datasources only
+                    //mapdocuments details are obtained on getting map doc list     
+                    /*
                     var record2 = getLayer(recID); //from map_documents
                     record2['d'] = record['d'];
+                    //get min and max zoom
                     resdata.fld(record, DT_MINIMUM_MAP_ZOOM);
                     resdata.fld(record, DT_MAXIMUM_MAP_ZOOM);
                     resdata.removeRecord(recID);
-                    
-                    //get min and max zoom
+                    */
                     
                 }
             }
@@ -552,7 +553,7 @@ function hMapDocument( _options )
         //
         // show/hide entire map document
         //
-        setMapDocumentVisibulity: function( mapdoc_id, is_visibile ){
+        setMapDocumentVisibility: function( mapdoc_id, is_visibile ){
             //loop trough all 
             var resdata = map_documents_content[mapdoc_id];
             var idx, records = resdata.getRecords();
@@ -625,23 +626,36 @@ function hMapDocument( _options )
         //
         zoomToMapDocument: function(mapdoc_id){
 
+            
+            var record2 = map_documents.getById( mapdoc_id );
 
-            var resdata = map_documents_content[mapdoc_id];
-            var ids = [];
-            if(resdata){
-                var idx, records = resdata.getRecords();
-                for(idx in records){
-                    if(idx)
-                    {
-                        var record = records[idx];
-                        if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER && record['layer']){
-                            ids.push((record['layer']).getNativeId());
+            var mapdoc_extent = window.hWin.HEURIST4.geo.getWktBoundingBox(
+                map_documents.getFieldGeoValue(record2, DT_GEO_OBJECT)
+                );
+            if(mapdoc_extent!=null){
+
+                    options.mapwidget.mapping('zoomToBounds', mapdoc_extent);
+                
+            }else{
+                var resdata = map_documents_content[mapdoc_id];
+            
+                //find all layer ids and zoom to summary extent
+                var ids = [];
+                if(resdata){
+                    var idx, records = resdata.getRecords();
+                    for(idx in records){
+                        if(idx)
+                        {
+                            var record = records[idx];
+                            if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER && record['layer']){
+                                ids.push((record['layer']).getNativeId());
+                            }
                         }
                     }
                 }
+                if(ids.length>0)
+                    options.mapwidget.mapping('zoomToLayer', ids);
             }
-            if(ids.length>0)
-                options.mapwidget.mapping('zoomToLayer', ids);
         },
         
         //
