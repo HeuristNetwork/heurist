@@ -155,7 +155,7 @@ function __getMenuContent($parent_id, $menuitems, $lvl)
                                 .htmlspecialchars(__getValue($menu_rec,DT_NAME)).'</a>';
                 
                 $menuitems2 = @$menu_rec['details'][DT_CMS_MENU];
-                if(count($menuitems2)>0){                          
+                if(is_array($menuitems2) && count($menuitems2)>0){                          
                     $sub = __getMenuContent($rd['id'], $menuitems2, $lvl+1);
                     if($sub!='')
                         $res = $res. '<ul style="min-width:200px"'.($lvl==0?' class="level-1"':'').'>'.$sub.'</ul>';

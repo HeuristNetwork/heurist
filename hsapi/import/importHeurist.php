@@ -373,7 +373,8 @@ public static function importRecords($filename, $session_id){
         $records = $data['heurist']['records'];
         
         $records_corr = array(); //source rec id -> target rec id
-        $resource_fields = array(); //source rec id -> field type id -> field value (source recid)
+        $resource_fields = array(); //source rec id -> field type id -> field value (target recid)
+        $keep_rectypes = array(); //keep rectypes for furhter rectitle update
         
         $is_rollback = false;
         $keep_autocommit = mysql__begin_transaction($mysqli);    
@@ -525,7 +526,9 @@ public static function importRecords($filename, $session_id){
             }
             
             //source rec id => target rec id
-            $records_corr[$record_src['rec_ID']] = $out['data']; //new record id
+            $new_rec_id  = $out['data']; //new record id
+            $records_corr[$record_src['rec_ID']] = $new_rec_id; 
+            $keep_rectypes[$new_rec_id] = $record['RecTypeID'];
             
             $execution_counter++;
         
@@ -543,36 +546,47 @@ public static function importRecords($filename, $session_id){
             $cnt_imported++;
         }//records
         
-        if(!$is_rollback){             
+        if(!$is_rollback){    
+            
             //update resource fields with new record ids
             foreach ($resource_fields as $src_recid=>$fields){
-                
-                $trg_recid = @$records_corr[$src_recid];
-                if($trg_recid>0)
-                foreach ($fields as $fieldtype_id=>$old_values){
-                    foreach ($old_values as $old_value){
-                        $new_value = @$records_corr[$old_value];
-                        if($new_value>0){
-                            $query = 'UPDATE recDetails SET dtl_Value='.$new_value
-                                    .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                    .' AND dtl_Value='.$old_value;
-                                    
-                        }else{
-                            //target record not found 
-                            $query = 'DELETE FROM recDetails '
-                                    .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                    .' AND dtl_Value='.$old_value;
+
+                //get new id in target db                
+                $trg_recid = @$records_corr[$src_recid];//source rec id -> target rec id
+                if($trg_recid>0){
+                    foreach ($fields as $fieldtype_id=>$old_values){
+                        foreach ($old_values as $old_value){
+                            //get new id in target db                
+                            $new_value = @$records_corr[$old_value];
+                            if($new_value>0){
+                                $query = 'UPDATE recDetails SET dtl_Value='.$new_value
+                                        .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
+                                        .' AND dtl_Value='.$old_value;
+                                        
+                            }else{
+                                //target record not found 
+                                $query = 'DELETE FROM recDetails '
+                                        .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
+                                        .' AND dtl_Value='.$old_value;
+                            }
+                            $ret = mysql__exec_param_query($mysqli, $query, null);
+                            if($ret!==true){
+                                self::$system->addError(HEURIST_DB_ERROR, 'Cannot update resource fields', $ret);
+                                $is_rollback = true;
+                                break;   
+                            }
                         }
-                        $ret = mysql__exec_param_query($mysqli, $query, null);
-                        if($ret!==true){
-                            self::$system->addError(HEURIST_DB_ERROR, 'Cannot update resource fields', $ret);
-                            $is_rollback = true;
-                            break;   
-                        }
-                    }
+                    }//for
                 }
             }//for
-            
+            if(!$is_rollback){ 
+                $idx_mask = $defs['rectypes']['typedefs']['commonNamesToIndex']['rty_TitleMask'];         
+                //update resource fields with new record ids
+                foreach ($keep_rectypes as $rec_id=>$rty_id){
+                    $mask = @$defs['rectypes']['typedefs'][$rty_id]['commonFields'][$idx_mask];
+                    recordUpdateTitle(self::$system, $rec_id, $mask, null);
+                }
+            }
         }
         
         if($is_rollback){
