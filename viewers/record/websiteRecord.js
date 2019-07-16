@@ -37,7 +37,7 @@ function onPageInit(success){
 //since v5 they are built in to the core: contextmenu textcolor
         ],      
         //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-        toolbar: ['formatselect | bold italic forecolor backcolor  | media image link | align | bullist numlist outdent indent | table | removeformat | help | customHeuristMedia | customAddWidget customSaveButton customCloseButton' ],  
+        toolbar: ['formatselect | bold italic forecolor backcolor  | customHeuristMedia link | align | bullist numlist outdent indent | table | removeformat | help | customAddWidget customSaveButton customCloseButton' ],  
         content_css: [
             '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
             //,'//www.tinymce.com/css/codepen.`min.css'
@@ -511,7 +511,7 @@ function onPageInit(success){
                         }else if(item.attr('type')=='checkbox'){
                             item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
                         }else if(item.attr('type')=='radio'){
-                            item.prop('checked', item.val()==opts[item.attr('name')]);
+                            item.prop('checked', item.val()== String(opts[item.attr('name')]));
                         }else if(item.val()!=''){
                             item.val( opts[item.attr('name')] );
                         }
