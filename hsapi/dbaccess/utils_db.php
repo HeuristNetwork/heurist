@@ -896,7 +896,7 @@ $query = 'CREATE TABLE sysDashboard ('
 
             }else{
 
-                include(dirname(__FILE__).'/utils_db_load_script.php'); // used to load procedures/triggers
+                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
                     $res = true;
                 }

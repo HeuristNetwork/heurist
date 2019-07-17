@@ -131,11 +131,20 @@
         }
 
         // ACCESS -------------
-        if(!$access && isset($userDefaultAccess)) {
+        // for CMS rectypes by default public
+        if (($system->defineConstant('RT_CMS_HOME') && $rectype==RT_CMS_HOME)||
+            ($system->defineConstant('RT_CMS_MENU') && $rectype==RT_CMS_MENU)||
+            ($system->defineConstant('RT_CMS_PAGE') && $rectype==RT_CMS_PAGE))
+        {  
+            $access = 'public';
+        }
+
+        
+        if(!$access && isset($userDefaultAccess)) {//from user prefs
             $access = $userDefaultAccess;
         }
         if(!$access){
-            $access = @$sysvals['sys_NewRecAccess'];
+            $access = @$sysvals['sys_NewRecAccess']; //from db prefs
         }
         if(!$access){
             $access = 'viewable';
@@ -143,7 +152,7 @@
         //access groups
         if($access!='viewable'){
             $access_grps = null;
-        }else if($access_grps==null && isset($userDefaultAccessGroups)){
+        }else if($access_grps==null && isset($userDefaultAccessGroups)){  
             $access_grps = $userDefaultAccessGroups;
         }
         
