@@ -258,22 +258,22 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new, $circle_color, $bg_ci
         if(true && ($bg_circle_color!=null || $circle_color!=null)){
             
             $img = imagecreatetruecolor(25, 25);      //truecolor image 25x25 pix
-            //imagealphablending( $img, false );
-            //imagesavealpha( $img, true );
+            imagealphablending( $img, false );
+            imagesavealpha( $img, true );
             
-            // fill the background color
-            $bg = imagecolorallocate($img, 200, 200, 200);
+            //fill the background color
+            //$bg = imagecolorallocate($img, 200, 200, 200);
+            //imagecolortransparent($img, $bg);
             // make the background transparent
-            //$bg = imagecolorallocatealpha($img, 200, 200, 200, 127);
-            imagecolortransparent($img, $bg);
+            $bg = imagecolorallocatealpha($img, 200, 200, 200, 127);
             
             //draw transparent rectangle
             imagefilledrectangle($img, 0, 0, 25, 25, $bg); //fill bg rectangle
             
             // draw filled circle
             if($bg_circle_color!=null){
-                $col_ellipse = imagecolorallocate($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2]);
-                //$col_ellipse = imagecolorallocatealpha($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2], 65);
+                //$col_ellipse = imagecolorallocate($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2]);
+                $col_ellipse = imagecolorallocatealpha($img, $bg_circle_color[0], $bg_circle_color[1], $bg_circle_color[2], 80);
                 imagefilledellipse($img, 12, 12 , 24, 24, $col_ellipse);        
             }
             // draw circle

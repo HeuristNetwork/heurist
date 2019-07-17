@@ -264,7 +264,6 @@ if(_mapdata.limit_warning){
                                 + ((mapdata.options.items[i].options.linkedRecIDs)?'&circle='+new_color2:'');
                     }
                     
-
                     mapdata.options.items[i].options.color = new_color;
                     mapdata.options.items[i].options.lineColor = new_color;
                     mapdata.options.items[i].options.fillColor = new_color;
