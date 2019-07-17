@@ -452,6 +452,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             }
                         }
                         
+                        
                         //disable selection for map source databaset bboxes
                         var is_disabled = (window.hWin.HEURIST4.util.findArrayIndex(recTypeID, disabled_selection)>=0);
                         

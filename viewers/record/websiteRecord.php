@@ -166,6 +166,7 @@ function __getMenuContent($parent_id, $menuitems, $lvl)
 } //__getMenuContent
       
 ?>
+<!DOCTYPE html>
 <html>
 <head>
 	<title><?php print __getValue($rec, DT_NAME);?></title>
@@ -226,7 +227,9 @@ function onPageInit(success)
         
     if(!success) return;
     
-    window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));
+    var ele = $('body').find('#main-content');
+    window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
+    ele.show();
     
     //cfg_widgets is from layout_defaults=.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
@@ -261,9 +264,11 @@ function onPageInit(success)
     $('#btn_inline_editor').hide();
     
     $( "#main-banner > a").click(function(event){
+              window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
               $('#main-content').empty().load("<?php print HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&field='.DT_EXTENDED_DESCRIPTION.'&recid='.$rec_id?>",
               function(){
                   window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
+                  window.hWin.HEURIST4.msg.sendCoverallToBack();
               });
     });
     
@@ -352,6 +357,16 @@ body{
     font-size:1.5em;
     color:black;
 }
+<?php
+    if(!$edit_Available){
+?>
+div.coverall-div {
+    background-color: white;
+    opacity: 1;
+}
+<?php        
+}
+    ?>        
 </style>
     
 </head>
@@ -387,18 +402,19 @@ if($edit_Available){
     ?>        
         <a href="#" id="btn_inline_editor2" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page headers</a>
         <a href="#" id="btn_inline_editor" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page content</a>
+        <a href="#" id="btn_inline_editor3" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">source</a>
         <input id="edit_mode" type="hidden"/>
 <?php        
 }
     ?>        
     </div>
     <div class="ent_content_full" style="top:145px;padding: 5px;">
-        <div id="main-content" data-homepageid="<?php print $rec_id;?>" style="position:absolute;left:0;right:0;top:0;bottom:0;">
+        <div id="main-content" data-homepageid="<?php print $rec_id;?>" style="display:none;position:absolute;left:0;right:0;top:0;bottom:0;">
             <?php print __getValue($rec, DT_EXTENDED_DESCRIPTION);?>
         </div>
 <?php        
 if($edit_Available){        
-        print '<textarea class="tinymce-body" style="position:absolute;width:99.9%;top:0;bottom:0;display:none">'.__getValue($rec, DT_EXTENDED_DESCRIPTION).'</textarea>';
+        print '<textarea class="tinymce-body" style="position:absolute;left:0;width:99.9%;top:0;bottom:0;display:none">'.__getValue($rec, DT_EXTENDED_DESCRIPTION).'</textarea>';
 }
 ?>        
     </div>

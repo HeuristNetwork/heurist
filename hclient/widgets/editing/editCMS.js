@@ -46,7 +46,8 @@ function editCMS(home_page_record_id, main_callback){
     ];
 
     var body = $(this.document).find('body');
-    var dim = {h:body.innerHeight(), w:body.innerWidth()},
+    var dim = {h:body.innerHeight(), w:body.innerWidth()};
+    dim.h = (window.hWin?window.hWin.innerHeight:window.innerHeight);
     //
     //
     //
@@ -80,7 +81,9 @@ function editCMS(home_page_record_id, main_callback){
     );
 */    
     
-    edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editCMS.html',
+    
+console.log(dim);    
+    var edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editCMS.html',
                 edit_buttons,window.hWin.HR('Define Website'),
                 {open:onDialogInit, width:dim.w*0.95, height:dim.h*0.95, isPopupDlg:true, close:function(){
                     edit_dialog.empty();//dilaog('destroy');

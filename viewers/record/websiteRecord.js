@@ -5,7 +5,9 @@ function onPageInit(success){
         return;
     }
     
-    window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));
+    var ele = $('body').find('#main-content');
+    window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
+    ele.show();
     
     //cfg_widgets is from layout_defaults=.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
@@ -124,17 +126,18 @@ function onPageInit(success){
 
     
     $('#btn_inline_editor')
-            //.button({icon:'ui-icon-pencil'})
-            .css({position:'absolute', right:'40px', top:'40px', 'font-size':'1.1em'})
-            //.position({my:'right bottom', at:'right top', of:'#main-content'})
+            .css({position:'absolute', right:'90px', top:'40px', 'font-size':'1.1em'})
             .click(function( event ){
                 
                 $('#btn_inline_editor').hide();
                 $('#btn_inline_editor2').hide();
+                $('#btn_inline_editor3').hide();
+                $('#btn_inline_editor').text('Edit page content');
+                $('#btn_inline_editor3').text('source');
                 
                 $('#main-content').parent().css('overflow-y','hidden');
                 $('#main-content').hide();
-                $('#edit_mode').val(1).click();
+                $('#edit_mode').val(1).click();//to disable left panel
                 $('.tinymce-body').show();
                 //last_save_content = $('.tinymce-body').val();  //keep value to restore
                 //inlineEditorConfig.height = $('.tinymce-body').height();
@@ -149,6 +152,29 @@ function onPageInit(success){
             })
             .show();
 
+    $('#btn_inline_editor3')
+            .css({position:'absolute', right:'40px', top:'40px', 'font-size':'1.1em'})
+            .click(function( event ){
+                
+                if(_isDirectEditMode()){
+                    //save changes
+                    __saveChanges( true );
+                }else{
+                    $('#btn_inline_editor2').hide();
+                    $('#btn_inline_editor').text('wyswyg');
+                    $('#btn_inline_editor3').text('Save');
+                    
+                    $('#main-content').parent().css('overflow-y','hidden');
+                    $('#main-content').hide();
+                    $('#edit_mode').val(1).click();//to disable left panel
+                    $('.tinymce-body').show();
+                }
+                
+
+            })
+            .show();
+            
+            
     $('#btn_inline_editor2')
             .css({position:'absolute', right:'40px', top:'10px', 'font-size':'1.1em'}).show();
             
@@ -218,6 +244,14 @@ function onPageInit(success){
         }
         return newval;        
     }
+    
+    //
+    //
+    //
+    function _isDirectEditMode(){
+        
+        return ($('#btn_inline_editor3').text()=='Save');
+    }
          
     //
     // need_close close editor and reinit page preview
@@ -226,7 +260,7 @@ function onPageInit(success){
         
         window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));
 
-        var newval = __getEditorContent();
+        var newval = (_isDirectEditMode()) ?$('.tinymce-body').val() :__getEditorContent();
         
         //send data to server
         var request = {a: 'replace',
@@ -257,9 +291,14 @@ function onPageInit(success){
     //                    
     function __hideEditor( new_pageid ){
             
-            tinymce.remove('.tinymce-body');
+            if(!_isDirectEditMode()){
+                tinymce.remove('.tinymce-body');
+            }
             $('#btn_inline_editor').show();
             $('#btn_inline_editor2').show();
+            $('#btn_inline_editor3').show();
+            $('#btn_inline_editor').text('Edit page content');
+            $('#btn_inline_editor3').text('source');
             
             if(new_pageid>0){
                 __loadPageById( new_pageid );   
@@ -291,6 +330,7 @@ function onPageInit(success){
         var itop = $('#main-header').height(); //[0].scrollHeight;
         $('#btn_inline_editor2').css({top:itop-70});
         $('#btn_inline_editor').css({top:itop-30});
+        $('#btn_inline_editor3').css({top:itop-30});
         
         //$('#main-header').css('height',itop-10);
         //$('#main-content').css('top',itop+10);
@@ -475,7 +515,9 @@ function onPageInit(success){
             var widget_name = ele.attr('data-heurist-app-id');
             $dlg.find('#widgetName').val( widget_name ); //selector
             if(ele  && ele[0].dataset)
-                $dlg.find('#widgetCss').val( ele[0].dataset.mceStyle );
+                var s = ele[0].dataset.mceStyle;
+                s = s.replace(/;/g, ";\n");
+                $dlg.find('#widgetCss').val( s );
             
             var opts = window.hWin.HEURIST4.util.isJSON(ele.find('span').text());
             
