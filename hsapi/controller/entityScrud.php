@@ -44,6 +44,7 @@
     require_once (dirname(__FILE__).'/../entity/dbRecords.php');
     require_once (dirname(__FILE__).'/../entity/dbUsrBookmarks.php');
     require_once (dirname(__FILE__).'/../entity/dbUsrReminders.php');
+    require_once (dirname(__FILE__).'/../entity/dbUsrSavedSearches.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
     $response = array();

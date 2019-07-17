@@ -930,6 +930,7 @@ error_log(print_r($_REQUEST, true));
 
     /**
     * Returns array of ID of all groups for current user plus current user ID
+    * $level - admin/emeber
     */
     public function get_user_group_ids($level=null, $refresh=false){
     

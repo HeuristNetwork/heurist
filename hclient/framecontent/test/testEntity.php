@@ -52,6 +52,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefDetailTypes.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefDetailTypes.js"></script>
 
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrSavedSearches.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchUsrSavedSearches.js"></script>
+        
+        
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysIdentification.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysDatabases.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysDatabases.js"></script>
@@ -357,7 +361,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             {"key":"RecUploadedFiles",title:"Uploaded Files",icon:'ui-icon-image'},
                             {"key":"usrReminders",title:"Reminders",icon:'ui-icon-mail-closed'},
                             {"key":"sysDatabases",title:"Databases",icon:'ui-icon-database'},
-                            {"key":"",title:"Saved Searches",icon:'ui-icon-search'},
+                            {"key":"UsrSavedSearches",title:"Saved Searches",icon:'ui-icon-search'},
                             {"key":"DefRecTypes",title:"Record Types",icon:'ui-icon-image'},
                             {"key":"DefRecTypeGroups",title:"Record Type Groups"},
                             {"key":"DefDetailTypes",title:"Field Types"},
@@ -432,10 +436,10 @@ print $targetPath.'<br>';
                             <option value="UsrTags">Tags +</option>
                             <option value="RecUploadedFiles">Uploaded Files +</option>
                             <option value="UsrReminders" >Reminders</option>
+                            <option value="UsrSavedSearches" selected>Filters</option>
                             <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
-                            <option value="Records">Saved Searches</option>
-                            <option value="DefRecTypes" selected>Record Types</option>
+                            <option value="DefRecTypes">Record Types</option>
                             <option value="DefRecTypeGroups">Record Type Groups+</option>
                             <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
