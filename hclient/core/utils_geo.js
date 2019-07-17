@@ -614,6 +614,22 @@ window.hWin.HEURIST4.geo = {
     },
 
     //
+    // geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
+    //    
+    getHeuristBookmarkBoundingBox: function(geodata){
+      
+         if(geodata){
+            //Name, Min Longitude,Max Longitude, Min Latitude, Max Latitude
+            var vals = geodata.split(',') 
+            if(vals.length>4){
+                //extent.ymin,extent.xmin],[extent.ymax,extent.xmax
+                return [[vals[3], vals[1]],[vals[4], vals[2]]];
+            }
+         }
+         return null;
+    },
+    
+    //
     //  _format - google or timemap
     //    
     wktValueToShapes:function(wkt, typeCode, _format){

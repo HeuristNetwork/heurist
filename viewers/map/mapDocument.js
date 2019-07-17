@@ -40,6 +40,7 @@ function hMapDocument( _options )
     DT_QUERY_STRING = 0,
     DT_SYMBOLOGY = 0, //@todo rename to DT_SYMBOLOGY
     DT_GEO_OBJECT = 0,
+    DT_MAP_BOOKMARK = 0,
     DT_NAME = 0,
     
     DT_MINIMUM_MAP_ZOOM = 0, //bounds for mapoc and visibility for layers
@@ -67,6 +68,7 @@ function hMapDocument( _options )
         DT_SYMBOLOGY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'];
         DT_NAME      = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+        DT_MAP_BOOKMARK = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK'];
         DT_MINIMUM_MAP_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_MAP_ZOOM'];
         DT_MAXIMUM_MAP_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_MAP_ZOOM'];
         
@@ -85,7 +87,7 @@ function hMapDocument( _options )
         
             var request = {
                         q: 't:'+RT_MAP_DOCUMENT,w: 'a',
-                        detail: [DT_GEO_OBJECT,DT_MINIMUM_MAP_ZOOM,DT_MAXIMUM_MAP_ZOOM], //'header',
+                        detail: [DT_GEO_OBJECT,DT_MAP_BOOKMARK], //'header',
                         source: 'map_document'};
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
@@ -630,8 +632,12 @@ function hMapDocument( _options )
             var record2 = map_documents.getById( mapdoc_id );
 
             var mapdoc_extent = window.hWin.HEURIST4.geo.getWktBoundingBox(
-                map_documents.getFieldGeoValue(record2, DT_GEO_OBJECT)
-                );
+                        map_documents.getFieldGeoValue(record2, DT_GEO_OBJECT));
+            if(mapdoc_extent==null){
+                mapdoc_extent = window.hWin.HEURIST4.geo.getHeuristBookmarkBoundingBox(
+                        map_documents.fld(record2, DT_MAP_BOOKMARK));
+            }    
+                
             if(mapdoc_extent!=null){
 
                     options.mapwidget.mapping('zoomToBounds', mapdoc_extent);
