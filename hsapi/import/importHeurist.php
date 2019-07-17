@@ -390,7 +390,8 @@ public static function importRecords($filename, $session_id){
             // keep record IDs in resource fields to replace them later
             $record = array();
             $record['ID'] = 0; //add new
-            $record['RecTypeID'] = $importDef->getTargetIdBySourceId('rectypes', $record_src['rec_RecTypeID']);
+            $record['RecTypeID'] = $importDef->getTargetIdBySourceId('rectypes',
+                                                 $record_src['rec_RecTypeID']);
             $record['AddedByImport'] = 2; //import without strict validation
             $record['no_validation'] = true;
             $record['URL'] = @$record_src['rec_URL'];
