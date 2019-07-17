@@ -108,6 +108,7 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 <html  class="no-js" lang="en" dir="ltr">
 */
 ?>
+<!DOCTYPE html>
 <!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
 <html>
 <head>
