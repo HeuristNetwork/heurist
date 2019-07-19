@@ -166,7 +166,6 @@ function __getMenuContent($parent_id, $menuitems, $lvl)
 } //__getMenuContent
       
 ?>
-<!DOCTYPE html>
 <html>
 <head>
 	<title><?php print __getValue($rec, DT_NAME);?></title>

@@ -107,8 +107,10 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 <!doctype html>
 <html  class="no-js" lang="en" dir="ltr">
 */
+if(defined('IS_INDEX_PAGE')){
+    //print '<!DOCTYPE html>'; //it affect clientHeight it always 13
+}
 ?>
-<!DOCTYPE html>
 <!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
 <html>
 <head>
