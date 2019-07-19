@@ -147,10 +147,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
         var $dlg;
         if(url){
-            var isPopupDlg = options && options.isPopupDlg;
-            var $dlg = isPopupDlg?window.hWin.HEURIST4.msg.getPopupDlg():window.hWin.HEURIST4.msg.getMsgDlg();
+            var isPopupDlg = (options.isPopupDlg || options.container);
+            var $dlg = isPopupDlg
+                            ?window.hWin.HEURIST4.msg.getPopupDlg( options.container)
+                            :window.hWin.HEURIST4.msg.getMsgDlg();
             $dlg.load(url, function(){
-                window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title, options, isPopupDlg);
+                window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title, options);
             });
         }
         return $dlg;
@@ -228,10 +230,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     // creates and returns div (id=dialog-popup) similar to  dialog-common-messages - but without width limit
     //
-    getPopupDlg: function(){
-        var $dlg = $( "#dialog-popup" );
+    getPopupDlg: function(element_id){        
+        if(!element_id) element_id = 'dialog-popup';
+        var $dlg = $( '#'+element_id );
         if($dlg.length==0){
-            $dlg = $('<div>',{id:'dialog-popup'}).css('padding','2em').css({'min-wdith':'380px'}).appendTo('body'); //,'max-width':'640px'
+            $dlg = $('<div>',{id:element_id})
+                .css({'padding':'2em','min-wdith':'380px'}).appendTo('body'); //,'max-width':'640px'
             $dlg.removeClass('ui-heurist-border');
         }
         return $dlg;
@@ -786,17 +790,22 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     //
     // MAIN method
     // buttons - callback function or objects of buttons for dialog option
-    // title - either string for title, or object {title:, yes: ,no, cancel, }
+    // title - either string for title, or object with labels {title:, yes: ,no, cancel, }
     // ext_options:
     //
-    showMsgDlg: function(message, buttons, labels, ext_options, isPopupDlg){
+    showMsgDlg: function(message, buttons, labels, ext_options){
 
         if(!$.isFunction(window.hWin.HR)){
             alert(message);
             return;
         }
+        
+        if(!ext_options) ext_options = {};
+        var isPopupDlg = (ext_options.isPopupDlg || ext_options.container);
 
-        var $dlg = isPopupDlg?window.hWin.HEURIST4.msg.getPopupDlg():window.hWin.HEURIST4.msg.getMsgDlg();
+        var $dlg = isPopupDlg  //show popup in specified container
+                    ?window.hWin.HEURIST4.msg.getPopupDlg(ext_options.container)
+                    :window.hWin.HEURIST4.msg.getMsgDlg();
 
         if(message!=null){
             
@@ -805,13 +814,14 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(!isobj){
                 isPopupDlg = isPopupDlg || (message.indexOf('#')===0 && $(message).length>0);
             }
-
+ 
             if(isPopupDlg){
 
-                $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
+                $dlg = window.hWin.HEURIST4.msg.getPopupDlg( ext_options.container );
                 if(isobj){
                     $dlg.append(message);
                 }else if(message.indexOf('#')===0 && $(message).length>0){
+                    //it seems it is in DH only
                     $dlg.html($(message).html());
                 }else{
                     $dlg.html(message);
@@ -869,43 +879,47 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         var options =  {
             title: window.hWin.HR(title),
             resizable: false,
-            //height:140,
-            width: 'auto',
             modal: true,
             closeOnEscape: true,
             buttons: buttons
         };
-        if(isPopupDlg){
-
-            options.open = function(event, ui){
-                $dlg.scrollTop(0);
-            };
-
-            options.height = 515;
-            options.width = 705;
-            options.resizable = true;
-            options.resizeStop = function( event, ui ) {
-                    $dlg.css({overflow: 'none !important','width':'100%', 'height':$dlg.parent().height()
-                            - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height() - 20 });
-                };
-        }
         
         if(ext_options){
-           if(ext_options.options){
-                $.extend(options, ext_options.options);
-           }else if( $.isPlainObject(ext_options) ){
+
+           if( $.isPlainObject(ext_options) ){
                 $.extend(options, ext_options);
            }
            if(ext_options.my && ext_options.at && ext_options.of){
                options.position = {my:ext_options.my, at:ext_options.at, of:ext_options.of};
-           }else if(!ext_options.options && !$.isPlainObject(ext_options)){  
+           }
+           else if(!ext_options.options && !$.isPlainObject(ext_options)){  
+                //it seems this is not in use
                 var posele = $(ext_options);
                 if(posele.length>0)
                     options.position = { my: "left top", at: "left bottom", of: $(ext_options) };
            }
         }
-        
 
+        if(isPopupDlg){
+
+            if(!options.open){
+                options.open = function(event, ui){
+                    $dlg.scrollTop(0);
+                };
+            }
+
+            if(!options.height) options.height = 515;
+            if(!options.width) options.width = 705;
+            options.resizable = true;
+            options.resizeStop = function( event, ui ) {
+                    $dlg.css({overflow: 'none !important','width':'100%', 'height':$dlg.parent().height()
+                            - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height() - 20 });
+                };
+        }else if(!options.width){
+            options.width = 'auto';
+        }
+
+        
         $dlg.dialog(options);
         
         if(options.hideTitle){

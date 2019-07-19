@@ -126,13 +126,13 @@ function () {
        + '<p>Associated files stored in upload subdirectories have been archived and moved to "DELETED_DATABASES" folder.</p>'
        + '<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>',
        null, 'Database deleted',
-       {options:{
-             width:700,
-             height:180,
+       {
+            width:700,
+            height:180,
             close: function(){
                 window.hWin.document.location = window.hWin.HAPI4.baseURL; //+ "hsapi/utilities/list_databases.php";
             }
-       }}
+       }
     );
 }
 );

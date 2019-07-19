@@ -294,12 +294,12 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                                             
                                             window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 
                                                 {ok:'Close', title:'Record not found or hidden'}, 
-                                                    {options:{close:function(){ window.close(); }}});
+                                                    {close:function(){ window.close(); }});
                                             
                                         }
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response, false, 
-                                            {options:{close:function(){ if(isPopup){ window.close(); } }}});
+                                            {close:function(){ if(isPopup){ window.close(); }}});
                                     }
 
                                 });

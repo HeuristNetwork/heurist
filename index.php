@@ -274,12 +274,12 @@ _time_debug = new Date().getTime() / 1000;
                                // show lock popup that forces to clear cache
                                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionCheckMsg.html',
                                    {}/* no buttons */,null,
-                                   {options:{hideTitle:true, closeOnEscape:false,
+                                   {hideTitle:true, closeOnEscape:false,
                                        open:function( event, ui ) {
                                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                            $dlg.find('#version_cache').text(version_in_cache);
                                            $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
-                               }}});
+                               }});
 
                            }
                        }
@@ -294,13 +294,13 @@ _time_debug = new Date().getTime() / 1000;
 //console.log(window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDatabase.php?db='+window.hWin.HAPI4.database);                                   
 top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDatabase.php?db='+window.hWin.HAPI4.database);
                                }},null,
-                               {options:{hideTitle:false, closeOnEscape:false,
+                               {hideTitle:false, closeOnEscape:false,
                                    open:function( event, ui ) {
                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                                        $dlg.find('#version_db').text(window.hWin.HAPI4.sysinfo.db_version);
                                        $dlg.find('#version_min_db').text(window.hWin.HAPI4.sysinfo.db_version_req);
                                        $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
-                           }}});
+                           }});
 
                        }
                        

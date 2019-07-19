@@ -75,7 +75,8 @@ $.widget( "heurist.resultList", {
         
         recordDiv_class:null,  //additional class for recordDiv
         
-        search_realm:  null  //accepts search/selection events from elements of the same realm only
+        search_realm:  null,  //accepts search/selection events from elements of the same realm only
+        search_initial: null  //query string or svs_ID for initial search
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -362,7 +363,7 @@ $.widget( "heurist.resultList", {
         .css({'overflow-y':'scroll'})
         .appendTo( this.element );
         
-        if(this._is_publication){
+        if(this._is_publication){ //make transparent
             this.div_toolbar.css({'background':'none'});
             this.div_content.css({'background':'none'});
         }else{
@@ -1393,7 +1394,7 @@ $.widget( "heurist.resultList", {
         if (ispwdreminder){
             var pwd = $rdiv.attr('pwd');
             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(pwd, null, "Password reminder", 
-                {my: "left top", at: "left bottom", of: $target, options:{modal:false}}
+                {my: "left top", at: "left bottom", of: $target, modal:false}
             );
             $dlg.addClass('password-reminder-popup'); //class all these popups on refresh
             return;

@@ -336,8 +336,8 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
                         var ele = $(window.hWin.document.body).find('#dh_search_2');
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(doc['description'], null, doc['title'], 
-                        {options:{resizable:true, modal:false, width:ele.width(), height:ele.height()-100}, 
-                            my:'left top', at:'left top', of:ele}, false);
+                        {resizable:true, modal:false, width:ele.width(), height:ele.height()-100,
+                            my:'left top', at:'left top', of:ele});
                             
                     }
                 }
