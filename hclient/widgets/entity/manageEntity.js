@@ -69,6 +69,7 @@ $.widget( "heurist.manageEntity", {
         pagesize: 200,      // page size in resultList 
         list_header: false, // show header in list mode (@todo implement)
         list_mode:'default', // use standard resultList widget (for example in defTerms we use treeview)
+        resultList:{}, //configuration for resultList widget
         
         //SEARCH/filter section
         use_cache: false,   // search performed once and then we apply local filter  @see updateRecordList, filterRecordList
@@ -304,10 +305,9 @@ $.widget( "heurist.manageEntity", {
         var that = this;
         
         if(this.options.list_mode=='default'){
-
-                //init record list
-                this.recordList
-                    .resultList({
+            
+                this.options.resultList = $.extend(this.options.resultList, 
+                {
                        recordDiv_class: 'recordDiv_blue',
                        eventbased: false, 
                        isapplication: false, //do not listent global events @todo merge with eventbased
@@ -334,7 +334,10 @@ $.widget( "heurist.manageEntity", {
                                 return that._recordListHeaderRenderer();  //custom header for list mode (table header)
                                 }:null
                                
-                                });     
+                });                
+
+                //init record list
+                this.recordList.resultList( this.options.resultList );     
 
                 this._on( this.recordList, {        
                         "resultlistonselect": function(event, selected_recs){

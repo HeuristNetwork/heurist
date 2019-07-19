@@ -34,7 +34,9 @@ $.widget( "heurist.app_timemap", {
         
         leaflet: false,
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
-        init_at_once: false,
+        search_initial: null,  //query string or svs_ID for initial search
+
+        init_at_once: false,  //load basemap at once (useful for publish to avoid empty space) 
         
         layout_params:null, //params to be passed to map
         mapdocument:null

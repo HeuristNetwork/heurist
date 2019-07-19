@@ -128,6 +128,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     // invoked from _init after load entity config    
     //
     _initControls: function() {
+
+
+        var reset_to_defs = !this.options.resultList || !this.options.resultList.searchfull;
         
         if(!this._super()){
             return false;
@@ -146,15 +149,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         this.searchForm.css({'height':iheight+'em'});
         this.recordList.css({'top':iheight+0.4+'em'});
-*/        
-        this.recordList.resultList(
-            this.options.resultList
-                ?this.options.resultList
-                :{
-                    searchfull:null,
-                    renderer:true //use default renderer but custom onaction see _onActionListener
-                }); //use default recordList renderer
-        
+        */
+        //if full search function and renderer were not set - reset to defaults
+        if(reset_to_defs){
+            this.recordList.resultList(
+                    {
+                        searchfull:null,
+                        renderer:true //use default renderer but custom onaction see _onActionListener
+                    }); //use default recordList renderer
+        }
+                
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
         }
@@ -1687,7 +1691,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     var sMsg = 'Record does not exist in database or has status "hidden" for non owners';
                     window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 
                             {ok:'Close', title:'Record not found or hidden'}, 
-                                {options:{close:function(){ that.closeEditDialog(); }}});
+                                {close:function(){ that.closeEditDialog(); }});
                     return;
                 }else{
                     that._isInsert = response.is_insert;     

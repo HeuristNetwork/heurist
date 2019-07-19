@@ -655,29 +655,19 @@ $.widget( "heurist.svs_list", {
         for (i=0; i<svsIDs.length; i++)
         {
             var svsID = svsIDs[i];
-
-            isfaceted = false;
-            try {
-                facet_params = $.parseJSON(this.allowed_svsIDs[svsID][_QUERY]);
-
-                isfaceted = (facet_params && Hul.isArray(facet_params.rectypes));
-            }
-            catch (err) {
-            }
-
-            this.allowed_svsIDs[svsID].push(isfaceted);
-
+            
+            var params = Hul.parseHeuristQuery(this.allowed_svsIDs[svsID][_QUERY]);
 
             var iconBtn = 'ui-icon-search';
-            if(isfaceted){
+            if(params.type==3){
                 iconBtn = 'ui-icon-box';
             }else {
-                var qsearch = this.allowed_svsIDs[svsID][_QUERY];
-                var hasrules = this._hasRules(qsearch);
-                if(hasrules==1){ //withrules
+                if(params.type==1){ //withrules
                     iconBtn = 'ui-icon-plus ui-icon-shuffle';
-                }else if(hasrules==2){ //rules only
+                }else if(params.type==2){ //rules only
                     iconBtn = 'ui-icon-shuffle';
+                }else  if(params.type<0){ //broken empty
+                    iconBtn = 'ui-icon-alert';
                 }
             }
 
@@ -694,8 +684,8 @@ $.widget( "heurist.svs_list", {
                 if (svs_ID){
                     var qsearch = that.allowed_svsIDs[svs_ID][_QUERY];
                     var qname   = that.allowed_svsIDs[svs_ID][_NAME];
-                    var isfaceted = that.allowed_svsIDs[svs_ID][_FACET];
-                    that.doSearch( svs_ID, qsearch, isfaceted, event.target ); //qname replaced with svs_ID
+
+                    that.doSearch( svs_ID, qsearch, event.target ); //qname replaced with svs_ID
                     that.accordeon.find('#search_query').val('');
                 }
             })
@@ -723,7 +713,7 @@ $.widget( "heurist.svs_list", {
                     if (code == 13) {
                         window.hWin.HEURIST4.util.stopEvent(e);
                         e.preventDefault();
-                        that.doSearch('', ele_search.val(), false, ele_search);
+                        that.doSearch('', ele_search.val(), ele_search);
                     }
                 }
             });
@@ -733,7 +723,7 @@ $.widget( "heurist.svs_list", {
             .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
             this._on( btn_search, {
                 click:  function(){
-                    that.doSearch('', ele_search.val(), false, ele_search);
+                    that.doSearch('', ele_search.val(), ele_search);
                 }
             });
         }
@@ -913,47 +903,47 @@ $.widget( "heurist.svs_list", {
                         var s_hint = '';  //NOT USED this hint shows explanatory text about mode of search:faceted,with rules,rules only
                         var s_hint2 = ''; //this hint shows notes and RAW text of query,rules
 
-                        var prms = null;
+                        
+                        var squery = '';
                         if(node.data.url){
                             s_hint2 = node.title;
-                            prms = Hul.parseHeuristQuery(node.data.url);
+                            squery = node.data.url;
                         }else{
                             s_hint2 = node.key+':'+node.title;
                             if(window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key]){
                                 var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key];
-                                if(!node.data.isfaceted){
+                                squery = svs[_QUERY];
+                                /*if(!node.data.isfaceted){
                                     var qsearch = svs[_QUERY];
                                     prms = Hul.parseHeuristQuery(qsearch);
-                                }
+                                }*/
                             }
                         }
-                        if(prms!=null){
-                            if(!Hul.isempty(prms.notes)){
-                                s_hint2 = s_hint2 + '\nNotes: '+prms.notes;
-                            }
-                            if(!Hul.isempty(prms.q)){
-                                s_hint2 = s_hint2 + '\nFilter: '+prms.q;
-                            }
-                            if(!Hul.isempty(prms.rules)){
-                                s_hint2 = s_hint2 + '\nRules: '+prms.rules;
-                            }
+                        var prms = Hul.parseHeuristQuery(squery);
+                        
+                        if(!Hul.isempty(prms.notes)){
+                            s_hint2 = s_hint2 + '\nNotes: '+prms.notes;
+                        }
+                        if(!Hul.isempty(prms.q)){
+                            s_hint2 = s_hint2 + '\nFilter: '+prms.q;
+                        }
+                        if(!Hul.isempty(prms.rules)){
+                            s_hint2 = s_hint2 + '\nRules: '+prms.rules;
                         }
 
-                        if(node.data.isfaceted){
+                        if(prms.type==3){ //node.data.isfaceted
                             s = '<span class="ui-icon ui-icon-box svs-type-icon" title="faceted" ></span>';
                             s_hint = this._HINT_FACETED;
-                        }else if(window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key]) {
-                            var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key][_QUERY];
-                            var hasrules = that._hasRules(qsearch);
-                            if(hasrules==1){ //withrules
+                        }else if(prms.type==1){ //withrules
                                 s = '<span class="ui-icon ui-icon-plus svs-type-icon"></span>'
                                 +'<span class="ui-icon ui-icon-shuffle svs-type-icon"></span>';
-
                                 s_hint = this._HINT_WITHRULES;
-                            }else if(hasrules==2){ //rules only
+                        }else if(prms.type==2){ //rules only
                                 s = '<span class="ui-icon ui-icon-shuffle svs-type-icon" title="rules" ></span>';
                                 s_hint = this._HINT_RULESET;
-                            }
+                        }else if(prms.type<0){ //broken
+                                s = '<span class="ui-icon ui-icon-alert svs-type-icon" title="rules" ></span>';
+                                s_hint = 'Broken filter. Remove and re-create it';
                         }
 
                         if(s==''){
@@ -982,9 +972,8 @@ $.widget( "heurist.svs_list", {
 
             click: function(event, data) {
                 if(!data.node.folder){
-                    var qname, qsearch, isfaceted;
+                    var qname, qsearch;
                     if(data.node.data && data.node.data.url){
-                        isfaceted= data.node.data.isfaceted;
                         qsearch = data.node.data.url;
                         qname   = (data.node.key>0)?data.node.key:data.node.title; //qname replaced with svs_ID
                     }else{
@@ -994,14 +983,13 @@ $.widget( "heurist.svs_list", {
                                 
                             qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_QUERY];
                             qname   = data.node.key; //window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_NAME];
-                            isfaceted = data.node.data.isfaceted;
                         }
                     }
 
                     //data.node.setSelected(true);
                     //remove highlight from others
                     that.search_tree.find('li.ui-state-active').removeClass('ui-state-active');
-                    that.doSearch( qname, qsearch, isfaceted, event.target );
+                    that.doSearch( qname, qsearch, event.target );
                     setTimeout(function(){
                         that.search_tree.find('div.svs-contextmenu2').parent().addClass('leaves');
                         $(data.node.li).css('border','none').addClass('ui-state-active leaves');
@@ -1452,7 +1440,7 @@ $.widget( "heurist.svs_list", {
 
                     request.new_svs_ID = svsID;
 
-                    node.addNode( { title:request.svs_Name, key: request.new_svs_ID, isfaceted:request.isfaceted}
+                    node.addNode( { title:request.svs_Name, key: request.new_svs_ID }
                         , node.folder?"child":"after" );
 
                     that._saveTreeData( request.svs_UGrpID );
@@ -1598,30 +1586,13 @@ $.widget( "heurist.svs_list", {
 
         for (var svsID in ssearches)
         {
-            var facet_params = null, domain2, isfaceted = false;
-
             if(svsID && ssearches[svsID][_GRPID]==ugr_ID){
 
+                var prms = Hul.parseHeuristQuery(ssearches[svsID][_QUERY]);
 
-                try {
-                    facet_params = $.parseJSON(ssearches[svsID][_QUERY]);
-
-                    if(facet_params && Hul.isArray(facet_params.rectypes)){
-                        //this is faceted search
-                        domain2 = facet_params.domain;
-                        isfaceted = true;
-                    }
-                }
-                catch (err) {
-                }
-                if(!isfaceted){
-                    var prms = Hul.parseHeuristQuery(ssearches[svsID][_QUERY]);
-                    domain2 = prms.w;
-                }
-
-                if(!domain || domain==domain2){
+                if(!domain || domain==prms.domain){
                     var sname = ssearches[svsID][_NAME];
-                    res.push( { title:sname, folder:false, key:svsID, isfaceted:isfaceted } );    //, url:ssearches[svsID][_QUERY]
+                    res.push( { title:sname, folder:false, key:svsID } );
                 }
             }
         }
@@ -1654,49 +1625,34 @@ $.widget( "heurist.svs_list", {
             var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_QUERY];
             var qname   = svsID; //window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_NAME];
             
-            var isfaceted = false;
-            
-            try {
-                var facet_params = $.parseJSON(qsearch);
-                isfaceted = (facet_params && Hul.isArray(facet_params.rectypes));
-            }
-            catch (err) {
-            }
-            
-            
-            this.doSearch( qname, qsearch, isfaceted, null );
+            this.doSearch( qname, qsearch, null );
         }
         
     },
     
-    doSearch: function(qname, qsearch, isfaceted, ele){
+    doSearch: function(qname, qsearch, ele){
 
         if ( qsearch ) {
 
-            if(isfaceted){
+            var params = Hul.parseHeuristQuery( qsearch );
+            
+            if(params.type==3){ //isfaceted
 
-                var facet_params = null;
-                try {
-                    facet_params = $.parseJSON(qsearch);
-                }
-                catch (err) {
-                    facet_params = null;
-                }
-                if(!facet_params || !Hul.isArray(facet_params.facets)){
+                /*if(facet_params==null){
                     // Do something about the exception here
                     window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise this faceted search due to corrupted parameters. Please remove and re-create this search.'), null, window.hWin.HR('Warning'));
                     return;
-                }
+                }*/
 
                 var that = this;
 
 
-                if(facet_params['version']==2){
+                if(params['version']==2){
 
                     this.search_faceted.show();
                     this.search_tree.hide();
 
-                    var noptions= { query_name:qname, params:facet_params, search_realm:this.options.search_realm,
+                    var noptions= { query_name:qname, params:params, search_realm:this.options.search_realm,
                         onclose:function(event){
                             that.search_faceted.hide();
                             that.search_tree.show();
@@ -1705,7 +1661,7 @@ $.widget( "heurist.svs_list", {
                     
                     if(!$.isFunction($('body')['search_faceted'])){
                         $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/search/search_faceted.js', function() {
-                            that.doSearch( qname, qsearch, isfaceted, ele );
+                            that.doSearch( qname, qsearch, ele );
                         });
                         return;
                     }else
@@ -1725,10 +1681,14 @@ $.widget( "heurist.svs_list", {
                         + "function and it was not cost-effective to provide backward compatibility (given the relative "
                         + "ease of rebuilding searches and the new features now available).")
                 }
+                
+            }else if(params.type<0){
 
+                window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise saearch due to corrupted parameters. Please remove and re-create this search.'), null, window.hWin.HR('Warning'));
+                return;
             }else{
 
-                var request = Hul.parseHeuristQuery(qsearch);
+                var request = params;
 
                 request.rules = window.hWin.HEURIST4.util.cleanRules(request.rules);
                 
@@ -1795,18 +1755,6 @@ $.widget( "heurist.svs_list", {
 
     }
 
-    //
-    // return 0 - no rules, 1 with rules, 2 rules only, -1 - nothing defined
-    //
-    , _hasRules: function(query){
-        var prms = Hul.parseHeuristQuery(query);
-        if(Hul.isempty(prms.q)){
-            return Hul.isempty(prms.rules) ?-1:2;
-        }else {
-            return Hul.isempty(prms.rules) ?0:1;
-        }
-    }
-
     
     // open edit dialog
     // mode: saved, rules, faceted
@@ -1830,8 +1778,8 @@ $.widget( "heurist.svs_list", {
                     node = tree.rootNode;
                     node.folder = true;
                 }
-                var isfaceted = (mode=='faceted');
-                node.addNode( { title:response.svs_Name, key: response.new_svs_ID, isfaceted:isfaceted}
+
+                node.addNode( { title:response.svs_Name, key: response.new_svs_ID}
                     , node.folder?"child":"after" );
 
                 that._saveTreeData( groupID );
@@ -1904,30 +1852,31 @@ $.widget( "heurist.svs_list", {
     _getFilterString: function( svs_ID ){
         
         var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
-        if(svs && !svs[_FACET]){
+        if(svs ){
             var qsearch = svs[_QUERY];
             var prms = Hul.parseHeuristQuery(qsearch); //url to json
-            
-            var res = Hul.hQueryStringify(prms); //json to string
+            if(prms.type!=3){
+                var res = Hul.hQueryStringify(prms); //json to string
 
-            if(!Hul.isempty(res)){
-                        var dummy = document.createElement("input");
-                        dummy.value = res;
-                        document.body.appendChild(dummy);
-                        dummy.select();
-                        try {
-                            //console.log(
-                            if(document.execCommand("copy"));  // Security exception may be thrown by some browsers.
-                            {
-                                window.hWin.HEURIST4.msg.showMsgFlash('Query is in clipboard');
-                            }
-                            
-                        } catch (ex) {
-                            console.warn("Copy to clipboard failed.", ex);
-                        } finally {
-                            document.body.removeChild(dummy);
-                        }        
-            }    
+                if(!Hul.isempty(res)){
+                            var dummy = document.createElement("input");
+                            dummy.value = res;
+                            document.body.appendChild(dummy);
+                            dummy.select();
+                            try {
+                                //console.log(
+                                if(document.execCommand("copy"));  // Security exception may be thrown by some browsers.
+                                {
+                                    window.hWin.HEURIST4.msg.showMsgFlash('Query is in clipboard');
+                                }
+                                
+                            } catch (ex) {
+                                console.warn("Copy to clipboard failed.", ex);
+                            } finally {
+                                document.body.removeChild(dummy);
+                            }        
+                }    
+            }
         }
         
     },

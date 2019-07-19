@@ -28,7 +28,7 @@
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Size":128,
-                        "rst_DisplayWidth":80,
+                        "rst_DisplayWidth":60,
                         "rst_DisplayName": "Name",
                         "rst_DisplayHelpText": "The display name for this saved filter", 
                         "rst_RequirementType":"required"
@@ -49,6 +49,7 @@
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "rst_DisplayName": "Query",
+                        "rst_DisplayWidth":60,
                         "rst_DisplayHelpText": "The text of the saved search - added to search URL"
                     }
                 }

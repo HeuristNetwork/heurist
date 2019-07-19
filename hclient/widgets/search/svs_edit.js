@@ -543,8 +543,8 @@ function hSvsEdit(args) {
                         + ' style="min-width: 200px; margin-left:0.2em" rows="4" cols="50">'
                         +res
                         +'</textarea>',null,null,
-                        {options:{width:450, buttons:buttons},
-                        my:'center bottom', at:'center bottom', of: $dlg}
+                        {width:450, buttons:buttons,
+                            my:'center bottom', at:'center bottom', of: $dlg}
                         );
                     }
                 }

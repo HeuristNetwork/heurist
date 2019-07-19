@@ -31,7 +31,8 @@ $.widget( "heurist.recordListExt", {
         url:null,
         
         reload_for_recordset: false, //refresh every time recordset is changed
-        search_realm: null
+        search_realm: null,
+        search_initial: null  //query string or svs_ID for initial search
     },
 
     _query_request: null, //keep current query request

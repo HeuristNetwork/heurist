@@ -57,10 +57,29 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
     //
     _initControls: function() {
         
+        this.options.resultList = {
+            view_mode: 'list',
+            show_toolbar: false,  
+            show_viewmode: false,  
+            rendererHeader: function(){
+                var s = '<div style="width:40px"></div>'
+            +'<div style="width:12em;border:none;">Name</div>'
+            +'<div style="width:12em;border-right:none;border-left:1px solid gray;">Notes</div>'
+            +'<div style="position:absolute;width:7em;right:270px;border-right:none;border-left:1px solid gray">Group</div>'
+                    
+                    if (this.options.select_mode=='manager'){
+                        s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+                    }
+                    
+                    return s;
+                }
+        };
+        
+        
         if(!this._super()){
             return false;
         }
-        
+
         if(this.options.edit_mode=='editonly'){
             this._initEditorOnly();
             return;
@@ -125,27 +144,11 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         
         if(this.options.select_mode=='manager'){
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
-            
-            
-            this.recordList.resultList('option','rendererHeader',
-                    function(){
-                    var s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
-                +'<div style="width:12em;border:none;">Name</div>'
-                +'<div style="position:absolute;width:7em;right:270px;border-right:none;border-left:1px solid gray">Group</div>'
-                        
-                        if (window.hWin.HAPI4.is_admin()){
-                            s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
-                        }
-                        
-                        return s;
-                    }
-                );
-            //this.recordList.resultList('applyViewMode');
         }
 
         this._on( this.searchForm, {
-                "searchsysusersonresult": this.updateRecordList,
-                "searchsysusersonadd": function() { this.addEditRecord(-1); }
+                "searchusrsavedsearchesonresult": this.updateRecordList,
+                "searchusrsavedsearchesonadd": function() { this.addEditRecord(-1); }
                 });
         
         return true;
@@ -176,14 +179,38 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         
         
         var recID   = fld('svs_ID');
-        var recipient = fld('rem_ToWorkgroupName');
-        if(!recipient) recipient = fld('rem_ToUserName');
-        if(!recipient) recipient = fld('rem_ToEmail');
-        recipient = '<div class="truncate" style="display:inline-block;width:19ex">'+recipient+'</div>';
+        
+        var qsearch = recordset.fld(record, 'svs_Query');
+        var params = window.hWin.HEURIST4.util.parseHeuristQuery(qsearch);
+        
+        var iconBtn = 'ui-icon-search';
+        if(params.type==3){
+            iconBtn = 'ui-icon-box';
+        }else {
+            if(params.type==1){ //withrules
+                iconBtn = 'ui-icon-plus ui-icon-shuffle';
+            }else if(params.type==2){ //rules only
+                iconBtn = 'ui-icon-shuffle';
+            }else  if(params.type<0){ //broken empty
+                iconBtn = 'ui-icon-alert';
+            }
+        }
+        
+        var group_id = recordset.fld(record, 'svs_UGrpID');
+        //var group_name = window.hWin.HAPI4.usr_names({UGrpID:group_id});
+        var group_name = (group_id==window.hWin.HAPI4.user_id())
+                            ?window.hWin.HAPI4.currentUser['ugr_FullName']
+                            :window.hWin.HAPI4.sysinfo.db_usergroups[group_id];
+        
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+                + '<div class="recordSelector"><input type="checkbox" /></div>'
+                + '<div class="recordIcons"><span class="ui-icon '+iconBtn+'"/></div>'
                 + fld2('svs_Name','39ex')
-                + fld2('svs_UGrpID','39ex')
+                + '<div class="truncate" style="display:inline-block;width:29ex">'
+                    +group_name+'</div>'
+                + '<div class="truncate" style="display:inline-block;width:30ex">'
+                    +(window.hWin.HEURIST4.util.isempty(params.notes)?'':params.notes)+'</div>';
         
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){

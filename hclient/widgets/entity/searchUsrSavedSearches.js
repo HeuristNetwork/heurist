@@ -25,12 +25,14 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
         var that = this;
         
         this.input_search_group = this.element.find('#input_search_group');   //user group
+        var topOptions = [{key:'any',title:'any group'},{key:window.hWin.HAPI4.user_id(),title:'My Filters'}];
+        
         if(window.hWin.HAPI4.is_admin()){
             window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], 'all_my_first' , 
-                        [{key:'any',title:'any group'}]);
+                        topOptions);
         }else{
             window.hWin.HEURIST4.ui.createUserGroupsSelect(this.input_search_group[0], null, 
-                        [{key:'any',title:'any group'}]);
+                        topOptions);
         }
         
         this._super();

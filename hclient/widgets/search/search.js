@@ -197,10 +197,10 @@ $.widget( "heurist.search", {
 */
 
         // Search field
-        this.div_search_input = $('<div>').css({'width':'100%'})
-        .addClass('div-table-cell')
+        this.div_search_input = $('<div>')
+        .addClass('div-table-cell')       
         .appendTo( this.div_search );
-
+        
         this.input_search_prompt = $( "<span>" ).text(window.hWin.HR("enter search/filter or use filter builder at right"))
         .css({'color':'gray','font-size':'0.8em', 'margin': '22px 0 0 0.5em',
               'position': 'absolute'})
@@ -212,8 +212,8 @@ $.widget( "heurist.search", {
 
         
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'2.5em', 'max-height':'6.6em', //'height':'2.5em', 'max-height':'67px', 
-            'padding':'0.4em', 
+        .css({'margin-right':'0.2em', 'height':'37px', 'max-height':'70px', //'height':'2.5em', 'max-height':'67px', 
+            'padding':'0.4em','min-height':'29px', 
             'min-width':'10em', 'width':'100%', 'padding-right':'18px' })  //was width:sz_input, 'max-width':sz_input,  
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
@@ -225,8 +225,12 @@ $.widget( "heurist.search", {
             });
         
         //disable because of initial search
-        if(this.options.btn_visible_newrecord)
+        if(this.options.btn_visible_newrecord){
             window.hWin.HEURIST4.util.setDisabled(this.input_search, true); 
+            this.input_search.css({'width':'470px','height':'1.4em','max-width':'650px'});
+        }else{
+            this.div_search_input.css({'width':'100%'});
+        }
             
         
         //quick filter by entity
@@ -1072,7 +1076,10 @@ $.widget( "heurist.search", {
                 if(is_keep && !this.options.search_realm){
                     var qs = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true);
                     if(qs && qs.length<2000){
-                        window.history.pushState("object or string", "Title", location.pathname+'?'+qs );
+                        var s = location.pathname;
+                        while (s.substring(0, 2) === '//') s = s.substring(1);
+                        
+                        window.history.pushState("object or string", "Title", s+'?'+qs );
                     }
                 }
                 

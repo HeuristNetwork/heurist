@@ -383,20 +383,33 @@ window.hWin.HEURIST4.util = {
     // hQueryParseURL
     parseHeuristQuery: function(qsearch)
     {
+        
+        var type = -1;
+        
         var domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '';
         if(qsearch){
             
-            if(typeof qsearch === 'string' && qsearch.indexOf('?')==0){ //this is quesry in form of URL 
+            
+            if(typeof qsearch === 'string' && qsearch.indexOf('?')==0){ //this is query in form of URL params 
                 domain  = window.hWin.HEURIST4.util.getUrlParameter('w', qsearch);
                 rules   = window.hWin.HEURIST4.util.getUrlParameter('rules', qsearch);
                 rulesonly = window.hWin.HEURIST4.util.getUrlParameter('rulesonly', qsearch);
                 notes   = window.hWin.HEURIST4.util.getUrlParameter('notes', qsearch);
                 viewmode = window.hWin.HEURIST4.util.getUrlParameter('viewmode', qsearch);
                 qsearch = window.hWin.HEURIST4.util.getUrlParameter('q', qsearch);
+                
+                
             }else{ //it may be aquery in form of json
             
                 var r = window.hWin.HEURIST4.util.isJSON(qsearch);
                 if(r!==false){
+                    
+                    if(window.hWin.HEURIST4.util.isArray(r.rectypes)){
+                        r.type = 3; //'faceted';
+                        r.domain = (r.domain=='b' || r.domain=='bookmark')?'bookmark':'all';
+                        return r;
+                    }
+                    
                     if(r.rules){
                         rules = r.rules;
                     }
@@ -410,9 +423,18 @@ window.hWin.HEURIST4.util = {
             }
             
         }
+        
+        if(window.hWin.HEURIST4.util.isempty(qsearch)){
+            type = window.hWin.HEURIST4.util.isempty(rules) ?-1:2; //empty, rulesonly 
+        }else {
+            type = window.hWin.HEURIST4.util.isempty(rules) ?0:1; //searchonly, both
+        }
+        
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
-
-        return {q:qsearch, w:domain, rules:rules, rulesonly:rulesonly, notes:notes, primary_rt:primary_rt, viewmode:viewmode};
+        
+        return {q:qsearch, w:domain, rules:rules, rulesonly:rulesonly, notes:notes, 
+                        primary_rt:primary_rt, viewmode:viewmode, type:type};    
+        
     },
 
     //
@@ -1100,5 +1122,5 @@ $.getMultiScripts = function(arr, path) {
 }
 
 //constants for saved searches\
-const _NAME = 0, _QUERY = 1, _GRPID = 2, _FACET = 3;
+const _NAME = 0, _QUERY = 1, _GRPID = 2;
 
