@@ -4,7 +4,7 @@
         if you are familiar with CSS use "display" property.
         <br>
         To place multiple searches on a page, see 
-        <a href="context_help/website_instructions.html" target="_blank">website help<a>
+        <a href="context_help/website_instructions.html" target="_blank">website help</a>
 </div>
 
 <fieldset style="padding:0">
@@ -19,6 +19,7 @@
             <option value="heurist_Map" data-name="map/timeline">Map and timeline</option>
             <option value="heurist_Graph" data-name="network diagram">Network graph</option>
             <option value="heurist_resultListExt" data-name="custom report">Custom report</option>
+            <option value="heurist_Navigation" data-name="navigation">Menu / Navigation</option>
         </select>
     </div>
     <div>
@@ -137,5 +138,23 @@
         </select>
     </div>
     
+
+    <div class="heurist_Navigation">
+        <div class="header"><label>Orientation:</label></div>
+        <select name="orientation" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+            <option value="horizontal">horizontal</option>
+            <option value="vertical">vertical</option>
+        </select>
+    </div>
+    <div class="heurist_Navigation">
+        <div id="menu_recIDs"/>
+    </div>
     
+</fieldset>    
+    
+<fieldset style="padding:0">    
+    <input name="menu_recIDs" type="hidden" value=""/>
+    <input name="page_recIDs" type="hidden" value=""/>
+    <div class="heurist_Navigation" id="menu_recIDs">aaaa</div>
+    <div class="heurist_Navigation" id="page_recIDs"/>
 </fieldset>

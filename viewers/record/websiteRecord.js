@@ -597,11 +597,16 @@ function onPageInit(success){
                     $dlg.dialog( "close" );
                 };
         
-        
+console.log('!!!!');        
         $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
                 +"hclient/widgets/editing/editCMS_AddWidget.html?t="+(new Date().getTime()), 
                 buttons, 'Add Heurist Widget to your Web Page', 
-        {
+        {  container:'cms-add-widget-popup',
+           width:750,
+           close: function(){
+                $dlg.dialog('destroy');       
+                $('#cms-add-widget-popup').remove();
+           },
            open: function(){
                
                //init elements on dialog open
@@ -632,7 +637,40 @@ function onPageInit(success){
                        $dlg.find('#widgetCss').val(s);
                    }
                    
-                   
+                   if(val=='heurist_Navigation'){
+                       
+                       var ele = dele.find('#menu_recIDs');
+                       if(!ele.editing_input('instance')){
+                           
+                            var ed_options = {
+                                recID: -1,
+                                dtID: ele.attr('id'), //'group_selector',
+                                rectypeID: window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+                                //show_header: false,
+                                values: [dele.find('input[name="menu_recIDs"]').val()],
+                                readonly: false,
+                                showclear_button: true,
+                                dtFields:{
+                                    dty_Type:"resource", rst_MaxValues:0,
+                                    rst_DisplayName: 'Top menu items', rst_DisplayHelpText:'',
+                                    rst_FieldConfig: {entity:'records', csv:true}
+                                }
+                            };
+
+                            ele.editing_input(ed_options);
+                           
+                           /*
+                           window.hWin.HEURIST4.ui.createEntitySelectorElement({
+                                input_ele: ele,
+                                init_value: dele.find('input[name="menu_recIDs"]').val(),
+                                entityName: 'records', 
+                                title: 'Top menu records',
+                                rectypeID: window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']
+                           });
+                           */
+                       }
+                       
+                   }else
                    if(val=='heurist_Map' && 
                     dele.find('select[name="mapdocument"]').find('options').length==0){
                        

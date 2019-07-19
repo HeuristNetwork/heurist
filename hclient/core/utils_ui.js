@@ -1441,7 +1441,7 @@ window.hWin.HEURIST4.ui = {
                 selObj.hSelect("destroy"); 
             }
             
-
+ //console.log(parent_ele);
             var menu = selObj.hSelect(       
               { style: 'dropdown',
                 position:{collision: "flip"},
@@ -1464,6 +1464,9 @@ window.hWin.HEURIST4.ui = {
                     wmenu.width( wmenu.width()+20 ); 
                     var wmenu_div = wmenu.parent('div.ui-selectmenu-menu');
                     var pos = wmenu_div.position().top;
+                    
+//console.log( '>>> ' + wmenu.parents('body').height() );
+                    
                     if(wmenu.parents('body').height()>0 && pos+wmenu.height()>wmenu.parents('body').height()){
                         var newtop = wmenu.parents('body').height()-wmenu.height()-5;
                         if(newtop<0){
@@ -1851,7 +1854,7 @@ window.hWin.HEURIST4.ui = {
                                         }
                                         window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 
                                                 {ok:'Close', title:'Record not found or hidden'}, 
-                                                    {options:{close:function(){ widget.closeEditDialog(); }}});
+                                                    {close:function(){ widget.closeEditDialog();}});
                                     }
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -2370,6 +2373,47 @@ window.hWin.HEURIST4.ui = {
                 .importStructure( options );
                 
         
+    },
+    
+    //
+    //
+    //
+    createEntitySelectorElement: function(params){
+        
+        var input_ele = params.input_ele,
+            init_value = (window.hWin.HEURIST4.util.isnull(params.init_value))?'':params.init_value,
+            entityName = params.entityName,
+            title = (window.hWin.HEURIST4.util.isnull(params.title))?'Select':params.title;
+            
+        if(!$.isArray(params.init_value)){
+            params.init_value = [params.init_value];
+        }
+        
+        var ed_options = {
+            recID: -1,
+            dtID: input_ele.attr('id'), //'group_selector',
+            //rectypeID: rectypeID,
+            //rectypes: window.hWin.HEURIST4.rectypes,
+            values: init_value,
+            readonly: false,
+            showclear_button: true,
+            dtFields:{
+                dty_Type:"resource",
+                rst_DisplayName: title, rst_DisplayHelpText:'',
+                rst_FieldConfig: {entity:entityName, csv:true}
+            }
+            //change:_onAddRecordChange
+        };
+        
+        if(params.rectypeID>0){
+            ed_options.rectypeID = params.rectypeID;
+        }
+
+        
+        var ele = input_ele; //$('#'+input_id);
+        ele.editing_input(ed_options);
+        ele.find('.editint-inout-repeat-button').hide();
+        ele.find('.header').css('padding-right','16px');
     },
     
     

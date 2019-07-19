@@ -82,8 +82,9 @@ function editCMS(home_page_record_id, main_callback){
 */    
     
     
-console.log(dim);    
-    var edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editCMS.html',
+
+    var edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+        +'hclient/widgets/editing/editCMS.html',
                 edit_buttons,window.hWin.HR('Define Website'),
                 {open:onDialogInit, width:dim.w*0.95, height:dim.h*0.95, isPopupDlg:true, close:function(){
                     edit_dialog.empty();//dilaog('destroy');
