@@ -2252,6 +2252,7 @@ public static function performImport($params, $mode_output){
                             else if($fieldtype_type == "geo"){
                                 //verify WKT
                                 $geoType = null;
+                                $r_value = strtoupper($r_value);
                                 //get WKT type
                                 if(strpos($r_value,'POINT')!==false){
                                     $geoType = "p";
