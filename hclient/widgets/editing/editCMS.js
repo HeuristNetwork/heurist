@@ -18,7 +18,7 @@
 */
 
 function editCMS(home_page_record_id, main_callback){
-    
+        
     var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
      RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
      RT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'],
@@ -29,9 +29,39 @@ function editCMS(home_page_record_id, main_callback){
      DT_NAME      = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
      
      if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && RT_CMS_PAGE>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0 && DT_CMS_PAGE>0)){
-        window.hWin.HEURIST4.msg.showMsgDlg('This function is still in development. You will need record types '
-        +'99-51, 99-52 and 99-53 which will be made available as part of Heurist_Reference_Set. '
-        +'You may contact ian.johnson@sydney.edu.au if you want to test out this function prior to release in mid July 2019.');
+        var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg('You will need record types '
+        +'99-51, 99-52 and 99-53 which aew available as part of Heurist_Reference_Set. '
+        +'Click "Import" to get these definitions',
+                    {'Import':function(){
+                        var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                        $dlg2.dialog('close');
+        
+                        //import recctype 51 (CMS Home page) from Heurist_Core_Definitions        
+                        window.hWin.HEURIST4.msg.bringCoverallToFront();
+                        window.hWin.HEURIST4.msg.showMsgFlash('Import definitions', 10000);
+                        
+                        window.hWin.HAPI4.SystemMgr.import_definitions(2, 51,
+                            function(response){    
+                                window.hWin.HEURIST4.msg.sendCoverallToBack(); 
+                                var $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+                                if($dlg2.dialog('instance')) $dlg2.dialog('close');
+
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    editCMS(home_page_record_id, main_callback);
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);     
+                                }
+                            });
+                        
+                    },
+                    'Cancel':function(){
+                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg2.dialog('close');}
+                    },
+                            'Definitions required');
+        
+        
+        
         return;
      }
     var edit_dialog = null;

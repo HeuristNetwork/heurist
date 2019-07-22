@@ -351,6 +351,8 @@ public static function importRecords($filename, $session_id){
         ini_set('max_execution_time', 0);
         $importDef = new DbsImport( self::$system );
         
+        
+        //verify that all 
         $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
                     'databaseID'=>@$data['heurist']['database']['id'], 
                     'definitionID'=>array_keys($imp_rectypes) ));
@@ -392,6 +394,11 @@ public static function importRecords($filename, $session_id){
             $record['ID'] = 0; //add new
             $record['RecTypeID'] = $importDef->getTargetIdBySourceId('rectypes',
                                                  $record_src['rec_RecTypeID']);
+            //if($record['RecTypeID']<1){
+            //    $this->system->addError(HEURIST_ERROR, 'Unable to get rectype in thiss database by ');
+            //}                                                 
+                                                 
+                                                 
             $record['AddedByImport'] = 2; //import without strict validation
             $record['no_validation'] = true;
             $record['URL'] = @$record_src['rec_URL'];

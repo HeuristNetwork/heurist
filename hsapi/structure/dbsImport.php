@@ -827,6 +827,7 @@ $mysqli->commit();
     
     // 
     // finds target id by source id via concept code
+    // get concept code in source - find local in target
     //
     public function getTargetIdBySourceId($defType, $source_id){
         //get concept code in source
@@ -836,7 +837,8 @@ $mysqli->commit();
             $defs = $this->source_defs[$defType]['typedefs'];
             $idx_ccode = intval($defs['commonNamesToIndex'][$fieldName]);
             
-            $conceptCode = $defs[$source_id]['commonFields'][$idx_ccode];
+            //get concept code
+            $conceptCode = @$defs[$source_id]['commonFields'][$idx_ccode];
             
         }else if($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
             $defType = 'detailtypes';
@@ -844,7 +846,7 @@ $mysqli->commit();
             $defs = $this->source_defs[$defType]['typedefs'];
             $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
             
-            $conceptCode = $defs[$source_id]['commonFields'][$idx_ccode];
+            $conceptCode = @$defs[$source_id]['commonFields'][$idx_ccode];
             
         }else if($defType=='enum' || $defType=='relationtype'){
             
@@ -852,13 +854,17 @@ $mysqli->commit();
             $defs = $this->source_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
             $idx_ccode = intval($this->source_defs['terms']['fieldNamesToIndex'][$fieldName]);
             
-            $conceptCode = $defs[$source_id][$idx_ccode];
+            $conceptCode = @$defs[$source_id][$idx_ccode];
             
         }
         
+        if($conceptCode){
+            return DbsImport::getLocalCode($defType, $this->target_defs, $conceptCode, false);    
+        }else{
+            return 0;
+        }
         
         
-        return DbsImport::getLocalCode($defType, $this->target_defs, $conceptCode, false);
     }
     //
     // get local code by concept code
@@ -1398,6 +1404,8 @@ $mysqli->commit();
         
         if($need_updated_defs){
             $resp['defs'] = array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_detailtypes,'terms'=>$trg_terms);
+            $data = $this->system->getCurrentUserAndSysInfo(true);
+            $resp['defs']['sysinfo'] = $data['sysinfo'];
         }
         return $resp;    
     }    

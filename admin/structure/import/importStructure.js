@@ -982,30 +982,17 @@ $.widget( "heurist.importStructure", {
         }
         */
 
-        var request = {databaseID:this._selectedDB, 
-            definitionID:this._selectedRtyID,
-            db:window.hWin.HAPI4.database, import:'rectype'};
-
-        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/sys_structure.php';
-
-        var that = this;
-
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
-
-        window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){    
+        
+        var that = this;
+        
+        window.hWin.HAPI4.SystemMgr.import_definitions(this._selectedDB, this._selectedRtyID,
+            function(response){    
 
             window.hWin.HEURIST4.msg.sendCoverallToBack(); 
 
             if(response.status == window.hWin.ResponseStatus.OK){
 
-                //refresh local definitions
-                if(response.defs){
-                    if(response.defs.rectypes) window.hWin.HEURIST4.rectypes = response.defs.rectypes;
-                    if(response.defs.detailtypes) window.hWin.HEURIST4.detailtypes = response.defs.detailtypes;
-                    if(response.defs.terms) window.hWin.HEURIST4.terms = response.defs.terms;
-                }
-
-                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                 that.panel_report.find('#btn_close_panel_report').click();
 
 
@@ -1060,7 +1047,19 @@ $.widget( "heurist.importStructure", {
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
 
-        });
+        }        
+        );
+        
+        /*
+        var request = {databaseID:this._selectedDB, 
+            definitionID:this._selectedRtyID,
+            db:window.hWin.HAPI4.database, import:'rectype'};
+            
+
+        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/sys_structure.php';
+
+        window.hWin.HEURIST4.util.sendRequest(url, request, null, );
+        */
 
     },
 
