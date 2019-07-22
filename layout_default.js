@@ -41,6 +41,8 @@ var cfg_widgets = [
 
     {id:'heurist_Search', name:'Search', widgetname:'search', script:'hclient/widgets/search/search.js'},
     {id:'heurist_SearchTree', name:'Saved searches', widgetname:'svs_list', script:'hclient/widgets/search/svs_list.js'},
+    {id:'heurist_Navigation', name:'Navigation', widgetname:'navigation', script:'hclient/widgets/dropdownmenus/navigation.js'},
+    
 
 
     /* experimental - widgets for future implementation

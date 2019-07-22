@@ -1260,6 +1260,13 @@ function hLayout(args) {
             }else{
                 $container = $(containerid);
             }
+            var layout = _getLayoutParams($container); 
+            if(layout){
+                _appInitAll(layout, $container); 
+            }
+        },
+        
+        appInitFromContainer2: function( $container ){
             //create layout based on heurist-app-id and heurist-app-options
             var layout = _getLayoutParams($container); 
             if(layout){

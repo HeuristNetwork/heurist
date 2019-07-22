@@ -119,7 +119,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         //window.hWin.HEURIST4.ui.onInactiveReset();
 
         //remove remark to debug 
-        //request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
+        request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.baseURL+"hsapi/controller/"+action+".php"; //+(new Date().getTime());
@@ -146,7 +146,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                                         message: err_message, 
                                         request_code:request_code};
 
-                if(callback){
+                if($.isFunction(callback)){
                     callback(response);
                 }
                 //message:'Error connecting server '+textStatus});
@@ -155,7 +155,7 @@ function hAPI(_db, _oninit) { //, _currentUser
 
                 _is_callserver_in_progress = false;
                 
-                if(callback){
+                if($.isFunction(callback)){
                     if($.isPlainObject(response)){
                         response.request_code = request_code;
                     }
@@ -713,8 +713,33 @@ prof =Profile
                 if(!request['a']) request['a'] = 'folders';
                 if(!request['operation']) request['operation'] = 'list';
                 _callserver('usr_info', request, callback);
-            }
+            },
             
+            //
+            import_definitions: function(databaseID, definitionID, callback){
+             
+                var request = {databaseID:databaseID, 
+                    definitionID:definitionID,
+                    db:window.hWin.HAPI4.database, import:'rectype'};
+                    
+                _callserver('sys_structure', request, function(response){
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        //refresh local definitions
+                        if(response.defs){
+                            if(response.defs.rectypes) window.hWin.HEURIST4.rectypes = response.defs.rectypes;
+                            if(response.defs.detailtypes) window.hWin.HEURIST4.detailtypes = response.defs.detailtypes;
+                            if(response.defs.terms) window.hWin.HEURIST4.terms = response.defs.terms;
+                            if(response.defs.sysinfo) window.hWin.HAPI4.sysinfo = response.defs.sysinfo; //constants
+                        }
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+                    }
+                    if($.isFunction(callback)){
+                        callback(response);
+                    }
+                });
+            }
 
             /*
             ,databases: function(request, callback){

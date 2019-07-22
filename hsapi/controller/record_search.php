@@ -106,6 +106,10 @@
 
         $response = recordSearchRelated($system, $_REQUEST['ids'], @$_REQUEST['direction']);
 
+    }else if(@$_REQUEST['a'] == 'menu'){
+        
+        $resids = array();
+        $response = recordSearchMenuItems($system, $_REQUEST['ids'], $resids);
     }else {
         
         if(@$_REQUEST['remote'] == 'master'){

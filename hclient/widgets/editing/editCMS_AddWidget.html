@@ -45,13 +45,15 @@
     </div>
 
     <div class="heurist_SearchTree">
-        <div class="header"><label>Allowed groups</label></div>
-        <input name="allowed_UGrpID" value=""/>
+        <!-- <div class="header"><label>Allowed groups</label></div> -->
+        <input name="allowed_UGrpID" type="hidden" value=""/>
+        <div id="allowed_UGrpID" style="display:table-row"></div>
     </div>
 
     <div class="heurist_SearchTree">
-        <div class="header"><label>Initial search</label></div>
-        <input name="init_svsID" value=""/>
+        <!-- <div class="header"><label>Initial search</label></div> -->
+        <input name="init_svsID" type="hidden" value=""/>
+        <div id="init_svsID" style="display:table-row"></div>
     </div>
     
     <!-- result list -->    
@@ -147,14 +149,13 @@
         </select>
     </div>
     <div class="heurist_Navigation">
-        <div id="menu_recIDs"/>
+        <input name="menu_recIDs" type="hidden" value=""/>
+        <div id="menu_recIDs" style="display:table-row"></div>
+    </div>
+    <div  class="heurist_Navigation">
+        <div class="header"><label>If root has the only, item use next level</label></div>
+        <input name="use_next_level" type="checkbox"/>
     </div>
     
 </fieldset>    
     
-<fieldset style="padding:0">    
-    <input name="menu_recIDs" type="hidden" value=""/>
-    <input name="page_recIDs" type="hidden" value=""/>
-    <div class="heurist_Navigation" id="menu_recIDs">aaaa</div>
-    <div class="heurist_Navigation" id="page_recIDs"/>
-</fieldset>

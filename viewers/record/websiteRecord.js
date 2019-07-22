@@ -421,7 +421,9 @@ function onPageInit(success){
             return val;
         }
 
-
+        //
+        // from UI
+        //
         function __prepareWidgetDiv( widgetid ){
             //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
             
@@ -463,15 +465,29 @@ function onPageInit(success){
                     if(mapdoc_id>0) opts['mapdocument'] = mapdoc_id;
 
             }else{
+                
+                var cont = $dlg.find('div.'+widget_name);
+                
+                if(widget_name=='heurist_SearchTree'){
+                    cont.find('input[name="allowed_UGrpID"]').val( 
+                            cont.find('#allowed_UGrpID').editing_input('getValues') );
+                    cont.find('input[name="init_svsID"]').val( 
+                            cont.find('#init_svsID').editing_input('getValues') );
+                }else if(widget_name=='heurist_Navigation'){
+                    cont.find('input[name="menu_recIDs"]').val( 
+                            cont.find('#menu_recIDs').editing_input('getValues') );
+                }
             
-                $dlg.find('div.'+widget_name+' input').each(function(idx, item){
+                cont.find('input').each(function(idx, item){
                     item = $(item);
-                    if(item.attr('type')=='checkbox'){
-                        opts[item.attr('name')] = item.is(':checked');    
-                    }else if(item.attr('type')=='radio'){
-                        if(item.is(':checked')) opts[item.attr('name')] = __prepareVal(item.val());    
-                    }else if(item.val()!=''){
-                        opts[item.attr('name')] = __prepareVal(item.val());    
+                    if(item.attr('name')){
+                        if(item.attr('type')=='checkbox'){
+                            opts[item.attr('name')] = item.is(':checked');    
+                        }else if(item.attr('type')=='radio'){
+                            if(item.is(':checked')) opts[item.attr('name')] = __prepareVal(item.val());    
+                        }else if(item.val()!=''){
+                            opts[item.attr('name')] = __prepareVal(item.val());    
+                        }
                     }
                 });
                 $dlg.find('div.'+widget_name+' select').each(function(idx, item){
@@ -508,6 +524,9 @@ function onPageInit(success){
             return content; 
         }
         
+        //
+        // to UI
+        //
         function __restoreValuesInUI( widgetid ){
             //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
             var ele = $(tinymce.activeEditor.dom.get( widgetid ));
@@ -548,14 +567,14 @@ function onPageInit(success){
                 
                     $dlg.find('div.'+widget_name+' input').each(function(idx, item){
                         item = $(item);
-                        if(item.attr('type')=='hidden'){
-                            
-                        }else if(item.attr('type')=='checkbox'){
-                            item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
-                        }else if(item.attr('type')=='radio'){
-                            item.prop('checked', item.val()== String(opts[item.attr('name')]));
-                        }else if(item.val()!=''){
-                            item.val( opts[item.attr('name')] );
+                        if(item.attr('name')){
+                            if(item.attr('type')=='checkbox'){
+                                item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
+                            }else if(item.attr('type')=='radio'){
+                                item.prop('checked', item.val()== String(opts[item.attr('name')]));
+                            }else {  //if(item.val()!=''){
+                                item.val( opts[item.attr('name')] );
+                            }
                         }
                     });
                     $dlg.find('div.'+widget_name+' select').each(function(idx, item){
@@ -597,7 +616,7 @@ function onPageInit(success){
                     $dlg.dialog( "close" );
                 };
         
-console.log('!!!!');        
+      
         $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
                 +"hclient/widgets/editing/editCMS_AddWidget.html?t="+(new Date().getTime()), 
                 buttons, 'Add Heurist Widget to your Web Page', 
@@ -605,7 +624,7 @@ console.log('!!!!');
            width:750,
            close: function(){
                 $dlg.dialog('destroy');       
-                $('#cms-add-widget-popup').remove();
+                $dlg.remove();
            },
            open: function(){
                
@@ -645,7 +664,6 @@ console.log('!!!!');
                             var ed_options = {
                                 recID: -1,
                                 dtID: ele.attr('id'), //'group_selector',
-                                rectypeID: window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
                                 //show_header: false,
                                 values: [dele.find('input[name="menu_recIDs"]').val()],
                                 readonly: false,
@@ -653,21 +671,64 @@ console.log('!!!!');
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:0,
                                     rst_DisplayName: 'Top menu items', rst_DisplayHelpText:'',
-                                    rst_FieldConfig: {entity:'records', csv:true}
+                                    rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+                                              window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'],
+                                              window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']],
+                                    rst_FieldConfig: {entity:'records', csv:false}
                                 }
                             };
 
                             ele.editing_input(ed_options);
+                            ele.parent().css('display','block');
+                            ele.find('.header').css({'width':'150px','text-align':'right'});
                            
-                           /*
-                           window.hWin.HEURIST4.ui.createEntitySelectorElement({
-                                input_ele: ele,
-                                init_value: dele.find('input[name="menu_recIDs"]').val(),
-                                entityName: 'records', 
-                                title: 'Top menu records',
-                                rectypeID: window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']
-                           });
-                           */
+                       }
+                       
+                   }else
+                   if(val=='heurist_SearchTree'){
+                       
+                       var ele = dele.find('#allowed_UGrpID');
+                       if(!ele.editing_input('instance')){
+                           
+                            var ed_options = {
+                                recID: -1,
+                                dtID: ele.attr('id'), 
+                                values: [dele.find('input[name="allowed_UGrpID"]').val()],
+                                readonly: false,
+                                showclear_button: true,
+                                dtFields:{
+                                    dty_Type:"resource", rst_MaxValues:1,
+                                    rst_DisplayName: 'Allowed groups', rst_DisplayHelpText:'',
+                                    rst_FieldConfig: {entity:'sysGroups', csv:true}
+                                }
+                            };
+
+                            ele.editing_input(ed_options);
+                            ele.parent().css('display','block');
+                            ele.find('.header').css({'width':'150px','text-align':'right'});
+                           
+                       }
+                       
+                       ele = dele.find('#init_svsID');
+                       if(!ele.editing_input('instance')){
+                           
+                            var ed_options = {
+                                recID: -1,
+                                dtID: ele.attr('id'), 
+                                values: [dele.find('input[name="init_svsID"]').val()],
+                                readonly: false,
+                                showclear_button: true,
+                                dtFields:{
+                                    dty_Type:"resource", rst_MaxValues:1,
+                                    rst_DisplayName: 'Initial search', rst_DisplayHelpText:'',
+                                    rst_FieldConfig: {entity:'usrSavedSearches', csv:false}
+                                }
+                            };
+
+                            ele.editing_input(ed_options);
+                            ele.parent().css('display','block');
+                            ele.find('.header').css({'width':'150px','text-align':'right'});
+                           
                        }
                        
                    }else

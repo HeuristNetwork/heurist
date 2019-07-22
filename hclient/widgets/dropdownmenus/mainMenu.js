@@ -158,16 +158,12 @@ $.widget( "heurist.mainMenu", {
 
         // MAIN MENU-----------------------------------------------------
         var he = this.element.height();
-        this.divMainMenu = $("<div>")
-            .css({'position':'absolute',left:0,right:0,top:he/2}) //'border-bottom':'lightgray solid 1px',
-            .appendTo(this.element);;
 
         this.divMainMenu = $( "<div>")
-        .css({'position':'absolute', 'left':24, bottom:he/8, 'text-align':'left'})  //one rows
-        //.addClass('logged-in-only')
-        .appendTo(this.element);
+            .css({'position':'absolute', 'left':24, bottom:he/8, 'text-align':'left'})  //one rows
+            //.addClass('logged-in-only')
+            .appendTo(this.element);
         
-
         this.divMainMenuItems = $('<ul>')
                 .addClass('horizontalmenu')
                 .css({'float':'left', 'padding-right':'4em', 'margin-top': '1.5em'})
@@ -663,7 +659,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(action == "menu-cms-create"){
             
             var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-            if(RT_CMS_HOME>0 && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]>0){
+            if(RT_CMS_HOME>0 && window.hWin.HEURIST4.rectypes.counts
+                 && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]>0){
             
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     'You already have a website. Are you sure you want to create an additional site?',

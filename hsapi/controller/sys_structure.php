@@ -110,7 +110,7 @@ ini_set('max_execution_time', 0);
             if(!$isOK){
                 $system->error_exit(null);  //produce json output and exit script
             }
-            $response = $importDef->getReport(true); //with updated definitions
+            $response = $importDef->getReport(true); //with updated definitions and sysinfo
 
             $response['status'] = HEURIST_OK;            
             

@@ -734,6 +734,8 @@ $.widget( "heurist.svs_list", {
         
         if(visible_cnt==1){//this.allowed_svsIDs &&
             $(this.accordeon).find('button[data-svs-id="'+visible_svsID+'"]').click();
+        }else if(this.options.init_svsID){
+            $(this.accordeon).find('button[data-svs-id="'+this.options.init_svsID+'"]').click();
         }
 
     },

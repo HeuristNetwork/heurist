@@ -3,10 +3,16 @@
     /**
     *  Website generator based on CMS records 99-51,52,53
     * 
-    *  Paramters
-    *  recID - home page record (99-51)
+    *  Parameters
+    *  recID - home page record (99-51) or web page (99-53)
+    *          if is is not defined it takes first record of type 'Home page'
+    *  field - if defined it is assumed web page and it returns only DT_EXTENDED_DESCRIPTION
     * 
-    *  if is is not defined it takes first record of this type 
+    * if home page has defined template file it is loaded as body, otherwise default template
+    * that includes header with main-banner, main-title, main-menu and 
+    * main-content where content of particular page will be loaded
+    *  
+    * 
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -103,7 +109,7 @@ $topmenu = $rec['details'][DT_CMS_TOP_MENU];
 $menu_content = __getMenuContent($rec['rec_ID'], $topmenu, 0);
 
 //
-//
+// returns link to uploaded file
 //
 function __getFile(&$rec, $id, $def){
     
@@ -120,7 +126,7 @@ function __getFile(&$rec, $id, $def){
 }
 
 //
-//
+// returns fist value
 //
 function __getValue(&$menu_rec, $id){
     
@@ -136,7 +142,7 @@ function __getValue(&$menu_rec, $id){
 }
 
 //
-// create menu
+// creates menu
 //
 function __getMenuContent($parent_id, $menuitems, $lvl)
 {
@@ -230,7 +236,7 @@ function onPageInit(success)
     window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
     ele.show();
     
-    //cfg_widgets is from layout_defaults=.js 
+    //cfg_widgets is from layout_defaults.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
 
@@ -262,7 +268,7 @@ function onPageInit(success)
     $('#btn_inline_editor2').hide();
     $('#btn_inline_editor').hide();
     
-    $( "#main-banner > a").click(function(event){
+    $( "#main-banner").click(function(event){
               window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
               $('#main-content').empty().load("<?php print HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&field='.DT_EXTENDED_DESCRIPTION.'&recid='.$rec_id?>",
               function(){
@@ -367,13 +373,13 @@ div.coverall-div {
 }
     ?>        
 </style>
-    
+
 </head>
 <body>
     <div class="ent_wrapper">
     <div id="main-header" class="ent_header" style="background:rgb(112,146,190);height:140px">
-	    <div id="main-banner" style="float:left;min-height:80px;">
-            <a href="#" style="text-decoration:none;">
+	    <div style="float:left;min-height:80px;">
+            <a href="#" style="text-decoration:none;" id="main-banner">
         <?php print $image_banner?'<img style="max-height:80px" src="'.$image_banner.'">'
             :'<div style="text-align:center;display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image</div>';?>
             </a>

@@ -679,6 +679,45 @@
 
 
     }
+    
+    //
+    //
+    //
+    function recordSearchMenuItems($system, $menuitems, &$result){
+        
+        $isRoot = (count($result)==0);
+        if($isRoot){
+            $system->defineConstant('DT_CMS_MENU');
+        }
+
+        $menuitems = prepareIds($menuitems);
+        $rec_IDs = array();
+        
+        foreach ($menuitems as $rec_ID){   
+            if(!in_array($rec_ID, $result)){
+                array_push($result, $rec_ID);
+                array_push($rec_IDs, $rec_ID);
+            }
+        }
+         
+        if(count($rec_IDs)>0){       
+            $menuitems2 = mysql__select_list2($system->get_mysqli(),
+                'SELECT dtl_Value FROM recDetails WHERE dtl_RecID in ('
+                    .implode(',',$rec_IDs).') AND dtl_DetailTypeID='.DT_CMS_MENU);
+
+            $menuitems2 = prepareIds( $menuitems2 );
+            
+            if(is_array($menuitems2) && count($menuitems2)>0){                          
+                    recordSearchMenuItems($system, $menuitems2, $result);
+            }
+        }
+        
+        if($isRoot){
+            //return recordset
+            return recordSearch($system, array('q'=>array('ids'=>$result), 'detail'=>'detail'));
+        }
+        
+    }
 
     //-----------------------------------------------------------------------
     /**
