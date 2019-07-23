@@ -186,7 +186,7 @@ $.widget( "heurist.mainMenu", {
         if(__include('Structure')) this._initMenu('Structure', 0);
         if(__include('Verify')) this._initMenu('Verify', 0);
         if(__include('Import')) this._initMenu('Import', 0);
-        if(__include('Website')) this._initMenu('Website', 0);
+        if(__include('Website')) this._initMenu('Website', 1);
         if(__include('Export')) {
             this._initMenu('Export', 2, null, 3); //invisible in main menu   
             //this.menues['btn_Export'].hide();
@@ -361,6 +361,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         */
         
         
+        var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
+        if(cms_record_id>0){
+            if(!window.hWin.HAPI4.is_member(2)){
+                window.hWin.HEURIST4.msg.showMsgDlg('To perform web site edit you have to be logged in as member of db managers group');
+            }else{
+                window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
+            }
+        }else
         if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0){
             this.btn_dashboard.show();  
         }else{

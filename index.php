@@ -35,6 +35,14 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         $format = $_REQUEST['format'];        
     }else if (array_key_exists('website', $_REQUEST)) {
         $format = 'website';
+        define('PDIR','');
+        include dirname(__FILE__).'/viewers/record/websiteRecord.php';
+        exit();
+    if(@$_REQUEST['field']>0){
+        $redirect = $redirect.'&field='.$_REQUEST['field'];    
+    }
+        
+        
     }else if (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) {
         $format = 'web&field='.$_REQUEST['field'];
     }else{

@@ -133,9 +133,10 @@ function onPageInit(success){
         
     },500);
 
+    var itop = $('#main-header').height();
     
     $('#btn_inline_editor')
-            .css({position:'absolute', right:'90px', top:'40px', 'font-size':'1.1em'})
+            .css({position:'absolute', right:'90px', top:itop-30, 'font-size':'1.1em'})
             .click(function( event ){
                 
                 $('#btn_inline_editor').hide();
@@ -162,7 +163,7 @@ function onPageInit(success){
             .show();
 
     $('#btn_inline_editor3')
-            .css({position:'absolute', right:'40px', top:'40px', 'font-size':'1.1em'})
+            .css({position:'absolute', right:'40px', top:itop-30, 'font-size':'1.1em'})
             .click(function( event ){
                 
                 if(_isDirectEditMode()){
@@ -185,7 +186,7 @@ function onPageInit(success){
             
             
     $('#btn_inline_editor2')
-            .css({position:'absolute', right:'40px', top:'10px', 'font-size':'1.1em'}).show();
+            .css({position:'absolute', right:'40px', top:itop-70, 'font-size':'1.1em'}).show();
             
 
     //

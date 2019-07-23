@@ -358,6 +358,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_KEYWORDS' => array(99, 948),
     'DT_CMS_TARGET' => array(99, 949),
     'DT_CMS_CSS' => array(99, 950),
+    'DT_CMS_BANNER' => array(99, 951),
     'DT_CMS_PAGETITLE' => array(99, 952)   //show page title abobe content
 
 ); //TODO: add email magic numbers

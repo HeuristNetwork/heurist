@@ -30,10 +30,10 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-define('PDIR','../../');  //need for proper path to js and css    
+if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php'); //without client hapi
-require_once(dirname(__FILE__)."/../../hsapi/dbaccess/db_recsearch.php");
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 
 
 $system->defineConstants();
@@ -99,8 +99,9 @@ if($rec['rec_RecTypeID']!=RT_CMS_HOME && $rec['rec_RecTypeID']!=RT_CMS_PAGE){
 }
 
 $image_icon = __getFile($rec, DT_THUMBNAIL, HEURIST_BASE_URL.'favicon.ico');
-$image_banner = __getFile($rec, DT_FILE_RESOURCE, null); //HEURIST_BASE_URL.'hclient/assets/h4logo.png'
-//$image_background = __getFile($rec, DT_THUMBNAIL, HEURIST_BASE_URL.'favicon.ico');
+$image_logo = __getFile($rec, DT_FILE_RESOURCE, null); 
+$image_banner = __getFile($rec, DT_CMS_BANNER, null); 
+
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 
@@ -233,6 +234,10 @@ function onPageInit(success)
         //load home page
         $( "#main-banner").click(); 
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
+        
+        var itop = $('#main-header').height(); //[0].scrollHeight;
+        $('#btn_editor').css({top:itop-30, right:40});
+        
     },500);
     
     
@@ -340,6 +345,11 @@ body{
     left:0;right:0;top:0;bottom:0;
     padding:10px;
 }
+#main-header{
+    background:rgb(112,146,190);
+    height:160px;   
+    padding: 0.5em;
+}
 <?php
     if(!$edit_Available){
 ?>
@@ -355,10 +365,10 @@ div.coverall-div {
 </head>
 <body>
     <div class="ent_wrapper">
-    <div id="main-header" class="ent_header" style="background:rgb(112,146,190);height:160px">
-	    <div style="float:left;min-height:80px;">
-            <a href="#" style="text-decoration:none;" id="main-banner">
-        <?php print $image_banner?'<img style="max-height:80px" src="'.$image_banner.'">'
+    <div id="main-header" class="ent_header" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\');background-repeat: repeat-x;background-size:auto 170px;"':'' ?>>
+	    <div style="float:left;min-height:80px;" id="main-banner">
+            <a href="#" style="text-decoration:none;">
+        <?php print $image_logo?'<img style="max-height:80px" src="'.$image_logo.'">'
             :'<div style="text-align:center;display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image</div>';?>
             </a>
         </div>
@@ -387,6 +397,9 @@ if($edit_Available){
         <a href="#" id="btn_inline_editor3" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">source</a>
         <input id="edit_mode" type="hidden"/>
 <?php        
+}else if($system->is_member(2)){
+        print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$rec_id.'" id="btn_editor" target="_blank" '
+        .'style="position:absolute;right:40px, top:110px,font-size:1.1em;font-weight:bold;color:blue;">Web site editor</a>';
 }
     ?>  
         <div id="main-pagetitle" style="position:absolute;padding:4;bottom:4"></div>       
