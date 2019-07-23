@@ -82,10 +82,15 @@ if(!$hasAccess){
     exit();
 } 
 
-if(@$_REQUEST['field']){
-    print __getValue($rec, DT_EXTENDED_DESCRIPTION);
+//output content of particular page - just title and content
+if(@$_REQUEST['field']){ 
+    
+    
+    print '<h2>'.__getValue($rec, DT_NAME).'</h2>'
+                        .__getValue($rec, DT_EXTENDED_DESCRIPTION);
     exit();
 }
+//-----------------------
 
 if($rec['rec_RecTypeID']!=RT_CMS_HOME && $rec['rec_RecTypeID']!=RT_CMS_PAGE){
     $message = 'Record #'.$rec_id.' is not allowed record type. Expecting Website Home Page';
@@ -103,10 +108,6 @@ $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 $layout_theme = 'heurist';//'le-frog'; //__getValue($rec, DT_CMS_THEME);
 if(!$layout_theme) $layout_theme = 'heurist';
 $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-
-
-$topmenu = $rec['details'][DT_CMS_TOP_MENU];
-$menu_content = __getMenuContent($rec['rec_ID'], $topmenu, 0);
 
 //
 // returns link to uploaded file
@@ -140,37 +141,6 @@ function __getValue(&$menu_rec, $id){
         return $val;    
     }
 }
-
-//
-// creates menu
-//
-function __getMenuContent($parent_id, $menuitems, $lvl)
-{
-    global $system;
-
-    $res ='';
-
-    foreach ($menuitems as $dtl_ID=>$rd){   
-                                
-                $menu_rec = recordSearchByID($system, $rd['id'], true);
-                
-                $page_id = __getValue($menu_rec,DT_CMS_PAGE);
-              
-                $res = $res.'<li><a href="#" style="padding:2px 1em" data-pageid="'.@$page_id['id']
-                                .'" title="'.htmlspecialchars(__getValue($menu_rec,DT_SHORT_SUMMARY)).'">'
-                                .htmlspecialchars(__getValue($menu_rec,DT_NAME)).'</a>';
-                
-                $menuitems2 = @$menu_rec['details'][DT_CMS_MENU];
-                if(is_array($menuitems2) && count($menuitems2)>0){                          
-                    $sub = __getMenuContent($rd['id'], $menuitems2, $lvl+1);
-                    if($sub!='')
-                        $res = $res. '<ul style="min-width:200px"'.($lvl==0?' class="level-1"':'').'>'.$sub.'</ul>';
-                }
-                $res = $res. '</li>';
-    }
-    return $res;
-} //__getMenuContent
-      
 ?>
 <html>
 <head>
@@ -206,6 +176,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/search_minimal.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/dropdownmenus/navigation.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
@@ -239,44 +210,45 @@ function onPageInit(success)
     //cfg_widgets is from layout_defaults.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
-
+/*
     $( "#main-menu > ul" ).addClass('horizontalmenu').menu( {position:{ my: "left top", at: "left+20 bottom" }} );
 
     $('#main-menu').show();
     $('#main-menu').find('a').addClass('truncate').click(function(event){
-
         var pageid = $(event.target).attr('data-pageid');
-        if(pageid>0){
-              $('#main-content').empty().load("<?php print HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&field='.DT_EXTENDED_DESCRIPTION.'&recid='?>"+pageid,
-              function(){
-                  window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
-              });
-        }
+        loadPageContent(pageid);
     });
-    
-    setTimeout(function(){
-        /*var itop = $('#main-header')[0].scrollHeight;
-        $('#main-header').css('height',itop-10);
-        $('#main-content').css('top',itop+10);*/
-        
-        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
-        
-        $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
-        
-        window.hWin.HEURIST4.msg.sendCoverallToBack();
-    },1500);
+*/    
     $('#btn_inline_editor2').hide();
     $('#btn_inline_editor').hide();
     
     $( "#main-banner").click(function(event){
-              window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
-              $('#main-content').empty().load("<?php print HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&field='.DT_EXTENDED_DESCRIPTION.'&recid='.$rec_id?>",
-              function(){
-                  window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
-                  window.hWin.HEURIST4.msg.sendCoverallToBack();
-              });
+              loadPageContent(<?php print $rec_id?>);
     });
     
+    setTimeout(function(){
+        //init main menu
+        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header" );
+        $('#main-menu').show();
+        //load home page
+        $( "#main-banner").click(); 
+        $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
+    },500);
+    
+    
+}
+function loadPageContent(pageid){
+        if(pageid>0){
+              window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
+              $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='
+                        +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
+                  function(){
+                      var pagetitle = $($('#main-content').children()[0]).addClass("webpageheading");
+                      $('#main-pagetitle').empty().append(pagetitle);
+                      window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
+                      window.hWin.HEURIST4.msg.sendCoverallToBack();
+              });
+        }
 }
 </script>
 <?php
@@ -362,6 +334,12 @@ body{
     font-size:1.5em;
     color:black;
 }
+#main-content{
+    display:none;
+    position:absolute;
+    left:0;right:0;top:0;bottom:0;
+    padding:10px;
+}
 <?php
     if(!$edit_Available){
 ?>
@@ -377,7 +355,7 @@ div.coverall-div {
 </head>
 <body>
     <div class="ent_wrapper">
-    <div id="main-header" class="ent_header" style="background:rgb(112,146,190);height:140px">
+    <div id="main-header" class="ent_header" style="background:rgb(112,146,190);height:160px">
 	    <div style="float:left;min-height:80px;">
             <a href="#" style="text-decoration:none;" id="main-banner">
         <?php print $image_banner?'<img style="max-height:80px" src="'.$image_banner.'">'
@@ -397,9 +375,8 @@ div.coverall-div {
             </a> 
             </div>
         
-        
-	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;font-weight:bold !important">
-            <ul><?php print $menu_content; ?></ul>
+	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;font-weight:bold !important" data-heurist-app-id="heurist_Navigation">
+<span style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal"}</span>
         </div>
         
 <?php        
@@ -411,15 +388,15 @@ if($edit_Available){
         <input id="edit_mode" type="hidden"/>
 <?php        
 }
-    ?>        
+    ?>  
+        <div id="main-pagetitle" style="position:absolute;padding:4;bottom:4"></div>       
     </div>
-    <div class="ent_content_full" style="top:145px;padding: 5px;">
-        <div id="main-content" data-homepageid="<?php print $rec_id;?>" style="display:none;position:absolute;left:0;right:0;top:0;bottom:0;">
-            <?php print __getValue($rec, DT_EXTENDED_DESCRIPTION);?>
+    <div class="ent_content_full" style="top:165px;padding: 5px;">
+        <div id="main-content" data-homepageid="<?php print $rec_id;?>">
         </div>
 <?php        
 if($edit_Available){        
-        print '<textarea class="tinymce-body" style="position:absolute;left:0;width:99.9%;top:0;bottom:0;display:none">'.__getValue($rec, DT_EXTENDED_DESCRIPTION).'</textarea>';
+        print '<textarea class="tinymce-body" style="position:absolute;left:0;width:99.9%;top:0;bottom:0;display:none"></textarea>';
 }
 ?>        
     </div>

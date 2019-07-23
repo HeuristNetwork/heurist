@@ -166,20 +166,20 @@ error_log(print_r($_REQUEST, true));
     /**
     * Defines all constants
     */
-    public function defineConstants() {
+    public function defineConstants($reset=false) {
 
         // Record type constants
         global $rtDefines;
         foreach ($rtDefines as $str => $id)
         if(!defined($str)){
-            $this->defineRTLocalMagic($str, $id[1], $id[0]);
+            $this->defineRTLocalMagic($str, $id[1], $id[0], $reset);
         }
 
         // Data type constants
         global $dtDefines;
         foreach ($dtDefines as $str => $id)
         if(!defined($str)){
-            $this->defineDTLocalMagic($str, $id[1], $id[0]);
+            $this->defineDTLocalMagic($str, $id[1], $id[0], $reset);
         }
     }
 
@@ -205,9 +205,9 @@ error_log(print_r($_REQUEST, true));
     //
     // get constants as array to use on client side
     //
-    private function getLocalConstants(){
+    private function getLocalConstants( $reset=false ){
 
-        $this->defineConstants();
+        $this->defineConstants( $reset );
         
         $res = array();
 
@@ -859,7 +859,7 @@ error_log(print_r($_REQUEST, true));
                     "db_total_records"=>$this->get_system('sys_RecordCount'),
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli), //all groups- to fast retrieve group name
                     "baseURL"=>HEURIST_BASE_URL,
-                    "dbconst"=>$this->getLocalConstants(), //some record and detail types constants with local values specific for current db
+                    "dbconst"=>$this->getLocalConstants( $include_reccount_and_dashboard_count ), //some record and detail types constants with local values specific for current db
                     "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
                     'max_post_size'=>get_php_bytes('post_max_size'),
                     'max_file_size'=>get_php_bytes('upload_max_filesize'),

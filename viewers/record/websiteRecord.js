@@ -6,7 +6,7 @@ function onPageInit(success){
     }
     
     var ele = $('body').find('#main-content');
-    window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
+    //window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
     ele.show();
     
     //cfg_widgets is from layout_defaults=.js 
@@ -100,29 +100,38 @@ function onPageInit(success){
 
     };
     
+    /*
     $( "#main-menu > ul" ).addClass('horizontalmenu').menu( {position:{ my: "left top", at: "left+20 bottom" }} );
     $('#main-menu').show()
     $('#main-menu').find('a').addClass('truncate').click(function(event){  //load new page
 
         var pageid = $(event.target).attr('data-pageid');
         __iniLoadPageById( pageid);
-
     });
+    */
     //reload home
-    $( "#main-banner > a").click(function(event){
+    $( "#main-banner").click(function(event){
         __iniLoadPageById( home_pageid);
     });
 
     
     setTimeout(function(){
         __alignButtons();
-        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
+        
+        //init main menu in header
+        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header", 
+                    {heurist_Navigation:{onmenuselect:__iniLoadPageById}} );
+        
+        $('#main-menu').show()
+        
+        //init home page content
+        __iniLoadPageById( home_pageid );
         
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
         
-        window.hWin.HEURIST4.msg.sendCoverallToBack();
+        //window.hWin.HEURIST4.msg.sendCoverallToBack();
         
-    },1500);
+    },500);
 
     
     $('#btn_inline_editor')
@@ -220,6 +229,8 @@ function onPageInit(success){
             $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 +'&field=1&recid='+pageid, function()
                 {
+                        var pagetitle = $($('#main-content').children()[0]).addClass("webpageheading");
+                        $('#main-pagetitle').empty().append(pagetitle);
                         $('.tinymce-body').val($('#main-content').html());
                         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -648,6 +659,8 @@ function onPageInit(success){
 
                        if(val=='heurist_Search'){
                             s = s + 'height:100px;width:600px;';        
+                       }else if(val=='heurist_Navigation'){
+                            s = s + 'height:80px;width:600px;';        
                        }else if(val=='heurist_SearchTree'){
                             s = s + 'height:600px;width:230px;';        
                        }else{

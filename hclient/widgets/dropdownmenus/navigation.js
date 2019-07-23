@@ -23,7 +23,8 @@ $.widget( "heurist.navigation", {
     options: {
        menu_recIDs:[],
        orientation: 'horizontal', //vertical
-       use_next_level: false 
+       use_next_level: false,
+       onmenuselect: null
     },
 
     menues:{},
@@ -35,8 +36,11 @@ $.widget( "heurist.navigation", {
 
         var that = this;
 
-        if(this.element.parent().attr('data-heurist-app-id')){
+        if(this.element.parent().attr('data-heurist-app-id') || this.element.attr('data-heurist-app-id')){
             //this is CMS publication - take bg from parent
+            if(this.element.parent().attr('data-heurist-app-id')){
+                this.element.parent().css({'background':'none','border':'none'});
+            }
             this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
         }else{
             this.element.css('height','100%').addClass('ui-heurist-header2')    
@@ -53,7 +57,8 @@ $.widget( "heurist.navigation", {
                 .appendTo( this.divMainMenu );
                 
         if(this.options.orientation=='horizontal'){
-            this.divMainMenuItems.addClass('horizontalmenu')
+            this.divMainMenuItems.addClass('horizontalmenu');
+            
         }
 
         var ids = this.options.menu_recIDs;
@@ -94,14 +99,17 @@ $.widget( "heurist.navigation", {
     //
     _onGetMenuData:function(resdata){
         
-        var DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+        var RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+
+            DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
             DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
+            DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
             DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
-            RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
             DT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'],
             DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'],
             DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'];//target element on page or popup
             
+        var that = this;
         
         function __getMenuContent(parent_id, menuitems, lvl){
             
@@ -113,9 +121,10 @@ $.widget( "heurist.navigation", {
                 
                 var menuName = resdata.fld(record, DT_NAME);
                 var menuTitle = resdata.fld(record, DT_SHORT_SUMMARY);
+                var recType = resdata.fld(record, 'rec_RecTypeID');
                 var page_id; //record id to be load into content
                 
-                if(resdata.fld(record, 'rec_RecTypeID') == RT_CMS_MENU){
+                if(recType == RT_CMS_MENU || recType == DT_CMS_TOP_MENU){
                     page_id = resdata.fld(record, DT_CMS_PAGE);
                 }else{
                     page_id = resdata.fld(record, 'rec_ID');
@@ -131,8 +140,11 @@ $.widget( "heurist.navigation", {
                                 + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
                                 +window.hWin.HEURIST4.util.htmlEscape(menuName)+'</a>';
                 
-                var submenu = resdata.values(record, DT_CMS_MENU);
                 var subres = '';
+                var submenu = resdata.values(record, DT_CMS_MENU);
+                if(!submenu){
+                    submenu = resdata.values(record, DT_CMS_TOP_MENU);
+                }
                 if(submenu){
                     if(!$.isArray(submenu)) submenu = submenu.split(',');
                     
@@ -145,7 +157,7 @@ $.widget( "heurist.navigation", {
                 }
                 res = res + '</li>';
                 
-                if(lvl==0 && menuitems.length==1 && this.options.use_next_level){
+                if(lvl==0 && menuitems.length==1 && that.options.use_next_level){
                         return subres;    
                 }
                 
@@ -158,7 +170,12 @@ $.widget( "heurist.navigation", {
         
         $(menu_content).appendTo(this.divMainMenuItems);
         
-        this.divMainMenuItems.menu();
+        var opts = {};
+        if(this.options.orientation=='horizontal'){
+            opts = {position:{ my: "left top", at: "left+20 bottom" }};
+        }
+        
+        this.divMainMenuItems.menu( opts );
         
         this.divMainMenuItems.find('a').addClass('truncate').click(function(event){
 
@@ -168,38 +185,55 @@ $.widget( "heurist.navigation", {
             
             if(pageid>0){
                 
-                var page_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                +'&field=1&recid='+pageid;
-
-                if(page_target=='popup'){
+                if($.isFunction(that.options.onmenuselect)){
                     
-console.log('!!!!1');                    
-                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(page_url, null, 
-                            'Heurist', 
-                    {  container:'cms-popup-'+window.hWin.HEURIST4.util.random(),
-                       width:750,
-                       close: function(){
-                            $dlg.dialog('destroy');       
-                            $dlg.remove();
-                       },
-                       open: function(){
-                           window.hWin.HAPI4.LayoutMgr.appInitFromContainer2( $dlg );
-                       }
-                    });
+                    that.options.onmenuselect( pageid );
                     
-
                 }else{
-                    if(page_target[0]!='#') page_target = '#'+page_target;
+                
+                    var page_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                                    +'&field=1&recid='+pageid;
 
-                    $(page_target).empty().load(page_url,
-                        function(){
-                            //$('.tinymce-body').val($(pagetarget).html());
-                            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
-                            //window.hWin.HEURIST4.msg.sendCoverallToBack();
+                    if(page_target=='popup'){
+                        
+                        var $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(page_url, null, 
+                            'Heurist', 
+                            {  container:'cms-popup-'+window.hWin.HEURIST4.util.random(),
+                                width:750,
+                                close: function(){
+                                    $dlg.dialog('destroy');       
+                                    $dlg.remove();
+                                },
+                                open: function(){
 
-                    });
-                }                
 
+                                    var pagetitle = $($dlg.find('.ui-dialog-content').children()[0]);
+                                    if(pagetitle.is('h2')){
+                                        pagetitle.addClass("webpageheading");
+                                        //$('#main-pagetitle').empty().append(pagetitle);
+                                    }
+
+                                    window.hWin.HAPI4.LayoutMgr.appInitFromContainer2( $dlg );
+                                }
+                        });
+
+                    }else{
+                        if(page_target[0]!='#') page_target = '#'+page_target;
+
+                        $(page_target).empty().load(page_url,
+                            function(){
+                                
+                                var pagetitle = $($('#main-content').children()[0]);
+                                if(pagetitle.is('h2')){
+                                    pagetitle.addClass("webpageheading");
+                                    $('#main-pagetitle').empty().append(pagetitle);
+                                }
+                                window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
+                                //window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                        });
+                    }                
+                }
             }
         });
         

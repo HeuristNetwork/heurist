@@ -688,6 +688,7 @@
         $isRoot = (count($result)==0);
         if($isRoot){
             $system->defineConstant('DT_CMS_MENU');
+            $system->defineConstant('DT_CMS_TOP_MENU');
         }
 
         $menuitems = prepareIds($menuitems);
@@ -703,7 +704,8 @@
         if(count($rec_IDs)>0){       
             $menuitems2 = mysql__select_list2($system->get_mysqli(),
                 'SELECT dtl_Value FROM recDetails WHERE dtl_RecID in ('
-                    .implode(',',$rec_IDs).') AND dtl_DetailTypeID='.DT_CMS_MENU);
+                    .implode(',',$rec_IDs).') AND (dtl_DetailTypeID='.DT_CMS_MENU
+                    .' OR dtl_DetailTypeID='.DT_CMS_TOP_MENU.')');
 
             $menuitems2 = prepareIds( $menuitems2 );
             

@@ -164,8 +164,10 @@ function hLayout(args) {
     
     /**
     *  Creates "free" layout from html elements attributes heurist-app-id and heurist-app-options
+    *  supp_options - additional options that can not be set via configuration in html - such as event listeners
+    * 
     */
-    function _getLayoutParams($container){
+    function _getLayoutParams($container, supp_options){
         
         var eles = $container.find('div[data-heurist-app-id]');
         
@@ -178,8 +180,14 @@ function hLayout(args) {
             var app_id = ele.attr('data-heurist-app-id');
             if(_appGetWidgetById(app_id)!=null){
                 var opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-heurist-app-options')); //old way
-                if(!opts){
+                if(!opts){ //find span with configuration
                     opts = window.hWin.HEURIST4.util.isJSON(ele.find('span').text());
+                    
+                    //extend options with suppimentary ones
+                    if(supp_options && supp_options[app_id]){
+                        opts = (opts!=false)? $.extend(opts, supp_options[app_id])
+                                        :supp_options[app_id];
+                    }
                 }
                 
                 layout[ele.attr("id")] = {dropable:false, apps:[{appid:app_id, hasheader:false, 
@@ -1250,7 +1258,7 @@ function hLayout(args) {
         //
         // get layout priperties from attributes and init free layout
         //
-        appInitFromContainer: function( document, containerid ){
+        appInitFromContainer: function( document, containerid, supp_options ){
             
             _containerid = containerid;
             _is_container_layout = true;
@@ -1260,15 +1268,15 @@ function hLayout(args) {
             }else{
                 $container = $(containerid);
             }
-            var layout = _getLayoutParams($container); 
+            var layout = _getLayoutParams($container, supp_options); 
             if(layout){
                 _appInitAll(layout, $container); 
             }
         },
         
-        appInitFromContainer2: function( $container ){
+        appInitFromContainer2: function( $container, supp_options ){
             //create layout based on heurist-app-id and heurist-app-options
-            var layout = _getLayoutParams($container); 
+            var layout = _getLayoutParams($container, supp_options); 
             if(layout){
                 _appInitAll(layout, $container); 
             }
