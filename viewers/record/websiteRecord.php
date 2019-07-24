@@ -71,7 +71,7 @@ if($rec==null){
     exit();
 }
 
-$hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' ||
+$hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' || $system->is_admin() ||
     ($system->get_user_id()>0 && $rec['rec_NonOwnerVisibility'] !== 'hidden') ||    //visible for logged 
     $system->is_member($rec['rec_OwnerUGrpID']) );   //owner
 
@@ -81,6 +81,8 @@ if(!$hasAccess){
     include ERROR_REDIR;
     exit();
 } 
+
+$hasAccess = ($system->is_admin() || $system->is_member($rec['rec_OwnerUGrpID']));
 
 //output content of particular page - just title and content
 if(@$_REQUEST['field']){ 
@@ -405,7 +407,7 @@ if($edit_Available){
         <div id="main-pagetitle" style="position:absolute;padding:4;bottom:4"></div>       
     </div>
     <div class="ent_content_full" style="top:165px;padding: 5px;">
-        <div id="main-content" data-homepageid="<?php print $rec_id;?>">
+        <div id="main-content" data-homepageid="<?php print $rec_id;?>" data-viewonly="<?php print ($hasAccess)?0:1;?>">
         </div>
 <?php        
 if($edit_Available){        

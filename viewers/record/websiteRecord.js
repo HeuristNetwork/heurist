@@ -13,6 +13,7 @@ function onPageInit(success){
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
     var home_pageid = $('#main-content').attr('data-homepageid'),
+        is_viewonly = ($('#main-content').attr('data-viewonly')==1),
         current_pageid = home_pageid,
         was_modified = false, //was modified and saved - on close need to reinit widgets
         last_save_content = null;
@@ -339,13 +340,17 @@ function onPageInit(success){
     //
     //
     function __alignButtons(){
-        var itop = $('#main-header').height(); //[0].scrollHeight;
-        $('#btn_inline_editor2').css({top:itop-70});
-        $('#btn_inline_editor').css({top:itop-30});
-        $('#btn_inline_editor3').css({top:itop-30});
         
-        //$('#main-header').css('height',itop-10);
-        //$('#main-content').css('top',itop+10);
+        if(is_viewonly){
+            $('#btn_inline_editor').hide();
+            $('#btn_inline_editor2').hide();
+            $('#btn_inline_editor3').hide();
+        }else{
+            var itop = $('#main-header').height(); //[0].scrollHeight;
+            $('#btn_inline_editor2').css({top:itop-70});
+            $('#btn_inline_editor').css({top:itop-30});
+            $('#btn_inline_editor3').css({top:itop-30});
+        }
     }    
     
     //

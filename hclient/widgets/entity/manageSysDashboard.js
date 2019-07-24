@@ -130,15 +130,18 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this.recordList.resultList('option','select_mode', 'select_single');
         
         //load all menu commands
+        var menu_entries = [];
         var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('mainMenu');
         if(app && app.widget){
             menu_entries = $(app.widget).mainMenu('menuGetAllActions');
+            if($.isArray(menu_entries)){
+                menu_entries.unshift( {key:'action-CreateFilter', title: 'Trigger quick query dropdown'} );
+                menu_entries.unshift( {key:'action-SearchById', title: 'Run a  saved filter' } );
+                menu_entries.unshift( {key:'action-Search', title: 'Execute a filter string'} );
+                menu_entries.unshift( {key:'action-AddRecord',title:'Add specific entity/record type'});
+                menu_entries.unshift( {key:'',title:'select command ...'});
+            }
         }
-        menu_entries.unshift( {key:'action-CreateFilter', title: 'Trigger quick query dropdown'} );
-        menu_entries.unshift( {key:'action-SearchById', title: 'Run a  saved filter' } );
-        menu_entries.unshift( {key:'action-Search', title: 'Execute a filter string'} );
-        menu_entries.unshift( {key:'action-AddRecord',title:'Add specific entity/record type'});
-        menu_entries.unshift( {key:'',title:'select command ...'});
         
         //get all saved searches
         var saved_searches = [];

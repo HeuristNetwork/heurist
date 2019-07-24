@@ -28,6 +28,7 @@ $.widget( "heurist.navigation", {
     },
 
     menues:{},
+    pageStyles:{},
 
     _current_query_string:'',
 
@@ -132,7 +133,10 @@ $.widget( "heurist.navigation", {
                 
                 //target and position
                 var pageTarget = resdata.fld(record, DT_CMS_TARGET);
-                var pagePosition = resdata.fld(record, DT_CMS_CSS);
+                var pageStyle = resdata.fld(record, DT_CMS_CSS);
+                if(pageStyle){
+                    that.pageStyles[page_id] = pageStyles;    
+                }
                 
                 res = res + '<li><a href="#" style="padding:2px 1em" data-pageid="'
                                 + page_id + '"'
@@ -193,6 +197,8 @@ $.widget( "heurist.navigation", {
                 
                     var page_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                     +'&field=1&recid='+pageid;
+                                    
+                    var pageCss = that.pageStyles[page_id];
 
                     if(page_target=='popup'){
                         
@@ -223,10 +229,15 @@ $.widget( "heurist.navigation", {
                         $(page_target).empty().load(page_url,
                             function(){
                                 
-                                var pagetitle = $($('#main-content').children()[0]);
+                                var pagetitle = $($(page_target).children()[0]);
                                 if(pagetitle.is('h2')){
-                                    pagetitle.addClass("webpageheading");
-                                    $('#main-pagetitle').empty().append(pagetitle);
+                                    if(page_target=='#main-content')
+                                    {
+                                        pagetitle.addClass("webpageheading");
+                                        $('#main-pagetitle').empty().append(pagetitle);
+                                    }else{
+                                        pagetitle.remove();
+                                    }
                                 }
                                 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
                                 //window.hWin.HEURIST4.msg.sendCoverallToBack();
