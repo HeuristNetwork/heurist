@@ -990,6 +990,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             for(var i=0;i<map_controls.length;i++){
                 prefs['mctrl_'+map_controls[i]] = 1;
             }
+            
+            window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#map_template'), [{key:'',title:'na'}],
+                            window.hWin.HAPI4.get_prefs_def('map_template', null));
 
             //from prefs to ui
             allFields.each(function(){

@@ -35,7 +35,7 @@ function hMapLayer2( _options ) {
         preserveViewport: true  
     };
 
-    var _record, 
+    var _record,     //datasource record
         _recordset;
         
     var _nativelayer_id = 0;
@@ -221,9 +221,10 @@ function hMapLayer2( _options ) {
     //
     function _addQueryLayer(){
 
-        var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
-        //var layer_popup_template = 'Hello! this is tempalte for map popup';
-        //_recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
+        var layer_style = _recordset.fld(options.rec_layer || _record, 
+                                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+        var layer_popup_template = _recordset.fld(options.rec_layer || _record, 
+                                    window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
         
         var query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
         var request = window.hWin.HEURIST4.util.parseHeuristQuery(query);
@@ -259,7 +260,7 @@ function hMapLayer2( _options ) {
                                     {geojson_data: geojson_data,
                                     timeline_data: timeline_data,
                                     layer_style: layer_style,
-                                    //popup_template: layer_popup_template,
+                                    popup_template: layer_popup_template,
                                     dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
                                     preserveViewport:options.preserveViewport });
                                                          
@@ -279,9 +280,10 @@ function hMapLayer2( _options ) {
     //
     function _addRecordSet(){
         
-        var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
-        //var layer_popup_template = 'Hello! this is tempalte for map popup';
-        //_recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
+        var layer_style = _recordset.fld(options.rec_layer || _record, 
+                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+        var layer_popup_template = _recordset.fld(options.rec_layer || _record, 
+                    window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
         
         var data = options.recordset.toGeoJSON();
 
@@ -296,7 +298,7 @@ function hMapLayer2( _options ) {
                         {geojson_data: geojson_data,
                         timeline_data: timeline_data,
                         layer_style: layer_style,
-                        //popup_template: layer_popup_template,
+                        popup_template: layer_popup_template,
                         dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
                         preserveViewport:options.preserveViewport });
                                              

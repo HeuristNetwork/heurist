@@ -474,13 +474,14 @@ function onPageInit(success){
                         if(ctrls.length>0 && ctrls.length<3) layout_params['legend'] = ctrls.join(',');
                     }
                     layout_params['published'] = 1;
+                    layout_params['template'] = $dlg.find('select[name="template"]').val();
                 
                     opts['layout_params'] = layout_params;
                     opts['leaflet'] = true;
                     
                     var mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
                     if(mapdoc_id>0) opts['mapdocument'] = mapdoc_id;
-
+                    
             }else{
                 
                 var cont = $dlg.find('div.'+widget_name);
@@ -574,7 +575,9 @@ function onPageInit(success){
                         $dlg.find('input[name="legend"]').each(
                             function(idx,item){$(item).prop('checked',legend.indexOf($(item).val())>=0);}
                         );
-                        
+                        if(opts.layout_params['template']){
+                            $dlg.find('select[name="template"]').attr('data-template', opts.layout_params['template']);        
+                        }
                     }
                     if(opts['mapdocument']>0){
                         $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
@@ -598,7 +601,6 @@ function onPageInit(success){
                         item = $(item);
                         item.val( opts[item.attr('name')] );
                     });
-                    
                     if(widget_name=='heurist_resultListExt'){
                         if(opts['template']){
                             $dlg.find('select[name="template"]').attr('data-template', opts['template']);        
@@ -788,34 +790,22 @@ function onPageInit(success){
 
                             }
                         );  
+                        
+                        var $select2 = dele.find('select[name="template"]'); 
+                        
+                        window.hWin.HEURIST4.ui.createTemplateSelector( $select2
+                                           ,[{key:'',title:'na'}], $select2.attr('data-template'));
+                        
 
                        
                    }else if(val=='heurist_resultListExt' && 
                     dele.find('select[name="template"]').find('options').length==0){
                        
-                        var $select = dele.find('select[name="template"]');
-
-                        var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
-                        var request = {mode:'list', db:window.hWin.HAPI4.database};
+                        var $select = dele.find('select[name="template"]'); 
                         
-                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
-                            function(context){
-                                
-                                var opts = [];
-                                if(context && context.length>0){
-                                    for (var i=0; i<context.length; i++){
-                                        opts.push({key:context[i].filename, title:context[i].name});
-                                    } // for
-                                }
-                                
-                                
-                                window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
-                                if($select.attr('data-template')){
-                                    $select.val( $select.attr('data-template') );
-                                }
-                                window.hWin.HEURIST4.ui.initHSelect($select[0], false);
-                                
-                            });
+                        window.hWin.HEURIST4.ui.createTemplateSelector( $select 
+                                           ,null, $select.attr('data-template'));
+
                    
                    }
                    

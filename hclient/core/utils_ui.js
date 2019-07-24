@@ -46,6 +46,8 @@ setValueAndWidth assign value to input and adjust its width
 
 initHSelect - converts HTML select to jquery selectmenu
 
+createTemplateSelector - fills with names of smarty templates
+
 ENTITY
 
 openRecordEdit  - open add/edit record form/dialog
@@ -1453,7 +1455,7 @@ window.hWin.HEURIST4.ui = {
                     offset: null
                 },*/
                 change: function( event, data ) {
-    
+ console.log('set '+data.item.value);   
                         selObj.val(data.item.value);//change value for underlaying html select
                         selObj.trigger('change');
                 },
@@ -2214,6 +2216,35 @@ window.hWin.HEURIST4.ui = {
         $(container).find('.add-rel-button').hide();
         
         return ele;
+    },
+
+    //
+    // $select jquery select
+    //
+    createTemplateSelector: function($select, topOptions, defValue){
+        
+        var baseurl = window.hWin.HAPI4.baseURL + "viewers/smarty/templateOperations.php";
+        var request = {mode:'list', db:window.hWin.HAPI4.database};
+        
+        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+            function(context){
+                
+                var opts = topOptions?topOptions:[];
+                if(context && context.length>0){
+                    for (var i=0; i<context.length; i++){
+                        opts.push({key:context[i].filename, title:context[i].name});
+                    } // for
+                }
+                
+                window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
+                if(defValue){
+                    $select.val( defValue );
+                }
+                window.hWin.HEURIST4.ui.initHSelect($select[0], false);
+                
+            });
+        
+
     },
     
     //------------------------------------

@@ -223,6 +223,7 @@ console.log('onPageInit');
             
             layout_params['controls'] = __gp('controls'); //comma separated list of visible controls
             layout_params['legend'] = __gp('legend'); //comma separated list of visible panels
+            layout_params['template'] = __gp('template'); //smarty template for popup info
             
             layout_params['published'] = '1';
         }

@@ -335,11 +335,13 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MAP_BOOKMARK' => array(3, 1082),
     'DT_MINIMUM_MAP_ZOOM' => array(3, 1077), // from Jan 2017 uses DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM for both maps and layers
     'DT_MAXIMUM_MAP_ZOOM' => array(3, 1078), // prior Jan 2017 some databases used one, some used the other. Either now used for setting.
-    'DT_SYMBOLOGY_POINTMARKER' => array(3, 1091),  
+    'DT_SYMBOLOGY_POINTMARKER' => array(3, 1091),  //outdated
     'DT_SYMBOLOGY' => array(3, 1092),  //MAIN field that stores ALL styles for map symbology
-    'DT_SYMBOLOGY_COLOR' => array(3, 1037),
-    'DT_BG_COLOR' => array(2, 551),
-    'DT_OPACITY' => array(3, 1090),
+    'DT_SYMBOLOGY_THEMES' => array(3, 1093),  // Thematic mapping
+    'DT_POPUP_TEMPLATE' => array(3, 9999),  // smarty template to produce popup info 
+    'DT_SYMBOLOGY_COLOR' => array(3, 1037), // outdated
+    'DT_BG_COLOR' => array(2, 551),         // outdated
+    'DT_OPACITY' => array(3, 1090),         // outdated
     
     'DT_DATA_SOURCE' => array(3, 1083),
     'DT_MINIMUM_ZOOM' => array(3, 1085), // from Jan 2017 uses DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM for both maps and layers

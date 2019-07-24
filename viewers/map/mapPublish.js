@@ -145,13 +145,16 @@ function hMapPublish( _options )
         //container:null,
         //mapwidget:null,   
     },
-    popupelement = null;
+    popupelement = null,
+    popupdialog = null;
         
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
     function _init ( _options ) {
         options = $.extend(options, _options);
         
+        
+        /* OLD
         var ele = $('<div>').appendTo(options.container);
         //create div
         ele.load(window.hWin.HAPI4.baseURL+'viewers/map/mapPublish.html?t'
@@ -163,15 +166,24 @@ function hMapPublish( _options )
                 _initControls();
             }
         });
-        
+        */
     }
     
     function _initControls(){
-        popupelement = options.container.find('#map-embed-dialog');
+        
+        //popupelement = options.container.find('#map-embed-dialog');
+        popupelement = popupdialog.find('#map-embed-dialog');
         
         popupelement.find('input[type="checkbox"]').on({change:function(){
             _fillUrls();
         }});
+        
+        var $select = popupelement.find('#map_template');
+        
+        window.hWin.HEURIST4.ui.createTemplateSelector( $select, [{key:'',title:'na'}] );
+        $select.on({change:function(){
+            _fillUrls();
+        }});        
         
         popupelement = popupelement[0];
     }
@@ -223,6 +235,10 @@ function hMapPublish( _options )
             if(ctrls.length>0 && ctrls.length<3) layout_params['legend'] = ctrls.join(',');
         }
         
+        if($(popupelement).find('#map_template').val()){
+            layout_params['template'] = $(popupelement).find('#map_template').val();
+        }
+        
         var url     = base_url + params_search;
         var url_enc = base_url + params_search_encoded;
         for(var key in layout_params) {
@@ -253,16 +269,34 @@ function hMapPublish( _options )
 
 
         openPublishDialog: function(){
-            
+        
+            popupdialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'viewers/map/mapPublish.html?t'
+                +window.hWin.HEURIST4.util.random(), 
+                    null, window.hWin.HR('Publish Map'), 
+            {  container:'map-publish-popup',
+               height: 680,
+               width: 700,
+               close: function(){
+                    popupdialog.dialog('destroy');       
+                    popupdialog.remove();
+                    popupdialog = null;
+               },
+               open: function(){
+                    _initControls();
+                    _fillUrls();
+               }
+            });        
+        
+        /* OLD
             _fillUrls();
 
             window.hWin.HEURIST4.msg.showElementAsDialog({
                 element: popupelement,
-                height: 580,
+                height: 600,
                 width: 700,
                 title: window.hWin.HR('Publish Map')
             });
-
+        */
             
         }
 

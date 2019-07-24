@@ -117,7 +117,10 @@ $.widget( "heurist.mapping", {
         element_map: 'map',
         element_timeline: 'timeline',
  
-        layout_params:{}, //various layout and behaviour settings
+        //various layout and behaviour settings
+        // they are assigned in map.php onPageInit from url parameters
+        // which in turn can be set in app_timemap.js
+        layout_params:{}, 
         
         // callbacks
         onselect: null,
@@ -150,6 +153,7 @@ $.widget( "heurist.mapping", {
     
     //popup element
     main_popup: null,
+    mapPopUpTemplate: null,
     //
     drawnItems: null,
     //deffau draw style
@@ -539,13 +543,20 @@ $.widget( "heurist.mapping", {
     //
     // adds geojson layer to map
     // returns nativemap id
+    // options:
+    //      geojson_data
+    //      timeline_data
+    //      dataset_name
+    //      preserveViewport
+    //      layer_style
+    //      popup_template   - smarty template for popup info
     //
     addGeoJson: function(options){
             
             var geojson_data = options.geojson_data,
                 timeline_data = options.timeline_data,
                 layer_style = options.layer_style,
-                //popup_template = options.popup_template,
+                popup_template = options.popup_template,
                 dataset_name = options.dataset_name,
                 preserveViewport = options.preserveViewport;
 
@@ -557,6 +568,7 @@ $.widget( "heurist.mapping", {
             var new_layer = L.geoJSON(geojson_data, {
                     default_style: null
                     , layer_name: dataset_name
+                    , popup_template: popup_template
                     //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
                    /* 
                     , onEachFeature: function(feature, layer) {
@@ -1178,7 +1190,7 @@ $.widget( "heurist.mapping", {
             
             if(layer.feature.properties.rec_ID>0){
             
-                that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
+                if(that.vistimeline) that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
 
                 that.setFeatureSelection([layer.feature.properties.rec_ID]);
                 if($.isFunction(that.options.onselect)){
@@ -1192,11 +1204,20 @@ $.widget( "heurist.mapping", {
                         popupURL =  info; //load content from url
                     }
                 }else{
-                    popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
-                            +layer.feature.properties.rec_ID
-                            +'&db='+window.hWin.HAPI4.database+'&ll='
-                            +window.hWin.HAPI4.sysinfo['layout'];
-                }                
+                    if(that.mapPopUpTemplate || layer.options.popup_template){
+                        
+                        popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
+                                + layer.feature.properties.rec_ID
+                                + '&db='+window.hWin.HAPI4.database+'&template='
+                                + encodeURIComponent(layer.options.popup_template || that.mapPopUpTemplate);
+                        
+                    }else{
+                        popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
+                                +layer.feature.properties.rec_ID
+                                +'&db='+window.hWin.HAPI4.database+'&ll='
+                                +window.hWin.HAPI4.sysinfo['layout'];
+                    }  
+                }              
                 //open popup
                 if(popupURL){
                     $.get(popupURL, function(responseTxt, statusTxt, xhr){
@@ -1518,6 +1539,7 @@ $.widget( "heurist.mapping", {
         if(window.hWin.HEURIST4.util.isempty(params)){
             //this is not publish take params from preferences
             params = {};
+            params['template'] = window.hWin.HAPI4.get_prefs_def('map_template', null);
             params['nocluster'] = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)!=1);
             params['controls'] = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'all');
             params['controls'] = params['controls']+',legend'; //is always visible for non-published maps
@@ -1761,6 +1783,10 @@ $.widget( "heurist.mapping", {
             this.mapManager.loadBaseMap( params['basemap'] );  
         }else{
             this.mapManager.loadBaseMap( 0 );  
+        }
+
+        if(params['template']){
+            this.mapPopUpTemplate = params['template'];
         }
         
         $('#'+map_element_id).find('#map-loading').empty();

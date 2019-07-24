@@ -801,10 +801,10 @@
             $system->defineConstant('DT_END_DATE');
             $system->defineConstant('DT_GEO_OBJECT');
             $system->defineConstant('DT_DATE');
-            $system->defineConstant('DT_SYMBOLOGY_POINTMARKER');
-            $system->defineConstant('DT_SYMBOLOGY_COLOR');
-            $system->defineConstant('DT_BG_COLOR');
-            $system->defineConstant('DT_OPACITY');
+            $system->defineConstant('DT_SYMBOLOGY_POINTMARKER'); //outdated
+            $system->defineConstant('DT_SYMBOLOGY_COLOR'); //outdated
+            $system->defineConstant('DT_BG_COLOR'); //outdated
+            $system->defineConstant('DT_OPACITY');  //outdated
             
             $rectypes_as_place = $system->get_system('sys_TreatAsPlaceRefForMapping');
             if($rectypes_as_place){
