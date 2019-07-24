@@ -28,7 +28,8 @@ $.widget( "heurist.navigation", {
     },
 
     menues:{},
-    pageStyles:{},
+    pageStyles:{},  //page_id=>styles
+    pageStyles_original:{}, //keep to restore  element_id=>css
 
     _current_query_string:'',
 
@@ -135,7 +136,7 @@ $.widget( "heurist.navigation", {
                 var pageTarget = resdata.fld(record, DT_CMS_TARGET);
                 var pageStyle = resdata.fld(record, DT_CMS_CSS);
                 if(pageStyle){
-                    that.pageStyles[page_id] = pageStyles;    
+                    that.pageStyles[page_id] = window.hWin.HEURIST4.util.cssToJson(pageStyle);    
                 }
                 
                 res = res + '<li><a href="#" style="padding:2px 1em" data-pageid="'
@@ -198,14 +199,12 @@ $.widget( "heurist.navigation", {
                     var page_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                     +'&field=1&recid='+pageid;
                                     
-                    var pageCss = that.pageStyles[page_id];
+                    var pageCss = that.pageStyles[pageid];
 
                     if(page_target=='popup'){
                         
-                        var $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(page_url, null, 
-                            'Heurist', 
-                            {  container:'cms-popup-'+window.hWin.HEURIST4.util.random(),
-                                width:750,
+                        
+                        var opts =  {  container:'cms-popup-'+window.hWin.HEURIST4.util.random(),
                                 close: function(){
                                     $dlg.dialog('destroy');       
                                     $dlg.remove();
@@ -221,10 +220,51 @@ $.widget( "heurist.navigation", {
 
                                     window.hWin.HAPI4.LayoutMgr.appInitFromContainer2( $dlg );
                                 }
-                        });
+                        };
+                        
+                        var dlg_css = null;
+                        if(pageCss){
+                            
+                            if(pageCss['position']){
+                               var val = window.hWin.HEURIST4.util.isJSON(pageCss['position']);
+                               if(val==false){
+                                   delete pageCss['position'];
+                               }else{
+                                   pageCss['position'] = val;
+                               }
+                            }  
+                            opts = $.extend(opts, pageCss);
+                            
+                            dlg_css = window.hWin.HEURIST4.util.cloneJSON(pageCss);
+                            if(dlg_css['width']) delete dlg_css['width'];
+                            if(dlg_css['height']) delete dlg_css['height'];
+                            
+                        }else{
+                            opts['width']= 750;                            
+                        }                                
 
+                        
+                        var $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(page_url, null, 
+                            'Heurist', opts, dlg_css);
+                           
+                        if(dlg_css){
+                            $dlg.css(dlg_css);
+                        }
+                           
+                           
                     }else{
                         if(page_target[0]!='#') page_target = '#'+page_target;
+                        
+                        if(pageCss && Object.keys(pageCss).length>0){
+                            if(!that.pageStyles_original[page_target]){ //keep to restore
+                                that.pageStyles_original[page_target] = $(page_target).clone();
+                                //document.getElementById(page_target.substr(1)).style;//$(page_target).css();
+                            }
+                            $(page_target).css(pageCss);
+                        }else if(that.pageStyles_original[page_target]){ //restore
+                            //document.getElementById(page_target.substr(1)).style = that.pageStyles_original[page_target];
+                            $(page_target).replaceWith(that.pageStyles_original[page_target]);                            
+                        }
 
                         $(page_target).empty().load(page_url,
                             function(){
@@ -232,7 +272,7 @@ $.widget( "heurist.navigation", {
                                 var pagetitle = $($(page_target).children()[0]);
                                 if(pagetitle.is('h2')){
                                     if(page_target=='#main-content')
-                                    {
+                                    {   //move page title
                                         pagetitle.addClass("webpageheading");
                                         $('#main-pagetitle').empty().append(pagetitle);
                                     }else{

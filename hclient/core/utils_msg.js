@@ -149,7 +149,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(url){
             var isPopupDlg = (options.isPopupDlg || options.container);
             var $dlg = isPopupDlg
-                            ?window.hWin.HEURIST4.msg.getPopupDlg( options.container)
+                            ?window.hWin.HEURIST4.msg.getPopupDlg( options.container )
                             :window.hWin.HEURIST4.msg.getMsgDlg();
             $dlg.load(url, function(){
                 window.hWin.HEURIST4.msg.showMsgDlg(null, buttons, title, options);
@@ -910,11 +910,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             if(!options.height) options.height = 515;
             if(!options.width) options.width = 705;
-            options.resizable = true;
+            if(window.hWin.HEURIST4.util.isempty(options.resizable)) options.resizable = true;
+            if(false && options.resizable === true){
             options.resizeStop = function( event, ui ) {
                     $dlg.css({overflow: 'none !important','width':'100%', 'height':$dlg.parent().height()
                             - $dlg.parent().find('.ui-dialog-titlebar').height() - $dlg.parent().find('.ui-dialog-buttonpane').height() - 20 });
                 };
+            }
         }else if(!options.width){
             options.width = 'auto';
         }

@@ -444,6 +444,7 @@ window.hWin.HEURIST4.util = {
         
             try {
                 if(typeof value === 'string'){
+                    value = value.replace(/[\n\r]+/g, '');
                     value = $.parseJSON(value);    
                 }
                 if($.isArray(value) || $.isPlainObject(value)){
@@ -801,6 +802,44 @@ window.hWin.HEURIST4.util = {
             $inspector.remove(); // and remove from DOM
         }
     },
+    
+    //
+    //
+    //
+    cssToJson: function(css){
+
+        var json = {};
+
+        if(css){
+
+            var styles = css.split(';'),
+            i= styles.length,
+            style, k, v;
+
+
+            while (i--)
+            {
+                var pos = styles[i].indexOf(':');
+                if(pos>1){
+                    k = $.trim(styles[i].substr(0,pos));
+                    v = $.trim(styles[i].substr(pos+1));
+                }
+                /*style = styles[i].split(':');
+                k = $.trim(style[0]);
+                v = $.trim(style[1]);*/
+                if (k.length > 0 && v.length > 0)
+                {
+                    if(v==='true')v=true;
+                    else if(v==='false')v=false;     
+                    json[k] = v;
+                }
+            }
+        }
+
+        return json;        
+
+    },
+    
     
     /*: function(e){
         for(var r=0,i=0;i<e.length;i++){
