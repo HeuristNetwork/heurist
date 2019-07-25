@@ -108,6 +108,9 @@ $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 
 
+//it can be html, html file or smarty report
+$page_template = __getValue($rec, DT_POPUP_TEMPLATE, null); 
+
 $layout_theme = 'heurist';//'le-frog'; //__getValue($rec, DT_CMS_THEME);
 if(!$layout_theme) $layout_theme = 'heurist';
 $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
@@ -207,51 +210,47 @@ function onPageInit(success)
     if(!success) return;
     
     var ele = $('body').find('#main-content');
+    
+    //fill default elements with value from home page record
+    //@todo
+    
+    
     window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
     ele.show();
     
     //cfg_widgets is from layout_defaults.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
-/*
-    $( "#main-menu > ul" ).addClass('horizontalmenu').menu( {position:{ my: "left top", at: "left+20 bottom" }} );
-
-    $('#main-menu').show();
-    $('#main-menu').find('a').addClass('truncate').click(function(event){
-        var pageid = $(event.target).attr('data-pageid');
-        loadPageContent(pageid);
-    });
-*/    
-    $('#btn_inline_editor2').hide();
-    $('#btn_inline_editor').hide();
     
+    //reload home page content by click on logo
     $( "#main-banner").click(function(event){
-              loadPageContent(<?php print $rec_id?>);
+              loadHomePageContent(<?php print $rec_id?>);
     });
     
     setTimeout(function(){
         //init main menu
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header" );
         $('#main-menu').show();
-        //load home page
+        //load home page content
         $( "#main-banner").click(); 
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
         
         var itop = $('#main-header').height(); //[0].scrollHeight;
-        $('#btn_editor').css({top:itop-30, right:40});
+        $('#btn_editor').css({top:itop-50, right:40});
         
     },500);
     
     
 }
-function loadPageContent(pageid){
+function loadHomePageContent(pageid){
         if(pageid>0){
               window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
               $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='
                         +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
                   function(){
-                      var pagetitle = $($('#main-content').children()[0]).addClass("webpageheading");
-                      $('#main-pagetitle').empty().append(pagetitle);
+                      var pagetitle = $($('#main-content').children()[0]);
+                      pagetitle.remove();
+                      $('#main-pagetitle').empty();
                       window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
                       window.hWin.HEURIST4.msg.sendCoverallToBack();
               });
@@ -349,8 +348,21 @@ body{
 }
 #main-header{
     background:rgb(112,146,190);
-    height:160px;   
+    height:180px;   
     padding: 0.5em;
+    padding-bottom:0;
+}
+#main-menu .horizontalmenu > li.ui-menu-item > a{
+   font-weight:bold !important; 
+}
+#main-pagetitle{
+    position: absolute;
+    padding: 10;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    min-height: 19px;
 }
 <?php
     if(!$edit_Available){
@@ -366,6 +378,19 @@ div.coverall-div {
 
 </head>
 <body>
+<?php
+/*
+if ($page_template!=null) {
+if(substr($page_template,-1,4)=='.tpl'){
+    
+//}else if(substr($page_template,0,4)=='http' && substr($page_template,-1,5)=='.html'){
+}else{
+    
+}
+}
+*/
+?>
+
     <div class="ent_wrapper">
     <div id="main-header" class="ent_header" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\');background-repeat: repeat-x;background-size:auto 170px;"':'' ?>>
 	    <div style="float:left;min-height:80px;" id="main-banner">
@@ -375,7 +400,7 @@ div.coverall-div {
             </a>
         </div>
         <div id="main-title" style="float:left;padding: 35px 0 0 20px;vertical-align:middle;">
-            <h2 class="webpageheading"><?php print __getValue($rec, DT_NAME);?></h2>
+            <h2 class="webpageheading" style="font-size:1.7em;"><?php print __getValue($rec, DT_NAME);?></h2>
         </div>
         
             <div id="host_info" style="float:right;vertical-align: middle;height:40px;margin-right: 15px;margin-top: 15px">
@@ -387,14 +412,13 @@ div.coverall-div {
             </a> 
             </div>
         
-	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;font-weight:bold !important" data-heurist-app-id="heurist_Navigation">
+	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;" data-heurist-app-id="heurist_Navigation">
 <span style="display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal"}</span>
         </div>
         
 <?php        
 if($edit_Available){        
     ?>        
-        <a href="#" id="btn_inline_editor2" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page headers</a>
         <a href="#" id="btn_inline_editor" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page content</a>
         <a href="#" id="btn_inline_editor3" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">source</a>
         <input id="edit_mode" type="hidden"/>
@@ -405,9 +429,9 @@ if($edit_Available){
         .'style="position:absolute;right:40px, top:110px,font-size:1.1em;font-weight:bold;color:blue;">Web site editor</a>';
 }
     ?>  
-        <div id="main-pagetitle" style="position:absolute;padding:4;bottom:4"></div>       
+        <div id="main-pagetitle"></div>       
     </div>
-    <div class="ent_content_full" style="top:165px;padding: 5px;">
+    <div class="ent_content_full" style="top:180px;padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" data-viewonly="<?php print ($hasAccess)?0:1;?>">
         </div>
 <?php        

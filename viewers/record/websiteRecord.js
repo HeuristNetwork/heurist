@@ -140,11 +140,11 @@ function onPageInit(success){
     $('#btn_refresh_menu').click( __reloadMainMenu );
     
     $('#btn_inline_editor')
-            .css({position:'absolute', right:'90px', top:itop-30, 'font-size':'1.1em'})
+            .css({position:'absolute', right:'90px', top:itop-50, 'font-size':'1.1em'})
             .click(function( event ){
                 
                 $('#btn_inline_editor').hide();
-                $('#btn_inline_editor2').hide();
+                //$('#btn_inline_editor2').hide();
                 $('#btn_inline_editor3').hide();
                 $('#btn_inline_editor').text('Edit page content');
                 $('#btn_inline_editor3').text('source');
@@ -167,14 +167,14 @@ function onPageInit(success){
             .show();
 
     $('#btn_inline_editor3')
-            .css({position:'absolute', right:'40px', top:itop-30, 'font-size':'1.1em'})
+            .css({position:'absolute', right:'40px', top:itop-50, 'font-size':'1.1em'})
             .click(function( event ){
                 
                 if(_isDirectEditMode()){
                     //save changes
                     __saveChanges( true );
                 }else{
-                    $('#btn_inline_editor2').hide();
+                    //$('#btn_inline_editor2').hide();
                     $('#btn_inline_editor').text('wyswyg');
                     $('#btn_inline_editor3').text('Save');
                     
@@ -189,8 +189,8 @@ function onPageInit(success){
             .show();
             
             
-    $('#btn_inline_editor2')
-            .css({position:'absolute', right:'40px', top:itop-70, 'font-size':'1.1em'}).show();
+    //$('#btn_inline_editor2')
+    //        .css({position:'absolute', right:'40px', top:itop-90, 'font-size':'1.1em'}).show();
             
 
     //
@@ -234,8 +234,14 @@ function onPageInit(success){
             $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 +'&field=1&recid='+pageid, function()
                 {
-                        var pagetitle = $($('#main-content').children()[0]).addClass("webpageheading");
+                        var pagetitle = $($('#main-content').children()[0]);
+                        if(pageid==home_pageid){
+                            pagetitle.empty();
+                        }
+                        pagetitle.addClass("webpageheading");
                         $('#main-pagetitle').empty().append(pagetitle);
+                        
+                        
                         $('.tinymce-body').val($('#main-content').html());
                         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -311,7 +317,7 @@ function onPageInit(success){
                 tinymce.remove('.tinymce-body');
             }
             $('#btn_inline_editor').show();
-            $('#btn_inline_editor2').show();
+            //$('#btn_inline_editor2').show();
             $('#btn_inline_editor3').show();
             $('#btn_inline_editor').text('Edit page content');
             $('#btn_inline_editor3').text('source');
@@ -346,13 +352,13 @@ function onPageInit(success){
         
         if(is_viewonly){
             $('#btn_inline_editor').hide();
-            $('#btn_inline_editor2').hide();
+            //$('#btn_inline_editor2').hide();
             $('#btn_inline_editor3').hide();
         }else{
             var itop = $('#main-header').height(); //[0].scrollHeight;
-            $('#btn_inline_editor2').css({top:itop-70});
-            $('#btn_inline_editor').css({top:itop-30});
-            $('#btn_inline_editor3').css({top:itop-30});
+            //$('#btn_inline_editor2').css({top:itop-90});
+            $('#btn_inline_editor').css({top:itop-50});
+            $('#btn_inline_editor3').css({top:itop-50});
         }
     }    
     

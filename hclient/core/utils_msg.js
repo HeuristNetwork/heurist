@@ -744,6 +744,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         $dlg.remove();
                     }
             };
+            if(options["position"]) opts["position"] = options["position"];
+            
+            
             $dlg.dialog(opts);
 
             if(options.borderless){
