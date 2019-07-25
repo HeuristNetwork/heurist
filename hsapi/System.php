@@ -969,7 +969,7 @@ error_log(print_r($_REQUEST, true));
     */
     public function is_member($ugs){
         
-        if($ugs==0 || $ugs==null ||count($ugs)==0){
+        if($ugs==0 || $ugs==null || (is_array($ugs) && count($ugs)==0)){
             return true;
         }
         

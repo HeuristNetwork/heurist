@@ -388,7 +388,7 @@ div.coverall-div {
             </div>
         
 	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;font-weight:bold !important" data-heurist-app-id="heurist_Navigation">
-<span style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal"}</span>
+<span style="display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal"}</span>
         </div>
         
 <?php        
@@ -398,6 +398,7 @@ if($edit_Available){
         <a href="#" id="btn_inline_editor" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page content</a>
         <a href="#" id="btn_inline_editor3" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">source</a>
         <input id="edit_mode" type="hidden"/>
+        <a href="#" id="btn_refresh_menu" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">refresh menu</a>
 <?php        
 }else if($system->is_member(2)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$rec_id.'" id="btn_editor" target="_blank" '

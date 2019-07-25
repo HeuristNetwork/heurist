@@ -464,7 +464,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 
             }else if(@$this->data['a'] == 'delete'){
                 
-                $res = $this->detailsDelete();
+                $res = $this->detailsDelete(true);
             }
             
             if($res===false){
@@ -634,7 +634,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
     /**
     * Remove detail value for given set of records and detail type and values
     */
-    public function detailsDelete(){
+    public function detailsDelete($unconditionally=false){
 
         if(!$this->_validateParamsAndCounts()){
             return false;
@@ -698,23 +698,26 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 continue;
             }
 
-            //validate if details can be deleted for required fields            
-            if(count($this->rtyIDs)>1){
-                //get rectype for current record   
-                $rectype_ID = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$recID);
-            }else{
-                $rectype_ID = $this->rtyIDs[0];
-            }
-            if(array_search($rectype_ID, $rtyRequired)!==FALSE){ //this is required field
-                if(!$isDeleteAll){
-                    //find total count
-                    $total_cnt = mysql__select_value($mysqli, "select count() from recDetails where ".
-                        " where dtl_RecID = $recID and dtl_DetailTypeID = $dtyID");
-                    
+            
+            if(!$unconditionally){
+                //validate if details can be deleted for required fields            
+                if(count($this->rtyIDs)>1){
+                    //get rectype for current record   
+                    $rectype_ID = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$recID);
+                }else{
+                    $rectype_ID = $this->rtyIDs[0];
                 }
-                if($isDeleteAll || ($total_cnt == count($valuesToBeDeleted))){
-                    array_push($limitedRecIDs, $recID);
-                    continue;
+                if(array_search($rectype_ID, $rtyRequired)!==FALSE){ //this is required field
+                    if(!$isDeleteAll){
+                        //find total count
+                        $total_cnt = mysql__select_value($mysqli, "select count() from recDetails where ".
+                            " where dtl_RecID = $recID and dtl_DetailTypeID = $dtyID");
+                        
+                    }
+                    if($isDeleteAll || ($total_cnt == count($valuesToBeDeleted))){
+                        array_push($limitedRecIDs, $recID);
+                        continue;
+                    }
                 }
             }
             

@@ -326,7 +326,7 @@ function editCMS(home_page_record_id, main_callback){
                                                 d.find( "#btn_inline_editor2").click(function(event){
                                                         _editHomePageRecord();
                                                 });
-                                                //
+                                                //coverall for left side panel by invokation from websiteRecord.js
                                                 d.find( "#edit_mode").on({click:function(event){
                                                         if($(event.target).val()==1){
                                                             $('<div>').addClass('coverall-div-bare')
@@ -336,10 +336,10 @@ function editCMS(home_page_record_id, main_callback){
                                                             edit_dialog.find('.ui-layout-west').find('.coverall-div-bare').remove();
                                                         }
                                                 }});
-                                                
                                             }});
                                         }//no access
 
+                                        
                                         //reload preview
                                         btn_refresh.button({icon:'ui-icon-refresh'}).click(function(){
                                             //load new content to iframe
@@ -390,7 +390,7 @@ function editCMS(home_page_record_id, main_callback){
                                     //add,edit menu,edit page,remove
                                     var actionspan = $('<div class="svs-contextmenu3" data-parentid="'
                                           +item.data.parent_id+'" data-menuid="'+menu_id+'" data-pageid="'+page_id+'" >'
-                                          //+menu_id
+                                          +menu_id
                                         +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
                                         +'<span class="ui-icon ui-icon-menu" title="Edit menu record"></span>'
                                         +'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
@@ -455,8 +455,8 @@ function editCMS(home_page_record_id, main_callback){
                                             }else if(ele.hasClass('ui-icon-trash')){
                                                 removeMenuEntry(parent_id, menuid, function(){
                                                     item.remove();    
-                                                    //@todo 
                                                     //refresh preview
+                                                    refreshMainMenu();
                                                 });
                                             }
 
@@ -518,12 +518,12 @@ function editCMS(home_page_record_id, main_callback){
                                     preventRecursiveMoves: true,
                                     autoExpandMS: 400,
                                     dragStart: function(node, data) {
-                                        return true;
+                                        return !no_access;
                                     },
                                     dragEnter: function(node, data) {
                                         //data.otherNode - dragging node
                                         //node - target node
-                                        return !no_access; //node.folder ?['over'] :["before", "after"];
+                                        return true; //node.folder ?['over'] :["before", "after"];
                                     },
                                     dragDrop: function(node, data) {
                                         //data.otherNode - dragging node
@@ -546,7 +546,7 @@ function editCMS(home_page_record_id, main_callback){
                                         request.actions.push(
                                             {a: 'delete',
                                                 recIDs: source_parent,
-                                                dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                                dtyID: source_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
                                                 sVal:data.otherNode.key});
 
                                         }
@@ -573,6 +573,7 @@ function editCMS(home_page_record_id, main_callback){
                                                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                                                 if(response.status == hWin.ResponseStatus.OK){
                                                     window.hWin.HEURIST4.msg.showMsgFlash('saved');
+                                                    refreshMainMenu();
                                                 }else{
                                                     window.hWin.HEURIST4.msg.showMsgErr(response);
                                                 }
@@ -741,6 +742,12 @@ function editCMS(home_page_record_id, main_callback){
         });                                        
         
     }
+    
+    function refreshMainMenu(){
+        var preview_frame = edit_dialog.find('#web_preview');
+        preview_frame[0].contentWindow.reloadMainMenu();
+    }
+    
     
 }
    

@@ -136,6 +136,9 @@ function onPageInit(success){
 
     var itop = $('#main-header').height();
     
+   
+    $('#btn_refresh_menu').click( __reloadMainMenu );
+    
     $('#btn_inline_editor')
             .css({position:'absolute', right:'90px', top:itop-30, 'font-size':'1.1em'})
             .click(function( event ){
@@ -823,4 +826,20 @@ function onPageInit(success){
         
     }
  
+   
+    function __reloadMainMenu(){
+        
+         $('#main-menu').empty().append($('<span style="display: none;">{"menu_recIDs":"'
+            +home_pageid
+            +'","use_next_level":true,"orientation":"horizontal"}</span>'));
+ 
+         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header", 
+                    {heurist_Navigation:{onmenuselect:__iniLoadPageById}} );
+        
+    }
+ 
+}
+
+function reloadMainMenu(){
+    $('#btn_refresh_menu').click();
 }
