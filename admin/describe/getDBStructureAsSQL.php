@@ -513,11 +513,11 @@ function print_row($row,$fmt) {
 
         case 'defRecTypes': // Data from the defRecTypes table
             if($row['rty_ID'] != 0) {
-                $rty_Name = $mysqli->real_escape_string($row['rty_Name']); // escapes RTF-8 characters
-                $rty_Description = $mysqli->real_escape_string($row['rty_Description']);
-                $rty_TitleMask = $mysqli->real_escape_string($row['rty_TitleMask']);
+                $rty_Name = htmlspecialchars($mysqli->real_escape_string($row['rty_Name'])); // escapes RTF-8 characters
+                $rty_Description = htmlspecialchars($mysqli->real_escape_string($row['rty_Description']));
+                $rty_TitleMask = htmlspecialchars($mysqli->real_escape_string($row['rty_TitleMask']));
                 $rty_CanonicalTitleMask = $mysqli->real_escape_string($row['rty_CanonicalTitleMask']);
-                $rty_Plural = $mysqli->real_escape_string($row['rty_Plural']);
+                $rty_Plural = htmlspecialchars($mysqli->real_escape_string($row['rty_Plural']));
                 $rty_NameInOriginatingDB = $mysqli->real_escape_string($row['rty_NameInOriginatingDB']);
                 $rty_RecTypeGroupID = $mysqli->real_escape_string($row['rty_RecTypeGroupID']);
                 $rty_ReferenceURL = $mysqli->real_escape_string($row['rty_ReferenceURL']);
@@ -544,10 +544,10 @@ function print_row($row,$fmt) {
         
             $dty_FieldSetRecTypeID = $row['dty_FieldSetRecTypeID']>0?$row['dty_FieldSetRecTypeID']:0;
         
-            $dty_Name = $mysqli->real_escape_string($row['dty_Name']);
-            $dty_Documentation = $mysqli->real_escape_string($row['dty_Documentation']);
-            $dty_HelpText = $mysqli->real_escape_string($row['dty_HelpText']);
-            $dty_ExtendedDescription = $mysqli->real_escape_string($row['dty_ExtendedDescription']);
+            $dty_Name = htmlspecialchars($mysqli->real_escape_string($row['dty_Name']));
+            $dty_Documentation = htmlspecialchars($mysqli->real_escape_string($row['dty_Documentation']));
+            $dty_HelpText = htmlspecialchars($mysqli->real_escape_string($row['dty_HelpText']));
+            $dty_ExtendedDescription = htmlspecialchars($mysqli->real_escape_string($row['dty_ExtendedDescription']));
             $dty_EntryMask = $mysqli->real_escape_string($row['dty_EntryMask']);
             $dty_JsonTermIDTree = $mysqli->real_escape_string($row['dty_JsonTermIDTree']);
             $dty_TermIDTreeNonSelectableIDs = $mysqli->real_escape_string($row['dty_TermIDTreeNonSelectableIDs']);
@@ -572,10 +572,10 @@ function print_row($row,$fmt) {
             break;
 
         case 'defRecStructure': // Data from the defRecStructure table
-            $rst_DisplayName = $mysqli->real_escape_string($row['rst_DisplayName']);
-            $rst_DisplayHelpText = $mysqli->real_escape_string($row['rst_DisplayHelpText']);
-            $rst_DisplayExtendedDescription = $mysqli->real_escape_string($row['rst_DisplayExtendedDescription']);
-            $rst_DefaultValue = $mysqli->real_escape_string($row['rst_DefaultValue']);
+            $rst_DisplayName = htmlspecialchars($mysqli->real_escape_string($row['rst_DisplayName']));
+            $rst_DisplayHelpText = htmlspecialchars($mysqli->real_escape_string($row['rst_DisplayHelpText']));
+            $rst_DisplayExtendedDescription = htmlspecialchars($mysqli->real_escape_string($row['rst_DisplayExtendedDescription']));
+            $rst_DefaultValue = htmlspecialchars($mysqli->real_escape_string($row['rst_DefaultValue']));
             $rst_FilteredJsonTermIDTree = $mysqli->real_escape_string($row['rst_FilteredJsonTermIDTree']);
             $rst_TermIDTreeNonSelectableIDs = $mysqli->real_escape_string($row['rst_TermIDTreeNonSelectableIDs']);
             $rst_PtrFilteredIDs = $mysqli->real_escape_string($row['rst_PtrFilteredIDs']);
@@ -618,7 +618,7 @@ function print_row($row,$fmt) {
 
         case 'defTerms': // Data from the rec_details_lookup table
             $trm_Label = $mysqli->real_escape_string($row['trm_Label']);
-            $trm_Description = $mysqli->real_escape_string($row['trm_Description']);
+            $trm_Description = htmlspecialchars($mysqli->real_escape_string($row['trm_Description']));
             $trm_SemanticReferenceURL = $mysqli->real_escape_string($row['trm_SemanticReferenceURL']);
             $trm_IllustrationURL = $mysqli->real_escape_string($row['trm_IllustrationURL']);
             
@@ -734,7 +734,7 @@ function print_row($row,$fmt) {
         case 'sysUGrps': // User details - data from sysUGrps table
             $ugr_Name = $mysqli->real_escape_string($row['ugr_Name']);
             $ugr_LongName = $mysqli->real_escape_string($row['ugr_LongName']);
-            $ugr_Description = $mysqli->real_escape_string($row['ugr_Description']);
+            $ugr_Description = htmlspecialchars($mysqli->real_escape_string($row['ugr_Description']));
             $ugr_Password = $mysqli->real_escape_string($row['ugr_Password']);
             $ugr_eMail = $mysqli->real_escape_string($row['ugr_eMail']);
             $ugr_FirstName = $mysqli->real_escape_string($row['ugr_FirstName']);
