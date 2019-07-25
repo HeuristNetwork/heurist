@@ -111,7 +111,7 @@ function onPageInit(success){
     });
     */
     //reload home
-    $( "#main-banner").click(function(event){
+    $( "#main-logo").click(function(event){
         __iniLoadPageById( home_pageid);
     });
 
@@ -119,9 +119,13 @@ function onPageInit(success){
     setTimeout(function(){
         __alignButtons();
         
+        
         //init main menu in header
-        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header", 
-                    {heurist_Navigation:{onmenuselect:__iniLoadPageById}} );
+        var topmenu = $('#main-menu');
+        topmenu.attr('data-heurist-app-id','heurist_Navigation');
+        
+        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
+            {heurist_Navigation:{menu_recIDs:home_pageid, use_next_level:true, orientation:'horizontal', onmenuselect:__iniLoadPageById }} );
         
         $('#main-menu').show()
         
@@ -832,7 +836,7 @@ function onPageInit(success){
         
     }
  
-   
+    //not used
     function __reloadMainMenu(){
         
          $('#main-menu').empty().append($('<span style="display: none;">{"menu_recIDs":"'

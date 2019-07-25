@@ -149,8 +149,12 @@ function editCMS(home_page_record_id, main_callback){
 
     function onDialogInit(){
         
-            web_link = $('<div>').css({padding:'14px 0 0 12px'})
-                .appendTo( edit_dialog.parent().find('.ui-dialog-buttonpane') );
+            web_link = edit_dialog.parent().find('.ui-dialog-buttonpane').find('#web_link');
+        
+            if(web_link.length==0){
+                web_link = $('<div>').attr('id','web_link').css({padding:'14px 0 0 12px'})
+                    .appendTo( edit_dialog.parent().find('.ui-dialog-buttonpane') );
+            }
 
 
             if(home_page_record_id<0){

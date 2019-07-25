@@ -68,19 +68,24 @@ $publishmode = 0;
 $execution_counter = 0;
 $execution_total_counter = 0;
 
-$system = new System(); 
-if($system->init(@$_REQUEST['db'])){
+$is_included = isset($system); //this script is included into other one
 
-    require_once(dirname(__FILE__).'/smartyInit.php');
-    require_once(dirname(__FILE__).'/reportRecord.php');
-
-    if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
-    (array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
-    {
-        executeSmartyTemplate($system, $_REQUEST);
+if(!$is_included){
+    $system = new System(); 
+    if(!$system->init(@$_REQUEST['db'])){
+        exit;
     }
-
 }
+
+require_once(dirname(__FILE__).'/smartyInit.php');
+require_once(dirname(__FILE__).'/reportRecord.php');
+
+if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
+(array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
+{
+    executeSmartyTemplate($system, $_REQUEST);
+}
+
 /*
 executeSmartyTemplate - main routine
 smarty_post_filter - SMARTY callback: adds a small piece of code in main loop with function smarty_function_progress - need to    
@@ -98,7 +103,7 @@ function executeSmartyTemplate($system, $params){
 
     //$smarty is inited in smartyInit.php
     global $smarty, $outputfile, $isJSout, $gparams, $max_allowed_depth, $publishmode,
-           $execution_counter, $execution_total_counter;
+           $execution_counter, $execution_total_counter, $is_included;
 
     $isJSout     = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
     $outputfile  = (array_key_exists("output", $params)) ? $params["output"] :null;
@@ -328,7 +333,7 @@ function executeSmartyTemplate($system, $params){
     $execution_counter = -1;
     $execution_total_counter = count($results);
     try{
-        if($outputfile==null && $publishmode==1){
+        if($outputfile==null && $publishmode==1 && !$is_included){
             header("Content-type: text/html;charset=UTF-8");
         }
         $smarty->display($template_file);
@@ -383,7 +388,7 @@ function smarty_output_filter($tpl_source, Smarty_Internal_Template $template)
 //
 function save_report_output2($tpl_source){
 
-    global $outputfile, $isJSout, $gparams, $publishmode;
+    global $outputfile, $isJSout, $gparams, $publishmode, $is_included;
 
     $errors = null;
     $res_file = null;

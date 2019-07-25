@@ -9,7 +9,7 @@
     *  field - if defined it is assumed web page and it returns only DT_EXTENDED_DESCRIPTION
     * 
     * if home page has defined template file it is loaded as body, otherwise default template
-    * that includes header with main-banner, main-title, main-menu and 
+    * that includes header with main-logo, main-title, main-menu and 
     * main-content where content of particular page will be loaded
     *  
     * 
@@ -107,9 +107,6 @@ $image_banner = __getFile($rec, DT_CMS_BANNER, null);
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 
-
-//it can be html, html file or smarty report
-$page_template = __getValue($rec, DT_POPUP_TEMPLATE, null); 
 
 $layout_theme = 'heurist';//'le-frog'; //__getValue($rec, DT_CMS_THEME);
 if(!$layout_theme) $layout_theme = 'heurist';
@@ -223,16 +220,22 @@ function onPageInit(success)
     
     
     //reload home page content by click on logo
-    $( "#main-banner").click(function(event){
+    $( "#main-logo").click(function(event){
               loadHomePageContent(<?php print $rec_id?>);
     });
     
     setTimeout(function(){
         //init main menu
-        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header" );
+        //add menu definitions to main-menu
+        var topmenu = $('#main-menu');
+        topmenu.attr('data-heurist-app-id','heurist_Navigation');
+                
+        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
+            {heurist_Navigation:{menu_recIDs:"<?php print $rec_id;?>", use_next_level:true, orientation:'horizontal' }} );
+            
         $('#main-menu').show();
         //load home page content
-        $( "#main-banner").click(); 
+        $( "#main-logo").click(); 
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
         
         var itop = $('#main-header').height(); //[0].scrollHeight;
@@ -379,21 +382,26 @@ div.coverall-div {
 </head>
 <body>
 <?php
-/*
-if ($page_template!=null) {
-if(substr($page_template,-1,4)=='.tpl'){
+//it can be html, html file or smarty report
+$page_template = __getValue($rec, DT_POPUP_TEMPLATE, null); 
+
+//implemented for template only
+if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
     
-//}else if(substr($page_template,0,4)=='http' && substr($page_template,-1,5)=='.html'){
+    $_REQUEST['publish'] = '1';
+    $_REQUEST['debug'] = '0';
+    $_REQUEST['q'] = 'ids:'.$rec_id;
+    $_REQUEST['template'] = $page_template;
+
+    include dirname(__FILE__).'/../../viewers/smarty/showReps.php';
+    
 }else{
-    
-}
-}
-*/
+
 ?>
 
     <div class="ent_wrapper">
     <div id="main-header" class="ent_header" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\');background-repeat: repeat-x;background-size:auto 170px;"':'' ?>>
-	    <div style="float:left;min-height:80px;" id="main-banner">
+	    <div style="float:left;min-height:80px;" id="main-logo">
             <a href="#" style="text-decoration:none;">
         <?php print $image_logo?'<img style="max-height:80px" src="'.$image_logo.'">'
             :'<div style="text-align:center;display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image</div>';?>
@@ -412,8 +420,7 @@ if(substr($page_template,-1,4)=='.tpl'){
             </a> 
             </div>
         
-	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;" data-heurist-app-id="heurist_Navigation">
-<span style="display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal"}</span>
+	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;">
         </div>
         
 <?php        
@@ -441,6 +448,9 @@ if($edit_Available){
 ?>        
     </div>
     </div>
+<?php
+}
+?>    
 </body>
 </html>
 
