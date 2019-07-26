@@ -75,7 +75,7 @@
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Size":63,
-                        "rst_DisplayWidth":43,
+                        "rst_DisplayWidth":25,
                         "rst_DisplayName": "Label:",
                         "rst_DisplayHelpText": "The short text which will describe this function on the dashboard", 
                         "rst_RequirementType":"required"

@@ -360,7 +360,7 @@ body{
 }
 #main-pagetitle{
     position: absolute;
-    padding: 10;
+    padding: 15 0 5 10;
     bottom: 0;
     left: 0;
     right: 0;
@@ -422,16 +422,9 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         
 	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size: 1.1em;">
         </div>
-        
+
 <?php        
-if($edit_Available){        
-    ?>        
-        <a href="#" id="btn_inline_editor" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">Edit page content</a>
-        <a href="#" id="btn_inline_editor3" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">source</a>
-        <input id="edit_mode" type="hidden"/>
-        <a href="#" id="btn_refresh_menu" style="display:none;font-size:1.2em;font-weight:bold;color:blue;">refresh menu</a>
-<?php        
-}else if($system->is_member(2)){
+if($system->is_member(2)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$rec_id.'" id="btn_editor" target="_blank" '
         .'style="position:absolute;right:40px, top:110px,font-size:1.1em;font-weight:bold;color:blue;">Web site editor</a>';
 }
@@ -441,11 +434,6 @@ if($edit_Available){
     <div class="ent_content_full" style="top:180px;padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" data-viewonly="<?php print ($hasAccess)?0:1;?>">
         </div>
-<?php        
-if($edit_Available){        
-        print '<textarea class="tinymce-body" style="position:absolute;left:0;width:99.9%;top:0;bottom:0;display:none"></textarea>';
-}
-?>        
     </div>
     </div>
 <?php

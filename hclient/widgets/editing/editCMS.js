@@ -205,6 +205,7 @@ function editCMS(home_page_record_id, main_callback){
                     }
             }}
         );
+        
     }
 
     //  
@@ -336,9 +337,8 @@ function editCMS(home_page_record_id, main_callback){
                                             preview_frame.on({load:function(){
                                                 //find elements in preview that opens home page record editor
                                                 var d = $(preview_frame[0].contentWindow.document);
-                                                /*d.find( "#btn_inline_editor2").click(function(event){
-                                                        _editHomePageRecord();
-                                                });*/
+                                                d.find( "#btn_inline_editor4").click();
+                                                
                                                 //coverall for left side panel by invokation from websiteRecord.js
                                                 d.find( "#edit_mode").on({click:function(event){
                                                         if($(event.target).val()==1){
@@ -434,7 +434,7 @@ function editCMS(home_page_record_id, main_callback){
                                             +'" title="Remove menu entry from website (record retains)"></span>'
                                         +'</div>').appendTo(parent_span);
 
-                                    $('<div class="svs-contextmenu4"/>').appendTo(parent_span);
+                                    $('<div class="svs-contextmenu4"/>').appendTo(parent_span); //progress icon
 
                                     actionspan.find('.ui-icon').click(function(event){
                                         var ele = $(event.target);

@@ -212,8 +212,8 @@ $.widget( "heurist.search", {
 
         
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'37px', 'max-height':'70px', //'height':'2.5em', 'max-height':'67px', 
-            'padding':'0.4em','min-height':'29px', 
+        .css({'margin-right':'0.2em', 'height':'40px', 'max-height':'70px', //'height':'2.5em', 'max-height':'67px', 
+            'padding':'0.4em','min-height':'33px', 
             'min-width':'10em', 'width':'100%', 'padding-right':'18px' })  //was width:sz_input, 'max-width':sz_input,  
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
