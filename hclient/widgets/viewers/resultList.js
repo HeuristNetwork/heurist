@@ -319,7 +319,7 @@ $.widget( "heurist.resultList", {
         this.div_header =  $( "<div>" ).css('height','3em').appendTo( this.element );
 
         $('<div class="result-list-header">')
-        .css('padding','0.7em 0 0 0.7em')
+        .css('padding','0.7em 0 0 20px')  //padding left to align to search input field
         .appendTo(this.div_header);
         
         this.setHeaderText('<h3>'+window.hWin.HR('Filtered Result')+'</h3>');
@@ -490,7 +490,7 @@ $.widget( "heurist.resultList", {
         if(this.options.show_menu){
             if($.isFunction($('body').resultListMenu)){
                 this.div_actions = $('<div>')
-                .css({display:'inline-block','padding-bottom':'4px'})
+                .css({display:'inline-block','padding-bottom':'4px','padding-left':'6px'})
                 //.css({'position':'absolute','top':3,'left':2})
                 .resultListMenu({
                         menu_class: this.options.header_class,

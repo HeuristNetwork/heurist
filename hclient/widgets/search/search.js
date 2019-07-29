@@ -132,6 +132,7 @@ $.widget( "heurist.search", {
                                     'height':is_vis?'auto':'10px'})
                                 .appendTo( this.element );
         //quick filter by entity
+        $('<label>').text(window.hWin.HR('Entities')+': ').appendTo(this.div_entity_btns);
         this.btns_by_entity = $('<button>').button({label: window.hWin.HR("Show list of entities to filter"), 
                 showLabel:false, icon:'ui-icon-gear'})
         .css({'font-size':'1.1em'})        
@@ -213,7 +214,7 @@ $.widget( "heurist.search", {
         
         this.input_search = $( "<textarea>" )
         .css({'margin-right':'0.2em', 'height':'40px', 'max-height':'70px', //'height':'2.5em', 'max-height':'67px', 
-            'padding':'0.4em','min-height':'33px', 
+            'padding':'0.4em','min-height':'41px', 'line-height': '14px', 
             'min-width':'10em', 'width':'100%', 'padding-right':'18px' })  //was width:sz_input, 'max-width':sz_input,  
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
@@ -227,7 +228,7 @@ $.widget( "heurist.search", {
         //disable because of initial search
         if(this.options.btn_visible_newrecord){
             window.hWin.HEURIST4.util.setDisabled(this.input_search, true); 
-            this.input_search.css({'width':'470px','height':'1.4em','max-width':'650px'});
+            this.input_search.css({'width':'400px','height':'1.4em','max-width':'650px'});
         }else{
             this.div_search_input.css({'width':'100%'});
         }
@@ -235,7 +236,7 @@ $.widget( "heurist.search", {
         
         //quick filter by entity
         if(this.options.menu_entity_filter){
-            var div_search_help_links = $('<div>').css('padding-top','15px').appendTo(this.div_search_input);
+            var div_search_help_links = $('<div>').css('padding-top','2px').appendTo(this.div_search_input);
 
             var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
             +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')                
@@ -699,26 +700,28 @@ $.widget( "heurist.search", {
         
         this.div_entity_btns.find('.entity-filter-button').remove();
         
-        var idx=0;
-        while(idx<this.buttons_by_entity.length){
+        var idx=this.buttons_by_entity.length-1;
+        while(idx>=0){
             
             var rty_ID = this.buttons_by_entity[idx];
             
             if(rty_ID>0 && window.hWin.HEURIST4.rectypes.names[rty_ID]) {           
             
-                var btn = $('<button>').button({label: '<span class="truncate" style="max-width:100px;display:inline-block;">'
+                var btn = $('<div>').button({label:
+                '<img src="'+window.hWin.HAPI4.iconBaseURL + rty_ID + '.png" height="12">'
+                +'<span class="truncate" style="max-width:100px;display:inline-block;margin-left:2px">'
                         + window.hWin.HEURIST4.rectypes.names[rty_ID] + '</span>'
                         + '<span style="float:right;font-size:0.8em;padding:2px">('
                         +  ((window.hWin.HEURIST4.rectypes.counts[rty_ID]>0)?window.hWin.HEURIST4.rectypes.counts[rty_ID]:0)
-                        +')</span>', 
-                    showLabel:true})  //icon:window.hWin.HAPI4.iconBaseURL + rty_ID + '.png'
+                        +')</span>'}) 
                     .attr('data-id', rty_ID)
-                    .css({'font-size':'0.9em','margin-right':'6px'})        
+                    .css({'font-size':'0.9em','margin-left':'6px'})        
                     .addClass('entity-filter-button ui-state-active')
-                    .insertBefore(this.btns_by_entity); //appendTo(this.div_entity_btns);
+                    .insertAfter(this.btns_by_entity); //appendTo(this.div_entity_btns);
                 
                 this._on( btn, {  click: function(e){
-                       var selval = $(e.target).is('button')?$(e.target):$(e.target).parent('button');
+                       var selval = $(e.target).hasClass('entity-filter-button')
+                                ?$(e.target):$(e.target).parent('.entity-filter-button');
                        selval = selval.attr('data-id');
                        if(selval>0){
                            this.select_rectype_filter.val(selval);
@@ -727,7 +730,7 @@ $.widget( "heurist.search", {
                        }
                 } });
             
-                idx++;
+                idx--;
             }else{
                 //remove wrong(removed) rectypes
                 is_init = false;
@@ -735,6 +738,23 @@ $.widget( "heurist.search", {
             }
             
         }//for
+        
+        var that = this;
+        this.div_entity_btns.sortable({
+            //containment: 'parent',
+            items: '.entity-filter-button',
+            cursor: 'move',
+            handle:'img',
+            delay: 250,
+            axis: 'x',
+            stop:function(){
+                that.buttons_by_entity = [];
+                $.each(that.div_entity_btns.find('.entity-filter-button'),function(idx, item){
+                  that.buttons_by_entity.push( $(item).attr('data-id') );
+                })
+                window.hWin.HAPI4.save_pref('entity_filter_btns', that.buttons_by_entity.join(','));
+            }}
+        );
         
         if(is_init!==true){
             //save in user preferences
