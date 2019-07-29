@@ -1,5 +1,5 @@
 /**
-* mapManager.js - manage layers and proejcts
+* mapManager.js - manage layers and proejcts - map legend
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -220,7 +220,7 @@ function hMapManager( _options )
     // redraw legend entries
     //
     function _defineContent(groupID, data, container){
-        
+
         var content = null;
         
         if(groupID=='search'){

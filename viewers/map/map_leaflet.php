@@ -103,8 +103,6 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/vis/dist/vis.css" />
 
 <style>
-    .ui-map-document { background-image: url('<?php echo PDIR;?>hclient/assets/mapdocument.png') !important;}
-    .ui-map-layer { background-image: url('<?php echo PDIR;?>hclient/assets/maplayer.png') !important;}
     
     .leaflet-div-icon {
         background: none;
@@ -203,7 +201,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         function __gp(name){
             return window.hWin.HEURIST4.util.getUrlParameter(name, location.search)
         }
-console.log('onPageInit');
+
         var layout_params = null;
         is_init_here = __gp('noinit')!='1';
         if(is_init_here){    //take parameters from url 
@@ -222,7 +220,7 @@ console.log('onPageInit');
             layout_params['extent'] = __gp('extent'); //@todo
             
             layout_params['controls'] = __gp('controls'); //comma separated list of visible controls
-            layout_params['legend'] = __gp('legend'); //comma separated list of visible panels
+            layout_params['legend'] = __gp('legend'); //comma separated list of visible panels: basemap,search,mapdocs
             layout_params['template'] = __gp('template'); //smarty template for popup info
             
             layout_params['published'] = '1';

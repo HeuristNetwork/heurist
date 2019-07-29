@@ -1911,3 +1911,6 @@ input[type="file"] {
 .mce-path{
     display:none !important;   
 }
+
+.ui-map-document { background-image: url('hclient/assets/mapdocument.png') !important;}
+.ui-map-layer { background-image: url('hclient/assets/maplayer.png') !important;}

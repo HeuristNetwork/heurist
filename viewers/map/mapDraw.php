@@ -30,6 +30,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 ?>
     <link rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/leaflet.css"/>
     <script type="text/javascript" src="<?php echo PDIR;?>external/leaflet/leaflet.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
     <script src="<?php echo PDIR;?>external/leaflet/geocoder/Control.Geocoder.js"></script>
 <?php
 }else{
@@ -41,6 +42,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
        integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
        crossorigin=""></script>   
     <!-- link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" /-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.16.1/jquery.fancytree-all.min.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 <?php
 }
@@ -52,6 +54,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <script src="<?php echo PDIR;?>external/leaflet/leaflet.circle.topolygon-src.js"></script>
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/bookmarks/leaflet.bookmarks.css">
 <link type="text/css" rel="stylesheet" href="<?php echo PDIR;?>external/leaflet/draw/leaflet.draw.css">
+<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 
         
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapping.js"></script>
@@ -107,7 +110,7 @@ console.log('load google map api')
                 layout_params['nocluster'] = '1'
             
                 layout_params['controls'] = 'legend,bookmark,geocoder,draw';
-                layout_params['legend'] = 'basemaps';
+                layout_params['legend'] = 'basemaps,mapdocs';
                 
                 initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search);
         
@@ -347,7 +350,7 @@ console.log(el_name+'  '+is_checked);
                 text-align:center;
                 position: absolute;
                 top: 50px;
-                width: 200px;
+                width: 196px;
                 right: 0px;
                 bottom: 0px;
             }

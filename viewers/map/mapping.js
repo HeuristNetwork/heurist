@@ -1038,8 +1038,20 @@ $.widget( "heurist.mapping", {
 
             var is_new_markercluster = window.hWin.HEURIST4.util.isnull(this.all_clusters[layer_id]);
             if(is_new_markercluster){
-                this.all_clusters[layer_id] = L.markerClusterGroup({showCoverageOnHover:false, 
-                                                    maxClusterRadius:this.markerClusterGridSize});
+                var opts = {showCoverageOnHover:false, 
+                                                    maxClusterRadius:this.markerClusterGridSize};
+                if(window.hWin.HAPI4.database=='digital_harlem'){
+                    opts['iconCreateFunction'] = function(cluster) {
+                        
+                        var markers = cluster.getAllChildMarkers();
+                        if(markers.length>0){
+                            markers = markers[0];
+                            return markers.options.icon;
+                        }
+                    }
+                }
+                
+                this.all_clusters[layer_id] = L.markerClusterGroup(opts);
             }else{
                 this.all_clusters[layer_id].clearLayers() 
             }
