@@ -286,7 +286,6 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 window.hWin.HEURIST4.ui.showEntityDialog('defRecTypeGroups', 
                     {edit_mode:'editonly', rec_ID: $(event.target).parent().attr('data-grp'), //select_mode:'single', 
                     onselect:function(event, data){
-console.log(data);                        
                         /*
                         $('#selected_div').empty();
                         var s = 'Selected ';

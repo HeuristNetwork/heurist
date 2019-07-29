@@ -180,7 +180,10 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_geo.js"></script>
 
-<!-- loaded by demand script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script -->
+<?php if(@$_REQUEST['ll']=='DigitalHarlem' || @$_REQUEST['ll']=='DigitalHarlem1935'){ ?>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/dh_search_minimal.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/google_analytics.js"></script>
+<?php } ?>
 
 <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
@@ -358,12 +361,14 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
             window.hWin.HAPI4.sysinfo['layout'] = layoutid; //keep current layout
 
             if(layoutid=='DigitalHarlem' || layoutid=='DigitalHarlem1935'){ //digital harlem - @todo move style to layout
+            /*
                 $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/dh_search_minimal.js').fail(function(){
                     window.hWin.HEURIST4.msg.showMsgErr('Cannot load script for DH search');
                 });
                 $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/digital_harlem/google_analytics.js').fail(function(){
                     window.hWin.HEURIST4.msg.showMsgErr('Cannot include Google Analtyics script');
                 });
+            */    
             }
         }
         

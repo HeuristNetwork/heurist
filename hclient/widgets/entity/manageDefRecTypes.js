@@ -350,6 +350,7 @@ console.log(response);
         }
         rdata.count = rdata.order.length;
         
+        
         if(this.options.import_structure){
             this.recordList.resultList('option', 'empty_remark',
                                         '<div style="padding:1em 0 1em 0">'+

@@ -632,6 +632,7 @@ $idx_type           = $def_rts['dtFieldNamesToIndex']['dty_Type'];
 $idx_terms_tree     = $def_rts['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];  //value is the same as
 $idx_terms_disabled = $def_rts['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
 $idx_constraints    = $def_rts['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+$idx_defaultvalue   = $def_rts['dtFieldNamesToIndex']['rst_DefaultValue'];
 
 $dtFieldNames = $def_rts['dtFieldNames'];
 
@@ -653,8 +654,18 @@ foreach ($this->imp_recordtypes as $rtyID){
                 $fields[ $this->fields_correspondence[$ftId] ] = $def_field;
             }
         }
-        //clear term trees and resource constraints
+        //clear term trees and resource constraints; assign default value for terms
         foreach ($fields as $ftId => $def_field){
+            
+            
+            if($def_field[$idx_type] == "enum"
+                || $def_field[$idx_type] == "relationtype" 
+                || $def_field[$idx_type] == "relmarker")
+            {
+                //change terms ids for enum and reltypes
+                $def_field[$idx_defaultvalue] = $this->replaceTermIds(@$def_field[$idx_defaultvalue], $def_field[$idx_type]);
+            }
+            
             $def_field[$idx_terms_tree] = '';
             $def_field[$idx_terms_disabled] = '';
             $def_field[$idx_constraints] = '';
