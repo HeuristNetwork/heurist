@@ -70,7 +70,7 @@ $.widget( "heurist.search", {
         }else{
             this.element.addClass('ui-widget-content');
         }
-        this.element.css({height:'100%',height:'100%'});
+        this.element.css({height:'100%',height:'100%','font-size':'0.7em'});
 
         //var css_valign = {'position': 'relative', 'top': '50%', 'transform': 'translateY(-50%)',
         //          '-webkit-transform': 'translateY(-50%)', '-ms-transform': 'translateY(-50%)'};
@@ -134,7 +134,7 @@ $.widget( "heurist.search", {
         //quick filter by entity
         $('<label>').text(window.hWin.HR('Entities')+': ').appendTo(this.div_entity_btns);
         this.btns_by_entity = $('<button>').button({label: window.hWin.HR("Show list of entities to filter"), 
-                showLabel:false, icon:'ui-icon-gear'})
+                  showLabel:false, icon:'ui-icon-gear'})
         .css({'font-size':'1.1em'})        
         .appendTo(this.div_entity_btns);
         
@@ -325,7 +325,7 @@ $.widget( "heurist.search", {
         this.btn_search_as_user = $( "<button>", {
             label: window.hWin.HR(this.options.search_button_label), title: "Apply the filter/search in the search field and display results in the central panel below"
         })
-        .css({'font-size':'1.3em', 'min-width':'9em'})  //'width':'10em', 
+        .css({'font-size':'1.3em','min-width':'9em'})  
         .appendTo( this.div_search_as_user )
         .addClass('ui-heurist-btn-header1')
         .button({showLabel:true, icon:'ui-icon-filter'});
@@ -333,7 +333,7 @@ $.widget( "heurist.search", {
         this.btn_search_domain = $( "<button>", {
             label: window.hWin.HR("filter option")
         })
-        .css({'vertical-align':'top', 'font-size':'1.45em'})
+        .css({'font-size':'1.45em','vertical-align':'top'}) 
         .appendTo( this.div_search_as_user )
         .addClass('ui-heurist-btn-header1 heurist-bookmark-search')
         .button({icon:'ui-icon-carat-1-s',  label: window.hWin.HR("filter domain"), showLabel:false});
@@ -483,7 +483,7 @@ $.widget( "heurist.search", {
             this.btn_add_record = $( "<button>", {
                 title: "Click to select a record type and create a new record (entity) in the database"
             })
-            .css({'min-width':'110px','font-size':'1.3em','max-width':'250px'})
+            .css({'font-size':'1.3em','min-width':'110px','max-width':'250px'})  
             //.addClass('logged-in-only')
             //.addClass('ui-heurist-btn-header1')
             .appendTo( this.div_add_record )
@@ -507,7 +507,7 @@ $.widget( "heurist.search", {
             .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
             
             this.btn_add_record_dialog = $( "<button>")
-            .css({'font-size':'0.765em'})
+            .css({'font-size':'0.8em'})
             .appendTo( this.div_add_record )
             .button({label: '<div style="text-align:left;display:inline-block">'
                             +window.hWin.HR('Define Parameters') +'<br>'+window.hWin.HR('Add Record')+'</div>', 
@@ -520,7 +520,7 @@ $.widget( "heurist.search", {
             this.btn_add_record_dialog.find('.ui-button-icon').css('vertical-align','baseline');
 
             this.btn_select_owner = $( "<button>")
-            .css({'font-size':'0.765em'})
+            .css({'font-size':'0.8em'})
             .appendTo( this.div_add_record )
             .button({label:'owner', icon: "ui-icon-carat-1-s", iconPosition:'end',
                      title:'Ownership and access rights for new record'}).hide();
@@ -711,11 +711,11 @@ $.widget( "heurist.search", {
                 '<img src="'+window.hWin.HAPI4.iconBaseURL + rty_ID + '.png" height="12">'
                 +'<span class="truncate" style="max-width:100px;display:inline-block;margin-left:2px">'
                         + window.hWin.HEURIST4.rectypes.names[rty_ID] + '</span>'
-                        + '<span style="float:right;font-size:0.8em;padding:2px">('
+                        + '<span style="float:right;padding:2px;font-size:0.8em;">('   
                         +  ((window.hWin.HEURIST4.rectypes.counts[rty_ID]>0)?window.hWin.HEURIST4.rectypes.counts[rty_ID]:0)
                         +')</span>'}) 
                     .attr('data-id', rty_ID)
-                    .css({'font-size':'0.9em','margin-left':'6px'})        
+                    .css({'margin-left':'6px','font-size':'0.9em'})        
                     .addClass('entity-filter-button ui-state-active')
                     .insertAfter(this.btns_by_entity); //appendTo(this.div_entity_btns);
                 

@@ -70,6 +70,8 @@ $.widget( "heurist.timeline", {
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
         
+            this.element.addClass('ui-widget');
+        
             this.timeline_ele = document.getElementById( this.options.element_timeline );
             // Configuration for the Timeline
             var options = {dataAttributes: ['id'],

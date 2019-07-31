@@ -32,6 +32,7 @@ function onPageInit(success){
         //max_height: 300,
         entity_encoding:'raw',
         inline_styles: true,
+        //content_style: "body {font-size:0.7em}",
 
         plugins: [
             'advlist autolink lists link image media preview', //anchor charmap print 

@@ -145,7 +145,8 @@ $.widget( "heurist.search_faceted", {
                     .addClass('truncate').appendTo( this.div_header );
         }
 
-        this.div_toolbar = $( "<div>" ).css({"font-size":"0.7em","float":"right","padding-top":"0.3em","padding-right":"0.6em"})
+        //"font-size":"0.7em",
+        this.div_toolbar = $( "<div>" ).css({"float":"right","padding-top":"0.3em","padding-right":"0.6em"})
                 .appendTo( this.div_header );
 
         this.btn_submit = $( "<button>", { text: window.hWin.HR("Submit") })

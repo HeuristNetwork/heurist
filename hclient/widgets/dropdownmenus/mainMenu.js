@@ -34,7 +34,7 @@ $.widget( "heurist.mainMenu", {
 
         var that = this;
 
-        this.element.css('height','100%').addClass('ui-heurist-header2')
+        this.element.css({'height':'100%'}).addClass('ui-heurist-header2')
             .disableSelection();// prevent double click to select text
 
         this.div_logo = $( "<div>")
@@ -54,7 +54,7 @@ $.widget( "heurist.mainMenu", {
         }
 
         $("<div>")                                               
-            .css({'font-size':'0.8em', 'text-align':'center', 'margin-left': '85px', 'padding-top':'12px', 'width':'100%'})
+            .css({'font-size':'0.6em', 'text-align':'center', 'margin-left': '85px', 'padding-top':'12px', 'width':'100%'})
             .html('<span style="padding-left:20px">v'+window.hWin.HAPI4.sysinfo.version+sUpdate+'</span>').appendTo( this.div_logo );
             
         // bind click events
@@ -76,14 +76,14 @@ $.widget( "heurist.mainMenu", {
 
 
         this.divProfileMenu = $( "<div>")
-        .css({'float':'right', 'margin-top':'1em' })  //one rows 'padding-right':'2em', 
+        .css({'float':'right', 'margin-top':'1em', 'font-size':'1.1em'})  //one rows 'padding-right':'2em', 
         //.css({'position':'absolute', 'right':10, 'padding-right':'2em', 'padding-top':'1em' })  //one rows
         //.addClass('logged-in-only')
         .appendTo(this.element);
 
         //dashboard button                
         this.btn_dashboard = $('<div>').button({label:'Open dashboard'})
-            .css({'float':'right', margin:'0.7em'})
+            .css({'float':'right', margin:'1.1em', 'font-size':'0.8em'})
             .addClass('ui-heurist-header2')
             .appendTo( this.element )
             .click(
@@ -104,7 +104,7 @@ $.widget( "heurist.mainMenu", {
         
         this.div_dbname = $( "<div>")
             //.css({'float':'right', 'margin-top':'1.2em', 'padding-right':'2em' })
-            .css({'float':'left', 'margin-top':'1.2em', 'margin-left':'6em'})
+            .css({'float':'left', 'margin-top':'0.8em', 'margin-left':'5em'})
             .appendTo(this.element);
             
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.sysinfo.dbrecent)){
@@ -116,7 +116,7 @@ $.widget( "heurist.mainMenu", {
             
             var wasCtrl = false;
             var selObj = window.hWin.HEURIST4.ui.createSelector(null, window.hWin.HAPI4.sysinfo.dbrecent);        
-            $(selObj).css({'font-size':'1.3em', 'font-weight':'bold','border':'none', outline:0,
+            $(selObj).css({'font-size':'1em', 'font-weight':'bold','border':'none', outline:0,
                            'min-width':'150px', 'margin-left':'25px', })
             .click(function(event){
                 wasCtrl = event.shiftKey;
@@ -139,7 +139,7 @@ $.widget( "heurist.mainMenu", {
             .val( window.hWin.HAPI4.database ).appendTo( this.div_dbname );
         }else{
             
-            $("<div>").css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
+            $("<div>").css({'font-size':'1em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',
                 'background-position': 'left center',
                 'background-repeat': 'no-repeat',
                 'background-image': 'url("'+window.hWin.HAPI4.baseURL+'hclient/assets/database.png")' })
@@ -166,7 +166,7 @@ $.widget( "heurist.mainMenu", {
         
         this.divMainMenuItems = $('<ul>')
                 .addClass('horizontalmenu')
-                .css({'float':'left', 'padding-right':'4em', 'margin-top': '1.5em'})
+                .css({'float':'left', 'padding-right':'4em', 'margin-top': '1.5em', 'font-size':'0.8em'})
                 .appendTo( this.divMainMenu );
 
         /* new entityfeatures*/

@@ -224,6 +224,9 @@ $.widget( "heurist.manageEntity", {
             return;
         }
         
+        //this.element.css({'font-size':'1em'});
+        
+        
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
         this.recordList = this.element.find('.recordList');
         //this.recordListToolbar = this.element.find('.recordList');

@@ -331,7 +331,7 @@ $(document).ready(function() {
     
 <style>
 body{
-    /*font-size:0.7em;*/
+    /* A11 font-size:0.7em;*/
 }
 #main-foooter{
     font-size:0.8em;

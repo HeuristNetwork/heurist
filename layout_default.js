@@ -114,12 +114,12 @@ var cfg_layouts = [
     // TODO: change the id and name to jsut HeuristDefault and Heurist Default - h4 and h3 are hangovers from old versions
     {id:'H5Default', name:'Heurist Def v5', theme:'heurist', type:'free',
         north_pane:{ dropable:false, dragable:false, 
-                css:{position:'absolute', top:0,left:0,height:'8em',right:0, 
+                css:{position:'absolute', top:0,left:0,height:'6em',right:0, 
                      'min-width':'75em'}, 
             apps:[{appid:'heurist_mainMenu', hasheader:false, css:{height:'100%', border:'solid'}}] 
         },
         center_pane:{ dockable:false, dropable:false, dragable:false, 
-                css:{position:'absolute', top:'8em',left:0,bottom:0,right:0},
+                css:{position:'absolute', top:'6em',left:0,bottom:0,right:0},
             apps:[{appid:'include_layout', 
                         name: 'Filter-Analyse-Publish',
                         layout_id:'FAP',dragable:false,
@@ -164,7 +164,7 @@ var cfg_layouts = [
     },
         
     {id:'SearchAnalyze2', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
-        north:{size:'11em', resizable:false, overflow:'hidden',
+        north:{size:'7em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'heurist_Search', hasheader:false, 
                 css:{position:'absolute', top:0, left:0, right:0,bottom:0,
@@ -172,7 +172,7 @@ var cfg_layouts = [
             options:{has_paginator:false, btn_visible_newrecord:true} }, 
         ]},
         center:{Xminsize:300, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false, 
-                     dockable:false, dragable:false, css:{'background-color':'white'}, 
+                     dockable:false, dragable:false, css:{'background-color':'white','font-size':'12px'}, 
                      options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true, header_class:'ui-heurist-header2',show_url_as_link:true} }]},  //search result
         east:{size:'50%', Xminsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, //css:{'font-size':'0.95em'},

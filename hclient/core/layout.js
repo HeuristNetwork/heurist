@@ -1173,7 +1173,7 @@ function hLayout(args) {
                             'outline':0,
                             'border':'none',
                             'font-weight': 'bold',
-                            'font-size': '1.4em',
+                            //A11 'font-size': '1.4em',
                             'padding': '12px 20px 0 1px',
                             'margin': '12px 0px 0px -4px',
                             'z-index': 3,

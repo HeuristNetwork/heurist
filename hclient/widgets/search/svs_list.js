@@ -67,7 +67,7 @@ $.widget( "heurist.svs_list", {
             this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
         }
         
-        this.element.css({'overflow-y':'auto'});
+        this.element.css({'overflow-y':'auto','font-size':'0.7em'});
         this.element.parent().css({'overflow':'hidden'});
         
         //panel to show list of saved filters

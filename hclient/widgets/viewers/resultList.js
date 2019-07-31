@@ -119,6 +119,7 @@ $.widget( "heurist.resultList", {
         }else{
             this.element.addClass('ui-heurist-bg-light');
         }
+        //this.element.css({'font-size':'0.7em'});
 
         this._initControls();
 
@@ -457,10 +458,10 @@ $.widget( "heurist.resultList", {
         )
         .appendTo( this.div_toolbar );
         
-        this.view_mode_selector.find('button[value="list"]').button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('list')});
-        this.view_mode_selector.find('button[value="icons"]').button({icon: "ui-icon-view-icons-b", showLabel:false, label:window.hWin.HR('icons')});
-        this.view_mode_selector.find('button[value="thumbs"]').button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('thumbs')});
-        this.view_mode_selector.find('button[value="thumbs3"]').button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('thumbs3')});
+        this.view_mode_selector.find('button[value="list"]').button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('list')}).css('font-size','1em');
+        this.view_mode_selector.find('button[value="icons"]').button({icon: "ui-icon-view-icons-b", showLabel:false, label:window.hWin.HR('icons')}).css('font-size','1em');
+        this.view_mode_selector.find('button[value="thumbs"]').button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('thumbs')}).css('font-size','1em');
+        this.view_mode_selector.find('button[value="thumbs3"]').button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('thumbs3')}).css('font-size','1em');
         this.view_mode_selector.controlgroup();
 
         

@@ -373,7 +373,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         }
         
         if(!(layoutid=='UAdelaide' || layoutid=='Beyond1914')){
-            $('body').css({'font-size':'0.7em'});
+            //A11 $('body').css({'font-size':'0.7em'});
         }
 
         //add version to title
