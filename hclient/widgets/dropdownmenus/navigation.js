@@ -190,6 +190,21 @@ $.widget( "heurist.navigation", {
             
             if(pageid>0){
                 
+                //highlight top most menu
+                var ele = $(event.target).parents('.ui-menu-item');
+                that.divMainMenuItems.find('a').removeClass('selected');
+                $(ele[ele.length-1].firstChild).addClass('selected');    
+                /*
+                $.each(ele, function (idx, item){
+                    if($(item).parent().hasClass('ui-menu')){ //top most
+                        that.divMainMenuItems.find('a').removeClass('selected');
+                        $(item).children('a').addClass('selected');    
+                        return false;
+                    }
+                });
+                */
+                
+                
                 if($.isFunction(that.options.onmenuselect)){
                     
                     that.options.onmenuselect( pageid );
