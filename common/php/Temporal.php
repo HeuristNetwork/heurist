@@ -187,7 +187,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
     if( preg_match('/^-?\d+$/', $value) ){ //only digits with possible minus
         $date = array('year'=>$value);
     }else{
-        
+
         $cnt_slash = substr_count($value,'/');  //try to convert from format with / separator
         if( $cnt_slash>0){  // 6/2006  =  1-6-2006
             if($cnt_slash==1){
@@ -195,19 +195,20 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
                 $need_day = false;
             }
             $value = str_replace('/','-',$value);
-            
+
         }else if(substr_count($value,'-')==1) {
             $need_day = false;
         }
-        
-         try{   
+
+        try{   
+            $origHasSeconds = (substr_count($value,':')>1);
             $t2 = new DateTime($value);
             $datestamp = $t2->format('Y-m-d H:i:s');
             $date = date_parse($datestamp);
-         } catch (Exception  $e){
-             $date = null;
+        } catch (Exception  $e){
+            $date = null;
             //print $value.' => NOT SUPPORTED<br>';                            
-         }                            
+        }                            
     }
 
 	if($date){
@@ -269,7 +270,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 				if(!@$date['minute']) { $date['minute'] = 0; }
 				$res = $res.':'.str_pad(''.$date['minute'],2,'0',STR_PAD_LEFT);
 			}
-			if(@$date['second']>0){
+			if(@$date['second']>0 || $origHasSeconds){
 				$res = $res.':'.str_pad(''.$date['second'],2,'0',STR_PAD_LEFT);
 			}
 		}
