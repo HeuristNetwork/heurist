@@ -380,7 +380,7 @@ function hMapManager( _options )
                                                 //enable buttons
                                                 var btns = $(data.node.li).find('.svs-contextmenu3');
                                                 btns.find('span.ui-icon-arrow-4-diag').css({color:'black'});    
-                                                btns.find('span.ui-icon-trash').css({color:'black'});
+                                                btns.find('span.ui-icon-refresh').css({color:'black'});
                                             }
                                                 
                                             
@@ -536,33 +536,43 @@ function hMapManager( _options )
             
             var isEditAllowed = options.mapwidget.mapping('option','isEditAllowed');
             
-            var actionspan = $('<div class="svs-contextmenu3" '
+            var actionspan = '<div class="svs-contextmenu3" '
                     +(mapdoc_id>=0?('" data-mapdoc="'+mapdoc_id+'"'):'')
                     +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
                 +'<span class="ui-icon ui-icon-arrow-4-diag" '
                     +((item.data.type=='mapdocument' && !item.data.extent)?'style="color:gray"':'')
-                    +' title="Zoom to '+item.data.type+' extent"></span>'
-                + (isEditAllowed
-                   ?('<span class="ui-icon ui-icon-pencil" title="'
-                    + ((mapdoc_id>0) 
-                        ?(item.data.type=='mapdocument'?'Modify the map document':'Change symbology and behaviour of map layer')
-                        :'Change symbology')
-                    +'"></span>')
-                    :'')                                                              //arrowstop-1-s
-                + (isEditAllowed && (item.data.type=='mapdocument' && mapdoc_id>0)
-                    ?('<span class="ui-icon ui-map-layer" title="Add map layer">'
-                        +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
-                        +'</span>')
-                    :( (isEditAllowed && mapdoc_id==0)
-                        ?'<span class="ui-icon ui-icon-arrowstop-1-s" title="Save result set as layer"></span>'
-                        :''))
-                        
-                + (isEditAllowed && ((mapdoc_id>0 && recid==-1)||mapdoc_id==0)
-                    ?'<span class="ui-icon ui-icon-trash" '
-                    +((item.data.type=='mapdocument')?'style="color:gray"':'')
-                    +' title="'+(item.data.type=='mapdocument'?'Delete map document':'Remove map layer')
-                    +'"></span>':'')+
-                +'</div>').appendTo(parent_span);
+                    +' title="Zoom to '+item.data.type+' extent"></span>';
+                    
+            if(isEditAllowed){        
+                
+                if(item.data.type=='mapdocument' && mapdoc_id>0){
+                    
+                    actionspan +=
+                        ('<span class="ui-icon ui-icon-pencil" title="Modify the map document"></span>'
+                        +'<span class="ui-icon ui-map-layer" title="Add map layer">'
+                            +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
+                        +'</span>'
+                        +'<span class="ui-icon ui-icon-refresh" style="color:gray" title="Reload map document"></span>'
+                        //+'<span class="ui-icon ui-icon-trash" style="color:gray" title="Close map document"></span>'
+                        )
+                    
+                }else if(mapdoc_id>0){
+                    
+                    actionspan +=
+                        '<span class="ui-icon ui-icon-pencil" title="Change symbology and behaviour of map layer"></span>'
+                    
+                    
+                }else{
+                    
+                    actionspan +=
+                        '<span class="ui-icon ui-icon-pencil" title="Change symbology"></span>'
+                        +'<span class="ui-icon ui-icon-arrowstop-1-s" title="Save result set as layer"></span>'
+                        +'<span class="ui-icon ui-icon-trash" title="Remove map layer"></span>';
+                    
+                }
+
+            }
+            actionspan = $(actionspan+'</div>').appendTo(parent_span);
 
             $('<div class="svs-contextmenu4"/>').appendTo(parent_span);
                 
@@ -620,12 +630,14 @@ function hMapManager( _options )
                                     }
                                 );
                                 */
-                            }else{
+                            }
+                            
+                        }else if(ele.hasClass('ui-icon-arrowstop-1-s')){ 
+                        
                                 mapDocuments.saveResultSetAsLayerRecord(recid, function(data){
                                         ele.hide();
                                         parent_span.find('.svs-contextmenu4').hide();
                                 });
-                            }
                             
                         }else if(ele.hasClass('ui-icon-pencil')){
                             
@@ -674,6 +686,20 @@ function hMapManager( _options )
                                         
                                     });
                                 }
+                        }else if(ele.hasClass('ui-icon-refresh') && (mapdoc_id>0) && mapDocuments.isLoaded(mapdoc_id)){
+                               
+                                mapDocuments.closeMapDocument(mapdoc_id);
+                                //remove children from treeview
+                                //item.setSelected(false, {noEvents:true});
+                                item.removeChildren();
+                                item.resetLazy();
+                                
+                                item.selected = false;
+                                parent_span.removeClass('fancytree-selected fancytree-partsel');
+                                
+                                that.openMapDocument(mapdoc_id);
+                                
+                                
                         }else if(ele.hasClass('ui-icon-trash')){
                             
                             //mapdocument - remove from map and unload from memory
