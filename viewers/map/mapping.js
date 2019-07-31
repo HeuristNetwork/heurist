@@ -182,6 +182,7 @@ $.widget( "heurist.mapping", {
     //  settings
     isMarkerClusterEnabled: true,
     markerClusterGridSize: 50,
+    markerClusterMaxZoom: 18,
     isEditAllowed: true,
     
     
@@ -1039,7 +1040,9 @@ $.widget( "heurist.mapping", {
             var is_new_markercluster = window.hWin.HEURIST4.util.isnull(this.all_clusters[layer_id]);
             if(is_new_markercluster){
                 var opts = {showCoverageOnHover:false, 
-                                                    maxClusterRadius:this.markerClusterGridSize};
+                                maxClusterRadius:this.markerClusterGridSize,
+                                disableClusteringAtZoom:this.markerClusterMaxZoom};
+                                
                 if(window.hWin.HAPI4.database=='digital_harlem'){
                     opts['iconCreateFunction'] = function(cluster) {
                         
@@ -1557,6 +1560,7 @@ $.widget( "heurist.mapping", {
             params['controls'] = params['controls']+',legend'; //is always visible for non-published maps
             
             this.markerClusterGridSize = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 50));
+            this.markerClusterMaxZoom = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 18));
         }
         
         //maxClusterRadius
