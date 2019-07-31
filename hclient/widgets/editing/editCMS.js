@@ -30,7 +30,7 @@ function editCMS(home_page_record_id, main_callback){
      
      if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && RT_CMS_PAGE>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0 && DT_CMS_PAGE>0)){
         var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg('You will need record types '
-        +'99-51, 99-52 and 99-53 which aew available as part of Heurist_Reference_Set. '
+        +'99-51, 99-52 and 99-53 which are available as part of Heurist_Reference_Set. '
         +'Click "Import" to get these definitions',
                     {'Import':function(){
                         var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
@@ -166,10 +166,12 @@ function editCMS(home_page_record_id, main_callback){
 
                 var request = { action: 'import_records',
                     filename: 'websiteStarterRecords.hml',
+                    is_cms_init: 1,
                     //session: session_id,
                     id: window.hWin.HEURIST4.util.random()
                 };
 
+                //create default set of records for website
                 window.hWin.HAPI4.doImportAction(request, function( response ){
                     
                     window.hWin.HEURIST4.msg.sendCoverallToBack();

@@ -331,7 +331,7 @@ $(document).ready(function() {
     
 <style>
 body{
-    font-size:0.7em;
+    /*font-size:0.7em;*/
 }
 #main-foooter{
     font-size:0.8em;
@@ -366,6 +366,10 @@ body{
     right: 0;
     background: white;
     min-height: 19px;
+}
+#main-menu .ui-menu > li > a.selected{
+    background: black;
+    color: white;
 }
 <?php
     if(!$edit_Available){

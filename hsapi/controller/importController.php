@@ -216,7 +216,7 @@ if(!$system->init(@$_REQUEST['db'])){
         }else if($action=='import_records'){
             
             //returns count of imported records
-            $res = ImportHeurist::importRecords(@$_REQUEST['filename'], @$_REQUEST['session']);
+            $res = ImportHeurist::importRecords(@$_REQUEST['filename'], @$_REQUEST['session'], @$_REQUEST['is_cms_init']==1);
             
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missed or wrong");                
