@@ -36,6 +36,7 @@ $.widget( "heurist.search", {
         btn_entity_filter: true,     // show buttons: filter by entity
         menu_entity_filter: true,    // show dropdown entity filter
         search_button_label: 'Filter',
+        search_input_label: '',
         
         
         isapplication:true,  // send and recieve the global events
@@ -54,6 +55,7 @@ $.widget( "heurist.search", {
     
     buttons_by_entity:[], //
 
+    _is_publication:false, //this is CMS publication - take css from parent
     
     // the constructor
     _create: function() {
@@ -61,6 +63,8 @@ $.widget( "heurist.search", {
         var that = this;
         
         if(this.element.parent().attr('data-heurist-app-id')){
+            
+            this._is_publication = true;
             //this is CMS publication - take bg from parent
             this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
         }else
@@ -127,7 +131,8 @@ $.widget( "heurist.search", {
         var is_vis = this.options.btn_entity_filter && (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
         
         this.div_entity_btns   = $('<div>').addClass('heurist-entity-filter-buttons')
-                                .css({ 'display':'block','padding':'10px '+sz_search_padding,
+                                .css({ 'display':(this._is_publication?'none':'block'),
+                                    'padding':this._is_publication?0:('10px '+sz_search_padding),
                                     'visibility':is_vis?'visible':'hidden',
                                     'height':is_vis?'auto':'10px'})
                                 .appendTo( this.element );
@@ -188,9 +193,15 @@ $.widget( "heurist.search", {
         
         //header-label
         this.div_search_header = $('<div>')
-        .css({'width':'0','text-align':'right', 'height':'6.88em'}) //was width:110px
+        .css({'width':'auto','text-align':'right','height':'6.88em','line-height':'31px'}) //was width:110px
         .addClass('div-table-cell')
         .appendTo( this.div_search );
+        
+        if(this.options.search_input_label){
+            this.div_search_header.text( this.options.search_input_label ).css({'padding-right':'4px'});     
+        }
+        
+        
 /* hidden on 2016-11-11        
         $( "<label>" ).text(window.hWin.HR("Filter"))
         .css({'font-weight':'bold','font-size':'1.2em','padding-left':'1em','padding-right':'1em','vertical-align': 'top', 'line-height':'20px'})
@@ -213,11 +224,17 @@ $.widget( "heurist.search", {
 
         
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'40px', 'max-height':'70px', //'height':'2.5em', 'max-height':'67px', 
-            'padding':'0.4em','min-height':'41px', 'line-height': '14px', 
+        .css({'margin-right':'0.2em', 'height':'41px', 
+            'max-height':'70px',
+            'padding':'0.4em',
+            'min-height':'41px', 'line-height': '14px', 
             'min-width':'10em', 'width':'100%', 'padding-right':'18px' })  //was width:sz_input, 'max-width':sz_input,  
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
+        
+        if(this._is_publication){
+            this.input_search.css({'resize':'none', 'height':'30px', 'max-height':'30px', 'min-height':'30px' });    
+        }
         
         // AAAA
         this._on( this.input_search, {
@@ -308,7 +325,7 @@ $.widget( "heurist.search", {
         //
         // search/filter buttons - may be Search or Bookmarks according to settings and whether logged in
         //
-        this.div_search_as_guest = $('<div>').css({'min-width':'14em'})
+        this.div_search_as_guest = $('<div>') //.css({'min-width':'14em'})
         .addClass('div-table-cell logged-out-only')
         .appendTo( this.div_search );
 
@@ -317,9 +334,8 @@ $.widget( "heurist.search", {
         .addClass('ui-heurist-btn-header1')
         .button({label: window.hWin.HR(this.options.search_button_label), iconPosition: 'end', icon:"ui-icon-search"});
 
-        this.div_search_as_user = $('<div>').css({'min-width':'18em'})
+        this.div_search_as_user = $('<div>') //.css({'min-width':'18em','padding-right': '10px'})
         .addClass('div-table-cell logged-in-only')
-        .css({'padding-right': '10px'})
         .appendTo( this.div_search );
 
         this.btn_search_as_user = $( "<button>", {
@@ -328,7 +344,7 @@ $.widget( "heurist.search", {
         .css({'font-size':'1.3em','min-width':'9em'})  
         .appendTo( this.div_search_as_user )
         .addClass('ui-heurist-btn-header1')
-        .button({showLabel:true, icon:'ui-icon-filter'});
+        .button({showLabel:true, icon:this._is_publication?'ui-icon-search':'ui-icon-filter'});
         
         this.btn_search_domain = $( "<button>", {
             label: window.hWin.HR("filter option")
@@ -447,7 +463,7 @@ $.widget( "heurist.search", {
 
         var linkGear = $('<a>',{href:'#', 
         title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
-        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-65px','opacity':'0.5','margin-top': '0.6em'})
+        .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-27px','opacity':'0.5','margin-top': '0.6em', width:'20px'})
         .addClass('ui-icon ui-icon-filter-form') //was ui-icon-gear
         .appendTo(this.div_buttons);
         this._on( linkGear, {  click: this.showSearchAssistant });
@@ -475,7 +491,7 @@ $.widget( "heurist.search", {
             .appendTo( this.element );
             */
             
-            this.div_add_record = $('<div>').css({'min-width':'36em'})
+            this.div_add_record = $('<div>').css({'min-width':'36em','padding-left':'40px'})
             .addClass('div-table-cell logged-in-only')
             .appendTo( this.div_search );
 

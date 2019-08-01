@@ -126,7 +126,8 @@ function onPageInit(success){
         topmenu.attr('data-heurist-app-id','heurist_Navigation');
         
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
-            {heurist_Navigation:{menu_recIDs:home_pageid, use_next_level:true, orientation:'horizontal', onmenuselect:__iniLoadPageById }} );
+            {heurist_Navigation:{menu_recIDs:home_pageid, use_next_level:true, orientation:'horizontal', 
+            onmenuselect:__iniLoadPageById, toplevel_css:{background:'rgba(112,146,190,0.7)'} }} ); //,color:'white','margin-right':'24px'
         
         $('#main-menu').show()
         
@@ -149,8 +150,7 @@ function onPageInit(success){
         .appendTo(main_content.parent());
     
     $('<a href="#" id="btn_inline_editor">Edit page content</a>')
-            .appendTo($('body')).addClass('ui-front')
-            .css({'font-size':'1.1em','font-weight':'bold',color:'blue'})
+            .appendTo($('body')).addClass('ui-front cms-button')
             .click(function( event ){
                 
                 $('#btn_inline_editor').hide();
@@ -177,8 +177,7 @@ function onPageInit(success){
             .show();
 
     $('<a href="#" id="btn_inline_editor3">source</a>')
-            .appendTo($('body')).addClass('ui-front')
-            .css({'font-size':'1.1em','font-weight':'bold',color:'blue'})
+            .appendTo($('body')).addClass('ui-front cms-button')
             .click(function( event ){
                 
                 if(_isDirectEditMode()){
@@ -200,8 +199,7 @@ function onPageInit(success){
         
         
             $('<a href="#" id="btn_inline_editor4">edit page settings</a>')
-            .appendTo($('body')).addClass('ui-front')
-            .css({'font-size':'1.1em','font-weight':'bold',color:'blue'})
+            .appendTo($('body')).addClass('cms-button')
             .click(function(event){
 
                 //edit page
@@ -238,7 +236,7 @@ function onPageInit(success){
                             var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
                             $dlg2.dialog('close');__hideEditor(pageid);}},
                                 'Content modified');
-            $dlg2.parents('.ui-dialog').css('font-size','1.2em');    
+            //$dlg2.parents('.ui-dialog').css('font-size','1.2em');    
             
         }else{
             __hideEditor( pageid ); //hide current editor and loads new page
@@ -262,10 +260,9 @@ function onPageInit(success){
                         var pagetitle = $($('#main-content').children()[0]);
                         if(pageid==home_pageid){
                             pagetitle.empty();
-                        }
+                        }        
                         pagetitle.addClass("webpageheading");
                         $('#main-pagetitle').empty().append(pagetitle);
-                        
                         
                         $('.tinymce-body').val($('#main-content').html());
                         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
@@ -384,8 +381,11 @@ function onPageInit(success){
         }else{
             $('#btn_inline_editor').position({my:'right top',at:'right-90 top-70',of:$('#main-content')}).show();
             $('#btn_inline_editor3').position({my:'right top',at:'right-40 top-70',of:$('#main-content')}).show();
-            var pos = {my:'right top',at:'right-40 top+15',of:$('#main-pagetitle')};   
-            $('#btn_inline_editor4').position(pos).show();
+            var ele = $('#main-pagetitle > h2');
+            if(ele.length>0){
+                var pos = {my:'left top',at:'right+20 top+5',of:$('#main-pagetitle > h2')};   
+                $('#btn_inline_editor4').position(pos).show();
+            }
         }
     }    
     
@@ -404,7 +404,7 @@ function onPageInit(success){
                 
             $(eles).each(function(idx, ele){
                 $(ele).find('a.edit').click(function(event){
-                    var wid = $(event.target).parent().attr('id');
+                    var wid = $(event.target).parents('.mceNonEditable').attr('id');
                     __addEditWidget( wid );                    
                 });
                 $(ele).find('a.remove').click(function(event){  
@@ -570,9 +570,9 @@ function onPageInit(success){
                 +' data-heurist-app-id="'+widget_name
                 + '" style="'+ widgetCss+'" '
                 + '>'
-                + '<div style="padding:10px">Heurist '+widget_title
+                + '<div style="padding:10px;"><a href="#" class="edit" style="padding:0 10px" title="Click to edit">Heurist '+widget_title
                 //+ 'Placeholder for ' + widget_name 
-                + ' widget</div><a href="#" class="edit" style="padding:0 10px">edit</a>&nbsp;&nbsp;<a href="#" class="remove">remove</a>'//+widgetCss
+                + ' widget</a>&nbsp;&nbsp;<a href="#" class="remove">remove</a></div>'//+widgetCss
                 + ' <span style="font-style:italic;display:none">'+widget_options+'</span></div>';
                 
             return content; 

@@ -544,7 +544,7 @@ EOD;
 //"2552":{"7462":{"id":"1326","type":"98","title":"Record to imported","hhash":null}}}                   
                 }else{
                     if($is_cms_init 
-                        && ($record['RecTypeID']==RT_CMS_PAGE  || $record['RecTypeID']==RT_CMS_HOME)
+                        && ($record['RecTypeID']==RT_CMS_PAGE) //  || $record['RecTypeID']==RT_CMS_HOME
                         && $ftId==DT_EXTENDED_DESCRIPTION){
                             
                         foreach($values as $idx=>$value){    

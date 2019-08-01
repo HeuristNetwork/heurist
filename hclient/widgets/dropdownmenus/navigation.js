@@ -24,7 +24,8 @@ $.widget( "heurist.navigation", {
        menu_recIDs:[],
        orientation: 'horizontal', //vertical
        use_next_level: false,
-       onmenuselect: null
+       onmenuselect: null,
+       toplevel_css:null  //css for top level items
     },
 
     menues:{},
@@ -43,7 +44,7 @@ $.widget( "heurist.navigation", {
             if(this.element.parent().attr('data-heurist-app-id')){
                 this.element.parent().css({'background':'none','border':'none'});
             }
-            this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
+            //A11 this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
         }else{
             this.element.css('height','100%').addClass('ui-heurist-header2')    
         }
@@ -60,7 +61,6 @@ $.widget( "heurist.navigation", {
                 
         if(this.options.orientation=='horizontal'){
             this.divMainMenuItems.addClass('horizontalmenu');
-            
         }
 
         var ids = this.options.menu_recIDs;
@@ -182,6 +182,11 @@ $.widget( "heurist.navigation", {
         
         this.divMainMenuItems.menu( opts );
         
+        if(this.options.toplevel_css!==null){
+            this.divMainMenuItems.children('li.ui-menu-item').children('a').css(this.options.toplevel_css);
+        }
+        
+        
         this.divMainMenuItems.find('a').addClass('truncate').click(function(event){
 
             var pageid = $(event.target).attr('data-pageid');
@@ -229,8 +234,7 @@ $.widget( "heurist.navigation", {
 
                                     var pagetitle = $($dlg.find('.ui-dialog-content').children()[0]);
                                     if(pagetitle.is('h2')){
-                                        pagetitle.addClass("webpageheading");
-                                        //$('#main-pagetitle').empty().append(pagetitle);
+                                        pagetitle.addClass("webpageheading");//.css({position:'absolute',left:0,width:'auto'});
                                     }
 
                                     window.hWin.HAPI4.LayoutMgr.appInitFromContainer2( $dlg );
