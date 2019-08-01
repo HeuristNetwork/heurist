@@ -127,9 +127,9 @@ if(!in_array($action_type, $allowed_actions)){
 </head>
 
 <!-- HTML -->
-<body style="overflow:hidden;background:white">
+<body style="overflow:hidden;background:white;">
 
-    <div id="div_parameters" class="popup_content_div">
+    <div id="div_parameters" class="popup_content_div" style="font-size:0.7em;">
 
         <div id="div_header" style="padding: 0.2em; min-width: 600px;">
 
@@ -147,7 +147,7 @@ if(!in_array($action_type, $allowed_actions)){
 
             <div id="div_sel_rectype" style="padding: 0.2em; min-width: 600px;display:none;" class="input">
                 <div class="header" style="padding: 0 16px 0 16px;"><label for="sel_recordtype">Convert to record type:</label></div>
-                <select id="sel_recordtype" style="max-width:30em"></select>
+                <select id="sel_recordtype" style="max-width:30em;"></select>
                 
                 <div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>
                 <div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>
@@ -168,7 +168,7 @@ if(!in_array($action_type, $allowed_actions)){
 
     </div>
 
-    <div id="div_result" class="content_div" style="display: none;overflow-y: auto;position: absolute;top: 0;bottom: 50;">
+    <div id="div_result" class="content_div" style="display: none;overflow-y: auto;position: absolute;top: 0;bottom:1.5em; font-size:0.7em;">
         RESULT
     </div>
     

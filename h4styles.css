@@ -1363,14 +1363,14 @@ background: #8ea9b9
     top:0;
     left:0px;
     right:0px;
-    bottom:3em
+    bottom:1.5em
 }
 .popup_buttons_div{
     position:absolute;
     bottom:0;left:0px;right:0px;
-    height:3em;
-    text-align:right;
-    padding: 1em 1em .3em .4em;
+    height:1.5em;
+    text-align: right;
+    padding: 4px;
 }
 
 .ent_wrapper{position:absolute;top:0;bottom:0;left:0;right: 1px;overflow:hidden;}
@@ -1915,3 +1915,7 @@ input[type="file"] {
 
 .ui-map-document { background-image: url('hclient/assets/mapdocument.png') !important;}
 .ui-map-layer { background-image: url('hclient/assets/maplayer.png') !important;}
+
+.ui-dialog .ui-dialog-buttonpane{
+    margin-top:0.1em;
+}

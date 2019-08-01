@@ -1491,7 +1491,7 @@ window.hWin.HEURIST4.ui = {
 
             menu.hSelect( "menuWidget" ).css( {'padding':0,'background':'#F4F2F4','zIndex':9999999 });
                         
-            menu.hSelect( "menuWidget" ).addClass('heurist-selectmenu overflow').css({'max-height':'300px'});
+            menu.hSelect( "menuWidget" ).addClass('heurist-selectmenu overflow').css({'max-height':'300px','font-size':'12px'});
             menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF', 'font-size':'1.1em',
                 width:(dwidth?dwidth:'auto'),'min-width':dminwidth }); //,'min-width':'16em''#F4F2F4'
         }
