@@ -671,10 +671,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 sContent =  
 '<div style="margin:10px 4px;"><div style="padding-bottom:0.5em;display:inline-block;width: 100%;">'
 
-+'<h2 class="truncate rectypeHeader" style="float:left;max-width:400px;margin-right:8px;">'
++'<h3 class="truncate rectypeHeader" style="float:left;max-width:400px;margin:0 8px 0 0;">'
                 + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right: 10px;background-image:url(\''
                 + window.hWin.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
-                + window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h2>'
+                + window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h3>'
 +'<select class="rectypeSelect ui-corner-all ui-widget-content" '
 +'style="display:none;z-index: 20;position: absolute;border: 1px solid gray;'  //background:white;
 +'top: 5.7em;" size="20"></select><div class="btn-modify non-owner-disable"/></div>'
@@ -2348,7 +2348,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 +'<span class="btn-edit-rt-template" style="font-size: smaller;font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">template</span>'
                 +'<span class="btn-edit-rt-template ui-icon ui-icon-arrowthickstop-1-s smallicon" style="height:18px;margin-left:4px"></span></span>'
 
-                    +'<hr style="margin-top: 10px;width:230px">'
+                    +'<hr style="margin: 10px 0 0 0;width:230px">'
              +'</div>'
              +'<div style="display:table-cell;text-align:right;padding: 10px 40px 0px 0px;font-weight: bold;">'
 
@@ -2423,7 +2423,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             if(!this._isInsert){
                 sheader = sheader + 
                     '&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
-                    + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle" class="truncate">'
+                    + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0" class="truncate">'
                     + this._getField('rec_Title')+'</h3>';            
                 
             

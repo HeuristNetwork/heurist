@@ -67,7 +67,7 @@ $.widget( "heurist.svs_list", {
             this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
         }
         
-        this.element.css({'overflow-y':'auto','font-size':'0.7em'});
+        this.element.css({'overflow-y':'auto','font-size':'0.8em'});
         this.element.parent().css({'overflow':'hidden'});
         
         //panel to show list of saved filters
@@ -893,9 +893,9 @@ $.widget( "heurist.svs_list", {
                     var s = '', s1='';
                     if(node.folder){
                         //
-                        s1 = '<span class="ui-icon-folder-open ui-icon" style="display:inline-block;"></span>';
+                        s1 = '<span class="ui-icon-folder-open ui-icon" style="font-size:0.9em;"></span>';
                         $span.find("> span.fancytree-title").html(s1 +
-                            '<div style="display:inline-block;vertical-align:top;padding:2 0 0 3;">'+node.title+'</div>');
+                            '<div style="display:inline-block;vertical-align:top;">'+node.title+'</div>');  //padding:2 0 0 3;
                         //vertical-align:top;  font-weight:normal !important
 
                         //$span.find("> span.fancytree-icon").addClass("ui-icon-folder-open ui-icon").css('display','inline-block');

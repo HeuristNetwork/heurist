@@ -83,7 +83,7 @@ $.widget( "heurist.mainMenu", {
 
         //dashboard button                
         this.btn_dashboard = $('<div>').button({label:'Open dashboard'})
-            .css({'float':'right', margin:'1.1em', 'font-size':'0.8em'})
+            .css({'float':'right', margin:'1.1em', 'font-size':'0.9em'})
             .addClass('ui-heurist-header2')
             .appendTo( this.element )
             .click(
@@ -104,7 +104,7 @@ $.widget( "heurist.mainMenu", {
         
         this.div_dbname = $( "<div>")
             //.css({'float':'right', 'margin-top':'1.2em', 'padding-right':'2em' })
-            .css({'float':'left', 'margin-top':'0.8em', 'margin-left':'5em'})
+            .css({'float':'left', 'margin-top':'0.9em', 'margin-left':'5em'})
             .appendTo(this.element);
             
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(window.hWin.HAPI4.sysinfo.dbrecent)){
@@ -166,7 +166,7 @@ $.widget( "heurist.mainMenu", {
         
         this.divMainMenuItems = $('<ul>')
                 .addClass('horizontalmenu')
-                .css({'float':'left', 'padding-right':'4em', 'margin-top': '1.5em', 'font-size':'0.8em'})
+                .css({'float':'left', 'padding-right':'4em', 'margin-top': '1.5em', 'font-size':'0.9em'})
                 .appendTo( this.divMainMenu );
 
         /* new entityfeatures*/

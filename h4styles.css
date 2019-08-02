@@ -22,24 +22,39 @@
 * {
     -moz-box-sizing: border-box;
 }
+/*
 * {
     margin: 0;
     padding: 0;
 }
+*/
 body {
     font-family: Helvetica,Arial,sans-serif;
-    /*
+    font-size: 14px;
+    /* Verdana,
     font-size: 0.7em;
     font-family: Verdana,Arial,sans-serif;
     padding:10px;*/
 }
+.ui-widget {
+    font-size: 0.8em;
+}
 a{
 outline: 0;
 }
+/* A11
 H2 {
     color: #6A7C99;
     font-size:1.2em;
 }
+
+P {
+    color: #333333;
+    font-size: 11px;
+    line-height: 21px;
+}
+
+*/
 
 .logo {
     background-image: url("hclient/assets/h4logo_small.png") !important;
@@ -157,10 +172,6 @@ H2 {
 .ui-resizable-resizing {
     z-index: 99999 !important;
 }
-.ui-widget {
-    font-size: 0.7em;
-}
-
 
 .tab_ctrl{
     position: absolute;
@@ -1836,11 +1847,6 @@ option {padding-left:15px;}
     font-size:10px;
 }
 
-P {
-    color: #333333;
-    font-size: 11px;
-    line-height: 21px;
-}
 A:link {
     text-decoration: underline;
 }

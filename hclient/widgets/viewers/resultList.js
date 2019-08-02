@@ -320,10 +320,10 @@ $.widget( "heurist.resultList", {
         this.div_header =  $( "<div>" ).css('height','3em').appendTo( this.element );
 
         $('<div class="result-list-header">')
-        .css('padding','0.7em 0 0 20px')  //padding left to align to search input field
+        .css({'padding':'0.7em 0 0 20px', 'font-size': '1.17em'})   //padding left to align to search input field
         .appendTo(this.div_header);
         
-        this.setHeaderText('<h3>'+window.hWin.HR('Filtered Result')+'</h3>');
+        this.setHeaderText('<h3 style="margin:0">'+window.hWin.HR('Filtered Result')+'</h3>');
         
         //add label to display number of selected, button and selected onlu checkbox
         if(this.options.select_mode=='select_multi'){
@@ -849,7 +849,7 @@ $.widget( "heurist.resultList", {
             */
 
             if(this.div_header!=null) {
-                this.setHeaderText('<h3>'+new_title+'</h3>');
+                this.setHeaderText('<h3 style="margin:0">'+new_title+'</h3>');
             }
             if(new_title==''){
                 this.triggerSelection();

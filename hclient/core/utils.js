@@ -82,9 +82,24 @@ window.hWin.HEURIST4.util = {
     },
 
     // get current font size in pixels
-    px: function(input) {
-        var emSize = parseFloat($("body").css("font-size"));
-        return (input / emSize);
+    px: function(input, ele) {
+        
+        if(!ele) {
+            ele = $("body");   
+            fs = ele.css('font-size')
+        }
+        else {
+            fs = ele.css('font-size')
+            ele = ele.parent();
+        }
+        /*
+        var rele = $('<span>').html(input).css('font-size', fs).appendTo(ele);
+        var res = rele.width();
+        rele.remove();
+        return res;
+        */
+        var emSize = parseFloat(fs);
+        return (input.length * emSize);
     },
 
     //

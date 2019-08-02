@@ -181,7 +181,9 @@ function hLayout(args) {
             if(_appGetWidgetById(app_id)!=null){
                 var opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-heurist-app-options')); //old way
                 if(!opts){ //find span with configuration
-                    opts = window.hWin.HEURIST4.util.isJSON(ele.find('span').text());
+                    var cfgele = ele.find('span.widget-options');
+                    if(cfgele.length==0) cfgele = ele.find('span'); //backward capability
+                    opts = window.hWin.HEURIST4.util.isJSON(cfgele.text());
                     
                     //extend options with suppimentary ones
                     if(supp_options && supp_options[app_id]){

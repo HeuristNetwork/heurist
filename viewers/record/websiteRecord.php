@@ -171,6 +171,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
+    
+    <!-- link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/tinymce/skins/lightgray/content.min.css"/ -->
 
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
   
@@ -428,7 +430,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
             :'<div style="text-align:center;display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image</div>';?>
             </a>
         </div>
-        <div id="main-title" style="float:left;padding: 35px 0 0 20px;vertical-align:middle;">
+        <div id="main-title" style="float:left;padding-left:20px;vertical-align:middle;">
             <h2 style="font-size:1.7em;color:black"><?php print __getValue($rec, DT_NAME);?></h2>
         </div>
         

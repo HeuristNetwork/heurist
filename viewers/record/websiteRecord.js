@@ -32,7 +32,7 @@ function onPageInit(success){
         //max_height: 300,
         entity_encoding:'raw',
         inline_styles: true,
-        //content_style: "body {font-size:0.7em}",
+        content_style: "body {font-family: Helvetica,Arial,sans-serif;}",
 
         plugins: [
             'advlist autolink lists link image media preview', //anchor charmap print 
@@ -572,8 +572,8 @@ function onPageInit(success){
                 + '>'
                 + '<div style="padding:10px;"><a href="#" class="edit" style="padding:0 10px" title="Click to edit">Heurist '+widget_title
                 //+ 'Placeholder for ' + widget_name 
-                + ' widget</a>&nbsp;&nbsp;<a href="#" class="remove">remove</a></div>'//+widgetCss
-                + ' <span style="font-style:italic;display:none">'+widget_options+'</span></div>';
+                + ' widget ( edit )</a>&nbsp;&nbsp;<a href="#" class="remove">remove</a></div>'//+widgetCss
+                + ' <span class="widget-options" style="font-style:italic;display:none">'+widget_options+'</span></div>';
                 
             return content; 
         }
@@ -592,7 +592,10 @@ function onPageInit(success){
                 s = s.replace(/;/g, ";\n");
                 $dlg.find('#widgetCss').val( s );
             
-            var opts = window.hWin.HEURIST4.util.isJSON(ele.find('span').text());
+            
+            var cfgele = ele.find('span.widget-options');
+            if(cfgele.length==0) cfgele = ele.find('span'); //backward capability
+            var opts = window.hWin.HEURIST4.util.isJSON(cfgele.text());
             
             if(opts!==false){
             
@@ -653,14 +656,19 @@ function onPageInit(success){
                     var widgetid = 'mywidget_'+window.hWin.HEURIST4.util.random();
                     var  content = __prepareWidgetDiv( widgetid );            
                     
-                    if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){
+                    if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){  //edit
+                        /*  old way it does not activeate noneditable
                         var ele = $(content).appendTo($('body'));
                         tinymce.activeEditor.dom.replace( ele[0], tinymce.activeEditor.dom.get(widgetid_edit) );
-                    }else{
+                        */
+                        
+                        tinymce.activeEditor.selection.select( tinymce.activeEditor.dom.get(widgetid_edit) );
                         tinymce.activeEditor.insertContent(content);
-                        __initWidgetEditLinks(widgetid);
+                        
+                    }else{  //replace
+                        tinymce.activeEditor.insertContent(content);
                     }
-            
+                    __initWidgetEditLinks(widgetid);
             
                     //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                     $dlg.dialog( "close" );
@@ -699,16 +707,20 @@ function onPageInit(success){
                    dele.show();
                    
                    if(is_initial_set){
-                       s = 'border:2px solid gray;background:white;position:relative;';
+                       s = 'background:white;position:relative;';
 
                        if(val=='heurist_Search'){
-                            s = s + 'height:100px;width:600px;';        
-                       }else if(val=='heurist_Navigation'){
-                            s = s + 'height:80px;width:600px;';        
-                       }else if(val=='heurist_SearchTree'){
-                            s = s + 'height:600px;width:230px;';        
-                       }else{
-                            s = s + 'height:600px;width:600px;';        
+                            s = s + 'border:0px solid gray;'
+                            s = s + 'height:50px;width:400px;';        
+                       }else {
+                           s = s + 'border:1px solid gray;'
+                           if(val=='heurist_Navigation'){
+                                s = s + 'height:50px;width:100%;';        
+                           }else if(val=='heurist_SearchTree'){
+                                s = s + 'height:100%;width:300px;';        
+                           }else{
+                                s = s + 'height:600px;width:100%';        
+                           }
                        }
                        $dlg.find('#widgetCss').val(s);
                    }
@@ -862,7 +874,7 @@ function onPageInit(success){
     //not used
     function __reloadMainMenu(){
         
-         $('#main-menu').empty().append($('<span style="display: none;">{"menu_recIDs":"'
+         $('#main-menu').empty().append($('<span class="widget-options" style="display: none;">{"menu_recIDs":"'
             +home_pageid
             +'","use_next_level":true,"orientation":"horizontal"}</span>'));
  

@@ -43,7 +43,7 @@ $.widget( "heurist.resultListMenu", {
         this._collectionURL = window.hWin.HAPI4.baseURL + "hsapi/utilities/manageCollection.php";
 
         this.element
-        .css('font-size', '1.4em')
+        .css('font-size', '1.3em')
         // prevent double click to select text
         .disableSelection();
         

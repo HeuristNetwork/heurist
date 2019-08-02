@@ -164,12 +164,12 @@ var cfg_layouts = [
     },
         
     {id:'SearchAnalyze2', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
-        north:{size:'7em', resizable:false, overflow:'hidden',
+        north:{size:'9em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'heurist_Search', hasheader:false, 
                 css:{position:'absolute', top:0, left:0, right:0,bottom:0,
                 border:'none', 'background':'white', 'min-width':'75em'}, 
-            options:{has_paginator:false, btn_visible_newrecord:true} }, 
+            options:{has_paginator:false, btn_visible_newrecord:true, search_button_label:'Filter'} }, 
         ]},
         center:{Xminsize:300, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false, 
                      dockable:false, dragable:false, css:{'background-color':'white','font-size':'12px'}, 

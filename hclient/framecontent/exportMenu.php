@@ -40,8 +40,8 @@ require_once(dirname(__FILE__)."/initPage.php");
 </script>
 </head>
 
-<body style="background-color:white;font-size:0.7em">
-    <div style="width:480px;top:0;bottom:0;left:0;position:absolute;padding:10px;font-size:1.2em">
+<body style="background-color:white;font-size:0.8em">
+    <div style="top:0;bottom:0;left:0;position:absolute;padding:10px;font-size:1.2em">
 
         <h2>Text file export</h2>
 

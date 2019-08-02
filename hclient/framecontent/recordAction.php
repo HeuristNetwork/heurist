@@ -129,7 +129,7 @@ if(!in_array($action_type, $allowed_actions)){
 <!-- HTML -->
 <body style="overflow:hidden;background:white;">
 
-    <div id="div_parameters" class="popup_content_div" style="font-size:0.7em;">
+    <div id="div_parameters" class="popup_content_div" style="font-size:0.8em;">
 
         <div id="div_header" style="padding: 0.2em; min-width: 600px;">
 
@@ -168,7 +168,7 @@ if(!in_array($action_type, $allowed_actions)){
 
     </div>
 
-    <div id="div_result" class="content_div" style="display: none;overflow-y: auto;position: absolute;top: 0;bottom:1.5em; font-size:0.7em;">
+    <div id="div_result" class="content_div" style="display: none;overflow-y: auto;position: absolute;top: 0;bottom:1.5em; font-size:0.8em;">
         RESULT
     </div>
     
