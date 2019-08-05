@@ -38,6 +38,8 @@ $.widget( "heurist.search", {
         search_button_label: '',
         search_input_label: '',
         
+        button_class: 'ui-heurist-btn-header1',
+        
         
         isapplication:true,  // send and recieve the global events
         // callbacks
@@ -64,6 +66,7 @@ $.widget( "heurist.search", {
         
         if(this.element.parent().attr('data-heurist-app-id')){
             
+            this.options.button_class = '';
             this._is_publication = true;
             //this is CMS publication - take bg from parent
             this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
@@ -99,7 +102,7 @@ $.widget( "heurist.search", {
                 this.btn_login = $( "<button>" ) // login button
                 .css('width',(window.hWin.HAPI4.sysinfo.registration_allowed==1)?'80px':'160px')
                 .addClass('logged-out-only')
-                .addClass('ui-heurist-btn-header1')
+                .addClass(this.options.button_class)
                 .appendTo(div_left)
                 .button({label: window.hWin.HR("Login"), icon:'ui-icon-key'})
                 .click( function(){ that._doLogin(); });
@@ -111,7 +114,7 @@ $.widget( "heurist.search", {
                     })
                     .css('width','80px')
                     .addClass('logged-out-only')
-                    .addClass('ui-heurist-btn-header1')
+                    .addClass(this.options.button_class)
                     .appendTo(div_left)
                     .button()
                     .click( function(){ that._doRegister(); });
@@ -332,7 +335,7 @@ $.widget( "heurist.search", {
         this.btn_search_as_guest = $( "<button>")
         .appendTo( this.div_search_as_guest )
         .css({'min-height':'30px'})
-        .addClass('ui-heurist-btn-header1')
+        .addClass(this.options.button_class)
         .button({label: window.hWin.HR(this.options.search_button_label), iconPosition: 'end', icon:"ui-icon-search"});
 
         this.div_search_as_user = $('<div>') //.css({'min-width':'18em','padding-right': '10px'})
@@ -344,7 +347,7 @@ $.widget( "heurist.search", {
         })
         .css({'min-height':'30px'})
         .appendTo( this.div_search_as_user )
-        .addClass('ui-heurist-btn-header1')
+        .addClass(this.options.button_class)
         .button({showLabel:true, icon:this._is_publication?'ui-icon-search':'ui-icon-filter'});
         
         if(!this._is_publication){
@@ -360,7 +363,7 @@ $.widget( "heurist.search", {
         })
         .css({'font-size':'1.45em','vertical-align':'top'}) 
         .appendTo( this.div_search_as_user )
-        .addClass('ui-heurist-btn-header1 heurist-bookmark-search')
+        .addClass(this.options.button_class+' heurist-bookmark-search')
         .button({icon:'ui-icon-carat-1-s',  label: window.hWin.HR("filter domain"), showLabel:false});
         //.height( this.btn_search_as_user.height() );
 
@@ -417,7 +420,7 @@ $.widget( "heurist.search", {
                 title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree in the left panel')
             })
             .css({'min-width': '110px','vertical-align':'top','margin-left': '15px'})
-            .addClass('ui-heurist-btn-header1')
+            .addClass(this.options.button_class)
             .appendTo(div_save_filter)
             .button({icon: 'ui-icon-circle-arrow-s'});
 
@@ -441,7 +444,7 @@ $.widget( "heurist.search", {
             })
             .css({'width':'140px','min-width': '120px','margin-left':'3em'})
             //.addClass('logged-in-only')
-            .addClass('ui-heurist-btn-header1')
+            .addClass(this.options.button_class)
             .appendTo( this.div_add_record )
             .button()
             .click(function(){ 
@@ -466,7 +469,7 @@ $.widget( "heurist.search", {
         .button({icon: 'ui-icon-arrowthick-1-s', showLabel:false,
             label:'Dropdown form for building a simple filter expression',
             title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
-        .addClass('ui-heurist-btn-header1')
+        .addClass(this.options.button_class)
         .css({'width':'40px','vertical-align': '-4px'})  //'padding':'0 1.0em',
         .appendTo(this.div_buttons);*/
 
@@ -510,7 +513,7 @@ $.widget( "heurist.search", {
             })
             .css({'font-size':'1.3em','min-width':'110px','max-width':'250px'})  
             //.addClass('logged-in-only')
-            //.addClass('ui-heurist-btn-header1')
+            //.addClass(this.options.button_class)
             .appendTo( this.div_add_record )
             .button({label: window.hWin.HR("Add Record"), icon:'ui-icon-plusthick'}) //"ui-icon-circle-plus"
             .addClass('truncate')
@@ -528,7 +531,7 @@ $.widget( "heurist.search", {
             this.btn_select_rt = $( "<button>")
             .css({'font-size':'1.3em'})
             .appendTo( this.div_add_record )
-            //.addClass('ui-heurist-btn-header1 heurist-bookmark-search')
+            //.addClass(this.options.button_class+' heurist-bookmark-search')
             .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
             
             this.btn_add_record_dialog = $( "<button>")
@@ -1388,7 +1391,7 @@ $.widget( "heurist.search", {
             label: window.hWin.HR("close")
         })
         .appendTo( $dlg )
-        .addClass('ui-heurist-btn-header1 quick-search-close')
+        .addClass(this.options.button_class+' quick-search-close')
         .css({position:'absolute', zIndex:9999, 'right':4, top:4, width:16, height:16, 'font-size':'0.8em'})
         .button({icon: "ui-icon-triangle-1-n", showLabel:false});
         that._on( search_quick_close, {
@@ -1418,7 +1421,7 @@ $.widget( "heurist.search", {
 
         var search_quick_go = $( "<button>")
         .appendTo( dv )
-        .addClass('ui-heurist-btn-header1')
+        .addClass(this.options.button_class)
         //.css({position:'absolute', zIndex:9999, 'right':4, top:4, width:18, height:18})
         .css('float', 'right')
         .button({

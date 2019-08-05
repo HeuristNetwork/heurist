@@ -265,6 +265,8 @@ function onPageInit(success){
                         $('#main-pagetitle').empty().append(pagetitle);
                         
                         $('.tinymce-body').val($('#main-content').html());
+                        
+                        //init widgets 
                         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         
@@ -397,12 +399,18 @@ function onPageInit(success){
             var eles;
             if(widgetid==null){
                 eles = tinymce.activeEditor.dom.select('.mceNonEditable'); //div.
+                
+                //$(tinymce.activeEditor.dom.select('.initTabs')).tabs();
+                
             }else{
                 eles = tinymce.activeEditor.dom.get( widgetid );
                 eles = [eles];
             }
                 
             $(eles).each(function(idx, ele){
+                
+                if ($(ele).hasClass('initTabs')) $(ele).tabs();
+                
                 $(ele).find('a.edit').click(function(event){
                     var wid = $(event.target).parents('.mceNonEditable').attr('id');
                     __addEditWidget( wid );                    
@@ -413,6 +421,7 @@ function onPageInit(success){
                         tinymce.activeEditor.dom.remove( wid );
                     });
                 });
+                
             })
     }
     
@@ -484,6 +493,7 @@ function onPageInit(success){
             var widget_name = sel.val();
             var widget_title = sel.find('option:selected').attr('data-name');
             var widgetCss = $dlg.find('#widgetCss').val();
+            var groupContent = '';
             
             var opts = {};
             
@@ -518,6 +528,42 @@ function onPageInit(success){
                     var mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
                     if(mapdoc_id>0) opts['mapdocument'] = mapdoc_id;
                     
+            }else if (widget_name=='heurist_Groups'){
+                
+                //find all inputs with class = tabs
+                var header = '<ul>';
+                var cont = $dlg.find('div.'+widget_name);
+                var tabs = [];
+                var index = 1;
+                cont.find('input.tabs').each(function(idx, item){
+                    var title = $(item).val().trim();
+                    if(title!=''){
+                        var tab_id = widgetid+'-tab'+index;
+                        header = header + '<li><a href="#'+tab_id+'">'+title+'</a></li>';
+                        index++;
+                        
+                        var tabdiv = tinymce.activeEditor.dom.get(tab_id);
+                        if(tabdiv){
+                            groupContent = groupContent + $(tabdiv).html();
+                        }else{
+                            groupContent = groupContent + '<div id="'+tab_id+'" class="mceEditable">'
+                            +'Edit content for tab '+tab_id+'</div>';
+                        }
+                        
+                        tabs.push({title:title, description:''});    
+                    }
+                });
+                opts['tabs'] = tabs;
+                groupContent = header + '</ul>' + groupContent;
+                    
+                opts['groups_mode'] = __prepareVal( cont.find('input[name="groups_mode"]:checked').val());
+                
+                
+                //for source code need to generate <ul> to visualize header in edit mode
+                //and add content divs
+                
+                
+                    
             }else{
                 
                 var cont = $dlg.find('div.'+widget_name);
@@ -525,6 +571,8 @@ function onPageInit(success){
                 if(widget_name=='heurist_SearchTree'){
                     cont.find('input[name="allowed_UGrpID"]').val( 
                             cont.find('#allowed_UGrpID').editing_input('getValues') );
+                    cont.find('input[name="allowed_svsIDs"]').val( 
+                            cont.find('#allowed_svsIDs').editing_input('getValues') );
                     cont.find('input[name="init_svsID"]').val( 
                             cont.find('#init_svsID').editing_input('getValues') );
                 }else if(widget_name=='heurist_Navigation'){
@@ -566,14 +614,31 @@ function onPageInit(success){
                 widget_options = widget_options+key+':'+opts[key]+';'                
             }*/
             
-            var content = '<div id="'+widgetid+'" class="mceNonEditable" '
+            var vals = widgetCss.split(';')
+            var sh = '';
+            for (var i=0; i<vals.length; i++){
+                var vs = vals[i].split(':');
+                if(vs && vs.length==2){
+                    vs[0] = vs[0].trim();
+                    if(vs[0]=='width' || vs[0]=='height' ){
+                       sh = sh+' '+vals[i];
+                    }
+                }
+            }
+            
+            
+            var content = '<div id="'+widgetid+'" class="mceNonEditable'
+                + ((widget_name=='heurist_Groups')?' initTabs':'') +'" '
                 +' data-heurist-app-id="'+widget_name
                 + '" style="'+ widgetCss+'" '
                 + '>'
-                + '<div style="padding:10px;"><a href="#" class="edit" style="padding:0 10px" title="Click to edit">Heurist '+widget_title
-                //+ 'Placeholder for ' + widget_name 
-                + ' widget ( edit )</a>&nbsp;&nbsp;<a href="#" class="remove">remove</a></div>'//+widgetCss
-                + ' <span class="widget-options" style="font-style:italic;display:none">'+widget_options+'</span></div>';
+                + '<div style="padding:10px;"><img src="'
+                +window.hWin.HAPI4.baseURL+'/hclient/assets/h4_icon_35x35.png" height="22" style="vertical-align:middle">&nbsp;<b>'
+                +widget_title
+                + '</b><a href="#" class="edit" style="padding:0 10px" title="Click to edit">edit</a>&nbsp;&nbsp;'
+                + '<a href="#" class="remove">remove</a> '+sh+' </div>'//+widgetCss
+                + ' <span class="widget-options" style="font-style:italic;display:none">'+widget_options+'</span>'
+                + groupContent + '</div>';
                 
             return content; 
         }
@@ -622,6 +687,13 @@ function onPageInit(success){
                         $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
                     }
 
+                }else if (widget_name=='heurist_Groups'){
+                    
+                    $dlg.find('input[name="groups_mode"][value="'+opts['groups_mode']+'"]').prop('checked',true);
+                    __addTabs(opts['tabs']);
+                    //cont.find('.ui-icon-circle-b-minus').click
+                    
+                    
                 }else{
                 
                     $dlg.find('div.'+widget_name+' input').each(function(idx, item){
@@ -650,6 +722,36 @@ function onPageInit(success){
             }
         } //end __restoreValuesInUI
         
+        // add input for tabs in config dialog
+        //
+        function __addTabs( tabs ){
+                    if(!tabs || tabs.length==0){
+                        tabs = [{title:'Tab1'}];
+                    }
+                    var cont = $dlg.find('.heurist_Groups');
+                    for(var i=1;i<cont.length;i++){
+                        $(cont[i]).remove();    
+                    }
+                    
+                    $.each(tabs, function(idx, item){
+                        
+                        cont = $('<div  class="heurist_Groups">').appendTo($dlg.find('fieldset'))
+                        
+                        $('<div class="header"><label>'+((idx==0)?'Tabs':'&nbsp;')+'</label></div>').appendTo(cont);
+                        $('<input value="'+item.title+'" class="tabs"/>').appendTo(cont);
+                        
+                        //'<span class="ui-icon ui-icon-circle-b-minus" style="visibility:hidden"></span>'
+                    });
+                    cont = $('<div>').addClass('heurist_Groups').appendTo($dlg.find('fieldset'))
+                    $('<div class="header">&nbsp;</div>').appendTo(cont);
+                    $('<span>').button({icon:'ui-icon-circle-b-plus', label:'Add new tab/group'})   // class="ui-button-icon ui-icon ui-icon-circle-b-plus tabs"></span>')
+                        .click(function(event){
+                            $('<div  class="heurist_Groups"><div class="header tabs">&nbsp;</div><input value="" class="tabs"/></div>')
+                                .insertBefore($(event.target).parent());
+                        })
+                        .appendTo(cont);
+        }
+        
                 
         buttons[window.hWin.HR(window.hWin.HEURIST4.util.isempty(widgetid_edit)?'Add':'Save')]  = function() {
             
@@ -668,7 +770,7 @@ function onPageInit(success){
                     }else{  //replace
                         tinymce.activeEditor.insertContent(content);
                     }
-                    __initWidgetEditLinks(widgetid);
+                    __initWidgetEditLinks(widgetid); //activate edit/remove links
             
                     //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                     $dlg.dialog( "close" );
@@ -707,22 +809,26 @@ function onPageInit(success){
                    dele.show();
                    
                    if(is_initial_set){
-                       s = 'background:white;position:relative;';
+                       s = 'background:white;\nposition:relative;\n';
 
                        if(val=='heurist_Search'){
-                            s = s + 'border:0px solid gray;'
-                            s = s + 'height:50px;width:400px;';        
+                            s = s + 'border:0px solid gray;\n'
+                            s = s + 'height:50px;\nwidth:400px;';        
                        }else {
                            s = s + 'border:1px solid gray;'
                            if(val=='heurist_Navigation'){
-                                s = s + 'height:50px;width:100%;';        
+                                s = s + 'height:50px;\nwidth:100%;';        
                            }else if(val=='heurist_SearchTree'){
-                                s = s + 'height:100%;width:300px;';        
+                                s = s + 'height:100%;\nwidth:300px;';        
                            }else{
-                                s = s + 'height:600px;width:100%';        
+                                s = s + 'height:600px;\nwidth:100%';        
                            }
                        }
                        $dlg.find('#widgetCss').val(s);
+                       
+                       if(val=='heurist_Groups'){
+                            __addTabs();
+                       }
                    }
                    
                    if(val=='heurist_Navigation'){
@@ -767,8 +873,30 @@ function onPageInit(success){
                                 showclear_button: true,
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'Allowed groups', rst_DisplayHelpText:'',
+                                    rst_DisplayName: 'Show all searches in these workgroups', rst_DisplayHelpText:'',
                                     rst_FieldConfig: {entity:'sysGroups', csv:true}
+                                }
+                            };
+
+                            ele.editing_input(ed_options);
+                            ele.parent().css('display','block');
+                            ele.find('.header').css({'width':'150px','text-align':'right'});
+                           
+                       }
+                       
+                       ele = dele.find('#allowed_svsIDs');
+                       if(!ele.editing_input('instance')){
+                           
+                            var ed_options = {
+                                recID: -1,
+                                dtID: ele.attr('id'), 
+                                values: [dele.find('input[name="allowed_svsIDs"]').val()],
+                                readonly: false,
+                                showclear_button: true,
+                                dtFields:{
+                                    dty_Type:"resource", rst_MaxValues:1,
+                                    rst_DisplayName: 'Choose specific searches', rst_DisplayHelpText:'',
+                                    rst_FieldConfig: {entity:'usrSavedSearches', csv:true}
                                 }
                             };
 

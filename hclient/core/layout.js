@@ -468,6 +468,9 @@ function hLayout(args) {
         var panes = Object.keys(layout);
         var i, reserved = ['id', 'name', 'theme', 'type', 'options', 'cssfile', 'template'];
 
+        //
+        // pos - element id and index in layout (cfg) array
+        //
         function __layoutAddPane($container, pos){
             
             if(layout[pos]){
@@ -477,6 +480,7 @@ function hLayout(args) {
                 var ele = $container.find('#'+pos);
                 //this div may already exists
                 if(ele.length<1){
+                    //does not exist - add new one
                     $pane = $('<div>',{id:pos})
                             .addClass('ui-layout-'+pos)
                             .appendTo($container);
@@ -504,7 +508,7 @@ function hLayout(args) {
         for (i=0; i<panes.length; i++){
             if(reserved.indexOf(panes[i])<0){
                  __layoutAddPane($container, panes[i]);
-                 layoutInitPane(layout, $container, panes[i], null);
+                 layoutInitPane(layout, $container, panes[i], null);//init widget
             }
         }
 
@@ -513,6 +517,14 @@ function hLayout(args) {
         //setTimeout(function(){$container.show();},1000);
     }
 
+    //
+    // init either tabs or accordion or groups
+    //
+    function _initLayoutGroups($container){
+        
+    }
+    
+    
     /**
     * Adds application/widgets to specified pane
     *
@@ -531,7 +543,15 @@ function hLayout(args) {
                 var lpane = layout[pos];
                 
                 var $pane = $container.find('.ui-layout-'+pos);
-                $pane.empty();
+                if (lpane.apps && lpane.apps[0].appid == 'heurist_Groups') {
+                    
+                    $pane.tabs();
+                    return;
+                    
+                }else{
+                    $pane.empty();    
+                }
+                
 
                 if(cardinal_panes.indexOf(pos)>=0){
 
@@ -692,7 +712,7 @@ function hLayout(args) {
         }
         
 
-        if(needcontent){ //for standalone application laod content at once
+        if(needcontent){ //for standalone application load content at once
 
             var application = _appGetWidgetById(app.appid); //find in app array
 
@@ -733,15 +753,16 @@ function hLayout(args) {
     /**
     * Createas and add div with application content - widget or url
     *
-    * $container - pane in layout
+    * $app_container - pane in layout
     * app - entry from widgets array
-    * options - application options from layouts array - parameters to init application
+    * appcfg - application options from layouts array - parameters to init application
     */
     function appAddContent($app_container, app, appcfg){
         
       var options = appcfg.options, 
           layout_id = appcfg.layout_id;
           app_css = appcfg.css;
+
 
         var $content = $(document.createElement('div'));
         $content.attr('id', app.id+'_'+app_counter)
@@ -1243,14 +1264,19 @@ function hLayout(args) {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
+        //returns widget options from cfg_widgets
         appGetWidgetById: function(id){
             return _appGetWidgetById(id);
         },
         
+        //returns widget options from cfg_widgets
         appGetWidgetByName: function( widgetname ){
             return _appGetWidgetByName( widgetname );
         },
         
+        //
+        //
+        //
         appInitAll: function(layoutid, containerid){
             _containerid = containerid
             var $container = $(containerid);

@@ -317,7 +317,7 @@ $.widget( "heurist.resultList", {
         //------------------------------------------       
 
         //if(this.options.innerHeader || this.options.select_mode=='select_multi'){  .addClass('ui-widget-content')
-        this.div_header =  $( "<div>" ).css('height','3em').appendTo( this.element );
+        this.div_header =  $( "<div>" ).css('height','41px').appendTo( this.element );
 
         $('<div class="result-list-header">')
         .css({'padding':'0.7em 0 0 20px', 'font-size': '1.17em'})   //padding left to align to search input field
@@ -355,7 +355,7 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" )
         .addClass('div-result-list-toolbar ent_header')
-        .css({'width':'100%'})
+        .css({'width':'100%','top':'4px'})
         .appendTo( this.element );
 
         this.div_content = $( "<div>" )
@@ -652,7 +652,6 @@ $.widget( "heurist.resultList", {
         }else{
             this.div_header.hide();
         }
-
         this.div_toolbar.css({'top':top+'px', height:'auto'});//this.options.show_savefilter?'4.9em':'2.5em'});
         if(this.options.show_toolbar){
             this.div_toolbar.show();

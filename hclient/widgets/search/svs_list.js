@@ -609,6 +609,13 @@ $.widget( "heurist.svs_list", {
         
         var that = this;
         if(!this.allowed_svsIDs){  //find all saved searches for current user
+        
+            if(this.options.allowed_svsIDs && !$.isArray(this.options.allowed_svsIDs)){
+                this.options.allowed_svsIDs = this.options.allowed_svsIDs.split(',');
+            }
+            if(this.options.allowed_UGrpID && !$.isArray(this.options.allowed_UGrpID)){
+                this.options.allowed_UGrpID = this.options.allowed_UGrpID.split(',');
+            }
 
             window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs: this.options.allowed_svsIDs,
                 UGrpID: this.options.allowed_UGrpID},
@@ -677,7 +684,7 @@ $.widget( "heurist.svs_list", {
             if(sname.toLowerCase().indexOf('placeholder')===0) continue;
 
             $('<button>', {text: sname, 'data-svs-id':svsID})
-            .css({'width':'100%','margin-top':'0.4em'})
+            .css({'width':'100%','margin-top':'0.4em','max-width':'300px','text-align':'left'})
             .button({icons:{primary: iconBtn}}).on("click", function(event){
 
                 var svs_ID = $(this).attr('data-svs-id');
@@ -690,6 +697,7 @@ $.widget( "heurist.svs_list", {
                 }
             })
             .appendTo(this.accordeon);
+            $('<br>').appendTo(this.accordeon);
 
             visible_svsID = svsID;
             visible_cnt++;

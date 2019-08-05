@@ -208,11 +208,9 @@ function onPageInit(success)
         
     if(!success) return;
     
+console.log('1111');    
+    
     var ele = $('body').find('#main-content');
-    
-    //fill default elements with value from home page record
-    //@todo
-    
     
     window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
     ele.show();
@@ -244,13 +242,13 @@ function onPageInit(success)
         var itop = $('#main-header').height(); //[0].scrollHeight;
         $('#btn_editor').css({top:itop-70, right:40});
         
-    },500);
+    },300);
     
     
 }
 function loadHomePageContent(pageid){
         if(pageid>0){
-              window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
+              //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
               $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='
                         +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
                   function(){
@@ -347,6 +345,7 @@ body{
     color:black;
     position:absolute;
     left:10;
+    margin: 0;
     width:auto;
 }
 #main-content{
@@ -394,6 +393,7 @@ body{
     if(!$edit_Available){
 ?>
 div.coverall-div {
+    background-position: top;     
     background-color: white;
     opacity: 1;
 }
@@ -452,7 +452,7 @@ if(!$edit_Available && $system->is_member(2)){
         .'style="position:absolute;right:40px; top:100px;" class="cms-button">Web site editor</a>';
 }
     ?>  
-        <div id="main-pagetitle"></div>       
+        <div id="main-pagetitle">loading...</div>       
     </div>
     <div class="ent_content_full" style="top:180px;padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" data-viewonly="<?php print ($hasAccess)?0:1;?>">
