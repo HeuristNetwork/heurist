@@ -182,7 +182,7 @@ function hAPI(_db, _oninit) { //, _currentUser
                             message: err_message,
                             request_code: request_code}
 
-                if(callback){
+                if($.isFunction(callback)){
                     callback(response);
                 }
             }
@@ -692,6 +692,7 @@ prof =Profile
                         if($.isFunction(callback)) callback.call();
 
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+                        
                     }
                 });
 
@@ -775,8 +776,6 @@ prof =Profile
     * @returns {Object}
     */
     function hRecordMgr(){
-
-        
         
         var that = {
 
@@ -795,6 +794,7 @@ prof =Profile
                 }
                 _callserver('record_edit', request, callback);
             }
+            
 
             /**
             *  Save Record (remove temporary flag if new record)
@@ -804,12 +804,34 @@ prof =Profile
             */
             ,saveRecord: function(request, callback){
                 if(request) request.a = 's';
-                _callserver('record_edit', request, callback);
+                
+                function __triggerRecordUpdateEvent(response){
+                    
+                    if(response && response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE);    
+                    }
+                    if($.isFunction(callback)){
+                            callback(response);
+                    }
+                }
+                
+                _callserver('record_edit', request, __triggerRecordUpdateEvent);
             }
             
             ,duplicate: function(request, callback){
                 if(request) request.a = 'duplicate';
-                _callserver('record_edit', request, callback);
+                
+                function __triggerRecordUpdateEvent(response){
+                    
+                    if(response && response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE);    
+                    }
+                    if($.isFunction(callback)){
+                            callback(response);
+                    }
+                }                
+                
+                _callserver('record_edit', request, __triggerRecordUpdateEvent);
             }
             
             /**
@@ -835,7 +857,18 @@ prof =Profile
             */
             ,remove: function(request, callback){
                 if(request) request.a = 'd';
-                _callserver('record_edit', request, callback);
+                
+                function __triggerRecordUpdateEvent(response){
+                    
+                    if(response && response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE);    
+                    }
+                    if($.isFunction(callback)){
+                            callback(response);
+                    }
+                }
+                                
+                _callserver('record_edit', request, __triggerRecordUpdateEvent);
             }
 
             /**
@@ -1172,6 +1205,7 @@ prof =Profile
             ON_REC_SEARCHSTART: "ON_REC_SEARCHSTART",
             ON_REC_SEARCH_FINISH: "ON_REC_SEARCH_FINISH",
             ON_REC_PAGESET: "ON_REC_PAGESET",
+            ON_REC_UPDATE: "ON_REC_UPDATE",
             ON_REC_SELECT: "ON_REC_SELECT",
             ON_LAYOUT_RESIZE: "ON_LAYOUT_RESIZE",
             ON_SYSTEM_INITED: "ON_SYSTEM_INITED",
@@ -1517,8 +1551,18 @@ prof =Profile
         , doImportAction: function(request, callback){
             //if(request) request.a = 'svs_delete';
             //request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
+            
+            function __triggerRecordUpdateEvent(response){
+                
+                if(response && response.status == window.hWin.ResponseStatus.OK){
+                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE);    
+                }
+                if($.isFunction(callback)){
+                        callback(response);
+                }
+            }
 
-            _callserver('importController', request, callback);
+            _callserver('importController', request, __triggerRecordUpdateEvent);
         }
 
         

@@ -131,13 +131,13 @@ $.widget( "heurist.search", {
         }
 
         //------------------------------------------- filter by entities
-        var is_vis = this.options.btn_entity_filter && (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
+        this.options.btn_entity_filter = this.options.btn_entity_filter && (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
         
         this.div_entity_btns   = $('<div>').addClass('heurist-entity-filter-buttons')
                                 .css({ 'display':(this._is_publication?'none':'block'),
                                     'padding':this._is_publication?0:('10px '+sz_search_padding),
-                                    'visibility':is_vis?'visible':'hidden',
-                                    'height':is_vis?'auto':'10px'})
+                                    'visibility':this.options.btn_entity_filter?'visible':'hidden',
+                                    'height':this.options.btn_entity_filter?'auto':'10px'})
                                 .appendTo( this.element );
         //quick filter by entity
         $('<label>').text(window.hWin.HR('Entities')+': ').appendTo(this.div_entity_btns);
@@ -146,6 +146,7 @@ $.widget( "heurist.search", {
         .css({'font-size':'1.1em'})        
         .appendTo(this.div_entity_btns);
         
+        //selector with checkboxes to select filter by entity buttons
         this.btns_by_entity_options = {select_name:'select_btns_by_entity', 
                 useIcons: true, useCounts:true, useGroups:true, useCheckboxes:true, 
                 ancor: this.btns_by_entity, 
@@ -175,10 +176,7 @@ $.widget( "heurist.search", {
                                return false;
                            }};            
         
-        if(!this.select_btns_by_entity){
-            this._openSelectRectypeFilter(this.btns_by_entity_options, true);
-        }
-        
+        //click on button - opens rectype selector with checkboxes
         this._on( this.btns_by_entity, {  click: function(){
                 this._openSelectRectypeFilter( this.btns_by_entity_options );
                 return false;
@@ -285,10 +283,7 @@ $.widget( "heurist.search", {
                                    return false;
                                }};            
             
-            if(!this.select_rectype_filter){
-                this._recreateSelectRectypeFilter(this.filter_by_entity_options);
-            }
-            
+            //click on label - opens selector
             this._on( this.filter_by_entity, {  click: function(){
                     this._openSelectRectypeFilter( this.filter_by_entity_options );
                     return false;
@@ -673,12 +668,15 @@ $.widget( "heurist.search", {
         $(window.hWin.document).on(
             window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
+            + ' ' + window.hWin.HAPI4.Event.ON_REC_UPDATE
             + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(e, data) { that._onSearchGlobalListener(e, data) } );
             
             
         this.div_search.find('.div-table-cell').css('vertical-align','top');
 
+        this._recreateRectypeSelectors();
+        
         this._refresh();
 
     }, //end _create
@@ -885,40 +883,40 @@ $.widget( "heurist.search", {
         this.btn_search_domain.css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'inline-block':'none');
 
         if(this.options.btn_visible_newrecord){
-        
-            if(!this.select_rectype_addrec){ //add record selctor
 
-            this.select_rectype_addrec = window.hWin.HEURIST4.ui.createRectypeSelect();
-            if(this.select_rectype_addrec.hSelect("instance")!=undefined){
-                this.select_rectype_addrec.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
+            if(!this.select_rectype_addrec){ //add record selector
+
+                this.select_rectype_addrec = window.hWin.HEURIST4.ui.createRectypeSelect();
+                if(this.select_rectype_addrec.hSelect("instance")!=undefined){
+                    this.select_rectype_addrec.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
+                }
+
+                var that = this;
+                this.select_rectype_addrec.hSelect({change: function(event, data){
+
+                    var selval = data.item.value;
+                    that.select_rectype_addrec.val(selval);
+                    var opt = that.select_rectype_addrec.find('option[value="'+selval+'"]');
+                    that.btn_add_record.button({label: 'Add '+opt.text().trim()});
+
+                    var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                    if(!$.isArray(prefs) || prefs.length<4){
+                        prefs = [selval, 0, 'viewable', '']; //default to everyone   window.hWin.HAPI4.currentUser['ugr_ID']
+                    }else{
+                        prefs[0] = selval; 
+                    }
+                    window.hWin.HAPI4.save_pref('record-add-defaults', prefs);
+
+                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
+
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{RecTypeID:selval}});
+                    return false;
+                    }
+                });
+                this.select_rectype_addrec.hSelect('hideOnMouseLeave', this.btn_select_rt);
+
             }
 
-            var that = this;
-            this.select_rectype_addrec.hSelect({change: function(event, data){
-                    
-                   var selval = data.item.value;
-                   that.select_rectype_addrec.val(selval);
-                   var opt = that.select_rectype_addrec.find('option[value="'+selval+'"]');
-                   that.btn_add_record.button({label: 'Add '+opt.text().trim()});
-
-                   var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-                   if(!$.isArray(prefs) || prefs.length<4){
-                        prefs = [selval, 0, 'viewable', '']; //default to everyone   window.hWin.HAPI4.currentUser['ugr_ID']
-                   }else{
-                        prefs[0] = selval; 
-                   }
-                   window.hWin.HAPI4.save_pref('record-add-defaults', prefs);
-                   
-                   window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
-                   
-                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{RecTypeID:selval}});
-                   return false;
-                }
-            });
-            this.select_rectype_addrec.hSelect('hideOnMouseLeave', this.btn_select_rt);
-
-        }
-        
             var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
             if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
                 add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
@@ -926,21 +924,17 @@ $.widget( "heurist.search", {
             if(add_rec_prefs.length<4){
                 add_rec_prefs.push(''); //visibility groups
             }
-            
+
             if(add_rec_prefs[0]>0) {
                 this.select_rectype_addrec.val(add_rec_prefs[0]); 
                 var opt = this.select_rectype_addrec.find('option[value="'+add_rec_prefs[0]+'"]');
                 this.btn_add_record.button({label: 'Add '+opt.text()});
             }
-           
+
             this.setOwnerAccessButtonLabel( add_rec_prefs );
-           
+
         }
         
-        if(!this.select_rectype_filter && this.options.menu_entity_filter){
-            this._recreateSelectRectypeFilter( this.filter_by_entity_options );
-        }
-            
         this._showhide_input_prompt();
     },
 
@@ -968,7 +962,54 @@ $.widget( "heurist.search", {
             this[select_rectype].hSelect('hideOnMouseLeave', opts.ancor);
     },
     
-    _openSelectRectypeFilter: function( opts, is_init ){
+
+    //
+    // recreate rectype selectors and filter button set
+    //
+    _recreateRectypeSelectors: function(){
+
+        var that = this;
+        
+        window.hWin.HEURIST4.rectypes.counts_update = (new Date()).getTime();
+                    
+        var request = {
+                'a'       : 'counts',
+                'entity'  : 'defRecTypes',
+                'mode'    : 'record_count',
+                'ugr_ID'  : window.hWin.HAPI4.user_id()
+                };
+                                
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+    
+                    window.hWin.HEURIST4.rectypes.counts = response.data;
+                    
+                    if(that.options.menu_entity_filter){ //selector to filter by entity
+                            that._recreateSelectRectypeFilter(that.filter_by_entity_options);
+                    }
+                        
+                    //buttons - filter by entity
+                    if(that.options.btn_entity_filter){
+                        that._redraw_buttons_by_entity(true);
+                        that.btns_by_entity_options.marked = that.buttons_by_entity;
+                        
+                        that._recreateSelectRectypeFilter(that.btns_by_entity_options);
+                    }
+        
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.rectypes.counts_update = 0;
+                }
+        });
+        
+    },
+
+
+    //
+    //
+    //
+    _openSelectRectypeFilter: function( opts ){
         
                 var select_rectype = opts['select_name'];
         
@@ -1003,50 +1044,25 @@ $.widget( "heurist.search", {
                     }
                     
                 }
-            
+                
+                if(!this[select_rectype]){
+                    __openSelect();
+                }
+                    
+
+                /*            
                 if(!window.hWin.HEURIST4.rectypes.counts ||
                     (new Date()).getTime() - window.hWin.HEURIST4.rectypes.counts_update > 30000)  //30 seconds
                 {
-                        window.hWin.HEURIST4.rectypes.counts_update = (new Date()).getTime();
-                    
-                        var request = {
-                                'a'       : 'counts',
-                                'entity'  : 'defRecTypes',
-                                'mode'    : 'record_count',
-                                'ugr_ID'  : window.hWin.HAPI4.user_id()
-                                };
-                                
-                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                            function(response){
-                                if(response.status == window.hWin.ResponseStatus.OK){
-                    
-                                    window.hWin.HEURIST4.rectypes.counts = response.data;
-                                    
-                                    if(is_init==true){ //it applicable for entity filter buttons
-                                        that._redraw_buttons_by_entity(true);
-                                        opts.marked = that.buttons_by_entity;
-                                    }                                    
-                                    
-                                    that._recreateSelectRectypeFilter( opts );
-                                    
-                                    if(is_init!==true){
-                                        __openSelect();    
-                                    }
-                                    
-                        
-                                }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                                    window.hWin.HEURIST4.rectypes.counts_update = 0;
-                                }
-                        });
 
                 }else{
                     if(!this[select_rectype]){
-                        this._recreateSelectRectypeFilter( opts );
+                        this._recreateSelectRectypeFilter();
                     }
                     
                     __openSelect();
-                }    
+                } 
+                */   
     },
         
 
@@ -1162,6 +1178,11 @@ $.widget( "heurist.search", {
                 }
             }
 
+        }else if(e.type == window.hWin.HAPI4.Event.ON_REC_UPDATE){ //record added/removed
+            
+            //recreate selectors
+            this._recreateRectypeSelectors();
+            
         }else if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE){
 
             if(this.search_assistant!=null){
@@ -1172,14 +1193,16 @@ $.widget( "heurist.search", {
                 //this.search_assistant.dialog('destroy');
                 this.search_assistant.remove();
                 this.search_assistant = null;
+
             }
-            
+            //force recreate rectype selectors
             if(this.select_rectype_addrec!=null){
                 this.select_rectype_addrec.remove();
                 this.select_rectype_addrec = null;
                 this._refresh();
             }
-            
+
+            this._recreateRectypeSelectors();
         }
 
 
@@ -1720,6 +1743,7 @@ $.widget( "heurist.search", {
           +' '+window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
         $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
           + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
+          + ' ' + window.hWin.HAPI4.Event.ON_REC_UPDATE
           + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
 
         // remove generated elements
