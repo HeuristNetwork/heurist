@@ -643,7 +643,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             }
         
         if(action == "menu-database-browse"){
-            
+
                 window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', {
                     select_mode:'select_single',
                     isdialog: true,
@@ -655,41 +655,47 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             if(db.indexOf('hdb_')===0) db = db.substr(4);
                             window.open( window.hWin.HAPI4.baseURL + '?db=' + db, '_blank');
                         }
-                                                
+
                     }
                 });
 
-        }else 
-        if(action == "menu-cms-create"){
-            
-            var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-            if(RT_CMS_HOME>0 && window.hWin.HEURIST4.rectypes.counts
-                 && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]>0){
-            
-                window.hWin.HEURIST4.msg.showMsgDlg(
-                    'You already have a website. Are you sure you want to create an additional site?',
-                    function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
-            }else{
-                window.hWin.HEURIST4.ui.showEditCMSDialog( -1 );
-            }
-            
-        }else 
-        if(action == "menu-cms-edit"){
-            
-            that._select_CMS_Home();
-            
-        }else 
-        if(action == "menu-database-properties"){
-            
-                window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
-        }else
-        if(action == "menu-database-rollback"){
-           
-            window.hWin.HEURIST4.msg.showMsgDlg('Although rollback data has been recorded, '
-                    + 'there is currently no end-user interface way of rolling '
-                    + 'back the database. <br><br>'+window.hWin.HR('New_Function_Contact_Team'));
-        }else 
-        if(action == "menu-structure-import" || action == "menu-structure-import-express"){
+        }else if(action == "menu-cms-create"){
+
+                var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+                if(RT_CMS_HOME>0 && window.hWin.HEURIST4.rectypes.counts
+                    && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]>0){
+
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                        'You already have a website. Are you sure you want to create an additional site?',
+                        function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                }else{
+                    window.hWin.HEURIST4.ui.showEditCMSDialog( -1 );
+                }
+
+        }else if(action == "menu-cms-edit"){
+
+                        var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+                        if(RT_CMS_HOME>0){
+
+                            if (window.hWin.HEURIST4.rectypes.counts
+                                && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]>0){
+
+                                that._select_CMS_Home();
+                            }else{
+                                window.hWin.HEURIST4.ui.showEditCMSDialog( -1 );    
+                            }
+                        }
+
+
+        }else if(action == "menu-database-properties"){
+
+                            window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
+        }else if(action == "menu-database-rollback"){
+
+                                window.hWin.HEURIST4.msg.showMsgDlg('Although rollback data has been recorded, '
+                                    + 'there is currently no end-user interface way of rolling '
+                                    + 'back the database. <br><br>'+window.hWin.HR('New_Function_Contact_Team'));
+        }else if(action == "menu-structure-import" || action == "menu-structure-import-express"){
 
             var opts = {isdialog: true};
             if(action == "menu-structure-import-express"){

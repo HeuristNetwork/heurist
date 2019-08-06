@@ -47,7 +47,7 @@ function editCMS(home_page_record_id, main_callback){
                                 if($dlg2.dialog('instance')) $dlg2.dialog('close');
 
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                    editCMS(home_page_record_id, main_callback);
+                                    editCMS(home_page_record_id, main_callback); //call itself again
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);     
                                 }
@@ -178,6 +178,12 @@ function editCMS(home_page_record_id, main_callback){
                 
                     if(response.status == window.hWin.ResponseStatus.OK){
                         $('#spanRecCount2').text(response.data.count_imported);
+                        
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                        '<p>To save you time we have created a set of commonly used menu entries and web pages with dummy content.</p>'
+                        +'<p>Please use <b>Menu &amp; pages</b> on the left to delete the menu entries you don\'t need or to rename them '
+                        +'(don\'t forget to change the title of the page which is generally a longer version of the menu label). You can also add new ones.</p>'
+                        +'<p>The pages can be edited by navigating to the page and clicking <b>Edit page content</b>.</p>');                            
 
                         _initWebSiteEditor( true, { q:"ids:"+response.data.ids.join(',') } );
 
