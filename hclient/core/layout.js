@@ -181,7 +181,7 @@ function hLayout(args) {
             if(_appGetWidgetById(app_id)!=null){
                 var opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-heurist-app-options')); //old way
                 if(!opts){ //find span with configuration
-                    var cfgele = ele.find('span.widget-options');
+                    var cfgele = ele.find('span.widget-options:first');
                     if(cfgele.length==0) cfgele = ele.find('span'); //backward capability
                     opts = window.hWin.HEURIST4.util.isJSON(cfgele.text());
                     
@@ -547,16 +547,16 @@ function hLayout(args) {
                     
                     //$($pane.children()[0]).remove(); //remove div with header
                     //$($pane.children()[0]).remove(); //remove span with options
-                    $pane.find('div.widget-design-header').remove(); //remove div with header
-                    $pane.find('span.widget-options').remove(); //remove div with header
+                    $pane.find('div.widget-design-header:first').remove(); //remove div with header
+                    $pane.find('span.widget-options:first').remove(); //remove div with header
                     
                     
                     var mode = lpane.apps[0].options.groups_mode;
                     
                     if(mode!='tabs'){
                         
-                        $pane.find('ul').remove();
-                        $pane.find('.ui-tabs-panel').each(function(idx,item){
+                        $pane.children('ul').remove();
+                        $pane.children('.ui-tabs-panel').each(function(idx,item){
                             
                             if(idx<lpane.apps[0].options.tabs.length){
                                 $('<h3>').html(lpane.apps[0].options.tabs[idx].title).appendTo($pane);

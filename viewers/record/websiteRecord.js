@@ -486,7 +486,7 @@ function onPageInit(success){
         //
         // from UI
         //
-        function __prepareWidgetDiv( widgetid ){
+        function __prepareWidgetDiv( widgetid, widget_old ){
             //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
             
             var sel = $dlg.find('#widgetName');
@@ -540,15 +540,21 @@ function onPageInit(success){
                     if(title!=''){
                         var tab_id = widgetid+'-tab'+index;
                         header = header + '<li><a href="#'+tab_id+'">'+title+'</a></li>';
+                        
+                        var content = 'Edit content for tab '+tab_id;
+                        
+                        if(!window.hWin.HEURIST4.util.isempty(widget_old)){
+                            tab_id_old = widget_old+'-tab'+index;
+                            var tabdiv = tinymce.activeEditor.dom.get('#'+tab_id_old);
+                            if(tabdiv){
+                                content = $(tabdiv).html();
+                            }
+                        }
+                        
                         index++;
                         
-                        var tabdiv = tinymce.activeEditor.dom.get(tab_id);
-                        if(tabdiv){
-                            groupContent = groupContent + $(tabdiv).html();
-                        }else{
-                            groupContent = groupContent + '<div id="'+tab_id+'" class="mceEditable">'
-                            +'Edit content for tab '+tab_id+'</div>';
-                        }
+                        groupContent = groupContent + '<div id="'+tab_id+'" class="mceEditable">'
+                            +content+'</div>';
                         
                         tabs.push({title:title, description:''});    
                     }
@@ -658,7 +664,7 @@ function onPageInit(success){
                 $dlg.find('#widgetCss').val( s );
             
             
-            var cfgele = ele.find('span.widget-options');
+            var cfgele = ele.find('span.widget-options:first');
             if(cfgele.length==0) cfgele = ele.find('span'); //backward capability
             var opts = window.hWin.HEURIST4.util.isJSON(cfgele.text());
             
@@ -756,7 +762,7 @@ function onPageInit(success){
         buttons[window.hWin.HR(window.hWin.HEURIST4.util.isempty(widgetid_edit)?'Add':'Save')]  = function() {
             
                     var widgetid = 'mywidget_'+window.hWin.HEURIST4.util.random();
-                    var  content = __prepareWidgetDiv( widgetid );            
+                    var  content = __prepareWidgetDiv( widgetid, widgetid_edit );            
                     
                     if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){  //edit
                         /*  old way it does not activeate noneditable
