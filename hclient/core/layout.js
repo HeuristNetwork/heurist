@@ -545,7 +545,44 @@ function hLayout(args) {
                 var $pane = $container.find('.ui-layout-'+pos);
                 if (lpane.apps && lpane.apps[0].appid == 'heurist_Groups') {
                     
-                    $pane.tabs();
+                    //$($pane.children()[0]).remove(); //remove div with header
+                    //$($pane.children()[0]).remove(); //remove span with options
+                    $pane.find('div.widget-design-header').remove(); //remove div with header
+                    $pane.find('span.widget-options').remove(); //remove div with header
+                    
+                    
+                    var mode = lpane.apps[0].options.groups_mode;
+                    
+                    if(mode!='tabs'){
+                        
+                        $pane.find('ul').remove();
+                        $pane.find('.ui-tabs-panel').each(function(idx,item){
+                            
+                            if(idx<lpane.apps[0].options.tabs.length){
+                                $('<h3>').html(lpane.apps[0].options.tabs[idx].title).appendTo($pane);
+                                $('<div>').html($(item).html()).appendTo($pane);
+                            }
+                            $(item).remove();    
+                        });
+                        
+                        if(mode=='accordion'){
+                            $pane.accordion();
+                        }
+                    
+                    }else{ //tabs by default
+                    
+                        // in design mode - it called from iframe and baseURL is different 
+                        // to fix this mess
+                        var rhash = /#.*$/;
+                        var locationUrl = location.href.replace( rhash, "" );
+                        $pane.find('li > a').each(function(idx, item){
+                           var href = $(item).attr('href');
+                           href = href.substr(href.indexOf('#'));           
+                           $(item).attr('href', locationUrl + href);
+                        });
+                        $pane.tabs();    
+                    }
+                    
                     return;
                     
                 }else{
@@ -1297,6 +1334,11 @@ function hLayout(args) {
                 $container = $(containerid);
             }
             var layout = _getLayoutParams($container, supp_options); 
+            
+            //init groups
+            
+            
+            
             if(layout){
                 _appInitAll(layout, $container); 
             }

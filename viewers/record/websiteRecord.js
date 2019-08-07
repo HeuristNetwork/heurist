@@ -632,8 +632,8 @@ function onPageInit(success){
                 +' data-heurist-app-id="'+widget_name
                 + '" style="'+ widgetCss+'" '
                 + '>'
-                + '<div style="padding:10px;"><img src="'
-                +window.hWin.HAPI4.baseURL+'/hclient/assets/h4_icon_35x35.png" height="22" style="vertical-align:middle">&nbsp;<b>'
+                + '<div style="padding:10px;" class="widget-design-header"><img src="'
+                +window.hWin.HAPI4.baseURL+'hclient/assets/h4_icon_35x35.png" height="22" style="vertical-align:middle">&nbsp;<b>'
                 +widget_title
                 + '</b><a href="#" class="edit" style="padding:0 10px" title="Click to edit">edit</a>&nbsp;&nbsp;'
                 + '<a href="#" class="remove">remove</a> '+sh+' </div>'//+widgetCss
@@ -747,7 +747,7 @@ function onPageInit(success){
                     $('<span>').button({icon:'ui-icon-circle-b-plus', label:'Add new tab/group'})   // class="ui-button-icon ui-icon ui-icon-circle-b-plus tabs"></span>')
                         .click(function(event){
                             $('<div  class="heurist_Groups"><div class="header tabs">&nbsp;</div><input value="" class="tabs"/></div>')
-                                .insertBefore($(event.target).parent());
+                                .insertBefore($(event.target).parents('.heurist_Groups'));
                         })
                         .appendTo(cont);
         }

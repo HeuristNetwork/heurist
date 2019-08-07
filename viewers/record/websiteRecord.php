@@ -32,6 +32,7 @@
     */
 if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css    
 
+
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php'); //without client hapi
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_users.php');
@@ -115,6 +116,7 @@ $layout_theme = 'heurist';//'le-frog'; //__getValue($rec, DT_CMS_THEME);
 if(!$layout_theme) $layout_theme = 'heurist';
 $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
 
+
 //
 // returns link to uploaded file
 //
@@ -177,6 +179,11 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     
     <!-- link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/tinymce/skins/lightgray/content.min.css"/ -->
 
+<script>
+    var _time_debug = new Date().getTime() / 1000;
+//    console.log('webpage start');
+</script>
+    
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
   
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
@@ -184,6 +191,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/search_minimal.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/localization.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/dropdownmenus/navigation.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
@@ -208,13 +216,11 @@ if($edit_Available){
 //init page for publication version  
 function onPageInit(success)
 {
+
+//console.log('webpage onPageInit  '+(new Date().getTime() / 1000 - _time_debug));
+_time_debug = new Date().getTime() / 1000;
         
     if(!success) return;
-    
-    var ele = $('body').find('#main-content');
-    
-    window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
-    ele.show();
     
     //cfg_widgets is from layout_defaults.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
@@ -224,6 +230,8 @@ function onPageInit(success)
     $( "#main-logo").click(function(event){
               loadHomePageContent(<?php print $rec_id?>);
     });
+    //$( "#main-logo").click(); 
+    
     
     setTimeout(function(){
         //init main menu
@@ -253,6 +261,9 @@ function loadHomePageContent(pageid){
               $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='
                         +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
                   function(){
+                      
+//console.log('webpage load page content  '+(new Date().getTime() / 1000 - _time_debug));
+                      
                       var pagetitle = $($('#main-content').children()[0]);
                       pagetitle.remove();
                       $('#main-pagetitle').empty();
@@ -268,12 +279,22 @@ function loadHomePageContent(pageid){
 <script>
 function onHapiInit(success){   
     
+//    console.log('webpage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
+    _time_debug = new Date().getTime() / 1000;
+    
     if(!success){    
             window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
             return;
     }
     
     window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+        
+//console.log('DBG execution time "get_defs" '+response.exec_time);                            
+//console.log('DBG size "get_defs" '+response.zip_size);                            
+        
+//console.log('webpage db struct  '+(new Date().getTime() / 1000 - _time_debug));
+_time_debug = new Date().getTime() / 1000;
+        
         if(response.status == window.hWin.ResponseStatus.OK){
             window.hWin.HEURIST4.rectypes = response.data.rectypes;
             window.hWin.HEURIST4.terms = response.data.terms;
@@ -307,8 +328,19 @@ function onHapiInit(success){
 var gtag = null;//google log
 //init hapi    
 $(document).ready(function() {
+    
+        var ele = $('body').find('#main-content');
+        window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
+        ele.show();
+    
+//console.log('webpage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
+        _time_debug = new Date().getTime() / 1000;
+    
         // Standalone check
         if(!window.hWin.HAPI4){
+            window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
+            
+/*            
             // In case of standalone page
             //load minimum set of required scripts
             $.getMultiScripts(['localization.js'], '<?php echo PDIR;?>hclient/core/')
@@ -323,7 +355,7 @@ $(document).ready(function() {
             }).always(function() {
                 // always called, both on success and error
             });
-
+*/
         }else{
             // Not standalone, use HAPI from parent window
             onPageInit( true );
@@ -425,6 +457,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
 
     <div class="ent_wrapper">
     <div id="main-header" class="ent_header" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\');background-repeat: repeat-x;background-size:auto 170px;"':'' ?>>
+    
 	    <div style="float:left;min-height:80px;" id="main-logo">
             <a href="#" style="text-decoration:none;">
         <?php print $image_logo?'<img style="max-height:80px" src="'.$image_logo.'">'
@@ -436,9 +469,9 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         </div>
         
         <div style="float:right;margin-top: 15px">
-            <div id="host_info" style="float:right;line-height:36px;height:40px;margin-right: 15px;">
+            <div id="host_info" style="float:right;line-height:38px;height:40px;margin-right: 15px;">
             </div>
-            <div style="float:right;padding:0 10px;background: white;height:40px;line-height: 36px;"> 
+            <div style="float:right;padding:0 10px;background: white;height:40px;line-height: 38px;"> 
             <a href="http://HeuristNetwork.org" target="_blank" style="text-decoration:none;color:black;"
             title="This website is generated by Heurist, an academic knowledge management system developed at the University of Sydney Faculty of Arts and Social Sciences under the direction of Dr Ian Johnson, chief programmer Artem Osmakov.">
                 Powered by <img src="<?php echo HEURIST_BASE_URL ?>hclient/assets/h4_icon_16x16.png" style="vertical-align:sub"> Heurist
