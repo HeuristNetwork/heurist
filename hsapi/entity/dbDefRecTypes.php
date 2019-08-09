@@ -439,7 +439,7 @@ WHERE
             $query = 'SELECT d.rty_ID, count(r0.rec_ID) FROM defRecTypes d ';
             $where = ' LEFT OUTER JOIN Records r0 ON r0.rec_RectypeID=d.rty_ID AND ';
 */              
-            if(@$this->data['ugr_ID']>=0){
+            if((@$this->data['ugr_ID']>0) || (@$this->data['ugr_ID']===0)){
                 $conds = $this->_getRecordOwnerConditions($this->data['ugr_ID']);
                 $query = $query . $conds[0];
                 $where = $where . $conds[1];      

@@ -672,7 +672,9 @@ class HPredicate {
         if( in_array($this->pred_type, $this->allowed) ){
             $this->value = $value;
 
-            if(is_array($value)){
+            if(is_array($value) &&  count($value)>0 && 
+                !(is_numeric(@$value[0]) || is_string(@$value[0])) )
+            { //subqueries
                 $level = $this->parent->level."_".$this->parent->cnt_child_query;
                 $this->parent->cnt_child_query++;
 
@@ -1410,9 +1412,15 @@ class HPredicate {
 
         //@todo between , datetime, terms
         if(is_array($this->value)){
+            $cs_ids = getCommaSepIds($this->value);
+            if($cs_ids!=null){
+                $this->value = implode(',',$this->value);
+            }
+            /*
             error_log('value expected string - array given');
             error_log(print_r($params_global,true));
             $this->value = reset($this->value);
+            */
         }
 
         //
