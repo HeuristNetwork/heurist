@@ -939,7 +939,7 @@ $.widget( "heurist.search", {
     },
 
     //
-    //
+    // creates selectors menu_entity_filter, btn_entity_filter
     //
     _recreateSelectRectypeFilter: function(opts){
             var that = this;
@@ -1045,7 +1045,7 @@ $.widget( "heurist.search", {
                     
                 }
                 
-                if(!this[select_rectype]){
+                if(this[select_rectype]){
                     __openSelect();
                 }
                     
