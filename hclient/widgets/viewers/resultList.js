@@ -239,7 +239,7 @@ $.widget( "heurist.resultList", {
                                 that.applyViewMode( that._query_request.viewmode );
                         }
 
-                        that._renderRecordsIncrementally(recset); //hRecordSet
+                        that._renderRecordsIncrementally(recset); //hRecordSet - render record on search finish
                         
                         if(that.btn_search_save) {
                             that.btn_search_save.show();
@@ -279,6 +279,12 @@ $.widget( "heurist.resultList", {
         this._refresh();
 
         this._renderStartupMessageComposedFromRecord();
+        
+        // 
+        if(false){
+            this.updateResultSet(recordset); // render records if search in this realm has been performed earlier
+        }
+        
     
     }, //end _create
     

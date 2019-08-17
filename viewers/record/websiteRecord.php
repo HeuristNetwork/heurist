@@ -111,6 +111,7 @@ $image_banner = __getFile($rec, DT_CMS_BANNER, null);
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 
+$site_css = __getValue($rec, DT_CMS_CSS);
 
 $layout_theme = 'heurist';//'le-frog'; //__getValue($rec, DT_CMS_THEME);
 if(!$layout_theme) $layout_theme = 'heurist';
@@ -196,6 +197,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
+    <!-- script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script -->
     
 <?php
 $edit_Available = (@$_REQUEST['edit']==1);
@@ -241,7 +243,9 @@ _time_debug = new Date().getTime() / 1000;
                 
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
             {heurist_Navigation:{menu_recIDs:"<?php print $rec_id;?>", use_next_level:true, 
-            orientation:'horizontal',toplevel_css:{background:'rgba(112,146,190,0.7)'} }} );
+            orientation:'horizontal',toplevel_css:{background:'rgba(112,146,190,0.7)'},
+            aftermenuselect: afterPageLoad
+            }} );
             
         $('#main-menu').show();
         //load home page content
@@ -255,6 +259,94 @@ _time_debug = new Date().getTime() / 1000;
     
     
 }
+
+//
+//
+//
+function afterPageLoad(pageid){
+    
+//console.log('after '+pageid);    
+    if(pageid!=133082) return;
+    
+    
+        var ele = $('#mywidget_3166-2').find('div[widgetid="heurist_SearchTree"]');
+        
+        if(!$.isFunction(ele.svs_list) || !ele.svs_list('instance')){
+            //not inited yet
+            setTimeout(function(){ afterPageLoad(pageid); }, 500);
+            return;    
+        }
+    
+        $('#hie_navigation').find('a').attr('href','#')
+            .css({width:'200px','font-weight': 'bold','font-size': '1.1em', 
+                'text-decoration': 'none'}).click(function(event)
+        {
+            var ele_id = $(event.target).attr('data-ref');
+            $('.group-tab').hide(); //hide all tabs
+            $('#hie_navigation').hide();
+            var ele = $('#'+ele_id).show(); //show selected tab
+            if(ele_id=='mywidget_3166-0'){
+                //show result list for places
+                var mpos = $('#hie_navigation').height()/2;
+                ele.find('div[data-heurist-app-id="heurist_Map"]').css({bottom:mpos});
+                ele.find('div[data-heurist-app-id="heurist_resultList"]').css({top:mpos}).show();
+            }
+            
+        });
+        
+        
+        function __showbtns(){
+            //$('.group-tab').hide();
+            $('#hie_navigation').show();    
+        }
+        
+        $('#mywidget_3166-0').find('div[widgetid="heurist_SearchTree"]')
+                        .svs_list({onclose_search:__showbtns});
+        $('#mywidget_3166-1').find('div[widgetid="heurist_SearchTree"]')
+                        .svs_list({onclose_search:__showbtns});
+        $('#mywidget_3166-2').find('div[widgetid="heurist_SearchTree"]')
+                        .svs_list({onclose_search:__showbtns});
+    
+        $(document).on(window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, data) {
+//navigation for HIE - @todo in CMS editor
+//console.log(data);
+            if(data && data.search_realm=='hie_places' 
+                && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection))
+            {
+                $('#hie_navigation').hide();
+                $('.group-tab').hide();
+                $('#mywidget_3166-3').show();
+                
+                var wele = $('#mywidget_3166-3').find('div[widgetid="heurist_SearchTree"]');
+                wele.svs_list({sup_filter:'{"linked_to:12:134":'+data.selection[0]+'}', 
+                        onclose_search:function(){
+                            $('.group-tab').hide();
+                            $('#mywidget_3166-0').show();
+                        }});
+                wele.svs_list('doSearchByID', 21);
+              
+            }else if(data && data.search_realm=='hie_persons' 
+                && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection))
+            {
+                $('#hie_navigation').hide();
+                $('.group-tab').hide();
+                $('#mywidget_3166-4').show();
+                
+                var wele = $('#mywidget_3166-4').find('div[widgetid="heurist_SearchTree"]');
+                wele.svs_list({sup_filter:'{"related_to:61:290":[{"t":"61"},{"linked_to:10:16":'+data.selection[0]+'}]}', 
+                        onclose_search:function(){
+                            $('.group-tab').hide();
+                            $('#mywidget_3166-1').show();
+                        }});
+                wele.svs_list('doSearchByID', 23);
+              
+            }
+        });
+        
+    
+}
+
+
 function loadHomePageContent(pageid){
         if(pageid>0){
               //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
@@ -269,6 +361,8 @@ function loadHomePageContent(pageid){
                       $('#main-pagetitle').empty();
                       window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
                       window.hWin.HEURIST4.msg.sendCoverallToBack();
+                      
+                      afterPageLoad( pageid );
               });
         }
 }
@@ -423,7 +517,7 @@ body{
     color:blue;
 }
 <?php
-    if(!$edit_Available){
+if(!$edit_Available){
 ?>
 div.coverall-div {
     background-position: top;     
@@ -432,9 +526,11 @@ div.coverall-div {
 }
 <?php        
 }
-    ?>        
+if($site_css!=null){
+    print $site_css;
+}
+?>          
 </style>
-
 </head>
 <body>
 <?php
@@ -464,11 +560,13 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
             :'<div style="text-align:center;display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image</div>';?>
             </a>
         </div>
+        <div style="display:none;" id="main-logo-alt">
+        </div>
         <div id="main-title" style="float:left;padding-left:20px;vertical-align:middle;">
             <h2 style="font-size:1.7em;color:black"><?php print __getValue($rec, DT_NAME);?></h2>
         </div>
         
-        <div style="float:right;margin-top: 15px">
+        <div id="main-host" style="float:right;margin-top: 15px">
             <div id="host_info" style="float:right;line-height:38px;height:40px;margin-right: 15px;">
             </div>
             <div style="float:right;padding:0 10px;background: white;height:40px;line-height: 38px;"> 

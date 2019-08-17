@@ -25,6 +25,7 @@ $.widget( "heurist.navigation", {
        orientation: 'horizontal', //vertical
        use_next_level: false,
        onmenuselect: null,
+       aftermenuselect: null,
        toplevel_css:null  //css for top level items
     },
 
@@ -209,7 +210,6 @@ $.widget( "heurist.navigation", {
                 });
                 */
                 
-                
                 if($.isFunction(that.options.onmenuselect)){
                     
                     that.options.onmenuselect( pageid );
@@ -300,7 +300,11 @@ $.widget( "heurist.navigation", {
                                 }
                                 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
                                 //window.hWin.HEURIST4.msg.sendCoverallToBack();
-
+                                if($.isFunction(that.options.aftermenuselect)){
+                                    setTimeout(function(){
+                                        that.options.aftermenuselect( pageid );
+                                    },2000);
+                                }
                         });
                     }                
                 }

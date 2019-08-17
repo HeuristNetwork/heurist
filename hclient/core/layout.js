@@ -555,12 +555,20 @@ function hLayout(args) {
                     
                     if(mode!='tabs'){
                         
+                        var pid = $pane.attr('id');
+                        
                         $pane.children('ul').remove();
                         $pane.children('.ui-tabs-panel').each(function(idx,item){
                             
                             if(idx<lpane.apps[0].options.tabs.length){
-                                $('<h3>').html(lpane.apps[0].options.tabs[idx].title).appendTo($pane);
-                                $('<div>').html($(item).html()).appendTo($pane);
+                                if(mode!='divs'){
+                                    $('<h3>').html(lpane.apps[0].options.tabs[idx].title).appendTo($pane);
+                                }
+                                var ele = $('<div>')
+                                        .html($(item).html())
+                                        .appendTo($pane);
+                                ele.addClass('group-tab').attr('id',(pid+'-'+idx));
+                                if(mode=='divs' && idx>0) ele.hide();
                             }
                             $(item).remove();    
                         });

@@ -110,7 +110,8 @@ $.widget( "heurist.search_faceted", {
         ispreview: false,
         showclosebutton: true,
         onclose: null,
-        search_realm: null
+        search_realm: null,
+        preliminary_filter:null
     },
 
     cached_counts:[], //stored results of get_facets by stringified query index
@@ -140,7 +141,7 @@ $.widget( "heurist.search_faceted", {
         
         if(!this.options.ispreview){                       //padding-top:1.4em;
             this.div_title = $('<div>')
-            .css({padding:'1em 0em 0.7em 1em','font-size':'1.4em','font-weight':'bold',color:'rgb(142, 169, 185)','max-width':'90%'})
+            .css({padding:'0.5em 0em 0.5em 1em','font-size':'1.4em','font-weight':'bold',color:'rgb(142, 169, 185)','max-width':'90%'})
 //style='text-align:left;margin:4px 0 0 0!important;padding-left:1em;width:auto, max-width:90%'></h3")
                     .addClass('truncate').appendTo( this.div_header );
         }
@@ -502,7 +503,7 @@ $.widget( "heurist.search_faceted", {
        this._initFacetQueries();
         
        
-       this.facets_list.empty();
+       if(this.facets_list) this.facets_list.empty();
        
        var $fieldset = $("<fieldset>").css({'font-size':'0.9em','background-color':'white'})
                     .addClass('fieldset_search').appendTo(this.facets_list);
@@ -704,7 +705,7 @@ $.widget( "heurist.search_faceted", {
     }
 
     ,doClose: function(){
-        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
+        //$(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
         this._trigger( "onclose");
     }
 

@@ -31,10 +31,14 @@ $.widget( "heurist.svs_list", {
         buttons_mode: false,
         allowed_UGrpID: [], // allowed groups
         allowed_svsIDs: [], // allowed searches
-        init_svsID:null    // launch search on init
+        init_svsID:null,    // launch search on init
+        
+        onclose_search:null,  //function to be called on close faceted search
+        sup_filter:null       //suplementary filter for faceted search
     },
 
     allowed_svsIDs: null,
+    search_faceted: null,
 
     currentSearch: null,
     hSvsEdit: null,
@@ -135,6 +139,7 @@ $.widget( "heurist.svs_list", {
                 text:false})
             .css({'font-size': '0.8em','height':'18px','margin-left':'2px'})
             .attr("disabled", true);
+            
             this.btn_save = $( "<button>" )
             .appendTo( this.filter_div )
             .button({icons: {
@@ -242,6 +247,9 @@ $.widget( "heurist.svs_list", {
         if(key=='rectype_set'){
         this._refresh();
         }*/
+        if(key=='onclose_search' && this.search_faceted && $.isFunction(this.search_faceted.search_faceted)){
+            this.search_faceted.search_faceted('option', 'onclose', value);
+        }
     },
 
     _setOptionFromUrlParam: function( key, param_name, dtype ){
@@ -1636,6 +1644,18 @@ $.widget( "heurist.svs_list", {
             var qname   = svsID; //window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_NAME];
             
             this.doSearch( qname, qsearch, null );
+        }else{
+
+            var that = this;
+            window.hWin.HAPI4.SystemMgr.ssearch_get( { svsIDs:svsID },
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        var qsearch = response.data[svsID][_QUERY];
+                        that.doSearch( svsID, qsearch, null );
+                    }
+            });
+            
         }
         
     },
@@ -1661,13 +1681,30 @@ $.widget( "heurist.svs_list", {
 
                     this.search_faceted.show();
                     this.search_tree.hide();
+                    
+                    //suplementary filter for faceted search
+                    if(that.options.sup_filter){
+                        params.sup_filter = that.options.sup_filter;
+                    }
 
-                    var noptions= { query_name:qname, params:params, search_realm:this.options.search_realm,
-                        onclose:function(event){
+                    var noptions = { query_name:qname, 
+                        params:params, 
+                        search_realm:this.options.search_realm};
+                    
+                    
+                    //function to be called on close faceted search
+                    if($.isFunction(that.options.onclose_search)){
+                        noptions.onclose = that.options.onclose_search;
+                    }else{
+                        noptions.onclose = function(event){
+
+                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:that.options.search_realm} ]);  //global app event to clear views
+
                             that.search_faceted.hide();
                             that.search_tree.show();
                             that._adjustAccordionTop();
-                    }};
+                        };
+                    }
                     
                     if(!$.isFunction($('body')['search_faceted'])){
                         $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/search/search_faceted.js', function() {
@@ -1737,7 +1774,10 @@ $.widget( "heurist.svs_list", {
         }
 
     },
-
+    
+    //
+    //
+    //
     _deleteSavedSearch: function(svsID, svsTitle, callback){
 
 

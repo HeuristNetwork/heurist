@@ -842,7 +842,7 @@ window.hWin.HEURIST4.util = {
                 /*style = styles[i].split(':');
                 k = $.trim(style[0]);
                 v = $.trim(style[1]);*/
-                if (k.length > 0 && v.length > 0)
+                if (k && v && k.length > 0 && v.length > 0)
                 {
                     if(v==='true')v=true;
                     else if(v==='false')v=false;     
