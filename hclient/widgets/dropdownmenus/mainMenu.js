@@ -682,7 +682,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
                                 that._select_CMS_Home();
                             }else{
-                                window.hWin.HEURIST4.ui.showEditCMSDialog( -1 );    
+                                window.hWin.HEURIST4.msg.showMsgDlg(
+                                    'New website will be created. Continue?',
+                                    function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
                             }
                         }
 
