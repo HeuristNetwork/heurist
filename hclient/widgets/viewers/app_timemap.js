@@ -245,14 +245,18 @@ $.widget( "heurist.app_timemap", {
 
 //console.log('_initmap');
 
-            var mapping = this.mapframe[0].contentWindow.mapping;
+            //access mapping object in mapframe to referesh content 
+            var mapping = null;
+            if(this.mapframe[0].contentWindow){
+                mapping = this.mapframe[0].contentWindow.mapping;
+            }
 
             var that = this;
 
             if(!mapping){
                 this.map_inited = false; 
                 cnt_call = (cnt_call>0) ?cnt_call+1 :1;
-                setTimeout(function(){ that._initmap(cnt_call)}, 1000); //bad idea
+                setTimeout(function(){ that._initmap(cnt_call); }, 1000); //bad idea
                 return;
             }
 

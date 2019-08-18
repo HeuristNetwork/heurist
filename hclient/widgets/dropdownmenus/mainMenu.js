@@ -26,6 +26,7 @@ $.widget( "heurist.mainMenu", {
     },
     
     menues:{},
+    cms_home_records_count:0,
 
     _current_query_string:'',
 
@@ -221,7 +222,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }
         
         // LISTENERS --------------------------------------------------
-        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
             function(e, data) {
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
                     if(data) {
@@ -241,12 +242,41 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             that._refresh();
         });
 
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_UPDATE,
+        function(e, data) {
+            that._getCountWebSiteRecords();
+        });
+        
+        that._getCountWebSiteRecords();
 
         this._refresh();
 
     }, //end _create
 
-
+     //
+     //
+     //   
+    _getCountWebSiteRecords: function(){
+        var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+        if(RT_CMS_HOME>0){
+            var request = {
+                    'a'       : 'counts',
+                    'entity'  : 'defRecTypes',
+                    'mode'    : 'record_count',
+                    'ugr_ID'  : -1,
+                    'rty_ID'  : RT_CMS_HOME
+                    };
+            var that = this;        
+                                    
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        that.cms_home_records_count = response.data[RT_CMS_HOME];
+                    }
+                });
+        }   
+    },
+    
 
     // Any time the widget is called with no arguments or with only an option hash,
     // the widget is initialized; this includes when the widget is created.
@@ -377,8 +407,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     // custom, widget-specific, cleanup.
     _destroy: function() {
 
-        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS);
-        $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART);
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART);
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '+window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_UPDATE);
         
         this.div_logo.remove();
         this.divMainMenu.remove();
@@ -662,8 +693,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else if(action == "menu-cms-create"){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-                if(RT_CMS_HOME>0 && window.hWin.HEURIST4.rectypes.counts
-                    && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]>0){
+                if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
 
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         'You already have a website. Are you sure you want to create an additional site?',
@@ -674,20 +704,18 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
         }else if(action == "menu-cms-edit"){
 
-                        var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-                        if(RT_CMS_HOME>0){
+                var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+                if(RT_CMS_HOME>0){
 
-                            if (window.hWin.HEURIST4.rectypes.counts
-                                && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]>0){
-
-                                that._select_CMS_Home();
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'New website will be created. Continue?',
-                                    function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
-                            }
-                        }
-
+                    if (that.cms_home_records_count>0)
+                    {
+                        that._select_CMS_Home();
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                            'New website will be created. Continue?',
+                            function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                    }
+                }
 
         }else if(action == "menu-database-properties"){
 
