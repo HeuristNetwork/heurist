@@ -285,21 +285,29 @@ function afterPageLoad(pageid){
             $('.group-tab').hide(); //hide all tabs
             $('#hie_navigation').hide();
             var ele = $('#'+ele_id).show(); //show selected tab
+            var wele = ele.find('div[widgetid="heurist_SearchTree"]');
+            
             if(ele_id=='mywidget_3166-0'){
                 //show result list for places
                 var mpos = $('#hie_navigation').height()/2;
                 ele.find('div[data-heurist-app-id="heurist_Map"]').css({bottom:mpos});
                 ele.find('div[data-heurist-app-id="heurist_resultList"]').css({top:mpos}).show();
+                
+                wele.svs_list('doSearchByID', 20);
+            }else if(ele_id=='mywidget_3166-1'){ //persons
+                wele.svs_list('doSearchByID', 22);
+            }else if(ele_id=='mywidget_3166-2'){ //events
+                wele.svs_list('doSearchByID', 24);
             }
             
         });
         
-        
+        //show navigation buttons above faceted search
         function __showbtns(){
             //$('.group-tab').hide();
             $('#hie_navigation').show();    
         }
-        
+        //override default behavior of close button in facted search
         $('#mywidget_3166-0').find('div[widgetid="heurist_SearchTree"]')
                         .svs_list({onclose_search:__showbtns});
         $('#mywidget_3166-1').find('div[widgetid="heurist_SearchTree"]')
@@ -315,15 +323,24 @@ function afterPageLoad(pageid){
             {
                 $('#hie_navigation').hide();
                 $('.group-tab').hide();
-                $('#mywidget_3166-3').show();
+                var ele = $('#mywidget_3166-3').show();
                 
-                var wele = $('#mywidget_3166-3').find('div[widgetid="heurist_SearchTree"]');
+                var mpos = $('#hie_navigation').height()/2;
+                ele.find('div[data-heurist-app-id="heurist_Map"]').css({bottom:mpos});
+                ele.find('div[data-heurist-app-id="heurist_resultList"]').css({top:mpos});
+
+                //add supplementary filter to faceted search and override close button                
+                var wele = ele.find('div[widgetid="heurist_SearchTree"]');
                 wele.svs_list({sup_filter:'{"linked_to:12:134":'+data.selection[0]+'}', 
-                        onclose_search:function(){
+                        onclose_search:function(){ //close event and back to places
                             $('.group-tab').hide();
                             $('#mywidget_3166-0').show();
                         }});
-                wele.svs_list('doSearchByID', 21);
+                wele.svs_list('doSearchByID', 21);//start search events by places
+
+                var request = {q:'ids:'+data.selection[0]};
+                wele = ele.find('div[widgetid="heurist_Map"]').app_timemap('updateDataset',request,'Current query');
+
               
             }else if(data && data.search_realm=='hie_persons' 
                 && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection))
@@ -338,7 +355,7 @@ function afterPageLoad(pageid){
                             $('.group-tab').hide();
                             $('#mywidget_3166-1').show();
                         }});
-                wele.svs_list('doSearchByID', 23);
+                wele.svs_list('doSearchByID', 23);//start search events by persons
               
             }
         });

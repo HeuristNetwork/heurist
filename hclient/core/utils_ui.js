@@ -1455,7 +1455,7 @@ window.hWin.HEURIST4.ui = {
                     offset: null
                 },*/
                 change: function( event, data ) {
- console.log('set '+data.item.value);   
+ //console.log('set '+data.item.value);   
                         selObj.val(data.item.value);//change value for underlaying html select
                         selObj.trigger('change');
                 },

@@ -98,6 +98,7 @@ VALUE
 
 5) Find all records without field  "f:5":"NULL"
 6) Find all records with any value in field  "f:5":""
+7) Find all records with value not equal ABC  "f:5":"-ABC"
 
 */
 
@@ -125,6 +126,9 @@ $top_query;
 {"related_to:99":[{"t":"12"}, {"linked_to:73":[{"t":"11"},{"f:1":"X7"}]}, {"linkedfrom:90":[{"t":"16"},{"f:89":"X8"}]}  ]}  //address->street(11)  and linkedfrom role(16) role of place
 ]
 
+[{"t":"12"},{"linkedfrom:134":{"t":"49"}}]   places with events 
+[{"t":"12"}, {"not":{"ids": [{"t":"12"},{"linkedfrom:134":{"t":"4"}}] }} ]  places not linked from events
+    
 */
 // $params need for
 // q - json query array
@@ -1031,18 +1035,24 @@ class HPredicate {
         $p = $this->qlevel;
         $rl = "rl".$p."x".$this->index_of_predicate;
         
+        if(!is_array($this->value) && strpos($this->value, '-')===0){
+            $this->negate = true;
+            $this->value = substr($this->value, 1);
+        }
+        
         if($this->isEmptyValue()){
             
             $rd = "rd".$this->qlevel;
             
             if($this->field_id){
-                //no pointer field
-                $where = "NOT exists (select dtl_ID from recDetails $rd where r$p.rec_ID=$rd.dtl_RecID AND "
+                //no pointer field exists among record details
+                $where = (($this->negate)?'':'NOT')." exists (select dtl_ID from recDetails $rd where r$p.rec_ID=$rd.dtl_RecID AND "
             ."$rd.dtl_DetailTypeID=".$this->field_id.")";
             
             }else{
-                //no links at all
-                $where = "r$p.rec_ID NOT IN (select rl_SourceID from recLinks where $rl.rl_RelationID is null";
+                //no links at all or any link
+                $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
+                    ." IN (select rl_SourceID from recLinks where $rl.rl_RelationID is null";
             }
             
             return array("where"=>$where);
@@ -1096,7 +1106,6 @@ class HPredicate {
         
         global $top_query, $params_global;
         $not_nested = (@$params_global['nested']===false);
-        
 
         $this->field_type = "link";
         $p = $this->qlevel;

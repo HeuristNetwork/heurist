@@ -189,7 +189,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     function onPageInit(success){
         
         if(!success) return;
-        
+//console.log('!!!!!');        
         
         var lt = window.hWin.HAPI4.sysinfo['layout'];
         if(lt=='Beyond1914' || lt=='UAdelaide'){
@@ -204,7 +204,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         var layout_params = null;
         is_init_here = __gp('noinit')!='1';
-        if(is_init_here){    //take parameters from url 
+        if(is_init_here){    //take layout parameters from url 
             // params: 
             //   nomap, notimeline
             //   controls: [all,none,zoom,bookmark,geocoder,print,publish,legend]
@@ -238,7 +238,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     // init map data based on url parameters
     //
     function onMapInit( mapwdiget ){
-  
+console.log('onMapInit');  
         //take url parameters and open mapdocument or/and perform query
         if(is_init_here){ 
             //this case only for initialization of mapping when it is loaded independently 

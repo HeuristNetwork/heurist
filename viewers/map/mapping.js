@@ -1,25 +1,6 @@
 /**
-* @todo for mapping+timeline
 
-+Init standalone map (published) by query or mapdoc id in url  - 1 hr
-+Filter timeline visible range to map - 1hr
-+Highlight selection on map 1-2hr
-
-Cosmetics/workflow 2hr
-Scroll in map legend
-Render symbol colour in legend
-Publish button
-+Zoom to entire mapdoc
-Add layer to mapdoc (open select record dialog from legend)
-Save current result set as layer+datasource records 
-
-Bugs 1-2hr
-Glitches in symbology editor (not proper init values for marker in some cases)
-Timeline does not expand automatically
-Always keep current query as top group in timeline
-Content of map popup is out of border (not wrapped)
-
-Later?
+@todo Later?
 KML is loaded as a single collection (without access to particular feature) Need to use our kml parser to parse and load each kml' placemark individually
 Altough our kml parser supports Placemarks only. It means no external links, image overlays and other complex kml features. 
 SHP loader not done (it seems there are leaflet plugin) 

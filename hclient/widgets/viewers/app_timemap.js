@@ -26,8 +26,7 @@ $.widget( "heurist.app_timemap", {
         recordset: null,
         selection: null, //list of record ids
         
-        layout:null, //['header','map','timeline']
-        startup:0,         //map document loaded on map init
+        layout:null, // ['header','map','timeline']
         
         eventbased:true,
         tabpanel:false,  //if true located on tabcontrol need top:30
@@ -39,7 +38,8 @@ $.widget( "heurist.app_timemap", {
         init_at_once: false,  //load basemap at once (useful for publish to avoid empty space) 
         
         layout_params:null, //params to be passed to map
-        mapdocument:null
+        mapdocument:null,   // map document loaded on map init
+        init_search:null    // search performed on init
     },
 
     _events: null,
@@ -179,9 +179,10 @@ $.widget( "heurist.app_timemap", {
 
                 this.loadanimation(true);
                 
-                var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
-                if(mapdocument>0){
-                    this.options.startup = mapdocument;    
+              
+                var mapdoc = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+                if(mapdoc>0){
+                    this.options.mapdocument = mapdoc;    
                 }
                 
                 var url = window.hWin.HAPI4.baseURL + 'viewers/map/map'+
@@ -212,11 +213,14 @@ $.widget( "heurist.app_timemap", {
                         if( this.options.layout.indexOf('header')<0 )
                             url = url + '&noheader=1';
                     }
-                    url = url + '&noinit=1'; //to init map here
+                    url = url + '&noinit=1'; // map will be inited here 
                 }
                 
                 if(this.options.mapdocument>0){
                     url = url + '&mapdocument='+this.options.mapdocument; 
+                }
+                if(this.options.init_search){
+                    url = url + '&q='+encodeURIComponent(this.options.init_search); 
                 }
                 
                 (this.mapframe).attr('src', url);
@@ -284,7 +288,7 @@ $.widget( "heurist.app_timemap", {
                 
                 mapping.load( null, //mapdataset,
                     this.options.selection,  //array of record ids
-                    this.options.startup,    //map document on load
+                    this.options.mapdocument,    //map document on load
                     function(selected){  //callback if something selected on map
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
                             { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
@@ -302,6 +306,22 @@ $.widget( "heurist.app_timemap", {
         }
 
     }
+    
+    , updateDataset: function(data, dataset_name){
+        var mapping = null;
+        if(this.mapframe[0].contentWindow){
+            mapping = this.mapframe[0].contentWindow.mapping;
+            if(mapping){
+                mapping.mapping('addSearchResult', data, dataset_name);    
+            }else{
+                this.options.init_search = data['q'];
+                this.recordset_changed = true;
+                this._refresh();
+            }
+            
+        }
+    }
+    
 
     , _doVisualizeSelection: function (selection) {
 
