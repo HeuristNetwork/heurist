@@ -102,11 +102,15 @@ if(!$format) $format='csv';
             .select_rectype_seq:hover > .hid_temp, .select_rectype_seq:hover > .rt_arrow{
                 display:inline-block;    
             }
+            h2{
+                font-size:1.2em;
+                margin:0;
+            }
         </style>
     </head>
 
     <!-- HTML -->
-    <body class="ui-heurist-bg-light" style="overflow:hidden;min-height:400px">
+    <body class="ui-heurist-bg-light" style="overflow:hidden;min-height:400px;font-size:0.7em;">
 
 <!-- STEP 1 upload data/select session -->    
 <div style="width:100%; height:100%;" id="divStep1">
@@ -346,29 +350,30 @@ If you have missing data for Required fields, you may find it convenient to set 
                         They MUST contain "H-ID" somewhere in the column name.                    
                     </div>
                     
-                    <table class="tbfields" style="font-weight:bold"><tr>
+                </div>
+                <div class="ent_content" id="divFieldRoles" style="top:6em;bottom:3.5em;padding: 0.2em 0.5em;border: 1px solid lightgray;">
+                    
+                    <table class="tbfields" style="font-weight:bold"><thead><tr>
                                 <td style="width:150px">Column</td>
                                 <td style="width:50px">&nbsp;</td>
                                 <td style="width:50px;text-align:center">Heurist<br>Identifier</td>
                                 <td style="width:50px;text-align:center">Date</td>
-                                <td style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></td></tr></table>
+                                <td style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></td></tr></thead><tbody></tbody></table>
+                    
                     
                 </div>
-                <div class="ent_content" id="divFieldRoles" style="top:8em;bottom:5em;padding: 0.2em 0.5em">
-                    list of field roles
-                </div>
                 <div  class="ent_footer">
-                    <label id="lblParseStep2" style="position:absolute;bottom:22px;right:320px;font-style:italic">
-                        If Continue is disabled, you need to select record types in the list above
-                    </label>
-                    <div id="btnParseStep2" style="position:absolute;bottom:1em;right:80px"
+                    <div id="btnParseStep2" style="bottom:5px"
                     title="Start upload your CSV data into temporary database table, converts it to UTF8, parses data and verifies ID columns for valid integer values"
                     >Continue</div>
+                    <label id="lblParseStep2" style="font-style:italic">
+                        If Continue is disabled, you need to select record types in the list above
+                    </label>
                 </div>
         </div>
         
     </div>
-    <div class="ent_content_full" style="top:27em;padding:0.5em" id="divParsePreview">
+    <div class="ent_content_full" style="top:28em;padding:0.5em" id="divParsePreview">
     
     </div>
 </div>
@@ -485,7 +490,8 @@ If you have missing data for Required fields, you may find it convenient to set 
             <input type="radio" checked="" name="sa_match" id="sa_match0" value="0" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
             <label for="sa_match0" style="padding-right:3em">Match on column(s)</label>
 
-            <input type="radio" name="sa_match" id="sa_match1" value="1" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
+            <input type="radio" name="sa_match" id="sa_match1" value="1" class="text" 
+                        onchange="{importRecordsCSV.onMatchModeSet();importRecordsCSV.doMatchingInit();}">&nbsp;
             <label for="sa_match1" id="lbl_sa_match1" style="padding-right:3em">Use Heurist ID column</label>
 
 <!--            

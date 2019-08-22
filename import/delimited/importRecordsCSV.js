@@ -155,7 +155,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
                             $('#divFieldRolesHeader').hide();
                             $('#divParsePreview').empty();
-                            $('#divFieldRoles').empty();
+                            $('#divFieldRoles > .tbfields > tbody').empty();
+                            $('#divFieldRoles').hide();
                             $('#lblParseStep2').hide();
                             
                             //_doParse(1);
@@ -1636,6 +1637,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             // mapping selector
             s = s + '<td style="width:300px;">&nbsp;<span style="display:none;">'
                 + '<select id="sa_dt_'+i+'" style="width:280px; font-size: 1em;" data-field="'+i+'" '
+                //+ ' title="Only matchable fields - text, numeric, date, terms - are shown" '
                 + (isIndex||isIDfield?'class="indexes"':'')+'></select></span>';
             
             s = s + '</td>';
@@ -1821,6 +1823,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 var selObj = window.hWin.HEURIST4.ui.createSelector(item, [{key:'id',title:'Record ID'}] );  //the only option for current id field
                 selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, false);
             }else{
+                
+                if(currentStep==3){
+                    $(item).attr('title','Only matchable fields - text, numeric, date, terms - are shown');
+                }else{
+                    $(item).attr('title','');
+                }
                 
                 var field_idx = $(item).attr('data-field');
                 var dt_id = mapping_flds[field_idx];
@@ -2089,7 +2097,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
                     $('#divFieldRolesHeader').hide();
                     $('#divParsePreview').empty();
-                    $('#divFieldRoles').empty();
+                    $('#divFieldRoles > .tbfields > tbody').empty();
+                    $('#divFieldRoles').hide();
                     $('#lblParseStep2').hide();
                     
                     //_doParse(1);
@@ -2141,7 +2150,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     window.hWin.HEURIST4.util.setDisabled( $('#btnParseStep2'), true );
                     $('#divFieldRolesHeader').hide();
                     container.empty();
-                    container2.empty();
+                    container2.find('.tbfields > tbody').empty();
+                    container2.hide();
                     $('#lblParseStep2').hide();
                 }else{
                     request['encoded_filename'] = encoded_file_name; //full path
@@ -2268,6 +2278,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 $('#lblParseStep2').hide();
                         }else{
                                 $('#divFieldRolesHeader').show();
+                                container2.show();
                         }
                         $('#divFieldRolesHeader').show();
 
@@ -2307,7 +2318,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             
                             //<tr><th>Column</th><th>Is date?</th><th>Is key?</th><th>For record type</th></tr>
                             //add header for list of columns
-                            tbl  = $('<table>').addClass('tbfields').appendTo(container2);
+                            tbl = container2.find('.tbfields > tbody');
+                            tbl.empty();
+                            //tbl  = $('<table>').addClass('tbfields').appendTo(container2);
                             
                             var id_suggestions = []; 
                             //fill list of columns
@@ -2452,9 +2465,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }else{
                 $('#sa_match1').show();
                 $('label[for="sa_match1"]').show();
-                $('#lbl_sa_match1').html('Skip matching (use <i>'+imp_session['columns'][key_idx]+'</i>)');
+                $('#lbl_sa_match1').html('Use <i>'+imp_session['columns'][key_idx]+'</i>'); //Skip matching
                 //window.hWin.HEURIST4.util.setDisabled($('#sa_match1'), false);
                 //$('label[for="sa_match1"]').css('color','');
+                
             }
             
             if($('#sa_match0').is(':checked')){ // normal matching
@@ -2522,9 +2536,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
             
             if($('#sa_match2').is(':checked')){  //skip matching
-                $('#btnMatchingStart').button({label:'Skip matching (import all as new)'});
+                $('#btnMatchingStart').button({label:'Import all as new'}); //Skip matching
             }else if($('#sa_match1').is(':checked')){  //use id column
-                $('#btnMatchingStart').button({label:'Skip matching (use <i>'+imp_session['columns'][key_idx]+'</i>)'});
+                $('#btnMatchingStart').button({label:'Use <i>'+imp_session['columns'][key_idx]+'</i>'}); //Skip matching
             }else{
                 $('#btnMatchingStart').button({label:'Match against existing records'});
             }
@@ -4050,7 +4064,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         },
         onMatchModeSet:function (event){
             _onMatchModeSet();
+        },
+        doMatchingInit:function (event){
+            _doMatchingInit();
         }
+        
         
     }
 
