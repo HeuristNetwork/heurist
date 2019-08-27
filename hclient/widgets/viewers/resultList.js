@@ -36,12 +36,12 @@ $.widget( "heurist.resultList", {
         isapplication: true,  //if false it does not listen global events @todo merge with eventbased
         eventbased:true,
 
-        show_toolbar: true,
+        show_toolbar: true,   //toolbar contains menu,savefilter,counter,viewmode and pagination
         show_menu: false,       //@todo ? - replace to action_select and action_buttons
         show_savefilter: false,
         show_counter: true,
         show_viewmode: true,
-        show_inner_header: false,   // show title of current search in header
+        show_inner_header: false,   // show title of current search in header (above toolbar)
         header_class: null,       //class name for menu
         show_url_as_link:false,
 

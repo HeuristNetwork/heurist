@@ -694,13 +694,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
                 if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
-
-                    window.hWin.HEURIST4.msg.showMsgDlg(
-                        'You already have a website. Are you sure you want to create an additional site?',
-                        function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                    sMsg = 'You already have a website. Are you sure you want to create an additional site?';
                 }else{
-                    window.hWin.HEURIST4.ui.showEditCMSDialog( -1 );
+                    sMsg = 'Are you sure you want to create a site?';
                 }
+                
+                window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
+                        function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                
 
         }else if(action == "menu-cms-edit"){
 

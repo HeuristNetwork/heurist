@@ -184,6 +184,7 @@ function onPageInit(success){
                     //save changes
                     __saveChanges( true );
                 }else{
+                    $('#btn_inline_editor4').hide();
                     $('#btn_inline_editor').text('wyswyg');
                     $('#btn_inline_editor3').text('Save');
                     
@@ -381,11 +382,11 @@ function onPageInit(success){
             $('#btn_inline_editor3').hide();
             $('#btn_inline_editor4').hide();
         }else{
-            $('#btn_inline_editor').position({my:'right top',at:'right-90 top-70',of:$('#main-content')}).show();
-            $('#btn_inline_editor3').position({my:'right top',at:'right-40 top-70',of:$('#main-content')}).show();
+            $('#btn_inline_editor').position({my:'right top',at:'right-90 top-15',of:$('#main-content')}).show();
+            $('#btn_inline_editor3').position({my:'right top',at:'right-40 top-15',of:$('#main-content')}).show();
             var ele = $('#main-pagetitle > h2');
             if(ele.length>0){
-                var pos = {my:'left top',at:'right+20 top+5',of:$('#main-pagetitle > h2')};   
+                var pos = {my:'left top',at:'right+20 top+2',of:$('#main-pagetitle > h2')};   
                 $('#btn_inline_editor4').position(pos).show();
             }
         }
@@ -976,7 +977,7 @@ function onPageInit(success){
                         var $select2 = dele.find('select[name="template"]'); 
                         
                         window.hWin.HEURIST4.ui.createTemplateSelector( $select2
-                                           ,[{key:'',title:'na'}], $select2.attr('data-template'));
+                                           ,[{key:'',title:'Standard map popup template'}], $select2.attr('data-template'));
                         
 
                        
@@ -1019,6 +1020,15 @@ function onPageInit(success){
  
 }
 
+//
+// methods to be accessed from editCMS.js
+//
 function reloadMainMenu(){
     $('#btn_refresh_menu').click();
+}
+function editPageRecord(){
+    $('#btn_inline_editor4').click();
+}
+function editPageContent(){
+    $('#btn_inline_editor').click();
 }

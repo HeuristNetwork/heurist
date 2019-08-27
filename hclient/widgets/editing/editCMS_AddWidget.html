@@ -82,8 +82,8 @@
     <div  class="heurist_resultList">
         <div class="header"><label>Show toolbar</label></div>
         <input name="show_toolbar" type="checkbox"/>&nbsp;&nbsp;
-        <label>counter&nbsp;<input type="checkbox" name="show_counter"/></label>&nbsp;
-        <label>viewmode&nbsp;<input type="checkbox" name="show_viewmode"/></label>&nbsp;
+        <label>counter&nbsp;<input type="checkbox" name="show_counter" checked/></label>&nbsp;
+        <label>viewmode&nbsp;<input type="checkbox" name="show_viewmode"/ checked></label>&nbsp;
         <label>header&nbsp;<input type="checkbox" name="show_inner_header"/></label>
     </div>
     
@@ -104,7 +104,7 @@
     </div>
 
     <div  class="heurist_resultList">
-        <div class="header"><label>Show view record on select</label></div>
+        <div class="header"><label>Click to view record</label></div>
         <input name="recordview_onselect" type="checkbox" checked/>
     </div>
 
@@ -157,7 +157,8 @@
 
     <!-- diagram -->    
     <div class="heurist_resultListExt heurist_Map">
-        <div class="header"><label>Template:</label></div>
+        <div class="header">
+            <label>Template:</label>
         <select name="template" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
         </select>
     </div>

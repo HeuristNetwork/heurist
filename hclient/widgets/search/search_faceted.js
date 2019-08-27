@@ -249,10 +249,23 @@ $.widget( "heurist.search_faceted", {
                 new_title = this.options.params.ui_title;
             }else{
                 var svsID = this.options.query_name;
-                if(svsID > 0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
+                if(svsID > 0){
+                    
+                    if (window.hWin.HAPI4.currentUser.usr_SavedSearch && 
                                 window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID])
-                {
-                    new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][0];//_NAME];
+                    {
+                         new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][0];//_NAME];                
+                    }else{
+                        
+                        window.hWin.HAPI4.SystemMgr.ssearch_get( null,
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
+                                    that._refreshTitle();
+                                }
+                        });
+                    }
+                    
                 }else{
                     new_title = svsID;
                 }
@@ -557,7 +570,7 @@ $.widget( "heurist.search_faceted", {
                     $("<div>",{id: "fv_"+field['var'] }).html(      //!!!!
                         '<div class="header" title="'+field['help']+'">'   // style="width: 100%; background-color: lightgray; padding: 5px; width:100%"
                               +(that.options.params.title_hierarchy?harchy:'')
-                              +'<h4 style="display:inline-block;">'
+                              +'<h4 style="display:inline-block;margin:0;">'
                               + field['title'] + '</h4>'+  //field['order']+'  '+
                               ((field['help'])?'<span class="bor-tooltip ui-icon ui-icon-circle-help" '
                               +'style="width:17px;height:17px;margin-left:4px;display:inline-block;vertical-align:text-bottom;" title="'
@@ -604,7 +617,7 @@ $.widget( "heurist.search_faceted", {
                     
                     inpt.find('.header').attr('title', field['help'])
                         .css('display','block')
-                        .html('<h4 style="display:inline-block;">'+field['title']+'</h4>');
+                        .html('<h4 style="display:inline-block;margin:0;">'+field['title']+'</h4>');
                                                                         
                     //@todo make as event listeneres
                     //assign event listener

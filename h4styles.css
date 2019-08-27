@@ -1303,8 +1303,9 @@ div > .svs-contextmenu {
                 margin: 1px;
                 padding: 2 2 0 2;
                 display:none;
-                background:white;
-                color:#95A7B7;
+                color:black !important;
+                /*background:white;
+                color:#95A7B7;*/
                 border-radius:2px;
             }
             span.fancytree-node{

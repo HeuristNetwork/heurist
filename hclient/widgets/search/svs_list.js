@@ -662,7 +662,7 @@ $.widget( "heurist.svs_list", {
         this.accordeon.hide();
         this.accordeon.empty();
         
-        $('<h4 style="padding:20px 0px;">Focussed searches</h4>').appendTo(this.accordeon);
+        $('<h4 style="padding:20px 0px;margin:0">Focussed searches</h4>').appendTo(this.accordeon);
 
         var i, svsIDs = Object.keys(this.allowed_svsIDs),
             visible_cnt = 0, visible_svsID;
@@ -716,7 +716,7 @@ $.widget( "heurist.svs_list", {
 
         //position:absolute;bottom:0px;
         var search_div = $('<div style="height:2.5em;padding:4px;width:100%">'
-            +'<h4 style="padding:20px 0px;">Simple search</h4><label>Search everything:</label>'
+            +'<h4 style="padding:20px 0px;margin:0">Simple search</h4><label>Search everything:</label>'
             +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
             +'&nbsp;<button id="search_button"/></div>')
         .insertAfter(this.accordeon);
@@ -803,7 +803,7 @@ $.widget( "heurist.svs_list", {
             sIcon = 'group';
         }
 
-        var $header = $('<h3 grpid="'+domain+'" class="hasmenu"><span class="ui-icon ui-icon-'+sIcon+'" '
+        var $header = $('<h3 grpid="'+domain+'" class="hasmenu" style="margin:0"><span class="ui-icon ui-icon-'+sIcon+'" '
             + 'style="display:inline-block;padding:0 4px"></span><span style="vertical-align:top;">'
             + name+'</span><span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;"> ('
             + ((sIcon=='user')?'private':'workgroup')

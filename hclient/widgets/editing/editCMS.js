@@ -329,9 +329,19 @@ function editCMS(home_page_record_id, main_callback){
                                         */
                                         
                                         if(!no_access){
-                                            edit_dialog.find('#btn_edit_home').button({icon:'ui-icon-pencil'}).click(function(){
+                                            edit_dialog.find('#btn_edit_home').button().click(function(){
                                                 _editHomePageRecord();
                                             });
+                                            
+                                            edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-pencil'}).click(function(){
+                                                var preview_frame = edit_dialog.find('#web_preview');
+                                                preview_frame[0].contentWindow.editPageContent();
+                                            });
+                                            edit_dialog.find('#btn_edit_page_record').button().click(function(){
+                                                var preview_frame = edit_dialog.find('#web_preview');
+                                                preview_frame[0].contentWindow.editPageRecord();
+                                            });
+                                           
                                         
                                             //add new root menu
                                             edit_dialog.find('#btn_add_menu').click(function(){
@@ -361,7 +371,7 @@ function editCMS(home_page_record_id, main_callback){
                                         }//no access
 
                                         
-                                        edit_dialog.find('#btn_edit_menu').button({icon:'ui-icon-pencil'}).click(function(){
+                                        edit_dialog.find('#btn_edit_menu').button().click(function(){
                                             
                                                         was_something_edited = false;
                                                 
@@ -432,12 +442,12 @@ function editCMS(home_page_record_id, main_callback){
                                     var parent_span = item_li.children('span.fancytree-node');
 
                                     //add,edit menu,edit page,remove
-                                    var actionspan = $('<div class="svs-contextmenu3" data-parentid="'
+                                    var actionspan = $('<div class="svs-contextmenu3" style="padding-right: 20px;" data-parentid="'
                                           +item.data.parent_id+'" data-menuid="'+menu_id+'" data-pageid="'+page_id+'" >'
                                           //+menu_id
                                         +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
-                                        +'<span class="ui-icon ui-icon-menu" title="Edit menu record"></span>'
-                                        +'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
+                                        +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
+                                        //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
                                         +'<span class="ui-icon ui-icon-trash" '
                                             +'" title="Remove menu entry from website (record retains)"></span>'
                                         +'</div>').appendTo(parent_span);
