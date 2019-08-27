@@ -29,12 +29,14 @@ $.widget( "heurist.recordListExt", {
         recordset: null,
         selection: null,  //list of selected record ids
         url:null,
+        is_frame_based: true,
         
         reload_for_recordset: false, //refresh every time recordset is changed
         search_realm: null,
         search_initial: null  //query string or svs_ID for initial search
     },
 
+    _current_url: null,
     _query_request: null, //keep current query request
     _events: null,
 
@@ -47,9 +49,11 @@ $.widget( "heurist.recordListExt", {
         .css({width:'100%', height:'100%'})
         .appendTo( this.element );
 
-        this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'})
-        //.attr('src',window.hWin.HAPI4.baseURL+"common/html/msgNoRecordsSelected.html")
-        .appendTo( this.div_content );
+        if(this.options.is_frame_based){
+            this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'})
+            //.attr('src',window.hWin.HAPI4.baseURL+"common/html/msgNoRecordsSelected.html")
+            .appendTo( this.div_content );
+        }
 
         //-----------------------     listener of global events
         this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS 
@@ -78,13 +82,7 @@ $.widget( "heurist.recordListExt", {
                 if(!that._isSameRealm(data)) return;
                 
                 if(data && !data.reset){
-                    that._query_request = jQuery.extend(true, {}, data);  //keep current query request (clone)
-                    that.options.selection = null;
-                    that.options.recordset = null;
-                    if(data.q!=''){
-                        that.loadanimation(true);
-                    }
-                    that._refresh();
+                    that.updateDataset( jQuery.extend(true, {}, data) ); //keep current query request (clone)
                 }
 
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
@@ -114,17 +112,52 @@ $.widget( "heurist.recordListExt", {
         });
         if(!this.options.is_single_selection){
             
-            this.dosframe.on('load', function(){
-                that.loadanimation(false);
-                if(!that.options.reload_for_recordset){
-                    that._refresh();
-                }
-            });
+            if(this.options.is_frame_based){
+                this.dosframe.on('load', function(){
+                    that.onLoadComplete();
+                });
+            }
         }
+        
 
 
     }, //end _create
 
+    loadURL: function( newurl ){
+        
+        var that = this;
+
+        this._current_url = newurl;
+        this.loadanimation(true);
+        
+        if(this.options.is_frame_based){
+            this.dosframe.attr('src', newurl);
+        }else{
+            this.div_content.load(newurl, function(){ that.onLoadComplete(); })
+        }
+        
+    },
+    
+    onLoadComplete: function(){
+        this.loadanimation(false);
+        if(!this.options.reload_for_recordset){
+            this._refresh();
+        }
+    },
+    
+    //
+    // refresh 
+    //
+    updateDataset: function(request){
+        this._query_request = request;
+        this.options.selection = null;
+        this.options.recordset = null;
+        if(request.q!=''){
+            this.loadanimation(true);
+        }
+        this._refresh();
+    },
+    
     //
     //
     //
@@ -179,22 +212,24 @@ $.widget( "heurist.recordListExt", {
                 }
             }
             if(newurl==null){
-                this.dosframe.attr('src', null);
+                if(this.options.is_frame_based){
+                    this.dosframe.attr('src', null);
+                }else{
+                    this.div_content.empty();
+                }
             }else{
                 newurl = window.hWin.HAPI4.baseURL +  newurl;
 
-                if(this.dosframe.attr('src')!==newurl){
-                    this.loadanimation(true);
-                    this.dosframe.attr('src', newurl);
+                if(this._current_url!==newurl){
+                    this.loadURL(newurl);
                 }
             }
 
-        }else if(!this.options.reload_for_recordset && this.dosframe.attr('src')!==this.options.url){
+        }else if(!this.options.reload_for_recordset && this._current_url!==this.options.url){
 
             this.options.url = window.hWin.HAPI4.baseURL +  this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
 
-            this.loadanimation(true);
-            this.dosframe.attr('src', this.options.url);
+            this.loadURL( this.options.url );
 
         }else{ //content has been loaded already
 
@@ -214,8 +249,8 @@ $.widget( "heurist.recordListExt", {
             if(this.options.reload_for_recordset)
             {
                 var newurl = window.hWin.HAPI4.baseURL +  this.options.url.replace("[query]", query_string_main);
-                this.loadanimation(true);
-                this.dosframe.attr('src', newurl);
+                
+                this.loadURL( newurl );
                 return;    
             }
             
@@ -230,28 +265,30 @@ $.widget( "heurist.recordListExt", {
                 }
             }
 
+            if(this.options.is_frame_based){
 
-            var showReps = this.dosframe[0].contentWindow.showReps;
-            if(showReps){
-                //@todo - reimplement - send on server JSON with list of record IDs
-                //{"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599,8604,8716,8852,8853,18580,18581,18582,18583,18584,8603,8589,11347,8601,8602,8600,8592,10312,11670,11672,8605"}
-                if (this.options.recordset!=null){
-                    this._checkRecordsetLengthAndRunSmartyReport(-1);
-                }
-            }else if (this.dosframe[0].contentWindow.crosstabsAnalysis) {
-                
-                if (this.options.recordset!=null){
-                    this._checkRecordsetLengthAndRunCrosstabsAnalysis(6000);
-                }
-                
-            }else{
-                var showMap = this.dosframe[0].contentWindow.showMap;
-                if(showMap){ //not used anymore
-                    showMap.processMap();
-                }else if(this.dosframe[0].contentWindow.updateRuleBuilder && this.options.recordset) {
+                var showReps = this.dosframe[0].contentWindow.showReps;
+                if(showReps){
+                    //@todo - reimplement - send on server JSON with list of record IDs
+                    //{"resultCount":23,"recordCount":23,"recIDs":"8005,11272,8599,8604,8716,8852,8853,18580,18581,18582,18583,18584,8603,8589,11347,8601,8602,8600,8592,10312,11670,11672,8605"}
+                    if (this.options.recordset!=null){
+                        this._checkRecordsetLengthAndRunSmartyReport(-1);
+                    }
+                }else if (this.dosframe[0].contentWindow.crosstabsAnalysis) {
+                    
+                    if (this.options.recordset!=null){
+                        this._checkRecordsetLengthAndRunCrosstabsAnalysis(6000);
+                    }
+                    
+                }else{
+                    var showMap = this.dosframe[0].contentWindow.showMap;
+                    if(showMap){ //not used anymore
+                        showMap.processMap();
+                    }else if(this.dosframe[0].contentWindow.updateRuleBuilder && this.options.recordset) {
 
-                    //todo - swtich to event trigger????
-                    this.dosframe[0].contentWindow.updateRuleBuilder(this.options.recordset.getRectypes(), this._query_request);
+                        //todo - swtich to event trigger????
+                        this.dosframe[0].contentWindow.updateRuleBuilder(this.options.recordset.getRectypes(), this._query_request);
+                    }
                 }
             }
             
@@ -270,7 +307,7 @@ $.widget( "heurist.recordListExt", {
         var that = this;
 
         // remove generated elements
-        this.dosframe.remove();
+        if(this.dosframe) this.dosframe.remove();
         this.div_content.remove();
     },
 
@@ -287,6 +324,8 @@ $.widget( "heurist.recordListExt", {
     // limit: -1 means no limits
     //
     _checkRecordsetLengthAndRunSmartyReport: function(limit){
+        
+        if(!this.options.is_frame_based) return;
 
         var showReps = this.dosframe[0].contentWindow.showReps;
         if(!showReps) return;
@@ -316,6 +355,8 @@ $.widget( "heurist.recordListExt", {
     
     _checkRecordsetLengthAndRunCrosstabsAnalysis: function(limit){
 /* @todo */
+        if(!this.options.is_frame_based) return;
+        
         var crosstabs = this.dosframe[0].contentWindow.crosstabsAnalysis;
         if(!crosstabs) return;
 
