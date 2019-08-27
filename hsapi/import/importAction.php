@@ -2,10 +2,10 @@
 
 /**
 * importAction.php  working with import data in temporary table - 
-*  1) matching
-*  2) assign rec ids
-*  3) validate 
-*  4) perform import
+*  1) matching           
+*  2) assign rec ids    assignRecordIds
+*  3) validate          validateImport
+*  4) perform import  - performImport
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
