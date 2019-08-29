@@ -108,7 +108,7 @@ $.widget( "heurist.navigation", {
             DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
             DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
             DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
-            DT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'],
+            DT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'],  //pointer to page 
             DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'],
             DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'];//target element on page or popup
             
@@ -129,6 +129,10 @@ $.widget( "heurist.navigation", {
                 
                 if(recType == RT_CMS_MENU || recType == DT_CMS_TOP_MENU){
                     page_id = resdata.fld(record, DT_CMS_PAGE);
+                    if(!(page_id>0)){
+                        //pointer to page not defined - take content from menu record
+                        page_id = resdata.fld(record, 'rec_ID');
+                    }
                 }else{
                     page_id = resdata.fld(record, 'rec_ID');
                 }

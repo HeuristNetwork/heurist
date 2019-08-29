@@ -98,7 +98,7 @@ if(@$_REQUEST['field']){
 }
 //-----------------------
 
-if($rec['rec_RecTypeID']!=RT_CMS_HOME && $rec['rec_RecTypeID']!=RT_CMS_PAGE){
+if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $rec['rec_RecTypeID']==RT_CMS_PAGE || $rec['rec_RecTypeID']==RT_CMS_MENU)){
     $message = 'Record #'.$rec_id.' is not allowed record type. Expecting Website Home Page';
     include ERROR_REDIR;
     exit();
@@ -136,7 +136,7 @@ function __getFile(&$rec, $id, $def){
 }
 
 //
-// returns fist value
+// returns first value
 //
 function __getValue(&$menu_rec, $id){
     
