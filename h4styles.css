@@ -234,9 +234,12 @@ input.Temporal, .list_div {
     cursor: hand;
     border: 1px solid rgba(0, 0, 0, 0.2);
     padding: 3px 10px 3px 30px;
-    max-height: 40px;
     overflow-y: auto;
     background:#F4F2F4 !important;
+    line-height: 18px;
+    max-height: 120px;
+    height: auto;
+    min-height: 20px;    
 }
 
 

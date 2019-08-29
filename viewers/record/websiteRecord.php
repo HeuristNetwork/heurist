@@ -338,6 +338,8 @@ function afterPageLoad(pageid){
                 ele.find('div[data-heurist-app-id="heurist_Map"]').css({right:302});
                 ele.find('div[data-heurist-app-id="heurist_resultList"]').css({width:300});
 
+console.log(data.selection);                
+                
                 //add supplementary filter to faceted search and override close button                
                 var wele = ele.find('div[widgetid="heurist_SearchTree"]');
                 wele.svs_list({sup_filter:'{"linked_to:12:134":'+data.selection[0]+'}', 

@@ -521,7 +521,7 @@ function onPageInit(success){
                         if(ctrls.length>0 && ctrls.length<3) layout_params['legend'] = ctrls.join(',');
                     }
                     layout_params['published'] = 1;
-                    layout_params['template'] = $dlg.find('select[name="template"]').val();
+                    layout_params['template'] = $dlg.find('select[name="map_template"]').val();
                 
                     opts['layout_params'] = layout_params;
                     opts['leaflet'] = true;
@@ -605,6 +605,7 @@ function onPageInit(success){
                 });
                 
                 if(widget_name=='heurist_resultListExt'){
+                    opts['template'] = $dlg.find('select[name="rep_template"]').val();
                     opts['reload_for_recordset'] = true;
                     opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0&template='
                         +encodeURIComponent(opts['template'])+'&[query]';
@@ -687,7 +688,7 @@ function onPageInit(success){
                             function(idx,item){$(item).prop('checked',legend.indexOf($(item).val())>=0);}
                         );
                         if(opts.layout_params['template']){
-                            $dlg.find('select[name="template"]').attr('data-template', opts.layout_params['template']);        
+                            $dlg.find('select[name="map_template"]').attr('data-template', opts.layout_params['template']);        
                         }
                     }
                     if(opts['mapdocument']>0){
@@ -721,7 +722,7 @@ function onPageInit(success){
                     });
                     if(widget_name=='heurist_resultListExt'){
                         if(opts['template']){
-                            $dlg.find('select[name="template"]').attr('data-template', opts['template']);        
+                            $dlg.find('select[name="rep_template"]').attr('data-template', opts['template']);        
                         }
                     }
                 }
@@ -974,7 +975,7 @@ function onPageInit(success){
                             }
                         );  
                         
-                        var $select2 = dele.find('select[name="template"]'); 
+                        var $select2 = dele.find('select[name="map_template"]'); 
                         
                         window.hWin.HEURIST4.ui.createTemplateSelector( $select2
                                            ,[{key:'',title:'Standard map popup template'}], $select2.attr('data-template'));
@@ -982,9 +983,9 @@ function onPageInit(success){
 
                        
                    }else if(val=='heurist_resultListExt' && 
-                    dele.find('select[name="template"]').find('options').length==0){
+                    dele.find('select[name="rep_template"]').find('options').length==0){
                        
-                        var $select = dele.find('select[name="template"]'); 
+                        var $select = dele.find('select[name="rep_template"]'); 
                         
                         window.hWin.HEURIST4.ui.createTemplateSelector( $select 
                                            ,null, $select.attr('data-template'));

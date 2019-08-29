@@ -477,7 +477,7 @@ function editCMS(home_page_record_id, main_callback){
                                                     _initWebSiteEditor();
                                                 });
                                                 
-                                            }else if(ele.hasClass('ui-icon-menu')){ //edit menu record
+                                            }else if(ele.hasClass('ui-icon-pencil')){ //edit menu record
                                                 
                                                 __in_progress();
                                                 //edit menu item
@@ -510,11 +510,16 @@ function editCMS(home_page_record_id, main_callback){
                                                 }});
                                                 
                                             }else if(ele.hasClass('ui-icon-trash')){    //remove menu entry
+                                            
+                                                window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',function(){
+                                            
                                                 removeMenuEntry(parent_id, menuid, function(){
                                                     item.remove();    
                                                     was_something_edited = true;
                                                     //refresh preview
                                                     //!!! refreshMainMenu();
+                                                });
+                                                
                                                 });
                                             }
 

@@ -164,7 +164,7 @@ var cfg_layouts = [
     },
         
     {id:'SearchAnalyze2', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
-        north:{size:'9em', resizable:false, overflow:'hidden',
+        north:{size:'10em', resizable:false, overflow:'hidden',
             apps:[
                 {appid:'heurist_Search', hasheader:false, 
                 css:{position:'absolute', top:0, left:0, right:0,bottom:0,

@@ -1374,7 +1374,7 @@ $.widget( "heurist.editing_input", {
             }
                 
             $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
-            +'style="display:inline-block;vertical-align:top;margin-left:8px;padding-top:8px;cursor:hand"></span>')
+            +'style="display:inline-block;vertical-align:top;margin-left:8px;margin-top:5px;cursor:hand"></span>')
             .insertBefore( $input );
             
             $input.addClass('entity_selector').css({'margin-left': '-24px'});

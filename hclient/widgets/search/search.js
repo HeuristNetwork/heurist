@@ -135,7 +135,7 @@ $.widget( "heurist.search", {
         
         this.div_entity_btns   = $('<div>').addClass('heurist-entity-filter-buttons')
                                 .css({ 'display':(this._is_publication?'none':'block'),
-                                    'padding':this._is_publication?0:('10px '+sz_search_padding),
+                                    'padding':this._is_publication?0:('20px '+sz_search_padding),
                                     'visibility':this.options.btn_entity_filter?'visible':'hidden',
                                     'height':this.options.btn_entity_filter?'auto':'10px'})
                                 .appendTo( this.element );
