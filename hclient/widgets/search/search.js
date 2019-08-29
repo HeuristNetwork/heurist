@@ -756,12 +756,12 @@ $.widget( "heurist.search", {
                        }
                 } });
             
-                idx--;
             }else{
                 //remove wrong(removed) rectypes
                 is_init = false;
                 this.buttons_by_entity.splice(idx,1);
             }
+            idx--;
             
         }//for
         
@@ -978,9 +978,10 @@ $.widget( "heurist.search", {
                 'mode'    : 'record_count',
                 'ugr_ID'  : window.hWin.HAPI4.user_id()
                 };
-                                
+                             
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
             function(response){
+
                 if(response.status == window.hWin.ResponseStatus.OK){
     
                     window.hWin.HEURIST4.rectypes.counts = response.data;

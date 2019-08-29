@@ -446,7 +446,7 @@ WHERE
             }else{
                 $where = $where . '(not r0.rec_FlagTemporary)';
             }
-            if($this->data['rty_ID']>0){
+            if(@$this->data['rty_ID']>0){
                 $where = $where . ' AND (r0.rec_RecTypeID='.$this->data['rty_ID'].')';
             }
             

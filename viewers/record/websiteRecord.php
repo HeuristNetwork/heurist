@@ -568,7 +568,7 @@ if($site_css!=null){
 <body>
 <?php
 //it can be html, html file or smarty report
-$page_template = __getValue($rec, DT_POPUP_TEMPLATE, null); 
+$page_template = defined('DT_POPUP_TEMPLATE')?__getValue($rec, DT_POPUP_TEMPLATE, null):null; 
 
 //implemented for template only
 if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {

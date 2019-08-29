@@ -100,15 +100,15 @@ $.widget( "heurist.importStructure", {
 
         +'<div class="ent_header" style="padding:4px;">'
         +'<div style="position:absolute;right:225px;left:0">' //450px
-        +'<h4  style="padding:4 0 0 4" id="h_source_rty"></h4>'     
+        +'<h4  style="margin:0;padding:4 0 0 4" id="h_source_rty"></h4>'     
         +'<div id="btn_back_to_databases" style="position:absolute;right:104px;top:40px;z-index:10"/>'
         +'</div>'
 
         //+'<div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
-        //     +'<h4 style="padding:4 0 0 4">Entity to be imported</h4>'
+        //     +'<h4 style="margin:0;padding:4 0 0 4">Entity to be imported</h4>'
         //+'</div>'
         +'<div style="border-left:1px solid lightgray;position:absolute;right:0px;width:223px;height:2.8em;">'
-        +'<h4 style="padding:4 0 0 4">Current entities in database</h4>'
+        +'<h4 style="margin:0;padding:4 0 0 4">Current entities in database</h4>'
         +'</div>'
         +'</div>'
 
@@ -225,11 +225,11 @@ $.widget( "heurist.importStructure", {
                 if(grp_val==0){
                     //width:100%;
                     return '<div style="padding:24px 0 4px 40px;border-bottom:1px solid lightgray">'
-                    +'<h2>Curated templates</h2>'
+                    +'<h2 style="margin:0">Curated templates</h2>'
                     +'<div style="padding-top:4px;"><i>Databases curated by the Heurist team as a source of useful entity types for new databases</i></div></div>';
                 }else{
                     return '<div style="width:100%;padding:24px 0 4px 40px;border-bottom:1px solid lightgray">'
-                    +'<h2>User databases</h2>'
+                    +'<h2 style="margin:0">User databases</h2>'
                     +'<div style="padding-top:4px"><i>Databases registered by Heurist users - use with care, look for entity types with good internal documentation</i></div></div>';
                 }
 
@@ -527,7 +527,7 @@ $.widget( "heurist.importStructure", {
                             +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
                             +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
-                            +'<h2>'+grp_val+'  '+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
+                            +'<h2 style="margin:0">'+grp_val+'  '+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
                             +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
                     },
                     renderer: this._recordtypeListItemRenderer
@@ -1002,19 +1002,19 @@ $.widget( "heurist.importStructure", {
                 +'<tr><th>ID</th><th>Name</th><th>&nbsp;</th><th>ID</th><th>Name</th><th></th></tr>';
 
                 if(response.report.rectypes) {
-                    report = report + '<h3>Record types</h3>'+theader
+                    report = report + '<h3 style="margin:0;">Record types</h3>'+theader
                     + response.report.rectypes
                     + '</table>';
                 }
 
                 if(response.report.detailtypes) {
-                    report = report + '<h3>Field types</h3>'+theader
+                    report = report + '<h3 style="margin:0;">Field types</h3>'+theader
                     + response.report.detailtypes
                     + '</table>';
                 }
 
                 if(response.report.terms) {
-                    report = report + '<h3>Terms</h3>'+theader
+                    report = report + '<h3 style="margin:0;">Terms</h3>'+theader
                     + response.report.terms
                     + '</table>';
                 }
