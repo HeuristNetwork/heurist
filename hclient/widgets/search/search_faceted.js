@@ -198,7 +198,7 @@ $.widget( "heurist.search_faceted", {
                         if(data.source==that.element.attr('id') ){   //search from this widget
                               current_query_request_id = data.id;
                         }else{
-                            //search from ourside - close this widget
+                            //search from outside - close this widget
                             that._trigger( "onclose");
                             //that.doClose();
                         }
@@ -1888,8 +1888,16 @@ if(!detailtypes[dtID]){
         }else{
             f_link_content = $("<span>").text(cterm.text);
             
-            if(display_mode=='block'){                 
-                f_link_content.css('width','80%').addClass('truncate');    //was this.facets_list_container.width()*0.6
+            if(display_mode=='block'){         
+            
+                var top_parent = this.element.parents('.mceNonEditable');
+                if(top_parent.length>0){ //this is web publication 
+                    f_link_content.css('width',top_parent.width()*0.6).addClass('truncate');
+                }else{
+                    f_link_content.css('width','80%').addClass('truncate');    //was this.facets_list_container.width()*0.6
+                }
+            
+            
                 f_link_content.attr('title', cterm.text);
             }
             

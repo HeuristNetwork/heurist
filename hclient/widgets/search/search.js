@@ -1159,12 +1159,10 @@ $.widget( "heurist.search", {
             //accept events from the same realm only
             if(!that._isSameRealm(data)) return;
         
-            //AAAA 
             window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
             
             if(this.input_search.is(':visible')) {
                 try{
-                    //AAAA 
                     this.input_search.focus();
                 }catch(e){}
             }
@@ -1545,7 +1543,6 @@ $.widget( "heurist.search", {
                 that._on( select_sortby, {
                     change: function(event){ 
                         this.calcShowSimpleSearch(); 
-                        //AAAA
                         search_quick_go.focus();
                     }
                 });
@@ -1729,7 +1726,6 @@ $.widget( "heurist.search", {
         if(!q){
             q = "sortby:t";
         }
-
         this.input_search.val(q);
         this.input_search.change();
 

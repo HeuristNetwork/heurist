@@ -1698,11 +1698,14 @@ $.widget( "heurist.svs_list", {
                     }else{
                         noptions.onclose = function(event){
 
-                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:that.options.search_realm} ]);  //global app event to clear views
+                            if(that.search_faceted.is(':visible')){
+                               
+                                $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:that.options.search_realm} ]);  //global app event to clear views
 
-                            that.search_faceted.hide();
-                            that.search_tree.show();
-                            that._adjustAccordionTop();
+                                that.search_faceted.hide();
+                                that.search_tree.show();
+                                that._adjustAccordionTop();
+                            }
                         };
                     }
                     
