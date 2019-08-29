@@ -1,1253 +1,174 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <hml xmlns="http://heuristnetwork.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://heuristnetwork.org/reference/scheme_hml.xsd">
 <database id="2">Heurist_Core_Definitions</database>
-<query w="all" depth="0" q="t:51,52,53" db="Heurist_Core_Definitions"/>
-<dateStamp>2019-08-18T08:52:38+00:00</dateStamp>
-<resultCount>78</resultCount>
+<query w="all" depth="0" q="t:51,52" db="Heurist_Core_Definitions"/>
+<dateStamp>2019-08-29T06:38:00+00:00</dateStamp>
+<resultCount>39</resultCount>
 <records>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=64&amp;db=Heurist_Core_Definitions</citeAs>
-<id>64</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . . About&lt;/b&gt; &gt;&gt; &lt;i&gt;About&lt;/i&gt; [ Website name here ] - [ Project background, Historical context, Project aims, Project timeline, Fieldwork locations, Sources]</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-08-18 01:34:02</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">About</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">The About page connected to this menu entry describes the project. Please edit the content and supply a project description.</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">70</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">110</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">112</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">114</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">116</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">120</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">140</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">70</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">110</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">112</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">114</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">116</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">120</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">140</reversePointer>
-<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=118&amp;db=Heurist_Core_Definitions</citeAs>
-<id>118</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . . Contacts&lt;/b&gt; &gt;&gt; &lt;i&gt;Contact information&lt;/i&gt; [ Website name here ]</title>
-<added>2019-07-31 09:40:20</added>
-<modified>2019-08-18 01:34:02</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Contacts</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">119</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">119</reversePointer>
-<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=88&amp;db=Heurist_Core_Definitions</citeAs>
-<id>88</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . . Contribute&lt;/b&gt; &gt;&gt; &lt;i&gt;Contribute / Participate&lt;/i&gt; [ Website name here ] - [ Information submission, Volunteer, Employment, Fieldwork]</title>
-<added>2019-07-31 09:08:08</added>
-<modified>2019-08-18 01:34:02</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Contribute</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">89</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">90</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">122</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">124</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">126</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">89</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">90</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">122</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">124</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">126</reversePointer>
-<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=65&amp;db=Heurist_Core_Definitions</citeAs>
-<id>65</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . . Discover (search)&lt;/b&gt; &gt;&gt; &lt;i&gt;Facet searches&lt;/i&gt; [ Website name here ]</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-08-18 01:34:02</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Discover (search)</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Search functions to search the database represented by/in this website</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">72</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">72</reversePointer>
-<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=104&amp;db=Heurist_Core_Definitions</citeAs>
-<id>104</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . . How to ...&lt;/b&gt; &gt;&gt; &lt;i&gt;How to use the database&lt;/i&gt; [ Website name here ] - [ FAQ, Searching, Mapping]</title>
-<added>2019-07-31 09:24:20</added>
-<modified>2019-08-18 01:34:02</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">How to ...</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">105</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">86</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">106</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">108</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">105</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">106</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">108</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">86</reversePointer>
-<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=128&amp;db=Heurist_Core_Definitions</citeAs>
-<id>128</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . . News and events&lt;/b&gt; &gt;&gt; &lt;i&gt;News and events&lt;/i&gt; [ Website name here ] - [ News &amp; Blogs, Newsletters, Events, Of interest, Press]</title>
-<added>2019-07-31 09:48:33</added>
-<modified>2019-08-18 01:34:02</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">News and events</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">129</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">136</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">130</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">132</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">134</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">138</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">129</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">136</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">130</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">132</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">134</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">138</reversePointer>
-<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=78&amp;db=Heurist_Core_Definitions</citeAs>
-<id>78</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . . Partners&lt;/b&gt; &gt;&gt; &lt;i&gt;Project partners&lt;/i&gt; [ Website name here ] - [ Partner 1, Partner 2]</title>
-<added>2019-07-31 08:59:05</added>
-<modified>2019-08-18 01:34:02</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Partners</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Acknowledgement and description of project partners (individuals and/or institutions)</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">79</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">80</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">82</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">79</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">80</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">82</reversePointer>
-<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=92&amp;db=Heurist_Core_Definitions</citeAs>
-<id>92</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . . Project outputs&lt;/b&gt; &gt;&gt; &lt;i&gt;Project outputs&lt;/i&gt; [ Website name here ] - [ Gallery, Publications, Tools, Methods, Teaching resources, Other resources]</title>
-<added>2019-07-31 09:13:17</added>
-<modified>2019-08-18 01:34:02</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project outputs</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">93</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">84</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">94</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">96</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">98</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">100</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">102</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">93</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">84</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">94</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">96</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">98</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">100</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">102</reversePointer>
-<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=67&amp;db=Heurist_Core_Definitions</citeAs>
-<id>67</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . . Project Team&lt;/b&gt; &gt;&gt; &lt;i&gt;Project team&lt;/i&gt; [ Website name here ] - [ Directors, Staff, Volunteers]</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-08-18 01:34:02</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project Team</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">A page about members of the team involved in the project.</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">66</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">68</detail>
-<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">69</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">73</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">73</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">66</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">68</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">69</reversePointer>
-<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=120&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=120&amp;db=Heurist_Core_Definitions</citeAs>
 <id>120</id>
 <type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . About . Fieldwork locations&lt;/b&gt; &gt;&gt; &lt;i&gt;Fieldwork locations&lt;/i&gt;</title>
+<title>&lt;b&gt;About . Fieldwork locations&lt;/b&gt;</title>
 <added>2019-07-31 09:41:54</added>
-<modified>2019-07-31 19:48:04</modified>
+<modified>2019-08-28 19:55:46</modified>
 <workgroup id="0">public</workgroup>
 <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Fieldwork locations</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">121</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Locations / sites where fieldwork took place as part of this project</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to map and/or describe any fieldwork/fieldwork locations for the project.</detail>
 <detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">64</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">121</reversePointer>
 </record>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=112&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=112&amp;db=Heurist_Core_Definitions</citeAs>
 <id>112</id>
 <type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . About . Historical context&lt;/b&gt; &gt;&gt; &lt;i&gt;Historical context&lt;/i&gt;</title>
+<title>&lt;b&gt;About . Historical context&lt;/b&gt;</title>
 <added>2019-07-31 09:35:18</added>
-<modified>2019-07-31 19:36:27</modified>
+<modified>2019-08-28 19:53:59</modified>
 <workgroup id="0">public</workgroup>
 <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Historical context</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">113</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to describe the historical context or intellectual context of the project.</detail>
 <detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">64</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">113</reversePointer>
 </record>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=114&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=114&amp;db=Heurist_Core_Definitions</citeAs>
 <id>114</id>
 <type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . About . Project aims&lt;/b&gt; &gt;&gt; &lt;i&gt;Project aims&lt;/i&gt;</title>
+<title>&lt;b&gt;About . Project aims&lt;/b&gt;</title>
 <added>2019-07-31 09:36:45</added>
-<modified>2019-07-31 19:37:32</modified>
+<modified>2019-08-28 19:53:59</modified>
 <workgroup id="0">public</workgroup>
 <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project aims</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">115</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to describe the aims and intended outcomes of the project.</detail>
 <detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">64</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">115</reversePointer>
 </record>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=110&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=110&amp;db=Heurist_Core_Definitions</citeAs>
 <id>110</id>
 <type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . About . Project background&lt;/b&gt; &gt;&gt; &lt;i&gt;Project background&lt;/i&gt;</title>
+<title>&lt;b&gt;About . Project background&lt;/b&gt;</title>
 <added>2019-07-31 09:31:47</added>
-<modified>2019-07-31 19:37:57</modified>
+<modified>2019-08-28 19:53:59</modified>
 <workgroup id="0">public</workgroup>
 <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project background</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">111</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page for a description of the background of the project itself.</detail>
 <detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">64</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">111</reversePointer>
 </record>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=116&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=116&amp;db=Heurist_Core_Definitions</citeAs>
 <id>116</id>
 <type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . About . Project timeline&lt;/b&gt; &gt;&gt; &lt;i&gt;Project timeline&lt;/i&gt;</title>
+<title>&lt;b&gt;About . Project timeline&lt;/b&gt;</title>
 <added>2019-07-31 09:38:13</added>
-<modified>2019-07-31 19:38:59</modified>
+<modified>2019-08-28 19:53:59</modified>
 <workgroup id="0">public</workgroup>
 <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project timeline</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">117</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to describe the timeline and intended outcomes of the project.</detail>
 <detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">64</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">117</reversePointer>
 </record>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=140&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=140&amp;db=Heurist_Core_Definitions</citeAs>
 <id>140</id>
 <type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . About . Sources&lt;/b&gt; &gt;&gt; &lt;i&gt;Documentary sources&lt;/i&gt;</title>
+<title>&lt;b&gt;About . Sources&lt;/b&gt;</title>
 <added>2019-07-31 10:05:54</added>
-<modified>2019-07-31 20:06:58</modified>
+<modified>2019-08-28 19:53:59</modified>
 <workgroup id="0">public</workgroup>
 <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Sources</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">141</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to reference the sources of information used by the project eg. archives, museums, newspapers, online sources.</detail>
 <detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">64</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">141</reversePointer>
 </record>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=124&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=124&amp;db=Heurist_Core_Definitions</citeAs>
 <id>124</id>
 <type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Contribute . Employment&lt;/b&gt; &gt;&gt; &lt;i&gt;Positions available&lt;/i&gt;</title>
+<title>&lt;b&gt;Contribute . Employment&lt;/b&gt;</title>
 <added>2019-07-31 09:45:16</added>
-<modified>2019-07-31 19:46:31</modified>
+<modified>2019-08-28 19:53:59</modified>
 <workgroup id="0">public</workgroup>
 <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Employment</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">125</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to describe any positions available with the project.</detail>
 <detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">88</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">88</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">125</reversePointer>
 </record>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=126&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=126&amp;db=Heurist_Core_Definitions</citeAs>
 <id>126</id>
 <type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Contribute . Fieldwork&lt;/b&gt; &gt;&gt; &lt;i&gt;Participate in fieldwork&lt;/i&gt;</title>
+<title>&lt;b&gt;Contribute . Fieldwork&lt;/b&gt;</title>
 <added>2019-07-31 09:46:55</added>
-<modified>2019-07-31 19:47:48</modified>
+<modified>2019-08-28 19:53:59</modified>
 <workgroup id="0">public</workgroup>
 <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Fieldwork</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">127</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to describe any fieldwork opportunities available.</detail>
 <detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">88</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">88</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">127</reversePointer>
 </record>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=90&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=90&amp;db=Heurist_Core_Definitions</citeAs>
 <id>90</id>
 <type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Contribute . Information submission&lt;/b&gt; &gt;&gt; &lt;i&gt;Information submission form&lt;/i&gt;</title>
+<title>&lt;b&gt;Contribute . Information submission&lt;/b&gt;</title>
 <added>2019-07-31 09:10:59</added>
-<modified>2019-07-31 19:13:03</modified>
+<modified>2019-08-28 19:53:59</modified>
 <workgroup id="0">public</workgroup>
 <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Information submission</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">91</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Add a Heurist data submission form to this page, either directly into the database (but set not to generate public output until reviewed) or into a separate database wher it can be reviewed and later imported into the main database.</detail>
 <detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">88</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">88</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">91</reversePointer>
 </record>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=122&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=122&amp;db=Heurist_Core_Definitions</citeAs>
 <id>122</id>
 <type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Contribute . Volunteer&lt;/b&gt; &gt;&gt; &lt;i&gt;Volunteering opportunities&lt;/i&gt;</title>
+<title>&lt;b&gt;Contribute . Volunteer&lt;/b&gt;</title>
 <added>2019-07-31 09:43:48</added>
-<modified>2019-07-31 19:45:01</modified>
+<modified>2019-08-28 19:53:59</modified>
 <workgroup id="0">public</workgroup>
 <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Volunteer</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">123</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to describe opportunities for volunteering with the project.</detail>
 <detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">88</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">88</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">123</reversePointer>
 </record>
 <record depth="0" visibility="public" visnote="no login required" selected="no">
 <dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=86&amp;db=Heurist_Core_Definitions</citeAs>
-<id>86</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . How to ... . FAQ&lt;/b&gt; &gt;&gt; &lt;i&gt;FAQ - Frequently Asked Questions&lt;/i&gt;</title>
-<added>2019-07-31 09:07:05</added>
-<modified>2019-08-17 15:11:03</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">FAQ</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">104</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">87</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">104</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">87</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=108&amp;db=Heurist_Core_Definitions</citeAs>
-<id>108</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . How to ... . Mapping&lt;/b&gt; &gt;&gt; &lt;i&gt;How to build a map&lt;/i&gt;</title>
-<added>2019-07-31 09:28:47</added>
-<modified>2019-07-31 19:29:31</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Mapping</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">109</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">104</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">104</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">109</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=106&amp;db=Heurist_Core_Definitions</citeAs>
-<id>106</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . How to ... . Searching&lt;/b&gt; &gt;&gt; &lt;i&gt;How to search the database&lt;/i&gt;</title>
-<added>2019-07-31 09:26:17</added>
-<modified>2019-07-31 19:28:33</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Searching</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">107</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">104</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">104</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">107</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=132&amp;db=Heurist_Core_Definitions</citeAs>
-<id>132</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . News and events . Events&lt;/b&gt; &gt;&gt; &lt;i&gt;Events&lt;/i&gt;</title>
-<added>2019-07-31 09:57:51</added>
-<modified>2019-07-31 19:59:24</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Events</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">133</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">133</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=136&amp;db=Heurist_Core_Definitions</citeAs>
-<id>136</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . News and events . News &amp; Blogs&lt;/b&gt; &gt;&gt; &lt;i&gt;Project news&lt;/i&gt;</title>
-<added>2019-07-31 10:01:35</added>
-<modified>2019-07-31 20:03:59</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">News &amp; Blogs</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">137</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">137</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=130&amp;db=Heurist_Core_Definitions</citeAs>
-<id>130</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . News and events . Newsletters&lt;/b&gt; &gt;&gt; &lt;i&gt;Newsletters&lt;/i&gt;</title>
-<added>2019-07-31 09:50:24</added>
-<modified>2019-07-31 19:57:20</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Newsletters</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">131</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">131</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=134&amp;db=Heurist_Core_Definitions</citeAs>
-<id>134</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . News and events . Of interest&lt;/b&gt; &gt;&gt; &lt;i&gt;Other events of interest&lt;/i&gt;</title>
-<added>2019-07-31 09:59:37</added>
-<modified>2019-07-31 20:01:20</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Of interest</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">135</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">135</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=138&amp;db=Heurist_Core_Definitions</citeAs>
-<id>138</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . News and events . Press&lt;/b&gt; &gt;&gt; &lt;i&gt;Press mentions&lt;/i&gt;</title>
-<added>2019-07-31 10:03:42</added>
-<modified>2019-07-31 20:05:23</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Press</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">139</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">139</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=80&amp;db=Heurist_Core_Definitions</citeAs>
-<id>80</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Partners . Partner 1&lt;/b&gt; &gt;&gt; &lt;i&gt;Partner 1&lt;/i&gt;</title>
-<added>2019-07-31 09:02:42</added>
-<modified>2019-07-31 19:03:49</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Partner 1</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">81</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">78</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">78</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">81</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=82&amp;db=Heurist_Core_Definitions</citeAs>
-<id>82</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Partners . Partner 2&lt;/b&gt; &gt;&gt; &lt;i&gt;Partner 2&lt;/i&gt;</title>
-<added>2019-07-31 09:03:56</added>
-<modified>2019-07-31 19:04:33</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Partner 2</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">83</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">78</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">78</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">83</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=84&amp;db=Heurist_Core_Definitions</citeAs>
-<id>84</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Project outputs . Gallery&lt;/b&gt; &gt;&gt; &lt;i&gt;Gallery&lt;/i&gt;</title>
-<added>2019-07-31 09:04:57</added>
-<modified>2019-07-31 19:06:48</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Gallery</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">A page of outputs from the project - images, videos and other visual project outputs</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">85</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">85</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=98&amp;db=Heurist_Core_Definitions</citeAs>
-<id>98</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Project outputs . Methods&lt;/b&gt; &gt;&gt; &lt;i&gt;Methods&lt;/i&gt;</title>
-<added>2019-07-31 09:18:49</added>
-<modified>2019-07-31 19:19:39</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Methods</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">99</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">99</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=102&amp;db=Heurist_Core_Definitions</citeAs>
-<id>102</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Project outputs . Other resources&lt;/b&gt; &gt;&gt; &lt;i&gt;Other resources&lt;/i&gt;</title>
-<added>2019-07-31 09:21:45</added>
-<modified>2019-07-31 19:23:22</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Other resources</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">103</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">103</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=94&amp;db=Heurist_Core_Definitions</citeAs>
-<id>94</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Project outputs . Publications&lt;/b&gt; &gt;&gt; &lt;i&gt;Publications&lt;/i&gt;</title>
-<added>2019-07-31 09:16:00</added>
-<modified>2019-07-31 19:17:31</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Publications</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">95</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">95</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=100&amp;db=Heurist_Core_Definitions</citeAs>
-<id>100</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Project outputs . Teaching resources&lt;/b&gt; &gt;&gt; &lt;i&gt;Teachign resources&lt;/i&gt;</title>
-<added>2019-07-31 09:20:10</added>
-<modified>2019-07-31 19:21:33</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Teaching resources</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">101</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">101</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=96&amp;db=Heurist_Core_Definitions</citeAs>
-<id>96</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Project outputs . Tools&lt;/b&gt; &gt;&gt; &lt;i&gt;Tools&lt;/i&gt;</title>
-<added>2019-07-31 09:17:48</added>
-<modified>2019-07-31 19:18:29</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Tools</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">97</detail>
-<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">97</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=66&amp;db=Heurist_Core_Definitions</citeAs>
-<id>66</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Project Team . Directors&lt;/b&gt; &gt;&gt; &lt;i&gt;Directors&lt;/i&gt;</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-07-22 07:54:06</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Directors</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">The directors and management staff of the project</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">71</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">67</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">67</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">71</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=68&amp;db=Heurist_Core_Definitions</citeAs>
-<id>68</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Project Team . Staff&lt;/b&gt; &gt;&gt; &lt;i&gt;Staff&lt;/i&gt;</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-07-22 08:32:45</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Staff</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">An overall description of the staff of this project</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">74</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">67</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">67</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">74</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=69&amp;db=Heurist_Core_Definitions</citeAs>
-<id>69</id>
-<type id="52" conceptID="2-52">CMS Menu Entry</type>
-<title>&lt;b&gt; . Project Team . Volunteers&lt;/b&gt; &gt;&gt; &lt;i&gt;Volunteers&lt;/i&gt;</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-07-22 08:33:12</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Volunteers</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Volunteers and interns who are participating or have participated in this project.</detail>
-<detail id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry" isRecordPointer="true">75</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">67</detail>
-<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">67</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">75</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=70&amp;db=Heurist_Core_Definitions</citeAs>
-<id>70</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;About&lt;/i&gt;&lt;/b&gt; &lt;&lt; About [ Website name here ]</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-07-31 11:17:20</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">About</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Short summary">This page contains a summary of the project aims, theory, methods and results</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Populate this page with information about the project. &lt;/p&gt;</detail>
-<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Research project, project description, overview, summary, aims, methods, theory, methodology, results</detail>
-<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">64</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">64</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=119&amp;db=Heurist_Core_Definitions</citeAs>
-<id>119</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Contact information&lt;/i&gt;&lt;/b&gt; &lt;&lt; Contacts [ Website name here ]</title>
-<added>2019-07-31 09:40:33</added>
-<modified>2019-07-31 11:17:36</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Contact information</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to provide contact and location information for the project.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">118</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">118</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=89&amp;db=Heurist_Core_Definitions</citeAs>
-<id>89</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Contribute / Participate&lt;/i&gt;&lt;/b&gt; &lt;&lt; Contribute [ Website name here ]</title>
-<added>2019-07-31 09:08:26</added>
-<modified>2019-07-31 11:17:57</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Contribute / Participate</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe ways for the public / other researchers to participate in or contribute to the project. This could include contact details, descrioption of ways of participating, a request to email information in a specific format, or a direct data entry form (probably as a link or sub-menu).&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">88</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">88</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=71&amp;db=Heurist_Core_Definitions</citeAs>
-<id>71</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Directors&lt;/i&gt;&lt;/b&gt; &lt;&lt; Directors</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-08-17 15:26:08</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Directors</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Short summary">This page provides information about the directors or leaders of the project which built this database</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Populate this page with the content of the page describing Directors of the project</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">66</detail>
-<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Directors, Project leaders, Research project</detail>
-<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">66</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=141&amp;db=Heurist_Core_Definitions</citeAs>
-<id>141</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Documentary sources&lt;/i&gt;&lt;/b&gt; &lt;&lt; Sources</title>
-<added>2019-07-31 10:06:05</added>
-<modified>2019-07-31 11:18:25</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Documentary sources</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to reference the sources of information used by the project eg. archives, museums, newspapers, online sources.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">140</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">140</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=133&amp;db=Heurist_Core_Definitions</citeAs>
-<id>133</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Events&lt;/i&gt;&lt;/b&gt; &lt;&lt; Events</title>
-<added>2019-07-31 09:58:03</added>
-<modified>2019-07-31 11:18:35</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Events</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to list any events such as seminars, exhibitions, public meetings, consultations etc. organised by the project.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">132</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">132</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=72&amp;db=Heurist_Core_Definitions</citeAs>
-<id>72</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Facet searches&lt;/i&gt;&lt;/b&gt; &lt;&lt; Discover (search) [ Website name here ]</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-07-31 11:18:59</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Facet searches</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Short summary">This page displays user-specified searches of the database content, generally in the form of pre-defined facet searches which the user can navigate.</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;This page is set up as a container for database searches. We suggest using a table to contain the search field or list of saved searched and the results list and visualisation (map, timeline, network diagram, report etc.).&lt;/p&gt;</detail>
-<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
-<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">65</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">65</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=87&amp;db=Heurist_Core_Definitions</citeAs>
-<id>87</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;FAQ - Frequently Asked Questions&lt;/i&gt;&lt;/b&gt; &lt;&lt; FAQ</title>
-<added>2019-07-31 09:07:19</added>
-<modified>2019-07-31 11:19:12</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">FAQ - Frequently Asked Questions</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Populate this page with frequently asked questions and responses.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">86</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">86</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=121&amp;db=Heurist_Core_Definitions</citeAs>
-<id>121</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Fieldwork locations&lt;/i&gt;&lt;/b&gt; &lt;&lt; Fieldwork locations</title>
-<added>2019-07-31 09:42:29</added>
-<modified>2019-07-31 11:19:27</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Fieldwork locations</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to map and/or describe any fieldwork/fieldwork locations for the project.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">120</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">120</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=85&amp;db=Heurist_Core_Definitions</citeAs>
-<id>85</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Gallery&lt;/i&gt;&lt;/b&gt; &lt;&lt; Gallery</title>
-<added>2019-07-31 09:05:12</added>
-<modified>2019-07-31 11:19:38</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Gallery</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;This page could contain a gallery of images, videos or otherproject outputs.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">84</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">84</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=113&amp;db=Heurist_Core_Definitions</citeAs>
-<id>113</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Historical context&lt;/i&gt;&lt;/b&gt; &lt;&lt; Historical context</title>
-<added>2019-07-31 09:35:30</added>
-<modified>2019-07-31 11:19:47</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Historical context</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the historical context or intellectual context of the project.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">112</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">112</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=144&amp;db=Heurist_Core_Definitions</citeAs>
-<id>144</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Home&lt;/i&gt;&lt;/b&gt; &lt;&lt;</title>
-<added>2019-08-02 10:39:44</added>
-<modified>2019-08-02 22:56:58</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Home</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;This is the website Home page generated by Heurist. Please edit the web pages in this site to create appropriate content.&lt;/p&gt;
-&lt;p&gt;The pages may embed images and dynamic components such as a search box, predefined searches and facet searches, maps, timelines, network diagrams and reports using the widget button at the end of the toolbar (when viewed in the website editor).&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;h3&gt;About Heurist&lt;/h3&gt;
-&lt;p&gt;Heurist (&lt;a title=&quot;Heurist Academic Knowledge Management System&quot; href=&quot;http://HeuristScholar.org&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;HeuristScholar.org&lt;/a&gt;) is a free, flexible, open-source data management application developed specifically for researchers in the Humanities.&lt;/p&gt;
-&lt;p&gt;Heurist allows researchers to design, build, analyse, visualise, publish and archive their own databases without coding or technical support.&lt;/p&gt;
-&lt;p&gt;Heurist is available as free, non-commercial web services available to researchers worldwide. Please visit the website to find a service in your region.&lt;/p&gt;
-&lt;p&gt;Heurist has been developed at the University of Sydney, Australia since 2005 in collaboration with dozens of research projects. The source is available on gitHub.&lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;
-&lt;p&gt; &lt;/p&gt;</detail>
-<reversePointer id="924" conceptID="2-924" type="Home page content" name="Home page content">63</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=109&amp;db=Heurist_Core_Definitions</citeAs>
-<id>109</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;How to build a map&lt;/i&gt;&lt;/b&gt; &lt;&lt; Mapping</title>
-<added>2019-07-31 09:28:58</added>
-<modified>2019-07-31 11:19:56</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">How to build a map</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe more advanced uses of the mapping pages.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">108</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">108</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=107&amp;db=Heurist_Core_Definitions</citeAs>
-<id>107</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;How to search the database&lt;/i&gt;&lt;/b&gt; &lt;&lt; Searching</title>
-<added>2019-07-31 09:26:26</added>
-<modified>2019-07-31 11:20:14</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">How to search the database</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to provide detailed instructions on the use of the database search functions, including advanced syntax, preferably with examples of how to construct a search (particularly if you provide a simple search box which can use all of Heurist's search capabilities and therefore requires a knoiwledge of the available syntax).&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">106</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">106</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=105&amp;db=Heurist_Core_Definitions</citeAs>
-<id>105</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;How to use the database&lt;/i&gt;&lt;/b&gt; &lt;&lt; How to ... [ Website name here ]</title>
-<added>2019-07-31 09:24:31</added>
-<modified>2019-07-31 11:20:25</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">How to use the database</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to provide instructions on how to use the database searches, maps, timelines or network visualisations, or other interactive resources displayed on the website.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">104</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">104</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=91&amp;db=Heurist_Core_Definitions</citeAs>
-<id>91</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Information submission form&lt;/i&gt;&lt;/b&gt; &lt;&lt; Information submission</title>
-<added>2019-07-31 09:11:19</added>
-<modified>2019-07-31 11:20:36</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Information submission form</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Add a Heurist data submission form to this page, either directly into the database (but set not to generate public output until reviewed) or into a separate database wher it can be reviewed and later imported into the main database.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">90</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">90</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=99&amp;db=Heurist_Core_Definitions</citeAs>
-<id>99</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Methods&lt;/i&gt;&lt;/b&gt; &lt;&lt; Methods</title>
-<added>2019-07-31 09:19:01</added>
-<modified>2019-07-31 11:20:46</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Methods</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe any specific methods or workflwo developed by the project.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">98</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">98</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=129&amp;db=Heurist_Core_Definitions</citeAs>
-<id>129</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;News and events&lt;/i&gt;&lt;/b&gt; &lt;&lt; News and events [ Website name here ]</title>
-<added>2019-07-31 09:48:46</added>
-<modified>2019-07-31 11:20:54</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">News and events</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to outline sources of news about the project, the types of events organised, newsletters, blogs and other public information sources.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">128</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=131&amp;db=Heurist_Core_Definitions</citeAs>
-<id>131</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Newsletters&lt;/i&gt;&lt;/b&gt; &lt;&lt; Newsletters</title>
-<added>2019-07-31 09:50:39</added>
-<modified>2019-07-31 11:21:06</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Newsletters</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to list newsletters if the project produces them. If numerous it may be worth recording them in the database (including a PDF) and embedding a custom report here to list them, with links to the PDF.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">130</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">130</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=135&amp;db=Heurist_Core_Definitions</citeAs>
-<id>135</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Other events of interest&lt;/i&gt;&lt;/b&gt; &lt;&lt; Of interest</title>
-<added>2019-07-31 09:59:53</added>
-<modified>2019-07-31 11:21:42</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Other events of interest</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to connect to third party events which may be of interest.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">134</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">134</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=103&amp;db=Heurist_Core_Definitions</citeAs>
-<id>103</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Other resources&lt;/i&gt;&lt;/b&gt; &lt;&lt; Other resources</title>
-<added>2019-07-31 09:21:56</added>
-<modified>2019-07-31 11:22:01</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Other resources</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to list and/or describe any other resources developed by the project. For a list it may be appropriate to embed a Heurist custom report which populates the lsit from the database.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">102</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">102</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=127&amp;db=Heurist_Core_Definitions</citeAs>
-<id>127</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Participate in fieldwork&lt;/i&gt;&lt;/b&gt; &lt;&lt; Fieldwork</title>
-<added>2019-07-31 09:47:05</added>
-<modified>2019-07-31 11:22:10</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Participate in fieldwork</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe any fieldwork opportunities available.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">126</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">126</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=81&amp;db=Heurist_Core_Definitions</citeAs>
-<id>81</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Partner 1&lt;/i&gt;&lt;/b&gt; &lt;&lt; Partner 1</title>
-<added>2019-07-31 09:02:55</added>
-<modified>2019-07-31 11:22:24</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Partner 1</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;A specific web page devoted to a project partner&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">80</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">80</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=83&amp;db=Heurist_Core_Definitions</citeAs>
-<id>83</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Partner 2&lt;/i&gt;&lt;/b&gt; &lt;&lt; Partner 2</title>
-<added>2019-07-31 09:04:06</added>
-<modified>2019-07-31 11:22:33</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Partner 2</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;A specific web page devoted to a project partner&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">82</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">82</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=125&amp;db=Heurist_Core_Definitions</citeAs>
-<id>125</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Positions available&lt;/i&gt;&lt;/b&gt; &lt;&lt; Employment</title>
-<added>2019-07-31 09:45:44</added>
-<modified>2019-07-31 11:22:42</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Positions available</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe any positions available with the project.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">124</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">124</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=139&amp;db=Heurist_Core_Definitions</citeAs>
-<id>139</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Press mentions&lt;/i&gt;&lt;/b&gt; &lt;&lt; Press</title>
-<added>2019-07-31 10:04:25</added>
-<modified>2019-07-31 11:22:52</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Press mentions</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to summarise and connect to mentions of the project in the press or other public listings.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">138</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">138</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=115&amp;db=Heurist_Core_Definitions</citeAs>
-<id>115</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Project aims&lt;/i&gt;&lt;/b&gt; &lt;&lt; Project aims</title>
-<added>2019-07-31 09:36:58</added>
-<modified>2019-07-31 11:23:02</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Project aims</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the aims and intended outcomes of the project.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">114</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">114</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=111&amp;db=Heurist_Core_Definitions</citeAs>
-<id>111</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Project background&lt;/i&gt;&lt;/b&gt; &lt;&lt; Project background</title>
-<added>2019-07-31 09:33:52</added>
-<modified>2019-07-31 11:23:10</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Project background</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page for a description of the background of the project itself.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">110</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">110</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=137&amp;db=Heurist_Core_Definitions</citeAs>
-<id>137</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Project news&lt;/i&gt;&lt;/b&gt; &lt;&lt; News &amp; Blogs</title>
-<added>2019-07-31 10:02:05</added>
-<modified>2019-07-31 11:23:46</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Project news</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page for specific news about the project (might also connect to blog entries).&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">136</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">136</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=93&amp;db=Heurist_Core_Definitions</citeAs>
-<id>93</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Project outputs&lt;/i&gt;&lt;/b&gt; &lt;&lt; Project outputs [ Website name here ]</title>
-<added>2019-07-31 09:13:45</added>
-<modified>2019-07-31 11:24:10</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Project outputs</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;A page to describe the outputs of the project - may include publications, methods, tools, public websites, community resources etc. For larger or more complex projects this page will be an overview and different types of output will probably be represented by subsidiary menu entries/pages.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">92</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=79&amp;db=Heurist_Core_Definitions</citeAs>
-<id>79</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Project partners&lt;/i&gt;&lt;/b&gt; &lt;&lt; Partners [ Website name here ]</title>
-<added>2019-07-31 08:59:23</added>
-<modified>2019-07-31 11:24:39</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Project partners</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the project partners, including logos where appropriate.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">78</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">78</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=73&amp;db=Heurist_Core_Definitions</citeAs>
-<id>73</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Project team&lt;/i&gt;&lt;/b&gt; &lt;&lt; Project Team [ Website name here ]</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-07-31 11:25:09</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Project team</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Short summary">This page lists members of the project team or summarises the team which is broken down in more detail in subsidiary pages for director(s), staff and volunteers/interns.</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Please edit this page to add photos and descriptions of your project team.&lt;/p&gt;
-&lt;p&gt;Additional menu entries can link to pages describing different sets of people, eg. Directors, Staff, Volunteers.&lt;/p&gt;</detail>
-<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Research team, People, Database, Heurist, Humanities, Digital Humanities,</detail>
-<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">67</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">67</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=117&amp;db=Heurist_Core_Definitions</citeAs>
-<id>117</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Project timeline&lt;/i&gt;&lt;/b&gt; &lt;&lt; Project timeline</title>
-<added>2019-07-31 09:38:29</added>
-<modified>2019-07-31 11:25:21</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Project timeline</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the timeline and intended outcomes of the project.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">116</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">116</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=95&amp;db=Heurist_Core_Definitions</citeAs>
-<id>95</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Publications&lt;/i&gt;&lt;/b&gt; &lt;&lt; Publications</title>
-<added>2019-07-31 09:16:14</added>
-<modified>2019-07-31 11:25:34</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Publications</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;This page may be used to list published outputs of the project. These could be entered as content here, or could be listed through a Heurist custom report drawing data from the database.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">94</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">94</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=74&amp;db=Heurist_Core_Definitions</citeAs>
-<id>74</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Staff&lt;/i&gt;&lt;/b&gt; &lt;&lt; Staff</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-07-31 11:25:48</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Staff</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Short summary">This page contains information about the staff of the project including academics, research assistants, technicians and other persons employed by the project (potentially including unpaid participants who have an intellectual input rather than purely a volunteering role)</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Enter description of the staff of the project on this page&lt;/p&gt;</detail>
-<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Staff, Employees, Research assistants, Academics</detail>
-<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">68</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">68</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=101&amp;db=Heurist_Core_Definitions</citeAs>
-<id>101</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Teachign resources&lt;/i&gt;&lt;/b&gt; &lt;&lt; Teaching resources</title>
-<added>2019-07-31 09:20:24</added>
-<modified>2019-07-31 11:26:04</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Teachign resources</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to list and/or describe any teaching resources developed by the project. For a lsit it may be appropriate to use a Heurist custom report and draw the list from the database.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">100</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">100</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=97&amp;db=Heurist_Core_Definitions</citeAs>
-<id>97</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Tools&lt;/i&gt;&lt;/b&gt; &lt;&lt; Tools</title>
-<added>2019-07-31 09:18:00</added>
-<modified>2019-07-31 11:26:15</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Tools</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe tools developed by the project.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">96</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">96</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=123&amp;db=Heurist_Core_Definitions</citeAs>
-<id>123</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Volunteering opportunities&lt;/i&gt;&lt;/b&gt; &lt;&lt; Volunteer</title>
-<added>2019-07-31 09:44:02</added>
-<modified>2019-07-31 11:26:26</modified>
-<workgroup id="0">public</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Volunteering opportunities</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe opportunities for volunteering with the project.&lt;/p&gt;</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">122</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">122</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=75&amp;db=Heurist_Core_Definitions</citeAs>
-<id>75</id>
-<type id="53" conceptID="2-53">CMS Web Page</type>
-<title>&lt;b&gt;&lt;i&gt;Volunteers&lt;/i&gt;&lt;/b&gt; &lt;&lt; Volunteers</title>
-<added>2019-07-21 21:54:06</added>
-<modified>2019-07-31 11:26:37</modified>
-<workgroup id="2">johnson</workgroup>
-<detail id="1" conceptID="2-1" type="Name / Title" name="Page title">Volunteers</detail>
-<detail id="3" conceptID="2-3" type="Short summary" name="Short summary">Volunteers, interns and members of the public who have participated in the project.</detail>
-<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Enter the list of project volunteers and interns on this page&lt;/p&gt;</detail>
-<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Volunteers, Interns, Public participation, Community, Crowdsourcing</detail>
-<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
-<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">69</detail>
-<reversePointer id="916" conceptID="2-916" type="Page for this menu entry" name="Page for this menu entry">69</reversePointer>
-</record>
-<record depth="0" visibility="public" visnote="no login required" selected="no">
-<dbID>2</dbID>
-<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=63&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=63&amp;db=Heurist_Core_Definitions</citeAs>
 <id>63</id>
 <type id="51" conceptID="2-51">CMS_Home</type>
 <title>&lt;b&gt;HOMEPAGE: Website name here&lt;/b&gt; [ Menus: About, News and events, Project Team, Partners, Contribute, Project outputs, Discover (search), How to ..., Contacts ]</title>
@@ -1289,7 +210,7 @@ Remember to indicate the institution and/or project, target audience and nature 
 <mimeType>image/png</mimeType>
 <fileSize units="kB">2</fileSize>
 <date>2019-07-21 21:54:06</date>
-<url>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?db=Heurist_Core_Definitions&amp;file=68340b50eadbc527a054473b44462de5e4a439a2</url>
+<url>https://heuristplus.sydney.edu.au/h5-ao/?db=Heurist_Core_Definitions&amp;file=68340b50eadbc527a054473b44462de5e4a439a2</url>
 </file>
 </detail>
 <detail id="912" conceptID="2-912" type="CMS Menus" name="Top level menus" isRecordPointer="true">64</detail>
@@ -1304,17 +225,531 @@ Remember to indicate the institution and/or project, target audience and nature 
 <detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Digital Humanities, Heurist, Research, Database, Open Data,</detail>
 <detail id="920" conceptID="2-920" type="Show page title" name="Show page titles" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
 <detail id="923" conceptID="2-923" type="Main menu location" name="Main menu location" termID="6251" termConceptID="2-6251" ParentTerm="Website main menu location vocab">Top of page, horizontal</detail>
-<detail id="924" conceptID="2-924" type="Home page content" name="Home page content" isRecordPointer="true">144</detail>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">64</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">128</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">67</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">78</reversePointer>
+<detail id="924" conceptID="2-924" type="Home page content" name="Home page content" isRecordPointer="true"/>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">118</reversePointer>
 <reversePointer id="247" conceptID="2-247" type="Parent entity">88</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">92</reversePointer>
 <reversePointer id="247" conceptID="2-247" type="Parent entity">65</reversePointer>
 <reversePointer id="247" conceptID="2-247" type="Parent entity">104</reversePointer>
-<reversePointer id="247" conceptID="2-247" type="Parent entity">118</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">128</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">78</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">92</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">67</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">64</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=86&amp;db=Heurist_Core_Definitions</citeAs>
+<id>86</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;How to ... . FAQ&lt;/b&gt;</title>
+<added>2019-07-31 09:07:05</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">FAQ</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Populate this page with frequently asked questions and responses.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">104</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">104</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=108&amp;db=Heurist_Core_Definitions</citeAs>
+<id>108</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;How to ... . Mapping&lt;/b&gt;</title>
+<added>2019-07-31 09:28:47</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Mapping</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to describe more advanced uses of the mapping pages.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">104</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">104</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=106&amp;db=Heurist_Core_Definitions</citeAs>
+<id>106</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;How to ... . Searching&lt;/b&gt;</title>
+<added>2019-07-31 09:26:17</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Searching</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to provide detailed instructions on the use of the database search functions, including advanced syntax, preferably with examples of how to construct a search (particularly if you provide a simple search box which can use all of Heurist's search capabilities and therefore requires a knoiwledge of the available syntax).</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">104</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">104</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=132&amp;db=Heurist_Core_Definitions</citeAs>
+<id>132</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;News and events . Events&lt;/b&gt;</title>
+<added>2019-07-31 09:57:51</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Events</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to list any events such as seminars, exhibitions, public meetings, consultations etc. organised by the project.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=136&amp;db=Heurist_Core_Definitions</citeAs>
+<id>136</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;News and events . News &amp; Blogs&lt;/b&gt;</title>
+<added>2019-07-31 10:01:35</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">News &amp; Blogs</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page for specific news about the project (might also connect to blog entries).</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=130&amp;db=Heurist_Core_Definitions</citeAs>
+<id>130</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;News and events . Newsletters&lt;/b&gt;</title>
+<added>2019-07-31 09:50:24</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Newsletters</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to list newsletters if the project produces them. If numerous it may be worth recording them in the database (including a PDF) and embedding a custom report here to list them, with links to the PDF.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=134&amp;db=Heurist_Core_Definitions</citeAs>
+<id>134</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;News and events . Of interest&lt;/b&gt;</title>
+<added>2019-07-31 09:59:37</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Of interest</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to connect to third party events which may be of interest.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=138&amp;db=Heurist_Core_Definitions</citeAs>
+<id>138</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;News and events . Press&lt;/b&gt;</title>
+<added>2019-07-31 10:03:42</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Press</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to summarise and connect to mentions of the project in the press or other public listings.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">128</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=80&amp;db=Heurist_Core_Definitions</citeAs>
+<id>80</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Partners . Partner 1&lt;/b&gt;</title>
+<added>2019-07-31 09:02:42</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Partner 1</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">A specific web page devoted to a project partner</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">78</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">78</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=82&amp;db=Heurist_Core_Definitions</citeAs>
+<id>82</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Partners . Partner 2&lt;/b&gt;</title>
+<added>2019-07-31 09:03:56</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Partner 2</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">A specific web page devoted to a project partner</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">78</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">78</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=84&amp;db=Heurist_Core_Definitions</citeAs>
+<id>84</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Project outputs . Gallery&lt;/b&gt;</title>
+<added>2019-07-31 09:04:57</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Gallery</detail>
+<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">A page of outputs from the project - images, videos and other visual project outputs</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">This page could contain a gallery of images, videos or otherproject outputs.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=98&amp;db=Heurist_Core_Definitions</citeAs>
+<id>98</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Project outputs . Methods&lt;/b&gt;</title>
+<added>2019-07-31 09:18:49</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Methods</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=102&amp;db=Heurist_Core_Definitions</citeAs>
+<id>102</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Project outputs . Other resources&lt;/b&gt;</title>
+<added>2019-07-31 09:21:45</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Other resources</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to list and/or describe any other resources developed by the project. For a list it may be appropriate to embed a Heurist custom report which populates the lsit from the database.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=94&amp;db=Heurist_Core_Definitions</citeAs>
+<id>94</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Project outputs . Publications&lt;/b&gt;</title>
+<added>2019-07-31 09:16:00</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Publications</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">This page may be used to list published outputs of the project. These could be entered as content here, or could be listed through a Heurist custom report drawing data from the database.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=100&amp;db=Heurist_Core_Definitions</citeAs>
+<id>100</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Project outputs . Teaching resources&lt;/b&gt;</title>
+<added>2019-07-31 09:20:10</added>
+<modified>2019-08-28 19:51:55</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Teaching resources</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to list and/or describe any teaching resources developed by the project. For a lsit it may be appropriate to use a Heurist custom report and draw the list from the database.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=96&amp;db=Heurist_Core_Definitions</citeAs>
+<id>96</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Project outputs . Tools&lt;/b&gt;</title>
+<added>2019-07-31 09:17:48</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Tools</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to describe tools developed by the project.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">92</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=66&amp;db=Heurist_Core_Definitions</citeAs>
+<id>66</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Project Team . Directors&lt;/b&gt;</title>
+<added>2019-07-21 21:54:06</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="2">johnson</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Directors</detail>
+<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">The directors and management staff of the project</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Populate this page with the content of the page describing Directors of the project</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">67</detail>
+<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Directors, Project leaders, Research project</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">67</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=68&amp;db=Heurist_Core_Definitions</citeAs>
+<id>68</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Project Team . Staff&lt;/b&gt;</title>
+<added>2019-07-21 21:54:06</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="2">johnson</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Staff</detail>
+<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">This page contains information about the staff of the project including academics, research assistants, technicians and other persons employed by the project (potentially including unpaid participants who have an intellectual input rather than purely a volunteering role)</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Enter description of the staff of the project on this page</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">67</detail>
+<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Staff, Employees, Research assistants, Academics</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">67</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=69&amp;db=Heurist_Core_Definitions</citeAs>
+<id>69</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>&lt;b&gt;Project Team . Volunteers&lt;/b&gt;</title>
+<added>2019-07-21 21:54:06</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="2">johnson</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Volunteers</detail>
+<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Volunteers and interns and members of the public who are participating or have participated in this project.</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Enter the list of project volunteers and interns on this page</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">67</detail>
+<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Volunteers, Interns, Public participation, Community, Crowdsourcing</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">67</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=64&amp;db=Heurist_Core_Definitions</citeAs>
+<id>64</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>[ Website name here ] &lt;b&gt; . About&lt;/b&gt; [ Project background, Historical context, Project aims, Project timeline, Fieldwork locations, Sources]</title>
+<added>2019-07-21 21:54:06</added>
+<modified>2019-08-29 05:47:34</modified>
+<workgroup id="2">johnson</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">About</detail>
+<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">This page contains a summary of the project aims, theory, methods and results</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Please populate this page with information about the project.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
+<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Research project, project description, overview, summary, aims, methods, theory, methodology, results</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">110</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">112</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">114</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">116</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">120</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">140</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">112</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">114</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">110</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">116</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">140</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">120</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=118&amp;db=Heurist_Core_Definitions</citeAs>
+<id>118</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>[ Website name here ] &lt;b&gt; . Contacts&lt;/b&gt;</title>
+<added>2019-07-31 09:40:20</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Contacts</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to provide contact and location information for the project.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=88&amp;db=Heurist_Core_Definitions</citeAs>
+<id>88</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>[ Website name here ] &lt;b&gt; . Contribute&lt;/b&gt; [ Information submission, Volunteer, Employment, Fieldwork]</title>
+<added>2019-07-31 09:08:08</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Contribute</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to describe ways for the public / other researchers to participate in or contribute to the project. This could include contact details, descrioption of ways of participating, a request to email information in a specific format, or a direct data entry form (probably as a link or sub-menu).</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">90</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">122</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">124</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">126</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">124</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">126</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">90</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">122</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=65&amp;db=Heurist_Core_Definitions</citeAs>
+<id>65</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>[ Website name here ] &lt;b&gt; . Discover (search)&lt;/b&gt;</title>
+<added>2019-07-21 21:54:06</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="2">johnson</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Discover (search)</detail>
+<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Search functions to search and display contents of the database represented by/in this website</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">This page is set up as a container for database searches. We suggest using a table to contain the search field or list of saved searched and the results list and visualisation (map, timeline, network diagram, report etc.).</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
+<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=104&amp;db=Heurist_Core_Definitions</citeAs>
+<id>104</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>[ Website name here ] &lt;b&gt; . How to ...&lt;/b&gt; [ FAQ, Searching, Mapping]</title>
+<added>2019-07-31 09:24:20</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">How to ...</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to provide instructions on how to use the database searches, maps, timelines or network visualisations, or other interactive resources displayed on the website.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">86</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">106</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">108</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">86</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">108</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">106</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=128&amp;db=Heurist_Core_Definitions</citeAs>
+<id>128</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>[ Website name here ] &lt;b&gt; . News and events&lt;/b&gt; [ News &amp; Blogs, Newsletters, Events, Of interest, Press]</title>
+<added>2019-07-31 09:48:33</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">News and events</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to outline sources of news about the project, the types of events organised, newsletters, blogs and other public information sources.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">136</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">130</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">132</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">134</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">138</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">132</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">136</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">130</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">134</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">138</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=78&amp;db=Heurist_Core_Definitions</citeAs>
+<id>78</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>[ Website name here ] &lt;b&gt; . Partners&lt;/b&gt; [ Partner 1, Partner 2]</title>
+<added>2019-07-31 08:59:05</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Partners</detail>
+<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Acknowledgement and description of project partners (individuals and/or institutions)</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Use this page to describe the project partners, including logos where appropriate.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">80</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">82</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">80</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">82</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=92&amp;db=Heurist_Core_Definitions</citeAs>
+<id>92</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>[ Website name here ] &lt;b&gt; . Project outputs&lt;/b&gt; [ Gallery, Publications, Tools, Methods, Teaching resources, Other resources]</title>
+<added>2019-07-31 09:13:17</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="0">public</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project outputs</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">A page to describe the outputs of the project - may include publications, methods, tools, public websites, community resources etc. For larger or more complex projects this page will be an overview and different types of output will probably be represented by subsidiary menu entries/pages.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">84</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">94</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">96</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">98</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">100</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">102</detail>
+<detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">84</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">98</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">102</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">94</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">96</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">100</reversePointer>
+</record>
+<record depth="0" visibility="public" visnote="no login required" selected="no">
+<dbID>2</dbID>
+<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=67&amp;db=Heurist_Core_Definitions</citeAs>
+<id>67</id>
+<type id="52" conceptID="2-52">CMS Menu Entry</type>
+<title>[ Website name here ] &lt;b&gt; . Project Team&lt;/b&gt; [ Directors, Staff, Volunteers]</title>
+<added>2019-07-21 21:54:06</added>
+<modified>2019-08-28 19:53:59</modified>
+<workgroup id="2">johnson</workgroup>
+<detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project Team</detail>
+<detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">A page about members of the team involved in the project.</detail>
+<detail id="4" conceptID="2-4" type="Extended description" name="HTML content">Please edit this page to add photos and descriptions of your project team.
+
+Additional menu entries can link to pages describing different sets of people, eg. Directors, Staff, Volunteers.</detail>
+<detail id="247" conceptID="2-247" type="Parent entity" isRecordPointer="true">63</detail>
+<detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Research team, People, Database, Heurist, Humanities, Digital Humanities,</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">66</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">68</detail>
+<detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">69</detail>
+<detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+<reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">66</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">68</reversePointer>
+<reversePointer id="247" conceptID="2-247" type="Parent entity">69</reversePointer>
 </record>
 </records>
-<recordCount>78</recordCount>
+<recordCount>39</recordCount>
 </hml>
