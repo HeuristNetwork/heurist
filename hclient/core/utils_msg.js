@@ -864,8 +864,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             buttons = {};
             buttons[lblYes] = function() {
-                callback.call();
                 $dlg.dialog( "close" );
+                callback.call();
             };
             buttons[lblNo] = function() {
                 $dlg.dialog( "close" );

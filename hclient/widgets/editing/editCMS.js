@@ -28,9 +28,9 @@ function editCMS(home_page_record_id, main_callback){
 //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
      DT_NAME      = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
      
-     if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && RT_CMS_PAGE>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0 && DT_CMS_PAGE>0)){
+     if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0)){
         var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg('You will need record types '
-        +'99-51, 99-52 and 99-53 which are available as part of Heurist_Reference_Set. '
+        +'99-51 (Web home) and 99-52 (Web menu/content) which are available as part of Heurist_Reference_Set. '
         +'Click "Import" to get these definitions',
                     {'Import':function(){
                         var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
