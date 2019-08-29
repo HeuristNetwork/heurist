@@ -1899,12 +1899,12 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         var rfr = that._getFakeRectypeField(DT_PARENT_ENTITY);
                         rfr[fi_name] = 'Child record of';
                         rfr[fi_order] = -1;//top most
-                        rfr[fi_reqtype] = 'required';
                         if(this.options.parententity>0){
                             rfr[fi_defval] = this.options.parententity;  //parent Record ID
                             rfr[fieldNames.length] = 'readonly';
                         }
                         if(parentsIds.length>0){
+                           rfr[fi_reqtype] = 'required';
                            rfr[fi_ptrs] = parentsIds; //constrained to parent record types
                            
                            //if the only value readonly as well
@@ -1915,6 +1915,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                                     rfr[fieldNames.length] = 'readonly';   
                                 }
                            }  
+                        }else{
+                            rfr[fi_reqtype] = 'optional';
                         }
                         
                         fieldNames.push('rst_Display');

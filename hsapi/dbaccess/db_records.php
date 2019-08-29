@@ -260,7 +260,7 @@
     * error array
     *
     */
-    function recordSave($system, $record, $use_transaction=true){
+    function recordSave($system, $record, $use_transaction=true, $suppress_parent_child=false){
 
         //check capture for newsletter subscription
         if (@$record['Captcha'] && @$_SESSION["captcha_code"]){
@@ -491,7 +491,7 @@
                 }*/
                 
                 //add reverce field "Parent Entity" (#247) in child resource record
-                if(defined('DT_PARENT_ENTITY')){
+                if(defined('DT_PARENT_ENTITY') && !$suppress_parent_child){
                     if(@$values['dtl_ParentChild']==true){
                         
                         

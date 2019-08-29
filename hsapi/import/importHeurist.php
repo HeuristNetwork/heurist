@@ -559,7 +559,10 @@ EOD;
                     $record['details'][$ftId] = $new_values; 
             }
             
-            $out = recordSave(self::$system, $record, false);  //see db_records.php
+            
+            // note: we need to suppress creation of reverse 247 pointer for parent-child links
+            
+            $out = recordSave(self::$system, $record, false, true);  //see db_records.php
 
             if ( @$out['status'] != HEURIST_OK ) {
                 //$origninal_RecID = $record_src['rec_ID'];
@@ -601,23 +604,26 @@ EOD;
                     foreach ($fields as $fieldtype_id=>$old_values){
                         foreach ($old_values as $old_value){
                             //get new id in target db                
+                            $query = null;
                             $new_value = @$records_corr[$old_value];
                             if($new_value>0){
                                 $query = 'UPDATE recDetails SET dtl_Value='.$new_value
                                         .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
                                         .' AND dtl_Value='.$old_value;
                                         
-                            }else{
+                            }else if($old_value>0){
                                 //target record not found 
                                 $query = 'DELETE FROM recDetails '
                                         .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
                                         .' AND dtl_Value='.$old_value;
                             }
-                            $ret = mysql__exec_param_query($mysqli, $query, null);
-                            if($ret!==true){
-                                self::$system->addError(HEURIST_DB_ERROR, 'Cannot update resource fields', $ret);
-                                $is_rollback = true;
-                                break;   
+                            if($query!=null){
+                                $ret = mysql__exec_param_query($mysqli, $query, null);
+                                if($ret!==true){
+                                    self::$system->addError(HEURIST_DB_ERROR, 'Cannot update resource fields', 'Query:'.$query.'. '.$ret);
+                                    $is_rollback = true;
+                                    break;   
+                                }
                             }
                         }
                     }//for
