@@ -117,10 +117,12 @@ $.widget( "heurist.mapping", {
     //reference to google or leaflet map
     
     //main elements
-    nativemap: null,
-    vistimeline: null,
-    mapManager: null,
-    current_query_layer:null, //record from search results mapdoc
+    nativemap: null,     //map container
+    vistimeline: null,   //timeline container 
+    mapManager: null,    //legend
+    
+    //record from search results mapdoc
+    current_query_layer:null, 
     
     //controls
     map_legend: null,
@@ -135,6 +137,7 @@ $.widget( "heurist.mapping", {
     //popup element
     main_popup: null,
     mapPopUpTemplate: null,
+    
     //
     drawnItems: null,
     //deffau draw style
@@ -147,7 +150,7 @@ $.widget( "heurist.mapping", {
     
 
     //storages
-    all_layers: [],    // array of all loaded top layers
+    all_layers: [],    // array of all loaded TOP layers by leaflet id
     all_clusters: {},  // markerclusters
     all_markers: {},
     
@@ -1181,14 +1184,81 @@ $.widget( "heurist.mapping", {
         
         var layer = (event.target);
         if(layer && layer.feature){
+
+
+            if(layer.feature.properties.rec_ID>0){
+                //find all overlapped polygones under click point
+                if(layer instanceof L.Polygon || layer instanceof L.Circle || layer instanceof L.Rectangle){
+                    
+                        var selected_layers = {};
+                        var sText = '';
+                        var latlng = event.latlng;
+                        
+                        //scan all visible layers
+                        this.nativemap.eachLayer(function(top_layer){    
+                            if(top_layer.feature && //top_layer.feature.properties.rec_ID!=layer.feature.properties.rec_ID && 
+                                (top_layer instanceof L.Polygon || top_layer instanceof L.Circle || top_layer instanceof L.Rectangle)){
+                                
+                                    if(top_layer.contains(latlng)){
+                                        selected_layers[top_layer._leaflet_id] = top_layer;
+                                        sText = sText + '<option value="'+top_layer._leaflet_id+'">'
+                                                        + window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title )+ '</option>';
+                                    }
+                                    
+                            }
+                        });
+                        
+                        var found_cnt = Object.keys(selected_layers).length;
+                        
+                        if(found_cnt>1){
+                            //show popup with selector
+                            this.main_popup.setLatLng(latlng)
+                                .setContent('<p style="margin:12px;font-style:italic">'
+                                        +found_cnt+' shapes found here. Select desired: </p>'
+                                        +'<select size="'+ ((found_cnt>10)?10:found_cnt)
+                                        +'" style="overflow-y: auto;border: none;outline: none; cursor:pointer">'
+                                        +sText+'</select>') 
+                                .openOn(this.nativemap);
+                            
+                            var that = this;
+                                
+                            var ele = $(this.main_popup._container).find('select');
+                            ele.on({'change':function(evt){
+                                var leaflet_id = $(evt.target).val();
+                                that._onLayerSelect(selected_layers[leaflet_id], latlng);
+                            },'mousemove':function(evt){
+                                var leaflet_id = $(evt.target).attr('value');
+                                if(leaflet_id>0){
+                                    $(evt.target).siblings().removeClass('selected');
+                                    $(evt.target).addClass('selected');
+                                    var layer = selected_layers[leaflet_id];
+                                    that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight
+                                }
+                            }});
+                            
+                            return;
+                        }
+                        
+                }
+
+            }                
+            
+            this._onLayerSelect( layer, event.latlng );
+            
+        }
+    },
+
+    _onLayerSelect: function(layer, latlng){
+
             
             var  that = this;
             
             if(layer.feature.properties.rec_ID>0){
-            
+                
+                
                 if(that.vistimeline) that.vistimeline.timeline('setSelection', [layer.feature.properties.rec_ID]);
 
-                that.setFeatureSelection([layer.feature.properties.rec_ID]);
+                that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight
                 if($.isFunction(that.options.onselect)){
                     that.options.onselect.call(that, [layer.feature.properties.rec_ID]);
                 }
@@ -1218,13 +1288,13 @@ $.widget( "heurist.mapping", {
                 if(popupURL){
                     $.get(popupURL, function(responseTxt, statusTxt, xhr){
                         if(statusTxt == "success"){
-                            that.main_popup.setLatLng(event.latlng)
+                            that.main_popup.setLatLng(latlng)
                             .setContent(responseTxt) //'<div style="width:99%;">'+responseTxt+'</div>')
                             .openOn(that.nativemap);
                         }
                     });
                 }else{
-                    that.main_popup.setLatLng(event.latlng)
+                    that.main_popup.setLatLng(latlng)
                             .setContent(info) //'<div style="width:99%;">'+responseTxt+'</div>')
                             .openOn(that.nativemap);
                 }
@@ -1243,13 +1313,12 @@ $.widget( "heurist.mapping", {
                     }
                     if(sText!=''){
                         sText = '<div class="map_popup">' + sText + '</div>';
-                        that.main_popup.setLatLng(event.latlng)
+                        that.main_popup.setLatLng(latlng)
                             .setContent(sText) 
                             .openOn(that.nativemap);
                     }
             }
         
-        }
     },
     
     //
