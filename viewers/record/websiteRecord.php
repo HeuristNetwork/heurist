@@ -174,6 +174,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <?php
 }
 ?>
+    <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.layout/jquery.layout-latest.js"></script>
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
     <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
@@ -215,6 +216,7 @@ if($edit_Available){
 }else{
 ?>    
   <script>
+
 //init page for publication version  
 function onPageInit(success)
 {
@@ -326,7 +328,7 @@ function afterPageLoad(pageid){
     
         $(document).on(window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, data) {
 //navigation for HIE - @todo in CMS editor
-//console.log(data);
+
             if(data && data.search_realm=='hie_places' 
                 && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection))
             {
@@ -334,11 +336,15 @@ function afterPageLoad(pageid){
                 $('.group-tab').hide();
                 var ele = $('#mywidget_3166-3').show();
                 
+                //setTimeout(function(){ele.find('#mywidget_7914').trigger( 'myOnShowEvent222' );},500);
+                //var myLayout = ele.find('#mywidget_7914').layout();
+                //myLayout.resizeAll();
+                
+                /*
                 var mpos = $('#main-content').height()/2;
-                ele.find('div[data-heurist-app-id="heurist_Map"]').css({right:302});
-                ele.find('div[data-heurist-app-id="heurist_resultList"]').css({width:300});
-
-console.log(data.selection);                
+                ele.find('div[data-heurist-app-id="heurist_Map"]').css({right:302});  //mywidget_7911-2
+                ele.find('div[data-heurist-app-id="heurist_resultList"]').css({width:300}); //mywidget_7911-3
+                */
                 
                 //add supplementary filter to faceted search and override close button                
                 var wele = ele.find('div[widgetid="heurist_SearchTree"]');

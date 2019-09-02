@@ -241,7 +241,7 @@ function hLayout(args) {
     // north-west-east-south layout
     //
     function _initLayoutCardinal(layout, $container){
-
+        
         var layout_opts =  {
             applyDefaultStyles: true,
             maskContents:        true,
@@ -360,19 +360,8 @@ function hLayout(args) {
         // 2) init layout container
         $container.layout( layout_opts );
 
-        function __toogleIcons(pane, closed, opened){
-            var tog = $container.find('.ui-layout-toggler-'+pane);
-            tog.addClass('ui-heurist-btn-header1')
-            
-            var togc = tog.find('.content-closed'); togc.empty();
-            $('<div>').addClass('ui-icon ui-icon-triangle-1-'+closed).appendTo(togc);
-            
-            togc = tog.find('.content-open'); togc.empty();
-            $('<div>').addClass('ui-icon ui-icon-triangle-1-'+opened).appendTo(togc);
-        }
-        
-        __toogleIcons('west', 'e', 'w');
-        __toogleIcons('east', 'w', 'e');
+        __toogleIcons($container, 'west', 'e', 'w');
+        __toogleIcons($container, 'east', 'w', 'e');
         
         // 3) add tabs/apps to panes
 
@@ -439,6 +428,17 @@ function hLayout(args) {
         //temp appAdjustContainer();
     }
 
+    function __toogleIcons($container, pane, closed, opened){
+        var tog = $container.find('.ui-layout-toggler-'+pane);
+        tog.addClass('ui-heurist-btn-header1')
+        
+        var togc = tog.find('.content-closed'); togc.empty();
+        $('<div>').addClass('ui-icon ui-icon-triangle-1-'+closed).appendTo(togc);
+        
+        togc = tog.find('.content-open'); togc.empty();
+        $('<div>').addClass('ui-icon ui-icon-triangle-1-'+opened).appendTo(togc);
+    }
+    
     /**
     * put your comment there...
     *
@@ -547,8 +547,8 @@ function hLayout(args) {
                     
                     //$($pane.children()[0]).remove(); //remove div with header
                     //$($pane.children()[0]).remove(); //remove span with options
-                    $pane.find('div.widget-design-header:first').remove(); //remove div with header
-                    $pane.find('span.widget-options:first').remove(); //remove div with header
+                    $pane.find('div.widget-design-header:first').remove(); //remove configuration div with header
+                    $pane.find('span.widget-options:first').remove(); //remove configuration span with header
                     
                     
                     var mode = lpane.apps[0].options.groups_mode;
@@ -590,6 +590,51 @@ function hLayout(args) {
                         });
                         $pane.tabs();    
                     }
+                    
+                    return;
+                    
+                }else if (lpane.apps && lpane.apps[0].appid == 'heurist_Cardinals') {
+
+                    $pane.find('div.widget-design-header:first').remove(); //remove configuration div with header
+                    $pane.find('span.widget-options:first').remove(); //remove configuration span with header
+                    var layout_opts = lpane.apps[0].options.tabs;
+                    var keys = Object.keys(layout_opts);
+                    
+                    for(var i=0; i<keys.length; i++){
+                        var ele_id = layout_opts[keys[i]].id;
+                        $pane.children('#'+ele_id).addClass('ui-layout-'+keys[i]);    
+                    }
+                    
+                    layout_opts['applyDefaultStyles'] = true;
+                    layout_opts['maskContents']       = true;
+                    layout_opts['togglerAlign_open']  = 'center';
+                    layout_opts['togglerContent_open']   = '&nbsp;';
+                    layout_opts['togglerContent_closed'] = '&nbsp;';
+                    layout_opts['spacing_open'] = 6;
+                    layout_opts['spacing_closed'] = 16;
+
+
+                    if(!$pane.is(':visible')){
+console.log('not visible');                        
+                        
+                        $pane.on("myOnShowEvent222", function(event){
+                            
+                            $pane.off("myOnShowEvent222");
+
+console.log('ON show');                        
+                            $pane.layout(layout_opts);
+                            __toogleIcons($pane, 'west', 'e', 'w');
+                            __toogleIcons($pane, 'east', 'w', 'e');
+                        });
+                        
+                    }else{
+                        $pane.layout(layout_opts);    
+                        __toogleIcons($pane, 'west', 'e', 'w');
+                        __toogleIcons($pane, 'east', 'w', 'e');
+                    }
+                    
+                    
+                    
                     
                     return;
                     
