@@ -706,18 +706,25 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else if(action == "menu-cms-edit"){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-                if(RT_CMS_HOME>0){
-
-                    if (that.cms_home_records_count>0)
-                    {
-                        that._select_CMS_Home();
-                    }else{
+                if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
+                        that._select_CMS_Home( false );
+                }else{
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             'New website will be created. Continue?',
                             function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
-                    }
                 }
 
+        }else if(action == "menu-cms-view"){
+
+                var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+                if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
+                        that._select_CMS_Home( true );
+                }else{
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                            'New website will be created. Continue?',
+                            function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                }
+                
         }else if(action == "menu-database-properties"){
 
                             window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
@@ -1042,6 +1049,22 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 };
             });
             
+
+            //map symbology editor            
+            var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
+                .addClass('smallbutton btn_add_term')
+                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                .appendTo( $dlg.find('#map_default_style_div') );
+            
+            $btn_edit_switcher.on( { click: function(){
+                    var current_val = window.hWin.HEURIST4.util.isJSON( $dlg.find('#map_default_style').val() );
+                    if(!current_val) current_val = {};
+                    window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, false, function(new_value){
+                        $dlg.find('#map_default_style').val(JSON.stringify(new_value));
+                    });
+            }});
+            
+            
             var ele = $dlg.find('#mapcluster_on');
             $dlg.find('#mapcluster_grid').change(function(){ ele.prop('checked', true)});
             $dlg.find('#mapcluster_count').change(function(){ ele.prop('checked', true)});
@@ -1269,7 +1292,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     //
     //
     //                
-    _select_CMS_Home: function (){
+    _select_CMS_Home: function ( is_view_mode ){
         
         var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
         if(!(RT_CMS_HOME>0)){
@@ -1281,7 +1304,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         if(window.hWin.HEURIST4.rectypes.counts && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]==1){
 
-            window.hWin.HEURIST4.ui.showEditCMSDialog( 0 ); //load the only entry at once
+            if(is_view_mode){
+                var url = window.hWin.HAPI4.baseURL+
+                            '?db='+window.hWin.HAPI4.database+'&website';
+                window.open(url, '_blank');
+            }else{
+                window.hWin.HEURIST4.ui.showEditCMSDialog( 0 ); //load the only entry at once
+            }
             return;
         }
         
@@ -1314,7 +1343,16 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         onselect:function(event, data){
                                  if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                                     var recordset = data.selection;
-                                    window.hWin.HEURIST4.ui.showEditCMSDialog( recordset.getOrder()[0] );
+                                    var rec_ID = recordset.getOrder()[0];
+                                    
+                                    if(is_view_mode){
+                                        var url = window.hWin.HAPI4.baseURL+
+                                                    '?db='+window.hWin.HAPI4.database+'&website&id='+rec_ID;
+                                        window.open(url, '_blank');
+                                    }else{
+                                        window.hWin.HEURIST4.ui.showEditCMSDialog( rec_ID );    
+                                    }
+                                    
                                  }
                         }
         };//popup_options
