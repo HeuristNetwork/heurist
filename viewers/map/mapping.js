@@ -626,7 +626,7 @@ $.widget( "heurist.mapping", {
             this.all_layers[new_layer._leaflet_id] = new_layer;
             
             //apply default style and fill markercluster
-            this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style:{color: "#00b0f0"});
+            this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style: this.setStyleDefaultValues() ); //{color: "#00b0f0"}
 
             if(!preserveViewport){
                    this.zoomToLayer(new_layer._leaflet_id);           
@@ -969,13 +969,13 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    //
+    // returns style for layer (defined in layer record or via legend)
     //
     getStyle: function(layer_id) {
         var affected_layer = this.all_layers[layer_id];
         if(!affected_layer) return null;
         var style = window.hWin.HEURIST4.util.isJSON(affected_layer.options.default_style);
-        if(!style){
+        if(!style){ //layer style not defined - get default style
             return this.setStyleDefaultValues({});    
         }else{
             return style;
@@ -1216,7 +1216,7 @@ $.widget( "heurist.mapping", {
                                 .setContent('<p style="margin:12px;font-style:italic">'
                                         +found_cnt+' shapes found here. Select desired: </p>'
                                         +'<select size="'+ ((found_cnt>10)?10:found_cnt)
-                                        +'" style="overflow-y: auto;border: none;outline: none; cursor:pointer">'
+                                        +'" style="max-width:300px;overflow-y: auto;border: none;outline: none; cursor:pointer">'
                                         +sText+'</select>') 
                                 .openOn(this.nativemap);
                             
@@ -1336,14 +1336,31 @@ $.widget( "heurist.mapping", {
     //
     // assigns default values for style (size,color and marker type)
     //
-    setStyleDefaultValues: function(style){
+    setStyleDefaultValues: function(style, suppress_prefs){
+        
+        //take map style from user preferences
+        var def_style;
+        if(suppress_prefs!==true){
+            def_style = window.hWin.HAPI4.get_prefs('map_default_style');
+            if(def_style) def_style = window.hWin.HEURIST4.util.isJSON(def_style);
+            def_style = this.setStyleDefaultValues(def_style, true);
+        }else{
+            def_style = {iconType:'rectype', color:'#00b0f0', weight:3, opacity:1, fillOpacity:0.2, iconSize:18};
+        }
+        
+        
         if(!style) style = {};
-        if(!style.iconType || style.iconType=='default') style.iconType ='rectype';
-        style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :((style.iconType=='circle')?9:18);
-        style.color = (style.color?style.color:'#00b0f0');
-        style.weight = style.weight>0?style.weight:3;
-        style.opacity = style.opacity>0?style.opacity:1;
-        style.fillOpacity = style.fillOpacity>0?style.fillOpacity:0.2;
+        if(!style.iconType || style.iconType=='default') style.iconType = def_style.iconType;
+        style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize; //((style.iconType=='circle')?9:18);
+        style.color = (style.color?style.color:def_style.color);   //light blue
+        style.weight = style.weight>0 ?style.weight :def_style.weight;
+        style.opacity = style.opacity>0 ?style.opacity :def_style.opacity;
+        style.fillOpacity = style.fillOpacity>0 ?style.fillOpacity :def_style.fillOpacity;
+        
+        if(!style.iconFont && def_style.iconFont){
+            style.iconFont = def_style.iconFont;
+        }
+        
         return style;
     },        
     
@@ -1402,9 +1419,10 @@ $.widget( "heurist.mapping", {
         //feature.default_style - style of parent heurist layer (can be changed via legend)
         var use_style = feature.style || feature.default_style;
         
+        //change color for selected features
         if( feature.properties && this.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
             use_style = window.hWin.HEURIST4.util.cloneJSON( use_style );
-            use_style.color = '#ffff00';
+            use_style.color = '#ffff00';  //yellow for selection
         }
         
         return use_style;
