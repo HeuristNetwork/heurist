@@ -245,7 +245,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
                                 //window.hWin.HEURIST4.remote.terms = response.data.terms;
                                 
-                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, true );
+                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, false ); //change to true to hide where rty_ShowInList=0
                                 /*
                                 if(that.options.import_structure.load_detailstypes){
                                     window.hWin.HAPI4.SystemMgr.get_defs(
