@@ -199,7 +199,7 @@ function onPageInit(success){
             .show();
         
         
-            $('<a href="#" id="btn_inline_editor4">edit page settings</a>')
+            $('<a href="#" id="btn_inline_editor4"></a>') //edit page settings
             .appendTo($('body')).addClass('cms-button')
             .click(function(event){
 
@@ -724,7 +724,12 @@ function onPageInit(success){
                         if(opts['template']){
                             $dlg.find('select[name="rep_template"]').attr('data-template', opts['template']);        
                         }
+                    }else if(widget_name=='heurist_resultList'){
+                        if(opts['rendererExpandDetails']){
+                            $dlg.find('select[name="rendererExpandDetails"]').attr('data-template', opts['rendererExpandDetails']);        
+                        }
                     }
+                    
                 }
                 
             }
@@ -991,6 +996,14 @@ function onPageInit(success){
                                            ,null, $select.attr('data-template'));
 
                    
+                   }else if(val=='heurist_resultList' && 
+                    dele.find('select[name="rendererExpandDetails"]').find('options').length==0){
+
+                        var $select2 = dele.find('select[name="rendererExpandDetails"]'); 
+                        
+                        window.hWin.HEURIST4.ui.createTemplateSelector( $select2
+                                           ,[{key:'',title:'Standard record view template'}], $select2.attr('data-template'));
+                       
                    }
                    
                    

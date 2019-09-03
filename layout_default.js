@@ -45,24 +45,6 @@ var cfg_widgets = [
     {id:'heurist_Groups', name:'Groups'},{id:'heurist_Cardinals', name:'Cardinal layout'},
 
 
-    /* experimental - widgets for future implementation
-    {id:'ha01', name:'About', widgetname:'about', script:'hclient/widgets/about.js', minsize:[200,200], size:[300,300], isframe:false },
-    {id:'ha02', name:'Profile', widgetname:'profile', script:'hclient/widgets/profile/profile_edit.js'},
-    {id:'ha14', name:'Tags', url:'hclient/widgets/search/tag_management.php'},
-    {id:'ha15', name:'Navigation', widgetname:'pagination', script:'hclient/widgets/search/pagination.js'},
-
-    {id:'ha21', name:'Search result',  widgetname:'rec_list', script:'hclient/widgets/viewers/rec_list.js'},
-    {id:'ha31', name:'Record', widgetname:'rec_viewer', script:'hclient/widgets/viewers/rec_viewer.js'},
-    {id:'ha32', name:'Media', title:'Record media viewer', url:'hclient/widgets/viewers/rec_media.php'},
-    {id:'ha33', name:'Relations', title:'Record relations viewer', url:'hclient/widgets/viewers/rec_relation.php'},
-    {id:'ha34', name:'Comments', title:'Discussion over record', url:'hclient/widgets/viewers/rec_comments.php'},
-
-    {id:'ha52', name:'Report', title:'Smarty report system', url:'hclient/widgets/viewers/smarty/rep_smarty.php'},
-    {id:'ha53', name:'Transform', url:'hclient/widgets/viewers/transforms/rep_xslt.php'},
-    {id:'ha54', name:'Crosstabs', url:'hsapi/analysis/crosstabulation.php', isframe:true},
-    {id:'ha61', name:'Ext Record Viewer', widgetname:'rec_viewer_ext', script:'hclient/widgets/viewers/rec_viewer_ext.js'},
-    */
-
     {id:'heurist_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'hclient/widgets/dropdownmenus/mainMenu.js'},
     {id:'heurist_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js'},
     {id:'heurist_resultListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
@@ -173,7 +155,7 @@ var cfg_layouts = [
         ]},
         center:{Xminsize:300, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false, 
                      dockable:false, dragable:false, css:{'background-color':'white','font-size':'12px'}, 
-                     options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true, header_class:'ui-heurist-header2',show_url_as_link:true} }]},  //search result
+                     options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true, header_class:'ui-heurist-header2',show_url_as_link:true} }]},
         east:{size:'50%', Xminsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, //css:{'font-size':'0.95em'},
                 apps:[

@@ -30,7 +30,7 @@ function editCMS(home_page_record_id, main_callback){
      
      if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0)){
         var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg('You will need record types '
-        +'99-51 (Web home) and 99-52 (Web menu/content) which are available as part of Heurist_Reference_Set. '
+        +'99-51 (Web home) and 99-52 (Web menu/content) which are available as part of Heurist_Core_Definitions. '
         +'Click "Import" to get these definitions',
                     {'Import':function(){
                         var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
@@ -40,6 +40,7 @@ function editCMS(home_page_record_id, main_callback){
                         window.hWin.HEURIST4.msg.bringCoverallToFront();
                         window.hWin.HEURIST4.msg.showMsgFlash('Import definitions', 10000);
                         
+                        //import missed record types from Database #2 Heurist_Core_Definitions
                         window.hWin.HAPI4.SystemMgr.import_definitions(2, 51,
                             function(response){    
                                 window.hWin.HEURIST4.msg.sendCoverallToBack(); 
@@ -668,7 +669,7 @@ function editCMS(home_page_record_id, main_callback){
                                 }
                             };
                             
-                            tree_element.fancytree(fancytree_options);
+                            tree_element.fancytree(fancytree_options).addClass('tree-cms');
                         }
                         
                         if(no_access){

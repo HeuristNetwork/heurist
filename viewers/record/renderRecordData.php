@@ -51,6 +51,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
+$without_header = array_key_exists('noheader', $_REQUEST) && ($_REQUEST['noheader']==1);
 $layout_name = @$_REQUEST['ll'];
 $is_production = !$is_map_popup && $layout_name=='WebSearch';
 
@@ -95,7 +96,7 @@ if(@$_REQUEST['ids']){
 	$sel_ids = explode(',',$_REQUEST['ids']);
     $sel_ids = array_unique($sel_ids);
 }
-if(!$is_map_popup){
+if(!($is_map_popup || $without_header)){
 ?>
 <html>
     <head>
@@ -384,8 +385,19 @@ if(!$is_map_popup){
 
         <?php
 } //$is_map_popup
-else{
+else if(!$is_map_popup){
 //    print '<div style="font-size:0.8em">';
+?>
+<script>
+            function printLTime(sdate,ele){
+                var date = new Date(sdate+"+00:00");
+                ele = document.getElementById(ele)
+                ele.innerHTML = (''+date.getHours()).padStart(2, "0")
+                        +':'+(''+date.getMinutes()).padStart(2, "0")
+                        +':'+(''+date.getSeconds()).padStart(2, "0");
+            }
+</script>
+<?php
 } 
 if ($bkm_ID>0 || $rec_id>0) {
        
@@ -476,7 +488,7 @@ if ($bkm_ID>0 || $rec_id>0) {
         } else {
             print 'No details found';
         }
- if($is_map_popup){
+ if($is_map_popup || $without_header){
 //    print '</div>';
  }else{
        ?>
@@ -490,7 +502,7 @@ if ($bkm_ID>0 || $rec_id>0) {
 
 // this functions outputs common info.
 function print_details($bib) {
-    global $is_map_popup, $ACCESSABLE_OWNER_IDS, $system;
+    global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system;
         
     print_header_line($bib);
     
@@ -532,7 +544,7 @@ function print_details($bib) {
 
 // this functions outputs the header line of icons and links for managing the record.
 function print_header_line($bib) {
-    global $is_map_popup, $is_production, $system;
+    global $is_map_popup, $without_header, $is_production, $system;
     
     $rec_id = $bib['rec_ID'];
                     //(($is_production)?'':'padding-top:21px')
@@ -783,7 +795,7 @@ function print_personal_details($bkmk) {
 
 
 function print_public_details($bib) {
-    global $system, $terms, $is_map_popup, $is_production, $ACCESSABLE_OWNER_IDS, $relRT;
+    global $system, $terms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT;
     
     $has_thumbs = false;
     
@@ -1160,17 +1172,17 @@ function print_public_details($bib) {
                     print '</div>';    
                 }else{
                     print '<img id="img'.$thumb['id'].'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
-                    if($isImageOrPdf){
+                    if($isImageOrPdf && !$without_header){
                         print ' onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')"';
                     }
                     print '><div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
                 }
             }else{  //for usual image
                 print '<img src="'.htmlspecialchars($thumb['thumb']).'" '
-                    .($is_map_popup?'':'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
+                    .(($is_map_popup || $without_header)?'':'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
             }
             print '<br/><div class="download_link">';
-            if($thumb['player'] && !$is_map_popup){
+            if($thumb['player'] && !($is_map_popup || $without_header)){
                 print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px" onclick="hidePlayer('.$thumb['id'].')">SHOW THUMBNAIL</a>';
             }
             

@@ -663,7 +663,8 @@ $.widget( "heurist.editing_input", {
                     }});
                  
                 if( this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'] || 
-                    this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU']){    
+                    this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
+                    this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){    
                     //what is visible initially
                     var nodes = $.parseHTML(value);
                     if(nodes && (nodes.length>1 || nodes[0].nodeName!='#text')){ //if it has html show editor at once
