@@ -259,7 +259,7 @@ fieldset input:focus,
 fieldset select:focus,
 fieldset textarea:focus,
 fieldset button:focus,
-btnset_radio:focus,
+.btnset_radio:focus,
 .ui-fancytree,
 .outline_suppress {
     outline: none;
@@ -1175,6 +1175,10 @@ li.fancytree-hidden{
 
 span.fancytree-checkbox{
     width:26;
+}
+
+.tree-cms > ul > li > .fancytree-node > .fancytree-title{
+    font-weight: bold;
 }
 
 .tree-facets .fancytree-has-children span.fancytree-checkbox
