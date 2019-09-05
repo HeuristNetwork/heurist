@@ -203,6 +203,8 @@ $.widget( "heurist.app_timemap", {
                     layout_params['controls'] = __gp('controls'); //cs list of visible controls
                     layout_params['legend'] = __gp('legend'); //cs list of visible panels
                     */
+                    if(this.options.published){
+                    }
                     
                 }else{
                     if(this.options.layout){
@@ -215,6 +217,7 @@ $.widget( "heurist.app_timemap", {
                     }
                     url = url + '&noinit=1'; // map will be inited here 
                 }
+                
                 
                 if(this.options.mapdocument>0){
                     url = url + '&mapdocument='+this.options.mapdocument; 

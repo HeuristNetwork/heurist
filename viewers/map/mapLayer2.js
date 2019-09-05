@@ -237,6 +237,7 @@ function hMapLayer2( _options ) {
                 w: request.w,
                 leaflet: true, //returns strict geojson and timeline data as two separate arrays
                 simplify: true,
+                zip: 1,
                 format:'geojson'};
                 
             //perform search        

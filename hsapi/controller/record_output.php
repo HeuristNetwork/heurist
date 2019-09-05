@@ -992,8 +992,22 @@ XML;
         
     }
  
-    if(@$params['zip']==1){
+    if(@$params['zip']==1 || @$params['zip']===true){
         
+        $output = gzencode(file_get_contents($tmp_destination), 6); 
+        fclose($fd);
+        
+        header('Content-Encoding: gzip');
+        if($params['format']=='json' || $params['format']=='geojson'){
+            header( 'Content-Type: application/json');    
+        }else{
+            header( 'Content-Type: text/xml');
+        }
+        unlink($tmp_destination);
+        echo $output; 
+        unset($output);   
+        
+        return true;
     }else{
  
         //$content = stream_get_contents($fd);
@@ -1009,10 +1023,10 @@ XML;
         if(@$params['restapi']==1 && count($rt_counts)==0){
             http_response_code(404);
         }
+        unlink($tmp_destination);
         
         exit($content);
     }
-    unlink($tmp_destination);
     
 }
 

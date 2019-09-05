@@ -689,7 +689,7 @@ error_log(print_r($_REQUEST, true));
         
         $response = $this->getError();
         
-        $status = $response['status'];
+        $status = @$response['status'];
         if($status==HEURIST_INVALID_REQUEST){
             $code = 400; // Bad Request - the request could not be understood or was missing required parameters. 
         }else if($status==HEURIST_REQUEST_DENIED) {

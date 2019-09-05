@@ -99,9 +99,10 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 // line: 13594 catch exception of datetime convertation
 //
 -->
+<?php if (!(@$_REQUEST['noinit']!=1 && @$_REQUEST['notimeline'])) { ?>
 <script type="text/javascript" src="<?php echo PDIR;?>external/vis/dist/vis.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/vis/dist/vis.css" />
-
+<?php } ?>
 <style>
     
     .leaflet-div-icon {
@@ -203,7 +204,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
         }
 
         var layout_params = null;
-        is_init_here = __gp('noinit')!='1';
+        is_init_here = __gp('noinit')!='1'; //noint=1 from standard interface therwise published
         if(is_init_here){    //take layout parameters from url 
             // params: 
             //   nomap, notimeline

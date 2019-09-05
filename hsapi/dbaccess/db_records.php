@@ -1746,6 +1746,7 @@
 
             $mysqli->query('SET foreign_key_checks = 0');
 
+            //duplicate record header
             $new_id = mysql__duplicate_table_record($mysqli, 'Records', 'rec_ID', $id, null);
             //@todo addRecordIndexEntry(DATABASE, $recTypeID, $id);
             
@@ -1764,6 +1765,7 @@
             
             if(!is_int($new_id)){ $error = $new_id; break; }
 
+            //duplicate record details
             $res = mysql__duplicate_table_record($mysqli, 'recDetails', 'dtl_RecID', $id, $new_id);
             if(!is_int($res)){ $error = $res; break; }
             
