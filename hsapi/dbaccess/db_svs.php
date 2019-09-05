@@ -83,6 +83,8 @@
 
             //$groups = user_getWorkgroups($mysqli, $ugrID); 
             //if( $groups && count($groups)>0){
+            
+            $ugr_groups = $system->get_user_group_ids(null, true); //always get latest
                 
             $current_User = $system->getCurrentUser();
             if($current_User && @$current_User['ugr_Groups'] && count(array_keys($current_User['ugr_Groups']))>0 ){

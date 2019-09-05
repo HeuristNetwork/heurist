@@ -244,6 +244,7 @@ $.widget( "heurist.search_faceted", {
     },
 
     _refreshTitle: function(){    
+        var new_title = '';
         if(this.div_title) {
             if(this.options.params.ui_title){
                 new_title = this.options.params.ui_title;
@@ -256,7 +257,7 @@ $.widget( "heurist.search_faceted", {
                     {
                          new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][0];//_NAME];                
                     }else{
-                        
+                        var that = this;
                         window.hWin.HAPI4.SystemMgr.ssearch_get( null,
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){

@@ -247,7 +247,8 @@ $.widget( "heurist.svs_list", {
         if(key=='rectype_set'){
         this._refresh();
         }*/
-        if(key=='onclose_search' && this.search_faceted && $.isFunction(this.search_faceted.search_faceted)){
+        if(key=='onclose_search' && this.search_faceted && 
+            $.isFunction(this.search_faceted.search_faceted) && this.search_faceted.search_faceted('instance')){
             this.search_faceted.search_faceted('option', 'onclose', value);
         }
     },
@@ -624,126 +625,136 @@ $.widget( "heurist.svs_list", {
             if(this.options.allowed_UGrpID && !$.isArray(this.options.allowed_UGrpID)){
                 this.options.allowed_UGrpID = this.options.allowed_UGrpID.split(',');
             }
+            
+            if(this.options.allowed_svsIDs.length>0 || this.options.allowed_UGrpID.length>0){
 
-            window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs: this.options.allowed_svsIDs,
-                UGrpID: this.options.allowed_UGrpID},
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that.allowed_svsIDs = response.data; //svs_id=>array()
-                        
-                        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
-                            window.hWin.HAPI4.currentUser.usr_SavedSearch = that.allowed_svsIDs
-                        }
-                        
-                        var svsID = Object.keys(that.allowed_svsIDs)
-                        var missed = [];
-                        //verify
-                        for(var i=0; i<that.options.allowed_svsIDs.length; i++){
-                            if(window.hWin.HEURIST4.util.findArrayIndex(that.options.allowed_svsIDs[i],svsID)<0){
-                                missed.push(that.options.allowed_svsIDs[i]);
+                window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs: this.options.allowed_svsIDs,
+                    UGrpID: this.options.allowed_UGrpID},
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            that.allowed_svsIDs = response.data; //svs_id=>array()
+                            
+                            if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
+                                window.hWin.HAPI4.currentUser.usr_SavedSearch = that.allowed_svsIDs
                             }
+                            
+                            var svsID = Object.keys(that.allowed_svsIDs)
+                            var missed = [];
+                            //verify
+                            for(var i=0; i<that.options.allowed_svsIDs.length; i++){
+                                if(window.hWin.HEURIST4.util.findArrayIndex(that.options.allowed_svsIDs[i],svsID)<0){
+                                    missed.push(that.options.allowed_svsIDs[i]);
+                                }
+                            }
+                            if(missed.length>0){
+                                window.hWin.HEURIST4.msg.showMsgErr(
+                                'Saved filter'+(missed.length>1?'s':'')+' (ID '
+                                + missed.join(', ')
+                                + ') specified in parameters '
+                                + (missed.length>1?'does':'do')+' not exist in the database. Please advise the database owner ('+
+                                + window.hWin.HAPI4.sysinfo['dbowner_email'] +')');
+                            }
+                            
+                            that._updateAccordeonAsListOfButtons();
                         }
-                        if(missed.length>0){
-                            window.hWin.HEURIST4.msg.showMsgErr(
-                            'Saved filter'+(missed.length>1?'s':'')+' (ID '
-                            + missed.join(', ')
-                            + ') specified in parameters '
-                            + (missed.length>1?'does':'do')+' not exist in the database. Please advise the database owner ('+
-                            + window.hWin.HAPI4.sysinfo['dbowner_email'] +')');
-                        }
-                        
-                        that._updateAccordeonAsListOfButtons();
-                    }
-            });
-
-            return;
+                });
+                
+                return;
+            }else{
+                this.allowed_svsIDs = [];
+            }
         }
 
         this.accordeon.hide();
         this.accordeon.empty();
         
-        $('<h4 style="padding:20px 0px;margin:0">Focussed searches</h4>').appendTo(this.accordeon);
-
+        
         var i, svsIDs = Object.keys(this.allowed_svsIDs),
             visible_cnt = 0, visible_svsID;
 
-        for (i=0; i<svsIDs.length; i++)
-        {
-            var svsID = svsIDs[i];
             
-            var params = Hul.parseHeuristQuery(this.allowed_svsIDs[svsID][_QUERY]);
-
-            var iconBtn = 'ui-icon-search';
-            if(params.type==3){
-                iconBtn = 'ui-icon-box';
-            }else {
-                if(params.type==1){ //withrules
-                    iconBtn = 'ui-icon-plus ui-icon-shuffle';
-                }else if(params.type==2){ //rules only
-                    iconBtn = 'ui-icon-shuffle';
-                }else  if(params.type<0){ //broken empty
-                    iconBtn = 'ui-icon-alert';
-                }
-            }
-
+        if(svsIDs.length>0){ 
             
-            var sname = this.allowed_svsIDs[svsID][_NAME];
-            
-            if(sname.toLowerCase().indexOf('placeholder')===0) continue;
+            $('<h4 style="padding:20px 0px;margin:0">Focussed searches</h4>').appendTo(this.accordeon);
 
-            $('<button>', {text: sname, 'data-svs-id':svsID})
-            .css({'width':'100%','margin-top':'0.4em','max-width':'300px','text-align':'left'})
-            .button({icons:{primary: iconBtn}}).on("click", function(event){
+            for (i=0; i<svsIDs.length; i++)
+            {
+                var svsID = svsIDs[i];
+                
+                var params = Hul.parseHeuristQuery(this.allowed_svsIDs[svsID][_QUERY]);
 
-                var svs_ID = $(this).attr('data-svs-id');
-                if (svs_ID){
-                    var qsearch = that.allowed_svsIDs[svs_ID][_QUERY];
-                    var qname   = that.allowed_svsIDs[svs_ID][_NAME];
-
-                    that.doSearch( svs_ID, qsearch, event.target ); //qname replaced with svs_ID
-                    that.accordeon.find('#search_query').val('');
-                }
-            })
-            .appendTo(this.accordeon);
-            $('<br>').appendTo(this.accordeon);
-
-            visible_svsID = svsID;
-            visible_cnt++;
-        }//for
-
-        //$(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
-        $(this.accordeon).css({'overflow':'hidden',position:'unset','padding':'4px'});
-
-        //position:absolute;bottom:0px;
-        var search_div = $('<div style="height:2.5em;padding:4px;width:100%">'
-            +'<h4 style="padding:20px 0px;margin:0">Simple search</h4><label>Search everything:</label>'
-            +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
-            +'&nbsp;<button id="search_button"/></div>')
-        .insertAfter(this.accordeon);
-        var ele_search = search_div.find('#search_query'); //$(window.hWin.document).find('#search_query');
-        if(ele_search.length>0){
-
-            this._on( ele_search, {
-                keypress: function(e){
-                    var code = (e.keyCode ? e.keyCode : e.which);
-                    if (code == 13) {
-                        window.hWin.HEURIST4.util.stopEvent(e);
-                        e.preventDefault();
-                        that.doSearch('', ele_search.val(), ele_search);
+                var iconBtn = 'ui-icon-search';
+                if(params.type==3){
+                    iconBtn = 'ui-icon-box';
+                }else {
+                    if(params.type==1){ //withrules
+                        iconBtn = 'ui-icon-plus ui-icon-shuffle';
+                    }else if(params.type==2){ //rules only
+                        iconBtn = 'ui-icon-shuffle';
+                    }else  if(params.type<0){ //broken empty
+                        iconBtn = 'ui-icon-alert';
                     }
                 }
-            });
 
-            var btn_search = search_div.find('#search_button')
-            .button({icons:{primary:'ui-icon-search'},text:false})
-            .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
-            this._on( btn_search, {
-                click:  function(){
-                    that.doSearch('', ele_search.val(), ele_search);
-                }
-            });
+                
+                var sname = this.allowed_svsIDs[svsID][_NAME];
+                
+                if(sname.toLowerCase().indexOf('placeholder')===0) continue;
+
+                $('<button>', {text: sname, 'data-svs-id':svsID})
+                .css({'width':'100%','margin-top':'0.4em','max-width':'300px','text-align':'left'})
+                .button({icons:{primary: iconBtn}}).on("click", function(event){
+
+                    var svs_ID = $(this).attr('data-svs-id');
+                    if (svs_ID){
+                        var qsearch = that.allowed_svsIDs[svs_ID][_QUERY];
+                        var qname   = that.allowed_svsIDs[svs_ID][_NAME];
+
+                        that.doSearch( svs_ID, qsearch, event.target ); //qname replaced with svs_ID
+                        that.accordeon.find('#search_query').val('');
+                    }
+                })
+                .appendTo(this.accordeon);
+                $('<br>').appendTo(this.accordeon);
+
+                visible_svsID = svsID;
+                visible_cnt++;
+            }//for
+
+            //$(this.accordeon).css({'overflow-x':'hidden',bottom:'3em'});
+            $(this.accordeon).css({'overflow':'hidden',position:'unset','padding':'4px'});
+
+            //position:absolute;bottom:0px;
+            var search_div = $('<div style="height:2.5em;padding:4px;width:100%">'
+                +'<h4 style="padding:20px 0px;margin:0">Simple search</h4><label>Search everything:</label>'
+                +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
+                +'&nbsp;<button id="search_button"/></div>')
+            .insertAfter(this.accordeon);
+            var ele_search = search_div.find('#search_query'); //$(window.hWin.document).find('#search_query');
+            if(ele_search.length>0){
+
+                this._on( ele_search, {
+                    keypress: function(e){
+                        var code = (e.keyCode ? e.keyCode : e.which);
+                        if (code == 13) {
+                            window.hWin.HEURIST4.util.stopEvent(e);
+                            e.preventDefault();
+                            that.doSearch('', ele_search.val(), ele_search);
+                        }
+                    }
+                });
+
+                var btn_search = search_div.find('#search_button')
+                .button({icons:{primary:'ui-icon-search'},text:false})
+                .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
+                this._on( btn_search, {
+                    click:  function(){
+                        that.doSearch('', ele_search.val(), ele_search);
+                    }
+                });
+            }
+
         }
-
 
         this.accordeon.show();
         
