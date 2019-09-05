@@ -73,7 +73,7 @@ function editCMS(home_page_record_id, main_callback){
         {text:window.hWin.HR('Close'), 
             id:'btnRecCancel',
             css:{'float':'right'}, 
-            click: function() { 
+            click: function() {     
                 edit_dialog.dialog('close'); 
         }}
     ];
@@ -119,8 +119,15 @@ function editCMS(home_page_record_id, main_callback){
     var edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
         +'hclient/widgets/editing/editCMS.html',
                 edit_buttons,window.hWin.HR('Define Website'),
-                {open:onDialogInit, width:dim.w*0.95, height:dim.h*0.95, isPopupDlg:true, close:function(){
-                    edit_dialog.empty();//dilaog('destroy');
+                {open:onDialogInit, width:dim.w*0.95, height:dim.h*0.95, isPopupDlg:true, 
+                close:function(){
+                    edit_dialog.empty();//dialog('destroy');
+                },
+                beforeClose:function(){
+                    var preview_frame = edit_dialog.find('#web_preview');
+                    return preview_frame[0].contentWindow.cmsEditing.onEditorExit(function(){
+                        edit_dialog.dialog('close');    
+                    });
                 }});
 
 
@@ -336,11 +343,14 @@ function editCMS(home_page_record_id, main_callback){
                                             
                                             edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-pencil'}).click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
-                                                preview_frame[0].contentWindow.editPageContent();
+                                                //preview_frame[0].contentWindow.editPageContent();
+                                                preview_frame[0].contentWindow.cmsEditing.editPageContent();
                                             });
                                             edit_dialog.find('#btn_edit_page_record').button().click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
-                                                preview_frame[0].contentWindow.editPageRecord();
+                                                //preview_frame[0].contentWindow.editPageRecord();
+                                                
+                                                preview_frame[0].contentWindow.cmsEditing.editPageRecord();
                                             });
                                            
                                         
