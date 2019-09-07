@@ -200,7 +200,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 h = (h<300)?300:(h>600?600:h);                                  
             }
         }
-console.log(h);        
+        
         this._as_dialog.dialog('option', 'height', h);                                    
         
     },

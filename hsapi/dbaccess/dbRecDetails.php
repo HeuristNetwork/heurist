@@ -138,7 +138,7 @@ class DbRecDetails
         $rtyID = @$this->data['rtyID'];
         
         $passedRecIDCnt = count(@$recIDs);
-        
+
         if ($passedRecIDCnt>0) {//check editable access for passed records
         
             if($rtyID){ //filter for record type
@@ -148,7 +148,14 @@ class DbRecDetails
             }
             if($passedRecIDCnt>0){
                 //exclude records if user has no right to edit
-                $this->recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_ID in (".implode(",",$recIDs).") and rec_OwnerUGrpID in (0,".join(",",$this->system->get_user_group_ids()).")");
+                if($this->system->is_dbowner()){ //dbowner can edit any record
+                    $this->recIDs = $recIDs;
+                }else{
+                    $this->recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_ID in ("
+                        .implode(",",$recIDs).") and rec_OwnerUGrpID in (0,"
+                        .join(",",$this->system->get_user_group_ids()).")");
+                }
+
                 $inAccessibleRecCnt = $passedRecIDCnt - count(@$this->recIDs);
             }
         }
@@ -556,7 +563,6 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             //get matching detail value for record if there is one
             $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
             $valuesToBeReplaced = mysql__select_assoc2($mysqli, $query);
-            
             if($mysqli->error!=null || $mysqli->error!=''){
                 $sqlErrors[$recID] = $mysqli->error;
                 continue;
