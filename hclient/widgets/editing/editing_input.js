@@ -615,6 +615,10 @@ $.widget( "heurist.editing_input", {
                                     statusbar: true,
                                     resize: 'both',
                                     menubar: false,
+                                    relative_urls : false,
+                                    remove_script_host : false,
+                                    convert_urls : true,            
+                                    
                                     entity_encoding:'raw',
                                      setup:function(ed) {
                                        ed.on('change', function(e) {

@@ -45,6 +45,10 @@ function hCmsEditing(_options) {
             //autoresize_on_init: false,
             //height: 300, //'100%',  //they said that this is entire height (including toolbar) alas it sets height of iframe only
             //max_height: 300,
+            relative_urls : false,
+            remove_script_host : false,
+            convert_urls : true,            
+            
             entity_encoding:'raw',
             inline_styles: true,
             content_style: "body {font-family: Helvetica,Arial,sans-serif;}",
@@ -301,15 +305,21 @@ function hCmsEditing(_options) {
         
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                 if(response.status == hWin.ResponseStatus.OK){
-
-                    last_save_content = newval;
-                    window.hWin.HEURIST4.msg.showMsgFlash('saved');
                     
-                    was_modified = true;     
-                    if($.isFunction(need_close)){
-                        need_close.call();
-                    }else if (need_close===true){
-                        __hideEditor( new_pageid );    
+                    if(response.data.noaccess==1){
+                        window.hWin.HEURIST4.msg.showMsgErr('It appears you have no enough rights to edit this record');
+                        
+                    }else{
+
+                        last_save_content = newval;
+                        window.hWin.HEURIST4.msg.showMsgFlash('saved');
+                        
+                        was_modified = true;     
+                        if($.isFunction(need_close)){
+                            need_close.call();
+                        }else if (need_close===true){
+                            __hideEditor( new_pageid );    
+                        }
                     }
                     
                 }else{
