@@ -37,7 +37,8 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
         this.span_info.addClass('help-block','lead').css({'color':'red','float':'left'}).insertAfter($header);
         
         //add bottom panel and place navigator on it
-        this.div_content.removeClass('ent_content_full').addClass('ent_content');
+        this.div_content.removeClass('ent_content_full')  //.addClass('ent_content');
+            .css({position: 'absolute', left: '0', right: '1px'});        
         
         
         this.div_bottom = $( "<div>" ).addClass('ent_footer').css('text-align','center')
@@ -82,7 +83,7 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
         this._super( pageno, recordset, is_retained_selection );
 
         this.div_content.css('overflow','hidden');
-        $('.bor-page-search').height( 600 );
+        $('#bor-page-search').height( 600 );
         
         
         var newHeight = $(this.div_content)[0].scrollHeight + 100;
@@ -96,7 +97,7 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
         } 
         
              
-        $('.bor-page-search').height( newHeight );
+        $('#bor-page-search').height( newHeight );
   },    
     
  //<h3 class="bor-section-title">Results</h3>   

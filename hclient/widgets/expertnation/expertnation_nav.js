@@ -226,6 +226,8 @@ $.widget( "heurist.expertnation_nav", {
     _constructNavigationMenu: function( recordset ){
 
 
+        //stop context menu
+        /*
         $("body").on("contextmenu",function(e){
             return false;
         });        
@@ -233,6 +235,7 @@ $.widget( "heurist.expertnation_nav", {
         $('body').bind('cut copy paste', function (e) {
             e.preventDefault();
         });
+        */
 
 
         var that = this;
