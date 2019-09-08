@@ -444,6 +444,15 @@ EOD;
                 
                 //field id in target database
                 $ftId = $importDef->getTargetIdBySourceId('detailtypes', $dty_ID);
+
+                if(!($ftId>0)){
+                    //target not found                    
+                    continue;
+                }
+                if(!@$def_dts[$ftId]){
+                    //definitions not found
+                    continue;
+                }
                 
                 $def_field = $def_dts[$ftId]['commonFields'];
                 

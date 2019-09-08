@@ -190,7 +190,6 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
     function onPageInit(success){
         
         if(!success) return;
-//console.log('!!!!!');        
         
         var lt = window.hWin.HAPI4.sysinfo['layout'];
         if(lt=='Beyond1914' || lt=='UAdelaide'){
@@ -239,7 +238,6 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
     // init map data based on url parameters
     //
     function onMapInit( mapwdiget ){
-console.log('onMapInit');  
         //take url parameters and open mapdocument or/and perform query
         if(is_init_here){ 
             //this case only for initialization of mapping when it is loaded independently 
