@@ -354,7 +354,7 @@ if($registrationRequired) //show registration dialog at once
         
         <style>
             .detailType {width:180px !important}
-            h2 {padding:10px}
+            h2 {padding:10px; margin:0}
             .error {
                 width:90%;
                 margin:auto;

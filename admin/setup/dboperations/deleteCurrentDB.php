@@ -75,7 +75,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 
             if(!@$_REQUEST['mode']) {
                 ?>
-        <div class='banner'><h2>Deleting Current Heurist Database</h2></div>
+        <div class='banner'><h2 style="margin:0">Deleting Current Heurist Database</h2></div>
             
         <div id="wait_p" class="loading" style="width:100%;height:320px;display:none">
             <i>Please wait for confirmation message (may take a couple of minutes for large databases)</i>
@@ -122,7 +122,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
 $(document).ready(
 function () {
     window.hWin.HEURIST4.msg.showMsgDlg(
-        '<h2>Database <b><?=$dbname?></b> has been deleted</h2>'
+        '<h3 style="margin:0">Database <b><?=$dbname?></b> has been deleted</h3>'
        + '<p>Associated files stored in upload subdirectories have been archived and moved to "DELETED_DATABASES" folder.</p>'
        + '<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>',
        null, 'Database deleted',

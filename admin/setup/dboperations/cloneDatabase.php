@@ -94,6 +94,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
             li {line-height: 20px; list-style:outside square; font-size:9px;}
             li ul {color:#CFE8EF; font-size:9px}
             li span {font-size:11px; color:#000;}
+            h2,h3{margin:0}
         </style>
     </head>
     <body class="popup">

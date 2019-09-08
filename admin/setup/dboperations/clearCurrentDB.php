@@ -54,10 +54,13 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
         font-size: 14px;
         color: #FFF;
     }
+    h2, h3{
+        margin:0;
+    }
     </style>
 </head>
 <body class='popup'>
-    <div class='banner'><h2>Clear Records from Current Heurist database</h2></div>
+    <div class='banner'><h3>Clear Records from Current Heurist database</h3></div>
     <div id='page-inner' style='overflow:auto'>
 <?php
     //owner can delete without password
