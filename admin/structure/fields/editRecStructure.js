@@ -171,7 +171,6 @@ function EditRecStructure() {
 
             };
             
-            
             //fill the values of record detail strcutures
             var arr = [];
             var _dts = typedef.dtFields;
@@ -586,9 +585,9 @@ function EditRecStructure() {
                 if(val0 === 'separator'){
                     Dom.addClass(elTr, 'separator');
                 }
-                var val1 = oRecord.getData('rst_NonOwnerVisibility');
+                //var val1 = oRecord.getData('rst_NonOwnerVisibility');  val1==='hidden' || 
                 var val2 = oRecord.getData('rst_RequirementType');
-                if (val1==='hidden' || val2==='forbidden') {
+                if (val2==='forbidden') {
                     Dom.addClass(elTr, 'gray');
                 }else{
                     Dom.removeClass(elTr, 'gray');
@@ -1361,6 +1360,10 @@ function EditRecStructure() {
         
         _isStreamLinedAdditionAction = false;
     }
+    
+    //_fromUItoArray(rst_ID);
+    //_saveUpdates(false);
+    
     
     /**
     * Find the row in database by recstructure type ID and returns the object with references.
@@ -3506,16 +3509,20 @@ function onCreateChildIfRecPtr(event,rst_ID, rty_ID){
 +'<div>WARNING: It is difficult to undo this step ie. to change a child record pointer field back to a standard pointer field.</div><br>'
 +'<div><label><input type="checkbox">Yes, I want to turn child-record function ON for this field</label></div>',
                      function(){
-                        $(ele).prop('checked',true);
+                        window.hWin.HEURIST4.msg.bringCoverallToFront( $(this.document).find('body') );            
+                        
                         //start action
                         var request = {
                              a: 'add_reverse_pointer_for_child',
-                             rtyID: rty_ID,
-                             dtyID: rst_ID,
+                             rtyID: rty_ID,   //rectype id
+                             dtyID: rst_ID,   //field type id 
                              allow_multi_parent:true
                         };
                         
                         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                            
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
                             if(response.status == hWin.ResponseStatus.OK){
                                 //show report
 
@@ -3562,10 +3569,13 @@ sMsg = sMsg
                             
                                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
                                 
-                                //save from UI to HEURIST
-                                editStructure.doExpliciteCollapse(rst_ID, true);
+                                $(ele).prop('checked', true);
+                                window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[rst_ID][fi.rst_CreateChildIfRecPtr] = 1;
+                                //save from UI to HEURIST - it is saved on server side in add_reverse_pointer_for_child
+                                //editStructure.doExpliciteCollapse(rst_ID, true);
                                 
                             }else{
+                                $(ele).prop('checked',false);
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
                         });

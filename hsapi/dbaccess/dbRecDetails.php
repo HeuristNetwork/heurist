@@ -333,6 +333,21 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         $this->result_data['childMiltiplied'] = $childMiltiplied;
         $this->result_data['titlesFailed'] = $titlesFailed;
         
+        
+        //set rst_CreateChildIfRecPtr=1 
+        $query = 'UPDATE defRecStructure set rst_CreateChildIfRecPtr=1 WHERE rst_RecTypeID='
+            .$this->data['rtyID'].' and rst_DetailTypeID='.$this->data['dtyID'];
+            
+        $res = $mysqli->query($query);
+        if(!$res){
+            $syserror = $mysqli->error;
+            $mysqli->rollback();
+            if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            return $this->system->addError(HEURIST_DB_ERROR, 
+                'Unable to set value in record sructure table', $syserror);
+        }
+        
+        
         $mysqli->commit();
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);
         
