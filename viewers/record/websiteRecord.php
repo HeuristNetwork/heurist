@@ -115,6 +115,8 @@ if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $rec['rec_RecTypeID']==RT_CMS_PAGE ||
 
 $image_icon = __getFile($rec, DT_THUMBNAIL, HEURIST_BASE_URL.'favicon.ico');
 $image_logo = __getFile($rec, DT_FILE_RESOURCE, null); 
+$image_altlogo = null;
+if(defined('DT_CMS_ALTLOGO')) $image_altlogo = __getFile($rec, DT_CMS_ALTLOGO, null); 
 $image_banner = null;
 if(defined('DT_CMS_BANNER')) $image_banner = __getFile($rec, DT_CMS_BANNER, null); 
 
@@ -232,8 +234,6 @@ if($edit_Available){
 ?>    
   <script>
   
-var page_scripts = {}; //pageid:functionname
-
 //
 // init page for publication version  
 // for cms version see websiteRecord.js
@@ -301,7 +301,7 @@ function loadHomePageContent(pageid){
                       window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
                       window.hWin.HEURIST4.msg.sendCoverallToBack();
                       
-                      afterPageLoad( pageid );
+                      afterPageLoad( document, pageid );
               });
         }
 }
@@ -310,10 +310,11 @@ function loadHomePageContent(pageid){
 }
 ?>
 <script>
+var page_scripts = {}; //pageid:functionname
 //
 // Executes custom javascript defined in field DT_CMS_SCRIPT
 //
-function afterPageLoad(pageid){
+function afterPageLoad(document, pageid){
     
     var DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
 
@@ -332,11 +333,11 @@ function afterPageLoad(pageid){
                     var func_name = 'afterPageLoad'+pageid;
                     var script = document.createElement('script');
                     script.type = 'text/javascript';
-                    script.innerHTML = 'function '+func_name +'(pageid){' + data + '}';
+                    script.innerHTML = 'function '+func_name +'(document, pageid){' + data + '}';
                     //s.src = "http://somedomain.com/somescript";
                     $("head").append(script);
                     page_scripts[pageid] = func_name;    
-                    window[func_name]( pageid );
+                    window[func_name]( document, pageid );
                 }
             });            
                 
@@ -344,7 +345,7 @@ function afterPageLoad(pageid){
         }
         
         if(page_scripts[pageid] !== false){
-            window[page_scripts[pageid]]( pageid );    
+            window[page_scripts[pageid]]( document, pageid );    
         }
         
     }
@@ -551,8 +552,11 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
             :'<div style="text-align:center;display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image</div>';?>
             </a>
         </div>
-        <div style="display:none;" id="main-logo-alt">
-        </div>
+        
+        <?php print $image_altlogo?'<div id="main-logo-alt" style="float:right;min-height: 73px;min-width: 130px;margin: 7px 4px 0 0;background-size: contain;'
+            .'background-image:url(\''.$image_altlogo.'\');"></div>'
+            :'';?>
+        
         <div id="main-title" style="float:left;padding-left:20px;vertical-align:middle;">
             <h2 style="font-size:1.7em;color:black"><?php print __getValue($rec, DT_NAME);?></h2>
         </div>

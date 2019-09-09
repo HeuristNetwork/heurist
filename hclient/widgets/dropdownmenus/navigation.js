@@ -308,7 +308,7 @@ $.widget( "heurist.navigation", {
                                 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
                                 //window.hWin.HEURIST4.msg.sendCoverallToBack();
                                 if($.isFunction(that.options.aftermenuselect)){
-                                    that.options.aftermenuselect( pageid );
+                                    that.options.aftermenuselect( document, pageid );
                                     /*setTimeout(function(){
                                         that.options.aftermenuselect( pageid );
                                     },2000);*/

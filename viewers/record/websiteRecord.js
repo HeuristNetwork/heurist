@@ -265,7 +265,8 @@ function hCmsEditing(_options) {
                         
                         __alignButtons();
                         
-                        afterPageLoad( pageid );
+                        //@todo does not properly work here svs_list('instance') returns undefined
+                        //afterPageLoad( document,  pageid );
                 });
         }
         
