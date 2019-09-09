@@ -3509,6 +3509,8 @@ function onCreateChildIfRecPtr(event,rst_ID, rty_ID){
 +'<div>WARNING: It is difficult to undo this step ie. to change a child record pointer field back to a standard pointer field.</div><br>'
 +'<div><label><input type="checkbox">Yes, I want to turn child-record function ON for this field</label></div>',
                      function(){
+                        
+                        window.hWin.HEURIST4.msg.showMsgFlash('converting to child records, may take up to a minute, please wait …', false);
                         window.hWin.HEURIST4.msg.bringCoverallToFront( $(this.document).find('body') );            
                         
                         //start action
@@ -3520,7 +3522,8 @@ function onCreateChildIfRecPtr(event,rst_ID, rty_ID){
                         };
                         
                         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
-                            
+                        
+                            window.hWin.HEURIST4.msg.closeMsgFlash();
                             window.hWin.HEURIST4.msg.sendCoverallToBack();
                             
                             if(response.status == hWin.ResponseStatus.OK){

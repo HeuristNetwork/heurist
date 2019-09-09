@@ -356,18 +356,23 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dlg.css({color:'white', border:'none', overflow:'hidden' });
             //addClass('ui-heurist-border').
         }
+        
+        if(timeout!==false){
 
-        if (!(timeout>200)) {
-            timeout = 1000;
+            if (!(timeout>200)) {
+                timeout = 1000;
+            }
+
+            
+            setTimeout(window.hWin.HEURIST4.msg.closeMsgFlash, timeout);
+            
         }
-
-        
-        setTimeout(function(){
-            if($dlg.dialog('instance')) $dlg.dialog('close');
-            $dlg.parent().find('.ui-dialog-titlebar').show();
-        }, timeout);
-        
-
+    },
+    
+    closeMsgFlash: function(){
+        var $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+        if($dlg.dialog('instance')) $dlg.dialog('close');
+        $dlg.parent().find('.ui-dialog-titlebar').show();
     },
 
     //@todo - redirect to error page
