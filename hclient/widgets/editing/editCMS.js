@@ -527,8 +527,6 @@ function editCMS(home_page_record_id, main_callback){
                                                 removeMenuEntry(parent_id, menuid, function(){
                                                     item.remove();    
                                                     was_something_edited = true;
-                                                    //refresh preview
-                                                    //!!! refreshMainMenu();
                                                 });
                                                 
                                                 });
@@ -647,7 +645,6 @@ function editCMS(home_page_record_id, main_callback){
                                                 //window.hWin.HEURIST4.msg.sendCoverallToBack();
                                                 if(response.status == hWin.ResponseStatus.OK){
                                                     window.hWin.HEURIST4.msg.showMsgFlash('saved');
-                                                    //!!! refreshMainMenu();
                                                 }else{
                                                     window.hWin.HEURIST4.msg.showMsgErr(response);
                                                 }
@@ -816,13 +813,6 @@ function editCMS(home_page_record_id, main_callback){
         });                                        
         
     }
-    
-    //not used
-    function refreshMainMenu(){
-        var preview_frame = edit_dialog.find('#web_preview');
-        preview_frame[0].contentWindow.reloadMainMenu();
-    }
-    
     
 }
    

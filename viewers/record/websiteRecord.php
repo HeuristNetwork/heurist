@@ -38,6 +38,13 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_users.php');
 
 
+/*
+Workflow:
+loads main page for logo, icon, banner, style
+
+
+*/
+
 $system->defineConstants();
 
 $mysqli = $system->get_mysqli();
@@ -91,10 +98,12 @@ $site_owner = user_getDbOwner($mysqli); //info about user #2
 //output content of particular page - just title and content
 if(@$_REQUEST['field']){ 
     
-    
-    print '<h2>'.__getValue($rec, DT_NAME).'</h2>'
-                        .__getValue($rec, DT_EXTENDED_DESCRIPTION);
-    exit();
+    if($_REQUEST['field']>1){
+        exit(__getValue($rec, $_REQUEST['field']));
+    }else{
+        exit('<h2>'.__getValue($rec, DT_NAME).'</h2>'
+                            .__getValue($rec, DT_EXTENDED_DESCRIPTION));
+    }
 }
 //-----------------------
 
@@ -222,8 +231,13 @@ if($edit_Available){
 }else{
 ?>    
   <script>
+  
+var page_scripts = {}; //pageid:functionname
 
-//init page for publication version  
+//
+// init page for publication version  
+// for cms version see websiteRecord.js
+//
 function onPageInit(success)
 {
 
@@ -251,7 +265,8 @@ _time_debug = new Date().getTime() / 1000;
                 
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
             {heurist_Navigation:{menu_recIDs:"<?php print $rec_id;?>", use_next_level:true, 
-            orientation:'horizontal',toplevel_css:{background:'rgba(112,146,190,0.7)'},
+            orientation:'horizontal',
+            toplevel_css:{background:'rgba(112,146,190,0.7)'},
             aftermenuselect: afterPageLoad
             }} );
             
@@ -271,110 +286,6 @@ _time_debug = new Date().getTime() / 1000;
 //
 //
 //
-function afterPageLoad(pageid){
-    
-//console.log('after '+pageid);    
-    if(pageid!=133082) return;
-    
-    
-        var ele = $('.hie-places').find('div[widgetid="heurist_SearchTree"]');
-        var ele2 = $('.hie-places').find('div[widgetid="heurist_resultList"]');
-        
-        var is_inited = $.isFunction(ele.svs_list) && ele.svs_list('instance')
-                        $.isFunction(ele2.resultList) && ele2.resultList('instance');
-        
-        if(!is_inited){
-            //verify that all faceted searches are inited not inited yet
-            setTimeout(function(){ afterPageLoad(pageid); }, 500);
-            return;    
-        }
-    
-        //main navigation buttons
-        $('#hie_navigation').find('a').attr('href','#')
-            .css({width:'200px','font-weight': 'bold','font-size': '1.1em', 
-                'text-decoration': 'none'}).click(function(event)
-        {
-            var ele_id = $(event.target).attr('data-ref');
-            $('.group-tab').hide(); //hide all tabs
-            //$('#hie_navigation').parent().hide();
-            var ele = $('.'+ele_id).show(); //show selected tab
-            
-            if(!ele.attr('data-inited')){ //once
-                
-                ele.attr('data-inited', 1);
-                var wele = ele.find('div[widgetid="heurist_SearchTree"]');
-
-                if(ele_id=='hie-places'){
-                    //show result list for places
-                    /*var mpos = $('#main-content').height()/2;
-                    ele.find('div[data-heurist-app-id="heurist_Map"]').css({right:302});
-                    ele.find('div[data-heurist-app-id="heurist_resultList"]').css({width:300}).show();*/
-                    
-                    wele.svs_list('doSearchByID', 20);
-                }else if(ele_id=='hie-persons'){ //persons
-                    wele.svs_list('doSearchByID', 22);
-                }else if(ele_id=='hie-events'){ //events
-                    wele.svs_list('doSearchByID', 24);
-                }
-                
-                wele.svs_list({onclose_search:function(){$('.group-tab').hide();}});
-                
-            }
-            
-        });
-        
-        //override default behavior of close button in facted search
-        $('.hie-places').find('div[widgetid="heurist_SearchTree"]')
-                        .svs_list({onclose_search:function(){$('.group-tab').hide()}})
-                        .svs_list('doSearchByID', 20);
-    
-        $(document).on(window.hWin.HAPI4.Event.ON_REC_SELECT, function(e, data) {
-//navigation for HIE - @todo in CMS editor
-
-            if(data && (data.search_realm=='hie_places' || data.search_realm=='map_selection')
-                && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection))
-            {
-                $('.group-tab').hide();
-                var ele = $('.hie-events-places').show();
-                
-                //add supplementary filter to faceted search and override close button                
-                var wele = ele.find('div[widgetid="heurist_SearchTree"]');
-                wele.svs_list({sup_filter:'{"linked_to:12:134":'+data.selection[0]+'}', 
-                        onclose_search:function(){ //close event and back to places
-                            $('.group-tab').hide();
-                            $('.hie-places').show();
-                        }});
-                wele.svs_list('doSearchByID', 21);//start search events by places
-
-                var request = {q:'ids:'+data.selection[0]};
-                //update title
-                wele = ele.find('div[widgetid="heurist_resultListExt"]').recordListExt('updateDataset', request);
-                
-              
-            }else if(data && data.search_realm=='hie_persons' 
-                && window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection))
-            {
-                $('.group-tab').hide();
-                var ele = $('.hie-events-persons').show();
-                
-                var wele = ele.find('div[widgetid="heurist_SearchTree"]');
-                wele.svs_list({sup_filter:'{"related_to:61:290":[{"t":"61"},{"linked_to:10:16":'+data.selection[0]+'}]}', 
-                        onclose_search:function(){
-                            $('.group-tab').hide();
-                            $('.hie-persons').show();
-                        }});
-                wele.svs_list('doSearchByID', 23);//start search events by persons
-
-                var request = {q:'ids:'+data.selection[0]};
-                wele = ele.find('div[widgetid="heurist_resultListExt"]').recordListExt('updateDataset', request);
-              
-            }
-        });
-        
-    
-}
-
-
 function loadHomePageContent(pageid){
         if(pageid>0){
               //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
@@ -399,6 +310,49 @@ function loadHomePageContent(pageid){
 }
 ?>
 <script>
+//
+// Executes custom javascript defined in field DT_CMS_SCRIPT
+//
+function afterPageLoad(pageid){
+    
+    var DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
+
+    if(DT_CMS_SCRIPT>0 && page_scripts[pageid] !== false){
+        
+        
+        if(!page_scripts[pageid]){
+            
+            var surl = window.hWin.HAPI4.baseURL+'?db='
+                +window.hWin.HAPI4.database+'&field='+DT_CMS_SCRIPT+'&recid='+pageid;
+            
+            $.get( surl, function( data ) {
+                if(data==''){
+                    page_scripts[pageid] = false;    
+                }else{
+                    var func_name = 'afterPageLoad'+pageid;
+                    var script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.innerHTML = 'function '+func_name +'(pageid){' + data + '}';
+                    //s.src = "http://somedomain.com/somescript";
+                    $("head").append(script);
+                    page_scripts[pageid] = func_name;    
+                    window[func_name]( pageid );
+                }
+            });            
+                
+            page_scripts[pageid] = false;
+        }
+        
+        if(page_scripts[pageid] !== false){
+            window[page_scripts[pageid]]( pageid );    
+        }
+        
+    }
+}
+
+//
+//
+//
 function onHapiInit(success){   
     
 //    console.log('webpage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
@@ -562,6 +516,15 @@ if($site_css!=null){
 </head>
 <body>
 <?php
+/*
+page structure can be defined in field DT_POPUP_TEMPLATE (of RT_CMS_HOME )
+otherwise this is default content consists of 
+    #main-header - header width logo, banner, hostinfo and main menu
+        #main-logo, #main-logo-alt, #main-host, #main-menu, #main-pagetitle
+        
+    #main-content-container > #main-content - target the content of particular page will be loaded  
+*/
+
 //it can be html, html file or smarty report
 $page_template = defined('DT_POPUP_TEMPLATE')?__getValue($rec, DT_POPUP_TEMPLATE, null):null; 
 

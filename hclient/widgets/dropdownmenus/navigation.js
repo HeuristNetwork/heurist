@@ -98,7 +98,7 @@ $.widget( "heurist.navigation", {
     },
     
     //
-    //
+    // callback function on getting menu records
     //
     _onGetMenuData:function(resdata){
         
@@ -110,6 +110,7 @@ $.widget( "heurist.navigation", {
             DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
             DT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'],  //pointer to page 
             DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'],
+            DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'],
             DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'];//target element on page or popup
             
         var that = this;
@@ -276,6 +277,8 @@ $.widget( "heurist.navigation", {
                            
                            
                     }else{
+                        //load page content to page_target element 
+                        
                         if(page_target[0]!='#') page_target = '#'+page_target;
                         
                         if(pageCss && Object.keys(pageCss).length>0){
@@ -305,9 +308,10 @@ $.widget( "heurist.navigation", {
                                 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
                                 //window.hWin.HEURIST4.msg.sendCoverallToBack();
                                 if($.isFunction(that.options.aftermenuselect)){
-                                    setTimeout(function(){
+                                    that.options.aftermenuselect( pageid );
+                                    /*setTimeout(function(){
                                         that.options.aftermenuselect( pageid );
-                                    },2000);
+                                    },2000);*/
                                 }
                         });
                     }                

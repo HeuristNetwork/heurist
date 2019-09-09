@@ -10,7 +10,12 @@ function onPageInit(success){
     
     cmsEditing = new hCmsEditing();
     
-}    
+}   
+
+/*
+workflow
+_init - #main-menu navigation wizard onselect -> __iniLoadPageById warn for changes -> _hideEditor -> __loadPageById
+*/ 
     
 function hCmsEditing(_options) {
     var _className = "CmsEditing",
@@ -24,6 +29,10 @@ function hCmsEditing(_options) {
         last_save_content = null;
     var inlineEditorConfig;
 
+    // define tinymce configuration
+    // init main menu with listener __iniLoadPageById
+    // init main-logo and editor buttons
+    // call __iniLoadPageById with main page id
     function _init(_options) {
              
         //window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
@@ -119,22 +128,13 @@ function hCmsEditing(_options) {
                 
             }
 
-        };
+        };//end inlineEditorConfig
         
-        /*
-        $( "#main-menu > ul" ).addClass('horizontalmenu').menu( {position:{ my: "left top", at: "left+20 bottom" }} );
-        $('#main-menu').show()
-        $('#main-menu').find('a').addClass('truncate').click(function(event){  //load new page
 
-            var pageid = $(event.target).attr('data-pageid');
-            __iniLoadPageById( pageid);
-        });
-        */
         //reload home
         $( "#main-logo").click(function(event){
             __iniLoadPageById( home_pageid );
         });
-
         
         setTimeout(function(){
             __alignButtons();
@@ -146,7 +146,9 @@ function hCmsEditing(_options) {
             
             window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
                 {heurist_Navigation:{menu_recIDs:home_pageid, use_next_level:true, orientation:'horizontal', 
-                onmenuselect:__iniLoadPageById, toplevel_css:{background:'rgba(112,146,190,0.7)'} }} ); //,color:'white','margin-right':'24px'
+                onmenuselect:__iniLoadPageById, 
+                //aftermenuselect: afterPageLoad,  //function in header websiteRecord.php
+                toplevel_css:{background:'rgba(112,146,190,0.7)'} }} ); //,color:'white','margin-right':'24px'
             
             $('#main-menu').show()
             
@@ -204,7 +206,7 @@ function hCmsEditing(_options) {
     }//_init  
             
     //
-    //        
+    // menu listener - init page switch - warns for  changes and hides editor
     //            
     function __iniLoadPageById( pageid ){                    
      
@@ -231,6 +233,9 @@ function hCmsEditing(_options) {
         
     }
             
+    //
+    // loads content of pageid  
+    //
     function __loadPageById( pageid ){
         
         if(pageid>0){
@@ -251,6 +256,7 @@ function hCmsEditing(_options) {
                         pagetitle.addClass("webpageheading");
                         $('#main-pagetitle').empty().append(pagetitle);
                         
+                        //assign content to editor
                         $('.tinymce-body').val($('#main-content').html());
                         
                         //init widgets 
@@ -258,6 +264,8 @@ function hCmsEditing(_options) {
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         
                         __alignButtons();
+                        
+                        afterPageLoad( pageid );
                 });
         }
         
@@ -265,6 +273,9 @@ function hCmsEditing(_options) {
         
     }        
     
+    //
+    // returns text content from editor
+    //
     function __getEditorContent(){
         var newval = null;
         if(tinymce && tinymce.activeEditor){
@@ -330,7 +341,8 @@ function hCmsEditing(_options) {
     }
             
     //
-    // new_pageid if ero restore last saved content
+    // new_pageid if zero restore last saved content
+    // otherwise load contents of new_pageid page 
     //                    
     function __hideEditor( new_pageid ){
             
@@ -1014,19 +1026,9 @@ function hCmsEditing(_options) {
         
     }
  
-    //not used
-    function __reloadMainMenu(){
-        
-         $('#main-menu').empty().append($('<span class="widget-options" style="display: none;">{"menu_recIDs":"'
-            +home_pageid
-            +'","use_next_level":true,"orientation":"horizontal"}</span>'));
- 
-         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header", 
-                    {heurist_Navigation:{onmenuselect:__iniLoadPageById}} );
-        
-    }
- 
- 
+    //
+    // opens record editor for current page
+    //
     function _editPageRecord(){
                     //edit page
                     window.hWin.HEURIST4.ui.openRecordEdit(current_pageid, null,
@@ -1038,6 +1040,9 @@ function hCmsEditing(_options) {
                     }});
     }
     
+    //
+    // opens tinymce for cotent editor
+    //
     function _editPageContent(){
      
                     $('#btn_inline_editor').hide();
@@ -1122,18 +1127,3 @@ function hCmsEditing(_options) {
     return that;  //returns object
  
 }
-
-//
-// methods to be accessed from editCMS.js
-//
-function reloadMainMenu(){
-    $('#btn_refresh_menu').click();
-}
-/*
-function editPageRecord(){
-    $('#btn_inline_editor4').click();
-}
-function editPageContent(){
-    $('#btn_inline_editor').click();
-}
-*/
