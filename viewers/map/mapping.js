@@ -1134,12 +1134,13 @@ $.widget( "heurist.mapping", {
                         new_layer.feature = feature;
                     }else{
                         layer.setIcon(setIcon);    
+                        layer.setOpacity( markerStyle.opacity );
                     }
 
                 }else if(layer instanceof L.CircleMarker){
                     if(markerStyle.iconType!='circle'){
                         //change from circle to icon marker
-                        new_layer = L.marker(layer.getLatLng(), {icon:setIcon});
+                        new_layer = L.marker(layer.getLatLng(), {icon:setIcon, opacity:markerStyle.opacity });
                         new_layer.feature = feature;
                     }else{
                         markerStyle.radius = markerStyle.iconSize/2;
