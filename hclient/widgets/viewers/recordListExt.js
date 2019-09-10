@@ -28,7 +28,7 @@ $.widget( "heurist.recordListExt", {
         is_single_selection: false, //work with the only record
         recordset: null,
         selection: null,  //list of selected record ids
-        url:null,
+        url:null,               //
         is_frame_based: true,
         
         reload_for_recordset: false, //refresh every time recordset is changed

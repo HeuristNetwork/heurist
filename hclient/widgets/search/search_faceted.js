@@ -246,7 +246,7 @@ $.widget( "heurist.search_faceted", {
     _refreshTitle: function(){    
         var new_title = '';
         if(this.div_title) {
-            if(this.options.params.ui_title){
+            if(this.options.params.ui_title){ //from settings
                 new_title = this.options.params.ui_title;
             }else{
                 var svsID = this.options.query_name;

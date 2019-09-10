@@ -37,7 +37,7 @@ $.widget( "heurist.svs_list", {
         sup_filter:null       //suplementary filter for faceted search
     },
 
-    allowed_svsIDs: null,
+    loaded_saved_searches: null,   //loaded searches for button mode - based on options.allowed_XXX
     search_faceted: null,
 
     currentSearch: null,
@@ -53,9 +53,16 @@ $.widget( "heurist.svs_list", {
     _create: function() {
         
         
-        if(!this.options.allowed_UGrpID)
+        if(this.options.allowed_svsIDs && !$.isArray(this.options.allowed_svsIDs)){
+            this.options.allowed_svsIDs = this.options.allowed_svsIDs.split(',');
+        }
+        if(this.options.allowed_UGrpID && !$.isArray(this.options.allowed_UGrpID)){
+            this.options.allowed_UGrpID = this.options.allowed_UGrpID.split(',');
+        }
+        
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_UGrpID))
             this._setOptionFromUrlParam('allowed_UGrpID', 'groupID');
-        if(!this.options.allowed_svsIDs)
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_svsIDs))
             this._setOptionFromUrlParam('allowed_svsIDs', 'searchIDs');
         if(window.hWin.HAPI4.has_access() && this.options.buttons_mode){
             this._setOptionFromUrlParam('treeview_mode','treeViewLoggedIn', 'bool');
@@ -275,6 +282,21 @@ $.widget( "heurist.svs_list", {
     /* private function */
     _refresh: function(){
 
+        
+        var that = this;
+        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){  //find all saved searches for current user
+
+            window.hWin.HAPI4.SystemMgr.ssearch_get( null,
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
+                        that._refresh();
+                    }
+            });
+            return;
+        }
+        
+        
         // show saved searches as a list of buttons
         if(this.options.buttons_mode){
 
@@ -307,19 +329,7 @@ $.widget( "heurist.svs_list", {
             //IAN request 2015-06-23 if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
         }
 
-        var that = this;
-        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){  //find all saved searches for current user
-
-            window.hWin.HAPI4.SystemMgr.ssearch_get( null,
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
-                        that._refresh();
-                    }
-            });
-        }else{
-            this._updateAccordeon();
-        }
+        this._updateAccordeon();
 
     },
 
@@ -617,28 +627,23 @@ $.widget( "heurist.svs_list", {
     _updateAccordeonAsListOfButtons: function(){
         
         var that = this;
-        if(!this.allowed_svsIDs){  //find all saved searches for current user
+        if(!this.loaded_saved_searches){  //find all saved searches for current user
         
-            if(this.options.allowed_svsIDs && !$.isArray(this.options.allowed_svsIDs)){
-                this.options.allowed_svsIDs = this.options.allowed_svsIDs.split(',');
-            }
-            if(this.options.allowed_UGrpID && !$.isArray(this.options.allowed_UGrpID)){
-                this.options.allowed_UGrpID = this.options.allowed_UGrpID.split(',');
-            }
-            
             if(this.options.allowed_svsIDs.length>0 || this.options.allowed_UGrpID.length>0){
 
                 window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs: this.options.allowed_svsIDs,
                     UGrpID: this.options.allowed_UGrpID},
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            that.allowed_svsIDs = response.data; //svs_id=>array()
+                            that.loaded_saved_searches = response.data; //svs_id=>array()
                             
+                            /*
                             if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
-                                window.hWin.HAPI4.currentUser.usr_SavedSearch = that.allowed_svsIDs
+                                window.hWin.HAPI4.currentUser.usr_SavedSearch = that.loaded_saved_searches
                             }
+                            */
                             
-                            var svsID = Object.keys(that.allowed_svsIDs)
+                            var svsID = Object.keys(that.loaded_saved_searches)
                             var missed = [];
                             //verify
                             for(var i=0; i<that.options.allowed_svsIDs.length; i++){
@@ -661,7 +666,7 @@ $.widget( "heurist.svs_list", {
                 
                 return;
             }else{
-                this.allowed_svsIDs = [];
+                this.loaded_saved_searches = [];
             }
         }
 
@@ -669,7 +674,7 @@ $.widget( "heurist.svs_list", {
         this.accordeon.empty();
         
         
-        var i, svsIDs = Object.keys(this.allowed_svsIDs),
+        var i, svsIDs = Object.keys(this.loaded_saved_searches),
             visible_cnt = 0, visible_svsID;
 
             
@@ -681,7 +686,7 @@ $.widget( "heurist.svs_list", {
             {
                 var svsID = svsIDs[i];
                 
-                var params = Hul.parseHeuristQuery(this.allowed_svsIDs[svsID][_QUERY]);
+                var params = Hul.parseHeuristQuery(this.loaded_saved_searches[svsID][_QUERY]);
 
                 var iconBtn = 'ui-icon-search';
                 if(params.type==3){
@@ -697,7 +702,7 @@ $.widget( "heurist.svs_list", {
                 }
 
                 
-                var sname = this.allowed_svsIDs[svsID][_NAME];
+                var sname = this.loaded_saved_searches[svsID][_NAME];
                 
                 if(sname.toLowerCase().indexOf('placeholder')===0) continue;
 
@@ -707,8 +712,8 @@ $.widget( "heurist.svs_list", {
 
                     var svs_ID = $(this).attr('data-svs-id');
                     if (svs_ID){
-                        var qsearch = that.allowed_svsIDs[svs_ID][_QUERY];
-                        var qname   = that.allowed_svsIDs[svs_ID][_NAME];
+                        var qsearch = that.loaded_saved_searches[svs_ID][_QUERY];
+                        var qname   = that.loaded_saved_searches[svs_ID][_NAME];
 
                         that.doSearch( svs_ID, qsearch, event.target ); //qname replaced with svs_ID
                         that.accordeon.find('#search_query').val('');
@@ -759,7 +764,7 @@ $.widget( "heurist.svs_list", {
         this.accordeon.show();
         
         //if the only search - start search at once
-        if(visible_cnt==1){//this.allowed_svsIDs &&
+        if(visible_cnt==1){//this.loaded_saved_searches &&
             $(this.accordeon).find('button[data-svs-id="'+visible_svsID+'"]').click();
         }else if(this.options.init_svsID){
             $(this.accordeon).find('button[data-svs-id="'+this.options.init_svsID+'"]').click();
@@ -1646,24 +1651,24 @@ $.widget( "heurist.svs_list", {
     this.doSearch(qsearch);
     },*/
 
-    doSearchByID: function(svsID){
+    doSearchByID: function(svsID, query_name){
     
         if(window.hWin.HAPI4.currentUser.usr_SavedSearch && 
             window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID]){
                                 
             var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_QUERY];
-            var qname   = svsID; //window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_NAME];
+            var qname   = query_name || svsID; //window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_NAME];
             
             this.doSearch( qname, qsearch, null );
         }else{
-
+            //not found - try to find
             var that = this;
             window.hWin.HAPI4.SystemMgr.ssearch_get( { svsIDs:svsID },
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
                         var qsearch = response.data[svsID][_QUERY];
-                        that.doSearch( svsID, qsearch, null );
+                        that.doSearch( query_name || svsID, qsearch, null );
                     }
             });
             

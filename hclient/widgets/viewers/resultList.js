@@ -45,7 +45,7 @@ $.widget( "heurist.resultList", {
         header_class: null,       //class name for menu
         show_url_as_link:false,
 
-        title: null,
+        title: null,  //see show_inner_header
         //searchsource: null,
 
         empty_remark:'No entries match the filter criteria',
@@ -183,7 +183,12 @@ $.widget( "heurist.resultList", {
                                 new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][_NAME];
                             }else{
                                 that._currentSavedFilterID = 0;
-                                new_title = window.hWin.HR(that.options.title || 'Filtered Result');        
+                                if(data.qname>0 || window.hWin.HEURIST4.util.isempty(data.qname)){
+                                    new_title = window.hWin.HR(that.options.title || 'Filtered Result');            
+                                }else{
+                                    new_title = window.hWin.HR(data.qname);
+                                }
+                                
                             }
                             
                             that._clearAllRecordDivs(new_title);

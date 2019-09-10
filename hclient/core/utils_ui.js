@@ -46,6 +46,7 @@ setValueAndWidth assign value to input and adjust its width
 
 initHSelect - converts HTML select to jquery selectmenu
 
+getRecordTitle - retuns of title for given record id
 createTemplateSelector - fills with names of smarty templates
 
 ENTITY
@@ -2216,6 +2217,27 @@ window.hWin.HEURIST4.ui = {
         $(container).find('.add-rel-button').hide();
         
         return ele;
+    },
+    
+    
+    //
+    //
+    //
+    getRecordTitle: function(recID, callback){
+        
+            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"header"},  
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    var recordset = new hRecordSet(response.data);
+                    if(recordset.length()>0){
+                        var record = recordset.getFirstRecord();
+                        if($.isFunction(callback)){
+                            callback(recordset.fld(record,'rec_Title'));    
+                        }
+                    }
+                }
+            });
+        
     },
 
     //
