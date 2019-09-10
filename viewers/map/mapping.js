@@ -1271,6 +1271,12 @@ $.widget( "heurist.mapping", {
                         popupURL =  info; //load content from url
                     }
                 }else{
+                    
+                    if(layer.options.popup_template=='none' || (layer.options.popup_template==null && that.mapPopUpTemplate=='none') ){
+                        that.main_popup.closePopup();
+                        return;
+                    }
+                    
                     if(that.mapPopUpTemplate || layer.options.popup_template){
                         
                         popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
@@ -1301,7 +1307,7 @@ $.widget( "heurist.mapping", {
                 }
         
             }else{
-                
+                    // show multiple selection
                     var sText = '';    
                     for(var key in layer.feature.properties) {
                         if(layer.feature.properties.hasOwnProperty(key) && key!='_deleted'){

@@ -990,7 +990,7 @@ function hCmsEditing(_options) {
                         var $select2 = dele.find('select[name="map_template"]'); 
                         
                         window.hWin.HEURIST4.ui.createTemplateSelector( $select2
-                                           ,[{key:'',title:'Standard map popup template'}], $select2.attr('data-template'));
+                                           ,[{key:'',title:'Standard map popup template'},{key:'none',title:'Disable popup'}], $select2.attr('data-template'));
                         
 
                        

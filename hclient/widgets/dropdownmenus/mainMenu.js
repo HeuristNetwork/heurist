@@ -1035,7 +1035,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 prefs['mctrl_'+map_controls[i]] = 1;
             }
             
-            window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#map_template'), [{key:'',title:'na'}],
+            window.hWin.HEURIST4.ui.createTemplateSelector( $dlg.find('#map_template'), [{key:'',title:'Standard map popup template'},{key:'none',title:'Disable popup'}],
                             window.hWin.HAPI4.get_prefs_def('map_template', null));
 
             //from prefs to ui
