@@ -868,6 +868,12 @@ function hMapManager( _options )
             
         },
         
+        // 
+        // returns default style for mapdoc or layer
+        //
+        getSymbology: function(mapdoc_id, layer_id) {
+            return mapDocuments.getSymbology( mapdoc_id, layer_id );
+        },
         //
         // returns list of mapdocuments ids
         // mode - all|loaded|visible

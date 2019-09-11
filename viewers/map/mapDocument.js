@@ -38,7 +38,7 @@ function hMapDocument( _options )
     DT_DATA_SOURCE = 0,
     RT_QUERY_SOURCE = 0,
     DT_QUERY_STRING = 0,
-    DT_SYMBOLOGY = 0, //@todo rename to DT_SYMBOLOGY
+    DT_SYMBOLOGY = 0, 
     DT_GEO_OBJECT = 0,
     DT_MAP_BOOKMARK = 0,
     DT_NAME = 0,
@@ -87,7 +87,7 @@ function hMapDocument( _options )
         
             var request = {
                         q: 't:'+RT_MAP_DOCUMENT,w: 'a',
-                        detail: [DT_GEO_OBJECT,DT_MAP_BOOKMARK], //'header',
+                        detail: [DT_GEO_OBJECT,DT_MAP_BOOKMARK,DT_SYMBOLOGY], //'header',
                         source: 'map_document'};
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
@@ -304,11 +304,24 @@ function hMapDocument( _options )
     }
     
     //
-    //  returns sybology for given layer of map document
+    //  returns sybology for given layer of map document, if layer not defined returns defaul symbology for map document
     //
     function _getSymbology( mapdoc_id, rec_id ){
         
-        var _recset = map_documents_content[mapdoc_id];
+        
+        if(!rec_id){
+            
+            if(map_documents){
+                var record2 = (mapdoc_id>0) ? map_documents.getById( mapdoc_id ) 
+                                            : map_documents.getFirstRecord();
+                var def_style = map_documents.fld(record2, DT_SYMBOLOGY);
+                return window.hWin.HEURIST4.util.isJSON(def_style);
+            }else{
+                return false;
+            }
+        }
+        
+        var _recset = map_documents_content[mapdoc_id]; //layers
         var _record = _recset.getById( rec_id );
         
         if(!_record['source_rectype'] || _record['source_rectype'] == RT_QUERY_SOURCE){
@@ -452,7 +465,6 @@ function hMapDocument( _options )
             
             //dataset_name is unique within mapdoc
             var search_res = recset.getSubSetByRequest({'rec_Title':('='+dataset_name)}); 
-            
             //var _record = recset.getById(dataset_name);
             var _record;
             if(search_res && search_res.length()>0){  //layer with such name already exists - replace
@@ -479,7 +491,7 @@ function hMapDocument( _options )
                         new hMapLayer2({rec_datasource: _record, 
                                         mapdoc_recordset: recset, //need to get fields
                                         mapwidget: options.mapwidget,
-                                        preserveViewport:(mapdoc_id!=0) })); //zoom to current search
+                                        preserveViewport:true })); //zoom to current search  (mapdoc_id!=0)
                                               
                                               
             return _record;
@@ -607,10 +619,9 @@ function hMapDocument( _options )
             }
         },
         
-        // get layer record, take symbology field and title 
-        // open symbology editor
-        // on exit 1) call mapLayer.applyStyles
-        //         2) change title in tree and timeline
+        // 
+        // returns default style for mapdoc or layer
+        //
         getSymbology: function( mapdoc_id, rec_id ){
             return _getSymbology( mapdoc_id, rec_id );    
         },
@@ -622,7 +633,7 @@ function hMapDocument( _options )
         editSymbology: function( mapdoc_id, rec_id, callback ){
             _editSymbology( mapdoc_id, rec_id, callback );    
         },
-        
+
         //
         //
         //

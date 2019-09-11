@@ -46,6 +46,7 @@ $.widget( "heurist.app_timemap", {
 
     recordset_changed: true,
     map_inited: false,
+    map_currsearch_inited: false,
 
     // the constructor
     _create: function() {
@@ -91,11 +92,11 @@ $.widget( "heurist.app_timemap", {
                     }
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
-                    
                     //accept events from the same realm only
                     if(!that._isSameRealm(data)) return;
-                    
+//console.log('search finished');                    
                     that.recordset_changed = true;
+                    that.map_currsearch_inited = false;
                     that.option("recordset", data.recordset); //hRecordSet
                     that._refresh();
                     that.loadanimation(false);
@@ -271,7 +272,9 @@ $.widget( "heurist.app_timemap", {
             
             if(this.options.leaflet){ //LEAFLET
             
-                if(that.options.recordset){
+                if(!that.map_currsearch_inited && that.options.recordset){
+//console.log(' add current query ');                    
+                    that.map_currsearch_inited = true;
                     mapping.mapping('addSearchResult', that.options.recordset, 'Current query');
                 //}else if(this.options.selection){
                 }
@@ -423,6 +426,13 @@ $.widget( "heurist.app_timemap", {
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
             mapping.map_control.editLayerProperties(dataset_id, legendid, callback);
+        }
+    },
+    
+    zoomToSelection:function(selection){
+        var mapping = this.mapframe[0].contentWindow.mapping;
+        if(mapping){
+            mapping.mapping('zoomToSelection', selection );
         }
     }
 

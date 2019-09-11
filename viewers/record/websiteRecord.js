@@ -28,6 +28,7 @@ function hCmsEditing(_options) {
         was_modified = false, //was modified and saved - on close need to reinit widgets
         last_save_content = null;
     var inlineEditorConfig;
+    var is_edit_widget_open = false;
 
     // define tinymce configuration
     // init main menu with listener __iniLoadPageById
@@ -406,7 +407,7 @@ function hCmsEditing(_options) {
 
             var eles;
             if(widgetid==null){
-                eles = tinymce.activeEditor.dom.select('.mceNonEditable'); //div.
+                eles = tinymce.activeEditor.dom.select('.widget-design-header'); //div.
                 
                 //$(tinymce.activeEditor.dom.select('.initTabs')).tabs();
                 
@@ -421,6 +422,7 @@ function hCmsEditing(_options) {
                 
                 $(ele).find('a.edit').click(function(event){
                     var wid = $(event.target).parents('.mceNonEditable').attr('id');
+                    window.hWin.HEURIST4.util.stopEvent(event);
                     __addEditWidget( wid );                    
                 });
                 $(ele).find('a.remove').click(function(event){  
@@ -428,6 +430,7 @@ function hCmsEditing(_options) {
                         var wid = $(event.target).parents('.mceNonEditable').attr('id');
                         tinymce.activeEditor.dom.remove( wid );
                     });
+                    window.hWin.HEURIST4.util.stopEvent(event);
                 });
                 
             })
@@ -481,6 +484,8 @@ function hCmsEditing(_options) {
     function __addEditWidget( widgetid_edit ){
         
         var $dlg, buttons = {};
+        
+        if(is_edit_widget_open) return;
             
         function __prepareVal(val){
             if(val==='false'){
@@ -808,21 +813,23 @@ function hCmsEditing(_options) {
         {  container:'cms-add-widget-popup',
            width:750,
            close: function(){
+               is_edit_widget_open = false;
                 $dlg.dialog('destroy');       
                 $dlg.remove();
            },
            open: function(){
-               
+               is_edit_widget_open = true;
+               $dlg.find('#test11').html('BBBBB');         
                //init elements on dialog open
-               var $select = $dlg.find('#widgetName');
+               var $selectWidget = $dlg.find('#widgetName');
                if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){
-                   //fill values for edit
+                   // fill values for edit
                    __restoreValuesInUI(widgetid_edit);
                }
                var is_initial_set = ($dlg.find('#widgetCss').val()=='');
                
-               window.hWin.HEURIST4.ui.initHSelect($select[0], false);
-               $select.on({change:function( event ){
+               window.hWin.HEURIST4.ui.initHSelect($selectWidget[0], false);
+               $selectWidget.on({change:function( event ){
                    var val = $(event.target).val();
                    $dlg.find('div[class^="heurist_"]').hide();    
                    var dele = $dlg.find('div.'+val+'');
@@ -952,7 +959,7 @@ function hCmsEditing(_options) {
                    if(val=='heurist_Map' && 
                     dele.find('select[name="mapdocument"]').find('options').length==0){
                        
-                        var $select = dele.find('select[name="mapdocument"]');
+                        var $selectMapDoc = dele.find('select[name="mapdocument"]');
                        //fill list of mapdpcuments
                         var request = {
                                     q: 't:'+window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'],w: 'a',
@@ -974,11 +981,11 @@ function hCmsEditing(_options) {
                                         }
                                     }//for
                                     
-                                    window.hWin.HEURIST4.ui.fillSelector($select[0], opts);
-                                    if($select.attr('data-mapdocument')>0){
-                                        $select.val( $select.attr('data-mapdocument') );
+                                    window.hWin.HEURIST4.ui.fillSelector($selectMapDoc[0], opts);
+                                    if($selectMapDoc.attr('data-mapdocument')>0){
+                                        $selectMapDoc.val( $selectMapDoc.attr('data-mapdocument') );
                                     }
-                                    window.hWin.HEURIST4.ui.initHSelect($select[0], false);
+                                    window.hWin.HEURIST4.ui.initHSelect($selectMapDoc[0], false);
                                     
                                 }else {
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -997,19 +1004,19 @@ function hCmsEditing(_options) {
                    }else if(val=='heurist_resultListExt' && 
                     dele.find('select[name="rep_template"]').find('options').length==0){
                        
-                        var $select = dele.find('select[name="rep_template"]'); 
+                        var $select3 = dele.find('select[name="rep_template"]'); 
                         
-                        window.hWin.HEURIST4.ui.createTemplateSelector( $select 
-                                           ,null, $select.attr('data-template'));
+                        window.hWin.HEURIST4.ui.createTemplateSelector( $select3 
+                                           ,null, $select3.attr('data-template'));
 
                    
                    }else if(val=='heurist_resultList' && 
                     dele.find('select[name="rendererExpandDetails"]').find('options').length==0){
 
-                        var $select2 = dele.find('select[name="rendererExpandDetails"]'); 
+                        var $select4 = dele.find('select[name="rendererExpandDetails"]'); 
                         
-                        window.hWin.HEURIST4.ui.createTemplateSelector( $select2
-                                           ,[{key:'',title:'Standard record view template'}], $select2.attr('data-template'));
+                        window.hWin.HEURIST4.ui.createTemplateSelector( $select4
+                                           ,[{key:'',title:'Standard record view template'}], $select4.attr('data-template'));
                        
                    }
                    
@@ -1017,7 +1024,7 @@ function hCmsEditing(_options) {
                }}).change();
                
                if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){
-                   window.hWin.HEURIST4.util.setDisabled($select[0], true);
+                   window.hWin.HEURIST4.util.setDisabled($selectWidget[0], true);
                }
                
                

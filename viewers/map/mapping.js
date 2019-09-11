@@ -150,7 +150,7 @@ $.widget( "heurist.mapping", {
     
 
     //storages
-    all_layers: [],    // array of all loaded TOP layers by leaflet id
+    all_layers: [],    // array of all loaded TOP layers by leaflet id   
     all_clusters: {},  // markerclusters
     all_markers: {},
     
@@ -829,7 +829,7 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    //  get summary bunds for set of layers
+    // get summary bunds for set of layers
     //
     getBounds: function(layer_ids){
         
@@ -875,7 +875,7 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    // get or save map bounds in usr prefs/resore and set map
+    // get or save map bounds in usr prefs/restore and set map
     //    
     getSetMapBounds: function(is_set){
         
@@ -903,7 +903,7 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    //
+    // zoom map to given bounds
     //
     zoomToBounds: function(bounds){
         
@@ -1348,8 +1348,13 @@ $.widget( "heurist.mapping", {
         //take map style from user preferences
         var def_style;
         if(suppress_prefs!==true){
-            def_style = window.hWin.HAPI4.get_prefs('map_default_style');
-            if(def_style) def_style = window.hWin.HEURIST4.util.isJSON(def_style);
+            //take default style from topmost map document
+            def_style = this.mapManager.getSymbology();
+            if(!def_style){
+                //otherwise from user preferences
+                def_style = window.hWin.HAPI4.get_prefs('map_default_style');
+                if(def_style) def_style = window.hWin.HEURIST4.util.isJSON(def_style);
+            }
             def_style = this.setStyleDefaultValues(def_style, true);
         }else{
             def_style = {iconType:'rectype', color:'#00b0f0', weight:3, opacity:1, fillOpacity:0.2, iconSize:18};
@@ -1447,7 +1452,7 @@ $.widget( "heurist.mapping", {
         this.selected_rec_ids = (window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) ?_selection:[];
         
         that.nativemap.eachLayer(function(top_layer){    
-            if(top_layer instanceof L.LayerGroup){
+            if(top_layer instanceof L.LayerGroup){  //apply only for geojson
                 top_layer.setStyle(function(feature) { return that._stylerFunction(feature); });
             }
         });
@@ -1480,6 +1485,40 @@ $.widget( "heurist.mapping", {
             this.vistimeline.timeline('setSelection', this.selected_rec_ids);
         }
         
+    },
+    
+    //
+    // get bounds for selection
+    //
+    zoomToSelection: function( _selection ){
+        
+        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)){
+            _selection  =  this.selected_rec_ids;
+        }
+        
+        var that = this, bounds = [], bnd;
+    
+        that.nativemap.eachLayer(function(top_layer){    
+            if(top_layer instanceof L.LayerGroup)   //geojson only
+                top_layer.eachLayer(function(layer){
+                    if (layer instanceof L.Layer && layer.feature && //(!(layer.cluster_layer_id>0)) &&
+                        (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
+                    {
+                        if(layer instanceof L.Marker || layer instanceof L.CircleMarker){    
+                            var ll = layer.getLatLng();
+                            var corner1 = L.latLng(ll.lat-0.25, ll.lng-0.25),
+                                corner2 = L.latLng(ll.lat+0.25, ll.lng+0.25);
+                            bnd = L.latLngBounds(corner1, corner2);            
+                        }else{
+                            bnd = layer.getBounds();
+                        }
+                        bounds.push(bnd);
+                    }
+                });
+        });
+
+        bounds = this._mergeBounds(bounds);
+        if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);
     },
 
     //
@@ -2082,6 +2121,9 @@ $.widget( "heurist.mapping", {
 
     },    
 
+    //
+    // zoom to drawn items
+    //    
     drawZoomTo: function(){
         
             var bounds = this.drawnItems.getBounds();
