@@ -424,6 +424,8 @@ function hCmsEditing(_options) {
                     var wid = $(event.target).parents('.mceNonEditable').attr('id');
                     window.hWin.HEURIST4.util.stopEvent(event);
                     __addEditWidget( wid );                    
+                }).dblclick(function(e){ 
+                   e.preventDefault();
                 });
                 $(ele).find('a.remove').click(function(event){  
                     window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',function(){
@@ -486,6 +488,7 @@ function hCmsEditing(_options) {
         var $dlg, buttons = {};
         
         if(is_edit_widget_open) return;
+        is_edit_widget_open = true;
             
         function __prepareVal(val){
             if(val==='false'){

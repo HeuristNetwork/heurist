@@ -56,13 +56,14 @@ $.widget( "heurist.navigation", {
         // MAIN MENU-----------------------------------------------------
         this.divMainMenu = $("<div>").appendTo(this.element);;
 
-        this.divMainMenuItems = $('<ul>')
+        this.divMainMenuItems = $('<ul>').attr('data-level',0)
                 //.css({'float':'left', 'padding-right':'4em', 'margin-top': '1.5em'})
                 .appendTo( this.divMainMenu );
                 
         if(this.options.orientation=='horizontal'){
             this.divMainMenuItems.addClass('horizontalmenu');
         }
+
 
         var ids = this.options.menu_recIDs;
         if(ids==null){
@@ -186,7 +187,35 @@ $.widget( "heurist.navigation", {
             opts = {position:{ my: "left top", at: "left+20 bottom" }};
         }
         
+        var myTimeoutId = 0;
+        //show hide function
+        var _hide = function(ele) {
+            myTimeoutId = setTimeout(function() {
+                $( ele ).hide();
+                }, 800);
+        },
+        _show = function(ele, parent) {
+            clearTimeout(myTimeoutId);
+            /*
+            $('.menu-or-popup').hide(); //hide other
+            var menu = $( ele )
+            //.css('width', this.btn_user.width())
+            .show()
+            .position({my: "left-2 top", at: "left bottom", of: parent });
+            */
+            return false;
+        };
+        
+        
         this.divMainMenuItems.menu( opts );
+        
+        
+        var all_menues = this.divMainMenuItems.find('ul.ui-menu');
+        this._on( all_menues, {
+            mouseenter : function(){_show()},
+            mouseleave : function(){_hide(all_menues)}
+        });
+        
         
         if(this.options.toplevel_css!==null){
             this.divMainMenuItems.children('li.ui-menu-item').children('a').css(this.options.toplevel_css);
@@ -198,6 +227,10 @@ $.widget( "heurist.navigation", {
             var pageid = $(event.target).attr('data-pageid');
             var page_target = $(event.target).attr('data-target');
             if(!page_target) page_target = '#main-content';
+            
+            $(event.target).parents('.ui-menu[data-level!=0]').hide();
+            /*var mele = $(event.target).parents('.ui-menu[data-level!=0]');
+            if(mele.attr('data-level')!=0) mele.hide();*/
             
             if(pageid>0){
                 

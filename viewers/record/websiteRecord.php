@@ -99,6 +99,11 @@ $site_owner = user_getDbOwner($mysqli); //info about user #2
 if(@$_REQUEST['field']){ 
     
     if($_REQUEST['field']>1){
+        
+        if ($_REQUEST['field']==DT_CMS_SCRIPT && !$system->is_js_acript_allowed()) {
+            exit('alert("Execution of custom script not allowed for this database")');   
+        }
+        
         exit(__getValue($rec, $_REQUEST['field']));
     }else{
         exit('<h2>'.__getValue($rec, DT_NAME).'</h2>'
@@ -217,7 +222,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
 
-    <!-- need only for symboly edit -->    
+    
+    <!-- need only for symbology edit $system->is_member(2) -->    
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editSymbology.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
@@ -565,7 +571,8 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
 	    <div style="float:left;min-height:80px;" id="main-logo">
             <a href="#" style="text-decoration:none;">
         <?php print $image_logo?'<img style="max-height:80px" src="'.$image_logo.'">'
-            :'<div style="text-align:center;display:block;width:250px;padding: 30px 10px;font-size:16px;background:white;color:red" >Logo / banner image</div>';?>
+            :'<div style="text-align:center;display:block;width:250px;padding: 20px 10px;background:white;">'
+            .'<h2 style="color:red;margin:4px">Logo</h2><div style="color:black">Set this as Website header/layout</div></div>';?>
             </a>
         </div>
         
