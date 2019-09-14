@@ -61,7 +61,7 @@ $.widget( "heurist.search", {
     
     // the constructor
     _create: function() {
-
+        
         var that = this;
         
         if(this.element.parent().attr('data-heurist-app-id')){
@@ -140,11 +140,12 @@ $.widget( "heurist.search", {
                                     'height':this.options.btn_entity_filter?'auto':'10px'})
                                 .appendTo( this.element );
         //quick filter by entity
-        $('<label>').text(window.hWin.HR('Entities')+': ').appendTo(this.div_entity_btns);
+        var $d2 = $('<div>').css('float','left');
+        $('<label>').text(window.hWin.HR('Entities')+': ').appendTo($d2);
         this.btns_by_entity = $('<button>').button({label: window.hWin.HR("Show list of entities to filter"), 
                   showLabel:false, icon:'ui-icon-gear'})
-        .css({'font-size':'1.1em'})        
-        .appendTo(this.div_entity_btns);
+        .css({'font-size':'1.1em'}).appendTo($d2);        
+        $d2.appendTo(this.div_entity_btns);
         
         //selector with checkboxes to select filter by entity buttons
         this.btns_by_entity_options = {select_name:'select_btns_by_entity', 
@@ -735,15 +736,15 @@ $.widget( "heurist.search", {
             
                 var btn = $('<div>').button({label:
                 '<img src="'+window.hWin.HAPI4.iconBaseURL + rty_ID + '.png" height="12">'
-                +'<span class="truncate" style="max-width:100px;display:inline-block;margin-left:2px">'
+                +'<span class="truncate" style="max-width:100px;display:inline-block;margin-left:8px">'
                         + window.hWin.HEURIST4.rectypes.names[rty_ID] + '</span>'
-                        + '<span style="float:right;padding:2px;font-size:0.8em;">('   
+                        + '<span style="float:right;padding:2px;font-size:0.8em;">['   
                         +  ((window.hWin.HEURIST4.rectypes.counts[rty_ID]>0)?window.hWin.HEURIST4.rectypes.counts[rty_ID]:0)
-                        +')</span>'}) 
+                        +']</span>'}) 
                     .attr('data-id', rty_ID)
                     .css({'margin-left':'6px','font-size':'0.9em'})        
-                    .addClass('entity-filter-button ui-state-active')
-                    .insertAfter(this.btns_by_entity); //appendTo(this.div_entity_btns);
+                    .addClass('entity-filter-button')  // ui-state-active
+                    .insertAfter(this.btns_by_entity.parent()); //appendTo(this.div_entity_btns);
                 
                 this._on( btn, {  click: function(e){
                        var selval = $(e.target).hasClass('entity-filter-button')
@@ -1695,9 +1696,19 @@ $.widget( "heurist.search", {
             }
         }else{
             
-            var isEnum = this.search_assistant.find(".fld_enum").is(':visible');
+            var isEnum = false;//this.search_assistant.find(".fld_enum").is(':visible');
             
-            if(fld) fld = "f:"+fld+":";
+            if(fld){
+                var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
+                var detailType = '';
+
+                if(Number(fld)>0){
+                    var detailType = detailtypes[fld].commonFields[detailtypes.fieldNamesToIndex['dty_Type']];
+                    isEnum = (detailType=='enum'  || detailType=='relationtype');
+                }
+                
+                fld = "f:"+fld+":";  
+            } 
             
             if(isEnum){
                 var termid = this.search_assistant.find(".sa_termvalue").val();
