@@ -566,7 +566,7 @@ $.widget( "heurist.editing_input", {
             
             if( this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
 
-                var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
+                var $btn_edit_switcher = $( '<span>style editor</span>', {title: 'Open symbology editor'})
                     //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
                     .addClass('smallbutton btn_add_term')
                     .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
@@ -2257,7 +2257,7 @@ console.log('onpaste');
             }*/
             
             if( this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
-                var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
+                var $btn_edit_switcher = $( '<span>style editor</span>', {title: 'Open symbology editor'})
                     //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
                     .addClass('smallbutton btn_add_term')
                     .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
