@@ -1787,11 +1787,10 @@ $loop_cnt++;
     } 
     
 //------------------------
-    function recordSearchByID($system, $id, $need_details = true) 
+    function recordSearchByID($system, $id, $need_details = true, $fields = null) 
     {
-        $mysqli = $system->get_mysqli();
-        $record = mysql__select_row_assoc( $mysqli, 
-            "select rec_ID,
+        if($fields==null){
+            $fields = "rec_ID,
             rec_RecTypeID,
             rec_Title,
             rec_URL,
@@ -1803,9 +1802,12 @@ $loop_cnt++;
             rec_Added,
             rec_Modified,
             rec_AddedByUGrpID,
-            rec_Hash
-            from Records
-            where rec_ID = $id");
+            rec_Hash";
+        }
+        
+        $mysqli = $system->get_mysqli();
+        $record = mysql__select_row_assoc( $mysqli, 
+            "select $fields from Records where rec_ID = $id");
         if ($need_details !== false && $record) {
             recordSearchDetails($system, $record, $need_details);
         }

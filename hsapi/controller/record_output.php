@@ -28,6 +28,8 @@
     * 
     * prefs for geojson, json
     *   extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels
+    *   leaflet - true|false returns strict geojson and timeline data as two separate arrays, withoud details, only header fields rec_ID, RecTypeID and rec_Title
+    *   simplify  true|false simplify  paths with more than 1000 vertices 
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -814,12 +816,18 @@ XML;
     
     $comma = '';
     
+    if($params['leaflet']){ //get only limited set of fields 
+        $retrieve_fields = "rec_ID,rec_RecTypeID,rec_Title";
+    }else{
+        $retrieve_fields = null;
+    }
+    
     $idx = 0;
     while ($idx<count($records)){ //replace to WHILE
     
         $recID = $records[$idx];
         $idx++;
-        $record = recordSearchByID($system, $recID, ($params['format']!='gephi') );
+        $record = recordSearchByID($system, $recID, ($params['format']!='gephi'), $retrieve_fields );
         
         $rty_ID = $record['rec_RecTypeID'];
         
@@ -831,7 +839,7 @@ XML;
         
         if($params['format']=='geojson'){
             
-            $feature = getGeoJsonFeature($record, (@$params['extended']==2), @$params['simplify']);
+            $feature = getGeoJsonFeature($record, (@$params['extended']==2), @$params['simplify'], @$params['leaflet']);
             if($params['leaflet']){ //include only geoenabled features, timeline data goes in separate timeline array
                    if(@$feature['when']){
                         $timeline_data[] = array('rec_ID'=>$recID, 'when'=>$feature['when']['timespans'], 
@@ -1370,8 +1378,9 @@ function array_to_xml( $data, &$xml_data ) {
 // 
 // $extended - include concept codes, term code and labels
 // $simplify - simplify paths with more than 1000 vertices
+// $leaflet_minimum_fields  - only header fields rec_ID, RecTypeID and rec_Title
 //
-function getGeoJsonFeature($record, $extended=false, $simplify=false){
+function getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_minimum_fields=false){
 
     global $system, $defRecTypes, $defDetailtypes, $defTerms;
 
@@ -1516,6 +1525,12 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false){
         } //for detail multivalues
     } //for all details of record
 
+    
+    if($leaflet_minimum_fields){
+        $res['properties']['details'] = null;
+        unset($res['properties']['details']);
+    }
+   
 
     if(count($geovalues)>1){
         $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
