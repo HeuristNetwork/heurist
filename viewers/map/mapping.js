@@ -58,6 +58,8 @@ Thematic mapping
     
     setFeatureSelection - triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
     setFeatureVisibility - applies visibility for given set of heurist recIds (filter from timeline)
+    zoomToSelection
+    setVisibilityAndZoom - show only items with given recordset and zoom 
     
     _onLayerClick - map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
     _clearHighlightedMarkers - removes special "highlight" selection circle markers from map
@@ -175,7 +177,10 @@ $.widget( "heurist.mapping", {
     basemaplayer: null,
     basemap_providers: [
     {name:'MapBox', options:{accessToken: 'pk.eyJ1Ijoib3NtYWtvdiIsImEiOiJjanV2MWI0Y3Awb3NmM3lxaHI2NWNyYjM0In0.st2ucaGF132oehhrpHfYOw'
-    , attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://    creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+    , attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
+    }},
+    {name:'AncientWorld', options:{accessToken: 'pk.eyJ1Ijoib3NtYWtvdiIsImEiOiJjanV2MWI0Y3Awb3NmM3lxaHI2NWNyYjM0In0.st2ucaGF132oehhrpHfYOw'
+    , attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'
     }},
     {name:'Esri.WorldStreetMap'},
     {name:'Esri.WorldTopoMap'},
@@ -411,8 +416,8 @@ $.widget( "heurist.mapping", {
     // data - recordset, heurist query or json
     // this method is invoked on global onserachfinish event in app_timemap
     //
-    addSearchResult: function(data, dataset_name) {
-        this.current_query_layer = this.mapManager.addSearchResult( data, dataset_name );
+    addSearchResult: function(data, dataset_name, preserveViewport ) {
+        this.current_query_layer = this.mapManager.addSearchResult( data, dataset_name, preserveViewport );
     },
 
     //
@@ -625,7 +630,7 @@ $.widget( "heurist.mapping", {
 
             this.all_layers[new_layer._leaflet_id] = new_layer;
             
-            //apply default style and fill markercluster
+            //apply layer ot default style and fill markercluster
             this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style: this.setStyleDefaultValues() ); //{color: "#00b0f0"}
 
             if(!preserveViewport){
@@ -829,7 +834,7 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    // get summary bunds for set of layers
+    // get summary bunds for set of TOP layers
     //
     getBounds: function(layer_ids){
         
@@ -864,7 +869,7 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    //
+    // zoom to TOP layers
     //
     zoomToLayer: function(layer_ids){
         
@@ -1504,15 +1509,7 @@ $.widget( "heurist.mapping", {
                     if (layer instanceof L.Layer && layer.feature && //(!(layer.cluster_layer_id>0)) &&
                         (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
                     {
-                        if(layer instanceof L.Marker || layer instanceof L.CircleMarker){    
-                            var ll = layer.getLatLng();
-                            var corner1 = L.latLng(ll.lat-0.25, ll.lng-0.25),
-                                corner2 = L.latLng(ll.lat+0.25, ll.lng+0.25);
-                            bnd = L.latLngBounds(corner1, corner2);            
-                        }else{
-                            bnd = layer.getBounds();
-                        }
-                        bounds.push(bnd);
+                        bounds.push( that.getLayerBounds(layer) );
                     }
                 });
         });
@@ -1521,6 +1518,7 @@ $.widget( "heurist.mapping", {
         if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);
     },
 
+    
     //
     // returns markers by heurist ids (for filter and highlight)
     //
@@ -1544,6 +1542,82 @@ $.widget( "heurist.mapping", {
         }        
         
         return selected_markers;
+    },
+    
+    //
+    //
+    //
+    getLayerBounds: function (layer){
+        
+        if(layer instanceof L.Marker || layer instanceof L.CircleMarker){    
+            var ll = layer.getLatLng();
+            var corner1 = L.latLng(ll.lat-0.25, ll.lng-0.25),
+                corner2 = L.latLng(ll.lat+0.25, ll.lng+0.25);
+            return L.latLngBounds(corner1, corner2);            
+        }else{
+            return layer.getBounds();
+        }
+    },
+    
+    //
+    // dataset_id -  {mapdoc_id, dataset_name, dataset_id}
+    //
+    setVisibilityAndZoom: function( dataset_id, _selection, need_zoom ){
+
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) {
+            
+            this._clearHighlightedMarkers();
+            
+            var _leaflet_id = this.mapManager.getLayerNativeId(dataset_id); //get _leaflet_id by mapdoc and dataset name
+            
+            //use  window.hWin.HEURIST4.util.findArrayIndex(layer.properties.rec_ID, _selection)
+            var that = this, bounds = [];
+        
+            that.nativemap.eachLayer(function(top_layer){    
+                if((top_layer instanceof L.LayerGroup) && (_leaflet_id==0 || _leaflet_id==top_layer._leaflet_id)){
+                    top_layer.eachLayer(function(layer){
+                          if (layer instanceof L.Layer && layer.feature && (!(layer.cluster_layer_id>0)) &&
+                            (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
+                          {
+                                layer.addTo( that.nativemap );    
+                                
+                                bounds.push( that.getLayerBounds(layer) );
+                                
+                          }else{
+                                layer.remove();    
+                          }
+                    });
+                }
+            });
+            
+            
+            if(this.isMarkerClusterEnabled){
+                /*  @todo
+                var selected_markers = this._getMarkersByRecordID(_selection);
+                for(var idx in selected_markers){
+
+                    var layer = selected_markers[idx];
+                    if(layer.cluster_layer_id>0 && that.all_clusters[layer.cluster_layer_id]){
+                        
+                            if(!that.all_clusters[layer.cluster_layer_id].hasLayer(layer)){
+                                that.all_clusters[layer.cluster_layer_id].addLayer(layer);
+                            }
+                    }else                        
+                        that.all_clusters[layer.cluster_layer_id].removeLayer(layer);
+                    }
+                }
+                */
+            }
+
+            if(need_zoom!==false){
+                bounds = this._mergeBounds(bounds);
+                if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);
+            }
+                
+        }
+        
+        
+        
     },
 
     //

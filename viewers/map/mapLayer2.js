@@ -235,8 +235,9 @@ function hMapLayer2( _options ) {
                 q: request.q,
                 rules: request.rules,
                 w: request.w,
-                leaflet: true, //returns strict geojson and timeline data as two separate arrays
-                simplify: true,
+                //returns strict geojson and timeline data as two separate arrays, withoud details, only header fields rec_ID, RecTypeID and rec_Title
+                leaflet: true, 
+                simplify: true, //simplify paths with more than 1000 vertices
                 zip: 1,
                 format:'geojson'};
                 
@@ -342,7 +343,9 @@ function hMapLayer2( _options ) {
 
         },
         
-        
+        //
+        //
+        //
         getBounds: function (format){
 
             var bnd = options.mapwidget.mapping('getBounds', _nativelayer_id);

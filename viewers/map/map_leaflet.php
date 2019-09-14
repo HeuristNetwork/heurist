@@ -184,7 +184,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 
 <script type="text/javascript">
 
-    var mapping, menu_datasets, btn_datasets, is_init_here = false;
+    var mapping, menu_datasets, btn_datasets;
     
     // Callback function on page initialization - see initPage.php
     function onPageInit(success){
@@ -203,28 +203,27 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
         }
 
         var layout_params = null;
-        is_init_here = __gp('noinit')!='1'; //noint=1 from standard interface therwise published
-        if(is_init_here){    //take layout parameters from url 
-            // params: 
-            //   nomap, notimeline
-            //   controls: [all,none,zoom,bookmark,geocoder,print,publish,legend]
-            //   legend: [basemaps,search,mapdocs|onedoc]
-            //   basemap: name of initial basemap
-            //   extent: fixed extent    
-            layout_params = {};
-            layout_params['nomap'] = __gp('nomap');
-            layout_params['notimeline'] = __gp('notimeline');
-            layout_params['nocluster'] = __gp('nocluster');
-            layout_params['editstyle'] = __gp('editstyle');
-            layout_params['basemap'] = __gp('basemap');  //name of basemap
-            layout_params['extent'] = __gp('extent'); //@todo
-            
-            layout_params['controls'] = __gp('controls'); //comma separated list of visible controls
-            layout_params['legend'] = __gp('legend'); //comma separated list of visible panels: basemap,search,mapdocs
-            layout_params['template'] = __gp('template'); //smarty template for popup info
-            
-            layout_params['published'] = '1';
-        }
+        
+        //take layout parameters from url 
+        // params: 
+        //   nomap, notimeline
+        //   controls: [all,none,zoom,bookmark,geocoder,print,publish,legend]
+        //   legend: [basemaps,search,mapdocs|onedoc]
+        //   basemap: name of initial basemap
+        //   extent: fixed extent    
+        layout_params = {};
+        layout_params['nomap'] = __gp('nomap');
+        layout_params['notimeline'] = __gp('notimeline');
+        layout_params['nocluster'] = __gp('nocluster');
+        layout_params['editstyle'] = __gp('editstyle');
+        layout_params['basemap'] = __gp('basemap');  //name of basemap
+        layout_params['extent'] = __gp('extent'); //@todo
+        
+        layout_params['controls'] = __gp('controls'); //comma separated list of visible controls
+        layout_params['legend'] = __gp('legend'); //comma separated list of visible panels: basemap,search,mapdocs
+        layout_params['template'] = __gp('template'); //smarty template for popup info
+        
+        layout_params['published'] = __gp('published');
         
         mapping = $('#mapping').mapping({
             element_layout: '#mapping',
@@ -239,11 +238,6 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
     //
     function onMapInit( mapwdiget ){
         //take url parameters and open mapdocument or/and perform query
-        if(is_init_here){ 
-            //this case only for initialization of mapping when it is loaded independently 
-            //otherwise initialization is performed in app_timemap.js
-
-                
             //take from frame
             var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);
             //take from top most
@@ -254,40 +248,17 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 }
             }
             
-            /*
-            var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
-            
-            //t:26 f:85:3313  f:1:building
-            // Perform database query if possible (for standalone mode - when map.php is separate page)
-            if( !window.hWin.HEURIST4.util.isempty(q) )
-            {
-                var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
-                
-                if(!window.hWin.HEURIST4.util.isempty(rules)){
-                    try{
-                        rules = JSON.parse(rules);
-                    }catch(ex){
-                        rules = null;    
-                    }
-                }else{
-                    rules = null;
-                }
-                
-                var request = {q: q, rules:rules, w: 'all'}
-                
-                mapwdiget.mapping('addSearchResult', request, 'Current query');
-            }
-            */
-            var request = window.hWin.HEURIST4.util.parseHeuristQuery(location.search );
-            if( !window.hWin.HEURIST4.util.isempty(request['q']) ){
-                mapwdiget.mapping('addSearchResult', request, 'Current query');
-            }
-    
-            if( !window.hWin.HEURIST4.util.isempty(mapdocument) ){
+            var with_mapdoc = !window.hWin.HEURIST4.util.isempty(mapdocument);
+
+            if( with_mapdoc ){
                 mapwdiget.mapping('openMapDocument', mapdocument);
             }
         
-        }//noinit!='1'        
+            var request = window.hWin.HEURIST4.util.parseHeuristQuery(location.search );
+            if( !window.hWin.HEURIST4.util.isempty(request['q']) ){
+                //do not zoom to current search if mapdoc is defined
+                mapwdiget.mapping('addSearchResult', request, 'Current query', with_mapdoc);
+            }
         
     }
 </script>

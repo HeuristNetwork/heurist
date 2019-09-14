@@ -435,7 +435,7 @@ function hMapDocument( _options )
         //
         // returns record to use in mapping widget
         //
-        addSearchResult: function(mapdoc_id, data, dataset_name){
+        addSearchResult: function(mapdoc_id, data, dataset_name, preserveViewport){
 
             var curr_request, original_heurist_query;
             
@@ -443,7 +443,7 @@ function hMapDocument( _options )
                     
                     var recset = data;
                     
-                    original_heurist_query = recset.getRequest();
+                    original_heurist_query = recset.getRequest(); //keep for possible 'save as layer'
                     
                     if(recset.length()<2001){ //limit query by id otherwise use current query
                         curr_request = { w:'all', q:'ids:'+recset.getIds().join(',') };
@@ -458,7 +458,7 @@ function hMapDocument( _options )
             }
                 
             if(!map_documents_content[mapdoc_id]){
-                map_documents_content[mapdoc_id] = new hRecordSet(); //create new recordset
+                map_documents_content[mapdoc_id] = new hRecordSet(); //create new recordset - list of layers for mapdocument
             }
             
             var recset = map_documents_content[mapdoc_id];
@@ -474,7 +474,7 @@ function hMapDocument( _options )
                 _record = recset.getById(recID);
                 recset.setFld(_record, DT_QUERY_STRING, curr_request);
                 //remove previous result set from map
-                if(_record['layer']){
+                if(_record['layer']){ //ref to hMapLayer2
                     _record['layer'].removeLayer();    
                     delete _record['layer']; //clear
                 }
@@ -487,16 +487,46 @@ function hMapDocument( _options )
             _record['original_heurist_query'] = original_heurist_query;
             
             _record['source_rectype'] = RT_QUERY_SOURCE;
+            
+            //always preserve for mapdoc layers 
+            preserveViewport = (mapdoc_id!=0) || (preserveViewport===true);
+            
             recset.setFld(_record, 'layer',
                         new hMapLayer2({rec_datasource: _record, 
                                         mapdoc_recordset: recset, //need to get fields
-                                        mapwidget: options.mapwidget,
-                                        preserveViewport:true })); //zoom to current search  (mapdoc_id!=0)
+                                        mapwidget: options.mapwidget,  //need to call back addGeoJson when data ara obtained from server
+                                        preserveViewport:preserveViewport })); //zoom to current search 
                                               
                                               
             return _record;
         },
         
+        //
+        // returns reference to hMapLayer by mapdoc id and name
+        //
+        getLayerByName: function( mapdoc_id, dataset_name, dataset_id ){
+            
+            var recset = map_documents_content[mapdoc_id];
+            //dataset_name is unique within mapdoc
+            if(recset){
+                
+                var recID;
+                if(dataset_id>0){
+                    recID = dataset_id;
+                }else{
+                    var search_res = recset.getSubSetByRequest({'rec_Title':('='+dataset_name)}); 
+                    if(search_res && search_res.length()>0){
+                        recID = search_res.getOrder();
+                        recID = recID[0];
+                    }    
+                }
+                _record = recset.getById(recID);
+                return _record?_record['layer']:null;
+                
+            }
+            
+            return null;
+        },
         
         //
         // adds arbitrary recorset

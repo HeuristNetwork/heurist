@@ -26,7 +26,7 @@ $.widget( "heurist.app_timemap", {
         recordset: null,
         selection: null, //list of record ids
         
-        layout:null, // ['header','map','timeline']
+        layout:null, // ['header','map','timeline'] - old parameters @todo change in layout_default to layout_params
         
         eventbased:true,
         tabpanel:false,  //if true located on tabcontrol need top:30
@@ -39,14 +39,19 @@ $.widget( "heurist.app_timemap", {
         
         layout_params:null, //params to be passed to map
         mapdocument:null,   // map document loaded on map init
-        init_search:null    // search performed on init
+        init_search:null,    // search performed on init
+        
+        //this value reset to false on every search_finish, need to set it to true explicitely before each search
+        preserveViewport: false,   //zoom to current search
+        use_cache: false   //allow the only request to server for current search - all others requests will show/hide items only
     },
 
     _events: null,
 
     recordset_changed: true,
     map_inited: false,
-    map_currsearch_inited: false,
+    map_curr_search_inited: false,
+    map_cache_got: false, 
 
     // the constructor
     _create: function() {
@@ -94,9 +99,9 @@ $.widget( "heurist.app_timemap", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                     //accept events from the same realm only
                     if(!that._isSameRealm(data)) return;
-//console.log('search finished');                    
+                 
                     that.recordset_changed = true;
-                    that.map_currsearch_inited = false;
+                    that.map_curr_search_inited = false;
                     that.option("recordset", data.recordset); //hRecordSet
                     that._refresh();
                     that.loadanimation(false);
@@ -180,6 +185,7 @@ $.widget( "heurist.app_timemap", {
 
                 this.loadanimation(true);
                 
+                //adding url parameters to map_leaflet.php from widget options
               
                 var mapdoc = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
                 if(mapdoc>0){
@@ -208,6 +214,7 @@ $.widget( "heurist.app_timemap", {
                     }
                     
                 }else{
+                    //init from default_layout
                     if(this.options.layout){
                         //old version
                         if( this.options.layout.indexOf('timeline')<0 )
@@ -216,10 +223,14 @@ $.widget( "heurist.app_timemap", {
                         if( this.options.layout.indexOf('header')<0 )
                             url = url + '&noheader=1';
                     }
-                    url = url + '&noinit=1'; // map will be inited here 
+                    url = url + '&noinit=1'; // map will be inited here (for google only)
+                    
+                    this.options.published = 0;
                 }
                 
-                
+                if(!window.hWin.HEURIST4.util.isempty(this.options.published)){
+                    url = url + '&published='+this.options.published; 
+                }
                 if(this.options.mapdocument>0){
                     url = url + '&mapdocument='+this.options.mapdocument; 
                 }
@@ -251,8 +262,6 @@ $.widget( "heurist.app_timemap", {
 
         if( !window.hWin.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0 ){
 
-//console.log('_initmap');
-
             //access mapping object in mapframe to referesh content 
             var mapping = null;
             if(this.mapframe[0].contentWindow){
@@ -272,10 +281,19 @@ $.widget( "heurist.app_timemap", {
             
             if(this.options.leaflet){ //LEAFLET
             
-                if(!that.map_currsearch_inited && that.options.recordset){
-//console.log(' add current query ');                    
-                    that.map_currsearch_inited = true;
-                    mapping.mapping('addSearchResult', that.options.recordset, 'Current query');
+                if(!that.map_curr_search_inited && that.options.recordset){
+
+                    that.map_curr_search_inited = true;
+                    
+                    if(that.map_cache_got && that.options.use_cache){
+                        //do not reload current search since first request load full dataset - just hide items that are not in current search
+                        var _selection = that.options.recordset.getIds();
+                        mapping.mapping('setVisibilityAndZoom', {mapdoc_id:0, dataset_name:'Current query'}, _selection);
+                    }else{
+                        mapping.mapping('addSearchResult', that.options.recordset, 'Current query', that.options.preserveViewport);
+                        that.options.preserveViewport = false; //restore it before each call if require
+                        that.map_cache_got = true; //@todo need to check that search is really performed
+                    }
                 //}else if(this.options.selection){
                 }
                 
@@ -290,6 +308,7 @@ $.widget( "heurist.app_timemap", {
                 this.map_inited = true;
             
             }else{
+                //google to remove
                 this.map_inited = true;
                 
                 mapping.load( null, //mapdataset,
@@ -300,7 +319,6 @@ $.widget( "heurist.app_timemap", {
                             { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
                     },
                     function(){ //callback function on native map init completion
-    console.log('call addRecordsetLayer on map complete init');
                         var params = {id:'main', recordset:that.options.recordset, title:'Current query'};
                         that.addRecordsetLayer(params, -1);
                     }
@@ -388,6 +406,7 @@ $.widget( "heurist.app_timemap", {
         this._reload_frame();    
     }
     
+    //google to remove
     , getMapDocumentDataById: function(mapdocument_id){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
@@ -397,6 +416,7 @@ $.widget( "heurist.app_timemap", {
         }
     }
     
+    //google to remove
     , loadMapDocumentById: function(recId){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
@@ -408,13 +428,15 @@ $.widget( "heurist.app_timemap", {
     * Add dataset on map
     * params = {id:$.uniqueId(), title:'Title for Legend', query: '{q:"", rules:""}'}
     */
+    //google to remove
     , addQueryLayer: function(params){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
             mapping.map_control.addQueryLayer(params);
         }
     }
-
+    
+    //google to remove
     , addRecordsetLayer: function(params){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
@@ -422,6 +444,7 @@ $.widget( "heurist.app_timemap", {
         }
     }
     
+    //google to remove
     , editLayerProperties: function( dataset_id, legendid, callback ){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping && mapping.map_control){
@@ -429,6 +452,7 @@ $.widget( "heurist.app_timemap", {
         }
     },
     
+    //leaflet
     zoomToSelection:function(selection){
         var mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping){

@@ -898,9 +898,9 @@ function hMapManager( _options )
         // data - recordset, heurist query or json
         // it sends request to server and obtain geojson to be passed to mapping.addGeoJson
         //
-        addSearchResult: function( data, dataset_name )
+        addSearchResult: function( data, dataset_name, preserveViewport )
         {
-            var record = mapDocuments.addSearchResult( 0, data, dataset_name );
+            var record = mapDocuments.addSearchResult( 0, data, dataset_name, preserveViewport );
             
             //refresh search results 
             var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
@@ -928,6 +928,21 @@ function hMapManager( _options )
             
         },
         
+        //
+        // returns leaflet layer_id by database mapdoc and name 
+        //
+        getLayerNativeId: function( dataset ){
+            
+            if(dataset && dataset.mapdoc_id>=0){
+                var layer = mapDocuments.getLayerByName(dataset.mapdoc_id, dataset.dataset_name, dataset.dataset_id);
+                if(layer){
+                    return layer.getNativeId();
+                }
+            }
+            return 0;
+            
+        },
+                
         //
         // switch base map layer
         //
