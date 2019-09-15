@@ -2753,7 +2753,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     
     var rt_checkbox = item.element.attr( "rt-checkbox" );
     if(rt_checkbox>=0){
-        $('<span style="float:left;padding-right:2px" '
+        $('<span style="float:left;padding:2px 0;min-width:1.5em;border:1px dot lightblue" '
                 + ' data-id="'+item.element.attr( 'data-id' )
                 + '" class="rt-checkbox ui-icon ui-icon-check-'+(rt_checkbox==1?'on':'off')+'"/>')
           .appendTo( wrapper );    
