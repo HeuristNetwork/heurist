@@ -582,7 +582,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_ugrid.val(svs[2]==window.hWin.HAPI4.currentUser.ugr_ID ?this.options.params.domain:svs[2]);
                 //svs_ugrid.parent().hide();
                 svs_ugrid.attr('disabled','disabled');;
-
+                
                 if(this.options.params.rectypes) {
                     $(opt_rectypes).val(this.options.params.rectypes[0]);
                     if($(opt_rectypes).hSelect("instance")!=undefined){
@@ -602,8 +602,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 $dlg.find('#svs_Title').val(this.options.params.ui_title);
                 $dlg.find('#svs_ViewMode').val(this.options.params.ui_viewmode);
-                $dlg.find('#svs_SearchOnReset').attr('checked', this.options.params.search_on_reset);
+                $dlg.find('#svs_SearchOnReset').prop('checked', this.options.params.search_on_reset);
 
+                $dlg.find('#svs_PrelimFilterToggle').prop('checked', this.options.params.ui_prelim_filter_toggle!==false);
+                $dlg.find('#svs_PrelimFilterToggleMode'
+                        +(this.options.params.ui_prelim_filter_toggle_mode==1)?'1':'0')
+                        .prop('checked', true);
+                $dlg.find('#svs_PrelimFilterToggleLabel').val(this.options.params.ui_prelim_filter_toggle_label);
+                
+                
             }else{ //add new saved search
                 this.originalRectypeID == null;
 
@@ -617,8 +624,21 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_ugrid.removeAttr('disabled');;
                 //svs_ugrid.parent().show();
                 $dlg.find('#svs_Title').val('');
-                $dlg.find('#svs_SearchOnReset').attr('checked', true);
+                $dlg.find('#svs_SearchOnReset').prop('checked', true);
+                
+                $dlg.find('#svs_PrelimFilterToggle').prop('checked', true);
+                $dlg.find('#svs_PrelimFilterToggleMode0').prop('checked', true);
+                $dlg.find('#svs_PrelimFilterToggleLabel').val(window.hWin.HR('Apply preliminary filter'));
             }
+            this._on($dlg.find('#svs_PrelimFilterToggle'), {change:function( event ){
+                if($(event.target).is(':checked')){
+                    $dlg.find('#svs_PrelimFilterToggleSettings').show();
+                }else{
+                    $dlg.find('#svs_PrelimFilterToggleSettings').hide();
+                }
+            }});
+            $dlg.find('#svs_PrelimFilterToggle').change()
+            
 
             if(isEdit && this.options.params.rectypes[0]==this.originalRectypeID)
             {
@@ -1485,6 +1505,10 @@ $.widget( "heurist.search_faceted_wiz", {
         this.options.params.ui_title =  $dlg.find('#svs_Title').val();
         this.options.params.ui_viewmode = $dlg.find('#svs_ViewMode').val();
         this.options.params.search_on_reset = $dlg.find('#svs_SearchOnReset').is(':checked');
+         
+        this.options.params.ui_prelim_filter_toggle = $dlg.find('#svs_PrelimFilterToggle').is(':checked');
+        this.options.params.ui_prelim_filter_toggle_mode = $dlg.find('#svs_PrelimFilterToggleMode0').is(':checked')?0:1;
+        this.options.params.ui_prelim_filter_toggle_label =$dlg.find('#svs_PrelimFilterToggleLabel').val();
 
         var svs_ugrid = svs_ugrid.val();
         if(parseInt(svs_ugrid)>0){

@@ -329,6 +329,7 @@ window.hWin.HEURIST4.util = {
             
             res_query = arguments[0];
             for (;idx<len;idx++){
+                if(arguments[idx])
                    res_query = window.hWin.HEURIST4.util.mergeTwoHeuristQueries(res_query, arguments[idx]);
             }     
         }   

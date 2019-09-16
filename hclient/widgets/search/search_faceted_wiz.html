@@ -52,7 +52,7 @@ The facets can, however, be based on attributes of other record types linked fro
 <fieldset>
 
 <div>
-<div class="header" style="vertical-align:top;"><label for="svs_Query">Preliminary filter</label></div>
+    <div class="header" style="vertical-align:top;"><label for="svs_Query">Preliminary filter</label></div>
     <div>
         <textarea name="svs_Query" id="svs_Query" rows="2" class="text ui-widget-content ui-corner-all"
                 style="margin-top:0.4em;width:450px"></textarea>
@@ -61,9 +61,32 @@ The facets can, however, be based on attributes of other record types linked fro
         </div>
     </div>    
     <div style="width: 420px; font-size: smaller; margin-top: 5px; margin-bottom: 5px;">
-            A Heurist filter string which extracts a subset of the database, to which the faceted search is then applied.
+                A Heurist filter string which extracts a subset of the database, to which the faceted search is then applied.
+    </div>
+    <div>
+        <label><input name="svs_PrelimFilterToggle" id="svs_PrelimFilterToggle" class="text ui-widget-content ui-corner-all" type="checkbox"
+                style="display:inline-block;margin:0"  checked="true"/>&nbsp;Allow user to toggle preliminary filter</label>
+    </div>
+    <div style="padding:5px 0 0 20px;" id="svs_PrelimFilterToggleSettings">
+        <label>
+        <input name="svs_PrelimFilterToggleMode" id="svs_PrelimFilterToggleMode0" class="text ui-widget-content ui-corner-all" type="radio"
+                style="display:inline-block;margin:0" checked="true"/>&nbsp;Normal : Checked = filter ON</label>
+        <label>&nbsp;&nbsp;&nbsp;
+        <input name="svs_PrelimFilterToggleMode" id="svs_PrelimFilterToggleMode1" class="text ui-widget-content ui-corner-all" type="radio"
+                style="display:inline-block;margin:0" checked="false"/>&nbsp;Reversed : Checked = filter OFF</label>
+        <br>        
+        <div class="header" style="vertical-align:top;display:inline-block;display:inline-block;"><label for="svs_PrelimFilterToggleLabel">Label on user interface</label></div>
+        <div style="padding-top:5px;display:inline-block;">
+            <input type="text" name="svs_PrelimFilterToggleLabel" id="svs_PrelimFilterToggleLabel" class="text ui-widget-content ui-corner-all"
+                maxlength="40" size="40" />
+            <div style="width: 320px; padding:5px 0; font-size: smaller;">
+                     Remember to reverse the sense of the label if Reversed is chosen)
+            </div>
+        </div>    
     </div>
 </div>
+
+
 
 <div>
     <div class="header" style="vertical-align:top">

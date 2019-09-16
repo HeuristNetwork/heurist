@@ -85,6 +85,10 @@ add_filter - additional filter that can be set in run time
 add_filter_original - original search string for add_filter if it is json
 search_on_reset - search for empty form (on reset and on init)
 
+ui_prelim_filter_toggle
+ui_prelim_filter_toggle_mode
+ui_prelim_filter_toggle_label
+
 viewport - collapse facet to limit count of items
 
 rectypes[0] 
@@ -122,6 +126,8 @@ $.widget( "heurist.search_faceted", {
     _current_query: null,
     
     _currentRecordset:null,
+    
+    _use_sup_filter:true, 
 
     // the widget's constructor
     _create: function() {
@@ -543,6 +549,40 @@ $.widget( "heurist.search_faceted", {
        var that = this;
        that._input_fields = {};
        
+       this._use_sup_filter = true;
+       //add toggle for supplementary filter
+       if(this.options.params.ui_prelim_filter_toggle){
+           
+           this._use_sup_filter = (that.options.params.ui_prelim_filter_toggle_mode==0);
+           
+           var lbl = that.options.params.ui_prelim_filter_toggle_label
+                        ?that.options.params.ui_prelim_filter_toggle_label
+                        :window.hWin.HR('Apply preliminary filter');
+           
+           var ele = $("<div>").html(      
+                        '<div class="header"><h4 style="margin:0;">'
+                              +lbl
+                        +'</h4></div>'
+                        +'<div class="input-cell" style="display:block;">'
+                            +'<input type="checkbox" style="margin-left:20px" checked/>'                            
+                        +'</div>').appendTo($fieldset);
+                        
+           this._on( ele.find('input[type="checkbox"]'), { change:                         
+           function(event){
+               
+               if(that.options.params.ui_prelim_filter_toggle_mode==0){
+                    that._use_sup_filter = $(event.target).is(':checked');    
+               }else{
+                    that._use_sup_filter = !$(event.target).is(':checked');                   
+               }
+               
+               that.doSearch();
+           }});             
+                        
+           
+       }
+       
+       
        $.each(this.options.params.facets, function(idx, field){
        
            //content_id+"_"+
@@ -896,7 +936,8 @@ $.widget( "heurist.search_faceted", {
             //2) it makes whole request heavier
             //add additional/supplementary filter
             this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
-                            this.options.params.sup_filter, this.options.params.add_filter);
+                            (this._use_sup_filter)?this.options.params.sup_filter:'', 
+                            this.options.params.add_filter);
             
             
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
@@ -972,7 +1013,8 @@ $.widget( "heurist.search_faceted", {
                 if(this._isInited){
                     //replace with current query   - @todo check for empty 
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query, 
-                                    this.options.params.sup_filter, this.options.params.add_filter);
+                                    (this._use_sup_filter)?this.options.params.sup_filter:'',
+                                    this.options.params.add_filter);
                 }else{
                     //replace with list of ids
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query,
@@ -1039,7 +1081,7 @@ $.widget( "heurist.search_faceted", {
 
                         //add additional/supplementary filter
                         query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
-                                        this.options.params.sup_filter,   //suplementary filter defined in wiz
+                                        (this._use_sup_filter)?this.options.params.sup_filter:'',   //suplementary filter defined in wiz
                                         this.options.params.add_filter);  //dynaminc addition filter
 
                         
