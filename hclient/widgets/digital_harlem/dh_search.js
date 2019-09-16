@@ -94,14 +94,150 @@ $.widget( "heurist.dh_search", {
             this._refresh();
         }
 
-        //find Map Documents (19) for featured individuals ---------------------------------------
         if(this._isDigitalHarlem){
-            
             this.element.on("myOnShowEvent", function(event){
                 if( event.target.id == that.element.attr('id')){
                     that._refresh();
                 }
             });
+        }
+        
+        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+'  '+
+                        window.hWin.HAPI4.Event.ON_SYSTEM_INITED,
+            function(e, data) {
+                // show progress div
+                if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
+                    if(data && !window.hWin.HEURIST4.util.isempty(data.q)){
+                        that.res_div.hide();
+                        that.res_div_progress.show();
+                    }
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
+                    that.res_div.show();
+                    that.res_div_progress.hide();
+                    
+                }else if(e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
+//alas it does not work - it is triggered before this widget is created                    
+                    
+                    if(that._isDigitalHarlem){
+                     
+                        var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
+                        if(!window.hWin.HEURIST4.util.isempty(init_search)){
+                            var request = {q: init_search, w: 'a', f: 'map', source:'init' };
+                            setTimeout(function(){
+                                window.hWin.HAPI4.SearchMgr.doSearch(document, request);
+                            }, 3000);
+                        }else{
+                            //trigger search finish to init some widgets
+                            $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null} );   
+                        }
+                        
+                    }
+                    
+                }
+                
+        });
+
+        var lt = window.hWin.HAPI4.sysinfo['layout'];
+        if(lt=='Beyond1914' || lt=='UAdelaide'){
+            //find on page external search_value and search_button elements  - for BORO external search form
+            var ele_search = $('#search_query'); //$(window.hWin.document).find('#search_query');
+            if(ele_search.length>0){
+                
+                this._on( ele_search, {
+                    keypress: function(e){
+                        var code = (e.keyCode ? e.keyCode : e.which);
+                        if (code == 13) {
+                            window.hWin.HEURIST4.util.stopEvent(e);
+                            e.preventDefault();
+                            
+                            that.doSearch3( ele_search.val() );
+                        }
+                    }
+                });
+                
+                var btn_search = $('#search_button');
+                this._on( btn_search, {
+                    click:  function(){
+                            that.doSearch3( ele_search.val() );}
+                });
+            }
+            
+            // for expertnation layouts the container page is hidden initially
+            // need to refresh-init when it becomes visible
+            $('.bor-page-search').on("myOnShowEvent", function(event){
+                if( event.target.id == 'bor-page-search'){
+                    that._refresh();
+                }
+            });
+            
+            
+        }
+        
+        
+        
+    }, //end _create
+
+    // events bound via _on are removed automatically
+    // revert other modifications here
+    _destroy: function() {
+
+        //
+        $(this.document).off( window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART );
+
+        this.search_list.remove();
+        this.search_faceted.remove();
+
+        if(this.btn_fi_menu) {
+            this._off( this.btn_fi_menu, 'click');
+            this.btn_fi_menu.remove();
+            this.menu_fi.remove();
+        }
+    },
+
+
+
+    _setOption: function( key, value ) {
+        this._super( key, value );
+        /*
+        if(key=='rectype_set'){
+        this._refresh();
+        }*/
+    },
+
+
+
+    /* private function */
+    _refresh: function(){
+
+        var that = this;
+        if(!this.usr_SavedSearch){  //find all saved searches for current user
+
+            window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.UGrpID},
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        that.usr_SavedSearch = response.data;
+                        that._refresh();
+                    }
+            });
+        }else{
+            this._updateSavedSearchList();
+        }
+
+    },
+
+    isInited: function(){
+        return (this.usr_SavedSearch!=null);  
+    },
+
+    //
+    // redraw list of saved searches
+    //
+    _updateSavedSearchList: function(){
+        this.search_list.empty();
+        
+        
+        //find Map Documents (19) for featured individuals ---------------------------------------
+        if(this._isDigitalHarlem){
             
             var query = null;
             // "Featured Individuals"
@@ -116,7 +252,6 @@ $.widget( "heurist.dh_search", {
                 detail: 'header',
                 source:this.element.attr('id') };
             //perform search
-            
             window.hWin.HAPI4.RecordMgr.search(request, function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
                     var resdata = new hRecordSet(response.data);
@@ -191,142 +326,8 @@ $.widget( "heurist.dh_search", {
             
         }//_isDigitalHarlem
         
-        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+'  '+
-                        window.hWin.HAPI4.Event.ON_SYSTEM_INITED,
-            function(e, data) {
-                // show progress div
-                if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
-                    if(data && !window.hWin.HEURIST4.util.isempty(data.q)){
-                        that.res_div.hide();
-                        that.res_div_progress.show();
-                    }
-                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
-                    that.res_div.show();
-                    that.res_div_progress.hide();
-                    
-                }else if(e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
-//alas it does not work - it is triggered before this widget is created                    
-//console.log(' INITED! ');
-                    
-                    if(that._isDigitalHarlem){
-                     
-                        var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
-                        if(!window.hWin.HEURIST4.util.isempty(init_search)){
-                            var request = {q: init_search, w: 'a', f: 'map', source:'init' };
-                            setTimeout(function(){
-                                window.hWin.HAPI4.SearchMgr.doSearch(document, request);
-                            }, 3000);
-                        }else{
-                            //trigger search finish to init some widgets
-                            $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null} );   
-                        }
-                        
-                    }
-                    
-                }
-                
-        });
-
-        var lt = window.hWin.HAPI4.sysinfo['layout'];
-        if(lt=='Beyond1914' || lt=='UAdelaide'){
-            //find on page external search_value and search_button elements  - for BORO external search form
-            var ele_search = $('#search_query'); //$(window.hWin.document).find('#search_query');
-            if(ele_search.length>0){
-                
-                this._on( ele_search, {
-                    keypress: function(e){
-                        var code = (e.keyCode ? e.keyCode : e.which);
-                        if (code == 13) {
-                            window.hWin.HEURIST4.util.stopEvent(e);
-                            e.preventDefault();
-                            
-                            that.doSearch3( ele_search.val() );
-                        }
-                    }
-                });
-                
-                var btn_search = $('#search_button');
-                this._on( btn_search, {
-                    click:  function(){
-                            that.doSearch3( ele_search.val() );}
-                });
-            }
-            
-            // for expertnation layouts the container page is hidden initially
-            // need to refresh-init when it becomes visible
-            $('.bor-page-search').on("myOnShowEvent", function(event){
-                if( event.target.id == 'bor-page-search'){
-                    that._refresh();
-                }
-            });
-            
-            
-        }
         
         
-        
-    }, //end _create
-
-
-
-    // events bound via _on are removed automatically
-    // revert other modifications here
-    _destroy: function() {
-
-        //
-        $(this.document).off( window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART );
-
-        this.search_list.remove();
-        this.search_faceted.remove();
-
-        if(this.btn_fi_menu) {
-            this._off( this.btn_fi_menu, 'click');
-            this.btn_fi_menu.remove();
-            this.menu_fi.remove();
-        }
-    },
-
-
-
-    _setOption: function( key, value ) {
-        this._super( key, value );
-        /*
-        if(key=='rectype_set'){
-        this._refresh();
-        }*/
-    },
-
-
-
-    /* private function */
-    _refresh: function(){
-
-        var that = this;
-        if(!this.usr_SavedSearch){  //find all saved searches for current user
-
-            window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.UGrpID},
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that.usr_SavedSearch = response.data;
-                        that._refresh();
-                    }
-            });
-        }else{
-            this._updateSavedSearchList();
-        }
-
-    },
-
-    isInited: function(){
-        return (this.usr_SavedSearch!=null);  
-    },
-
-    //
-    // redraw list of saved searches
-    //
-    _updateSavedSearchList: function(){
-
-        this.search_list.empty();
 
         var that = this, facet_params = null, isfaceted = false, cnt = 0;
 
