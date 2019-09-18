@@ -18,6 +18,16 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*
+main methods
+    _initFacetQueries - creates facet searches (counts and values for particular facets) and main query
+    _fillQueryWithValues - fille queries with values
+    doSearch - performs main search
+    _recalculateFacets - search for facet values
+    _redrawFacets 
+
+*/
+
 /* Explanation of faceted search
 
 There are two types of queries: 1) to search facet values 2) to search results
@@ -56,7 +66,7 @@ currentvalue:
 history:  - to keep facet values (to avoid redundat search)
 
 ],
-the simple (no level) facet
+//the simple (no level) facet
 [
 id: 1
 code: 10:1 
@@ -66,13 +76,26 @@ levels: []
 search: [t:10 f:1] 
 orderby: count|null
 groupby
+],
+//multi field facet ???
+[
+id: [1,2]
+code: [10:1,10:2]
+title: "Family Name"
+type:  "freetext"
+levels: []
+search: [t:10 f:1] 
+orderby: count|null
+groupby
+],
 ]
 
-]
 
-
+--------------
 NOTE - to make search for facet value faster we may try to omit current search in query and search for entire database
-  
+
+---------------
+TOP PARAMETERS for entire search
 facet search general parameters are the same to saved search plus several special
 
 domain
@@ -85,9 +108,12 @@ add_filter - additional filter that can be set in run time
 add_filter_original - original search string for add_filter if it is json
 search_on_reset - search for empty form (on reset and on init)
 
-ui_prelim_filter_toggle
-ui_prelim_filter_toggle_mode
-ui_prelim_filter_toggle_label
+ui_prelim_filter_toggle   - allow toggle on/off sup_filter
+ui_prelim_filter_toggle_mode - direct or reverse mode (0|1)
+ui_prelim_filter_toggle_label - label on UI
+
+ui_additional_filter - show search everything input (for add_filter)
+ui_additional_filter_label
 
 viewport - collapse facet to limit count of items
 
@@ -344,10 +370,10 @@ $.widget( "heurist.search_faceted", {
     }
 
     //Methods specific for this widget---------------------------------
-
+    
     //
-    // crerate lists of queries to search facet values
-    // create main JSON query
+    // 1. create lists of queries to search facet values
+    // 2. create main JSON query
     //
     ,_initFacetQueries: function(){
        
@@ -559,13 +585,11 @@ $.widget( "heurist.search_faceted", {
                         ?that.options.params.ui_prelim_filter_toggle_label
                         :window.hWin.HR('Apply preliminary filter');
            
-           var ele = $("<div>").html(      
-                        '<div class="header"><h4 style="margin:0;">'
-                              +lbl
-                        +'</h4></div>'
-                        +'<div class="input-cell" style="display:block;">'
-                            +'<input type="checkbox" style="margin-left:20px" checked/>'                            
-                        +'</div>').appendTo($fieldset);
+           var ele = $("<div>").html(
+                        '<h4 style="margin:0;"><div class="input-cell" style="display:block;">'
+                            +'<input type="checkbox" checked/>'                            
+                            +lbl
+                        +'</h4>').css({'border-bottom': '1px solid lightgray'}).appendTo($fieldset);
                         
            this._on( ele.find('input[type="checkbox"]'), { change:                         
            function(event){
@@ -578,8 +602,54 @@ $.widget( "heurist.search_faceted", {
                
                that.doSearch();
            }});             
+       }
+
+       if(this.options.params.ui_additional_filter){
+           
+           var lbl = that.options.params.ui_additional_filter_label
+                        ?that.options.params.ui_additional_filter_label
+                        :window.hWin.HR('Search everything');
+                        
                         
            
+           var ele = $("<div>").html(
+           '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
+                +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
+                +'<div style=" padding:5px 0 10px 21px;display: block;">'
+                    +'<div class="input-div" style="display: inline-block;">'
+                    +'<input class="ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="width: 150px;">'
+                    +'</div><button title="To clear previous search click the RESET button" class="smallbutton ui-button ui-corner-all ui-widget ui-button-icon-only">'
+                        +'<span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span></button>'
+                    +'</div>').css({'border-bottom': '1px solid lightgray'}).appendTo($fieldset);
+                        
+                        
+           /*ele.find(".start-search") class="input-cell"
+                        .button({icons: {primary: "ui-icon-search"}, text:false})
+                        .attr('title', window.hWin.HR('Start search'))
+                        .css({'height':'16px', 'width':'16px'})*/
+                        
+           this._on( ele.find('button'), { click:                         
+           function(event){
+               that.options.params.add_filter = ele.find('input').val();
+               //$(event.target).parents('.input-cell').find('input').val();  
+console.log(that.options.params.add_filter);               
+               that.doSearch();
+           }});   
+           
+           this._on( ele.find('input'), {
+                            keypress:
+                            function(e){
+                                var code = (e.keyCode ? e.keyCode : e.which);
+                                if (code == 13) {
+                                    that.options.params.add_filter = $(e.target).val();
+                                    window.hWin.HEURIST4.util.stopEvent(e);
+                                    e.preventDefault();
+                                    that.doSearch();
+                                }
+                            }});
+           
+                     
+
        }
        
        
@@ -802,12 +872,12 @@ $.widget( "heurist.search_faceted", {
 
         return res;                
     }
-
+    
     // we have a query (that searches main recordtype) it is created once (onReset)
     // for example {"t": "3"},{"f:1":"$X73105"},{"linked_to:4:15":[{t: "4"},{f:22: "$X47975"}]}
     // $Xn - is facet values to be substituted in this query
     //
-    // 1. substiture Xn variable in query array with value from input form
+    // 1. substitute Xn variable in query array with value from input form
     // 2. remove branch in query if all variables are empty (except root)
     //
     //  facet_index_do_not_touch - $Xn will be relaced with $FACET_VALUE - to use on server side for count calculations
@@ -818,7 +888,8 @@ $.widget( "heurist.search_faceted", {
         var that = this;
         var isbranch_empty = true;
             
-        $(q).each(function(idx, predicate){ //loop through all predicates
+        $(q).each(function(idx, predicate){ //loop through all predicates of main query 
+        // [{"f:1":$X680},....]
             
             $.each(predicate, function(key,val)
             {
@@ -897,7 +968,9 @@ $.widget( "heurist.search_faceted", {
         return isbranch_empty;
     }
     
-    
+    //
+    //
+    //
     ,doSearch : function(){
 
 //console.log('dosearchj');
@@ -2057,6 +2130,5 @@ if(!detailtypes[dtID]){
     }
 
 
-
-
+    
 });

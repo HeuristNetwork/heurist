@@ -603,12 +603,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_Title').val(this.options.params.ui_title);
                 $dlg.find('#svs_ViewMode').val(this.options.params.ui_viewmode);
                 $dlg.find('#svs_SearchOnReset').prop('checked', this.options.params.search_on_reset);
+                
+                $dlg.find('#svs_AdditionalFilter').prop('checked', this.options.params.ui_additional_filter!==false);
+                $dlg.find('#svs_AdditionalFilterLabel').val(this.options.params.ui_additional_filter_label);
 
                 $dlg.find('#svs_PrelimFilterToggle').prop('checked', this.options.params.ui_prelim_filter_toggle!==false);
                 $dlg.find('#svs_PrelimFilterToggleMode'
                         +(this.options.params.ui_prelim_filter_toggle_mode==1)?'1':'0')
                         .prop('checked', true);
-                $dlg.find('#svs_PrelimFilterToggleLabel').val(this.options.params.ui_prelim_filter_toggle_label);
+                $dlg.find('#svs_PrelimFilterToggleLabel')
                 
                 
             }else{ //add new saved search
@@ -626,10 +629,14 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_Title').val('');
                 $dlg.find('#svs_SearchOnReset').prop('checked', true);
                 
+                $dlg.find('#svs_AdditionalFilter').prop('checked', false);
+                $dlg.find('#svs_AdditionalFilterLabel').val(window.hWin.HR('Search everything'));
+                
                 $dlg.find('#svs_PrelimFilterToggle').prop('checked', true);
                 $dlg.find('#svs_PrelimFilterToggleMode0').prop('checked', true);
                 $dlg.find('#svs_PrelimFilterToggleLabel').val(window.hWin.HR('Apply preliminary filter'));
             }
+
             this._on($dlg.find('#svs_PrelimFilterToggle'), {change:function( event ){
                 if($(event.target).is(':checked')){
                     $dlg.find('#svs_PrelimFilterToggleSettings').show();
@@ -640,6 +647,17 @@ $.widget( "heurist.search_faceted_wiz", {
             $dlg.find('#svs_PrelimFilterToggle').change()
             
 
+            this._on($dlg.find('#svs_AdditionalFilter'), {change:function( event ){
+                if($(event.target).is(':checked')){
+                    $dlg.find('.svs_AdditionalFilter').show();
+                }else{
+                    $dlg.find('.svs_AdditionalFilter').hide();
+                }
+            }});
+            $dlg.find('#svs_AdditionalFilter').change()
+            
+            
+            
             if(isEdit && this.options.params.rectypes[0]==this.originalRectypeID)
             {
                 $("#btnSave").css({'visibility':'visible','margin-left':'20px'});//$("#btnSave").show();
@@ -1509,6 +1527,9 @@ $.widget( "heurist.search_faceted_wiz", {
         this.options.params.ui_prelim_filter_toggle = $dlg.find('#svs_PrelimFilterToggle').is(':checked');
         this.options.params.ui_prelim_filter_toggle_mode = $dlg.find('#svs_PrelimFilterToggleMode0').is(':checked')?0:1;
         this.options.params.ui_prelim_filter_toggle_label =$dlg.find('#svs_PrelimFilterToggleLabel').val();
+        
+        this.options.params.ui_additional_filter = $dlg.find('#svs_AdditionalFilter').is(':checked');
+        this.options.params.ui_additional_filter_label =$dlg.find('#svs_AdditionalFilterLabel').val();
 
         var svs_ugrid = svs_ugrid.val();
         if(parseInt(svs_ugrid)>0){

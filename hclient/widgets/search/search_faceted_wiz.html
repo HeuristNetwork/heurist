@@ -52,6 +52,20 @@ The facets can, however, be based on attributes of other record types linked fro
 <fieldset>
 
 <div>
+    <div class="header">
+        <label for="svs_AdditionalFilter">Show simple search</label>
+    </div>
+    <input name="svs_AdditionalFilter" id="svs_AdditionalFilter" class="text ui-widget-content ui-corner-all" type="checkbox"
+            style="display:inline-block;margin:0" title="Show simple search on top of facets"/>
+        <div class="header svs_AdditionalFilter" style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
+            <label for="svs_AdditionalFilterLabel">Label on user interface</label></div>
+        <div style="padding-top:5px;display:inline-block;" class="svs_AdditionalFilter">
+            <input type="text" name="svs_AdditionalFilterLabel" id="svs_AdditionalFilterLabel" class="text ui-widget-content ui-corner-all"
+                maxlength="40" size="40" />
+        </div>    
+</div>
+
+<div>
     <div class="header" style="vertical-align:top;"><label for="svs_Query">Preliminary filter</label></div>
     <div>
         <textarea name="svs_Query" id="svs_Query" rows="2" class="text ui-widget-content ui-corner-all"
@@ -75,7 +89,7 @@ The facets can, however, be based on attributes of other record types linked fro
         <input name="svs_PrelimFilterToggleMode" id="svs_PrelimFilterToggleMode1" class="text ui-widget-content ui-corner-all" type="radio"
                 style="display:inline-block;margin:0" checked="false"/>&nbsp;Reversed : Checked = filter OFF</label>
         <br>        
-        <div class="header" style="vertical-align:top;display:inline-block;display:inline-block;"><label for="svs_PrelimFilterToggleLabel">Label on user interface</label></div>
+        <div class="header" style="vertical-align:top;display:inline-block;"><label for="svs_PrelimFilterToggleLabel">Label on user interface</label></div>
         <div style="padding-top:5px;display:inline-block;">
             <input type="text" name="svs_PrelimFilterToggleLabel" id="svs_PrelimFilterToggleLabel" class="text ui-widget-content ui-corner-all"
                 maxlength="40" size="40" />
