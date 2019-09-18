@@ -1019,7 +1019,8 @@ $query = 'CREATE TABLE sysDashboard ('
     
 
     //
-    // returns null if some of csv is not integer - repalce with prepareIds?
+    // returns null if some of csv is not integer 
+    // otherwise returns validated string with CSV
     //
     function getCommaSepIds($value)
     {

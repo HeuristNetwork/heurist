@@ -669,7 +669,7 @@ class HPredicate {
         $key = explode(":", $key);
         $this->pred_type  = $key[0];
         $ll = count($key);
-        if($ll>1){
+        if($ll>1){ //get field ids "f:5" -> 5
             $this->field_id = $key[$ll-1];
         }
 
@@ -827,6 +827,13 @@ class HPredicate {
         $p = "rd".$this->qlevel.".";
         $p = "";
         
+        $several_ids = prepareIds($this->field_id); //getCommaSepIds - returns validated string
+        if(is_array($several_ids) && count($several_ids)>0){
+            $this->field_id = $several_ids[0];    
+        }else{
+            $several_ids = null;
+        }
+        
         if($this->pred_type=='count' || $this->pred_type=='cnt'){
             $this->field_type = 'link'; //integer without quotes
         }else if(intval($this->field_id)>0){
@@ -895,13 +902,25 @@ class HPredicate {
         }else if( $is_empty ){ //search for records where field value is not defined
             
             $res = "NOT exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
-            .$p."dtl_DetailTypeID=".$this->field_id.")";
+            .$p.' dtl_DetailTypeID';
+            if($several_ids){
+                $res = $res.' IN ('.implode(',',$several_ids).'))';    
+            }else{
+                $res = $res.'='.$this->field_id.')';
+            }
 
         }else if($this->pred_type=='count' || $this->pred_type=='cnt'){ //search for records where field occurs N times (repeatable values)
 
             $res = "(select count(dtl_ID) from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
-            .$p."dtl_DetailTypeID=".$this->field_id.")".$val;
+            .$p.'dtl_DetailTypeID';
         
+            if($several_ids){
+                $res = $res.' IN ('.implode(',',$several_ids).'))';    
+            }else{
+                $res = $res.'='.$this->field_id.')';
+            }
+            
+            $res = $res.$val;
             
         }else{
             
@@ -923,7 +942,15 @@ class HPredicate {
             //old $res = $p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val;
 
             $res = "exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
-            .$p."dtl_DetailTypeID=".$this->field_id." AND ".$field_name.$val.")";
+            .$p.'dtl_DetailTypeID';
+            
+            if($several_ids){
+                $res = $res.' IN ('.implode(',',$several_ids).')';    
+            }else{
+                $res = $res.'='.$this->field_id;
+            }
+            
+            $res = $res.' AND '.$field_name.$val.')';
 
         }
 
