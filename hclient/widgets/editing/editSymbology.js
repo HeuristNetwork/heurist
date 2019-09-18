@@ -76,7 +76,47 @@ function editSymbology(current_value, mode_edit, callback){
     fillColor
     animation
     */                    
-    _editing_symbology.initEditForm([                
+    var editFields;
+    if(mode_edit==2){
+        editFields = [
+        
+        {"dtID": "color",
+            "dtFields":{
+                "dty_Type":"freetext",
+                "rst_DisplayName": "Stroke color:",
+                "rst_DisplayHelpText": "",
+                "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+        }},
+        {"dtID": "weight",
+            "dtFields":{
+                "dty_Type":"integer",
+                "rst_DisplayName": "Stroke width:",
+                "rst_DisplayHelpText": "Stroke width in pixels"
+        }},
+        {"dtID": "opacity",
+            "dtFields":{
+                "dty_Type":"float",
+                "rst_DisplayName": "Stroke opacity:",
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+        }},
+        
+        {"dtID": "fillColor",
+            "dtFields":{
+                "dty_Type":"freetext",
+                "rst_DisplayName": "Fill color:",
+                "rst_DisplayHelpText": "Fill color. Defaults to the value of the color option",
+                "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+        }},
+        {"dtID": "fillOpacity",
+            "dtFields":{
+                "dty_Type":"float",
+                "rst_DisplayName": "Fill opacity:",
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+        }}
+        ];
+        
+    }else{
+        editFields = [                
         {"dtID": "sym_Name",
             "dtFields":{
                 "dty_Type":"freetext",
@@ -84,6 +124,13 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayName":"Name:",
                 "rst_Display": (mode_edit===true)?"visible":"hidden"
         }},
+        
+        
+        {
+        "groupHeader": "Symbols",
+        "groupTitleVisible": true,
+        "groupType": "group",
+            "children":[
 
         {"dtID": "iconType",
             "dtFields":{
@@ -91,7 +138,6 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayName": "Icon source:",
                 "rst_DefaultValue": "y",
                 "rst_DisplayHelpText": "Define type and source of icon",
-                "rst_Display": (mode_edit!=2)?"visible":"hidden",
                 "rst_FieldConfig":[
                     {"key":"url","title":"Image"},
                     {"key":"iconfont","title":"Icon font"},
@@ -105,7 +151,7 @@ function editSymbology(current_value, mode_edit, callback){
                 "dty_Type":"url",
                 "rst_DisplayName": "Icon URL:",
                 "rst_DisplayWidth":40,
-                "rst_Display":(mode_edit!=2 && current_value['iconType']=='url'?"visible":"hidden")
+                "rst_Display":(current_value['iconType']=='url'?"visible":"hidden")
         }},
         {"dtID": "iconFont",
             "dtFields":{
@@ -114,17 +160,24 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayWidth":40,
                 "rst_Display":(current_value['iconType']=='iconfont'?"visible":"hidden"),
                 "rst_DefaultValue": "location",
-                "rst_Display": (mode_edit!=2)?"visible":"hidden",
-                "rst_DisplayHelpText": "Define name of icon from set: http://mkkeck.github.io/jquery-ui-iconfont/"
+                "rst_DisplayHelpText": "Define name of icon from set: <a href='http://mkkeck.github.io/jquery-ui-iconfont/' target=_blank>http://mkkeck.github.io/jquery-ui-iconfont/</a>"
         }},
         {"dtID": "iconSize",
             "dtFields":{
                 "dty_Type":"integer",
-                "rst_DisplayName": "Icon size:",
-                "rst_Display": (mode_edit!=2)?"visible":"hidden"
+                "rst_DisplayName": "Icon size:"
                 //"rst_DefaultValue": 18,
-        }},
+        }}
+        
+        ]},
 
+        {
+        "groupHeader": "Outline",
+        "groupTitleVisible": true,
+        "groupType": "group",
+            "children":[
+       
+        
         {"dtID": "stroke",
             "dtFields":{
                 "dty_Type":"enum",
@@ -134,8 +187,7 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_FieldConfig":[
                     {"key":"0","title":"No"},
                     {"key":"1","title":"Yes"}
-                ],
-                "rst_Display": (mode_edit!=2)?"visible":"hidden"
+                ]
         }},
         {"dtID": "color",
             "dtFields":{
@@ -154,8 +206,17 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"float",
                 "rst_DisplayName": "Stroke opacity:",
-                "rst_DisplayHelpText": ""
-        }},
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+        }}
+        
+        ]},
+
+        {
+        "groupHeader": "Are fill",
+        "groupTitleVisible": true,
+        "groupType": "group",
+            "children":[
+        
         /*                    
         lineCap    String    'round'    A string that defines shape to be used at the end of the stroke.
         lineJoin    String    'round'    A string that defines shape to be used at the corners of the stroke.
@@ -171,8 +232,7 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_FieldConfig":[
                     {"key":"0","title":"No"},
                     {"key":"1","title":"Yes"}
-                ],
-                "rst_Display": (mode_edit!=2)?"visible":"hidden",
+                ]
         }},
         {"dtID": "fillColor",
             "dtFields":{
@@ -185,11 +245,16 @@ function editSymbology(current_value, mode_edit, callback){
             "dtFields":{
                 "dty_Type":"float",
                 "rst_DisplayName": "Fill opacity:",
-                "rst_DisplayHelpText": ""
+                "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
         }}
+        ]}
         //fillRule  A string that defines how the inside of a shape is determined.
 
-        ], recdata);
+        ];
+    }
+    
+    
+    _editing_symbology.initEditForm( editFields, recdata );
 
     var edit_buttons = [
         {text:window.hWin.HR('Cancel'), 
@@ -228,7 +293,7 @@ function editSymbology(current_value, mode_edit, callback){
     //
     edit_dialog = popup_dlg.dialog({
         autoOpen: true,
-        height: (mode_edit==2)?300:600,
+        height: (mode_edit==2)?300:800,
         width:  740,
         modal:  true,
         title: window.hWin.HR('Define Symbology'),
