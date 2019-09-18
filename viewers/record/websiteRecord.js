@@ -120,8 +120,8 @@ function hCmsEditing(_options) {
                     });            
 
                 editor.addButton('customCloseButton', {
-                      icon: 'close',
-                      text: 'Close',
+                      icon: 'checkmark',
+                      text: 'Done',
                       onclick: function (_) {
                           __iniLoadPageById(0); //reload current page
                       }
