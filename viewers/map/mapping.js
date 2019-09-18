@@ -1378,6 +1378,14 @@ $.widget( "heurist.mapping", {
             style.iconFont = def_style.iconFont;
         }
         
+        //opacity accepts values 0~1 so need to 
+        if(style.fillOpacity>1){
+            style.fillOpacity = style.fillOpacity/100;
+        }
+        if(style.opacity>1){
+            style.opacity = style.opacity/100;
+        }
+        
         return style;
     },        
     
