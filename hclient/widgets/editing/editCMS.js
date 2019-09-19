@@ -364,11 +364,65 @@ function editCMS(home_page_record_id, main_callback){
                                             
                                             var preview_frame = edit_dialog.find('#web_preview');
                                             preview_frame.on({load:function(){
+                                                //coverall for left side panel by invocation from websiteRecord.js
+                                                preview_frame[0].contentWindow.cmsEditing.onEditPageContent = function(is_exit, widgets, dest){
+                                                    
+                                                    var curtain = edit_dialog.find('.ui-layout-west').find('.coverall-div-bare'); 
+                                                    
+                                                    if(is_exit){
+                                                        curtain.remove();
+                                                    }else if(dest=='remove'){
+                                                        curtain.find('a[widgetid="'+widgets+'"]').parent('li').remove();
+                                                            
+                                                    }else{
+                                                        if(curtain.length==0){ //add curtain
+                                                            curtain = $('<div>').addClass('coverall-div-bare')
+                                                                  .css({'zIndex':9999,background:'rgba(0,0,0,0.6)'})
+                                                                  .appendTo(edit_dialog.find('.ui-layout-west'));
+                                                        }
+                                                        var wlist = null;
+                                                        if(dest=='add'){
+                                                            wlist = curtain.find('ul');
+                                                            widgets = [widgets];
+                                                        }
+                                                        if(!wlist || wlist.length==0){
+                                                            curtain.empty();
+                                                            if(widgets.length>0){
+                                                                wlist = $('<ul>').appendTo(
+                                                                $('<div><h4>Widgets on page</h4><span class="heurist-helper2">click to edit parameters</span></div>')
+                                                                  .css({background:'white', padding:'10px', 'overflow-y': 'auto',
+                                                                    position:'absolute',top:'50%',bottom:4, right:4, left:4})
+                                                                  .appendTo(curtain));
+                                                            }
+                                                        }
+
+                                                        if(widgets.length>0){
+                                                            var added = [];
+                                                            
+                                                            $(widgets).each(function(idx, ele){
+                                                                var wid = $(ele).parent().attr('id');
+                                                                if(added.indexOf(wid)<0){
+                                                                    $('<li><a href="#" widgetid="'+wid+'">'+$(ele).find('strong').text()+'</a></li>')
+                                                                        .appendTo(wlist);
+                                                                    added.push(wid);
+                                                                    
+                                                                    wlist.find('a').css({'line-height':'24px'}).click(function(event){
+                                                                        preview_frame[0].contentWindow.cmsEditing.editWidget( $(event.target).attr('widgetid') );
+                                                                        window.hWin.HEURIST4.util.stopEvent(event);
+                                                                    }).dblclick(function(e){ 
+                                                                        e.preventDefault();
+                                                                    });
+                                                                }
+                                                            });
+                                                        }
+                                                    }
+                                                };
+                                                
                                                 //find elements in preview that opens home page record editor
                                                 var d = $(preview_frame[0].contentWindow.document);
                                                 d.find( "#btn_inline_editor4").click();
                                                 
-                                                //coverall for left side panel by invokation from websiteRecord.js
+                                                /*
                                                 d.find( "#edit_mode").on({click:function(event){
                                                         if($(event.target).val()==1){
                                                             $('<div>').addClass('coverall-div-bare')
@@ -378,6 +432,7 @@ function editCMS(home_page_record_id, main_callback){
                                                             edit_dialog.find('.ui-layout-west').find('.coverall-div-bare').remove();
                                                         }
                                                 }});
+                                                */
                                             }});
                                         }//no access
 

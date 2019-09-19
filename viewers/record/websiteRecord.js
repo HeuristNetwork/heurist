@@ -377,7 +377,9 @@ function hCmsEditing(_options) {
             $('#main-content').show();
             $('#main-content').parent().css('overflow-y','auto');
             $('#edit_mode').val(0).click();
-            
+
+            //exit edit mode
+            if($.isFunction(that.onEditPageContent))that.onEditPageContent(true);
     }
     
     //
@@ -405,8 +407,9 @@ function hCmsEditing(_options) {
     //
     function __initWidgetEditLinks(widgetid){
 
-            var eles;
+            var eles;               
             if(widgetid==null){
+                //all
                 eles = tinymce.activeEditor.dom.select('.widget-design-header'); //div.
                 
                 //$(tinymce.activeEditor.dom.select('.initTabs')).tabs();
@@ -415,7 +418,10 @@ function hCmsEditing(_options) {
                 eles = tinymce.activeEditor.dom.get( widgetid );
                 eles = [eles];
             }
-                
+
+            if($.isFunction(that.onEditPageContent)){
+                that.onEditPageContent(false, tinymce.activeEditor.dom.select('.widget-design-header'));
+            }                
             $(eles).each(function(idx, ele){
                 
                 if ($(ele).hasClass('initTabs')) $(ele).tabs();
@@ -431,6 +437,7 @@ function hCmsEditing(_options) {
                     window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',function(){
                         var wid = $(event.target).parents('.mceNonEditable').attr('id');
                         tinymce.activeEditor.dom.remove( wid );
+                        if($.isFunction(that.onEditPageContent)) that.onEditPageContent(false, wid, 'remove');    
                     });
                     window.hWin.HEURIST4.util.stopEvent(event);
                 });
@@ -822,7 +829,7 @@ function hCmsEditing(_options) {
            },
            open: function(){
                is_edit_widget_open = true;
-               $dlg.find('#test11').html('BBBBB');         
+
                //init elements on dialog open
                var $selectWidget = $dlg.find('#widgetName');
                if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){
@@ -1130,7 +1137,14 @@ function hCmsEditing(_options) {
 
         onEditorExit: function( callback ){
             return _onEditorExit( callback );
-        }
+        },
+        
+        editWidget: function (wid) {
+            __addEditWidget(wid);
+        },
+        
+        //callback on tinymce opening
+        onEditPageContent: null
  
     }
  
