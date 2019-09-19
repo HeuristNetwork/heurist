@@ -395,6 +395,8 @@ $.widget( "heurist.importStructure", {
 
     startSearch_dbs: function(){
         var request = {};
+        
+        if(!this.input_search) return;
 
         if(this.input_search.val()!=''){
             request['rec_Title'] = this.input_search.val();

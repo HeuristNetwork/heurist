@@ -93,7 +93,7 @@ if (!$serverURL || !$dbReg || !$dbTitle || !$usrEmail || !$usrName || !$usrFirst
     return;
 }
 
-if(strpos($serverURL,'http://')===false){
+if(strpos($serverURL,'http://')===false && strpos($serverURL,'https://')===false){
     $serverURL = 'http://'.$serverURL;
 }
 

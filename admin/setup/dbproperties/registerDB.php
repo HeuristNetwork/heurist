@@ -211,7 +211,7 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
 
             <div id="registerDBForm" class="input-row" style="margin-top: 20px;">
                 <form action="registerDB.php" method="POST" name="NewDBRegistration">
-                   
+
                    <input type="hidden" name="pwd" value="<?=$sysadmin_pwd?>">
                    <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
 <fieldset style="padding-right:30px">
@@ -313,7 +313,7 @@ function registerDatabase() {
 
                 $serverURL = HEURIST_BASE_URL . "?db=" . $heuristDBname;
                 //remove http:// to avoid conversion path to localhost if masterindex on the same server
-                $serverURL = substr($serverURL,7); 
+                //$serverURL = substr($serverURL,7); 
                 
                 $usrEmail = rawurlencode($dbowner['ugr_eMail']);
                 $usrName = rawurlencode($dbowner['ugr_Name']);
