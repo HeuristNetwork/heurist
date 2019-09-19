@@ -100,11 +100,13 @@ if(@$_REQUEST['field']){
     
     if($_REQUEST['field']>1){
         
-        if ($_REQUEST['field']==DT_CMS_SCRIPT && !$system->is_js_acript_allowed()) {
+        $field_content = __getValue($rec, $_REQUEST['field']);
+        
+        if (trim($field_content)!='' && $_REQUEST['field']==DT_CMS_SCRIPT && !$system->is_js_acript_allowed()) {
             exit('alert("Execution of custom script not allowed for this database")');   
         }
         
-        exit(__getValue($rec, $_REQUEST['field']));
+        exit( $field_content );
     }else{
         exit('<h2>'.__getValue($rec, DT_NAME).'</h2>'
                             .__getValue($rec, DT_EXTENDED_DESCRIPTION));
