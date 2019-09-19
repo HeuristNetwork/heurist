@@ -141,7 +141,10 @@ class ReportRecord {
     }
     
     //
-    //
+    // $rec - record id or record array - record to find records linked to or from this record
+    // $rtyt_ID - record type or array of record type to filter output
+    // $direction - linkedfrom or linkedto or null to return  both direcctions
+    // returns array of record IDs devided to 2 arrays "linkedto" and "linkedfrom"
     //
     public function getLinkedRecords($rec, $rty_ID=null, $direction=null, $smarty_obj=null){
         
