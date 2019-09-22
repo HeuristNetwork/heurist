@@ -515,10 +515,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
             var $dlg, buttons = {}, _is_CancelClose = true;
         
-            if($('#sa_primary_rectype > option').length==0){
-                window.hWin.HEURIST4.ui.createRectypeSelect( $('#sa_primary_rectype').get(0), null, window.hWin.HR('select...'), false);
-            }else{
-                $('#sa_primary_rectype').val(imp_session['primary_rectype']);
+            if(true){ //$('#sa_primary_rectype > option').length==0
+                //var select_rectype = window.hWin.HEURIST4.ui.createRectypeSelect( $('#sa_primary_rectype').get(0), null, window.hWin.HR('select...'), false);
+                //$('#sa_primary_rectype').val(imp_session['primary_rectype']);
+                //select_rectype =  $('#sa_primary_rectype').hSelect('refresh');
             }
             
             //apply selection of primary and dependent record types
@@ -622,6 +622,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }
                 */    
             };
+
+            var select_rectype = $('#sa_primary_rectype');
+            select_rectype = window.hWin.HEURIST4.ui.createRectypeSelect( select_rectype.get(0), null, window.hWin.HR('select...'), false);
+            $('#sa_primary_rectype').val(imp_session['primary_rectype']);
         
             var dlg_options = {
                 title:'Select primary record type and dependencies',
@@ -629,6 +633,24 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 width: 900,
                 element: document.getElementById('divSelectPrimaryRecType'),
                 buttons: buttons,
+                open:function(){
+                    
+                    //console.log('assign change');                
+                    //reload dependency tree on select change
+                    select_rectype.hSelect({change: 
+                    function(event, data){ 
+                            var treeElement = $dlg.find('#dependencies_preview');
+                            var selval = data.item.value;
+                            _loadRectypeDependencies( $dlg, treeElement, selval ); 
+                                            
+                            /*var ele = $(event.target);
+                            _loadRectypeDependencies( $dlg, treeElement, ele.val() ); 
+                           */ 
+                            
+                    }});                
+
+                    
+                },
                 close: function(event, ui){
                     $dlg.parent().find('#sa_primary_rectype').off('change');    
                     if(_is_CancelClose){
@@ -646,14 +668,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 window.hWin.HEURIST4.util.setDisabled(btn, true);
             }
             
-            //reload dependency tree on select change
-            $dlg.parent().find('#sa_primary_rectype').change( function(event){ 
-                    var ele = $(event.target);
-                    var treeElement = ele.parents('#divSelectPrimaryRecType').find('#dependencies_preview');
 
-                    _loadRectypeDependencies( $dlg, treeElement, ele.val() ); 
-                    
-            });
                 
             
         
@@ -911,6 +926,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 var idx_reqtype = window.hWin.HEURIST4.rectypes['typedefs']['dtFieldNamesToIndex']['rst_RequirementType'];
                 var idx_title = window.hWin.HEURIST4.rectypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
                 
+                var isfirst_dep = true;
+                var top_offset = 0; //padding for label
+                
                 //Dependency list==================================================
                 do{
                     //find all record types for particular level 
@@ -963,7 +981,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                             var field = rtOrder['fields'][field_key];
 
-                            var sRectypeItem = '<div style="'+(depth>0?'padding-top:1em':'')
+                            var sRectypeItem = '<div style="padding:3px;'+(depth>0?'padding-top:1em':'')
                             + depth_separator+'">' 
                             + '<input type="checkbox" class="rt_select" data-rectype="'+field['rt_id']
                             +  '" data-rt="'+field_key+'" '
@@ -971,6 +989,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             + (hierarchy.join(','))+ '" '
                             + (depth==0?'checked="checked" disabled="disabled"':'')
                             + '>';
+                            
+                            if(isfirst_dep && depth_separator!=''){
+                                isfirst_dep = false;
+                                sRectypeItem = '<div style="background:white;width:100%;min-height:2em;margin-top:4px"></div>'
+                                    +sRectypeItem;
+                                $dlg.parent().find('#lbl_dependencies_preview').css('padding-top',(top_offset+2)*2 +'em');
+                            }
 
                             //get field name that refers to this recordtype
                             if(depth!=0){
@@ -1029,7 +1054,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     var is_required = (recStruc[field_id][idx_reqtype]=='required');
                                     
                                     sid_fields =  
-                                    '<div style="padding-left:2em;display:inline-block;">'
+                                    '<div style="display:inline-block;">'
                                     + '<div style="min-width:150px;display:inline-block">'
                                     + (prev_field!=field_title  //rt_field['title']
                                         ?'<i style="'+(is_required?'color:red':'')+'">' + field_title + '</i>'
@@ -1042,7 +1067,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                                     prev_field = field_title;//rt_field['title'];
 
-                                    $('<div style="padding-left:2em;">'
+                                    $('<div style="padding:0 3px 0 2em;">'
                                         //+'<span class="ui-icon ui-icon-triangle-1-e rt_arrow"></span>'
 
                                         //+ '<span class="ui-icon ui-icon-arrowthick-1-e rt_arrow"></span>'
@@ -1051,8 +1076,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                         +'</div>')
                                     .appendTo(depList);
 
+                                    top_offset++;
                                 }
                             }else{
+                                
                                 $('<div style="padding-left:4em;">'
                                     + '<i>No pointer fields defined</i>'
                                     +'</div>')
@@ -1069,6 +1096,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 }while(found_levels<4 && depth<10);
 
                 if(field_keys.length==1){
+                    $dlg.parent().find('#lbl_dependencies_preview').css('padding-top',0);
                     treeElement.text('No dependencies found');
                 }else{
 
@@ -1724,10 +1752,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
 
         _redrawArrow();
+        
+        
+        var h = 0;
 
         var pos = $('#divStep3 > .ent_header').height();
 
-        $('#divStep3 > .ent_content').css({top:pos+40});
+        $('#divStep3 > .ent_content').css({top:pos+5});
         
         /* todo - check how it works with new layout
         //adjust position of footer with action buttons  

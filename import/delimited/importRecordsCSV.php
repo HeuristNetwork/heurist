@@ -106,6 +106,12 @@ if(!$format) $format='csv';
                 font-size:1.2em;
                 margin:0;
             }
+            .step-ctrls{
+                padding-top:0.5em;
+                margin-left:2em;
+                position: absolute;
+                top: 150px;
+            }
         </style>
     </head>
 
@@ -114,10 +120,10 @@ if(!$format) $format='csv';
 
 <!-- STEP 1 upload data/select session -->    
 <div style="width:100%; height:100%;" id="divStep1">
-    <div class="ent_header" style="height:29.3em;padding:20px;">
+    <div class="ent_header" style="height:50%;padding:20px;">
     
         
-        <div id="divCsvIntro" style="padding:0 20 20 20" class="format-csv">
+        <div id="divCsvIntro" style="padding:0 20 20 20;min-width:1210" class="format-csv">
         
             <p>
 Importing all but the simplest spreadsheet is a complex business. It is important to clean up the data as much as possible in advance, so that there is one row per entry and columns contain a single element of data (which may include repeated values, normally separated by pipe symbols | ). Split concatenated values into separate columns; place notes about data items in a separate column - don't append to the data value; coded columns should use a consistent set of codes. In addition to your spreadsheet program, you may find OpenRefine (<a href="http://openrefine.org" target="_blank">http://openrefine.org</a>) a useful tool for checking and correcting coded columns, splitting fields, georeferencing, finding URL references and so forth.
@@ -131,7 +137,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         
         </div>      
 
-        <div id="divKmlIntro" style="padding:0 20 20 20;display:none">
+        <div id="divKmlIntro" style="padding:0 20 20 20;min-width:1210;display:none">
 <h4>This function imports a KML file into a set of map-enabled Heurist records</h4><br><br>
 <p>Each spatial object in the KML file generates a Heurist record which also stores attached attributes.  You may select the type of record to be created in a following step.</p><br><br>
 <p>A KML file can also be mapped directly by uploading it as a file attached to a record or storing it as a KML snippet in a text field within a record - use the KML record type for this purpose (standard in all databases). However, plotting KML in this way does not allow any additional information to be attached to the spatial objects, all you get is a single monolithic map layer.</<p><br><br>
@@ -158,7 +164,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         <div id="btnUploadData"  class="format-csv"
             title="Upload content of text area below to server side and use it as source for CSV/TSV import operation">Upload Data</div>
     </div>
-    <div class="ent_content_full" style="top:33em;width:100%;">
+    <div class="ent_content_full" style="top:50%;width:100%;">
         <textarea id="sourceContent" style="height:100%;width:100%;resize:none;" class="format-csv"></textarea>
     </div>
 </div>
@@ -380,22 +386,23 @@ If you have missing data for Required fields, you may find it convenient to set 
 <!-- STEP 3 matching and import -->
 <div style="width:100%; height:100%;display:none;overflow:auto" id="divStep3" class="selectmenu-parent">
 
-    <div class="ent_header" style="height:auto;border:none;padding-top:1em;padding-bottom:2.5em;min-width:970px">
+    <div class="ent_header" style="height:362;border:none;padding:5 6 0 6;min-width:970px">
     
-        <div>
-            <div id="btnBackToStart"
-                style="margin-left:2em;"
-                title="Return to the upload screen to select a new delimited file to upload to the server for processing">
-                Back to start</div>
-                
-            <div style="display: inline-block; font-size:1.1em; padding-left:10em">
-                Primary record type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
-                <a href="#" id="btnSetPrimaryRecType"
-                            title="Change primary record type"
-                            style="margin-left:10px;font-size:0.9em;text-decoration:none;color:gray">reset</a>        
-                            <!-- display:none; todo restore this feature -->
-            </div>    
-                
+        <div style="position:absolute;left:0;right:6;padding-left:2em">
+    
+            <div style="max-width: 500;float:left;">
+                <div id="btnBackToStart"
+                    title="Return to the upload screen to select a new delimited file to upload to the server for processing">
+                    Back to start</div>
+                    
+                <div style="font-size:1.1em;padding-top:9px">
+                    Importing: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
+                    <a href="#" id="btnSetPrimaryRecType"
+                                title="Change primary record type"
+                    style="margin-left:10px;font-size:0.9em;text-decoration:none;color:gray;font-style:italic">change</a>        
+                                <!-- display:none; todo restore this feature -->
+                </div>    
+            </div>        
             <div id="btnClearFile"  style="float: right;"
                 title="Clear the data for this uploaded file from the server">
                 Clear uploaded file</div>
@@ -411,7 +418,7 @@ If you have missing data for Required fields, you may find it convenient to set 
     
         </div>
 
-        <fieldset style="padding-top:1.5em;padding-bottom:0.2em">
+        <fieldset style="position: absolute;left: 0;right: 0;top: 50px;">
         <div>
             <div class="header optional" style="min-width: 80px; width: 80px;">
                 <label style="vertical-align: top;">Importing:</label><br>
@@ -434,9 +441,9 @@ If you have missing data for Required fields, you may find it convenient to set 
         <img id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none">        
         <img id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:16px;display:none">        
         
-        <div style="padding:1em 0 1em 4em" id="divheader">
+        <div style="padding:1em 0 1em 1em;position: absolute;top:110;" id="divheader">
             
-            <div  id="divActionsMatching" class="action_buttons step3">
+            <div  id="divActionsMatching" class="action_buttons step3" style="padding-left: 35px">
                 
                 <h2 style="display:inline-block">step 1: MATCHING</h2>
                 
@@ -450,7 +457,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                 <div id="btnNextRecType1" style="display:none" class="skip_step" 
                     title="It appears that every row in import data has valid Heurist record ID value. You may proceed to import of next record type in sequence">Skip to next record type</div>
 -->                    
-                <div id="btnBackToMatching2" class="need_resolve" style="margin-right:20px"
+                <div id="btnBackToMatching2" class="need_resolve" style="margin-right:35px"
                     title="Return to matching step to redefine mapping that may fix ambiguous matches">
                     Match Again</div>
                 <div id="btnResolveAmbiguous" class="need_resolve"
@@ -486,7 +493,8 @@ If you have missing data for Required fields, you may find it convenient to set 
             </div>            
         </div>
 <!-- radiogroup setting divs -->        
-        <div  id="divMatchingSetting" class="step3" style="padding-top:0.5em;margin-left:2em;display:none">
+
+        <div  id="divMatchingSetting" class="step3 step-ctrls" style="display:none">
             <input type="radio" checked="" name="sa_match" id="sa_match0" value="0" class="text" onchange="{importRecordsCSV.onMatchModeSet()}">&nbsp;
             <label for="sa_match0" style="padding-right:3em">Match on column(s)</label>
 
@@ -501,12 +509,12 @@ If you have missing data for Required fields, you may find it convenient to set 
             <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em;padding-bottom:3px;">
             </div>
         </div>
-        <div  id="divPrepareSetting" class="step4" style="padding-top:0.5em;margin-left:2em;display:none">
+        <div  id="divPrepareSetting" class="step4 step-ctrls" style="display:none">
             <div class="heurist-helper1" id="divPrepareSettingHelp" style="display:block;">
             </div>
         </div>
         
-        <div  id="divImportSetting" class="step5" style="padding-top:0.5em;margin-left:2em;display:none">
+        <div  id="divImportSetting" class="step5 step-ctrls" style="display:none">
             <div class="heurist-helper1" id="divImportSettingHelp" style="display:block;padding-bottom:1em">
                 You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.            
             </div>
@@ -519,7 +527,7 @@ If you have missing data for Required fields, you may find it convenient to set 
             <label for="sa_upd1">Add new data only if field is empty (new data ignored for non-empty fields)</label><br>
 
             <input type="radio" name="sa_upd" id="sa_upd2" value="2" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
-            <label for="sa_upd2">Add and replace all existing value(s) for the fields specified below</label>
+            <label for="sa_upd2">Replace all existing value(s) for the fields specified below</label>
             
                     <div style="padding-left: 60px; font-size: 0.9em; vertical-align: top; display: none;" id="divImport2">
                         <input type="radio" checked="" name="sa_upd2" id="sa_upd20" value="0" class="text">&nbsp;
@@ -531,7 +539,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         </div>
 <!-- end radiogroup setting divs -->     
 
-        <div id="divFieldMapping2" class="step4" style="display:none;padding:0.5em 0;margin-left:2em;">
+        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:37px">
             <table class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>
@@ -580,7 +588,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         </div>
    
         
-        <table class="tbmain" style="width:100%;position:absolute;bottom:0" cellspacing="0" cellpadding="2">
+        <table class="tbmain" style="width:99%;position:absolute;bottom:0" cellspacing="0" cellpadding="2">
             <thead><tr> <!-- Table headings -->
                 <th style="width:75px;">Use&nbsp;<br/>value</th>
                 <th style="width:75px;">Unique&nbsp;<br/>values</th>
@@ -598,7 +606,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         </table>    
     </div>
     <!-- CONTENT : MAPPING TABLE COLUMNS TO HEURIST FIELDS  -->
-    <div class="ent_content" style="bottom:0;top:27.1em;padding: 0em 0.5em;" id="divFieldMapping">
+    <div class="ent_content" style="bottom:0;top:367;padding: 0em 0.5em;" id="divFieldMapping">
                 <table id="tblFieldMapping" class="tbmain" style="width:100%" cellspacing="0" cellpadding="2">
                     <!-- <thead><tr>
                         <th style="width:75px;">Use&nbsp;<br/>value</th>
@@ -655,12 +663,12 @@ If you have missing data for Required fields, you may find it convenient to set 
             </div>        
         </div>                    
         <div>
-            <div class="header optional" style="vertical-align: top;min-width: 150px; width: 150px;">
+            <div id="lbl_dependencies_preview" class="header optional" style="vertical-align: top;min-width: 150px; width: 150px;">
                 <label>Dependencies:</label>
             </div>
             <div class="input-div">
                 <div id="dependencies_preview" xclass="ui-widget-content" 
-                    style="min-height:1.8em;padding: 0.4em; background-color:white">
+                    style="min-height:1.8em;background-color:white">
                 </div>    
                 
             </div>
