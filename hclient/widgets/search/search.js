@@ -135,13 +135,23 @@ $.widget( "heurist.search", {
         
         this.div_entity_btns   = $('<div>').addClass('heurist-entity-filter-buttons')
                                 .css({ 'display':(this._is_publication?'none':'block'),
-                                    'padding':this._is_publication?0:('20px '+sz_search_padding),
+                                    'padding':this._is_publication?0:('20px 5 20px '+sz_search_padding),
                                     'visibility':this.options.btn_entity_filter?'visible':'hidden',
                                     'height':this.options.btn_entity_filter?'auto':'10px'})
                                 .appendTo( this.element );
         //quick filter by entity
         var $d2 = $('<div>').css('float','left');
-        $('<label>').text(window.hWin.HR('Entities')+': ').appendTo($d2);
+        $('<label>').text(window.hWin.HR('Entities')).appendTo($d2);
+        
+        
+        if(this.options.menu_entity_filter){
+            this.filter_by_entity = $('<span title="Show list of entities to filter">'
+            +'by usage <span class="ui-icon ui-icon-triangle-1-s"></span></span>')                                          //
+            .css({'text-decoration':'none','color':'gray','padding':'0 10px','outline':0,'font-weight':'bold', 'font-size': '12px',cursor:'pointer'})
+            .appendTo( $d2 ); //was div_search_help_links
+        }
+        
+        
         this.btns_by_entity = $('<button>').button({label: window.hWin.HR("Show list of entities to filter"), 
                   showLabel:false, icon:'ui-icon-gear'})
         .css({'font-size':'1.1em'}).appendTo($d2);        
@@ -152,6 +162,7 @@ $.widget( "heurist.search", {
                 useIcons: true, useCounts:true, useGroups:true, useCheckboxes:true, 
                 ancor: this.btns_by_entity, 
                 marked: this.buttons_by_entity,
+                showAllRectypes: true, 
                 onmarker: function (ele){
                     var is_checked = !ele.hasClass('ui-icon-check-on');
                     var rty_ID = ele.attr('data-id');
@@ -266,11 +277,6 @@ $.widget( "heurist.search", {
                 window.open('context_help/advanced_search.html','_blank');
             } });
         
-            this.filter_by_entity = $('<span title="Show list of entities to filter">'
-            +'entity types <span class="ui-icon ui-icon-triangle-1-s"></span></span>')                                          //
-            .css({'text-decoration':'none','color':'gray','padding-left':'16px','outline':0, cursor:'pointer'})
-            .appendTo(div_search_help_links);
-            
             this.filter_by_entity_options = {select_name:'select_rectype_filter', 
                     useIcons: true, useCounts:true, useGroups:false, 
                     ancor:this.filter_by_entity, 

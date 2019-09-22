@@ -821,6 +821,8 @@ window.hWin.HEURIST4.ui = {
         var useGroups = (options.useGroups!==false);
         var useIds = (options.useIds===true);
         var useCheckboxes = (options.useCheckboxes===true);
+        
+        var showAllRectypes = (options.showAllRectypes===true); //otherwise only non-hidden
  
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
@@ -893,16 +895,18 @@ window.hWin.HEURIST4.ui = {
             
         }else{  //show rectypes separated by groups
         
+            var indexName = showAllRectypes?'allTypes':'showTypes';
+        
             for (index in rectypes.groups){
                 if (index == "groupIDToIndex" ||
-                    rectypes.groups[index].showTypes.length < 1) {
+                    rectypes.groups[index][indexName].length < 1) {
                     continue;
                 }
                 //show group if at least one rectype is visible
                 if(rectypeList.length>0){
                     var notfound = true;
-                    for (var recTypeIDIndex in rectypes.groups[index].showTypes){
-                        var rectypeID = rectypes.groups[index].showTypes[recTypeIDIndex];
+                    for (var recTypeIDIndex in rectypes.groups[index][indexName]){
+                        var rectypeID = rectypes.groups[index][indexName][recTypeIDIndex];
                         if(rectypeList.indexOf(rectypeID)>=0){
                             notfound = false;
                             break;
@@ -923,9 +927,9 @@ window.hWin.HEURIST4.ui = {
 
                 var idx_desc = rectypes.typedefs.commonNamesToIndex.rty_Description;
                 
-                for (var recTypeIDIndex in rectypes.groups[index].showTypes)
+                for (var recTypeIDIndex in rectypes.groups[index][indexName])
                 {
-                    var rectypeID = rectypes.groups[index].showTypes[recTypeIDIndex];
+                    var rectypeID = rectypes.groups[index][indexName][recTypeIDIndex];
                     var name = rectypes.names[rectypeID];
 
                     if(!window.hWin.HEURIST4.util.isnull(name) && 
