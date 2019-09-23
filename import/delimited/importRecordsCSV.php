@@ -395,7 +395,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                     title="Return to the upload screen to select a new delimited file to upload to the server for processing">
                     Back to start</div>
                     
-                <div style="font-size:1.1em;padding-top:9px">
+                <div style="font-size:1.1em;padding-top:12px">
                     Importing: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
                     <a href="#" id="btnSetPrimaryRecType"
                                 title="Change primary record type"
@@ -418,7 +418,7 @@ If you have missing data for Required fields, you may find it convenient to set 
     
         </div>
 
-        <fieldset style="position: absolute;left: 0;right: 0;top: 50px;">
+        <fieldset style="position: absolute;left: 0;right: 0;top:60px;">
         <div>
             <div class="header optional" style="min-width: 80px; width: 80px;">
                 <label style="vertical-align: top;">Importing:</label><br>

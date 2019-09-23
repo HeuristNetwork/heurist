@@ -1753,12 +1753,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         _redrawArrow();
         
-        
-        var h = 0;
+        var h = 262;
+        if(currentStep==3){
+            h = 262;
+        }else if(currentStep==4){
+            h = 290;
+        }else if(currentStep==5){
+            h = 362;
+        }
 
-        var pos = $('#divStep3 > .ent_header').height();
+        $('#divStep3 > .ent_header').height(h);
 
-        $('#divStep3 > .ent_content').css({top:pos+5});
+        $('#divStep3 > .ent_content').css({top:h+5});
         
         /* todo - check how it works with new layout
         //adjust position of footer with action buttons  
@@ -2506,7 +2512,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
                  shelp = 'Please select one or more columns on which to match <b>'
                  + window.hWin.HEURIST4.rectypes.names[rtyID]
-                 + '</b> in the incoming data against records already in the database.<br><br>';
+                 + '</b> in the incoming data against records already in the database.'
+                 + '<br>Note: do not use columns containing multiple values for matching, as this will generate multiple records per input line.<br><br>';
                  
                 if(key_idx>=0){
                     shelp = shelp + 'The existing identification field "'+imp_session['columns'][key_idx]+'" will be overwritten.' 
@@ -4076,6 +4083,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 _onUpdateModeSet();
             }
         }
+        _adjustTablePosition();
     }
     
     //public members
