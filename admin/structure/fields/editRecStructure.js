@@ -3545,25 +3545,27 @@ sMsg = '<h3>Conversion of records to child records</h3><br><b>Pointer field:'+ s
 +(response.data['disambiguation']>0?('<div>'+response.data['disambiguation']+' values ignored. The same records were pointed to as a child record by more than one parent</div>'):'')
 +(response.data['noaccess']>0?('<div>'+response.data['noaccess']+' records cannot be converted to child records (no access rights)</div>'):'');
 
-if(response.data['processedParents'].length>0){
+if(response.data['passed']>0)
+{
+if(response.data['processedParents'] && response.data['processedParents'].length>0){
 sMsg = sMsg
 +'<br><div>'+__getlink(response.data['processedParents'])+' parent records</a> (records of this type with this pointer field) were processed</div>'
 +((response.data['childInserted'].length>0)?('<div>'+__getlink(response.data['childInserted'])+' records</a> were converted to child records</div>'):'')
 +((response.data['childUpdated'].length>0)?('<div>'+__getlink(response.data['childUpdated'])+' child records</a> changed its parent</div>'):'')
 +((response.data['titlesFailed'].length>0)?('<div>'+__getlink(response.data['titlesFailed'])+' child records</a> failed to update tecord title</div>'):'');
 }
-if(response.data['childAlready'].length>0){
+if(response.data['childAlready'] && response.data['childAlready'].length>0){
 sMsg = sMsg
 +'<div>'+__getlink(response.data['childAlready'])+' child records</a> already have the required reverse pointer (OK)</div>';
 }
 
-if(response.data['childMiltiplied'].length>0){
+if(response.data['childMiltiplied'] && response.data['childMiltiplied'].length>0){
 sMsg = sMsg
 +'<div>'+__getlink(response.data['childMiltiplied'])+' records</a> were pointed to as a child record by more than one parent (Problem)</div>'
 +'<br><div>You will need to edit these records and choose which record is the parent (child records can only have one parent).</div>'
 +'<div>To find these records use Verify > Verify integrity <new tab icon></div><br>'
 }
-
+}
 //sMsg = sMsg 
 sMsg = sMsg 
 +'<br>Notes<br><div>We STRONGLY recommend removing - from the record structure of the child record type(s) -  any existing field which points back to the parent record</div>'

@@ -263,9 +263,9 @@ class DbRecDetails
                                    'noaccess'=> $inAccessibleRecCnt,
                                    'disambiguation'=> $cntDisambiguation);
 
-        if (count($toProcess)==0){
-            return $this->result_data;
-        }
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+        
+        if (count($toProcess)>0){
 /*debug
 error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $this->result_data,true) );
     return $this->result_data;
@@ -277,8 +277,6 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         $childAlready = array();    
         $titlesFailed = array();
         $childMiltiplied = array();
-        
-        $keep_autocommit = mysql__begin_transaction($mysqli);
         
         foreach ($toProcess as $row) {
             //parent_id,child_id,0,child_rectype,child_title
@@ -334,6 +332,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         $this->result_data['titlesFailed'] = $titlesFailed;
         
         
+        }
         //set rst_CreateChildIfRecPtr=1 
         $query = 'UPDATE defRecStructure set rst_CreateChildIfRecPtr=1 WHERE rst_RecTypeID='
             .$this->data['rtyID'].' and rst_DetailTypeID='.$this->data['dtyID'];
