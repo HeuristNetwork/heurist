@@ -183,7 +183,7 @@ if($response!=null){
 
     foreach($res['files'] as $idx=>$file){
         if(@$file->error){
-            $response = $system->addError(HEURIST_UNKNOWN_ERROR, "Sorry, file cannot be processed. ".$file->error."Please contact support at HeuristNetwork.org if the reason is not obvious or you need to add allowable file types.", null);
+            $response = $system->addError(HEURIST_UNKNOWN_ERROR, "Sorry, file cannot be processed. ".$file->error.". Please contact support at HeuristNetwork dot org if the reason is not obvious or you need to add allowable file types.", null);
             break;            
         }else if($entity_name=="recUploadedFiles"){ //register at once
             
