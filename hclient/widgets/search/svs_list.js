@@ -715,7 +715,7 @@ $.widget( "heurist.svs_list", {
                         var qsearch = that.loaded_saved_searches[svs_ID][_QUERY];
                         var qname   = that.loaded_saved_searches[svs_ID][_NAME];
 
-                        that.doSearch( svs_ID, qsearch, event.target ); //qname replaced with svs_ID
+                        that.doSearch( svs_ID, svs_ID, qsearch, event.target ); //qname replaced with svs_ID
                         that.accordeon.find('#search_query').val('');
                     }
                 })
@@ -744,7 +744,7 @@ $.widget( "heurist.svs_list", {
                         if (code == 13) {
                             window.hWin.HEURIST4.util.stopEvent(e);
                             e.preventDefault();
-                            that.doSearch('', ele_search.val(), ele_search);
+                            that.doSearch(0, '', ele_search.val(), ele_search);
                         }
                     }
                 });
@@ -754,7 +754,7 @@ $.widget( "heurist.svs_list", {
                 .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
                 this._on( btn_search, {
                     click:  function(){
-                        that.doSearch('', ele_search.val(), ele_search);
+                        that.doSearch(0, '', ele_search.val(), ele_search);
                     }
                 });
             }
@@ -1006,7 +1006,7 @@ $.widget( "heurist.svs_list", {
 
             click: function(event, data) {
                 if(!data.node.folder){
-                    var qname, qsearch;
+                    var qname, qsearch, svs_ID = 0;
                     if(data.node.data && data.node.data.url){
                         qsearch = data.node.data.url;
                         qname   = (data.node.key>0)?data.node.key:data.node.title; //qname replaced with svs_ID
@@ -1015,6 +1015,7 @@ $.widget( "heurist.svs_list", {
                             window.hWin.HAPI4.currentUser.usr_SavedSearch && 
                             window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key]){
                                 
+                            svs_ID = data.node.key; 
                             qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_QUERY];
                             qname   = data.node.key; //window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][_NAME];
                         }
@@ -1023,7 +1024,7 @@ $.widget( "heurist.svs_list", {
                     //data.node.setSelected(true);
                     //remove highlight from others
                     that.search_tree.find('li.ui-state-active').removeClass('ui-state-active');
-                    that.doSearch( qname, qsearch, event.target );
+                    that.doSearch( svs_ID, qname, qsearch, event.target );
                     setTimeout(function(){
                         that.search_tree.find('div.svs-contextmenu2').parent().addClass('leaves');
                         $(data.node.li).css('border','none').addClass('ui-state-active leaves');
@@ -1651,24 +1652,24 @@ $.widget( "heurist.svs_list", {
     this.doSearch(qsearch);
     },*/
 
-    doSearchByID: function(svsID, query_name){
+    doSearchByID: function(svs_ID, query_name){
     
         if(window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-            window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID]){
+            window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID]){
                                 
-            var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_QUERY];
-            var qname   = query_name || svsID; //window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_NAME];
+            var qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][_QUERY];
+            var qname   = query_name || svs_ID; //window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][_NAME];
             
-            this.doSearch( qname, qsearch, null );
+            this.doSearch( svs_ID, qname, qsearch, null );
         }else{
             //not found - try to find
             var that = this;
-            window.hWin.HAPI4.SystemMgr.ssearch_get( { svsIDs:svsID },
+            window.hWin.HAPI4.SystemMgr.ssearch_get( { svsIDs:svs_ID },
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        var qsearch = response.data[svsID][_QUERY];
-                        that.doSearch( query_name || svsID, qsearch, null );
+                        var qsearch = response.data[svs_ID][_QUERY];
+                        that.doSearch( svs_ID, query_name || svs_ID, qsearch, null );
                     }
             });
             
@@ -1676,7 +1677,7 @@ $.widget( "heurist.svs_list", {
         
     },
     
-    doSearch: function(qname, qsearch, ele){
+    doSearch: function(svs_ID, qname, qsearch, ele){
 
         if ( qsearch ) {
 
@@ -1703,7 +1704,9 @@ $.widget( "heurist.svs_list", {
                         params.sup_filter = that.options.sup_filter;
                     }
 
-                    var noptions = { query_name:qname, 
+                    var noptions = { 
+                        svs_ID: svs_ID,
+                        query_name:qname, 
                         params:params, 
                         search_realm:this.options.search_realm};
                     

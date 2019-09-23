@@ -171,9 +171,15 @@
             }else if($fieldid=='recModified' || $fieldid=='modified'){
                    $select_field = "r0.rec_Modified";
             }else{
+                    if(strpos($fieldid,',')>0 && getCommaSepIds($fieldid)!=null){
+                        $compare_field = 'IN ('.$fieldid.')';
+                    }else{
+                        $compare_field = '='.$fieldid;
+                    }
+                
                    $select_field  = "dt0.dtl_Value";
                    $detail_link   = ", recDetails dt0 ";
-                   $details_where = " AND (dt0.dtl_RecID=r0.rec_ID and dt0.dtl_DetailTypeID=".$fieldid.") AND (NULLIF(dt0.dtl_Value, '') is not null)";
+                   $details_where = " AND (dt0.dtl_RecID=r0.rec_ID and dt0.dtl_DetailTypeID $compare_field) AND (NULLIF(dt0.dtl_Value, '') is not null)";
                    //$detail_link   = " LEFT JOIN recDetails dt0 ON (dt0.dtl_RecID=r0.rec_ID and dt0.dtl_DetailTypeID=".$fieldid.")";
                    //$details_where = " and (dt0.dtl_Value is not null)";
             }

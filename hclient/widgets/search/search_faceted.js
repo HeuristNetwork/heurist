@@ -141,7 +141,8 @@ $.widget( "heurist.search_faceted", {
         showclosebutton: true,
         onclose: null,
         search_realm: null,
-        preliminary_filter:null
+        preliminary_filter:null,
+        svs_ID: null
     },
 
     cached_counts:[], //stored results of get_facets by stringified query index
@@ -154,9 +155,14 @@ $.widget( "heurist.search_faceted", {
     _currentRecordset:null,
     
     _use_sup_filter:true, 
+    
+    _use_multifield: false, //HIE - search for several fields per facet
 
     // the widget's constructor
     _create: function() {
+        
+        this._use_multifield = window.hWin.HAPI4.database=='johns_hamburg' &&
+                window.hWin.HEURIST4.util.findArrayIndex(this.options.svs_ID,[20,21,22,23,24,28,30,31])>=0;
 
         var that = this;
         
@@ -495,6 +501,13 @@ $.widget( "heurist.search_faceted", {
                             key  = slink+rtid_linked+":"+dtid.substr(2); //rtid need to distinguish links/relations for various recordtypes
                             val = [];
                         }else{
+                            //multifield search 
+                            if(dtid==9 && that._use_multifield){
+                                dtid = '9,10,11';
+                            }else if(dtid==1  && that._use_multifield){
+                                dtid = '1,18,231,304';
+                            }
+                            
                             key = "f:"+dtid
                             val = "$X"+field['var']; 
                         }
@@ -1233,10 +1246,16 @@ console.log(that.options.params.add_filter);
                 }
         
 //DEBUG console.log(query);
+                var fieldid = field['id'];
+                if(fieldid==9 && that._use_multifield){
+                    fieldid = '9,10,11';
+                }else if(fieldid==1  && that._use_multifield){
+                    fieldid = '1,18,231,304';
+                }
 
                 var request = {q: query, count_query:count_query, w: 'a', a:'getfacets',
                                      facet_index: i, 
-                                     field:  field['id'],
+                                     field:  fieldid,
                                      type:   field['type'],
                                      step:   step_level,
                                      facet_type: field['isfacet'], //0 direct search search, 1 - select/slider, 2 - list inline, 3 - list column
