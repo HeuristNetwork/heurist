@@ -217,6 +217,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/layout.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
     
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/search_faceted.js"></script>
