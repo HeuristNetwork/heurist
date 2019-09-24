@@ -121,7 +121,7 @@ var cfg_layouts = [
                 apps:[
                     {appid:'heurist_resultList', hasheader:true, name:'List', layout_id:'list',
                             css:{'background-color':'white','font-size':'14px'}, 
-                            options:{title:'List', view_mode:'thumbs', recordview_onselect: true, 
+                            options:{title:'List', view_mode:'thumbs', recordview_onselect: 'popup', 
                             show_inner_header: true, show_url_as_link:true} },  //search result
                     {appid:'heurist_Map', layout_id:'map', options:{layout:['map','timeline'],tabpanel:true}, 
                                     css:{'background-color':'white'} } //mapping
