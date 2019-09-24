@@ -2129,6 +2129,12 @@ $.widget( "heurist.resultList", {
                         }
                     });
         }
+        this.div_content.find('div.recordTitle').tooltip({
+            content: function(){
+                var ele = $( this );
+                return ele.attr('title');
+            }
+        }); //title may have html format - use jquery tooltip
 
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
