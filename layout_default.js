@@ -215,8 +215,8 @@ var cfg_layouts = [
        ,result_pane:{dropable:false,css:{},
                 apps:[{appid:'expertnation_results', 
                     options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
-                    multiselect:false, show_menu: false},
-                hasheader:true, css:{border:'none', 'background':'none'} }]}
+                    multiselect:false, show_menu: false, hasheader:false},
+                hasheader:false, css:{border:'none', 'background':'none'} }]}
        ,search_pane:{dropable:false,css:{},
                 apps:[                           
                 //prod 
@@ -248,7 +248,7 @@ var cfg_layouts = [
                 apps:[{appid:'expertnation_results', 
                     options:{view_mode:'list', show_toolbar: false, select_mode:'select_single', 
                     multiselect:false, show_menu: false},
-                hasheader:true, css:{border:'none', 'background':'none'} }]}
+                hasheader:false, css:{border:'none', 'background':'none'} }]}
        ,search_pane:{dropable:false,css:{},
                 apps:[                           
                 //prod 
