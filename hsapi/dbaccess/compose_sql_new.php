@@ -355,6 +355,7 @@ class HQuery {
     
     //
     // sort phrases must be on top level array - all others will be ignored
+    // {"sort":"rt"}
     //
     function extractSortPharses( $query_json ){
         
@@ -380,7 +381,7 @@ class HQuery {
     }
     
     //
-    //
+    // {"sort":"f:233"}  {"sort":"-title"}  
     //    
     function createSortClause() {
         
@@ -467,7 +468,20 @@ class HQuery {
                         $sort_expr[] = 'r0.rec_RecTypeID'.$scending;   
                     }
                     break;
+
+                case 'hie': //special case for Hamburg EARLY ISLAMIC EMPIRE
+
+                    if(!in_array('hie', $sort_fields)) {
+                        $sort_expr[] = 
+    '(select LEAST(getTemporalDateString(ifnull(sd2.dtl_Value,\'9999\')), getTemporalDateString(ifnull(sd3.dtl_Value,\'9999\')))' 
+                        .' from recDetails sd1'
+                        .' left join recDetails sd2 on sd1.dtl_Value=sd2.dtl_RecID and sd2.dtl_DetailTypeID=9'
+                        .' left join recDetails sd3 on sd1.dtl_Value=sd3.dtl_RecID and sd3.dtl_DetailTypeID=10'
+                        .' where r0.rec_ID=sd1.dtl_RecID and sd1.dtl_DetailTypeID=293 limit 1)';                    
+                        $sort_fields[] = 'hie';   
+                    }
                     
+                    break;
                 case 'f': case 'field':
                     if($dty_ID!=null && !in_array($dty_ID, $sort_fields)) {
                     $sort_expr[] = 
