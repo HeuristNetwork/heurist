@@ -357,7 +357,7 @@ $.widget( "heurist.ruleBuilder", {
                                 var isnotfound = true;
                                 var i, len = arr_fields.length;
                                 for (i=0;i<len;i++){
-                                    if( (arr_fields[i].key+'r') == dtyID){   //this reverse field may be added already
+                                    if( arr_fields[i].key == (dtyID+'r')){   //this reverse field may be added already
                                         //temp arr_fields[i].rectypes.push(rtyID);
                                         if(arr_fields[i].isreverse){
                                             arr_fields[i].rectypes.push(rtyID); //temp
