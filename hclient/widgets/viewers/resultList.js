@@ -841,8 +841,11 @@ $.widget( "heurist.resultList", {
         if(this.div_coverall){
             this.div_coverall.hide();
         }
+        
 
         if(this.div_content){
+            this.div_content.find('div.recordTitle').tooltip('destroy');
+            
             var $allrecs = this.div_content.find('.recordDiv');
             this._off( $allrecs, "click");
             this.div_content[0].innerHTML = '';//.empty();  //clear
@@ -2129,12 +2132,14 @@ $.widget( "heurist.resultList", {
                         }
                     });
         }
-        this.div_content.find('div.recordTitle').tooltip({
-            content: function(){
+        
+        
+        function ___ontooltip(){
                 var ele = $( this );
                 return ele.attr('title');
-            }
-        }); //title may have html format - use jquery tooltip
+        }
+        
+        this.div_content.find('div.recordTitle').tooltip({content: ___ontooltip}); //title may have html format - use jquery tooltip
 
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
