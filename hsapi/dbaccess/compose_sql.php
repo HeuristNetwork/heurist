@@ -590,7 +590,7 @@ class OrLimb {
 
             for ($i=0; $i < count($and_texts); ++$i){
                 $str = $and_texts[$i];
-                if ($str) {
+                if ($str!=null && $str!='') {
                     $str = str_replace('+', " ", $str); //workaround until understand how to regex F:("AA BB CC")
                     $this->addAndLimb($str);
                 }

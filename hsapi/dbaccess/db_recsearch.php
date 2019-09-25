@@ -1212,7 +1212,7 @@
 
             $is_mode_json = false;
 
-            if(@$params['q']){
+            if(@$params['q']!=null && @$params['q']!=''){
 
                     if(is_array(@$params['q'])){
                         $query_json = $params['q'];

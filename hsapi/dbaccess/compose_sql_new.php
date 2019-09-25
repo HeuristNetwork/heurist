@@ -724,6 +724,7 @@ class HPredicate {
 
         switch (strtolower($this->pred_type)) {
             case 'plain':            //query in old plain text format
+                //[{"t":"12"},{"plain":"0"},{"sortby":"t"}]
 
             
                 $query = parse_query($top_query->search_domain, urldecode($this->value), null, null, $top_query->currUserID);
