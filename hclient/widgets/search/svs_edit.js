@@ -448,7 +448,7 @@ function hSvsEdit(args) {
                             svs_Query: window.hWin.HEURIST4.util.composeHeuristQuery2({q:svs_query.val(), 
                                     w:domain, 
                                     rules:rules, 
-                                    rulesonly:svs_rules_only.is(':checked'), 
+                                    rulesonly:svs_rules_only.is(':checked')?1:0, 
                                     notes:svs_notes.val(),
                                     viewmode:svs_viewmode.val()  }, false),
                                     

@@ -546,7 +546,8 @@ $.widget( "heurist.search_faceted_wiz", {
             var svs_name = $dlg.find('#svs_Name');
             var svs_ugrid = $dlg.find('#svs_UGrpID');
             var svs_rules = $dlg.find('#svs_Rules');
-            var svs_fitler = $dlg.find('#svs_Query');
+            var svs_rules_only = $dlg.find('#svs_RulesOnly');
+            var svs_filter = $dlg.find('#svs_Query');
 
             $dlg.find('.messages').empty();
             svs_name.removeClass( "ui-state-error" );
@@ -608,7 +609,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
                 svs_rules.val( this.options.params.rules?this.options.params.rules:'' );
-                svs_fitler.val( this.options.params.sup_filter?this.options.params.sup_filter:'' );
+                svs_rules_only.prop('checked', (this.options.params.rulesonly==1 || this.options.params.rulesonly==true));
+                svs_filter.val( this.options.params.sup_filter?this.options.params.sup_filter:'' );
                 this.options.params = $.parseJSON(svs[1]);
 
                 this.options.domain = this.options.params.domain;
@@ -651,7 +653,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_id.val('');
                 svs_name.val('');
                 svs_rules.val('');
-                svs_fitler.val('');
+                svs_rules_only.prop('checked', false);
+                svs_filter.val('');
 
 
                 svs_ugrid.val(this.options.domain);
@@ -1526,7 +1529,8 @@ $.widget( "heurist.search_faceted_wiz", {
         var svs_name = $dlg.find('#svs_Name');
         var svs_ugrid = $dlg.find('#svs_UGrpID');
         var svs_rules = $dlg.find('#svs_Rules');
-        var svs_fitler = $dlg.find('#svs_Query');
+        var svs_rules_only = $dlg.find('#svs_RulesOnly');
+        var svs_filter = $dlg.find('#svs_Query');
         var message = $dlg.find('.messages');
 
         var allFields = $dlg.find('input');
@@ -1546,9 +1550,13 @@ $.widget( "heurist.search_faceted_wiz", {
 
         if(true || !Hul.isempty(svs_rules.val())){
             this.options.params.rules = svs_rules.val();
+            this.options.params.rulesonly = svs_rules_only.is(':checked')?1:0;
+        }else{
+            this.options.params.rules = null;
+            this.options.params.rulesonly = null;
         }
-        if(true || !Hul.isempty(svs_fitler.val())){
-            this.options.params.sup_filter = svs_fitler.val();
+        if(true || !Hul.isempty(svs_filter.val())){
+            this.options.params.sup_filter = svs_filter.val();
         }
 
         this.options.params.ui_title =  $dlg.find('#svs_Title').val();

@@ -100,6 +100,7 @@ facet search general parameters are the same to saved search plus several specia
 
 domain
 rules
+rulesonly
 ui_title - title in user interface
 ui_viewmode - result list viewmode
 title_hierarchy - show hierarchy in facet header
@@ -645,7 +646,7 @@ $.widget( "heurist.search_faceted", {
            function(event){
                that.options.params.add_filter = ele.find('input').val();
                //$(event.target).parents('.input-cell').find('input').val();  
-console.log(that.options.params.add_filter);               
+//console.log(that.options.params.add_filter);               
                that.doSearch();
            }});   
            
@@ -1044,6 +1045,7 @@ console.log(that.options.params.add_filter);
                             source:this.element.attr('id'), 
                             qname: this.options.query_name,
                             rules: this.options.params.rules,
+                            rulesonly: (this.options.params.rulesonly==1 || this.options.params.rulesonly)?1:0,
                             viewmode: this.options.params.ui_viewmode,
                             //to keep info what is primary record type in final recordset
                             primary_rt: this.options.params.rectypes[0],
