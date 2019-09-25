@@ -155,7 +155,7 @@ $.widget( "heurist.search_faceted", {
     
     _currentRecordset:null,
     
-    _use_sup_filter:true, 
+    _use_sup_filter:null, 
     
     _use_multifield: false, //HIE - search for several fields per facet
 
@@ -589,33 +589,41 @@ $.widget( "heurist.search_faceted", {
        var that = this;
        that._input_fields = {};
        
-       this._use_sup_filter = true;
+       //this._use_sup_filter = true;
        //add toggle for supplementary filter
-       if(this.options.params.ui_prelim_filter_toggle){
-           
-           this._use_sup_filter = (that.options.params.ui_prelim_filter_toggle_mode==0);
-           
-           var lbl = that.options.params.ui_prelim_filter_toggle_label
-                        ?that.options.params.ui_prelim_filter_toggle_label
-                        :window.hWin.HR('Apply preliminary filter');
-           
-           var ele = $("<div>").html(
-                        '<h4 style="margin:0;"><div class="input-cell" style="display:block;">'
-                            +'<input type="checkbox" checked/>'                            
-                            +lbl
-                        +'</h4>').css({'border-bottom': '1px solid lightgray'}).appendTo($fieldset);
-                        
-           this._on( ele.find('input[type="checkbox"]'), { change:                         
-           function(event){
+       if(this.options.params.sup_filter){
+           if(this.options.params.ui_prelim_filter_toggle){
                
-               if(that.options.params.ui_prelim_filter_toggle_mode==0){
-                    that._use_sup_filter = $(event.target).is(':checked');    
-               }else{
-                    that._use_sup_filter = !$(event.target).is(':checked');                   
+               if(this._use_sup_filter==null){
+                    this._use_sup_filter = (that.options.params.ui_prelim_filter_toggle_mode==0);
                }
                
-               that.doSearch();
-           }});             
+               var lbl = that.options.params.ui_prelim_filter_toggle_label
+                            ?that.options.params.ui_prelim_filter_toggle_label
+                            :window.hWin.HR('Apply preliminary filter');
+               
+               var ele = $("<div>").html(
+                            '<h4 style="margin:0;"><div class="input-cell" style="display:block;">'
+                                +'<input type="checkbox" '+(((this.options.params.ui_prelim_filter_toggle_mode==0 && this._use_sup_filter)
+                                || (this.options.params.ui_prelim_filter_toggle_mode!=0 && !this._use_sup_filter))
+                                ?'checked':'')+'/>'                            
+                                +lbl
+                            +'</h4>').css({'border-bottom': '1px solid lightgray'}).appendTo($fieldset);
+                            
+               this._on( ele.find('input[type="checkbox"]'), { change:                         
+               function(event){
+                   
+                   if(that.options.params.ui_prelim_filter_toggle_mode==0){
+                        that._use_sup_filter = $(event.target).is(':checked');    
+                   }else{
+                        that._use_sup_filter = !$(event.target).is(':checked');                   
+                   }
+                   
+                   that.doSearch();
+               }});             
+           }else{
+               this._use_sup_filter = true;
+           }
        }
 
        if(this.options.params.ui_additional_filter){

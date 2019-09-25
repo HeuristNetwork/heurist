@@ -381,7 +381,8 @@ $.widget( "heurist.search_faceted_wiz", {
                             
                                 var res = window.hWin.HEURIST4.util.hQueryStringify(window.hWin.HEURIST4.current_query_request);
                                 
-                                $dlg.find('#svs_Query').val(res);
+                                $dlg.find('#svs_Query').val(res).trigger('keyup');
+                                
                         });
 
                     });
@@ -548,6 +549,16 @@ $.widget( "heurist.search_faceted_wiz", {
             var svs_rules = $dlg.find('#svs_Rules');
             var svs_rules_only = $dlg.find('#svs_RulesOnly');
             var svs_filter = $dlg.find('#svs_Query');
+            
+            this._on(svs_filter,{keyup:function(){                                 
+                        if(svs_filter.val()!=''){
+                            $dlg.find('.prefilter-settings').show();    
+                        }else{
+                            $dlg.find('.prefilter-settings').hide();    
+                        }
+                        $dlg.find('#svs_PrelimFilterToggle').change();
+                }});
+            
 
             $dlg.find('.messages').empty();
             svs_name.removeClass( "ui-state-error" );
@@ -610,7 +621,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_name.val(svs[0]);
                 svs_rules.val( this.options.params.rules?this.options.params.rules:'' );
                 svs_rules_only.prop('checked', (this.options.params.rulesonly==1 || this.options.params.rulesonly==true));
-                svs_filter.val( this.options.params.sup_filter?this.options.params.sup_filter:'' );
+                svs_filter.val( this.options.params.sup_filter?this.options.params.sup_filter:'' ).trigger('keyup');
+                
                 this.options.params = $.parseJSON(svs[1]);
 
                 this.options.domain = this.options.params.domain;
@@ -654,7 +666,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_name.val('');
                 svs_rules.val('');
                 svs_rules_only.prop('checked', false);
-                svs_filter.val('');
+                svs_filter.val('').trigger('keyup');
 
 
                 svs_ugrid.val(this.options.domain);
@@ -672,7 +684,7 @@ $.widget( "heurist.search_faceted_wiz", {
             }
 
             this._on($dlg.find('#svs_PrelimFilterToggle'), {change:function( event ){
-                if($(event.target).is(':checked')){
+                if($(event.target).is(':checked') && svs_filter.val()!=''){
                     $dlg.find('#svs_PrelimFilterToggleSettings').show();
                 }else{
                     $dlg.find('#svs_PrelimFilterToggleSettings').hide();
