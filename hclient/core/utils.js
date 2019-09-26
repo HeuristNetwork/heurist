@@ -244,42 +244,49 @@ window.hWin.HEURIST4.util = {
     */
     composeHeuristQuery2: function(params, encode){
         if(params){
-        
+
             var query, rules = params.rules;
             var query_to_save = [];
-            
+
             if(!(window.hWin.HEURIST4.util.isempty(params.w) || params.w=='all' || params.w=='a')){
                 query_to_save.push('w='+params.w);
             }
-            
+
             if(!window.hWin.HEURIST4.util.isempty(params.q)){
-                
-               if($.isArray(params.q) || $.isPlainObject(params.q)){
-                  query = JSON.stringify(params.q);
-               } else{
-                  query = params.q;
-               }
-               query_to_save.push('q='+ (encode?encodeURIComponent(query):query) );
+
+                if($.isArray(params.q) || $.isPlainObject(params.q)){
+                    query = JSON.stringify(params.q);
+                } else{
+                    query = params.q;
+                }
+                query_to_save.push('q='+ (encode?encodeURIComponent(query):query) );
             }
-            
+
 
             if(!window.hWin.HEURIST4.util.isempty(rules)){
-              query_to_save.push('rules='+ (encode?encodeURIComponent(rules):rules));
-              if(params.rulesonly==1 || params.rulesonly==true){
-                  query_to_save.push('rulesonly=1');
-              }
+
+
+                if($.isArray(params.rules) || $.isPlainObject(params.rules)){
+                    rules = JSON.stringify(params.rules);
+                } else{
+                    rules = params.rules;
+                }
+                query_to_save.push('rules='+ (encode?encodeURIComponent(rules):rules));
+                if(params.rulesonly==1 || params.rulesonly==true){
+                    query_to_save.push('rulesonly=1');
+                }
             }
-            
+
             if(!window.hWin.HEURIST4.util.isempty(params.notes)){
-               query_to_save.push('notes='+ (encode?encodeURIComponent(params.notes):params.notes));
+                query_to_save.push('notes='+ (encode?encodeURIComponent(params.notes):params.notes));
             }
-            
+
             if(!window.hWin.HEURIST4.util.isempty(params.viewmode)){
-               query_to_save.push('viewmode='+ params.viewmode);
+                query_to_save.push('viewmode='+ params.viewmode);
             }
-            
+
             return '?'+query_to_save.join('&');
-                                        
+
         }else
             return '?';
     },

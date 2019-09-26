@@ -85,7 +85,7 @@
     
     $search_params = array();
     $search_params['w'] = @$params['w'];
-    $search_params['rules'] = @$params['rules'];
+    
     if(!(@$params['offset'] || @$params['limit']))
         $search_params['needall'] = 1;  //search without limit of returned record count
     
@@ -98,6 +98,14 @@
     }
     if($search_params['q']==null || $search_params['q']==''){
         $search_params['q'] = 'sortby:-m'; //get all records
+    }
+
+
+    if(@$params['rules']!=null){
+        $search_params['rules'] = $params['rules'];
+        if(@$params['rulesonly']==true || @$params['rulesonly']==1){
+            $search_params['rulesonly'] = 1;
+        }
     }
     
 

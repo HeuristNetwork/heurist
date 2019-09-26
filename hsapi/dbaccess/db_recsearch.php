@@ -1191,6 +1191,7 @@
                 //$fin_result['data']['records'] = array_unique($fin_result['data']['records']);
             }
             $fin_result['data']['count'] = count($fin_result['data']['records']);
+            $fin_result['data']['reccount'] = $fin_result['data']['count'];
 
             if($return_h3_format){
                         $fin_result = array("resultCount" => $fin_result['data']['count'],

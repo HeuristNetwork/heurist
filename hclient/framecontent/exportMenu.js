@@ -162,6 +162,7 @@ function hexportMenu() {
         var url = link.attr('href');
         
             if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
+                
                 var q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
                 if(!window.hWin.HEURIST4.util.isempty(q)) q = '&'+q;
                 if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
@@ -265,10 +266,15 @@ function hexportMenu() {
         if(isAll){
 
             if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
+                
+                q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
+                
+                /*
                 q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
                 if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
                     q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
                 }
+                */
             }
 
         }else{    //selected only
@@ -277,7 +283,7 @@ function hexportMenu() {
                 window.hWin.HEURIST4.msg.showMsgDlg("Please select at least one record to export");
                 return false;
             }
-            q = "ids:"+this._selectionRecordIDs.join(",");
+            q = "?w=all&q=ids:"+this._selectionRecordIDs.join(",");
 
         }
 
@@ -301,11 +307,10 @@ function hexportMenu() {
             }
             
 
-            var url = window.hWin.HAPI4.baseURL + script + '?' +
-            "w=all"+
+            var url = window.hWin.HAPI4.baseURL + script + 
+            q + 
             "&a=1"+
             "&depth="+depth +
-            "&q=" + q +
             /*(layoutString ? "&" + layoutString : "") +
             (selFilter ? "&" + selFilter : "") +
             (rtFilter ? "&" + rtFilter : "") +
