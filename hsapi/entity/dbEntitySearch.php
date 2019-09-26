@@ -467,7 +467,7 @@ class DbEntitySearch
                            }
                            $response[] = $rec;
                        }
-                       if(@$this->data['recID']>0 && count($response)==1){
+                       if(@$this->data[$this->primaryField]>0 && count($response)==1){
                            $response = $response[0];
                        }
 

@@ -281,7 +281,7 @@ class DbSysGroups extends DbEntityBase
     //
     public function delete(){
         
-        $this->recordIDs = prepareIds($this->data['recID']);
+        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
         if(in_array(1, $this->recordIDs)){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot remove "Database Owners" group');
             return false;

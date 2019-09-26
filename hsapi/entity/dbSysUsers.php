@@ -206,7 +206,7 @@ class DbSysUsers extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_admin() && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_admin() && (count($this->recordIDs)>0 || count($this->records)>0)){ //there are records to update/delete
             
             $ugrID = $this->system->get_user_id();
             if($this->recordIDs[0]!=$ugrID || count($this->recordIDs)>1){
@@ -349,7 +349,7 @@ class DbSysUsers extends DbEntityBase
     //
     public function delete(){
         
-        $this->recordIDs = prepareIds($this->data['recID']);
+        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
         if(in_array(2, $this->recordIDs)){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot remove "Database Owner" user');
             return false;

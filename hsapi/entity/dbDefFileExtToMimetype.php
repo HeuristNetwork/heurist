@@ -182,7 +182,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
         }
         $ret = null;
 
-        $rec_ID = $this->data['recID'];
+        $rec_ID = $this->data[$this->primaryField];
         if($rec_ID!=null){
             $query = "DELETE from ".$this->config['tableName']." WHERE ".$this->primaryField." = '".$rec_ID."'";
             

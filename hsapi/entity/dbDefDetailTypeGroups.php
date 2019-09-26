@@ -136,7 +136,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
     //
     public function delete(){
 
-        $this->recordIDs = prepareIds($this->data['recID']);
+        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 
         if(count($this->recordIDs)==0){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
@@ -160,10 +160,10 @@ class DbDefDetailTypeGroups extends DbEntityBase
     //    
     protected function _validatePermission(){
         
-        if(!$this->system->is_admin() && count($this->recordIDs)>0){ //there are records to update/delete
+        if(!$this->system->is_admin() && (count($this->recordIDs)>0 || count($this->records)>0)){ //there are records to update/delete
             
             $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'AAAA You are not admin and can\'t edit field type groups. Insufficient rights for this operation '
+                    'You are not admin and can\'t edit field type groups. Insufficient rights for this operation '
                         .$this->system->get_user_id().'  '.print_r($this->system->getCurrentUser(), true));
             return false;
                 

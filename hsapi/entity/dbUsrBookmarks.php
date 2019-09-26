@@ -168,7 +168,7 @@ class DbUsrBookmarks extends DbEntityBase
     //
     public function delete(){
 
-        $this->recordIDs = prepareIds($this->data['recID']);  //bookmark ids
+        $this->recordIDs = prepareIds($this->data[$this->primaryField]);  //bookmark ids
         
         $mysqli = $this->system->get_mysqli();
        

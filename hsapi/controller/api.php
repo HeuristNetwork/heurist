@@ -67,11 +67,16 @@ if($method == null){
 
 if($method=='save' || $method=='add'){
     //get request body
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-//DEBUG error_log(print_r($data,true));    
-    //request body
-    $_REQUEST['fields'] = $data;
+    if(!@$_REQUEST['fields']){
+        $data = json_decode(file_get_contents('php://input'), true);
+        if($data){
+            //DEBUG error_log(print_r($data,true));    
+            //request body
+            $_REQUEST['fields'] = $data;
+        }else{
+            $_REQUEST['fields'] = $_REQUEST;
+        }
+    }
     if(@$_REQUEST['fields']['db']){ //may contain db
         $_REQUEST['db'] = $_REQUEST['fields']['db'];
         unset($_REQUEST['fields']['db']);

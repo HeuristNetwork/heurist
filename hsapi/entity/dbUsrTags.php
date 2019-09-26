@@ -225,7 +225,7 @@ class DbUsrTags extends DbEntityBase
     */
     public function delete(){
         
-        $this->recordIDs = prepareIds($this->data['recID']);
+        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 
         if(count($this->recordIDs)>0){
             

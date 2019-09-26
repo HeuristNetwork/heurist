@@ -77,6 +77,16 @@ class DbEntityBase
        $this->data = $data;
        $this->_readConfig();
        $this->init();
+       
+       
+       //rename generic ID or recID to primary field name for particular entity
+       if(@$this->data[$this->primaryField]==null){
+            if(@$this->data['ID']>0) {
+                $this->data[$this->primaryField] = $this->data['ID'];
+            }else if(@$this->data['recID']>0) {
+                $this->data[$this->primaryField] = $this->data['recID'];
+            }
+       }
     }
 
     //
@@ -257,7 +267,7 @@ class DbEntityBase
     public function delete(){
         
         if(!@$this->recordIDs){
-            $this->recordIDs = prepareIds($this->data['recID']);
+            $this->recordIDs = prepareIds($this->data[$this->primaryField]);
         }
 
         if(count($this->recordIDs)==0){             
@@ -417,7 +427,7 @@ class DbEntityBase
            }
            
         }else{
-           $this->system->addError(HEURIST_SYSTEM_FATAL, "Cannot find configuration for entity ".@$this->data['entity']);     
+           $this->system->addError(HEURIST_SYSTEM_FATAL, 'Cannot find configuration for entity '.@$this->data['entity'].' in '.HEURIST_DIR.'hsapi/entity/');     
         }
     }
     
@@ -645,10 +655,6 @@ class DbEntityBase
     //
     //
     public function search(){
-        
-        if(@$this->data['recID']>0 && @$this->data[$this->primaryField]==null){
-            $this->data[$this->primaryField] = $this->data['recID'];
-        }
         
         $this->searchMgr = new DbEntitySearch( $this->system, $this->fields);
 

@@ -92,7 +92,7 @@
     if(@$params['recID']>0){
         $search_params['q'] = array('ids'=>$params['recID']);
     }else if(@$params['ids']){
-        $search_params['q'] = array('ids'=>implode(',',$params['ids']));
+        $search_params['q'] = array('ids'=>implode(',', prepareIds($params['ids']) ));
     }else{
         $search_params['q'] = @$params['q'];
     }

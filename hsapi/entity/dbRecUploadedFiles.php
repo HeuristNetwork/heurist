@@ -473,7 +473,7 @@ class DbRecUploadedFiles extends DbEntityBase
     //
     public function delete(){
         
-        $this->recordIDs = prepareIds($this->data['recID']);
+        $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 
         if(count($this->recordIDs)==0){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
