@@ -3054,8 +3054,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             ignore_insert: 0,
             utm_zone  : UTMzone,
             recid_field: 'field_'+key_idx, //imp_session['columns'][key_idx]
-            sa_upd: $("input[name='sa_upd']:checked"). val(),
-            sa_upd2: $("input[name='sa_upd2']:checked"). val()
+            //0 - Retain existing values and append distinct new data as repeat values
+            //1 - Add new data only if field is empty
+            //2 - Replace all existing value(s) 
+            sa_upd: $("input[name='sa_upd']:checked"). val(), 
+            sa_upd2: $("input[name='sa_upd2']:checked"). val()  //if no data: retain existing (0) or remove existing (1)
         };
         
 //        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';

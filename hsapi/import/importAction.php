@@ -2392,18 +2392,21 @@ public static function performImport($params, $mode_output){
                             }
            
 //sa_upd
-//0 - Retain existing values and append distinct new data as repeat values(existing values are not duplicated)                            
-//1 - Add new data only if field is empty (new data ignored for non-empty fields)
-//2 - Add and replace all existing value(s) for the fields specified below
+//0 - Retain existing values and append distinct new data as repeat values(existing values are not duplicated)                  //1 - Add new data only if field is empty (new data ignored for non-empty fields)
+//2 - Replace all existing value(s) for the fields specified below
+//    sa_upd2
+//       0   Retain existing if no new data supplied for record
+//       1   Delete existing even if no new data supplied for record   
 
-                            if($value) {
+                            if($value) {//value from cvs
                                 
                                 $need_add = false;
                                 
+                                //original is empty - add new
                                 if($params['sa_upd']==1 && !@$details_orig["t:".$field_type]){
                                     $need_add = true;
                                     
-                                }else if($params['sa_upd']==2){ //repalce old one
+                                }else if($params['sa_upd']==2){ //replace old one
                                     $need_add = true;
                                     
                                     if(@$details_orig["t:".$field_type]){ //remove original
@@ -2413,21 +2416,20 @@ public static function performImport($params, $mode_output){
                                     
                                 }else  if($params['sa_upd']==0){ //add distinct only
                                 
-                                    if(!@$details["t:".$field_type]){
-                                        //not yet assigned
-                                        $need_add = true;
-                                    }else{
-                                        $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
-                                        if (array_search(trim_lower_accent($value), $details_lc, true)===false){
-                                            //no duplications
-                                            $need_add = true;
-                                        } 
-                                    }
+                                    $need_add = true; //retain existing and add new distinct one
                                 }
                                 
                                 if($need_add){
-                                    $cnt = count(@$details["t:".$field_type])+1;
-                                    $details["t:".$field_type][$cnt] = $value;
+                                    //always prevent duplications
+                                    if(@$details["t:".$field_type]){                                    
+                                        $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
+                                        //duplications not found - can be added
+                                        $need_add = (array_search(trim_lower_accent($value), $details_lc, true)===false);
+                                    }
+                                    if($need_add){
+                                        $cnt = count(@$details["t:".$field_type])+1;
+                                        $details["t:".$field_type][$cnt] = $value;
+                                    }
                                 }
                             
                             }else 
