@@ -503,8 +503,10 @@ var lines = svg.append("svg:g").selectAll("path")
             sText = 'Showing '+cnt_vis+' of '+cnt_tot;
         }
         
-        $('#showRectypeSelector').button({label:sText, icons:{secondary:'ui-icon-carat-1-'
-            +($('#list_rectypes').is(':visible')?'n':'s')   }}).css({'padding':'4px 2px'});
+        $('#showRectypeSelector').button({label:'Select types to show', icons:{secondary:'ui-icon-carat-1-'
+            +($('#list_rectypes').is(':visible')?'n':'s')   }}).css({'padding':'1px 2px','margin-bottom': '4px'});
+            
+        $('#lblShowRectypeSelector').text(sText);
     }
     
     $('#btnZoomIn').button({icons:{primary:'ui-icon-plus'},text:false}).click(
