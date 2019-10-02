@@ -1413,9 +1413,10 @@ $.widget( "heurist.resultList", {
             $dlg.addClass('password-reminder-popup'); //class all these popups on refresh
             return;
         }else{
-
-            var isview = (this.options.recordview_onselect=='popup' || 
-                $target.parents('.rec_view_link').length>0); //this is VIEWER click
+            
+            //this.options.recordview_onselect=='popup'
+            var isview = ( (this.options.recordview_onselect!==false && this.options.view_mode!='list')
+                        || $target.parents('.rec_view_link').length>0); //this is VIEWER click
                 
             if(isview){
 

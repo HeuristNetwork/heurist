@@ -59,7 +59,7 @@ Thematic mapping
     setFeatureSelection - triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
     setFeatureVisibility - applies visibility for given set of heurist recIds (filter from timeline)
     zoomToSelection
-    setVisibilityAndZoom - show only items with given recordset and zoom 
+    setVisibilityAndZoom - show only items in given recordset and zoom 
     
     _onLayerClick - map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
     _clearHighlightedMarkers - removes special "highlight" selection circle markers from map
@@ -1571,8 +1571,24 @@ $.widget( "heurist.mapping", {
     // dataset_id -  {mapdoc_id, dataset_name, dataset_id}
     //
     setVisibilityAndZoom: function( dataset_id, _selection, need_zoom ){
+        
+        var check_function = null;
 
-        if(window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) {
+        if(_selection=='show_all'){
+            
+            check_function = function(rec_ID){return true};
+            
+        }else if (_selection=='hide_all'){
+
+            check_function = function(rec_ID){return false};
+            
+        }else if(window.hWin.HEURIST4.util.isArrayNotEmpty(_selection)) {
+            check_function = function(rec_ID){
+                return (window.hWin.HEURIST4.util.findArrayIndex(rec_ID, _selection)>=0);
+            }
+        }
+        
+        if(check_function!=null){
             
             this._clearHighlightedMarkers();
             
@@ -1585,7 +1601,8 @@ $.widget( "heurist.mapping", {
                 if((top_layer instanceof L.LayerGroup) && (_leaflet_id==0 || _leaflet_id==top_layer._leaflet_id)){
                     top_layer.eachLayer(function(layer){
                           if (layer instanceof L.Layer && layer.feature && (!(layer.cluster_layer_id>0)) &&
-                            (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
+                                check_function( layer.feature.properties.rec_ID )
+                            ) 
                           {
                                 layer.addTo( that.nativemap );    
                                 

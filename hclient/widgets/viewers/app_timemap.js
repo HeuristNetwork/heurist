@@ -39,11 +39,11 @@ $.widget( "heurist.app_timemap", {
         
         layout_params:null, //params to be passed to map
         mapdocument:null,   // map document loaded on map init
-        init_search:null,    // search performed on init
         
         //this value reset to false on every search_finish, need to set it to true explicitely before each search
         preserveViewport: false,   //zoom to current search
-        use_cache: false   //allow the only request to server for current search - all others requests will show/hide items only
+        //only the first request call the server - all others requests will show/hide items only
+        use_cache: false   
     },
 
     _events: null,
@@ -98,10 +98,26 @@ $.widget( "heurist.app_timemap", {
 
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                     //accept events from the same realm only
-                    if(!that._isSameRealm(data)) return;
+                    if(!((data && data.search_realm=='mapping_recordset') || 
+                        that._isSameRealm(data))) return;
+                 
+                 /* DEBUG
+if( data.search_realm=='mapping_recordset'){
+//console.log('listner '+data.search_realm);                    
+if(data.recordset=='show_all'){
+console.log('show all');        
+}else{
+var re = $.isArray(data.recordset)?data.recordset:data.recordset.getIds();
+console.log('got '+re.length);    
+console.log(re);    
+}
+}                        
+*/        
+                        
                  
                     that.recordset_changed = true;
                     that.map_curr_search_inited = false;
+                    
                     that.option("recordset", data.recordset); //hRecordSet
                     that._refresh();
                     that.loadanimation(false);
@@ -234,8 +250,8 @@ $.widget( "heurist.app_timemap", {
                 if(this.options.mapdocument>0){
                     url = url + '&mapdocument='+this.options.mapdocument; 
                 }
-                if(this.options.init_search){
-                    url = url + '&q='+encodeURIComponent(this.options.init_search); 
+                if(this.options.search_initial){
+                    url = url + '&q='+encodeURIComponent(this.options.search_initial); 
                 }
                 
                 (this.mapframe).attr('src', url);
@@ -287,8 +303,19 @@ $.widget( "heurist.app_timemap", {
                     
                     if(that.map_cache_got && that.options.use_cache){
                         //do not reload current search since first request load full dataset - just hide items that are not in current search
-                        var _selection = that.options.recordset.getIds();
-                        mapping.mapping('setVisibilityAndZoom', {mapdoc_id:0, dataset_name:'Current query'}, _selection);
+                        var _selection = null;
+                        if(that.options.recordset=='show_all' || that.options.recordset=='hide_all'){
+                            _selection = that.options.recordset;
+                            that.options.recordset = null;
+                        }else {
+                            _selection = $.isArray(that.options.recordset)
+                                    ?that.options.recordset :that.options.recordset.getIds();
+                            if(_selection.length==0) _selection = 'hide_all';
+                        }
+                            
+                        mapping.mapping('setVisibilityAndZoom', {mapdoc_id:0, dataset_name:'Current query'}, _selection);                            
+
+                        
                     }else{
                         mapping.mapping('addSearchResult', that.options.recordset, 'Current query', that.options.preserveViewport);
                         that.options.preserveViewport = false; //restore it before each call if require
@@ -338,7 +365,8 @@ $.widget( "heurist.app_timemap", {
             if(mapping){
                 mapping.mapping('addSearchResult', data, dataset_name);    
             }else{
-                this.options.init_search = data['q'];
+                //mapping not defined yet - perfrom initial search
+                this.options.search_initial = data['q'];
                 this.recordset_changed = true;
                 this._refresh();
             }

@@ -154,8 +154,11 @@ function hSearchMinimal() {
             
             if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){ 
                 
+                //global app event
                 $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH,   //_searchCompleted
-                            {search_realm:_query_request.search_realm, recordset:recordset}); //global app event
+                            {search_realm:_query_request.search_realm, 
+                             recordset: recordset,      //result 
+                             query: _query_request.q}); //orig query
             }
     }
 
