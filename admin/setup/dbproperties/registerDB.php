@@ -215,11 +215,17 @@ if(!$dbowner['ugr_eMail'] || !$dbowner['ugr_FirstName'] || !$dbowner['ugr_LastNa
                    <input type="hidden" name="pwd" value="<?=$sysadmin_pwd?>">
                    <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
 <fieldset style="padding-right:30px">
-    
+
+    <div>
+        <div class="header" style="vertical-align:top;min-width:100px"><label>Registration URL:</label></div>
+        <input readonly="readonly" style="backhround-color:lightgray;width: 520px;margin-bottom: 10px;"
+            tabindex="-1"
+            value="<?php echo HEURIST_SERVER_URL . '/heurist/' . "?db=" . HEURIST_DBNAME;?>"/>
+    </div>
     <div>
         <div class="header" style="vertical-align:top;min-width:100px"><label>Database Description:</label></div>
-        <textarea  type="memo" maxlength="1000" cols="70" rows="3" name="dbDescription" id="dbDescription" class="text"
-        style="border:1px solid;padding:2px"
+        <textarea type="memo" maxlength="1000" cols="70" rows="3" name="dbDescription" id="dbDescription" class="text"
+        style="border:1px solid;padding:2px" tabindex="0" autofocus
                                 onkeyup="onKeyUpDbDescription( event )"><?php echo $dbDescription;?></textarea>
 
         <div class="heurist-helper1">
@@ -310,8 +316,8 @@ function registerDatabase() {
             $dbID, $dbName, $dbDescription, $ownerGrpID, $dbNewID;
 
                 $heuristDBname = rawurlencode(HEURIST_DBNAME);
-
-                $serverURL = HEURIST_BASE_URL . "?db=" . $heuristDBname;
+                //was HEURIST_BASE_URL - now always use hurist
+                $serverURL = HEURIST_SERVER_URL . '/heurist/' . "?db=" . $heuristDBname;
                 //remove http:// to avoid conversion path to localhost if masterindex on the same server
                 //$serverURL = substr($serverURL,7); 
                 

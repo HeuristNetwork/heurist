@@ -53,6 +53,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         //
         var installDir = window.hWin.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in 2 places this file and 6 other files if changed
         //TODO: top directories - admin|applications|common| ... are defined in SEVEN separate locations. Rationalise.
+        that.installDir = installDir; //to detect development or production version 
         that.baseURL = window.hWin.location.protocol + '//'+window.hWin.location.host + installDir;
 
         // TODO: This is actually a proto URL rather than a base URL. Rename.
