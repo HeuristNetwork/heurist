@@ -122,7 +122,7 @@ define("HEURIST_INVALID_REQUEST", "invalid");    // 400 The Request provided was
 define("HEURIST_NOT_FOUND", "notfound");         // 404 The requested object not found.
 define("HEURIST_ERROR", "error");                // 500 General error: wrong data, file i/o
 define("HEURIST_OK", "ok");                      // 200 The response contains a valid Result.
-define("HEURIST_REQUEST_DENIED", "denied");      // 403 No enough rights or action
+define("HEURIST_REQUEST_DENIED", "denied");      // 403 Not enough rights or action
 define("HEURIST_ACTION_BLOCKED", "blocked");     // 409 The request could not be completed due to a conflict with the current state of the target resource. This code is used in situations where the user might be able to resolve the conflict and resubmit the request.
 define("HEURIST_UNKNOWN_ERROR", "unknown");      // 500 A request could not be processed due to a server error. The request may succeed if you try again.
 define("HEURIST_DB_ERROR", "database");          // 500 A request could not be processed due to a server database error. Most probably this is BUG. Contact developers

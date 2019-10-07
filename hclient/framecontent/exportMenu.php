@@ -45,7 +45,6 @@ require_once(dirname(__FILE__)."/initPage.php");
 .export-popup{
     display:inline-block;
     vertical-align:text-bottom;
-    color:lightgray;
     font-size:smaller;
 }
 .export-item{
@@ -76,7 +75,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 data-logaction="exp_HML"
                 data-action="menu-export-hml-resultset"
                 title="Generate HML (Heurist XML format) for current set of search results (current query + expansion)">
-                XML (HML schema - Heurist Markup Language) <span class="ui-icon ui-icon-extlink export-popup"></span></a>
+                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span> XML (HML schema - Heurist Markup Language)</a>
         </div>
 
         <div id="menu-export-json" class="export-item">
@@ -85,7 +84,8 @@ require_once(dirname(__FILE__)."/initPage.php");
                 data-logaction="exp_JSON"
                 data-action="menu-export-json"
                 title="Generate JSON for current set of search results (current query)">
-                JSON<span class="ui-icon ui-icon-extlink export-popup"></span></a>
+                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
+                JSON</a>
            <label><input type="checkbox" id="extendedJSON" checked/>&nbsp;&nbsp;Include concept codes and names</label>  
 
         </div>
@@ -96,7 +96,8 @@ require_once(dirname(__FILE__)."/initPage.php");
                 data-logaction="exp_GeoJSON"
                 data-action="menu-export-geojson"
                 title="Generate GeoJSON-T for current set of search results (current query)">
-                GeoJSON<span class="ui-icon ui-icon-extlink export-popup"></span></a>
+                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
+                GeoJSON</a>
         </div>
         
         <div id="menu-export-kml" class="export-item">
@@ -105,7 +106,8 @@ require_once(dirname(__FILE__)."/initPage.php");
                 data-logaction="exp_KML"
                 data-action="menu-export-kml"
                 title="Generate KML for current set of search results (current query + expansion)">
-                KML <span class="ui-icon ui-icon-extlink export-popup"></span></a>
+                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
+                KML</a>
         </div>
 
         <div id="menu-export-gephi" class="export-item">
@@ -114,7 +116,8 @@ require_once(dirname(__FILE__)."/initPage.php");
                 data-logaction="exp_GEPHI"
                 data-action="menu-export-gephi"
                 title="Generate GEPHI for current set of search results (current query + expansion)">
-                GEPHI <span class="ui-icon ui-icon-extlink export-popup"></span></a>
+                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
+                GEPHI</a>
         </div>
 
         <div id="menu-export-hml-multifile" class="export-item">
@@ -123,73 +126,9 @@ require_once(dirname(__FILE__)."/initPage.php");
                 data-logaction="exp_XMLHuNI"
                 data-action="menu-export-hml-multifile"
                 title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
-                HuNI harvestable XML files (file-per-record) <span class="ui-icon ui-icon-extlink export-popup"></span></a>
+                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
+                HuNI harvestable XML files (file-per-record)</a>
         </div>
-
-        <!--
-
-        <ul id="menu_container" style="margin-top:10px;padding:2px">
-
-        <li>EXPORT RESULTS SET</li>
-
-        <li class="admin-only" class="export-item">
-        <a href="export/delimited/exportDelimitedForRectype.html" name="auto-popup" class="fixed"
-        title="Export records as delimited text (comma/tab), applying record type and additional Heurist search filter as required">
-        CSV</a>
-        </li>
-
-        <li id="menu-export-hml-resultset" class="export-item">
-        <a href="#"
-        title="Generate HML (Heurist XML format) for current set of search results (current query + expansion)">
-        HML</a>
-        </li>
-
-        <li id="menu-export-kml" class="export-item">
-        <a href="#"
-        title="Generate KML for current set of search results (current query + expansion)">
-        KML</a>
-        </li>
-
-        <li  id="menu-export-rss" class="export-item">
-        <a href="#"
-        title="Generate RSS feed for current set of search results (current query + expansion)">
-        RSS</a>
-        </li>
-
-        <li  id="menu-export-atom" class="export-item">
-        <a href="#"
-        title="Generate Atom feed current set of search results (currrent query + expansion)">
-        Atom</a>
-        </li>
-
-        <hr/>
-
-        <li>HML</li>
-
-
-        <li id="menu-export-hml-selected" class="export-item">
-        <a href="#"
-        title="Generate HML (Heurist XML format) for currently selected records only">
-        Selected records</a>
-        </li>
-
-        <li id="menu-export-hml-plusrelated" class="export-item">
-        <a href="#"
-        title="Generate HML (Heurist XML format) for current selection and related records">
-        Selected with related records</a>
-        </li>
-
-        <li id="menu-export-hml-multifile" class="export-item">
-        <a href="#"
-        title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
-        One file per record</a>
-        </li>
-
-        <hr/>
-
-
-        </ul>
-        -->
         
         <div class="heurist-prompt" style="padding:6px">
             Allow popup window in your browser preferences

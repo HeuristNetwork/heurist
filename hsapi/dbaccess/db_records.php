@@ -137,7 +137,7 @@
             ($system->defineConstant('RT_CMS_PAGE') && $rectype==RT_CMS_PAGE))
         {  
             $access = 'public';
-            $owner_grps = array(3); 
+            $owner_grps = array(1); 
         }
 
         

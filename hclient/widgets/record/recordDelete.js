@@ -232,7 +232,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                                         +' removed: '+response.data.rels_count);
                            }
                            if(response.data.noaccess>0){
-                               msg += ('<br><br>No enough rights for '+response.data.noaccess+
+                               msg += ('<br><br>Not enough rights for '+response.data.noaccess+
                                         ' record' + (response.data.noaccess>1?'s':''));
                            }     
                             

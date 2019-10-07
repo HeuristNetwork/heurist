@@ -320,7 +320,7 @@ function hCmsEditing(_options) {
                 if(response.status == hWin.ResponseStatus.OK){
                     
                     if(response.data.noaccess==1){
-                        window.hWin.HEURIST4.msg.showMsgErr('It appears you have no enough rights to edit this record');
+                        window.hWin.HEURIST4.msg.showMsgErr('It appears you have not enough rights to edit this record');
                         
                     }else{
 

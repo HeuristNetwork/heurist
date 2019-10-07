@@ -308,7 +308,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                                 + response.data.updated  + ' record'
                                 + (response.data.updated>1?'s':'');
                            if(response.data.noaccess>0){
-                               msg += ('<br><br>No enough rights for '+response.data.noaccess+
+                               msg += ('<br><br>Not enough rights for '+response.data.noaccess+
                                         ' record' + (response.data.noaccess>1?'s':''));
                            }     
                             
