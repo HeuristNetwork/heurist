@@ -761,7 +761,7 @@ function output_Records($system, $data, $params){
             return false;
         }   
 
-        $t2 = new DateTime($value);
+        $t2 = new DateTime();
         $dt = $t2->format('Y-m-d');
 /*
         $gephi_header = 
@@ -848,7 +848,7 @@ XML;
         if($params['format']=='geojson'){
             
             $feature = getGeoJsonFeature($record, (@$params['extended']==2), @$params['simplify'], @$params['leaflet']);
-            if($params['leaflet']){ //include only geoenabled features, timeline data goes in separate timeline array
+            if(@$params['leaflet']){ //include only geoenabled features, timeline data goes in separate timeline array
                    if(@$feature['when']){
                         $timeline_data[] = array('rec_ID'=>$recID, 'when'=>$feature['when']['timespans'], 
                                         'rec_RecTypeID'=>$rty_ID, "rec_Title"=>$record['rec_Title']);
