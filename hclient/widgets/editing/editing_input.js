@@ -659,22 +659,22 @@ $.widget( "heurist.editing_input", {
                         if($input.is(':visible')){
                             __showEditor(true);
                         }else{
-                            $btn_edit_switcher.text('html');
+                            $btn_edit_switcher.text('wyswyg');
                             $input.show();
                             tinymce.remove(eid);
                             $(eid).hide();
                         }
                     }});
                  
-                if( this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'] || 
+                /*if( this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'] || 
                     this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
-                    this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){    
+                    this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){    }*/
                     //what is visible initially
                     var nodes = $.parseHTML(value);
                     if(nodes && (nodes.length>1 || nodes[0].nodeName!='#text')){ //if it has html show editor at once
                              setTimeout(__showEditor,500); 
                     }
-                }
+                
             } 
 
         }
