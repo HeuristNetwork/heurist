@@ -1087,8 +1087,13 @@ $.widget( "heurist.expertnation_nav", {
                 $('#main_pane').find('.clearfix').hide(); //hide all
                 $('.bor-page-aggregate').show();
                 $(app1.widget).expertnation_place('updateResultSet', res_recordset);
+                //$('#expertnation_place')
             }
+            
+            //var newHeight = $(this.div_content)[0].scrollHeight + 100;
 
+//            $('#bor-page-aggregate').height( newHeight );!!!!!!
+            
             //mapping
             if(mapids.length>0){
                 var map_recset = that.recset.getSubSetByIds(mapids); //get only map enabled
