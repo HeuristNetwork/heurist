@@ -43,12 +43,12 @@ private static function getConceptID($lclID, $tableName, $fieldNamePrefix) {
     $ids = mysql__select_row(self::$system->get_mysqli(), $query);
     
     //return "".$ids[0]."-".$ids[1];
-    if ($ids && count($ids) == 4 && is_numeric($ids[0]) && is_numeric($ids[1])) {
-        return "" . $ids[0] . "-" . $ids[1];
+    if ($ids && count($ids) == 2 && is_numeric($ids[0]) && is_numeric($ids[1])) {
+        return "" . $ids[0] . '-' . $ids[1];
     } else if (HEURIST_DBID) {
-        return "" . HEURIST_DBID . "-" . $lclID;
+        return '' . HEURIST_DBID . '-' . $lclID;
     } else {
-        return null;
+        return '0000-'.$lclID;
     }
 }
 /**
