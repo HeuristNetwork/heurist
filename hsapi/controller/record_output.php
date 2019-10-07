@@ -173,7 +173,7 @@
 exit();
 
 
-//
+// NOT USED
 // output data as 
 //           zip  : 0|1  compress
 //           file : 0|1  output as file or ptintout
@@ -1025,7 +1025,7 @@ XML;
         
         return true;
     }else{
- 
+        
         //$content = stream_get_contents($fd);
         $content = file_get_contents($tmp_destination);
         fclose($fd);
@@ -1034,6 +1034,12 @@ XML;
             header( 'Content-Type: application/json');    
         }else{
             header( 'Content-Type: text/xml');
+        }
+        
+        if(@$params['file']==1 || @$params['file']===true){
+            $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.$params['format'];
+            header('Content-disposition: attachment; filename='.$filename);
+            header('Content-Length: ' . strlen($content));
         }
         
         if(@$params['restapi']==1 && count($rt_counts)==0){

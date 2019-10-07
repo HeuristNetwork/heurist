@@ -106,7 +106,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 
 
-if(@$_REQUEST['file']){ // output manifest + files ??
+if(@$_REQUEST['multifile']){ // output manifest + files ??
     $intofile = true; //flag one-record-per-file mode for HuNI  
 }else{
     $intofile = false;
@@ -151,6 +151,13 @@ if(!defined('HEURIST_HML_DIR')){
 if(!$intofile){
     if (@$_REQUEST['mode'] != '1') {
         header('Content-type: text/xml; charset=utf-8');
+        
+        if(@$_REQUEST['file']==1 || @$_REQUEST['file']===true){
+            $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.hml';
+            header('Content-disposition: attachment; filename='.$filename);
+            //header('Content-Length: ' . strlen($content));
+        }
+        
     }
     output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
 }

@@ -41,9 +41,11 @@ if( !$system->init(@$_REQUEST['db']) ){
 
 $islist = array_key_exists("q", $_REQUEST);
 
+if(@$_REQUEST['file']==1 || @$_REQUEST['file']===true){
 header("Cache-Control: public");
 header("Content-Description: File Transfer");
 header("Content-Disposition: attachment; filename=\"export.kml\"");
+}
 header("Content-Type: text/kml");
 
 

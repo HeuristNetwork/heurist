@@ -38,16 +38,30 @@ require_once(dirname(__FILE__)."/initPage.php");
         }
     }            
 </script>
+<style>
+.export-button{
+    width:100px;
+}
+.export-popup{
+    display:inline-block;
+    vertical-align:text-bottom;
+    color:lightgray;
+    font-size:smaller;
+}
+.export-item{
+    padding:5px;
+}
+</style>
 </head>
 
 <body style="background-color:white;font-size:0.8em">
     <div style="top:0;bottom:0;left:0;position:absolute;padding:10px;font-size:1.2em">
 
-        <h2>Text file export</h2>
+        <h2>File export</h2>
 
         <br><br>
 
-        <div id="menu-export-csv" style="padding-left:5px;">
+        <div id="menu-export-csv" class="export-item">
             <button class="export-button">CSV</button>
             <a href="#" oncontextmenu="return false;" 
                 data-logaction="exp_CSV"
@@ -56,59 +70,60 @@ require_once(dirname(__FILE__)."/initPage.php");
                 Comma or tab-separated text file</a>
         </div>
 
-        <div id="menu-export-hml-resultset" style="padding-left:5px;">
-            <button class="export-button">HML</button>
+        <div id="menu-export-hml-resultset" class="export-item">
+            <button class="export-button">XML</button>
             <a href="#" oncontextmenu="return false;" 
                 data-logaction="exp_HML"
                 data-action="menu-export-hml-resultset"
                 title="Generate HML (Heurist XML format) for current set of search results (current query + expansion)">
-                HML <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
+                XML (HML schema - Heurist Markup Language) <span class="ui-icon ui-icon-extlink export-popup"></span></a>
         </div>
 
-        <div id="menu-export-hml-multifile" style="padding-left:5px;">
-            <button class="export-button">XML</button>
-            <a href="#" oncontextmenu="return false;" 
-                data-logaction="exp_XMLHuNI"
-                data-action="menu-export-hml-multifile"
-                title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
-                HuNI harvestable (file-per-record) <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
-        </div>
-
-        <div id="menu-export-json-multifile" style="padding-left:5px;">
+        <div id="menu-export-json" class="export-item">
             <button class="export-button">JSON</button>
-            <a href="#" oncontextmenu="return false;" 
+            <a href="#" oncontextmenu="return false;" style="padding-right:20px" 
                 data-logaction="exp_JSON"
-                data-action="menu-export-json-multifile"
-                title="Generate JSON for current set of search results (current query) with one record per file, plus manifest">
-                JSON<span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
-           <label>&nbsp;&nbsp;Include concept codes and names of definitions <input type="checkbox" id="extendedJSON" checked/></label>     
+                data-action="menu-export-json"
+                title="Generate JSON for current set of search results (current query)">
+                JSON<span class="ui-icon ui-icon-extlink export-popup"></span></a>
+           <label><input type="checkbox" id="extendedJSON" checked/>&nbsp;&nbsp;Include concept codes and names</label>  
+
         </div>
 
-        <div id="menu-export-geojson-multifile" style="padding-left:5px;">
+        <div id="menu-export-geojson" class="export-item">
             <button class="export-button">GeoJSON</button>
             <a href="#" oncontextmenu="return false;" 
                 data-logaction="exp_GeoJSON"
-                data-action="menu-export-geojson-multifile"
+                data-action="menu-export-geojson"
                 title="Generate GeoJSON-T for current set of search results (current query)">
-                GeoJSON<span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
+                GeoJSON<span class="ui-icon ui-icon-extlink export-popup"></span></a>
         </div>
         
-        <div id="menu-export-kml" style="padding-left:5px;">
+        <div id="menu-export-kml" class="export-item">
             <button class="export-button">KML</button>
             <a href="#" oncontextmenu="return false;" 
                 data-logaction="exp_KML"
                 data-action="menu-export-kml"
                 title="Generate KML for current set of search results (current query + expansion)">
-                KML <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
+                KML <span class="ui-icon ui-icon-extlink export-popup"></span></a>
         </div>
 
-        <div id="menu-export-gephi" style="padding-left:5px;">
+        <div id="menu-export-gephi" class="export-item">
             <button class="export-button">GEPHI</button>
             <a href="#" oncontextmenu="return false;" 
                 data-logaction="exp_GEPHI"
                 data-action="menu-export-gephi"
                 title="Generate GEPHI for current set of search results (current query + expansion)">
-                GEPHI <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:text-bottom"></span></a>
+                GEPHI <span class="ui-icon ui-icon-extlink export-popup"></span></a>
+        </div>
+
+        <div id="menu-export-hml-multifile" class="export-item">
+            <button class="export-button">HuNI</button>
+            <a href="#" oncontextmenu="return false;" 
+                data-logaction="exp_XMLHuNI"
+                data-action="menu-export-hml-multifile"
+                title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
+                HuNI harvestable XML files (file-per-record) <span class="ui-icon ui-icon-extlink export-popup"></span></a>
         </div>
 
         <!--
@@ -117,31 +132,31 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         <li>EXPORT RESULTS SET</li>
 
-        <li class="admin-only" style="padding-left:5px;">
+        <li class="admin-only" class="export-item">
         <a href="export/delimited/exportDelimitedForRectype.html" name="auto-popup" class="fixed"
         title="Export records as delimited text (comma/tab), applying record type and additional Heurist search filter as required">
         CSV</a>
         </li>
 
-        <li id="menu-export-hml-resultset" style="padding-left:5px;">
+        <li id="menu-export-hml-resultset" class="export-item">
         <a href="#"
         title="Generate HML (Heurist XML format) for current set of search results (current query + expansion)">
         HML</a>
         </li>
 
-        <li id="menu-export-kml" style="padding-left:5px;">
+        <li id="menu-export-kml" class="export-item">
         <a href="#"
         title="Generate KML for current set of search results (current query + expansion)">
         KML</a>
         </li>
 
-        <li  id="menu-export-rss" style="padding-left:5px;">
+        <li  id="menu-export-rss" class="export-item">
         <a href="#"
         title="Generate RSS feed for current set of search results (current query + expansion)">
         RSS</a>
         </li>
 
-        <li  id="menu-export-atom" style="padding-left:5px;">
+        <li  id="menu-export-atom" class="export-item">
         <a href="#"
         title="Generate Atom feed current set of search results (currrent query + expansion)">
         Atom</a>
@@ -152,19 +167,19 @@ require_once(dirname(__FILE__)."/initPage.php");
         <li>HML</li>
 
 
-        <li id="menu-export-hml-selected" style="padding-left:5px;">
+        <li id="menu-export-hml-selected" class="export-item">
         <a href="#"
         title="Generate HML (Heurist XML format) for currently selected records only">
         Selected records</a>
         </li>
 
-        <li id="menu-export-hml-plusrelated" style="padding-left:5px;">
+        <li id="menu-export-hml-plusrelated" class="export-item">
         <a href="#"
         title="Generate HML (Heurist XML format) for current selection and related records">
         Selected with related records</a>
         </li>
 
-        <li id="menu-export-hml-multifile" style="padding-left:5px;">
+        <li id="menu-export-hml-multifile" class="export-item">
         <a href="#"
         title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
         One file per record</a>

@@ -50,7 +50,6 @@ function hexportMenu() {
         $('.export-button').each(function(){
             var ele = $(this);
             
-            ele.parent().css('padding','5px');
             //find url
             var lnk = ele.parent().find('a').css({'text-decoration':'none','color':'black'});
             var href = lnk.attr('href');
@@ -66,13 +65,16 @@ function hexportMenu() {
                 
                 lnk.attr('href', href).click(
                     function(event){
+                        var save_as_file = true;
+                        
                         var ele = $(event.target);
                         if(ele.is('span')){
+                            save_as_file = false;
                             ele = ele.parent();
                         }
                         var action = ele.attr('data-action');
                         if(action){
-                            _menuActionHandler(event, action, ele.attr('data-logaction'));
+                            _menuActionHandler(event, action, ele.attr('data-logaction'), save_as_file);
                             return false;
                         }else{
                             _onPopupLink(event);
@@ -87,40 +89,6 @@ function hexportMenu() {
                     });
             
         });
-
-        
-       //old way - REMOVE
-        menu.find('[name="auto-popup"]').each(function(){
-            var ele = $(this);
-            var href = ele.attr('href');
-            if(!window.hWin.HEURIST4.util.isempty(href)){
-                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
-
-                if(ele.hasClass('h3link')){
-                    //h3link class on menus implies location of older (vsn 3) code
-                    href = window.hWin.HAPI4.baseURL + href;
-                }
-                
-                ele.attr('href', href).click(
-                    function(event){
-                        _onPopupLink(event);
-                    }
-                );
-
-            }
-        });
-
-       menu.find('li').click(function(event){
-            var action = $(event.target).attr('id');
-            if(!action){
-                action = $(event.target).parent().attr('id')
-            }
-            if(action){
-               _menuActionHandler(event, action, $(event.target).attr('data-logaction'));
-               return false;
-            }
-      });
-
         
     }
 
@@ -209,7 +177,7 @@ function hexportMenu() {
     //
     //
     //
-    function _menuActionHandler(event, action, action_log){
+    function _menuActionHandler(event, action, action_log, save_as_file){
 
         if(action_log){
             window.hWin.HAPI4.SystemMgr.user_log(action_log);
@@ -228,21 +196,28 @@ function hexportMenu() {
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV');
             
         }else if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
-            _exportRecords('hml',true,false,false); // isAll, includeRelated, multifile = separate files
+            _exportRecords({format:'hml', isAll:true, includeRelated:false, multifile:false, save_as_file:save_as_file});
+            
         }else if(action == "menu-export-hml-selected"){ // Currently selected records only
-            _exportRecords('hml',false,false,false);
+            _exportRecords({format:'hml', isAll:false, includeRelated:false, multifile:false, save_as_file:save_as_file});
+            
         }else if(action == "menu-export-hml-plusrelated"){ // Current resulteset plus any related records
-            _exportRecords('hml',true,true,false);
+            _exportRecords({format:'hml', isAll:true, includeRelated:true, multifile:false, save_as_file:save_as_file});
+
         }else if(action == "menu-export-hml-multifile"){ // selected + related
-            _exportRecords('hml',true,false,true);
-        }else if(action == "menu-export-json-multifile"){ 
-            _exportRecords('json',true,false,true);  //all, multifile
-        }else if(action == "menu-export-geojson-multifile"){ 
-            _exportRecords('geojson',true,false,true);  //all, multifile
+            _exportRecords({format:'hml', isAll:true, includeRelated:false, multifile:true, save_as_file:save_as_file});
+            
+        }else if(action == "menu-export-json"){ 
+            _exportRecords({format:'json', isAll:true, includeRelated:false, multifile:false, save_as_file:save_as_file});
+            
+        }else if(action == "menu-export-geojson"){ 
+            _exportRecords({format:'geojson', isAll:true, includeRelated:false, multifile:false, save_as_file:save_as_file});
+            
         }else if(action == "menu-export-gephi"){ 
-            _exportRecords('gephi',true,false,false); 
+            _exportRecords({format:'gephi', isAll:true, includeRelated:false, multifile:false, save_as_file:save_as_file});
+
         }else if(action == "menu-export-kml"){
-            _exportKML(true);
+            _exportKML(true, save_as_file);
         }else if(action == "menu-export-rss"){
             _exportFeed('rss');
         }else if(action == "menu-export-atom"){
@@ -255,15 +230,15 @@ function hexportMenu() {
     }    
     
     //
+    // opts: {format, isAll, includeRelated, multifile, save_as_file}
     //
-    //
-    function _exportRecords(format, isAll, includeRelated, multifile){ // isAll = resultset, false = current selection only
+    function _exportRecords(opts){ // isAll = resultset, false = current selection only
 
         var q = "",
         layoutString,rtFilter,relFilter,ptrFilter,
         depth = 0;
 
-        if(isAll){
+        if(opts.isAll){
 
             if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
                 
@@ -287,7 +262,7 @@ function hexportMenu() {
 
         }
 
-        if (includeRelated){
+        if (opts.includeRelated){
 
             depth = 1;
         }
@@ -296,16 +271,20 @@ function hexportMenu() {
             
             var script; 
             var params = '';
-            if(format=='hml'){
+            if(opts.format=='hml'){
                 script = 'export/xml/flathml.php';                
-                params =  'depth='+(includeRelated?1:0)
-                          + (multifile?'&file=1':'');    
-                
+                params =  'depth='+(opts.includeRelated?1:0)
+                          + (opts.multifile?'&multifile=1':'');    
+               
             }else{
                 script = 'hsapi/controller/record_output.php';
-                params = 'format='+format+'&file=0&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
+                params = 'format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
             }
             
+            if(opts.save_as_file){          
+                params = params + '&file=1'; //save as file
+            }
+                
 
             var url = window.hWin.HAPI4.baseURL + script + 
             q + 
@@ -325,7 +304,7 @@ function hexportMenu() {
         return false;
     }
      
-    function _exportKML(isAll){
+    function _exportKML(isAll, save_as_file){
 
         var q = "";
         if(isAll){
@@ -349,6 +328,11 @@ function hexportMenu() {
 
         if(q!=''){
             var url = window.hWin.HAPI4.baseURL + "export/xml/kml.php" + q + "&a=1&depth=1&db=" + window.hWin.HAPI4.database;
+            if(save_as_file){
+                url = url + '&file=1';
+            }
+            
+            
             window.open(url, '_blank');
         }
 
