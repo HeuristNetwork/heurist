@@ -242,12 +242,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             that._refresh();
         });
 
+        /*
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_UPDATE,
         function(e, data) {
             that._getCountWebSiteRecords();
         });
-        
         that._getCountWebSiteRecords();
+        */
+        
 
         this._refresh();
 
@@ -256,7 +258,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
      //
      //
      //   
-    _getCountWebSiteRecords: function(){
+    _getCountWebSiteRecords: function(callback){
         var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
         if(RT_CMS_HOME>0){
             var request = {
@@ -272,6 +274,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         that.cms_home_records_count = response.data[RT_CMS_HOME];
+                        if($.isFunction(callback)) callback(that);
                     }
                 });
         }   
@@ -409,7 +412,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART);
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '+window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
-        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_UPDATE);
+        //$(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_UPDATE);
         
         this.div_logo.remove();
         this.divMainMenu.remove();
@@ -693,37 +696,50 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else if(action == "menu-cms-create"){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-                if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
-                    sMsg = 'You already have a website. Are you sure you want to create an additional site?';
-                }else{
-                    sMsg = 'Are you sure you want to create a site?';
-                }
                 
-                window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
-                        function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                that._getCountWebSiteRecords(function(){
+                    if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
+                        sMsg = 'You already have '+
+                            ((that.cms_home_records_count==1)?'a website'
+                                    :(that.cms_home_records_count+' websites'))+
+                            '. Are you sure you want to create an additional site?';
+                    }else{
+                        sMsg = 'Are you sure you want to create a site?';
+                    }
+                    
+                    window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
+                            function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                    
+                }
+                );
                 
 
         }else if(action == "menu-cms-edit"){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-                if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
-                        that._select_CMS_Home( false );
-                }else{
-                        window.hWin.HEURIST4.msg.showMsgDlg(
-                            'New website will be created. Continue?',
-                            function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
-                }
+
+                that._getCountWebSiteRecords(function(){
+                    if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
+                            that._select_CMS_Home( false );
+                    }else{
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                'New website will be created. Continue?',
+                                function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                    }
+                });
 
         }else if(action == "menu-cms-view"){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-                if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
-                        that._select_CMS_Home( true );
-                }else{
-                        window.hWin.HEURIST4.msg.showMsgDlg(
-                            'New website will be created. Continue?',
-                            function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
-                }
+                that._getCountWebSiteRecords(function(){
+                    if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
+                            that._select_CMS_Home( true );
+                    }else{
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                'New website will be created. Continue?',
+                                function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                    }
+                });
                 
         }else if(action == "menu-database-properties"){
 
@@ -1305,14 +1321,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(window.hWin.HEURIST4.rectypes.counts && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]==1){
 
             if(is_view_mode){
-                var url = window.hWin.HAPI4.baseURL+
-                            '?db='+window.hWin.HAPI4.database+'&website';
-                window.open(url, '_blank');
+                this._openCMS();
             }else{
                 window.hWin.HEURIST4.ui.showEditCMSDialog( 0 ); //load the only entry at once
             }
             return;
         }
+        
+        var that = this;
         
         var popup_options = {
                         select_mode: 'select_single', //select_multi
@@ -1346,9 +1362,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                     var rec_ID = recordset.getOrder()[0];
                                     
                                     if(is_view_mode){
-                                        var url = window.hWin.HAPI4.baseURL+
-                                                    '?db='+window.hWin.HAPI4.database+'&website&id='+rec_ID;
-                                        window.open(url, '_blank');
+                                        that._openCMS(rec_ID);
                                     }else{
                                         window.hWin.HEURIST4.ui.showEditCMSDialog( rec_ID );    
                                     }
@@ -1359,7 +1373,54 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
         
-    }            
+    }, 
+    
+    //
+    // force_production_version
+    // 
+    _openCMS: function(rec_ID, force_production_version){
+        
+        var url = window.hWin.HAPI4.baseURL;
+        
+        if(force_production_version===true){
+
+            //replace devlopment folder to production on e(ie h5-ij to heurist)
+            url = url.split('/');
+            var i = url.length-1;
+            while(i>0 && url[i]=='') i--;
+            url[i]='heurist';
+            url = url.join('/');
+        
+        }else if(force_production_version!==false 
+            && window.hWin.HAPI4.installDir && !window.hWin.HAPI4.installDir.endsWith('/heurist/')){
+        
+            var that = this;    
+            var buttons = {};
+            buttons[window.hWin.HR('Current (development) version')]  = function() {
+                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" );
+                that._openCMS(rec_ID, false);
+            };                                 
+            buttons[window.hWin.HR('Production version')]  = function() {
+                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg(); $dlg.dialog( "close" );
+                that._openCMS(rec_ID, true);
+            };                                 
+            
+            window.hWin.HEURIST4.msg.showMsgDlg('<p>You are currently running a development version of Heurist.</p>' 
++'<p>Reply "Current (development) version" to use the development version for previewing your site, but please do not publish this URL.</p>' 
++'<p>Reply "Production version" to obtain the URL for public dissemination, which will load the production version of Heurist.</p>' 
+,buttons);
+            
+            return;
+        }
+        
+        url = url+'?db='+window.hWin.HAPI4.database+'&website';
+        if(rec_ID>0){
+            url = url + '&id='+rec_ID;
+        }
+                                                    
+        window.open(url, '_blank');
+        
+    }           
             
 
 });

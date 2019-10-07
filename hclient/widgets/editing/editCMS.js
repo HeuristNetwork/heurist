@@ -166,7 +166,8 @@ function editCMS(home_page_record_id, main_callback){
 
 
             if(home_page_record_id<0){
-                //create new set of records - website template
+                
+                //create new set of records - website template -----------------------
                 window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
                 window.hWin.HEURIST4.msg.showMsgFlash('Creating the set of website records', 10000);
 
