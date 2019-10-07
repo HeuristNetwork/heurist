@@ -906,6 +906,8 @@ class HPredicate {
             if($is_empty){
                 $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField=='')";    
             }else{
+                $ignoreApostrophe = $ignoreApostrophe && (strpos($val,"'")===false);
+                
                 if($ignoreApostrophe){
                     $res = "( replace( r".$this->qlevel.".$sHeaderField, \"'\", \"\")".$val.")";     
                 }else{
@@ -947,8 +949,7 @@ class HPredicate {
             }else{
                 
                 $field_name = $p."dtl_Value ";
-                
-                $ignoreApostrophe = (strpos($val, 'LIKE')==1);
+                $ignoreApostrophe = ((strpos($val, 'LIKE')==1) && (strpos($val,"'")===false));
                 if($ignoreApostrophe){
                     $field_name = 'replace('.$field_name.", \"'\", \"\") ";                   
                 }
