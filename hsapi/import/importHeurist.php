@@ -100,7 +100,8 @@ private static function readDataFile($filename, $type=null, $validate=true){
 }
 
 //
-// @todo use XMLReader 
+// @todo use XMLReader to allow stream read, 
+// simplexml_load_file -loads the entire file into memory
 //
 private static function hmlToJson($filename){
 

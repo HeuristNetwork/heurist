@@ -1125,8 +1125,9 @@ function isXMLfile($filename){
     $res = false;
     $handle = @fopen($filename, 'r');
     if ($handle) {
-        $output = fread($handle, 10);    
-        $res = (strpos($output, '<?xml') === 0);
+        $output = fread($handle, 10);   
+        $pp = strpos($output, '<?xml'); 
+        $res = ($pp === 0 || $pp === 3);
         fclose($handle);
     }
     return $res;
