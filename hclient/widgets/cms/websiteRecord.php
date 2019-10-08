@@ -613,7 +613,7 @@ if(!$edit_Available && $system->is_member(2)){
     ?>  
         <div id="main-pagetitle">loading...</div>       
     </div>
-    <div class="ent_content_full" style="top:180px;padding: 5px;" id="main-content-container">
+    <div class="ent_content_full" style="top:190px;padding: 5px;" id="main-content-container">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" data-viewonly="<?php print ($hasAccess)?0:1;?>">
         </div>
     </div>
