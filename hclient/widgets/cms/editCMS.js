@@ -110,14 +110,14 @@ function editCMS(home_page_record_id, main_callback){
             .appendTo( $(window.hWin.document).find('body') );
     }
     edit_dialog = popup_dlg.dialog(dlg_opts);
-    popup_dlg.load(window.hWin.HAPI4.baseURL+'hclient/widgets/editing/editCMS.html', 
+    popup_dlg.load(window.hWin.HAPI4.baseURL+'hclient/widgets/cms/editCMS.html', 
     );
 */    
     
     
 
     var edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
-        +'hclient/widgets/editing/editCMS.html',
+        +'hclient/widgets/cms/editCMS.html',
                 edit_buttons,window.hWin.HR('Define Website'),
                 {open:onDialogInit, width:dim.w*0.95, height:dim.h*0.95, isPopupDlg:true, 
                 close:function(){
@@ -461,7 +461,7 @@ function editCMS(home_page_record_id, main_callback){
                                         btn_refresh.button({icon:'ui-icon-refresh'}).click(function(){
                                             //load new content to iframe
                                             edit_dialog.find('#web_preview').attr('src', window.hWin.HAPI4.baseURL+
-                                                'viewers/record/websiteRecord.php?edit=1&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id);
+                                                'hclient/widgets/cms/websiteRecord.php?edit=1&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id);
                                         });
                                         
                                         var url = window.hWin.HAPI4.baseURL+

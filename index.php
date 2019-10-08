@@ -36,7 +36,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }else if (array_key_exists('website', $_REQUEST)) {
         $format = 'website';
         define('PDIR','');
-        include dirname(__FILE__).'/viewers/record/websiteRecord.php';
+        include dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
         exit();
     if(@$_REQUEST['field']>0){
         $redirect = $redirect.'&field='.$_REQUEST['field'];    
@@ -147,7 +147,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editSymbology.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editCMS.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
         <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 

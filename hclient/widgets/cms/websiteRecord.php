@@ -30,12 +30,12 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css    
+if(!defined('PDIR')) define('PDIR','../../../');  //need for proper path to js and css    
 
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php'); //without client hapi
-require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
-require_once (dirname(__FILE__).'/../../hsapi/dbaccess/db_users.php');
+require_once(dirname(__FILE__).'/../../framecontent/initPageMin.php'); //without client hapi
+require_once(dirname(__FILE__).'/../../../hsapi/dbaccess/db_recsearch.php');
+require_once (dirname(__FILE__).'/../../../hsapi/dbaccess/db_users.php');
 
 
 /*

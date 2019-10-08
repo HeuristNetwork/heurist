@@ -83,7 +83,7 @@ if($database_url!=null){ //redirect to resolver for another database
     
 }else if($format=='web' || $format=='website'){
     
-    $redirect = '../viewers/record/websiteRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
+    $redirect = '../hclient/widgets/cms/websiteRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
     if(@$_REQUEST['field']>0){
         $redirect = $redirect.'&field='.$_REQUEST['field'];    
     }

@@ -818,7 +818,7 @@ function hCmsEditing(_options) {
         
       
         $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
-                +"hclient/widgets/editing/editCMS_AddWidget.html?t="+(new Date().getTime()), 
+                +"hclient/widgets/cms/editCMS_AddWidget.html?t="+(new Date().getTime()), 
                 buttons, 'Add Heurist Widget to your Web Page', 
         {  container:'cms-add-widget-popup',
            width:750,
