@@ -126,7 +126,6 @@ require_once(dirname(__FILE__)."/initPage.php");
                 data-logaction="exp_XMLHuNI"
                 data-action="menu-export-hml-multifile"
                 title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
-                <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
                 HuNI harvestable XML files (file-per-record)</a>
         </div>
         
