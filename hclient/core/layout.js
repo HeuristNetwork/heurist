@@ -203,6 +203,25 @@ function hLayout(args) {
         return is_layout ?layout :null;
     }
     
+    
+    //
+    // define src attribute for img, source and embed elements 
+    // file id will be taken from data-id attribute
+    //
+    function _defineMediaSource($container){
+        
+        $container.find('img[data-id], source[data-id], embed[data-id]').each(
+            function(idx,item){
+                var surl = window.hWin.HAPI4.baseURL+'?db='
+                        + window.hWin.HAPI4.database
+                        + "&file=" + $(item).attr('data-id');
+                $(item).attr('src', surl);
+            }
+        );
+        
+    }
+    
+    
     /**
     * Main funtion that inits all stuff
     *
@@ -428,6 +447,9 @@ function hLayout(args) {
         //temp appAdjustContainer();
     }
 
+    //
+    //
+    //
     function __toogleIcons($container, pane, closed, opened){
         var tog = $container.find('.ui-layout-toggler-'+pane);
         tog.addClass('ui-heurist-btn-header1')
@@ -615,13 +637,10 @@ function hLayout(args) {
 
 
                     if(!$pane.is(':visible')){
-console.log('not visible');                        
                         
                         $pane.on("myOnShowEvent222", function(event){
                             
                             $pane.off("myOnShowEvent222");
-
-console.log('ON show');                        
                             $pane.layout(layout_opts);
                             __toogleIcons($pane, 'west', 'e', 'w');
                             __toogleIcons($pane, 'east', 'w', 'e');
@@ -951,7 +970,7 @@ console.log('ON show');
         }else{
             $content.html(app.content?app.content :app.name);
         }
-    }
+    }//appAddContent
 
     /**
     * Creates new tabcontrol - it may contains several applications
@@ -1202,16 +1221,17 @@ console.log('ON show');
 
         return res;
     }
+
+    //********************************************************** body of _appInitAll
     
-    var layout = null;
-    if($.isPlainObject(layoutid) && layoutid['type'] &&  layoutid['id']){
-        layout = layoutid;
-        layoutid = layout['id'];
-    }else{
-        layout = layoutGetById(layoutid);
-    }
+        var layout = null;
+        if($.isPlainObject(layoutid) && layoutid['type'] &&  layoutid['id']){
+            layout = layoutid;
+            layoutid = layout['id'];
+        }else{
+            layout = layoutGetById(layoutid);
+        }
     
-    //**********************************************************
 
         if(layout==null){
             window.hWin.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
@@ -1345,7 +1365,7 @@ console.log('ON show');
         }
 
 
-    }   
+    }//END _appInitAll   
  
     //public members
     var that = {
@@ -1374,7 +1394,7 @@ console.log('ON show');
         },
         
         //
-        // get layout priperties from attributes and init free layout
+        // get layout properties from attributes of elements and init free layout
         //
         appInitFromContainer: function( document, containerid, supp_options ){
             
@@ -1395,6 +1415,8 @@ console.log('ON show');
             if(layout){
                 _appInitAll(layout, $container); 
             }
+            //
+            _defineMediaSource($container); 
         },
         
         appInitFromContainer2: function( $container, supp_options ){
@@ -1403,7 +1425,8 @@ console.log('ON show');
             if(layout){
                 _appInitAll(layout, $container); 
             }
-                
+            
+            _defineMediaSource($container); 
         },
 
         putAppOnTop: function( widgetname ){

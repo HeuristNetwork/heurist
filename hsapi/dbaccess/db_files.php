@@ -574,7 +574,9 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
 
             //preload="none"
             $result = '<video '.$size.' controls="controls">'
-            .'<source type="'.$mimeType.'" src="'.$filepath.'" />'
+            .'<source type="'.$mimeType.'" src="'.$filepath.'"'
+                .($external_url?'':' data-id="'.$fileid.'"')
+                .'/>'
             /* 2019-03-05
             since flash is disabled by default in most browsers - this is not reliable approach
             .'<!-- Flash fallback for non-HTML5 browsers -->'
@@ -606,8 +608,10 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
             $result = '<iframe '.$size.' src="'.$playerURL.'" frameborder="0"></iframe>';                        
 
         }else{
-            $result = '<audio controls="controls"><source src="'.$filepath
-            .'" type="'.$mimeType.'"/>Your browser does not support the audio element.</audio>';                        
+            $result = '<audio controls="controls">'
+                .'<source src="'.$filepath.'" type="'.$mimeType.'"'
+                .($external_url?'':' data-id="'.$fileid.'"')
+                .'/>Your browser does not support the audio element.</audio>';                        
         }
 
     }else 
@@ -616,13 +620,17 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
             if($size==null || $size==''){
                 $size = 'width="300"';
             }
-            $result = '<img '.$size.' src="'.$filepath.'"/>';
+            $result = '<img '.$size.' src="'.$filepath.'"'
+                .($external_url?'':' data-id="'.$fileid.'"')
+                .'/>';
 
     }else if($mimeType=='application/pdf'){
         //error_log($filepath);                 
         $result = '<embed width="100%" height="100%" name="plugin" src="'
         .$filepath.'&embed=1'
-        .'" type="application/pdf" internalinstanceid="9">';
+        .'"'
+        .($external_url?'':' data-id="'.$fileid.'"')
+        .' type="application/pdf" internalinstanceid="9">';
 
     }else{
         //not media - show thumb with download link
