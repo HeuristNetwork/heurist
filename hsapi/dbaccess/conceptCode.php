@@ -111,7 +111,11 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
     
     $ids = explode("-", $conceptID);
     $res_id = null;
-    if ($ids && (count($ids) == 1 && is_numeric($ids[0])) || (count($ids) == 2 && is_numeric($ids[1]) && $ids[0] == HEURIST_DBID)) {
+    if ($ids && (count($ids) == 1 && is_numeric($ids[0])) 
+            || (count($ids) == 2 && is_numeric($ids[1]) && ( (!($ids[0] > 0)) || $ids[0] == HEURIST_DBID)) ) 
+    {
+        //local or defined in this database
+        
         if (count($ids) == 2) {
             $res_id = $ids[1]; //this code is already local
         } else {
