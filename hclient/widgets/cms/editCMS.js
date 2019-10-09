@@ -68,6 +68,7 @@ function editCMS(home_page_record_id, main_callback){
     var edit_dialog = null;
     var web_link, tree_element = null;
     var was_something_edited = false;
+    var remove_menu_records = false;
     
     var edit_buttons = [
         {text:window.hWin.HR('Close'), 
@@ -516,7 +517,7 @@ function editCMS(home_page_record_id, main_callback){
                                         +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
                                         //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
                                         +'<span class="ui-icon ui-icon-trash" '
-                                            +'" title="Remove menu entry from website (record retains)"></span>'
+                                            +'" title="Remove menu entry from website"></span>'
                                         +'</div>').appendTo(parent_span);
 
                                     $('<div class="svs-contextmenu4"/>').appendTo(parent_span); //progress icon
@@ -577,15 +578,45 @@ function editCMS(home_page_record_id, main_callback){
                                                 }});
                                                 
                                             }else if(ele.hasClass('ui-icon-trash')){    //remove menu entry
+
+
+                                                function __doRemove(){
+                                                    var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                                    $dlg.dialog( "close" );
+                                                    
+                                                    var to_del = [];
+                                                    if(remove_menu_records){
+                                                        item.visit(function(node){
+                                                            to_del.push(node.key);
+                                                        },true);
+                                                    }
+                                                    
+                                                    removeMenuEntry(parent_id, menuid, to_del, function(){
+                                                        item.remove();    
+                                                        was_something_edited = true;
+                                                        
+                                                    });
+                                                }
                                             
-                                                window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',function(){
-                                            
-                                                removeMenuEntry(parent_id, menuid, function(){
-                                                    item.remove();    
-                                                    was_something_edited = true;
-                                                });
+                                                var buttons = {};
+                                                buttons[window.hWin.HR('Yes. Remove records')]  = function() {
+                                                            remove_menu_records = true;
+                                                            __doRemove();
+                                                        };
+                                                buttons[window.hWin.HR('No. Remove menu only and retain records')]  = function() {
+                                                            remove_menu_records = false;
+                                                            __doRemove();
+                                                        };
+                                                buttons[window.hWin.HR('Cancel')]  = function() {
+                                                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                                            $dlg.dialog( "close" );
+                                                        };
+                                                         
+                                                window.hWin.HEURIST4.msg.showMsgDlg(
+                                                'This removes the menu entry from the database, as well as '
+                                                +'all content in the page and all sub-menus of this menu (if any). ' 
+                                                +'<br><br>To avoid deleting sub-menus, move them out of this menu before deletion.',buttons);
                                                 
-                                                });
                                             }
 
                                             },500);
@@ -834,8 +865,9 @@ function editCMS(home_page_record_id, main_callback){
         
     }
 
-    function removeMenuEntry(parent_id, menu_id, callback){
+    function removeMenuEntry(parent_id, menu_id, records_to_del, callback){
 
+        //delete detail from parent menu
         var request = {a: 'delete',
                     recIDs: parent_id,
                     dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
@@ -843,8 +875,22 @@ function editCMS(home_page_record_id, main_callback){
         
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                 if(response.status == hWin.ResponseStatus.OK){
-                    //refresh treeview
-                    if($.isFunction(callback)) callback.call();
+                    if(records_to_del && records_to_del.length>0){
+                        window.hWin.HAPI4.RecordMgr.remove({ids:records_to_del},
+                             function(response){
+                                if(response.status == hWin.ResponseStatus.OK){
+                                    //refresh treeview
+                                    if($.isFunction(callback)) callback.call();
+                                }else{
+                                    hWin.HEURIST4.msg.showMsgErr(response);
+                                }
+                             }      
+                        );
+                        
+                    }else{
+                        //refresh treeview
+                        if($.isFunction(callback)) callback.call();
+                    }
                 }else{
                     hWin.HEURIST4.msg.showMsgErr(response);
                 }
