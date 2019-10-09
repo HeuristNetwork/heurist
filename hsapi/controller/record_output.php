@@ -1521,7 +1521,7 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_m
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = $defTerms->getTermLabel($val, true);
                     $term_code  = $defTerms->getTermCode($val);
-                    if(!$term_code) $val['termCode'] = $term_code;    
+                    if($term_code) $val['termCode'] = $term_code;    
                 }
 
                 if(@$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID]){
@@ -1631,11 +1631,11 @@ function getJsonFeature($record, $mode){
                 $field_type = $defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
                 //It needs to include the field name and term label and term standard code.
                 if($field_type=='enum' || $field_type=='relationtype'){
-                    $val['termLabel'] = $defTerms->getTermLabel($val, true);
-                    $term_code  = $defTerms->getTermCode($val);
-                    if(!$term_code) $val['termCode'] = $term_code; 
-                    $term_code  = $defTerms->getTermConceptID($val);
-                    if(!$term_code) $val['termConceptID'] = $term_code;    
+                    $val['termLabel'] = $defTerms->getTermLabel($value, true);
+                    $term_code  = $defTerms->getTermCode($value);
+                    if($term_code) $val['termCode'] = $term_code; 
+                    $term_code  = $defTerms->getTermConceptID($value);
+                    if($term_code) $val['termConceptID'] = $term_code;    
                 }
 
                 if(@$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID]){

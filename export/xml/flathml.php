@@ -1146,7 +1146,6 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
             outputDetail($dt, $value, $record['rec_RecTypeID'], $depth, $outputStub);
                         //parentID - not used anymore $record['rec_RecTypeID'] == $relRT ? $parentID : $record['rec_ID']);
         }
-
     }
     /* woot is disabled
     if ($WOOT) {
