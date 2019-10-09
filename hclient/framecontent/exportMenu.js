@@ -235,8 +235,7 @@ function hexportMenu() {
     function _exportRecords(opts){ // isAll = resultset, false = current selection only
 
         var q = "",
-        layoutString,rtFilter,relFilter,ptrFilter,
-        depth = 0;
+        layoutString,rtFilter,relFilter,ptrFilter;
 
         if(opts.isAll){
 
@@ -262,11 +261,6 @@ function hexportMenu() {
 
         }
 
-        if (opts.includeRelated){
-
-            depth = 1;
-        }
-
         if(q!=''){
             
             var script; 
@@ -289,7 +283,6 @@ function hexportMenu() {
             var url = window.hWin.HAPI4.baseURL + script + 
             q + 
             "&a=1"+
-            "&depth="+depth +
             /*(layoutString ? "&" + layoutString : "") +
             (selFilter ? "&" + selFilter : "") +
             (rtFilter ? "&" + rtFilter : "") +

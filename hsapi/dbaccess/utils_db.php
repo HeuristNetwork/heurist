@@ -967,6 +967,10 @@ $query = 'CREATE TABLE sysDashboard ('
         if (null === $encoding) { $encoding = mb_internal_encoding(); }
         return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
     }
+    
+    function is_true($val){
+        return $val===true || in_array(strtolower($val), array('y','yes','true','t','ok'));
+    }
 
     //
     // $rec_IDs - may by csv string or array 

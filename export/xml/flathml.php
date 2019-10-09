@@ -106,6 +106,13 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 
 
+if(@$_REQUEST['rectype_templates']){ // output manifest + files ??
+    $rectype_templates = $_REQUEST['rectype_templates']; //flag to produce rectype templates instead of real records
+}else{
+    $rectype_templates = false;
+}
+
+
 if(@$_REQUEST['multifile']){ // output manifest + files ??
     $intofile = true; //flag one-record-per-file mode for HuNI  
 }else{
@@ -1038,11 +1045,16 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
     
     global $system, $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL, $already_out,
     $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile, $dbID,
-    $EXPAND_REV_PTR, $REVERSE;
+    $EXPAND_REV_PTR, $REVERSE, $rectype_templates;
 
     $hunifile = null;
+    
+    if($rectype_templates){
+        $record = recordTemplateByRecTypeID($system, $recID);//see db_recsearch
+    }else{
+        $record = recordSearchByID($system, $recID);//see db_recsearch
+    }
 
-    $record = recordSearchByID($system, $recID);//db_recsearch
     
     $filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
 
@@ -1113,11 +1125,11 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         'conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);
     makeTag('title', null, $record['rec_Title']);
 
-    if ($record['rec_URL']) {
+    if ($rectype_templates || $record['rec_URL']) {
         makeTag('url', null, $record['rec_URL']);
     }
 
-    if ($record['rec_ScratchPad']) {
+    if ($rectype_templates || $record['rec_ScratchPad']) {
         makeTag('notes', null, replaceIllegalChars($record['rec_ScratchPad']));
     }
 
@@ -1658,16 +1670,23 @@ $params['detail'] = 'ids'; // return ids only
 
 $params['publiconly'] =  $PUBONLY?1:0;
 $params['needall'] = 1; //to avoid search_detail_limit limit
-
-$result = recordSearch($system, $params); //see db_recsearch.php
-
 $error_msg  = null;
-if(@$result['status']==HEURIST_OK){
-    $result = $result['data'];
+
+if($rectype_templates){
+    $result = dbs_GetRectypeIDs($system->get_mysqli(), $rectype_templates);
+    $result['records'] = $result;
+    $result['reccount'] = count($result['records']);
 }else{
-    $error_msg = $system->getError();
-    $error_msg = $error_msg[0]['message'];
+    $result = recordSearch($system, $params); //see db_recsearch.php    
+    
+    if(@$result['status']==HEURIST_OK){
+        $result = $result['data'];
+    }else{
+        $error_msg = $system->getError();
+        $error_msg = $error_msg[0]['message'];
+    }
 }
+
     
 
 $query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'woot' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));

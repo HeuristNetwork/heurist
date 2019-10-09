@@ -34,6 +34,7 @@
     * dbs_GetRectypeGroups
     * dbs_GetRectypeByID
     * dbs_GetRectypeNames
+    * dbs_GetRectypeIDs  - returns array of rty_IDs
     * dbs_GetTerms
     * dbs_GetDetailTypes
     * dbs_GetDtLookups
@@ -357,6 +358,26 @@
         if ($rty_IDs) {
             $labels = mysql__select_assoc2($mysqli, 
                 'select rty_ID, rty_Name from defRecTypes where rty_ID in ('.implode(',', $rty_IDs).')');
+        }
+        return $labels;
+        
+    }
+
+    function dbs_GetRectypeIDs($mysqli, $_rty_IDs){
+        
+        if(is_true($_rty_IDs)){
+            $rty_IDs = true;  //returns all
+        }else{
+            $rty_IDs = prepareIds($_rty_IDs);
+        }
+        
+        $labels = array();
+        if ($rty_IDs) {
+            $query = 'select rty_ID from defRecTypes';
+            if(is_array($rty_IDs) && count($rty_IDs)>0){
+                $query = $query . ' where rty_ID in ('.implode(',', $rty_IDs).')';    
+            }
+            $labels = mysql__select_list2($mysqli, $query);
         }
         return $labels;
         

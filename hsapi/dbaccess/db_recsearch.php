@@ -1793,6 +1793,52 @@ $loop_cnt++;
         }
     } 
     
+//-----------------------
+    function recordTemplateByRecTypeID($system, $id){    
+    
+        $record = array(
+            'rec_ID'=>0,
+            'rec_RecTypeID'=>$id,
+            'rec_Title'=>'',
+            'rec_URL'=>'',
+            'rec_ScratchPad'=>'',
+            'rec_OwnerUGrpID'=>2,
+            'rec_NonOwnerVisibility'=>'public',
+            'rec_URLLastVerified'=>'',
+            'rec_URLErrorMessage'=>'',
+            'rec_AddedByUGrpID'=>2);
+            
+        $mysqli = $system->get_mysqli();
+        $fields = mysql__select_assoc2($mysqli, 'select dty_ID, dty_Type '
+        .'from defRecStructure, defDetailTypes where dty_ID = rst_DetailTypeID '
+        .'and rst_RecTypeID = '.$id);
+       
+        $details = array();
+        $idx = 1;
+        
+        foreach ($fields as $dty_ID=>$dty_Type){
+            if($dty_Type=='separator')continue;
+            
+            
+            if($dty_Type=='file'){
+                $details[$dty_ID] = array($idx=>array('file'=>array('file'=>'', 'fileid'=>'')) );    
+                
+            }else if($dty_Type=='resource'){
+                $details[$dty_ID] = array($idx=>array('id'=>0, 'type'=>0, 'title'=>''));    
+
+            }else if($dty_Type=='geo'){
+                $details[$dty_ID] = array($idx=>array('geo'=>array('type'=>'', 'wkt'=>'')) );    
+            }else{
+                $details[$dty_ID] = array($idx=>'');        
+            }
+            
+            $idx++;
+        }
+        $record['details'] = $details;
+        
+        return $record;
+    }    
+    
 //------------------------
     function recordSearchByID($system, $id, $need_details = true, $fields = null) 
     {
@@ -1876,7 +1922,7 @@ $loop_cnt++;
                 continue;
             }
 
-            if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
+            if (! @$details[$rd["w"]]) $details[$rd["dtl_DetailTypeID"]] = array();
 
             $detailValue = null;
 
