@@ -1119,7 +1119,9 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
     $conceptID = ConceptCode::getRecTypeConceptID($record['rec_RecTypeID']);
 
-    makeTag('citeAs', null, HEURIST_BASE_URL.'?recID='.$record['rec_ID'].'&db='.HEURIST_DBNAME);
+    if (!$rectype_templates){
+        makeTag('citeAs', null, HEURIST_BASE_URL.'?recID='.$record['rec_ID'].'&db='.HEURIST_DBNAME);
+    }
     makeTag('id', null, $record['rec_ID']);
     makeTag('type', array('id' => $record['rec_RecTypeID'],
         'conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);
@@ -1133,8 +1135,10 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         makeTag('notes', null, replaceIllegalChars($record['rec_ScratchPad']));
     }
 
-    makeTag('added', null, $record['rec_Added']);
-    makeTag('modified', null, $record['rec_Modified']);
+    if (!$rectype_templates){
+        makeTag('added', null, $record['rec_Added']);
+        makeTag('modified', null, $record['rec_Modified']);
+    }
 
     // saw FIXME  - need to output groups only
     if (array_key_exists($record['rec_OwnerUGrpID'], $WGN) || array_key_exists($record['rec_OwnerUGrpID'], $UGN)) {
@@ -1299,7 +1303,8 @@ function makeFileContentNode($file) {
 //
 function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
-    global $system,$DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT;
+    global $system,$DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT,
+            $rectype_templates;
     $attrs = array('id' => $dt, 'conceptID' => ConceptCode::getDetailTypeConceptID($dt));
 
     if (array_key_exists($dt, $DTN)) {
@@ -1384,29 +1389,38 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             }
             openTag('detail', $attrs);
             openTag('file');
-            makeTag('id', null, $file['ulf_ID']);
-            makeTag('nonce', null, $file['ulf_ObfuscatedFileID']);
-            makeTag('origName', null, $file['ulf_OrigFileName']);
-            if (@$file['fxm_MimeType']) {
-                makeTag('mimeType', null, $file['fxm_MimeType']);
-            }
-            if (@$file['ulf_FileSizeKB']) {
-                makeTag('fileSize', array('units' => 'kB'), $file['ulf_FileSizeKB']);
-            }
-            if (@$file['ulf_Added']) {
-                makeTag('date', null, $file['ulf_Added']);
-            }
-            if (@$file['ulf_Description']) {
-                makeTag('description', null, $file['ulf_Description']);
-            }
-            if (@$file['URL']) {
-                makeTag('url', null, $file['URL']);
-            }
-            if (@$file['thumbURL']) { //not used
-                makeTag('thumbURL', null, $file['thumbURL']);
-            }
-            if ($INCLUDE_FILE_CONTENT !== false && $INCLUDE_FILE_CONTENT >= $depth) {
-                makeFileContentNode($file);
+            
+            if($rectype_templates){
+                makeTag('url', null, 'FILE_OR_URL');
+                makeTag('mimeType', null, 'TEXT');
+                makeTag('description', null, 'MEMO_TEXT');
+                makeTag('origName', null, 'TEXT');
+                
+            }else{
+                makeTag('id', null, $file['ulf_ID']);
+                makeTag('nonce', null, $file['ulf_ObfuscatedFileID']);
+                makeTag('origName', null, $file['ulf_OrigFileName']);
+                if (@$file['fxm_MimeType']) {
+                    makeTag('mimeType', null, $file['fxm_MimeType']);
+                }
+                if (@$file['ulf_FileSizeKB']) {
+                    makeTag('fileSize', array('units' => 'kB'), $file['ulf_FileSizeKB']);
+                }
+                if (@$file['ulf_Added']) {
+                    makeTag('date', null, $file['ulf_Added']);
+                }
+                if (@$file['ulf_Description']) {
+                    makeTag('description', null, $file['ulf_Description']);
+                }
+                if (@$file['URL']) {
+                    makeTag('url', null, $file['URL']);
+                }
+                if (@$file['thumbURL']) { //not used
+                    makeTag('thumbURL', null, $file['thumbURL']);
+                }
+                if ($INCLUDE_FILE_CONTENT !== false && $INCLUDE_FILE_CONTENT >= $depth) {
+                    makeFileContentNode($file);
+                }
             }
             closeTag('file');
             closeTag('detail');
@@ -1436,13 +1450,17 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
         } else {
             makeTag('detail', $attrs, $value['id']);
         }
-    } else if (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype') && array_key_exists($value, $TL)) {
+    } else if (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype')) {
         $attrs['termID'] = $value;
-        $attrs['termConceptID'] =  ConceptCode::getTermConceptID($value);
-        if (@$TL[$value]['trm_ParentTermID']) {
-            $attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
+        if( array_key_exists($value, $TL) ){
+            $attrs['termConceptID'] =  ConceptCode::getTermConceptID($value);
+            if (@$TL[$value]['trm_ParentTermID']) {
+                $attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
+            }
+            makeTag('detail', $attrs, $TL[$value]['trm_Label']);
+        }else if($rectype_templates){
+            makeTag('detail', $attrs, 'TERM_LABEL');
         }
-        makeTag('detail', $attrs, $TL[$value]['trm_Label']);
     } else {
         makeTag('detail', $attrs, replaceIllegalChars($value));
     }
@@ -1802,6 +1820,23 @@ if($intofile){ // flags HuNI manifest + separate files per record
 
     openTag('hml', $hmlAttrs);
 
+    if($rectype_templates){
+        output( "<!--This file provides a template for preparing an XML file with Heurist schema which can be imported into a Heurist database.
+\n
+The file must indicate a source database. This is added automatically when HML is exported from Heurist. 
+\n
+In the case of data from a non-Heurist source, the file should indicate a database which contains definitions for all the record types 
+and fields to be imported - this can either be the database from which the template is exported or the target database if all 
+the necessary record types and fields have been imported into it (or if the database has been cloned from a suitable source). 
+Heurist will warn at the import stage if required definitions are missing.
+\n
+Values to be replaced are indicated with ALLCAPS, such as WKT (WellKnownText), NUMERIC, TERM, DATE etc.
+\n
+RECORD_REFERENCE may be replaced with a numeric or alphanumeric reference to another record, indicated by the <ID> tag. 
+Note that this reference will be replaced with an automatically generated numeric Heurist record ID (H-ID), 
+which will be different from the reference supplied.
+ -->\n");
+    }    
     //makeTag('raw',null, $response2 );
 
     /*  TODO: The schema locations are clearly rubbish

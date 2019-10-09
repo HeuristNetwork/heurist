@@ -1797,10 +1797,10 @@ $loop_cnt++;
     function recordTemplateByRecTypeID($system, $id){    
     
         $record = array(
-            'rec_ID'=>0,
+            'rec_ID'=>'ID',
             'rec_RecTypeID'=>$id,
             'rec_Title'=>'',
-            'rec_URL'=>'',
+            'rec_URL'=>'URL',
             'rec_ScratchPad'=>'',
             'rec_OwnerUGrpID'=>2,
             'rec_NonOwnerVisibility'=>'public',
@@ -1821,15 +1821,24 @@ $loop_cnt++;
             
             
             if($dty_Type=='file'){
-                $details[$dty_ID] = array($idx=>array('file'=>array('file'=>'', 'fileid'=>'')) );    
+                $details[$dty_ID] = array($idx=>array('file'=>array('file'=>'TEXT', 'fileid'=>'TEXT')) );    
                 
             }else if($dty_Type=='resource'){
-                $details[$dty_ID] = array($idx=>array('id'=>0, 'type'=>0, 'title'=>''));    
+                $details[$dty_ID] = array($idx=>array('id'=>'RECORD_REFERENCE', 'type'=>0, 'title'=>''));    
 
             }else if($dty_Type=='geo'){
-                $details[$dty_ID] = array($idx=>array('geo'=>array('type'=>'', 'wkt'=>'')) );    
+                $details[$dty_ID] = array($idx=>array('geo'=>array('type'=>'TEXT', 'wkt'=>'WKT_VALUE')) );    
+                
+            }else if($dty_Type=='enum' || $dty_Type=='relationtype'){
+                $details[$dty_ID] = array($idx=>'TERM');        
+            }else if($dty_Type=='integer' || $dty_Type=='float' || $dty_Type=='year' ){
+                $details[$dty_ID] = array($idx=>'NUMERIC');
+            }else if($dty_Type=='blocktext' ){
+                $details[$dty_ID] = array($idx=>'MEMO_TEXT');        
+            }else if($dty_Type=='date' ){
+                $details[$dty_ID] = array($idx=>'DATE');
             }else{
-                $details[$dty_ID] = array($idx=>'');        
+                $details[$dty_ID] = array($idx=>'TEXT');        
             }
             
             $idx++;
