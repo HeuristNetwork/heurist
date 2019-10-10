@@ -514,15 +514,6 @@ $.widget( "heurist.svs_list", {
                 //.css('border','none')
                 .append( this._defineHeader(window.hWin.HR('My Searches'), 'all'))
                 .append( this._defineContent('all') ));
-
-            this.helper_btm.before(
-                $('<div>')
-                .attr('grpid',  'entity').addClass('svs-acordeon')
-                //.addClass('heurist-bookmark-search')
-                .css('display', (window.hWin.HAPI4.get_prefs('entity_btn_on')=='1')?'block':'none')
-                .append( this._defineHeader(window.hWin.HR('Entity filters'), 'entity'))
-                .append( this._defineContent('entity') ) );
-                
                 
             var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
             for (var groupID in groups)
@@ -1556,7 +1547,6 @@ $.widget( "heurist.svs_list", {
             treeData = {
                 all: { title: window.hWin.HR('My Searches'), folder: true, expanded: true, children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'all') },
                 bookmark:{ title: window.hWin.HR('My Bookmarks'), folder: true, expanded: true, children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'bookmark') }
-                //@todo entity:{ title: window.hWin.HR('Entity filters'), folder: true, expanded: true, children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'entity') }
             };
             if(window.hWin.HAPI4.is_admin()){
                 treeData['guests'] = { title: window.hWin.HR('Searches for guests'), folder: true, expanded: false, children: this._define_SVSlist(0) };
