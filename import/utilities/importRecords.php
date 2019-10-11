@@ -84,6 +84,7 @@ $file_max_size = get_php_bytes('upload_max_filesize');
             <h2>Heurist JSON or HML Import</h2>
         </div>
         
+        <!-- STEP 0 - select source file -->
         <div id="divStep0">
         <p>This function imports</p>
            <div style="padding-left:40px">
@@ -97,31 +98,47 @@ $file_max_size = get_php_bytes('upload_max_filesize');
         
         </div>
 
+        <!-- STEP 1 - list of missed record types - offer to sync definitions -->
         <div id="divStep1" style="display:none">
-           <p class="st1_A">The following entity (record) types in this file do not yet exist in the database into which you are importing data:</p>
-           <p id="st1_B" style="display:none;">All entity types are recognised. However it is not guaranteed that they are identical. Press "Sync" button to make sure that all fields and terms are the same in source and destination databases. If you are sure that structure is valid you may skip sync step and proceed to record import.</p>
+           <p class="st1_A import-rem">The following entity (record) types in this file do not yet exist in the database into which you are importing data:</p>
+           <p id="st1_B" class="import-rem">All entity types are recognised. However it is not guaranteed that they are identical. Press "Sync" button to make sure that all fields and terms are the same in source and destination databases. If you are sure that structure is valid you may skip sync step and proceed to record import.</p>
+
+           <p class="st1_C import-rem">The target database does not contain all the structural elements required to accommodate the incoming data. 
+            You still can import the data. However, data for missed definitions will be ignored.
+            <a href="#" class="tsv_download">List of elements  in source file</a> (will download a tab-separated file).</p>
+            
+           <p class="st1_D import-rem">All entity types are recognised. However it is not guaranteed that they are identical.  
+            It is recommened to download the list of elements to be imported and verify matches.
+            <a href="#" class="tsv_download">List of elements in source file</a> (will download a tab-separated file)</p>
+            
+           <div id="div_tsv" style="display:none"></div>
+           
+           <!-- list of missed definitions -->
            <div id="div_RectypeToBeImported">
            </div>     
-           
-           <p class="st1_A">
+
+           <p class="st1_A import-rem">
 The source database MUST be registered with the Heurist Master Index BEFORE the data is exported. If it has not been registered, please close this dialogue, register the source database (only the owner or an administrator can do this), re-export the data and then run this function on the new file.
            </p>
-           <p class="st1_A">
+           <p class="st1_A import-rem">
 If the download of listed entity types fails to clear this message, please click on Help > Bug report and let us know. We will get back to you within 24 hours and help you import your data.
            </p>
+           
            <br><br>
-           <button id="btn_ImportRt">Download listed entity types</button>
+           <button id="btn_ImportRt" class="import-rem">Download listed entity types</button>
         </div>
         
+        <!-- STEP 2  - start donwload -->
         <div id="divStep2" style="display:none">
 <br>
-<p id="st2_B" style="display:none;">All entity types are recognised and synched.</p>
+<p id="st2_B" class="import-rem">All entity types are recognised and synched.</p>
 <p>Importing <span id="spanRecCount"></span> items as new records.</p>
 <p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please <?php echo CONTACT_HEURIST_TEAM;?> for assistance (support at heuristnetwork dot org or use the bug report function)</p>
            <br><br>
            <button id="btn_ImportRecords">Import Records</button>
         </div>
        
+        <!-- STEP 3 - result  -->
        <div id="divStep3" style="display:none">
        
 <p><span id="spanRecCount2"></span> records have been imported.</p>

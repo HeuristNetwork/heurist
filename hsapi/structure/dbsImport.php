@@ -94,7 +94,7 @@ class DbsImport {
         databaseID - database where to search definition if not defined take db from conceptCode
         conceptCode - unique identifier (optional if definitionID is set)
         
-        definitionID  - id in source database or array of ids
+        definitionID  - id in source database or array of ids   
         
       )
     * @return mixed
@@ -148,7 +148,9 @@ $time_debug2 = $time_debug;
             }
         }
         
-        if(!($db_reg_id>0)){
+        if (!($db_reg_id>0)) {
+            //@todo - check missed definitions
+            //return true;
             $this->system->addError(HEURIST_INVALID_REQUEST, "Not possible to determine an origin database id (source of import)");
             return false;
         }
@@ -874,8 +876,6 @@ $mysqli->commit();
         }else{
             return 0;
         }
-        
-        
     }
     //
     // get local code by concept code
@@ -884,11 +884,12 @@ $mysqli->commit();
         return DbsImport::getLocalCode($defType, $database_defs, $conceptCode, $sall);
     }
 
-    //
+    //    
+    // get local code by concept code or verifies that element with give code/localid exists
     // 
     public static function getLocalCode($defType, $database_defs, $conceptCode, $sall=false){
         $res = array();
-
+        
         if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
             $defType = 'rectypes';
             $fieldName = 'rty_ConceptID';
@@ -909,23 +910,41 @@ $mysqli->commit();
             
         }
     
-        foreach ($defs as $id => $def) {
-            if(is_numeric($id)){
-                
-                if($defType=='enum' || $defType=='relationtype'){
-                    $is_equal = $def[$idx_ccode]==$conceptCode;
-                }else{
-                    $is_equal = $def['commonFields'][$idx_ccode]==$conceptCode;
-                }
-                
-                if($is_equal){
-                    if($sall){
-                        array_push($res, $id);
+        if(strpos($conceptCode,'-')===false || strpos($conceptCode,'0000-')===0){ //this is local already
+        
+            if(strpos($conceptCode,'-')===false){
+                $id = $conceptCode; 
+            }else{
+                list($db, $id) = explode('-', $conceptCode);    
+            }
+            
+            
+            if(is_numeric($id) && $id>0 && $defs[$id]){
+                return $id;
+            }else{
+                return null; //not found
+            }
+            
+        }else{
+
+            foreach ($defs as $id => $def) {
+                if(is_numeric($id)){
+                    
+                    if($defType=='enum' || $defType=='relationtype'){
+                        $is_equal = $def[$idx_ccode]==$conceptCode;
                     }else{
-                        return $id;
+                        $is_equal = $def['commonFields'][$idx_ccode]==$conceptCode;
                     }
+                    
+                    if($is_equal){
+                        if($sall){
+                            array_push($res, $id);
+                        }else{
+                            return $id;
+                        }
+                    }
+                    
                 }
-                
             }
         }
         

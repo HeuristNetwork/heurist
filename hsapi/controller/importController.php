@@ -205,11 +205,12 @@ if(!$system->init(@$_REQUEST['db'])){
             }
             
         }else if($action=='import_preview'){
-            //reads import file and returns list of records to be imported
+            //reads import file and returns list of record types to be imported
             $res = ImportHeurist::getDefintions(@$_REQUEST['filename']);
             
         }else if($action=='import_definitions'){
             
+            //update record types from remote database
             $res = ImportHeurist::importDefintions(@$_REQUEST['filename'], @$_REQUEST['session']);
             $need_compress = true;
             

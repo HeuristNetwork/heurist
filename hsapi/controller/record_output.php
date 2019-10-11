@@ -992,6 +992,7 @@ XML;
             $rectypes = mysql__select_all($system->get_mysqli(),$query,1);    
                 
             foreach($rt_counts as $rtid => $cnt){
+                //include record types that are in output - name, ccode and count
                 $rt_counts[$rtid] = array('name'=>$rectypes[$rtid][0],'code'=>$rectypes[$rtid][1],'count'=>$cnt);
             }
             $database_info['rectypes'] = $rt_counts;

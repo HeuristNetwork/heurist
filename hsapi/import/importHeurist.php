@@ -24,6 +24,16 @@
 require_once(dirname(__FILE__)."/../../admin/verification/verifyValue.php");
 require_once(dirname(__FILE__)."/../../hsapi/dbaccess/db_records.php");
 
+/*
+main methods
+
+getDefintions - returns list of definitions (record types to be imported)
+importDefintions - Imports missed record types from remote database (uses dbsImport)
+importRecords - import records from xml or json file
+
+
+
+*/
 class ImportHeurist {
 
     private function __construct() {}    
@@ -89,6 +99,10 @@ private static function readDataFile($filename, $type=null, $validate=true){
                 if($data==null || !$imp_rectypes){
                     self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import data has wrong data. "Record type" section is not found');
                 }
+                
+                
+                
+                
             }
             
         }
@@ -116,14 +130,16 @@ private static function hmlToJson($filename){
     $db_attr = $xml_doc->database[0]->attributes();
     
     $json = array('heurist'=>array('records'=>array(), 'database'=>array(
-            'id'=>''.$db_attr['id'],
-            'db'=>''.$xml_doc->database,
+            'id'=>''.$db_attr['id'],     //registration id  
+            'db'=>''.$xml_doc->database, //name of db
             'url'=>''
         )));
     
     $db_url = null;
     
+    //found rectypes, fieldtypes
     $rectypes = array();
+    $fieldtypes = array();
     
     $xml_recs = $xml_doc->records;
     if($xml_recs)
@@ -135,6 +151,7 @@ private static function hmlToJson($filename){
                 $record = array(
                     'rec_ID'=>''.$xml_rec->id,
                     'rec_RecTypeID'=>$rectype_id,
+                    'rec_RecTypeConceptID'=>''.$rectype['conceptID'],
                     'rec_Title'=>''.$xml_rec->title,
                     'rec_URL'=>''.$xml_rec->url,
                     'rec_ScratchPad'=>''.$xml_rec->notes,
@@ -145,14 +162,17 @@ private static function hmlToJson($filename){
                     'rec_AddedByUGrpID'=>0 //$xml_rec->workgroup->id
                 );
                 
-                if(!@$rectypes[$rectype_id]){
-                    $rectypes[$rectype_id] = array(
+                //fill rectype array - it will be required to find missed rectypes
+                $rt_idx = ($rectype['id']>0)?$rectype_id:$rectype['conceptID'];
+                if(!@$rectypes[$rt_idx]){
+                    $rectypes[$rt_idx] = array(
+                        'id'   => $rectype_id,
                         'name'=>''.$xml_rec->type,
                         'code'=>''.$rectype['conceptID'],
                         'count'=>1
                     );
                 }else{
-                    $rectypes[$rectype_id]['count']++;
+                    $rectypes[$rt_idx]['count']++;
                 }
                 
                 if($db_url==null){
@@ -166,6 +186,16 @@ private static function hmlToJson($filename){
                        $dets = $xml_det->attributes();
                        $fieldtype_id = ''.$dets['id'];
                        $detail = ''.$xml_det;
+                       
+                       $field_idx = ($dets['id']>0)?$fieldtype_id: ''.$dets['conceptID'];
+                       
+                       if(!@$fieldtypes[$field_idx]){
+                            $fieldtypes[$field_idx] = array(
+                                'id'   => $fieldtype_id,
+                                'name' => ''.$dets['type'],
+                                'code' => ''.$dets['conceptID']
+                            );
+                       }
                        
                        if($dets['isRecordPointer']=='true'){
                            /*$detail = array(
@@ -205,8 +235,8 @@ private static function hmlToJson($filename){
                            }
                        }
                        
-                       if(!@$record['details'][$fieldtype_id]) $record['details'][$fieldtype_id] = array();
-                       $record['details'][$fieldtype_id][] = $detail; 
+                       if(!@$record['details'][$field_idx]) $record['details'][$field_idx] = array();
+                       $record['details'][$field_idx][] = $detail; 
                     }
                 }
                 
@@ -217,16 +247,19 @@ private static function hmlToJson($filename){
     }       
     
     $json['heurist']['database']['url'] = $db_url;
-    $json['heurist']['database']['rectypes'] = $rectypes;
+    $json['heurist']['database']['rectypes'] = $rectypes; //need to download/sync rectypes
+    $json['heurist']['database']['detailtypes'] = $fieldtypes; //need to show missed detail fields
 
     return $json;
 }
+
 
 /**
 * returns list of definitions (record types to be imported)
 * 
 * It reads manifest files and tries to find all record types in current database by concept code. All record types from manifest file
-* Returns local id for found records types, null otherwise
+* Returns array of rectypes, false otherwise
+*     source_rectype_id => array(name,code,count,target_RecTypeID
 *
 * @param mixed $filename
 */
@@ -243,29 +276,57 @@ public static function getDefintions($filename){
         $database_defs = dbs_GetRectypeStructures(self::$system, null, 2);
         $database_defs = array('rectypes'=>$database_defs);
         
+        //list of all rectypes in file 
         $imp_rectypes = @$data['heurist']['database']['rectypes'];
         
         if($data==null || !$imp_rectypes){
-            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import data has wrong data. "Record type" section is not found');
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import data has wrong format or no record types found');
             return false;
         }
         
-        
-        foreach ($imp_rectypes as $rtid=>$rt){
-            $conceptCode = $rt['code'];
+        //find local ids
+        foreach ($imp_rectypes as $rtid => $rt){
+            $conceptCode = $rt['code']?$rt['code']:rtid;
             $local_id = DbsImport::getLocalCode('rectypes', $database_defs, $conceptCode, false);
             $imp_rectypes[$rtid]['target_RecTypeID'] = $local_id;
         }
         
+        $dbsource_is_same = ((!(@$data['heurist']['database']['id']>0)) || 
+                            @$data['heurist']['database']['id']==HEURIST_DBID);
+        
+        $imp_detailtypes = null;
+        
+        if($dbsource_is_same){
+        
+            $imp_detailtypes = @$data['heurist']['database']['detailtypes'];
+            if($imp_detailtypes){
+                $database_defs = array('detailtypes'=>dbs_GetDetailTypes(self::$system, null, 2));
+                //find local ids
+                foreach ($imp_detailtypes as $dtid => $dt){
+                    $conceptCode = $dt['code']?$dt['code']:$dtid;
+                    $local_id = DbsImport::getLocalCode('detailtypes', $database_defs, $conceptCode, false);
+                    $imp_detailtypes[$dtid]['target_dtyID'] = $local_id;
+                }
+            }
+        }   
+         
         //return array of $imp_rectypes - record types to be imported
-        $res = $imp_rectypes;
+        $res = array(
+            'database'=>@$data['heurist']['database']['id'],
+            'rectypes'=>$imp_rectypes,    //need to download/sync rectypes
+            'detailtypes'=>$imp_detailtypes  //need to show missed detail fields
+        );
+            
+    }else{
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import data not recognized');
     }
 
     return $res;
 }
 
 //
-// Imports missed record types (along with all dependencies). Uses dbsImport.php
+// Imports missed record types from remote database (along with all dependencies). 
+// It uses dbsImport.php
 //
 public static function importDefintions($filename, $session_id){
     
@@ -285,6 +346,7 @@ public static function importDefintions($filename, $session_id){
 
 //$time_debug = microtime(true);        
         
+        //Finds all defintions to be imported
         if($importDef->doPrepare(  array(
                     'session_id'=>$session_id,
                     'defType'=>'rectype', 
@@ -325,6 +387,7 @@ public static function importRecords($filename, $session_id, $is_cms_init=false)
     
     $res = false;
     $cnt_imported = 0;
+    $cnt_ignored = 0;
     
     $data = self::readDataFile( $filename );
     
@@ -362,8 +425,8 @@ EOD;
         $execution_counter = 0;
         
         $tot_count = count(@$data['heurist']['database']['records']);
-        if($tot_count>0){
-            $tot_count = $data['heurist']['records'];  
+        if(!($tot_count>0)){
+            $tot_count = count($data['heurist']['records']);  
         } 
         
         if($session_id!=null){ //init progress
@@ -372,27 +435,44 @@ EOD;
             
         
         $imp_rectypes = $data['heurist']['database']['rectypes'];
-        $source_url = $data['heurist']['database']['url']; //need to copy files
-        $source_db = $data['heurist']['database']['db']; //need to copy files
+        //need to copy files
+        $source_url = $data['heurist']['database']['url']; //url of database
+        $source_db = $data['heurist']['database']['db']; //name of datbase 
         
         ini_set('max_execution_time', 0);
-        $importDef = new DbsImport( self::$system );
         
+        // if database not defined or the same
+        // it is assumed that all local codes in $data are already found and exists in 
+        // target database, elements without local codes or if not found will be ignored
+        $dbsource_is_same = ((!(@$data['heurist']['database']['id']>0)) || 
+                            @$data['heurist']['database']['id']==HEURIST_DBID);
         
-        //verify that all 
-        $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
-                    'databaseID'=>@$data['heurist']['database']['id'], 
-                    'definitionID'=>array_keys($imp_rectypes) ));
-                    
-        if(!$res2){
-            $err = self::$system->getError();
-            if($err && $err['status']!=HEURIST_NOT_FOUND){
-                return false;
-            }
-            self::$system->clearError();  
-        }  
-        //get target definitions (this database)
-        $defs = $importDef->getDefinitions();
+        if($dbsource_is_same){
+            
+            $defs = array(
+                'rectypes' => dbs_GetRectypeStructures(self::$system, null, 2),
+                'detailtypes' => dbs_GetDetailTypes(self::$system, null, 2),
+                'terms' => dbs_GetTerms(self::$system));
+            
+        }else{
+           
+            $importDef = new DbsImport( self::$system );
+            //Finds all defintions to be imported
+            $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
+                        'databaseID'=>@$data['heurist']['database']['id'], 
+                        'definitionID'=>array_keys($imp_rectypes) ));
+                        
+            if(!$res2){
+                $err = self::$system->getError();
+                if($err && $err['status']!=HEURIST_NOT_FOUND){
+                    return false;
+                }
+                self::$system->clearError();  
+            }  
+            //get target definitions (this database)
+            $defs = $importDef->getDefinitions();
+        }
+        
         $def_dts  = $defs['detailtypes']['typedefs'];
         $idx_type = $def_dts['fieldNamesToIndex']['dty_Type'];
         
@@ -414,15 +494,32 @@ EOD;
                 //this is record id - record data in the separate file
                 //@todo
             }
+            
+            if($dbsource_is_same){
+                $recTypeID = DbsImport::getLocalCode('rectypes', $defs, 
+                    $record_src['rec_RecTypeID']>0
+                        ?$record_src['rec_RecTypeID']
+                        :$record_src['rec_RecTypeConceptID'], false);
+                
+            }else{
+                $recTypeID = $importDef->getTargetIdBySourceId('rectypes',
+                                                 $record_src['rec_RecTypeID']);
+            }
+            
+            if(!($recTypeID>0)) {
+                //skip this record - record type not found
+                $cnt_ignored++;                
+                continue; 
+            }
         
             // prepare records - replace all fields, terms, record types to local ones
             // keep record IDs in resource fields to replace them later
             $record = array();
             $record['ID'] = 0; //add new
-            $record['RecTypeID'] = $importDef->getTargetIdBySourceId('rectypes',
-                                                 $record_src['rec_RecTypeID']);
+            $record['RecTypeID'] = $recTypeID;
+            
             //if($record['RecTypeID']<1){
-            //    $this->system->addError(HEURIST_ERROR, 'Unable to get rectype in thiss database by ');
+            //    $this->system->addError(HEURIST_ERROR, 'Unable to get rectype in this database by ');
             //}                                                 
                                                  
                                                  
@@ -444,10 +541,14 @@ EOD;
                 }
                 
                 //field id in target database
-                $ftId = $importDef->getTargetIdBySourceId('detailtypes', $dty_ID);
+                if($dbsource_is_same){
+                    $ftId = DbsImport::getLocalCode('detailtypes', $defs, $dty_ID, false);
+                }else{
+                    $ftId = $importDef->getTargetIdBySourceId('detailtypes', $dty_ID);
+                }
 
                 if(!($ftId>0)){
-                    //target not found                    
+                    //target not found - field is ignored                
                     continue;
                 }
                 if(!@$def_dts[$ftId]){
@@ -463,7 +564,14 @@ EOD;
                 {
                     foreach($values as $value){
                         //change terms ids for enum and reltypes
-                        $new_values[] = $importDef->getTargetIdBySourceId($def_field[$idx_type], $value); 
+                        if($dbsource_is_same){
+                            $termID = DbsImport::getLocalCode($def_field[$idx_type], $defs, $value, false);
+                        }else{
+                            $termID = $importDef->getTargetIdBySourceId($def_field[$idx_type], $value); 
+                        }
+                        if($termID>0){
+                            $new_values[] = $termID;
+                        }
                         //replaceTermIds( $value, $def_field[$idx_type] );
                     }
                 }else if($def_field[$idx_type] == "geo"){
@@ -491,7 +599,7 @@ EOD;
                             $file_entity->setRecords(null);
                             $dtl_UploadedFileID = $file_entity->save();   //it returns ulf_ID
                            
-                       }else{
+                       }else if(!$dbsource_is_same) { //do not copy file for the same database
                             //download to scratch folder
                             $tmp_file = HEURIST_SCRATCH_DIR.$value['ulf_OrigFileName'];
                             
@@ -656,7 +764,7 @@ EOD;
         }else{
                 $mysqli->commit();
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
-                $res = array('count_imported'=>$cnt_imported);
+                $res = array('count_imported'=>$cnt_imported, 'count_ignored'=>$cnt_ignored);
                 if(count($records_corr)<1000){
                     $res['ids'] = array_values($records_corr);    
                 }
