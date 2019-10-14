@@ -33,7 +33,7 @@
     *  getTopMostTermParent
     *  doDisambiguateTerms
     *  getSameLevelLabelsAndCodes
-    *  getAllTermsForField
+    *  getAllowedTermsForField
     *  getListForParent - flat list
     */
     
@@ -393,8 +393,11 @@ class DbsTerms
         return $term_value;
     }
     
+    // @todo  - verify - it is used in the only place - record_output
     //
-    //
+    // $terms_ids - vocab id or selected terms
+    // $terms_nonen - disabled terrms
+    // return term ids
     //
     public function getAllowedTermsForField($terms_ids, $terms_none, $domain){
         
@@ -410,11 +413,13 @@ class DbsTerms
                     if(!in_array($vocabId, $terms))
                         array_unshift($terms, $vocabId);
                 }else{
-                    
+                    //???????
+                    /*
                     $nonTerms = getAllTermsForField($terms_none, $domain);
                     if (count($nonTerms) > 0) {
                         $terms = array_diff($terms, $nonTerms);
                     }
+                    */
                 }
                 if (!empty($terms)) {
                     $allowed_terms = $terms;

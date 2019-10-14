@@ -141,7 +141,7 @@ If the download of listed entity types fails to clear this message, please click
         <!-- STEP 3 - result  -->
        <div id="divStep3" style="display:none">
        
-<p><span id="spanRecCount2"></span> records have been imported.</p>
+<p><span id="spanRecCount2"></span></p>
 
            <br><br>
            <button id="btn_Close">Close</button>

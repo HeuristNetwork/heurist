@@ -388,6 +388,7 @@ public static function importRecords($filename, $session_id, $is_cms_init=false)
     $res = false;
     $cnt_imported = 0;
     $cnt_ignored = 0;
+    $resource_notfound = array();
     
     $data = self::readDataFile( $filename );
     
@@ -484,6 +485,11 @@ EOD;
         $records_corr = array(); //source rec id -> target rec id
         $resource_fields = array(); //source rec id -> field type id -> field value (target recid)
         $keep_rectypes = array(); //keep rectypes for furhter rectitle update
+        $recid_already_checked = array(); //keep verified H-ID resource records
+        
+        //term 
+        $enum_fields = array(); //source rec id -> field type id -> field value (term label)
+        $enum_fields_values = array(); //rectype -> field id -> value
         
         $is_rollback = false;
         $keep_autocommit = mysql__begin_transaction($mysqli);    
@@ -520,7 +526,11 @@ EOD;
             
             //if($record['RecTypeID']<1){
             //    $this->system->addError(HEURIST_ERROR, 'Unable to get rectype in this database by ');
-            //}                                                 
+            //}    
+            
+            if(!@$record_src['rec_ID']){ //if not defined assign arbitrary unique
+                $record_src['rec_ID'] = uniqid(); //''.microtime();
+            }                                             
                                                  
                                                  
             $record['AddedByImport'] = 2; //import without strict validation
@@ -549,10 +559,12 @@ EOD;
 
                 if(!($ftId>0)){
                     //target not found - field is ignored                
+                    //@todo - add to report
                     continue;
                 }
                 if(!@$def_dts[$ftId]){
                     //definitions not found
+                    //@todo - add to report
                     continue;
                 }
                 
@@ -565,12 +577,51 @@ EOD;
                     foreach($values as $value){
                         //change terms ids for enum and reltypes
                         if($dbsource_is_same){
+                            //by local id or concept code
                             $termID = DbsImport::getLocalCode($def_field[$idx_type], $defs, $value, false);
                         }else{
                             $termID = $importDef->getTargetIdBySourceId($def_field[$idx_type], $value); 
                         }
+                        // if not numeric - it can be term code or term label
+                        $termID = self::validateEnumeration($recTypeID, $ftId, 
+                                        ($termID>0 ?$termID:$value), $defs);
+                        
                         if($termID>0){
                             $new_values[] = $termID;
+                        }else{
+                            //either not allowed or not found
+                            if(ctype_digit($value) || strpos($value,'-')>0){
+                                //not allowed
+                                //@todo - add to report
+                                continue;
+                            }else{
+                               
+                               //keep label value
+                               if(!@$enum_fields_values[$recTypeID]){
+                                   $enum_fields_values[$recTypeID] = array();
+                               }
+                               if(!@$enum_fields_values[$recTypeID][$ftId]){
+                                   $enum_fields_values[$recTypeID][$ftId] = array();
+                               }
+                               
+                               $uid = array_search($value, $enum_fields_values[$recTypeID][$ftId]);
+                               if($uid===false){
+                                    $uid = uniqid();
+                                    $enum_fields_values[$recTypeID][$ftId][$uid] = $value;    
+                               }
+                               
+                               //save $uid as field value, it will be replaced to term id
+                               //after new terms will be added
+                               if(!@$enum_fields[$record_src['rec_ID']]){
+                                   $enum_fields[$record_src['rec_ID']] = array();
+                               }
+                               if(!@$enum_fields[$record_src['rec_ID']][$ftId]){
+                                   $enum_fields[$record_src['rec_ID']][$ftId] = array();
+                               }
+                               $enum_fields[$record_src['rec_ID']][$ftId][] = $uid;
+                               
+                               $new_values[] = $uid;
+                            }
                         }
                         //replaceTermIds( $value, $def_field[$idx_type] );
                     }
@@ -651,12 +702,32 @@ EOD;
                    }
                    foreach($values as $value){
                        if(is_array($value)){
-                            $resource_fields[$record_src['rec_ID']][$ftId][] = $value['id'];    
-                            $new_values[] = $value['id'];
-                       }else{
+                           $value = $value['id'];    
+                       }
+                       if(strpos($value,'H-ID-')===0){
+                           $value = substr($value,5);
+                           
+                           if($recid_already_checked[$value]){
+                               $new_values[] = $value;
+                           }else
+                           if(is_numeric($value) && $value>0){
+                               //check existence
+                               $is_found = (mysql__select_value(
+                                        'select rec_ID from Records where rec_ID='
+                                        .$value)>0);
+                               if($is_found){
+                                   $recid_already_checked[]  = $value;
+                                   $new_values[] = $value;    
+                               }else{
+                                   $resource_notfound[] = $value;
+                               }
+                           }
+                           
+                       }else{                       
                            $resource_fields[$record_src['rec_ID']][$ftId][] = $value;    
                            $new_values[] = $value;
                        }
+                       
                    }
 //"2552":{"7462":{"id":"1326","type":"98","title":"Record to imported","hhash":null}}}                   
                 }else{
@@ -713,40 +784,89 @@ EOD;
         
         if(!$is_rollback){    
             
-            //update resource fields with new record ids
-            foreach ($resource_fields as $src_recid=>$fields){
-
+            //import new terms
+            $new_terms = array();
+            foreach ($enum_fields_values as $recTypeID=>$fields){
+                foreach ($fields as $fieldtype_id=>$values){
+                    foreach ($values as $uid=>$term_label){
+                        
+                        //add new term
+                        $new_term_id = self::addNewTerm($recTypeID, $fieldtype_id, $term_label, $defs);
+                        //add new term id to correspondance array
+                        $new_terms[$uid] = $new_term_id;    
+                    }
+                }
+            }
+            //replace temp uniqid in records to new term ids
+            foreach ($enum_fields as $src_recid=>$fields){
                 //get new id in target db                
                 $trg_recid = @$records_corr[$src_recid];//source rec id -> target rec id
                 if($trg_recid>0){
-                    foreach ($fields as $fieldtype_id=>$old_values){
-                        foreach ($old_values as $old_value){
-                            //get new id in target db                
-                            $query = null;
-                            $new_value = @$records_corr[$old_value];
-                            if($new_value>0){
-                                $query = 'UPDATE recDetails SET dtl_Value='.$new_value
+                    foreach ($fields as $fieldtype_id=>$values){
+                        foreach ($values as $idx=>$uid){
+                        
+                            //get new terms id
+                            $term_id = @$new_terms[$uid];
+                            
+                            if($term_id>0){
+                                $query = 'UPDATE recDetails SET dtl_Value='.$term_id
                                         .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                        .' AND dtl_Value='.$old_value;
+                                        .' AND dtl_Value=\''.$uid.'\'';
                                         
-                            }else if($old_value>0){
-                                //target record not found 
+                            }else{
+                                //new terms was not added
                                 $query = 'DELETE FROM recDetails '
                                         .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
-                                        .' AND dtl_Value='.$old_value;
+                                        .' AND dtl_Value=\''.$uid.'\'';
                             }
-                            if($query!=null){
-                                $ret = mysql__exec_param_query($mysqli, $query, null);
-                                if($ret!==true){
-                                    self::$system->addError(HEURIST_DB_ERROR, 'Cannot update resource fields', 'Query:'.$query.'. '.$ret);
-                                    $is_rollback = true;
-                                    break;   
-                                }
+                            
+                            $ret = mysql__exec_param_query($mysqli, $query, null);
+                            if($ret!==true){
+                                self::$system->addError(HEURIST_DB_ERROR, 'Cannot update term fields', 'Query:'.$query.'. '.$ret);
+                                $is_rollback = true;
+                                break;   
                             }
                         }
-                    }//for
+                    }
                 }
-            }//for
+            }
+            
+            if(!$is_rollback){
+                //update resource fields with new record ids
+                foreach ($resource_fields as $src_recid=>$fields){
+
+                    //get new id in target db                
+                    $trg_recid = @$records_corr[$src_recid];//source rec id -> target rec id
+                    if($trg_recid>0){
+                        foreach ($fields as $fieldtype_id=>$old_values){
+                            foreach ($old_values as $old_value){
+                                //get new id in target db                
+                                $query = null;
+                                $new_value = @$records_corr[$old_value];
+                                if($new_value>0){
+                                    $query = 'UPDATE recDetails SET dtl_Value='.$new_value
+                                            .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
+                                            .' AND dtl_Value='.$old_value;
+                                            
+                                }else if($old_value>0){
+                                    //target record not found 
+                                    $query = 'DELETE FROM recDetails '
+                                            .' WHERE dtl_RecID='.$trg_recid.' AND dtl_DetailTypeID='.$fieldtype_id
+                                            .' AND dtl_Value='.$old_value;
+                                }
+                                if($query!=null){
+                                    $ret = mysql__exec_param_query($mysqli, $query, null);
+                                    if($ret!==true){
+                                        self::$system->addError(HEURIST_DB_ERROR, 'Cannot update resource fields', 'Query:'.$query.'. '.$ret);
+                                        $is_rollback = true;
+                                        break;   
+                                    }
+                                }
+                            }
+                        }//for
+                    }
+                }//for
+            }
             if(!$is_rollback){ 
                 $idx_mask = $defs['rectypes']['typedefs']['commonNamesToIndex']['rty_TitleMask'];         
                 //update resource fields with new record ids
@@ -764,7 +884,9 @@ EOD;
         }else{
                 $mysqli->commit();
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
-                $res = array('count_imported'=>$cnt_imported, 'count_ignored'=>$cnt_ignored);
+                $res = array('count_imported'=>$cnt_imported, 
+                             'count_ignored'=>$cnt_ignored, //rectype not found 
+                             'resource_notfound'=>$resource_notfound  ); //if value is H-ID-nnn
                 if(count($records_corr)<1000){
                     $res['ids'] = array_values($records_corr);    
                 }
@@ -779,6 +901,122 @@ EOD;
     return $res;
 }
 
+//
+// Import term by label
+// 1. tries to find terms among allowed terms for given field id
+// 2. if not found - add to vocabulary or to special 'Auto-added terms' terms
+//
+
+//
+// check $term_value for field $dt_id of $recordType 
+// $defs - database definitions
+// $term_value can be term id, term code or label 
+//
+// returns term_id of $term_value is allowed, 
+//        otherwise it is condsidered as label and added to array to be added
+//
+private static function validateEnumeration($recTypeID, $dt_id, $term_value, $dbdefs){
+    
+    
+    $r_value2 = trim_lower_accent($term_value);
+    if($r_value2!=''){ //skip empty value
+        
+        $recStruc = $dbdefs['rectypes']['typedefs'];
+        //see similar code code in importAction.php validateEnumerations
+        
+        $dt_def = $recStruc[$recTypeID]['dtFields'][$dt_id];
+
+        $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
+        $idx_term_tree = $recStruc['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
+        $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+    
+
+        $is_termid = false;
+        if(ctype_digit($r_value2)){ //value is numeric try to compare with trm_ID
+            $is_termid = VerifyValue::isValidTerm( $dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id);
+        }
+
+        if($is_termid){
+            $term_id = $term_value;
+        }else{
+            //strip accents on both sides
+            $term_id = VerifyValue::isValidTermLabel($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id, true );
+         
+            if(!$term_id){
+                $term_id = VerifyValue::isValidTermCode($dt_def[$idx_term_tree], $dt_def[$idx_term_nosel], $r_value2, $dt_id );
+            }
+        }
+        
+        if (!$term_id)
+        {   //not found
+            return false;
+        }else{
+            return $term_id;
+        }
+    }    
+    
+}
+
+//
+// Import term by label for given field
+// 1.Detect vocabulary or set of terms
+// 2.Get parent term id
+// 3.Add new term
+//
+private static function addNewTerm($recTypeID, $dt_id, $term_label, $dbdefs){
+    
+//@todo use dbDefTerms _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});    
+
+    $recStruc = $dbdefs['rectypes']['typedefs'];
+    $dt_def = $recStruc[$recTypeID]['dtFields'][$dt_id];
+    $idx_fieldtype = $recStruc['dtFieldNamesToIndex']['dty_Type'];
+    $idx_term_tree = $recStruc['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
+    $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+    
+    $defs = $dt_def[$idx_term_tree];
+    $defs_nonsel = $dt_def[$idx_term_nosel];
+    
+    $domain = $dt_def[$idx_fieldtype]=='enum'?'enum':'relation'; //for domain
+
+    $terms = getTermsFromFormat($defs); //db_structure
+        
+    if (($cntTrm = count($terms)) > 0) {
+
+        if ($cntTrm > 1) {  //vocabulary
+            $nonTerms = getTermsFromFormat($defs_nonsel); //from db_structure
+            if (count($nonTerms) > 0) {
+                $terms = array_diff($terms, $nonTerms);
+            }
+        }
+        if (count($terms)<1) {
+            //@todo - add or find Added Terms vocabulary
+            return -1;
+        }
+        
+        $parentID = $terms[0];
+        
+        $mysqli = self::$system->get_mysqli();
+        
+        $query = 'select trm_ID from defTerms where trm_ParentTermID='
+                        .$parentID.' and trm_Label="'.$mysqli->real_escape_string($term_label).'"';    
+        $trmID = mysql__select_value($mysqli, $query);
+        if($trmID>0){
+            //already exists
+        
+        }else{
+            //add new 
+            $trmID = mysql__insertupdate($mysqli, 'defTerms', 'trm', 
+                array('trm_Label'=>$term_label, 'trm_ParentTermID'=>$parentID, 'trm_Domain'=>$domain ));
+        }
+        
+        return $trmID; 
+
+    }else{
+        return -1; //terms for field not defined
+    }    
+
+    
+}
     
 }  
 ?>

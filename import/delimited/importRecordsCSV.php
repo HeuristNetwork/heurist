@@ -125,13 +125,13 @@ if(!$format) $format='csv';
         
         <div id="divCsvIntro" style="padding:0 20 20 20;min-width:1210" class="format-csv">
         
-            <p>
+            <p style="margin:0">
 Importing all but the simplest spreadsheet is a complex business. It is important to clean up the data as much as possible in advance, so that there is one row per entry and columns contain a single element of data (which may include repeated values, normally separated by pipe symbols | ). Split concatenated values into separate columns; place notes about data items in a separate column - don't append to the data value; coded columns should use a consistent set of codes. In addition to your spreadsheet program, you may find OpenRefine (<a href="http://openrefine.org" target="_blank">http://openrefine.org</a>) a useful tool for checking and correcting coded columns, splitting fields, georeferencing, finding URL references and so forth.
             </p><br>
-            <p>
+            <p style="margin:0">
 We strongly suggest editing the structure of the database to add any fields and terms that you will require for the import, before attempting to load the data. If you start trying to load data without the appropriate fields in place you will find it frustrating having to exit the process repeatedly to add fields.
             </p><br>
-            <p>
+            <p style="margin:0">
 If you have missing data for Required fields, you may find it convenient to set those fields to Optional before importing, then set them back to Required, then use Database > Verify Structure and Data to get a list of the records which need correcting. Alternatively you will need to add some dummy value to the data, such as 'Missing', and search for this value after import.            
             </p>        
         

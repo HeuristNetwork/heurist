@@ -3413,7 +3413,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             +'<div>Please select from the possible matches in the dropdowns. You may not be able to determine the correct records'
             +' if you have used an incomplete set of fields for matching.</div>';
         
-        }else if(mode=='error' || mode=='warning'){    //------------------------------------------------------------------------------------------- 
+        }
+        else if(mode=='error' || mode=='warning'){    //------------------------------------------------------------------------------------------- 
 
                 var is_missed = false;
                 var tabs = res[mode];
@@ -3626,7 +3627,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             dlg_options['title'] = 'Records with '+mode+'s';
             
-        }else if(res['count_'+mode+'_rows']>0)
+        }
+        else if(res['count_'+mode+'_rows']>0)
         { //-------------------------------------------------------------------------------
             
             dlg_options['title'] = 'Records to be '+(mode=='insert'?'inserted':'updated');
@@ -3699,6 +3701,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
     } 
     
+    
     function _importNewTermsToAllFields($dlg, index, prepared_data){
 
         var btn_ads = $dlg.find('.add_terms');
@@ -3742,7 +3745,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var fieldname = window.hWin.HEURIST4.detailtypes.typedefs[dt_id].commonFields[fi_name];
         
         if(!(trm_ParentTermID>0)){
-        //detect vocabulary, if selection of terms add to special vocabulary  "Auto-added terms"
+            //detect vocabulary, if selection of terms add to special vocabulary  "Auto-added terms"
         
             var fi_term =  window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_JsonTermIDTree'];
             var terms = window.hWin.HEURIST4.detailtypes.typedefs[dt_id].commonFields[fi_term];
@@ -3874,6 +3877,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     function _importTerms($dlg, _prepareddata, is_all)
     {
+        //save hierarchy - label can have dots    
         var request = {
             'a'          : 'batch',
             'entity'     : 'defTerms',

@@ -340,7 +340,16 @@ function hImportRecords(_max_upload_size) {
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
                         _hideProgress(3);
-                        $('#spanRecCount2').text(response.data.count_imported);
+                        $('#spanRecCount2').html(
+                            response.data.count_imported+'  records have been imported.<br>'
+                            +(response.data.count_ignored>0
+                              ?(response.data.count_ignored+'  records have been ignored - record type not determined.<br>')
+                              :'')
+                            +(response.data.resource_notfound && response.data.resource_notfound.length>0
+                              ?(response.data.resource_notfound.length+' resource records not found: '
+                                    +response.data.resource_notfound.join(',')+ '<br>')
+                              :'')
+                        );
                         //window.hWin.HEURIST4.msg.showMsgDlg('Imported '+response.data+' records');
                     }else{
                         _hideProgress(2);

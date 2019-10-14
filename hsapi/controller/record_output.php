@@ -1509,6 +1509,8 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_m
                 }
                 $val = $value;
             }
+            
+            if(!isset($val)) $val = '';
 
             $val = array('ID'=>$dty_ID,'value'=>$val);
 

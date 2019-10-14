@@ -278,7 +278,7 @@ class DbDefTerms extends DbEntityBase
                 continue;
             }else{
                 $query = 'select trm_ID from defTerms where trm_ParentTermID='
-                        .$parentID.' and trm_Label="'.$label.'"';    
+                        .$parentID.' and trm_Label="'.$mysqli->real_escape_string($label).'"';    
                 $trmID = mysql__select_value($mysqli, $query);
                 if($trmID>0){
                     //already exists

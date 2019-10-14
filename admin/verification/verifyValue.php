@@ -145,7 +145,7 @@ public static function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
 *
 * used in import csv
 * 
-* @param mixed $defs
+* @param mixed $defs - array of all terms for dty
 * @param mixed $defs_nonsel
 * @param mixed $label
 * @param mixed $dtyID

@@ -1136,8 +1136,8 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
     }
 
     if (!$rectype_templates){
-        makeTag('added', null, $record['rec_Added']);
-        makeTag('modified', null, $record['rec_Modified']);
+        if(@$record['rec_Added']) makeTag('added', null, $record['rec_Added']);
+        if(@$record['rec_Modified']) makeTag('modified', null, $record['rec_Modified']);
     }
 
     // saw FIXME  - need to output groups only
@@ -1254,7 +1254,7 @@ function outputRecordStub($recordStub) {
 
 function makeFileContentNode($file) {
     
-    if ($file['fxm_MimeType'] === "application/xml") { // && file_exists($filename)) {
+    if (@$file['fxm_MimeType'] === "application/xml") { // && file_exists($filename)) {
     
         $fiilename = resolveFilePath($file['fullPath']);
         if ($file['ulf_OrigFileName'] !== "_remote" && file_exists($fiilename)) {
@@ -1336,8 +1336,8 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
         } else if (array_key_exists('file', $value)) {
             $file = $value['file'];
 
-            $external_url = $file['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
-            $file_nonce = $file['ulf_ObfuscatedFileID'];
+            $external_url = @$file['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
+            $file_nonce = @$file['ulf_ObfuscatedFileID'];
                 
             $file_URL   = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce; //download
             $file['URL'] = $external_url?$external_url:$file_URL;
@@ -1835,6 +1835,16 @@ Values to be replaced are indicated with ALLCAPS, such as WKT (WellKnownText), N
 RECORD_REFERENCE may be replaced with a numeric or alphanumeric reference to another record, indicated by the <ID> tag. 
 Note that this reference will be replaced with an automatically generated numeric Heurist record ID (H-ID), 
 which will be different from the reference supplied.
+\n
+If you wish to specify existing Heurist records in the target database as the target of a Record Pointer field, specify 
+their Heurist record ID (H-ID) in the target database in the form H-ID-nnnn, where nnnn  is the H-ID of the target record. 
+Specifying non-existent record IDs will throw an error. The record type of target records are not checked on import; pointers 
+to records of the wrong type can be found later with Verify > Verify integrity. 
+\n
+In the current version of HML import, you cannot import additional data into an existing record (this will be developed later 
+according to demand - in the meantime please use CSV import to update records). If you use an H-ID-nnnn format specification 
+in the <id> tag of a record, it will be regarded as an unknown alphanumeric identifier and will simply create a new record 
+with a new H-ID.
  -->\n");
     }    
     //makeTag('raw',null, $response2 );

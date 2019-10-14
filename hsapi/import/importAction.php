@@ -1366,7 +1366,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
     $idx_term_tree = $recStruc['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
     $idx_term_nosel = $recStruc['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
 
-    $dt_type = $dt_def[$idx_fieldtype];
+    $dt_type = $dt_def[$idx_fieldtype]; //for domain
     
     $res = $mysqli->query($query." LIMIT 5000");
 
@@ -1383,7 +1383,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
             foreach($values as $idx=>$r_value){
                 $r_value2 = trim_lower_accent($r_value);
           
-                if($r_value2!=""){
+                if($r_value2!=''){
 
                     $is_termid = false;
                     if(ctype_digit($r_value2)){ //value is numeric try to compare with trm_ID
