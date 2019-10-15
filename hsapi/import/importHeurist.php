@@ -187,12 +187,13 @@ private static function hmlToJson($filename){
                        $fieldtype_id = ''.$dets['id'];
                        $detail = ''.$xml_det;
                        
+                       //field idx can be local id or concept code
                        $field_idx = ($dets['id']>0)?$fieldtype_id: ''.$dets['conceptID'];
                        
                        if(!@$fieldtypes[$field_idx]){
                             $fieldtypes[$field_idx] = array(
                                 'id'   => $fieldtype_id,
-                                'name' => ''.$dets['type'],
+                                'name' => ''.$dets['name'],
                                 'code' => ''.$dets['conceptID']
                             );
                        }
@@ -235,6 +236,7 @@ private static function hmlToJson($filename){
                            }
                        }
                        
+                       //field idx can be local id or concept code
                        if(!@$record['details'][$field_idx]) $record['details'][$field_idx] = array();
                        $record['details'][$field_idx][] = $detail; 
                     }
@@ -436,6 +438,7 @@ EOD;
             
         
         $imp_rectypes = $data['heurist']['database']['rectypes'];
+        
         //need to copy files
         $source_url = $data['heurist']['database']['url']; //url of database
         $source_db = $data['heurist']['database']['db']; //name of datbase 
@@ -509,7 +512,9 @@ EOD;
                 
             }else{
                 $recTypeID = $importDef->getTargetIdBySourceId('rectypes',
-                                                 $record_src['rec_RecTypeID']);
+                    $record_src['rec_RecTypeID']>0
+                            ?$record_src['rec_RecTypeID']
+                            :$record_src['rec_RecTypeConceptID']);
             }
             
             if(!($recTypeID>0)) {
@@ -540,6 +545,10 @@ EOD;
             $record['ScratchPad'] = @$record_src['rec_ScratchPad'];
             $record['Title'] = @$record_src['rec_Title'];
             
+            
+            $record['OwnerUGrpID'] = 1;
+            $record['NonOwnerVisibility'] = 'public';
+            
             $record['details'] = array();
             
             foreach($record_src['details'] as $dty_ID => $values){
@@ -552,6 +561,7 @@ EOD;
                 
                 //field id in target database
                 if($dbsource_is_same){
+                    //$dty_ID can be local id or concept code
                     $ftId = DbsImport::getLocalCode('detailtypes', $defs, $dty_ID, false);
                 }else{
                     $ftId = $importDef->getTargetIdBySourceId('detailtypes', $dty_ID);

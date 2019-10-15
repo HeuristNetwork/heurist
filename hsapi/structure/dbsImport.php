@@ -139,7 +139,7 @@ $time_debug2 = $time_debug;
             }            
             list($db_id, $ent_id) = explode('-', $cCode);
 
-            if(!(is_numeric($db_id) && $db_id>0 && is_numeric($ent_id) && $ent_id>0)){
+            if(!(ctype_digit($db_id) && $db_id>0 && ctype_digit($ent_id) && $ent_id>0)){
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Concept code ($cCode) has wrong format - should be two numbers separated by dash");
                 return false;
             }
@@ -843,31 +843,34 @@ $mysqli->commit();
     // get concept code in source - find local in target
     //
     public function getTargetIdBySourceId($defType, $source_id){
+        
+        $iscc = (strpos($source_id,'-')!==false);
+        
         //get concept code in source
         if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
             $defType = 'rectypes';
-            $fieldName = 'rty_ConceptID';
             $defs = $this->source_defs[$defType]['typedefs'];
-            $idx_ccode = intval($defs['commonNamesToIndex'][$fieldName]);
-            
+
             //get concept code
-            $conceptCode = @$defs[$source_id]['commonFields'][$idx_ccode];
+            $fieldName = 'rty_ConceptID';
+            $idx_ccode = intval($defs['commonNamesToIndex'][$fieldName]);
+            $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
             
         }else if($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
+
             $defType = 'detailtypes';
-            $fieldName = 'dty_ConceptID';
             $defs = $this->source_defs[$defType]['typedefs'];
+
+            $fieldName = 'dty_ConceptID';
             $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
-            
-            $conceptCode = @$defs[$source_id]['commonFields'][$idx_ccode];
+            $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
             
         }else if($defType=='enum' || $defType=='relationtype'){
+            $defs = $this->source_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
             
             $fieldName = 'trm_ConceptID';
-            $defs = $this->source_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
             $idx_ccode = intval($this->source_defs['terms']['fieldNamesToIndex'][$fieldName]);
-            
-            $conceptCode = @$defs[$source_id][$idx_ccode];
+            $conceptCode = $iscc ?$source_id :@$defs[$source_id][$idx_ccode];
             
         }
         
@@ -892,40 +895,48 @@ $mysqli->commit();
         
         if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
             $defType = 'rectypes';
-            $fieldName = 'rty_ConceptID';
             $defs = $database_defs[$defType]['typedefs'];
+
+            $fieldName = 'rty_ConceptID';
             $idx_ccode = intval($defs['commonNamesToIndex'][$fieldName]);
             
         }else if($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
             $defType = 'detailtypes';
-            $fieldName = 'dty_ConceptID';
             $defs = $database_defs[$defType]['typedefs'];
+
+            $fieldName = 'dty_ConceptID';
             $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
             
         }else if($defType=='enum' || $defType=='relationtype'){
             
-            $fieldName = 'trm_ConceptID';
             $defs = $database_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
+
+            $fieldName = 'trm_ConceptID';
             $idx_ccode = intval($database_defs['terms']['fieldNamesToIndex'][$fieldName]);
             
         }
-    
-        if(strpos($conceptCode,'-')===false || strpos($conceptCode,'0000-')===0){ //this is local already
         
-            if(strpos($conceptCode,'-')===false){
-                $id = $conceptCode; 
-            }else{
-                list($db, $id) = explode('-', $conceptCode);    
+        $local_id = 0;
+        
+        if(strpos($conceptCode,'-')!==false){
+            list($db, $id) = explode('-', $conceptCode); 
+            if(ctype_digit($db) && $db==0 && ctype_digit($id) && $id>0){
+                 $local_id = $id;          
             }
-            
-            
-            if(is_numeric($id) && $id>0 && $defs[$id]){
-                return $id;
+        }else{
+            $local_id = $conceptCode;
+        }
+    
+        if(is_numeric($local_id) && $local_id>0){ //this is local already
+        
+            if($defs[$local_id]){
+                return $local_id;
             }else{
                 return null; //not found
             }
             
         }else{
+            //find by concept code
 
             foreach ($defs as $id => $def) {
                 if(is_numeric($id)){

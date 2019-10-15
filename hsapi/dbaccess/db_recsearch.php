@@ -1797,7 +1797,7 @@ $loop_cnt++;
     function recordTemplateByRecTypeID($system, $id){    
     
         $record = array(
-            'rec_ID'=>'ID',
+            'rec_ID'=>'RECORD-IDENTIFIER',
             'rec_RecTypeID'=>$id,
             'rec_Title'=>'',
             'rec_URL'=>'URL',
@@ -1827,10 +1827,10 @@ $loop_cnt++;
                 $details[$dty_ID] = array($idx=>array('id'=>'RECORD_REFERENCE', 'type'=>0, 'title'=>''));    
 
             }else if($dty_Type=='geo'){
-                $details[$dty_ID] = array($idx=>array('geo'=>array('type'=>'TEXT', 'wkt'=>'WKT_VALUE')) );    
+                $details[$dty_ID] = array($idx=>array('geo'=>array('wkt'=>'WKT_VALUE')) ); //'type'=>'TEXT',     
                 
             }else if($dty_Type=='enum' || $dty_Type=='relationtype'){
-                $details[$dty_ID] = array($idx=>'TERM');        
+                $details[$dty_ID] = array($idx=>'VALUE');        
             }else if($dty_Type=='integer' || $dty_Type=='float' || $dty_Type=='year' ){
                 $details[$dty_ID] = array($idx=>'NUMERIC');
             }else if($dty_Type=='blocktext' ){

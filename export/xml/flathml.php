@@ -1091,18 +1091,24 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         $recAttr['xsi:schemaLocation'] = 'http://heuristnetwork.org reference/scheme_record.xsd';
     }
 
-    $recAttr['depth'] = $depth;
-    $recAttr['visibility'] = ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable');
-    $recAttr['visnote'] = ($record['rec_NonOwnerVisibility']=='hidden' ? 'owner group only'
-        : (($record['rec_NonOwnerVisibility']=='public') ? 'no login required' : 'logged in users') );
-    $recAttr['selected'] = (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no');
+    if(!$rectype_templates){
+        $recAttr['visibility'] = ($record['rec_NonOwnerVisibility'] ? $record['rec_NonOwnerVisibility'] : 'viewable');
+        $recAttr['visnote'] = ($record['rec_NonOwnerVisibility']=='hidden' ? 'owner group only'
+            : (($record['rec_NonOwnerVisibility']=='public') ? 'no login required' : 'logged in users') );
+        $recAttr['selected'] = (in_array($record['rec_ID'], $selectedIDs) ? 'yes' : 'no');
+        $recAttr['depth'] = $depth;
+    }else{
+        output("<!--\n".$RTN[$record['rec_RecTypeID']]."\n-->\n");
+    }
 
     openTag('record', $recAttr);
 
-    if (isset($dbID) && ($dbID != 0)) {
-        output( "<dbID>".$dbID."</dbID>\n");
-    } else {
-        output( "<dbID>0</dbID>\n"); // unregistered database
+    if(!$rectype_templates){
+        if (isset($dbID) && ($dbID != 0)) {
+            output( "<dbID>".$dbID."</dbID>\n");
+        } else {
+            output( "<dbID>0</dbID>\n"); // unregistered database
+        }
     }
 
     if (array_key_exists('error', $record)) {
@@ -1119,13 +1125,21 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
     $conceptID = ConceptCode::getRecTypeConceptID($record['rec_RecTypeID']);
 
-    if (!$rectype_templates){
-        makeTag('citeAs', null, HEURIST_BASE_URL.'?recID='.$record['rec_ID'].'&db='.HEURIST_DBNAME);
+    if ($rectype_templates){
+        output('<!-- Specify the entity identifier in the source database (numeric or alphanumeric) if entity may be the target '
+        ."of a record pointer field, including the target record pointer of a  relationship record.-->\n");   
     }
+    
     makeTag('id', null, $record['rec_ID']);
-    makeTag('type', array('id' => $record['rec_RecTypeID'],
-        'conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);
-    makeTag('title', null, $record['rec_Title']);
+    
+    if ($rectype_templates){
+        output("<!-- type specifies the record (entity) type of the record -->\n");
+        makeTag('type', array('conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);
+    }else{
+        makeTag('type', array('id' => $record['rec_RecTypeID'],
+            'conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);
+    }
+    
 
     if ($rectype_templates || $record['rec_URL']) {
         makeTag('url', null, $record['rec_URL']);
@@ -1136,13 +1150,15 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
     }
 
     if (!$rectype_templates){
+        makeTag('citeAs', null, HEURIST_BASE_URL.'?recID='.$record['rec_ID'].'&db='.HEURIST_DBNAME);
+        makeTag('title', null, $record['rec_Title']);
         if(@$record['rec_Added']) makeTag('added', null, $record['rec_Added']);
         if(@$record['rec_Modified']) makeTag('modified', null, $record['rec_Modified']);
-    }
 
-    // saw FIXME  - need to output groups only
-    if (array_key_exists($record['rec_OwnerUGrpID'], $WGN) || array_key_exists($record['rec_OwnerUGrpID'], $UGN)) {
-        makeTag('workgroup', array('id' => $record['rec_OwnerUGrpID']), $record['rec_OwnerUGrpID'] > 0 ? (array_key_exists($record['rec_OwnerUGrpID'], $WGN) ? $WGN[$record['rec_OwnerUGrpID']] : (array_key_exists($record['rec_OwnerUGrpID'], $UGN) ? $UGN[$record['rec_OwnerUGrpID']] : 'Unknown')) : 'public');
+        // saw FIXME  - need to output groups only
+        if (array_key_exists($record['rec_OwnerUGrpID'], $WGN) || array_key_exists($record['rec_OwnerUGrpID'], $UGN)) {
+            makeTag('workgroup', array('id' => $record['rec_OwnerUGrpID']), $record['rec_OwnerUGrpID'] > 0 ? (array_key_exists($record['rec_OwnerUGrpID'], $WGN) ? $WGN[$record['rec_OwnerUGrpID']] : (array_key_exists($record['rec_OwnerUGrpID'], $UGN) ? $UGN[$record['rec_OwnerUGrpID']] : 'Unknown')) : 'public');
+        }
     }
 
     foreach ($record['details'] as $dt => $details) {
@@ -1168,7 +1184,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
     */
     
     
-    if(strpos($depth, '.')===false){
+    if(!$rectype_templates && strpos($depth, '.')===false){
 
     //artem - find reverse pointers dynamically
     if($REVERSE){
@@ -1305,14 +1321,22 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
     global $system,$DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT,
             $rectype_templates;
-    $attrs = array('id' => $dt, 'conceptID' => ConceptCode::getDetailTypeConceptID($dt));
-
-    if (array_key_exists($dt, $DTN)) {
-        $attrs['type'] = $DTN[$dt];
-    }
+            
+    $attrs = array('conceptID' => ConceptCode::getDetailTypeConceptID($dt));
 
     if (array_key_exists($rt, $RQS) && array_key_exists($dt, $RQS[$rt])) {
-        $attrs['name'] = $RQS[$rt][$dt];
+        $attrs['name'] = $RQS[$rt][$dt];    
+    }
+    
+    if($rectype_templates){
+        if(!@$attrs['name'] && array_key_exists($dt, $DTN)){
+            $attrs['name'] = $DTN[$dt];
+        }
+    }else{
+        $attrs['id'] = $dt;
+        if (array_key_exists($dt, $DTN)) {
+            $attrs['type'] = $DTN[$dt];
+        }
     }
 
     if ($dt === $relTypDT && array_key_exists($value, $INV) && $INV[$value] && array_key_exists($INV[$value], $TL)) { //saw Enum change
@@ -1433,13 +1457,18 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             closeTag('detail');
         }
     } else if ($DTT[$dt] === 'date') {
-        openTag('detail', $attrs);
         if (strpos($value, "|") === false) {
-            outputDateDetail($attrs, $value);
+            if($rectype_templates){
+                makeTag('detail', $attrs, $value);
+            }else{
+                outputDateDetail($attrs, $value);
+            }
         } else {
+            openTag('detail', $attrs);
             outputTemporalDetail($attrs, $value);
+            closeTag('detail');
         }
-        closeTag('detail');
+        
     } else if ($DTT[$dt] === 'resource') {
         $attrs['isRecordPointer'] = "true";
         if ($MAX_DEPTH == 0 && $outputStub) {
@@ -1452,15 +1481,18 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
         }
     } else if (($DTT[$dt] === 'enum' || $DTT[$dt] === 'relationtype')) {
         $attrs['termID'] = $value;
-        if( array_key_exists($value, $TL) ){
-            $attrs['termConceptID'] =  ConceptCode::getTermConceptID($value);
-            if (@$TL[$value]['trm_ParentTermID']) {
-                $attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
+        if($rectype_templates){        
+            makeTag('detail', $attrs, null);
+        }else{
+            if( array_key_exists($value, $TL) ){
+                $attrs['termConceptID'] =  ConceptCode::getTermConceptID($value);
+                    if (@$TL[$value]['trm_ParentTermID']) {
+                        $attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
+                    }
             }
             makeTag('detail', $attrs, $TL[$value]['trm_Label']);
-        }else if($rectype_templates){
-            makeTag('detail', $attrs, 'TERM_LABEL');
         }
+        
     } else {
         makeTag('detail', $attrs, replaceIllegalChars($value));
     }
@@ -1845,7 +1877,20 @@ In the current version of HML import, you cannot import additional data into an 
 according to demand - in the meantime please use CSV import to update records). If you use an H-ID-nnnn format specification 
 in the <id> tag of a record, it will be regarded as an unknown alphanumeric identifier and will simply create a new record 
 with a new H-ID.
- -->\n");
+\n
+<url>URL</url> This record level tag specifies a special URL attached directly to the record which is used to hyperlink record
+lists and for which checking can be automated. Primarily used for internet bookmarks.  
+\n
+Specify date field values in ISO format (yyyy or yyyy-mm or yyyy-mm-dd)
+\n
+termID= specifies any of the following, which are evaluated in order: local ID, concept code, label or standard code.   
+If no match is found, the value will be added as a new term 
+\n
+database id may be set to the source database ID for HML exported from a Heurist database. If it is set, the sync of definitions will be performed in target database before import records
+-->\n");
+ 
+
+ 
     }    
     //makeTag('raw',null, $response2 );
 
@@ -1857,19 +1902,23 @@ with a new H-ID.
     );
     */
     makeTag('database', array('id' => $dbID ), HEURIST_DBNAME);
-    makeTag('query', $query_attrs);
-    if (count($selectedIDs) > 0) {
-        makeTag('selectedIDs', null, join(",", $selectedIDs));
+    
+    if(!$rectype_templates){
+        makeTag('query', $query_attrs);
+        if (count($selectedIDs) > 0) {
+            makeTag('selectedIDs', null, join(",", $selectedIDs));
+        }
+        makeTag('dateStamp', null, date('c'));
     }
-    makeTag('dateStamp', null, date('c'));
+    
     if (array_key_exists('error', $result)) {
         makeTag('error', null, $result['error']);
     } else {
-        makeTag('resultCount', null, @$result['reccount']>0 ? $result['reccount'] : " 0 ");
+        if(!$rectype_templates) makeTag('resultCount', null, @$result['reccount']>0 ? $result['reccount'] : " 0 ");
         // Output all the records as XML blocks
         if (@$result['reccount'] > 0){
             $resout = outputRecords($result);  
-            makeTag('recordCount', null, count($resout));//@$result['recordCount']>0 ? $result['recordCount'] : " 0 ");
+            if(!$rectype_templates) makeTag('recordCount', null, count($resout));
         } 
     }
     closeTag('hml');
