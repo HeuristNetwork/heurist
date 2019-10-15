@@ -160,7 +160,12 @@ if(!$intofile){
         header('Content-type: text/xml; charset=utf-8');
         
         if(@$_REQUEST['file']==1 || @$_REQUEST['file']===true){
-            $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.hml';
+            if($rectype_templates){
+                $filename = 'Template_'.$_REQUEST['db'].'_'.date("YmdHis").'.hml';
+            }else{
+                $filename = 'Export_'.$_REQUEST['db'].'_'.date("YmdHis").'.hml';    
+            }
+            
             header('Content-disposition: attachment; filename='.$filename);
             //header('Content-Length: ' . strlen($content));
         }
