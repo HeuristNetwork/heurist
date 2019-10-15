@@ -1891,7 +1891,9 @@ Specify date field values in ISO format (yyyy or yyyy-mm or yyyy-mm-dd)
 termID= specifies any of the following, which are evaluated in order: local ID, concept code, label or standard code.   
 If no match is found, the value will be added as a new term 
 \n
-database id may be set to the source database ID for HML exported from a Heurist database. If it is set, the sync of definitions will be performed in target database before import records
+the XML file may (optionally) specify a Heurist database ID with <database id=??>. If a database ID is specified, synchronisation 
+of definitions from that database will be performed before the data are imported. Since imported files will normally use a template
+for record types and fields exported from the target database, this is only useful for synchronising vocabularies and terms.
 -->\n");
  
 

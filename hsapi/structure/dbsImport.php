@@ -1124,7 +1124,6 @@ $mysqli->commit();
             //loop through all this->imp_terms
             
             //top level import vocabularies
-                
             foreach($this->imp_terms[$domain] as $term_id){
                 $res = $this->_importVocabulary($term_id, $domain, 
                             @$this->source_defs['terms']['treesByDomain'][$domain][$term_id]);  //children
