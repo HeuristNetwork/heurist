@@ -96,8 +96,11 @@ private static function readDataFile($filename, $type=null, $validate=true){
             
             if($validate){
                 $imp_rectypes = @$data['heurist']['database']['rectypes'];
-                if($data==null || !$imp_rectypes){
-                    self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import data has wrong data. "Record type" section is not found');
+                if($data==null || !$imp_rectypes)
+                {
+                    if(!(count(self::$system->getError())>0))
+                        self::$system->addError(HEURIST_ACTION_BLOCKED, 
+                            'Import data has wrong data. "Record type" section is not found');
                 }
                 
                 
@@ -121,7 +124,7 @@ private static function hmlToJson($filename){
 
     $xml_doc = simplexml_load_file($filename);
     if($xml_doc==null || is_string($xml_doc) || !$xml_doc->database){
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that xml is corrupted');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that xml is corrupted. Element "database" is missed');
         return null;
     }
     
@@ -163,7 +166,7 @@ private static function hmlToJson($filename){
                 );
                 
                 //fill rectype array - it will be required to find missed rectypes
-                $rt_idx = ($rectype['id']>0)?$rectype_id:$rectype['conceptID'];
+                $rt_idx = ($rectype_id>0)?$rectype_id: ''.$rectype['conceptID'];
                 if(!@$rectypes[$rt_idx]){
                     $rectypes[$rt_idx] = array(
                         'id'   => $rectype_id,
@@ -188,7 +191,7 @@ private static function hmlToJson($filename){
                        $detail = ''.$xml_det;
                        
                        //field idx can be local id or concept code
-                       $field_idx = ($dets['id']>0)?$fieldtype_id: ''.$dets['conceptID'];
+                       $field_idx = ($fieldtype_id > 0)?$fieldtype_id: ''.$dets['conceptID'];
                        
                        if(!@$fieldtypes[$field_idx]){
                             $fieldtypes[$field_idx] = array(
@@ -320,7 +323,8 @@ public static function getDefintions($filename){
         );
             
     }else{
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import data not recognized');
+        if(!(count(self::$system->getError())>0))
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Import data not recognized');
     }
 
     return $res;
@@ -485,6 +489,7 @@ EOD;
         
         $records = $data['heurist']['records'];
         
+        $records_corr_alphanum = array();
         $records_corr = array(); //source rec id -> target rec id
         $resource_fields = array(); //source rec id -> field type id -> field value (target recid)
         $keep_rectypes = array(); //keep rectypes for furhter rectitle update
@@ -535,6 +540,14 @@ EOD;
             
             if(!@$record_src['rec_ID']){ //if not defined assign arbitrary unique
                 $record_src['rec_ID'] = uniqid(); //''.microtime();
+            }else if(!ctype_digit($record_src['rec_ID'])){
+                if(@$records_corr_alphanum[$record_src['rec_ID']]){
+                    $record_src['rec_ID'] = $records_corr_alphanum[$record_src['rec_ID']];
+                }else{
+                    $rand_id = random_int(999999999,9999999999);
+                    $records_corr_alphanum[$record_src['rec_ID']] = $rand_id;
+                    $record_src['rec_ID'] = $rand_id; 
+                }
             }                                             
                                                  
                                                  
@@ -638,7 +651,12 @@ EOD;
                 }else if($def_field[$idx_type] == "geo"){
                     
                    foreach($values as $value){
-                        $new_values[] = $value['geo']['type'].' '.$value['geo']['wkt'];
+                       //geo
+                       $geotype = '';
+                       if (@$value['geo']['type']){
+                            $geotype = $value['geo']['type'].' ';
+                       }
+                       $new_values[] = $geotype.$value['geo']['wkt'];
                    }
                    
                 }else if($def_field[$idx_type] == "file"){
@@ -732,8 +750,18 @@ EOD;
                                    $resource_notfound[] = $value;
                                }
                            }
-                           
+
                        }else{                       
+
+                           if(!ctype_digit($value)){ 
+                               if(@$records_corr_alphanum[$value]){
+                                   $value = $records_corr_alphanum[$value];
+                               }else{
+                                   $rand_id = random_int(999999999,9999999999);
+                                   $records_corr_alphanum[$value] = $rand_id;
+                                   $value = $rand_id; 
+                               }
+                           }
                            $resource_fields[$record_src['rec_ID']][$ftId][] = $value;    
                            $new_values[] = $value;
                        }
@@ -761,6 +789,7 @@ EOD;
             
             // note: we need to suppress creation of reverse 247 pointer for parent-child links
             
+            //no transaction, suppress parent-child
             $out = recordSave(self::$system, $record, false, true);  //see db_records.php
 
             if ( @$out['status'] != HEURIST_OK ) {

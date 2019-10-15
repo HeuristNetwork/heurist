@@ -1451,7 +1451,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
         } else if (array_key_exists('geo', $value)) {
             openTag('detail', $attrs);
             openTag('geo');
-            makeTag('type', null, $GEO_TYPES[$value['geo']['type']]);
+            if(!$rectype_templates) makeTag('type', null, $GEO_TYPES[$value['geo']['type']]);
             makeTag('wkt', null, $value['geo']['wkt']);
             closeTag('geo');
             closeTag('detail');

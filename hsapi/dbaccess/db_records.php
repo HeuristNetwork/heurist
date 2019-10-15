@@ -1600,9 +1600,24 @@
                         break;
 
                     case "geo":
-
+                    
+                        //note geoType can be not defined - detect it fron dtl_Geo
                         $geoType = trim(substr($dtl_Value, 0, 2));
-                        $dtl_Geo = trim(substr($dtl_Value, 2));
+                        if($geoType=='p'||$geoType=='l'||$geoType=='pl'||$geoType=='c'||$geoType=='r'||$geoType=='m'){
+                            $dtl_Geo = trim(substr($dtl_Value, 2));
+                        }else{
+                            $dtl_Geo = trim($dtl_Value);
+                            if(strpos($dtl_Geo, 'GEOMETRYCOLLECTION')!==false || strpos($dtl_Geo, 'MULTI')!==false){
+                                $geoType = "m";
+                            }else if(strpos($dtl_Geo,'POINT')!==false){
+                                $geoType = "p";
+                            }else if(strpos($dtl_Geo,'LINESTRING')!==false){
+                                $geoType = "l";
+                            }else if(strpos($dtl_Geo,'POLYGON')!==false){ //MULTIPOLYGON
+                                $geoType = "pl";
+                            }
+                        }
+
                         $res = mysql__select_value($mysqli, "select AsWKT(geomfromtext('".addslashes($dtl_Geo)."'))");
                         if($res){
                             $dtl_Value = $geoType;
