@@ -556,10 +556,20 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         spacing_closed:16,  
                         togglerAlign_open:'center',
                         togglerAlign_closed:'top',
-                        togglerLength_closed:16,  //makes it square
+                        //togglerLength_closed:16,  //makes it square
+                        togglerAlign_closed:20,
+                        togglerLength_closed:32,  //to makes it square set to 16
                         initClosed:(this.usrPreferences.summary_closed==true || this.usrPreferences.summary_closed=='true'),
                         slidable:false,  //otherwise it will be over center and autoclose
-                        contentSelector: '.editFormSummary'    
+                        contentSelector: '.editFormSummary',   
+                        onopen_start : function(){ 
+                            var tog = that.editFormPopup.find('.ui-layout-toggler-east');
+                            tog.removeClass('prominent-cardinal-toggler');
+                        },
+                        onclose_end : function(){ 
+                            var tog = that.editFormPopup.find('.ui-layout-toggler-east');
+                            tog.addClass('prominent-cardinal-toggler');
+                        }
                     },
                     /*south:{
                         spacing_open:0,
@@ -574,6 +584,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 };
 
                 this.editFormPopup.show().layout(layout_opts); //.addClass('ui-heurist-bg-light')
+                
+                
+                if(this.usrPreferences.summary_closed==true || this.usrPreferences.summary_closed=='true'){
+                            var tog = that.editFormPopup.find('.ui-layout-toggler-east');
+                            tog.addClass('prominent-cardinal-toggler');
+                }
+                
                 //this tabs are open by default
                 //if(!this.usrPreferences.summary_tabs) 
                 this.usrPreferences.summary_tabs = ['0','1','2','3']; //since 2018-03-01 always open

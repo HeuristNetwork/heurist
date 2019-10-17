@@ -286,7 +286,13 @@ function hLayout(args) {
                       setTimeout( function(){window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', ['west'] );}, 500 );
                       return 'abort';
                   }
+                  var tog = $container.find('.ui-layout-toggler-west');
+                  tog.removeClass('prominent-cardinal-toggler');
               },
+              onclose_end : function(){ 
+                   var tog = $container.find('.ui-layout-toggler-west');
+                   tog.addClass('prominent-cardinal-toggler');
+              }
             },
             east:{
               spacing_open:6,
@@ -304,9 +310,13 @@ function hLayout(args) {
                       setTimeout( function(){window.hWin.HAPI4.LayoutMgr.cardinalPanel('open', ['east'] );}, 500 );
                       return 'abort';
                   }
-                  
-                  
+                  var tog = $container.find('.ui-layout-toggler-east');
+                  tog.removeClass('prominent-cardinal-toggler');
               },
+              onclose_end : function(){ 
+                   var tog = $container.find('.ui-layout-toggler-east');
+                   tog.addClass('prominent-cardinal-toggler');
+              }
             },
             tips: {
                 Close:                "Click to minimise panel",
@@ -452,7 +462,7 @@ function hLayout(args) {
     //
     function __toogleIcons($container, pane, closed, opened){
         var tog = $container.find('.ui-layout-toggler-'+pane);
-        tog.addClass('ui-heurist-btn-header1')
+        //tog.addClass('ui-heurist-btn-header1');
         
         var togc = tog.find('.content-closed'); togc.empty();
         $('<div>').addClass('ui-icon ui-icon-triangle-1-'+closed).appendTo(togc);

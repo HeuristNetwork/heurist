@@ -1943,3 +1943,8 @@ input[type="file"] {
 .ui-dialog .ui-dialog-buttonpane{
     margin-top:0.1em;
 }
+
+.prominent-cardinal-toggler{
+    background: red !important;
+    color: white;
+}
