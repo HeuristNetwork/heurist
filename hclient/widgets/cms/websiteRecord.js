@@ -140,16 +140,20 @@ function hCmsEditing(_options) {
         setTimeout(function(){
             __alignButtons();
             
-            
+            var bg_color = $('#main-header').css('background');
+console.log('>>>')+bg_color;           
             //init main menu in header
             var topmenu = $('#main-menu');
             topmenu.attr('data-heurist-app-id','heurist_Navigation');
             
             window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
-                {heurist_Navigation:{menu_recIDs:home_pageid, use_next_level:true, orientation:'horizontal', 
-                onmenuselect:__iniLoadPageById, 
+                {heurist_Navigation:{menu_recIDs:home_pageid
+                , use_next_level:true
+                , orientation:'horizontal'
+                , onmenuselect:__iniLoadPageById
                 //aftermenuselect: afterPageLoad,  //function in header websiteRecord.php
-                toplevel_css:{background:'rgba(112,146,190,0.7)'} }} ); //,color:'white','margin-right':'24px'
+                , toplevel_css:{background:bg_color}  //'rgba(112,146,190,0.7)' ,color:'white','margin-right':'24px'
+                }} ); 
             
             $('#main-menu').show()
             

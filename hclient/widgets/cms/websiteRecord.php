@@ -286,13 +286,16 @@ _time_debug = new Date().getTime() / 1000;
     setTimeout(function(){
         //init main menu
         //add menu definitions to main-menu
+        var bg_color = $('#main-header').css('background');
+console.log('>>>')+bg_color;           
+
         var topmenu = $('#main-menu');
         topmenu.attr('data-heurist-app-id','heurist_Navigation');
                 
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
             {heurist_Navigation:{menu_recIDs:"<?php print $rec_id;?>", use_next_level:true, 
             orientation:'horizontal',
-            toplevel_css:{background:'rgba(112,146,190,0.7)'},
+            toplevel_css:{background:bg_color}, //'rgba(112,146,190,0.7)'
             aftermenuselect: afterPageLoad
             }} );
             
@@ -491,7 +494,7 @@ body{
     padding:10px;
 }
 #main-header{
-    background:rgb(112,146,190);
+    /*background:rgb(112,146,190);*/
     height:180px;   
     padding: 0.5em;
     padding-bottom:0;

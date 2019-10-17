@@ -599,22 +599,24 @@ function editCMS(home_page_record_id, main_callback){
                                                 }
                                             
                                                 var buttons = {};
-                                                buttons[window.hWin.HR('Yes. Remove records')]  = function() {
+                                                buttons[window.hWin.HR('Remove menu entry and sub-menus (if any)')]  = function() {
                                                             remove_menu_records = true;
                                                             __doRemove();
                                                         };
+                                                /*        
                                                 buttons[window.hWin.HR('No. Remove menu only and retain records')]  = function() {
                                                             remove_menu_records = false;
                                                             __doRemove();
                                                         };
+                                                */
                                                 buttons[window.hWin.HR('Cancel')]  = function() {
                                                             var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
                                                             $dlg.dialog( "close" );
                                                         };
                                                          
                                                 window.hWin.HEURIST4.msg.showMsgDlg(
-                                                'This removes the menu entry from the database, as well as '
-                                                +'all content in the page and all sub-menus of this menu (if any). ' 
+                                                'This removes the menu entry and web page content from the database, '
+                                                +'as well as all sub-menus of this menu (if any). '
                                                 +'<br><br>To avoid deleting sub-menus, move them out of this menu before deletion.',buttons);
                                                 
                                             }
