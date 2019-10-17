@@ -541,11 +541,12 @@ EOD;
             if(!@$record_src['rec_ID']){ //if not defined assign arbitrary unique
                 $record_src['rec_ID'] = uniqid(); //''.microtime();
             }else if(!ctype_digit($record_src['rec_ID'])){
-                if(@$records_corr_alphanum[$record_src['rec_ID']]){
-                    $record_src['rec_ID'] = $records_corr_alphanum[$record_src['rec_ID']];
+                $rec_id_an = strtolower($record_src['rec_ID']);
+                if(@$records_corr_alphanum[$rec_id_an]){ //aplhanum->random int
+                    $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_an];
                 }else{
                     $rand_id = random_int(999999999,9999999999);
-                    $records_corr_alphanum[$record_src['rec_ID']] = $rand_id;
+                    $records_corr_alphanum[$rec_id_an] = $rand_id;
                     $record_src['rec_ID'] = $rand_id; 
                 }
             }                                             
