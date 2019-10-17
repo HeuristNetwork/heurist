@@ -73,7 +73,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         this.getUiPreferences();
         
-        
         this._super();
         
         //this.editForm.empty();
@@ -96,7 +95,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //-----------------
         var sh = 0;
         if(hasSearchForm && this.searchForm.is(':visible')){
-            sh = 11;
+            sh = 12;
             if(hasSearchForm){
                 if(this.options.parententity){
                     sh = 14;  
@@ -2332,14 +2331,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
-        
-        //show-hide optional fields     
-        $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
-        $(this.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
 
-        $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
-
-        
         if(this.element.find('.chb_opt_fields').length==0){  //not inited yet
 
             $('<div style="display:table;min-width:575px;width:100%">'
@@ -2421,10 +2413,10 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                             that.usrPreferences['optfields'] = isfields_on;
                             $(that.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
                             $(that.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
+                            
+                            that._showHideEmptyFieldGroups();
                         });
                         
-            //to save spae - hide fieldset with hidden service fields (id, title, rectype etc)
-            $(this.editForm.find('fieldset')[0]).hide(); 
         }
         
         //add record title at the top ======================
@@ -2477,18 +2469,44 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         }
 
 
+        //show-hide optional fields     
         $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
         $(this.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
+        $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
 
+        //to save space - hide all fieldsets without visible fields
+        this._showHideEmptyFieldGroups();
+        
+        
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm);
         //show-hide help text below fields - it overrides comptency level
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
+        
         
         this.onEditFormChange();
         
         window.hWin.HAPI4.SystemMgr.user_log('edit_Record');
     },
-
+    
+    //
+    //to save space - hide all fieldsets without visible fields
+    //
+    _showHideEmptyFieldGroups: function(){
+        this.editForm.find('fieldset').each(function(idx,item){
+            
+            if($(item).children('div:visible').length>0){
+                $(item).show();
+            }else{
+                $(item).hide();
+                $(item).children('div').each(function(){
+                    if($(this).css('display')!='none'){
+                        $(item).show();
+                        return false;
+                    }
+                });
+            }
+        });
+    },
     
     //
     //

@@ -1318,7 +1318,7 @@ $.widget( "heurist.editing_input", {
                         height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
         
                     popup_options.width = Math.max(usrPreferences.width,710);
-                    popup_options.height = usrPreferences.height;
+                    popup_options.height = Math.max(usrPreferences.height,600);
                     
                     //init related/liked records selection dialog
                     window.hWin.HEURIST4.ui.showEntityDialog(that.configMode.entity, popup_options);
