@@ -1132,7 +1132,21 @@ window.hWin.HEURIST4.ui = {
             
             //fill select
             if (dtyNames.length >0) {
-                dtyNames.sort();
+                
+                //sort by name - case insensitive
+                dtyNames.sort(function(a, b) {
+                    var nameA = a.toUpperCase(); // ignore upper and lowercase
+                    var nameB = b.toUpperCase(); // ignore upper and lowercase
+                    if (nameA < nameB) {
+                        return -1;
+                    }
+                    if (nameA > nameB) {
+                        return 1;
+                    }
+
+                    // names must be equal
+                    return 0;
+                });
                 //add option for DetailType enabled followed by all Rectype.Fieldname options disabled
                 for (i in dtyNames) {
                   dtyName = dtyNames[i];
@@ -1233,7 +1247,21 @@ window.hWin.HEURIST4.ui = {
             }
 
             //sort by name
-            arrterm.sort(function (a,b){ return a[1]<b[1]?-1:1; });
+            arrterm.sort(function(a, b) {
+                    var nameA = a[1].toUpperCase(); // ignore upper and lowercase
+                    var nameB = b[1].toUpperCase(); // ignore upper and lowercase
+                    if (nameA < nameB) {
+                        return -1;
+                    }
+                    if (nameA > nameB) {
+                        return 1;
+                    }
+
+                    // names must be equal
+                    return 0;
+            });
+            
+            
             //add to select
             var i=0, cnt= arrterm.length;
             for(;i<cnt;i++) {
@@ -1283,7 +1311,20 @@ window.hWin.HEURIST4.ui = {
                     grp.label = detailtypes.groups[index].name;
                     selObj.appendChild(grp);
                     //sort by name
-                    arrterm.sort(function (a,b){ return a[1]<b[1]?-1:1; });
+                    arrterm.sort(function(a, b) {
+                            var nameA = a[1].toUpperCase(); // ignore upper and lowercase
+                            var nameB = b[1].toUpperCase(); // ignore upper and lowercase
+                            if (nameA < nameB) {
+                                return -1;
+                            }
+                            if (nameA > nameB) {
+                                return 1;
+                            }
+                            // names must be equal
+                            return 0;
+                    });
+
+                    
                     //add to select
                     var i=0, cnt= arrterm.length;
                     for(;i<cnt;i++) {
@@ -2732,7 +2773,36 @@ window.hWin.HEURIST4.ui = {
 
           }
       }
-  }    
+  },
+  
+  //
+  // edit base field definition
+  //
+  editBaseFieldDefinition: function(dty_ID, callback){
+  
+    var sURL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editDetailType.html?db="
+        +window.hWin.HAPI4.database+ "&detailTypeID="+dty_ID; //existing
+
+    window.hWin.HEURIST4.msg.showDialog(sURL, {
+           "close-on-blur": false,
+            "no-resize": false,
+            height: 680,
+            width: 840,
+            callback: function(context) {
+                if(!Hul.isnull(context)){
+                    window.hWin.HEURIST4.detailtypes = context.detailtypes;
+                }
+                if($.isFunction(callback)){
+                    callback.call();
+                }
+            },
+            afterclose: function(){
+            }
+            
+    });
+    
+    return false;
+  }
   
 }//end ui
 

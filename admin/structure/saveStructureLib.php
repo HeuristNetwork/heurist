@@ -221,13 +221,20 @@ copy_IconAndThumb_FromLibrary
         }else{
             $dtCount = $res->num_rows;
             if ($dtCount>0) { // there are fields that use this rectype, need to return error and the dty_IDs
-                $errMsg = "Error: You cannot delete record type $rtyID. "
+                $errMsg = 'Record type '.$rtyID.' is referenced as a pointer target by the following base field definition(s). ' 
+                .'To delete this record type you will need to remove this target record type from the base field definition(s). '
+                .'Please edit the fields (click on links below)'
+                .'<div style="text-align:left; padding-top:10px"><ul>';
+                /*
+                "Error: You cannot delete record type $rtyID. "
                             ." It is referenced in $dtCount base field defintions "
                             ."- please delete field definitions or remove rectype from pointer constraints to allow deletion of this record type.<div style='text-align:left'><ul>";
+                */
                 $ret['dtyIDs'] = array();
                 while ($row = $res->fetch_row()) {
                     array_push($ret['dtyIDs'], $row[0]);
-                    $errMsg = $errMsg.("<li>".$row[0]."&nbsp;".$row[1]."</li>");
+                    $errMsg = $errMsg.('<li>'.$row[0]
+                        .'&nbsp;<a href="#" onclick="{window.hWin.HEURIST4.ui.editBaseFieldDefinition('.$row[0].'); return false;}">'.$row[1].'</li>');
                 }
                 $errMsg= $errMsg."</ul></div>";
                 
