@@ -224,13 +224,14 @@ $.widget( "heurist.importStructure", {
             rendererGroupHeader: function(grp_val){
                 if(grp_val==0){
                     //width:100%;
-                    return '<div style="padding:24px 0 4px 40px;border-bottom:1px solid lightgray">'
-                    +'<h2 style="margin:0">Curated templates</h2>'
-                    +'<div style="padding-top:4px;"><i>Databases curated by the Heurist team as a source of useful entity types for new databases</i></div></div>';
+                    return '<div style="border-bottom:1px solid lightgray">'
+                    +'<div style="padding:24px 0 4px 40px;"><h2 style="margin:0">Curated templates</h2>'
+                    +'<div style="padding-top:4px;"><i>Databases curated by the Heurist team as a source of useful entity types for new databases</i></div></div></div>';
                 }else{
-                    return '<div style="width:100%;padding:24px 0 4px 40px;border-bottom:1px solid lightgray">'
+                    return '<div style="width:100%;border-bottom:1px solid lightgray">'
+                    +'<div style="padding:24px 0 4px 40px;">'
                     +'<h2 style="margin:0">User databases</h2>'
-                    +'<div style="padding-top:4px"><i>Databases registered by Heurist users - use with care, look for entity types with good internal documentation</i></div></div>';
+                    +'<div style="padding-top:4px"><i>Databases registered by Heurist users - use with care, look for entity types with good internal documentation</i></div></div></div>';
                 }
 
 

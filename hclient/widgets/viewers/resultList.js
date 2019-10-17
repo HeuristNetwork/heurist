@@ -1549,6 +1549,7 @@ $.widget( "heurist.resultList", {
                 this.options.rendererExpandDetails.call(this, recordset, record);
                 //this.options.rendererExpandDetails(selected_rec_ID, ele, function(){ ele.removeClass('loading'); });
             }else {
+                //expand header
                 var ele = $('<div>')
                     .css({'width':'100%','max-height':'400px','overflow':'hidden','padding-top':'5px','height':'25px'})
                     .addClass('record-expand-info').appendTo($rdiv);
@@ -2085,7 +2086,7 @@ $.widget( "heurist.resultList", {
             for (var grp_val in html_groups){
                 var gheader = (hasRender)
                     ?this.options.rendererGroupHeader.call(this, grp_val, this._grp_keep_status)
-                    :'<div style="width:100%">'+grp_val+'</div>';
+                    :'<div style="width:100%">'+grp_val+'</div>';  
                 
                 var is_expanded = ($.isEmptyObject(this._grp_keep_status) || this._grp_keep_status[grp_val]==1);
                 html += (gheader+'<div data-grp-content="'+grp_val
