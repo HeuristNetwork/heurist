@@ -86,8 +86,12 @@
     $search_params = array();
     $search_params['w'] = @$params['w'];
     
-    if(!(@$params['offset'] || @$params['limit']))
+    if(@$params['format']=='gephi'){
+        $search_params['limit'] = 1000;
+    }else
+    if(!(@$params['offset'] || @$params['limit'])){
         $search_params['needall'] = 1;  //search without limit of returned record count
+    }
     
     if(@$params['recID']>0){
         $search_params['q'] = array('ids'=>$params['recID']);
@@ -788,12 +792,14 @@ function output_Records($system, $data, $params){
 */
 //although anyURI is defined it is not recognized by gephi v0.92
 
+    $heurist_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;
+
         $gephi_header = <<<XML
 <gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
      xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
     <meta lastmodifieddate="{$dt}">
         <creator>HeuristNetwork.org</creator>
-        <description>Visualisation export</description>
+        <description>Visualisation export $heurist_url </description>
     </meta>
     <graph mode="static" defaultedgetype="directed">
         <attributes class="node">
