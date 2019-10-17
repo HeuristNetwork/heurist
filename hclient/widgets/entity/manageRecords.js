@@ -96,10 +96,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //-----------------
         var sh = 0;
         if(hasSearchForm && this.searchForm.is(':visible')){
-            sh = 9;
+            sh = 11;
             if(hasSearchForm){
                 if(this.options.parententity){
-                    sh = 12;  
+                    sh = 14;  
                     this.searchForm.height((sh+2.5)+'em').css('border','none');    
                 }else{
                     this.searchForm.height((sh+4.5)+'em').css('border','none');    
@@ -175,7 +175,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
                 
 
-        this.editForm.css({'overflow-y':'auto !important', 'overflow-x':'hidden'});
+        this.editForm.css({'overflow-y':'auto !important', 'overflow-x':'hidden', 'padding':'5px'});
             
         return true;
     },
@@ -698,11 +698,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 +'</div></div>'
 
 +'<div>'
-+'<div><label class="small-header">Added By:</label><span id="recAddedBy">'+that._getField('rec_AddedByUGrpID')+'</span></div>'
++'<div class="truncate"><label class="small-header">Added By:</label><span id="recAddedBy">'+that._getField('rec_AddedByUGrpID')+'</span></div>'
 + ((that._getField('rec_Added')=='')?'':
-  '<div><label class="small-header">Added:</label>'+that._getField('rec_Added')
+  '<div class="truncate"    ><label class="small-header">Added:</label>'+that._getField('rec_Added')
                 +' ('+window.hWin.HEURIST4.util.getTimeForLocalTimeZone(that._getField('rec_Added'))+' local)</div>')
-+'<div><label class="small-header">Updated:</label>'+that._getField('rec_Modified')
++'<div class="truncate"><label class="small-header">Updated:</label>'+that._getField('rec_Modified')
                 +' ('+window.hWin.HEURIST4.util.getTimeForLocalTimeZone(that._getField('rec_Modified'))+' local)</div>'
 +'</div>'
 +'</div>';
@@ -1000,12 +1000,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(sRel_Ids.length>0){
                     $('<div class="detailRowHeader" style="border:none">Related</div>').css('border','none').insertBefore(ele1);
                 }
+                //prevent wrapping
+                $(ele1).find('.related_record_title').addClass('truncate').css({'max-width':'44ex'});
                 if(sLink_Ids.length>0){
                     var ee2 = $('<div class="detailRowHeader">Linked from</div>').insertBefore(ele2);
                     if(sRel_Ids.length==0){
                         ee2.css('border','none')
                     }
                 }
+                //prevent wrapping
+                $(ele2).find('.related_record_title').addClass('truncate').css({'max-width':'64ex'});
+                
+                
                 if(sRel_Ids.length==0 && sLink_Ids.length==0){
                     $('<div class="detailRowHeader">none</div>').css('border','none').appendTo(panel);
                 }
@@ -1044,7 +1050,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(panel.text()!='') return;
                 
                 panel.append('<div class="bookmark" style="min-height:2em;padding:4px 2px 4px 0;vertical-align:top"/>'
-                +'<div class="reminders" style="min-height:2em;padding:4px 30px 4px 0;border-top: 1px lightgray solid;"/>');
+                +'<div class="reminders truncate" style="min-height:2em;padding:4px 30px 4px 0;border-top: 1px lightgray solid;"/>');
                 
                 //find bookmarks and reminders
                 that._renderSummaryBookmarks(null, panel);
@@ -1174,8 +1180,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     }
                 }
                 val = recordset.fld(rec, 'rem_Message');
-                if(val.length>30){
-                    val = val.substring(0,30)+'...';
+                if(val.length>150){
+                    val = val.substring(0,150)+'...';
                 }
                 sContent = 'Reminder to: '+sContent+' '+val;
                 //sContent = 'found :'+recordset.length();
@@ -2318,7 +2324,9 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
     },
     
     //
-    //
+    // 1. show-hide optional fields
+    // 2. add menu button on top of screen
+    // 3. add record title at the top 
     //    
     _afterInitEditForm: function(){
         
@@ -2333,7 +2341,22 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
 
         
         if(this.element.find('.chb_opt_fields').length==0){  //not inited yet
-            
+
+            $('<div style="display:table;min-width:575px;width:100%">'
+             +'<div style="display:table-cell;text-align:left;padding:20px 0px 5px 35px;">'
+                +'<span class="btn-edit-rt">Modify structure</span>'
+                +'<span class="btn-edit-rt-titlemask">Edit title mask</span>'
+                +'<span class="btn-edit-rt-template">Template</span>'
+                +'<span class="btn-bugreport">Bug report</span>'
+                
+                +'<div style="float:right;padding-right:20px">'
+                    +'<label><input type="checkbox" class="chb_show_help" '
+                        +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
+                    +'<label><input type="checkbox" class="chb_opt_fields" '
+                        +(isfields_on?'checked':'')+'/>Optional fields</label>'
+                +'</div>'
+             +'</div></div>').insertBefore(this.editForm.first('fieldset'));
+/*            
             $('<div style="display:table;min-width:575px;width:100%">'
              +'<div style="display:table-cell;text-align:left;padding:20px 0px 5px 35px;">'
                     +'<label><input type="checkbox" class="chb_show_help" '
@@ -2341,12 +2364,12 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     +'<label><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
                 +'<span class="btn-config4-container" style="border: 1px #7D9AAA solid;padding: 4px;margin-left: 50px;">'
-                +'<span class="btn-edit-rt" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">Modify structure</span>'
-                +'<span class="btn-edit-rt ui-icon ui-icon-gear smallicon" style="height:18px;margin-left:4px"></span></span>'
+                    +'<span class="btn-edit-rt" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">Modify structure</span>'
+                    +'<span class="btn-edit-rt ui-icon ui-icon-gear smallicon" style="height:18px;margin-left:4px"></span></span>'
 
                 +'<span class="btn-config4-container" style="padding: 4px;margin-left: 10px;">'
-                +'<span class="btn-edit-rt-titlemask" style="font-size: smaller;font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">edit title mask</span>'
-                +'<span class="btn-edit-rt-titlemask ui-icon ui-icon-pencil smallicon" style="height:18px;margin-left:4px"></span></span>'
+                    +'<span class="btn-edit-rt-titlemask" style="font-size: smaller;font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">edit title mask</span>'
+                    +'<span class="btn-edit-rt-titlemask ui-icon ui-icon-pencil smallicon" style="height:18px;margin-left:4px"></span></span>'
                 +'<span class="btn-edit-rt-template" style="font-size: smaller;font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">template</span>'
                 +'<span class="btn-edit-rt-template ui-icon ui-icon-arrowthickstop-1-s smallicon" style="height:18px;margin-left:4px"></span></span>'
 
@@ -2354,35 +2377,34 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
              +'</div>'
              +'<div style="display:table-cell;text-align:right;padding: 10px 40px 0px 0px;font-weight: bold;">'
 
-                +'<span class="btn-config6" style="font-size: smaller;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Bug report</span>'
+                +'<span class="btn-bugreport" style="font-size: smaller;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Bug report</span>'
                 +'<span class="btn-config7 ui-icon ui-icon-bug smallicon"></span>'
              +'</div></div>').insertBefore(this.editForm.first('fieldset'));
-
+*/
 
 
                 
             var that = this;    
-            
+
+            var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'#ecf1fb' };
             if(window.hWin.HAPI4.is_admin()){
-                this.element.find('.btn-edit-rt').click(function(){that.editRecordType();});
+
+                this.element.find('.btn-edit-rt').button({icon:'ui-icon-gear'}).css(btn_css)
+                        .click(function(){that.editRecordType();});
                 
-                //this.element.find('.btn-config5a').css({height: '18px', 'margin-left':'4px'})
+                this.element.find('.btn-edit-rt-titlemask').button({icon:'ui-icon-pencil'})
+                        .css(btn_css).click(function(){that.editRecordTypeTitle();});
                 
-                this.element.find('.btn-edit-rt-titlemask').click(function(){that.editRecordTypeTitle();});
-                
-                this.element.find('.btn-edit-rt-template').click(function(){
-                        window.hWin.HEURIST4.ui.showRecordActionDialog('recordTemplate',{recordType:that._currentEditRecTypeID});});
+                this.element.find('.btn-edit-rt-template').button({icon:'ui-icon-arrowthickstop-1-s'})
+                        .css(btn_css).click(function(){
+                            window.hWin.HEURIST4.ui.showRecordActionDialog('recordTemplate',{recordType:that._currentEditRecTypeID});});
                 
             }else{
                 this.element.find('.btn-config4-container').hide();
-                //this.element.find('.btn-config5').hide();
-                //this.element.find('.btn-config4').hide();
             }
             //bug report
-            this.element.find('.btn-config7')
-                        .css({height: '18px', 'margin-left':'4px'})
-                        .click(function(){ window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport'); });
-            this.element.find('.btn-config6').click(function(){ window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport'); });
+            this.element.find('.btn-bugreport').button({icon:'ui-icon-bug'})
+                .css(btn_css).click(function(){ window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport'); });
                 
                 
             this.element.find('.chb_show_help') //.attr('checked', ishelp_on)
@@ -2400,6 +2422,9 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                             $(that.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
                             $(that.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
                         });
+                        
+            //to save spae - hide fieldset with hidden service fields (id, title, rectype etc)
+            $(this.editForm.find('fieldset')[0]).hide(); 
         }
         
         //add record title at the top ======================
