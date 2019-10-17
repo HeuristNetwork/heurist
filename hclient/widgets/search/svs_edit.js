@@ -418,9 +418,9 @@ function hSvsEdit(args) {
                         }
 
                         var bOk = isRules || window.hWin.HEURIST4.msg.checkLength( svs_query, "Query", null, 1 );
-                        if(!bOk) bOk = window.hWin.HEURIST4.msg.checkLength( svs_rules, "Rules", null, 1 );
+                        if(!bOk) bOk = window.hWin.HEURIST4.msg.checkLength( svs_rules, "Rules", 'Rules are required if there is no filter string', 1 );
                         if(!bOk){
-                            message.text("Define query, rules or both.");
+                            message.text("Define filter, rules or both.");
                             message.addClass( "ui-state-highlight" );
                             setTimeout(function() {
                                 message.removeClass( "ui-state-highlight", 1500 );

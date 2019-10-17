@@ -390,6 +390,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                           //'<div class="ui-state-error" style="padding:10px">XXXX'+        +'</div>'
                                           
                                           //class="ui-state-error" 
+            if(!window.hWin.HEURIST4.util.isempty(message)) message_text = message;
+             
             window.hWin.HEURIST4.msg.showMsgFlash('<span style="padding:10px;border:0;">'+message_text+'</span>', 3000);
             
             /*
