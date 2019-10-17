@@ -1965,7 +1965,7 @@ window.hWin.HEURIST4.ui = {
                 rec_Title += (' - '+info['dtl_EndDate']);
             }
         }
-        rec_Title = window.hWin.HEURIST4.util.htmlEscape(rec_Title);
+        rec_Title = window.hWin.HEURIST4.util.stripTags(rec_Title); //was htmlEscape
         
         var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
         var sRelBtn = '';
@@ -1994,7 +1994,7 @@ window.hWin.HEURIST4.ui = {
         var reltype = ''
         if(info['trm_ID']>0){
             reltype = window.hWin.HEURIST4.ui.getTermValue(info['trm_ID']);
-            reltype = '<div class="detailType" style="display:table-cell;width:'
+            reltype = '<div class="detailType" style="display:table-cell;min-width:'
                 + Math.max(19, Math.min(reltype.length,25))+'ex;">'
                 + reltype + '</div>'
         }
@@ -2019,7 +2019,8 @@ window.hWin.HEURIST4.ui = {
                         //+ '<a target=_new href="#" data-recID="'+info['rec_ID'] +'">'
                         //+ window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a>'
                         + '</span><span class="related_record_title" data-recID="'
-                                        +info['rec_ID'] +'" style="display:table-cell;">'  //padding-top:4px;
+                                        +info['rec_ID']
+                                        +'" style="display:table-cell;">'  //padding-top:4px;
                         + rec_Title
                         + '</span>'
                         + '</div>'
@@ -2152,7 +2153,8 @@ window.hWin.HEURIST4.ui = {
                                                     var rec_Title = recordset.fld(record,'rec_Title');
                                                     if(!rec_Title) {rec_Title = 'New record. Title is not defined yet.';}
                                         
-                                                    ele.find('.related_record_title').text(rec_Title )
+                                                    ele.find('.related_record_title')
+                                                            .text( window.hWin.HEURIST4.util.stripTags(rec_Title) )
                                                             .attr('data-recID', related_ID);
                                                             
                                                     var rec_RecType = recordset.fld(record,'rec_RecTypeID');                            
@@ -2208,7 +2210,7 @@ window.hWin.HEURIST4.ui = {
                         if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
                             var recordset = res.selection;
                             var record = recordset.getFirstRecord();
-                            var rec_Title = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record,'rec_Title'));
+                            var rec_Title = window.hWin.HEURIST4.util.stripTags(recordset.fld(record,'rec_Title')); //was htmlEscape
                             
                             ele.find('span[data-recID='+recID+']').text(rec_Title);
                         }

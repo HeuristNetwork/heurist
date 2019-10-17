@@ -598,7 +598,7 @@ window.hWin.HEURIST4.util = {
     //
     stripTags: function(text, whitelist){
         
-        if(window.hWin.HEURIST4.util.isempty(whitelist)){
+        if(whitelist===false){ 
             
             return window.hWin.HEURIST4.util.htmlEscape(text);             
         }else{
@@ -609,7 +609,12 @@ window.hWin.HEURIST4.util = {
             document.body.appendChild(link);
             
             //find('*')
-            $(link).find('*').not(whitelist).each(function() {
+            var eles = $(link).find('*');
+            if(!window.hWin.HEURIST4.util.isempty(whitelist)){
+                eles = eles.not(whitelist);
+            }
+            
+            eles.each(function() {
                 var content = $(this).contents();
                 $(this).replaceWith(content);
             });   
