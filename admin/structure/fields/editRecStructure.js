@@ -4225,7 +4225,7 @@ function _onAddEditFieldType(dty_ID, rty_ID){
 
     //show warning first
     
-    //find all records that reference this type
+    //find all record types that reference this type
     var aUsage = window.hWin.HEURIST4.detailtypes.rectypeUsage[dty_ID];
     if(!Hul.isnull(aUsage)){
 

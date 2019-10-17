@@ -1501,7 +1501,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                     $is_NOT_allowed = false;
                 }else{
                     // Invalid password
-                    $this->addError(HEURIST_REQUEST_DENIED, 'Invalid password');
+                    $this->addError(HEURIST_REQUEST_DENIED, 'Password is incorrect'); //'Invalid password');
                 }
             }else{
                 $this->addError(HEURIST_SYSTEM_CONFIG, 
@@ -1509,7 +1509,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             }
         }else{
             //password not defined
-            $this->addError(HEURIST_INVALID_REQUEST, 'Password not specified');
+            $this->addError(HEURIST_INVALID_REQUEST, 'Password is missing'); //'Password not specified');
         }    
         
         return $is_NOT_allowed;
