@@ -540,8 +540,11 @@ function DetailTypeManager() {
 
                     }else{
 
-                        sUsage = "<div><b>Warning</b><br/><br/>This field type is used in the following record types:<br/>"+sUsage+
-                        "<br/><br/>You will need to delete these record types before you can delete this field.</div>";
+                        sUsage = '<div><b>Warning</b><br/><br/>This field type is used in the following record types:<br/>'
+                        +sUsage
+                        +'<br/><br/>'
+                        +'You have to either delete the field from the record type, '
+                        +'or delete the record type (it may not be possible or desirable to delete the record type)</div>';
 
                         window.hWin.HEURIST4.msg.showMsgDlg(sUsage);
                         

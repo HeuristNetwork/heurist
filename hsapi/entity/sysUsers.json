@@ -113,6 +113,7 @@
                         "dty_Type":"enum",
                         "rst_DisplayName": "Enabled:",
                         "rst_DisplayHelpText": "Check to enable the user, unchecked users will not be able to log in",
+                        "rst_DefaultValue": "y",
                         "rst_FieldConfig":[
                             {"key":"y","title":"Yes"},
                             {"key":"n","title":"No"}

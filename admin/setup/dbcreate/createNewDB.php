@@ -496,7 +496,7 @@ if($registrationRequired) //show registration dialog at once
         <!-- /div -->
         
         <div id="div_result" style="padding:0px 0 10px 0; font-size:larger;display:none">
-            <h2 style='padding-bottom:10px'>Congratulations, your new database  [ <span id="newdbname"></span>  ]  has been created</h2>
+            <h4 style='padding-bottom:10px;margin:0'>Congratulations, your new database  [ <span id="newdbname"></span>  ]  has been created</h4>
             <div id="div_login_info">
                 <p style="padding-left:10px"><strong>Admin username:</strong> <span id="newusername"></span></p>
                 <p style="padding-left:10px"><strong>Admin password:</strong> &#60;<i>same as the account you are currently logged in as</i>&#62;</p>
@@ -507,8 +507,8 @@ if($registrationRequired) //show registration dialog at once
                         title="" onclick="{closeDialog()}" target="blank"></a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>
 
             <p style="padding-left:6em">
-                After logging in to your new database, we suggest you import some additional entity types from one of the<br />
-                curated Heurist databases, or from one of the other databases listed in the central database catalogue,<br />
+                After logging in to your new database, we suggest you import some additional entity types from one of the
+                curated Heurist databases, or from one of the other databases listed in the central database catalogue,
                 using Database &gt; Structure &gt; Browse templates 
                 <!--or Database &gt; Structure &gt; Acquire from Templates -->
             </p>

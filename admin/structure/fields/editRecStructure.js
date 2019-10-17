@@ -745,7 +745,7 @@ function EditRecStructure() {
                         var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
                         
                         obj.liner_element.innerHTML =
-                        '<div class="edit-form" style="display:none;margin: 4px 60px; padding-bottom:5;border:black 1px solid">'+
+                        '<div class="edit-form" style="display:none;margin: 4px 20px; padding-bottom:5;border:black 1px solid">'+
 
                         // Name / prompt
                         '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div>'+
@@ -770,7 +770,7 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                         '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                         '<div class="input-cell">'+
-                        '<textarea style="width:450px" cols="450" rows="4" maxlength="255" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
+                        '<textarea style="width:650px" cols="450" rows="4" maxlength="255" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
                         'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
                         '<div class="prompt">Use &lt;br&gt; for new line and &lt;a href="web page URL" target=_blank&gt;Help&lt;/a&gt; for a link to a help page.</div>'+
                         

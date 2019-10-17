@@ -1217,8 +1217,8 @@ $.widget( "heurist.editing_input", {
             //define explicit add relationship button
             $( "<button>", {title: "Select record to be linked"})
                         .button({icon:"ui-icon-triangle-1-e",
-                               label:('&nbsp;&nbsp;&nbsp;select'+(isparententity?' child':'')+'&nbsp: '+rts)})
-                        .addClass('sel_link2 truncate').css({'max-width':'300px', 'background': 'lightgray'})
+                               label:('&nbsp;&nbsp;&nbsp;<b>select'+(isparententity?' child':'')+'&nbsp:</b> '+rts)})
+                        .addClass('sel_link2 truncate').css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
             
