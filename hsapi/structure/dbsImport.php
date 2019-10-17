@@ -49,6 +49,11 @@ class DbsImport {
     private $sourceIconURL = null; //url to copy rectype icons
     private $source_db_name;
 
+    //report data
+    private $rectypes_upddated;
+    private $rectypes_added;
+    
+    
     //  $data = 
     function __construct( $system ) {
         $this->system = $system;
@@ -232,6 +237,9 @@ $time_debug = microtime(true);
         //$fields_correspondence_existed = array();
         $this->terms_correspondence = array(); //"enum"=>array(), "relation"=>array());
         //$terms_correspondence_existed = array();
+        $this->rectypes_upddated  = array();
+        $this->rectypes_added  = array();
+
         
         //target(local) definitions
         $this->target_defs = array();
@@ -338,6 +346,7 @@ if(_DBG) error_log('Preparation '.(microtime(true)-$time_debug2));
         
     }
 
+    //--------------------------------------------------------------------------
     //
     // Perform database action - add rectypes, structure, fields and terms into our database
     //
@@ -467,7 +476,7 @@ foreach ($this->imp_recordtypes as $rtyID){
 
     $new_rtyID = @$this->rectypes_correspondence[$rtyID];
     if($new_rtyID>0){ //already  exists - update fields only - add missed fields
-        
+        $this->rectypes_upddated[] = $new_rtyID;
     }else{
     
         //replace group id with local one
@@ -499,6 +508,8 @@ foreach ($this->imp_recordtypes as $rtyID){
             $trg_rectypes['names'][$new_rtyID] = $def_rectype[$idx_name];
             $this->copyRectypeIcon($rtyID, $new_rtyID);
 
+            $this->rectypes_added[] = $new_rtyID;
+            
         }else{
 
             $this->error_exit2("Cannot add record type for id#".$recId.". ".$res);
@@ -1440,7 +1451,8 @@ $mysqli->commit();
             .$trg_terms['termsByDomainLookup'][$domain][$trg_id][$idx_name]."</td></tr>";
         }
         
-        $resp =  array( "report"=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms) );
+        $resp =  array( 'report'=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms,
+                        'updated'=>$this->rectypes_upddated, 'added'=>$this->rectypes_added) );
         
         if($need_updated_defs){
             $resp['defs'] = array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_detailtypes,'terms'=>$trg_terms);

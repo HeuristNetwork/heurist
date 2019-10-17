@@ -997,8 +997,24 @@ $.widget( "heurist.importStructure", {
 
                 that.panel_report.find('#btn_close_panel_report').click();
 
-
                 var report = ''
+                
+                if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.added) ){
+                    report = '<br>Added: ';
+                    for(idx in response.report.added){
+                        report += (window.hWin.HEURIST4.rectypes.names[response.report.added[idx]]+', ');    
+                    }
+                    report = report.substr(0,report.length-2)+'<br>';
+                }
+                if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.updated) ){
+                    report += '<br>Updated: ';
+                    for(idx in response.report.updated){
+                        report += (window.hWin.HEURIST4.rectypes.names[response.report.updated[idx]]+', ');    
+                    }
+                    report = report.substr(0,report.length-2)+'<br>';
+                }
+                
+                /* Detail report
                 var theader = '<table style="padding: 5px;font-size: 1em;">'
                 +'<tr><th colspan="2">Source</th><th>Concept ID</th><th colspan="3">Target</th></tr>'
                 +'<tr><th>ID</th><th>Name</th><th>&nbsp;</th><th>ID</th><th>Name</th><th></th></tr>';
@@ -1009,25 +1025,25 @@ $.widget( "heurist.importStructure", {
                     + '</table>';
                 }
 
-                if(response.report.detailtypes) {
+                if(false && response.report.detailtypes) {
                     report = report + '<h3 style="margin:0;">Field types</h3>'+theader
                     + response.report.detailtypes
                     + '</table>';
                 }
 
-                if(response.report.terms) {
+                if(false && response.report.terms) {
                     report = report + '<h3 style="margin:0;">Terms</h3>'+theader
                     + response.report.terms
                     + '</table>';
                 }
+                */
 
                 if(report!=''){ 
 
-                    report = 'Added';
+                    //report = 'Added';
+                    window.hWin.HEURIST4.msg.showMsgDlg(report); //showMsgFlash
 
-                    window.hWin.HEURIST4.msg.showMsgFlash(report,1000);
-
-                    /*
+                    /*                    
                     report = '<div style="font-size:0.9em;"><h2>Record type and associated structures imported</h2>'
                     +report
                     +'</div>'
@@ -1037,6 +1053,7 @@ $.widget( "heurist.importStructure", {
                     that.panel_report.find('.ent_content_full').html(report);
                     that.panel_report.show();
                     */
+                    
 
                 }else{
                     report = 'Nothing imported. '+
@@ -1091,7 +1108,7 @@ $.widget( "heurist.importStructure", {
         + '</div>'
         + '<div title="Click to import this record type" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="import" '
         + ' style="display:inline-block;height:16px;vertical-align:bottom;font-size:1.4em;padding-left:20px">'
-        +     '<span class="ui-button-icon-primary ui-icon-arrowthick-1-s"></span><span class="ui-button-text"></span>'
+        +     '<span class="ui-button-icon-primary ui-icon-arrowthick-1-s" style="cursor:pointer"></span><span class="ui-button-text"></span>'
         + '</div></div>';
 
         var info = '';
