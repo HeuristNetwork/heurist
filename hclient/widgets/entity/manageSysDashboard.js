@@ -405,6 +405,22 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
+        
+        var specialWidth = '';
+        
+        if (this.options.isViewMode) {
+            specialWidth = 'width:250px';
+            //detect if there is no description
+            recordset.each( function(id, record){
+                if (this.fld(record, 'dsh_Description')!='') {
+                    specialWidth = '';
+                    return false;
+                }
+            });
+        }
+        
+        
+                
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
         
         var recID   = fld('dsh_ID');
@@ -424,7 +440,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         +'</div>';
 
         var html = '<div class="recordDiv landscape'+(this.options.isViewMode?' dashboard outline_suppress':'')
-        +'" id="rd'+recID+'" recid="'+recID+'" style="cursor:pointer;">'
+        +'" id="rd'+recID+'" recid="'+recID+'" style="cursor:pointer;'+specialWidth+'">'
         + html_thumb;
         
         
