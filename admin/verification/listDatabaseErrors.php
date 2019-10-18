@@ -436,7 +436,7 @@ You can edit the record type structure by clicking on the name in the list below
                 }
             }
 
-            $res = $mysqli->query('select dtl_RecID, dty_Name, a.rec_Title
+            $res = $mysqli->query('select dtl_RecID, dty_Name, a.rec_Title, a.rec_RecTypeID
                 from recDetails
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join Records a on a.rec_ID = dtl_RecID and a.rec_FlagTemporary!=1
@@ -477,7 +477,7 @@ You can edit the record type structure by clicking on the name in the list below
                 </div>
                 <table>
                     <tr>
-                        <td colspan="3">
+                        <td colspan="5">
                             <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB');}">Mark all</label>
                         </td>
                     </tr>
@@ -486,6 +486,7 @@ You can edit the record type structure by clicking on the name in the list below
                         ?>
                         <tr>
                             <td><input type=checkbox name="recCB" value=<?= $row['dtl_RecID'] ?>></td>
+                            <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
                             <td style="white-space: nowrap;"><a target=_new
                                     href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                     <?= $row['dtl_RecID'] ?>
@@ -504,7 +505,7 @@ You can edit the record type structure by clicking on the name in the list below
             }
             
             //Record pointers which point to the wrong type of record
-            $res = $mysqli->query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name
+            $res = $mysqli->query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name, rec_RecTypeID
                 from defDetailTypes
                 left join recDetails on dty_ID = dtl_DetailTypeID
                 left join Records on rec_ID = dtl_Value and rec_FlagTemporary!=1
@@ -542,6 +543,7 @@ You can edit the record type structure by clicking on the name in the list below
                         foreach ($bibs as $row) {
                             ?>
                             <tr>
+                                <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
                                 <td style="white-space: nowrap;"><a target=_new
 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'><?= $row['dtl_RecID'] ?>
                                         <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
@@ -592,7 +594,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
 
 //---------------------------------------                
 //find parents with pointer field rst_CreateChildIfRecPtr=1) without reverse pointer in child record               
-$query1 = 'SELECT parentrec.rec_ID, parentrec.rec_Title as p_title, '  //'parent.dtl_DetailTypeID, rst_DisplayName, '
+$query1 = 'SELECT parentrec.rec_ID, parentrec.rec_RecTypeID, parentrec.rec_Title as p_title, '  //'parent.dtl_DetailTypeID, rst_DisplayName, '
 .'parent.dtl_Value, childrec.rec_Title as c_title, child.dtl_RecID as f247 '
 .'FROM Records parentrec, defRecStructure, recDetails parent '
  .'LEFT JOIN recDetails child ON child.dtl_DetailTypeID='.DT_PARENT_ENTITY.' AND child.dtl_Value=parent.dtl_RecID '
@@ -703,6 +705,7 @@ while ($row = $res->fetch_assoc()){
                         foreach ($bibs1 as $row) {
                             ?>
                             <tr>
+                                <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
                                 <td style="white-space: nowrap;"><a target=_new
 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['rec_ID'] ?>'><?= $row['rec_ID'] ?>
                                         <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
@@ -793,7 +796,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['chi
             $total_count_rows = 0;
             
             //find all fields with faulty dates
-            $res = $mysqli->query('select dtl_ID, dtl_RecID, a.rec_Title, dty_Name, dty_Type
+            $res = $mysqli->query('select dtl_ID, dtl_RecID, a.rec_RecTypeID, a.rec_Title, dty_Name, dty_Type
                 from recDetails, defDetailTypes, Records a
                 where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
             and (dty_Type!=\'file\') and ((dtl_Value=\'\') or (dtl_Value is null))');
@@ -828,7 +831,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
 
                 <table>
                     <tr>
-                        <td colspan="3">
+                        <td colspan="5">
                             <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB6');}">Mark all</label>
                         </td>
                     </tr>
@@ -841,6 +844,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                     ?>
                     <tr>
                         <td><input type=checkbox name="recCB6" value=<?= $row['dtl_RecID'] ?>></td>
+                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
                         <td style="white-space: nowrap;"><a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
@@ -867,7 +871,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             // ----- Fields of type "Date" with  wrong values -------------------
 
             //find all fields with faulty dates
-            $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_Title, a.rec_Added
+            $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_RecTypeID, a.rec_Title, a.rec_Added
                 from recDetails, defDetailTypes, Records a
                 where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
             and (dty_Type = "date") and (dtl_Value is not null)');
@@ -939,7 +943,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
 
                 <table>
                     <tr>
-                        <td colspan="4">
+                        <td colspan="6">
                             <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB5');}">Mark all</label>
                         </td>
                     </tr>
@@ -951,6 +955,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
                              print '<input type=checkbox name="recCB5" value='.$row['dtl_RecID'].'>';
                             ?>
                         </td>
+                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
                         <td style="white-space: nowrap;"><a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
@@ -991,7 +996,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
             }
 
             //find non existing term values
-            $res = $mysqli->query('select dtl_ID, dtl_RecID, dty_Name, a.rec_Title
+            $res = $mysqli->query('select dtl_ID, dtl_RecID, dty_Name, a.rec_RecTypeID, a.rec_Title
                 from recDetails
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join Records a on a.rec_ID = dtl_RecID
@@ -1034,7 +1039,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
 
                 <table>
                     <tr>
-                        <td colspan="3">
+                        <td colspan="5">
                             <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB1');}">Mark all</label>
                         </td>
                     </tr>
@@ -1044,6 +1049,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
                     ?>
                     <tr>
                         <td><input type=checkbox name="recCB1" value=<?= $row['dtl_RecID'] ?>></td>
+                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
                         <td style="white-space: nowrap;"><a target=_new
                                 href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                 <?= $row['dtl_RecID'] ?>
@@ -1181,7 +1187,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 <table>
                 
                     <tr>
-                        <td colspan="3">
+                        <td colspan="5">
                             <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB2');}">Mark all</label>
                         </td>
                     </tr>
@@ -1195,6 +1201,8 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                 <td>
                                     <input type=checkbox name="recCB2" value=<?= $row['dtl_RecID'] ?>>
                                 </td>
+                                <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
+                                
                                 <td style="white-space: nowrap;">
                                     <a target=_blank href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                                     <?= $row['dtl_RecID'] ?></a>
@@ -1205,7 +1213,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                 <?php
                                 $rec_id = $row['dtl_RecID'];
                             }else{
-                                print '<tr><td colspan="3"></td>';
+                                print '<tr><td colspan="4"></td>';
                             }
                             ?>
                             <td><?= $row['rst_DisplayName'] ?>
