@@ -239,7 +239,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         if($is_greg_or_julian && !$is_strict_iso){
 
             $res2 = "";
-            if(@$date['day']){
+            if(@$date['day'] && $need_day){
                 $res2 = $date['day']; 
             }
             if(@$date['month']){
