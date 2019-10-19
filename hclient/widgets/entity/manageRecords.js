@@ -1782,7 +1782,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                                     + window.hWin.HEURIST4.rectypes.names[rectypeID];                         
                                     
             }
-            
+ 
             if(this.options.edit_mode=='popup' && this._edit_dialog){
                 that._edit_dialog.dialog('option','title', dialog_title); 
             }else if(this.options.edit_mode=='editonly' && this._as_dialog){
@@ -2026,11 +2026,20 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 this._keepYPos = 0;
             }
             
+            //show rec_URL 
+            var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
+            var ele = that._editing.getFieldByName('rec_URL');
+            var hasURLfield = (rectypes.typedefs[rectypeID].commonFields[fi_url]=='1');
+            if(hasURLfield){
+                ele.show();
+            }
+            
             // special case  - show separator between parent record field and other fields
             // in case there is no header
-            if(window.hWin.HEURIST4.util.findArrayIndex(DT_PARENT_ENTITY, field_in_recset)>=0){
+            if(hasURLfield || window.hWin.HEURIST4.util.findArrayIndex(DT_PARENT_ENTITY, field_in_recset)>=0){
             //if(that.options.parententity>0){
                 var first_set = that.editForm.find('fieldset:first');
+                first_set.show();
                 var next_ele = first_set.next();
                 if(!next_ele.hasClass('separator')){
                     first_set.css('border-bottom','1px solid #A4B4CB');
@@ -2039,12 +2048,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             
             
             
-            //show rec_URL 
-            var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
-            var ele = that._editing.getFieldByName('rec_URL');
-            if(rectypes.typedefs[rectypeID].commonFields[fi_url]=='1'){
-                ele.show();
-            }
+            
             //special case for bookmarklet addition - some values are already assigned 
             if(that._isInsert){
                 var vals = ele.editing_input('getValues');
@@ -2358,7 +2362,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 +'<span class="btn-edit-rt-template">Template</span>'
                 +'<span class="btn-bugreport">Bug report</span>'
                 
-                +'<div style="float:right;padding-right:20px">'
+                +'<div style="display:inline-block;padding-left:50px">'
                     +'<label><input type="checkbox" class="chb_show_help" '
                         +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
                     +'<label><input type="checkbox" class="chb_opt_fields" '
@@ -2509,6 +2513,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
     //to save space - hide all fieldsets without visible fields
     //
     _showHideEmptyFieldGroups: function(){
+        
         this.editForm.find('fieldset').each(function(idx,item){
             
             if($(item).children('div:visible').length>0){
@@ -2523,6 +2528,35 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 });
             }
         });
+        
+        //if show optional is off and all fields in section between headers are invisible
+        var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
+        if(!isfields_on){
+            var sep = null;
+            var need_show_hint = false;
+        
+            this.editForm.children().each(function(){
+                
+                $(this).is('fieldset')
+                
+                if($(this).is('h4.separator')){
+                    if(sep!=null && need_show_hint){
+                        $('<span class="show_optional_hint" style="padding-left: 184px;">'
+                        +'This section contains optional fields.</span>')
+                            .insertAfter(sep.next());
+                    }
+                    sep = $(this);
+                    need_show_hint = true;
+                }else if($(this).is('fieldset') && !$(this).is(':visible')){
+                    //hidden check for optional
+                    need_show_hint = need_show_hint && ($(this).find('div > div.optional').length>0);
+                }
+                
+            });
+        }else{
+            this.editForm.find('span.show_optional_hint').remove();
+        }
+        
     },
     
     //
