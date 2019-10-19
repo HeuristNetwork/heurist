@@ -1549,6 +1549,7 @@ $.widget( "heurist.editing_input", {
             }
             else if(this.detailType=="integer" || this.detailType=="year"){//-----------------------------------------
 
+                 
                 $input.keypress(function (e) {
                     var code = e.charCode || e.keyCode;
                     var charValue = String.fromCharCode(code);
@@ -1567,6 +1568,15 @@ $.widget( "heurist.editing_input", {
                     }
 
                 });
+                
+                $input.on('paste', function(e){
+                    if(!Number.isInteger(+e.originalEvent.clipboardData.getData('text'))){
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        e.preventDefault();
+                        window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
+                    }
+                });
+                
                 /*$input.keyup(function () {
                 if (this.value != this.value.replace(/[^0-9-]/g, '')) {
                 this.value = this.value.replace(/[^0-9-]/g, '');  //[-+]?\d
@@ -1596,6 +1606,14 @@ $.widget( "heurist.editing_input", {
 
                     });
 
+                    $input.on('paste', function(e){
+                        if(!$.isNumeric(e.originalEvent.clipboardData.getData('text'))){
+                            window.hWin.HEURIST4.util.stopEvent(e);
+                            e.preventDefault();
+                            window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
+                        }
+                    });
+                    
             }else
             if(this.detailType=='date'){//----------------------------------------------------
                 
