@@ -1205,11 +1205,11 @@ function output_HeaderOnly($system, $data, $params)
             if(is_array(@$terms_pickup[$rty_ID])){  //there are enum fields for this rt
                 
                 $max_count = 0;
-                $placeholders = array_fill(0, $cnt_cols, '');
+                $placeholders = array(); //array_fill(0, $cnt_cols, '');
                 
                 foreach($terms_pickup[$rty_ID] as $dtid => $field){
                     $headers[$rty_ID][] = $field['name'].': Lookup list';
-                    $placeholders[] = 'Use to create a value control list';
+                    $placeholders[] = $field['name'].'. Use to create value control lists';
                     //get list of terms
                     $terms = $defTerms->getAllowedTermsForField( $field['term_ids'], $field['nonsel'], $field['domain'] );
                     $max_count = max($max_count, count($terms));    
@@ -1222,6 +1222,7 @@ function output_HeaderOnly($system, $data, $params)
             
             //write header
             fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure);
+            fwrite($fd, "\n\n");
               
             //write terms
             if($placeholders!=null){
@@ -1231,7 +1232,7 @@ function output_HeaderOnly($system, $data, $params)
                 $k = 0;
                 while ($k<$max_count){
 
-                    $placeholders = array_fill(0, $cnt_cols, '');
+                    $placeholders = array(); //no need to create empty columns: array_fill(0, $cnt_cols, '');
                     
                     foreach($terms_pickup[$rty_ID] as $dtid => $field){
                         
@@ -1252,7 +1253,7 @@ function output_HeaderOnly($system, $data, $params)
             }
 
             if($temp_name==null)
-                $temp_name = 'Template_'.$system->dbname().'_'.$rty_ID.'_'.$defRecTypes['names'][$rty_ID];
+                $temp_name = 'Heurist_'.$system->dbname();//.'_t'.$rty_ID.'_'.$defRecTypes['names'][$rty_ID];
         }
     }
     writeResults( $streams, $temp_name, $headers, null );
@@ -1264,6 +1265,8 @@ function output_HeaderOnly($system, $data, $params)
 //        
 function writeResults( $streams, $temp_name, $headers, $error_log ) {
   
+    global $defRecTypes;
+    
     if(count($streams)<2){
         
         $out = false;
@@ -1277,9 +1280,9 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
         
             $filename = $temp_name;
             if($rty_ID>0){
-                        $filename = $filename.'_'.$rty_ID.'_'.$defRecTypes['names'][$rty_ID];
+                $filename = $filename.'_t'.$rty_ID.'_'.$defRecTypes['names'][$rty_ID];
             }
-            $filename = $filename.'_'.date("YmdHis").'.csv';
+            $filename = $filename.'.csv'; //'_'.date("YmdHis").
         
             $fd = $streams[$rty_ID];
 
