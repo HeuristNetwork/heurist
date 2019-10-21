@@ -66,12 +66,28 @@ define ('TESTMODE', false);           // Set to true to process the file without
 //define ('VERSION','0.35b');
 //define ('BIGDUMP_DIR',dirname(__FILE__));
 //define ('PLUGIN_DIR',BIGDUMP_DIR.'/plugins/');
+$error = false;
+$errorFinalMsg = null;
 
+//
+//
+//
+function execute_db_script($system, $database_name_full, $script_file, $message){
+    global $errorFinalMsg;
+    
+    if( db_script($database_name_full, $script_file, false) ){
+        return true;
+    }else{
+        $system->addError(HEURIST_ERROR, $message, $errorFinalMsg);
+        return false;
+    }
+    
+}
 
 // Database configuration
 function db_script($db_name, $filename, $verbose = false){
     
-$verbose = true;
+global $error, $errorFinalMsg;
     
 $db_server   = HEURIST_DBSERVER_NAME;
 $db_username = ADMIN_DBUSERNAME;
@@ -134,8 +150,9 @@ $upload_dir = dirname(__FILE__);
 // If not familiar with PHP please don't change anything below this line
 // *******************************************************************************************
 
-if (!$verbose || $ajax)
-  ob_start();
+if (!$verbose || $ajax){
+  ob_start();  
+}
 
 @ini_set('auto_detect_line_endings', true);
 @set_time_limit(0);
@@ -147,6 +164,7 @@ if (function_exists("date_default_timezone_set") && function_exists("date_defaul
 
 
 $error = false;
+$errorFinalMsg = null;
 $file  = false;
 
 // Check PHP version
@@ -154,6 +172,7 @@ $file  = false;
 if (!$error && !function_exists('version_compare'))
 { 
     error_echo ("<p class=\"error\">PHP version 4.1.0 is required for db script read to proceed. You have PHP ".phpversion()." installed. Sorry!</p>\n");
+
 }
 
 // Check if mysql extension is available
@@ -170,43 +189,45 @@ do_action ('script_runs');
 
 if (!$error && !TESTMODE)
 { 
-   $mysqli = new mysqli($db_server,$db_username,$db_password);
-  if (!$mysqli){
+    $mysqli = new mysqli($db_server,$db_username,$db_password);
+    if (!$mysqli){
 
-    error_echo (  
-    "<p class=\"error\">Database connection failed due to ".mysqli_connect_error()."</p>\n"
-    ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
-      
-  }else{
-    $success = $mysqli->select_db($db_name);
-    
-      if (!$success)
-      { 
-        error_echo(
-            "<p class=\"error\">Database connection failed due to ".$mysqli->error."</p>\n"
+        error_echo (  
+            "<p class=\"error\">Database connection failed due to ".mysqli_connect_error()."</p>\n"
             ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
-      }
-  }
-    
-  if (!$error && $db_connection_charset!=='')
-    $mysqli->query("SET NAMES $db_connection_charset");
 
-  if (!$error && isset ($pre_query) && sizeof ($pre_query)>0)
-  { reset($pre_query);
-    foreach ($pre_query as $pre_query_value)
-    {	if (!$mysqli->query($pre_query_value))
-    	{ 
-        error_echo(
-            "<p class=\"error\">Error with pre-query.</p>\n"
-      	    ."<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n"
-      	    ."<p>MySQL: ".$mysqli->error."</p>\n");
-      	    break;
+    }else{
+        $success = $mysqli->select_db($db_name);
+
+        if (!$success)
+        { 
+            error_echo(
+                "<p class=\"error\">Database connection failed due to ".$mysqli->error."</p>\n"
+                ."<p>Edit the database settings in your configuration file, or ".CONTACT_SYSADMIN.".</p>\n");
+
         }
     }
-  }
+
+    if (!$error && $db_connection_charset!=='')
+        $mysqli->query("SET NAMES $db_connection_charset");
+
+    if (!$error && isset ($pre_query) && sizeof ($pre_query)>0)
+    { reset($pre_query);
+        foreach ($pre_query as $pre_query_value)
+        {	if (!$mysqli->query($pre_query_value))
+            { 
+                error_echo(
+                    "<p class=\"error\">Error with pre-query.</p>\n"
+                    ."<p>Query: ".trim(nl2br(htmlentities($pre_query_value)))."</p>\n"
+                    ."<p>MySQL: ".$mysqli->error."</p>\n");
+                break;
+            }
+        }
+    }
 }
 else
-{ $mysqli = false;
+{ 
+    $mysqli = false;
 }
 
 do_action('database_connected');
@@ -216,12 +237,12 @@ do_action('database_connected');
 
 if (!$error && !isset ($_REQUEST["fn"]) && $filename!="")
 {
-//    echo ("<p><a href=\"".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($filename)."&amp;foffset=0&amp;totalqueries=0\">Start Import</a> from $filename into $db_name at $db_server</p>\n");
-$_REQUEST["start"] = "1";
-$_REQUEST["fn"] = $filename;
-$_REQUEST["foffset"]=0;
-$_REQUEST["totalqueries"]=0;
-//$filename = "";
+    //    echo ("<p><a href=\"".$_SERVER["PHP_SELF"]."?start=1&amp;fn=".urlencode($filename)."&amp;foffset=0&amp;totalqueries=0\">Start Import</a> from $filename into $db_name at $db_server</p>\n");
+    $_REQUEST["start"] = "1";
+    $_REQUEST["fn"] = $filename;
+    $_REQUEST["foffset"]=0;
+    $_REQUEST["totalqueries"]=0;
+    //$filename = "";
 }
 
 // Open the file
@@ -229,44 +250,47 @@ $_REQUEST["totalqueries"]=0;
 if (!$error && isset($_REQUEST["start"]))
 {
 
-// Set current filename ($filename overrides $_REQUEST["fn"] if set)
+    // Set current filename ($filename overrides $_REQUEST["fn"] if set)
 
-  if ($filename!="")
-    $curfilename=$filename;
-  else if (isset($_REQUEST["fn"]))
-    $curfilename=urldecode($_REQUEST["fn"]);
-  else
-    $curfilename="";
+    if ($filename!="")
+        $curfilename=$filename;
+    else if (isset($_REQUEST["fn"]))
+        $curfilename=urldecode($_REQUEST["fn"]);
+    else
+        $curfilename="";
 
-//DEBUG error_log($curfilename);    
-    
-// Recognize GZip filename
-  $gzipmode=false;
+    //DEBUG error_log($curfilename);    
 
-  if ((!$gzipmode && !$file=@fopen($curfilename,"r")) || ($gzipmode && !$file=@gzopen($curfilename,"r")))   //$upload_dir.'/'.
-  {    
-    error_echo(
-        "<p class=\"error\">Can't open ".$curfilename." for import</p>\n"
-        ."<p>Please, check that your script file name contains only alphanumerical characters, and rename it accordingly, for example: $curfilename.".
-           "<br>Or, specify \$filename in bigdump.php with the full filename. ".
-           "<br>Or, you have to upload the $curfilename to the server first.</p>\n");
-  }
+    // Recognize GZip filename
+    $gzipmode=false;
 
-// Get the file size (can't do it fast on gzipped files, no idea how)
+    if ((!$gzipmode && !$file=@fopen($curfilename,"r")) || ($gzipmode && !$file=@gzopen($curfilename,"r")))   //$upload_dir.'/'.
+    {    
+        error_echo(
+            "<p class=\"error\">Can't open sql script file ".$curfilename."</p>");
+            /*
+            ."<p>Please, check that your script file name contains only alphanumerical characters, and rename it accordingly, for example: $curfilename.".
+            "<br>Or, specify \$filename in bigdump.php with the full filename. ".
+            "<br>Or, you have to upload the $curfilename to the server first.</p>\n");
+            */
+    }
+    // Get the file size (can't do it fast on gzipped files, no idea how)
 
-  else if ((!$gzipmode && @fseek($file, 0, SEEK_END)==0) || ($gzipmode && @gzseek($file, 0)==0))
-  { if (!$gzipmode) $filesize = ftell($file);
-    else $filesize = gztell($file);                   // Always zero, ignore
-  }
-  else
-  { error_echo ("<p class=\"error\">I can't seek into $curfilename</p>\n");
-  }
+    else if ((!$gzipmode && @fseek($file, 0, SEEK_END)==0) || ($gzipmode && @gzseek($file, 0)==0))
+    { if (!$gzipmode) $filesize = ftell($file);
+        else $filesize = gztell($file);                   // Always zero, ignore
+    }
+    else
+    { 
+        error_echo ("<p class=\"error\">Can't open sql script file $curfilename</p>\n");
+    }
 
-// Stop if csv file is used, but $csv_insert_table is not set
+    // Stop if csv file is used, but $csv_insert_table is not set
 
-  if (!$error && ($csv_insert_table == "") && (preg_match("/(\.csv)$/i",$curfilename)))
-  { error_echo ("<p class=\"error\">You have to specify \$csv_insert_table when using a CSV file. </p>\n");
-  }
+    if (!$error && ($csv_insert_table == "") && (preg_match("/(\.csv)$/i",$curfilename)))
+    { 
+        error_echo ("<p class=\"error\">You have to specify \$csv_insert_table when using a CSV file. </p>\n");
+    }
 }
 
 // *******************************************************************************************
@@ -473,7 +497,7 @@ if($linenumber>2999){
                 error_echo ("<p class=\"error\">Error at the line $linenumber: ". trim($dumpline)."</p>\n"
                 ."<p>Query: ".trim(nl2br(htmlentities($query)))."</p>\n"
                 ."<p>MySQL: ".$errorMsg."</p>\n");
-                $error = false;
+                //ART:why it was reset? $error = false;
                 if(strpos($errorMsg,'Duplicate column')===false){
                     $error = true;
                 }
@@ -621,7 +645,7 @@ else if ($file && $gzipmode) gzclose($file);
 
 // If error or finished put out the whole output from above and stop
 
-if ($error && $verbose)
+if ($verbose) //ART $error && 
 {
   $out1 = ob_get_contents();
   ob_end_clean();
@@ -634,7 +658,7 @@ if ($error && $verbose)
 // Anyway put out the output from above
 //ob_flush();
 
-  return !$error;
+  return !$error; //was !$error
 }//END MAIN FUNCTIONS
 
 // THE MAIN SCRIPT ENDS HERE
@@ -670,8 +694,13 @@ function skin_close()
 }
 
 function error_echo($msg){
-    global $error;
+    global $error, $errorFinalMsg;
+    
     error_log($msg);
+    
+    $error = true;
+    
+    $errorFinalMsg = $msg;
     //echo ($msg);
 }
 ?>

@@ -110,7 +110,7 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
           $isRegdataFromParams = true;
     }
                     
-    //restore use registration parameters in case creation fails
+    //restore USER registration parameters in case creation fails
     foreach ($_REQUEST as $param_name => $param_value){
         if(strpos($param_name,'ugr_')===0){ //&& $param_name!='ugr_Password' keep password
             //print '<input id="'.$param_name.'" name="'.$param_name.'" value="'.$param_value.'">';
@@ -138,7 +138,7 @@ if($passwordForDatabaseCreation){ //deined on confiigIni.php
         print '$("#div_need_password").show();';
 }
 
-if($registrationRequired) //show registration dialog at once
+if($registrationRequired) //show user registration dialog at once
 {
 ?>
                         if(!isRegdataEntered){

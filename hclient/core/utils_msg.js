@@ -65,11 +65,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             if(response.sysmsg && response.status!=window.hWin.ResponseStatus.REQUEST_DENIED){
                 //sysmsg for REQUEST_DENIED is current user id - it allows to check if session is expired
-                
+                msg = msg + '<br><br>System error: ';
                 if(typeof response.sysmsg['join'] === "function"){
-                    msg = msg + '<br>System error: ' +response.sysmsg.join('<br>');
+                    msg = msg + response.sysmsg.join('<br>');
                 }else{
-                    msg = msg + '<br>System error: ' + response.sysmsg;
+                    msg = msg + response.sysmsg;
                 }
 
             }

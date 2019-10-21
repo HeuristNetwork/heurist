@@ -374,33 +374,33 @@ class DbUtils {
         if (is_array($res)){
             self::$system->addError($res[0], $res[1]); //can't create
         }else
-        if($level<1 || db_script($database_name_full, $dumpfile)){
+        if($level<1 || execute_db_script(self::$system, $database_name_full, $dumpfile, 'Cannot create database tables')){
 
             // echo_flush ('OK');
             // echo_flush ("<p>Add Referential Constraints ");
 
-            if($level<2 || db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
+            if($level<2 || execute_db_script(self::$system, $database_name_full, 
+                HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql",
+                'Cannot add referential constraints')){
 
                 // echo_flush ('OK');
                 // echo_flush ("<p>Add Procedures and Triggers ");
 
-                if($level<2 || db_script($database_name_full, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
+                if($level<2 || execute_db_script(self::$system, $database_name_full, 
+                    HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql",
+                    'Cannot add referential constraints')){
 
                     // echo_flush ('OK');
                     return true;
-                }else{
-                    self::$system->addError(HEURIST_DB_ERROR, 'Cannot add procedures and triggers');
                 }
-            }else{
-                self::$system->addError(HEURIST_DB_ERROR, 'Cannot add referential constraints');
             }
-        }else{
-            self::$system->addError(HEURIST_DB_ERROR, 'Cannot create database tables');
         }
+        
         //fail
         mysql__drop_database($mysqli, $database_name_full);
         return false;
     }
+    
         
     //
     // create if not exists set of folders for given database
