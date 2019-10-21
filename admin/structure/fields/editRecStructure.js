@@ -770,7 +770,7 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                         '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                         '<div class="input-cell">'+
-                        '<textarea style="width:650px" cols="450" rows="4" maxlength="255" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
+                        '<textarea style="width:650px;max-width:650px" cols="450" rows="4" maxlength="255" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
                         'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
                         '<div class="prompt">Use &lt;br&gt; for new line and &lt;a href="web page URL" target=_blank&gt;Help&lt;/a&gt; for a link to a help page.</div>'+
                         
@@ -1860,7 +1860,7 @@ function EditRecStructure() {
             _detailType[fnames[fi.dty_ExtendedDescription]] = '';
             _detailType[fnames[fi.dty_Type]] = 'separator';
             _detailType[fnames[fi.dty_OrderInGroup]] = 0;
-            _detailType[fnames[fi.dty_HelpText]] = 'Dividers serve to break the data entry form up into sections';
+            _detailType[fnames[fi.dty_HelpText]] = ''; //'Dividers serve to break the data entry form up into sections';
             _detailType[fnames[fi.dty_ShowInLists]] = 1;
             _detailType[fnames[fi.dty_Status]] = 'open';
             _detailType[fnames[fi.dty_DetailTypeGroupID]] = ft_separator_group;

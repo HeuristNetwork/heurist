@@ -398,7 +398,7 @@ function hImportRecords(_max_upload_size) {
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     
                     if(!response || response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        _hideProgress( currentStep );
+                        if(progressInterval!=null) _hideProgress( currentStep );
                         //console.log(response+'  '+session_id);                   
                     }else{
                         
@@ -419,7 +419,7 @@ function hImportRecords(_max_upload_size) {
                                 progressLabel.text('preparing...');
                             }
                         }else{
-                            _hideProgress( currentStep );
+                            if(progressInterval!=null) _hideProgress( currentStep );
                         }
                         
                         
