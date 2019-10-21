@@ -67,18 +67,18 @@ define ('TESTMODE', false);           // Set to true to process the file without
 //define ('BIGDUMP_DIR',dirname(__FILE__));
 //define ('PLUGIN_DIR',BIGDUMP_DIR.'/plugins/');
 $error = false;
-$errorFinalMsg = null;
+$errorScriptExecution = null;
 
 //
 //
 //
 function execute_db_script($system, $database_name_full, $script_file, $message){
-    global $errorFinalMsg;
+    global $errorScriptExecution;
     
     if( db_script($database_name_full, $script_file, false) ){
         return true;
     }else{
-        $system->addError(HEURIST_ERROR, $message, $errorFinalMsg);
+        $system->addError(HEURIST_ERROR, $message, $errorScriptExecution);
         return false;
     }
     
@@ -87,7 +87,7 @@ function execute_db_script($system, $database_name_full, $script_file, $message)
 // Database configuration
 function db_script($db_name, $filename, $verbose = false){
     
-global $error, $errorFinalMsg;
+global $error, $errorScriptExecution;
     
 $db_server   = HEURIST_DBSERVER_NAME;
 $db_username = ADMIN_DBUSERNAME;
@@ -164,7 +164,7 @@ if (function_exists("date_default_timezone_set") && function_exists("date_defaul
 
 
 $error = false;
-$errorFinalMsg = null;
+$errorScriptExecution = null;
 $file  = false;
 
 // Check PHP version
@@ -694,13 +694,13 @@ function skin_close()
 }
 
 function error_echo($msg){
-    global $error, $errorFinalMsg;
+    global $error, $errorScriptExecution;
     
     error_log($msg);
     
     $error = true;
     
-    $errorFinalMsg = $msg;
+    $errorScriptExecution = $msg;
     //echo ($msg);
 }
 ?>

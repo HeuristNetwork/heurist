@@ -35,6 +35,7 @@
     6. Copy db folder and update file path in recUploadedFiles
 
 */
+set_time_limit(0);
 
 define('MANAGER_REQUIRED', 1);   
 define('PDIR','../../../');  //need for proper path to js and css    
@@ -280,10 +281,8 @@ if(@$_REQUEST['mode']=='2'){
 // 5. remove registration info and assign originID for definitions
 //
 function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
-    global $mysqli;
+    global $errorScriptExecution, $mysqli, $system;
     
-    set_time_limit(0);
-
     $isCloneTemplate = ($templateddb!=null);
     
     list($targetdbname_full, $targetdbname) = mysql__get_names( $targetdbname );
@@ -293,6 +292,13 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     .'<div id="wait_p" class="loading" style="width:100%;height:150px">'
     .'<i>Please wait for confirmation message (may take a couple of minutes for large databases)</i></div>');
     if(!DbUtils::databaseCreate($targetdbname_full, 1)){
+        $err = $system->getError();
+        echo_flush ('<script>document.getElementById("wait_p").style.display="none"</script>'
+        .'<div style="padding:10px 20px;font-weight:normal" class="ui-state-error">'
+            .$err['message']
+            .(@$err['sysmsg']?('<br><br>System message: '.$err['sysmsg']):'')
+        .'</div>');
+        
         return false;
     }else{
         echo_flush ('<script>document.getElementById("wait_p").style.display="none"</script><p style="padding-left:20px">SUCCESS</p>');
@@ -382,13 +388,15 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     
     // 4. add contrainsts, procedure and triggers
     echo_flush ("<p>Addition of Referential Constraints</p>");
+    
     if(db_script($targetdbname_full, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
         DbUtils::databaseDrop( false, $targetdbname_full, false, false );
         print '<p><h4>Note: </h4>Cloning failed due to an SQL constraints problem (internal database inconsistency). Please '
                 .CONTACT_HEURIST_TEAM
-                .' and request a fix for this problem - it should be cleaned up even if you don\'t need to clone the database</p>';
+                .' and request a fix for this problem - it should be cleaned up even if you don\'t need to clone the database</p>'
+                .$errorScriptExecution;
         return false;
     }
 
@@ -397,7 +405,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
     }else{
         DbUtils::databaseDrop( false, $targetdbname_full, false, false );
-        print $sHighLoadWarning;
+        print $sHighLoadWarning.$errorScriptExecution;
         return false;
     }    
     
