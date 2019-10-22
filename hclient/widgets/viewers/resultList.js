@@ -30,7 +30,7 @@ $.widget( "heurist.resultList", {
         selectbutton_label:'Select',
         action_select:null,  //array of actions
         action_buttons:null,
-
+                            
         recordview_onselect: false, //false/none inline or popup - show record viewer/info on select
         multiselect: true,    //allows highlight several records
         isapplication: true,  //if false it does not listen global events @todo merge with eventbased
@@ -773,11 +773,12 @@ $.widget( "heurist.resultList", {
         }
 
         if(!this.div_content.hasClass(newmode) || forceapply===true){
+            
+            this._closeExpandedDivs();
+            
             //var $allrecs = this.div_content.find('.recordDiv');
             if(newmode){
-                if(newmode!='list'){
-                    this.div_content.find('.record-expand-info').remove();
-                }
+
                 //var oldmode = this.options.view_mode;
                 this.options.view_mode = newmode;
                 //save viewmode is session
@@ -1356,6 +1357,21 @@ $.widget( "heurist.resultList", {
     },
     
     //
+    // close expanded recordDivs
+    //
+    _closeExpandedDivs: function(){
+        var exp_div = this.div_content.find('.record-expand-info');
+        
+        if(exp_div.length>0){
+            var rdiv2 = exp_div.parent();
+            exp_div.remove();
+            var tmp_parent = rdiv2.parent('.tmp_parent');
+            rdiv2.css({'height':'','width':''}).insertBefore(tmp_parent);
+            tmp_parent.remove();
+        }
+    },
+    
+    //
     //
     //
     _recordDivOnClick: function(event){
@@ -1415,10 +1431,11 @@ $.widget( "heurist.resultList", {
         }else{
             
             //this.options.recordview_onselect=='popup'
-            var isview = ( (this.options.recordview_onselect!==false && this.options.view_mode!='list')
-                        || $target.parents('.rec_view_link').length>0); //this is VIEWER click
+             //(this.options.recordview_onselect!==false && this.options.view_mode!='list')
+            var isview = (this.options.recordview_onselect=='popup' ||
+                            $target.parents('.rec_view_link').length>0); //this is VIEWER click
                 
-            if(isview){
+            if(isview){ //popup record view
 
                 var recInfoUrl = null;
                 if(this._currentRecordset){
@@ -1536,54 +1553,59 @@ $.widget( "heurist.resultList", {
         }
         
         //$.isFunction(this.options.renderer) && 
-        if(this.options.recordview_onselect=='inline' && this.options.view_mode=='list'){
+        if(this.options.recordview_onselect=='inline'){ // && this.options.view_mode=='list'
             
             var is_already_opened = $rdiv.find('.record-expand-info').length>0;
             //close other expanded recordDivs
-            this.div_content.find('.record-expand-info').remove();
+            this._closeExpandedDivs();
             
             if(!is_already_opened){
+                
+                var tmp_parent = $('<div class="list tmp_parent">').insertBefore($rdiv);
+                $rdiv.appendTo( tmp_parent );
+                $rdiv.css({'height':'auto','width':'auto'});
             
-            //expand selected recordDiv and draw record details inline
-            if($.isFunction(this.options.rendererExpandDetails)){
-                this.options.rendererExpandDetails.call(this, recordset, record);
-                //this.options.rendererExpandDetails(selected_rec_ID, ele, function(){ ele.removeClass('loading'); });
-            }else {
-                //expand header
-                var ele = $('<div>')
-                    .css({'width':'100%','max-height':'400px','overflow':'hidden','padding-top':'5px','height':'25px'})
-                    .addClass('record-expand-info').appendTo($rdiv);
-                
-                var infoURL;
-                
-                if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
+                //expand selected recordDiv and draw record details inline
+                if($.isFunction(this.options.rendererExpandDetails)){
+                    this.options.rendererExpandDetails.call(this, recordset, record);
+                    //this.options.rendererExpandDetails(selected_rec_ID, ele, function(){ ele.removeClass('loading'); });
+                }else {
+                    
+                    //expand header
+                    var ele = $('<div>')
+                        .css({'width':'100%','max-height':'400px','overflow':'hidden','padding-top':'5px','height':'25px'})
+                        .addClass('record-expand-info').appendTo($rdiv);
+                    
+                    var infoURL;
+                    
+                    if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
 
-                    infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
-                    + selected_rec_ID
-                    + '&db='+window.hWin.HAPI4.database+'&template='
-                    + encodeURIComponent(this.options.rendererExpandDetails);
+                        infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
+                        + selected_rec_ID
+                        + '&db='+window.hWin.HAPI4.database+'&template='
+                        + encodeURIComponent(this.options.rendererExpandDetails);
 
-                    ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
-                        var ele2 = that.div_content.find('.record-expand-info');
-                        var h = Math.min(ele2[0].scrollHeight+10, 400);
-                        ele2.removeClass('loading').animate({height:h},300);});
-                    
-                }else{
-                    infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
-                    +selected_rec_ID
-                    +'&db='+window.hWin.HAPI4.database;
-                    
-                    $('<iframe>').appendTo(ele).addClass('loading').attr('src', infoURL).on('load',function(){ 
-                        var ele2 = that.div_content.find('.record-expand-info');
+                        ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
+                            var ele2 = that.div_content.find('.record-expand-info');
+                            var h = Math.min(ele2[0].scrollHeight+10, 400);
+                            ele2.removeClass('loading').animate({height:h},300);});
                         
-                        var h = $(this.contentWindow.document).height();
+                    }else{
+                        infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
+                        +selected_rec_ID
+                        +'&db='+window.hWin.HAPI4.database;
                         
-                        var h = Math.min(h+10, 400);
-                        ele2.removeClass('loading').animate({height:h},300);});
+                        $('<iframe>').appendTo(ele).addClass('loading').attr('src', infoURL).on('load',function(){ 
+                            var ele2 = that.div_content.find('.record-expand-info');
+                            
+                            var h = $(this.contentWindow.document).height();
+                            
+                            var h = Math.min(h+10, 400);
+                            ele2.removeClass('loading').animate({height:h},300);});
+                        
+                    }  
                     
-                }  
-                
-            }
+                }
             }
         }
         
