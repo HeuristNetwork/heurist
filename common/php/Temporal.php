@@ -198,7 +198,21 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 
         }else if(substr_count($value,'-')==1) {
             $need_day = false;
+            list($m, $y) = explode('-', $value);
+            if(strlen($m)<3 && $m<13 && strlen($y)>2){
+                $value = $y.'-'.$m;
+            }
         }
+        
+        if(substr_count($value,'-')==2 && strpos($value,':')===false) {
+            //change d-m-y to y-m-d
+            list($m, $d, $y) = explode('-', $value);
+            if(strlen($d)<3 && $d>12 && strlen($y)>2){
+                $value = $y.'-'.$m.'-'.$d;
+            }
+        }
+        
+        
 
         try{   
             $origHasSeconds = (substr_count($value,':')>1);
