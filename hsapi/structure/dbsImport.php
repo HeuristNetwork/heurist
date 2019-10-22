@@ -817,7 +817,14 @@ $mysqli->commit();
            $defs = json_decode(gzdecode($defs), true);
            if (!$defs || @$defs['status']!=HEURIST_OK) {
                 $this->system->addError(HEURIST_ERROR,
-                        "Unable to connect the selected source database, possibly due to a timeout or proxy setting");
+'<p>Unable to contact the selected source database (ID # '.$database_id.'). This might indicate one of the following:</p> '
+.'<ol><li>the database is no longer online;</li>'
+.'<li>the registration in the Heurist master index is missing or points to the wrong URL '
+.$database_url
+.'<br>(check registration of the database using Database > Register);</li>'
+.'<li>a proxy error in contacting the database;</li><li>network timeout.</li></ol> '
+.'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' with the URL to the target database</p>');
+//, and to the source database if the XML was generated from a Heurist source;
                 return false;
            }
            $defs = $defs['data'];

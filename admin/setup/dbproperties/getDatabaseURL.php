@@ -76,6 +76,15 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
             if($database_url==null || $database_url==''){
                 $error_msg = 'Database URL is not set Heurist Master Index for database ID#'.$database_id;
             }
+            //fix registration bug
+            if(strpos($database_url,'http:///heuristplus')===0){
+                $database_url = 'https://'.substr($database_url,8); 
+            }else if(strpos($database_url,'http:///')===0){
+                $database_url = 'http://'.substr($database_url,8); 
+            }else if(strpos($database_url,'https:///')===0){
+                $database_url = 'https://'.substr($database_url,9); 
+            }
+                
         }else{
             $error_msg = 'Database with ID#'.$database_id.' is not found in Heurist Master Index';
         }
