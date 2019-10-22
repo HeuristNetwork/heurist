@@ -100,12 +100,12 @@ $file_max_size = get_php_bytes('upload_max_filesize');
 
         <!-- STEP 1 - list of missed record types - offer to sync definitions -->
         <div id="divStep1" style="display:none">
-           <p class="st1_A import-rem">The following entity (record) types in this file do not yet exist in the database into which you are importing data:</p>
+           <p class="st1_A import-rem">The following entity (record) types in this file do not yet exist, or require updating
+            in the database into which you are importing data:</p>
            <p id="st1_B" class="import-rem">All entity types are recognised. However it is not guaranteed that they are identical. 
            Press "Sync" button to make sure that all fields and terms are the same in source and destination databases. If you are sure that structure is valid you may skip sync step and proceed to record import.</p>
 
-           <p class="st1_C import-rem">The target database does not contain all the structural elements required to accommodate the incoming data. 
-            You still can import the data. However, data for missed definitions will be ignored.
+           <p class="st1_C import-rem">The target database does not contain all the structural elements required to accommodate the incoming data. You still can import the data. However, data for missed definitions will be ignored.
             <a href="#" class="tsv_download">List of elements  in source file</a> (will download a tab-separated file).</p>
             
            <p class="st1_D import-rem">All entity types are recognised. However it is not guaranteed that they are identical.  
