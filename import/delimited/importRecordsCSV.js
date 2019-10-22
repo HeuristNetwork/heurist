@@ -623,10 +623,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 */    
             };
 
-            var select_rectype = $('#sa_primary_rectype');
-            select_rectype = window.hWin.HEURIST4.ui.createRectypeSelect( select_rectype.get(0), null, window.hWin.HR('select...'), false);
-            $('#sa_primary_rectype').val(imp_session['primary_rectype']);
-        
             var dlg_options = {
                 title:'Select primary record type and dependencies',
                 height: 640,
@@ -635,32 +631,42 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 buttons: buttons,
                 open:function(){
                     
-                    //console.log('assign change');                
+                    var select_rectype = $(this).find('#sa_primary_rectype');
+                    select_rectype = window.hWin.HEURIST4.ui.createRectypeSelect( select_rectype.get(0), 
+                                null, window.hWin.HR('select...'), false);
+
                     //reload dependency tree on select change
                     select_rectype.hSelect({change: 
                     function(event, data){ 
                             var treeElement = $dlg.find('#dependencies_preview');
                             var selval = data.item.value;
                             _loadRectypeDependencies( $dlg, treeElement, selval ); 
-                                            
-                            /*var ele = $(event.target);
-                            _loadRectypeDependencies( $dlg, treeElement, ele.val() ); 
-                           */ 
-                            
                     }});                
 
+                    var selval = imp_session['primary_rectype'];
+                    select_rectype.val( selval );
+                    select_rectype.hSelect('refresh');
+                    
+                    var treeElement = $(this).find('#dependencies_preview');
+                    _loadRectypeDependencies( $(this), treeElement, selval ); 
                     
                 },
                 close: function(event, ui){
-                    $dlg.parent().find('#sa_primary_rectype').off('change');    
+                    
                     if(_is_CancelClose){
                         if(is_initial==true){
                              _showStep(1);
                         }
+                    }else{
+                        //parent()
+                        $dlg.find('#sa_primary_rectype').off('change');    
+                        $dlg.find('#sa_primary_rectype').hSelect("destroy");
                     }
                 }
                 };
             $dlg = window.hWin.HEURIST4.msg.showElementAsDialog(dlg_options);
+            //$dlg = window.hWin.HEURIST4.msg. 'importRecordsCSV_selectRectype.html'
+            
             $dlg.addClass('ui-heurist-bg-light');
             //disable OK button
             if(!(imp_session['primary_rectype']>0)){
