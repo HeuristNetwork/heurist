@@ -62,9 +62,10 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.1.7"; // sets current program version number, determined by Heurist development lead
+$version = "5.1.8"; // sets current program version number, determined by Heurist development lead
 
-// h5.1.7 : 6 Sep 2019  Majo work on website designer, add background maps to digitiser, entity buttons above search field, small improvements to CSV import and Leaflet maps, custom report for View record popup
+// h5.1.8 : 23 Oct 2019 HML(XML) import from Heurist DB or external including all relationships, HML template generator, Custom JS in website home pages, fixes to chld record conversion & Leaflet mapping, smarty report for info popups, cosmetics and imporved error messages. 
+// h5.1.7 : 6 Sep 2019  Major work on website designer, add background maps to digitiser, entity buttons above search field, small improvements to CSV import and Leaflet maps, custom report for View record popup
 // h5.1.6 : 12 July 2019 Fixes on Leaflet, fixes for timeouts, PDF uploads, selectable set of entity buttons above search field, Maptiler MBTilefile file support, CMS website first draft
 // h5.1.5 : 20 June 2019 Mapping with Leaflet in place of GMap, internal documentation of JSon export files, import hierarchichal terms, improve tabs in structure browsers, hosting logo, relationship vocabs usable for term fields, better error reporting particularly Zotero import 
 // h5.1.4 : 8 May 2019 Many small cosmetic/message improvements and bug fixes, added SKOS, FOAF, DOAP, BIO, BIBO, RDF, DCMI-TYPES/TERMS vocabularies.
