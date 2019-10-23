@@ -666,6 +666,9 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
 * @param mixed $destination  Destination file
 */
 function createZipArchive($source, $only_these_folders, $destination, $verbose=true) {
+    
+//error_log('>>>>>createZipArchive '.$source.'  to '.$destination);    
+    
     if (!extension_loaded('zip')) {
         echo "<br/>PHP Zip extension is not accessible";
         return false;
@@ -682,6 +685,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
         return false;
     }
 
+    try{
 
     $source = str_replace('\\', '/', realpath($source));
 
@@ -747,6 +751,14 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
         echo "<br/>The zip file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
     }
     return true;
+    
+    } catch (Exception  $e){
+        error_log( Exception::getMessage() );
+        if($verbose) {
+            echo "<br/>Can not create zip archive ".$destination.' '.Exception::getMessage();
+        }
+        return false;
+    }                            
 }
 
 function unzipArchive($zipfile, $destination, $entries=null){

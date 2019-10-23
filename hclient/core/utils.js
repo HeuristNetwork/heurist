@@ -651,7 +651,7 @@ window.hWin.HEURIST4.util = {
     // 1) for call H3 scripts in H4 code
     // 2) in case hapi is not inited 
     //
-    sendRequest: function(url, request, caller, callback, dataType){
+    sendRequest: function(url, request, caller, callback, dataType, timeout){
         
         if(!request.db && window.hWin && window.hWin.HAPI4){
             request.db = window.hWin.HAPI4.database;
@@ -674,6 +674,9 @@ window.hWin.HEURIST4.util = {
                     
                     //var UNKNOWN_ERROR = (window.hWin)
                     //        ?window.hWin.ResponseStatus.UNKNOWN_ERROR:'unknown';
+                    if(textStatus=='timeout'){
+                        
+                    }
                             
                     var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
                                             ?'Error_Connection_Reset':jqXHR.responseText;
@@ -721,6 +724,9 @@ window.hWin.HEURIST4.util = {
             options['dataType'] = 'json';
         }else if(dataType!='auto'){
             options['dataType'] = dataType;    
+        }
+        if(timeout>0){
+            options['timeout'] = timeout;    
         }
         
         $.ajax(options);

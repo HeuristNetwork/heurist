@@ -23,12 +23,16 @@
 require_once(dirname(__FILE__).'/../../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 
+set_time_limit(0);
+
 $res = false;
 
 $system = new System();
 
+$pwdok = (@$_REQUEST['db']==@$_REQUEST['database'] && @$_REQUEST['pwd']=='DELETE MY DATABASE');
+
 /** Password check */
-if(!$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion, 14) )
+if($pwdok || !$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletion, 14) )
 {
     if(@$_REQUEST['database']){
         
@@ -55,7 +59,14 @@ if(!$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatabaseDeletio
             
             if($allow_deletion)
             {
-                $res = DbUtils::databaseDrop(false, $_REQUEST['database'], false);    
+
+                $create_arc = ( (@$_REQUEST['create_archive']===true)
+                        || (@$_REQUEST['create_archive']==='true') 
+                        || (@$_REQUEST['create_archive']==1));
+                        
+//error_log('arvice '.@$_REQUEST['create_archive'].'  '.$create_arc); 
+                       
+                $res = DbUtils::databaseDrop(false, $_REQUEST['database'], $create_arc );    
             }else{
                 $system->addError(HEURIST_REQUEST_DENIED, 
                     'You must be logged in as a system administrator or database owner to delete database',1);

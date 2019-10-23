@@ -70,10 +70,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
             $err = $system->getError();
             print '<div class="ui-state-error">'.$err['message'].'</div>';
     }else{
-
             $dbname = $_REQUEST['db'];
-
-            if(!@$_REQUEST['mode']) {
                 ?>
         <div class='banner'><h2 style="margin:0">Deleting Current Heurist Database</h2></div>
             
@@ -91,75 +88,69 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
                 <h1 style='display:inline-block;font-size: 16px;'>DELETION OF CURRENT DATABASE</h1><br>
                 <h3>This will PERMANENTLY AND IRREVOCABLY delete the current database: </h3>
                 <h2>About to delete database: <?=$dbname?></h2>
-                <form name='deletion' action='deleteCurrentDB.php' method="post">
-                    <p>Enter the words DELETE MY DATABASE below in ALL-CAPITALS to confirm that you want to delete the current database
-                    <p>Type the words above to confirm deletion <input type='input' maxlength='20' size='20' name='del' id='del'>
+
+                <label><input type='checkbox' checked id='db-archive'>Archive all database files</label><br>
+                
+                <p>Enter the words DELETE MY DATABASE below in ALL-CAPITALS to confirm that you want to delete the current database
+                <p>Type the words above to confirm deletion <input type='input' maxlength='20' size='20' name='del' id='db-password'>
                     &nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type='button' class="h3button" value='OK to Delete' style='font-weight: bold;' 
-                        onclick="$('#page-inner').hide(); $('#wait_p').show(); forms[0].submit();">
-                    <input name="pwd" value="<?php echo $pwd;?>" type='hidden'>
-                    <input name='mode' value='2' type='hidden'>
-                    <input name='db' value='<?=$dbname?>' type='hidden'>
-                </form>
+                <input type='button' class="h3button" id="btnDelete" value='OK to Delete' style='font-weight: bold;'>
         </div>
-                <?php
-            }else if(@$_REQUEST['mode']=='2') {
-
-                if (@$_REQUEST['del']=='DELETE MY DATABASE') {
-                    
-                    if ($dbname=='') {
-                        print "<div class='ui-state-error'>Undefined database name</div>"; // shouldn't get here
-                    } else {
-                        
-                        //not verbose, copy files, don't dump data
-                        if(DbUtils::databaseDrop(false, $dbname, true, false)){ 
-
-                            //print "<p>Removing indexes<br /><br /></p>";
-                            ElasticSearch::deleteIndexForDatabase($dbname);  //Deleting all Elasticsearch indexes
-                            //show modal popup for furhter redirect to browse databases
-?>
 <script>    
 $(document).ready(
 function () {
-    window.hWin.HEURIST4.msg.showMsgDlg(
-        '<h3 style="margin:0">Database <b><?=$dbname?></b> has been deleted</h3>'
-       + '<p>Associated files stored in upload subdirectories have been archived and moved to "DELETED_DATABASES" folder.</p>'
-       + '<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>',
-       null, 'Database deleted',
-       {
-            width:700,
-            height:180,
-            close: function(){
-                window.hWin.document.location = window.hWin.HAPI4.baseURL; //+ "hsapi/utilities/list_databases.php";
+    
+$('#btnDelete').on({click:function(){
+    
+    if(!$('#page-inner').is(':visible')) return;
+    
+    if($('#db-password').val()==''){
+        return;  
+    } 
+    
+    $('#page-inner').hide();
+    $('#wait_p').show();
+  
+    var url = window.hWin.HAPI4.baseURL+'admin/setup/dboperations/deleteDB.php';
+    var request = {pwd: $('#db-password').val(), 
+                   db: window.hWin.HAPI4.database,
+                   database: window.hWin.HAPI4.database,
+                   create_archive:$('#db-archive').is(':checked')};
+
+    window.hWin.HEURIST4.util.sendRequest(url, request, null,
+        function(response){
+            $('#wait_p').hide();
+            if(response.status == window.hWin.ResponseStatus.OK){
+                
+                    var msgAboutArc = '';
+                    if($('#db-archive').is(':checked')){
+                       msgAboutArc = '<p>Associated files stored in upload subdirectories have been archived and moved to "DELETED_DATABASES" folder.</p>'
+                       + '<p>If you delete databases with a large volume of data, please ask your system administrator to empty this folder.</p>';                        
+                    }
+                
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                        '<h3 style="margin:0">Database <b>'+window.hWin.HAPI4.database+'</b> has been deleted</h3>'+msgAboutArc
+                       ,null, 'Database deleted',
+                       {
+                            width:700,
+                            height:180,
+                            close: function(){
+                                window.hWin.document.location = window.hWin.HAPI4.baseURL; //+ "hsapi/utilities/list_databases.php";
+                            }
+                       }
+                    );                
+            }else{
+                $('#page-inner').show();
+                window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                
             }
-       }
+        }, null, 360000  //timeout 6 minutes
     );
 }
-);
-</script>
-<?php                            
-                            
-                        }else{
-                            $err = $system->getError();
-                            $message = @$err['message'];
-?>                            
-        <div style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">
-            <div class="ui-state-error" 
-                style="width:90%;margin:auto;margin-top:10px;padding:10px;">
-                <span class="ui-icon ui-icon-alert" style="float: left; margin-right:.3em;font-weight:bold"></span>
-                Unable to delete <b> <?php echo $dbname;?></b>. <?php echo $message;?>
-                <p>Check that the database still exists. <?php echo CONTACT_HEURIST_TEAM;?> if needed<br></p>
-            </div>
-        </div>
-<?php                            
-                        }
-                    }
-                } // delete database
-
-                else { // didn't request properly
-                    print "<div class='ui-state-error'><h2>Request disallowed</h2>Incorrect challenge words entered. Database <b>$dbname</b> was not deleted</div>";
-                }
-            } // request mode 2
+});    
+});
+</script>                
+                <?php
     }
             ?>
     </body>

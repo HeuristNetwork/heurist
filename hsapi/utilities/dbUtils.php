@@ -53,6 +53,7 @@ class DbUtils {
     private static $mysqli = null;
     private static $system = null;
     private static $initialized = false;
+    private static $db_del_in_progress = null;
 
     public static function initialize($mysqli=null)
     {
@@ -129,14 +130,25 @@ class DbUtils {
     // remove database entirely
     //
     public static function databaseDrop( $verbose=false, $database_name=null, $createArchive=false, $dumpData=false ){
+        
+//error_log('databaseDrop '.$database_name.'   '.$createArchive);
+//error_log(debug_print_backtrace());
 
         self::initialize();
+
+        if(self::$db_del_in_progress!==null){
+            error_log('DELETION ALREADY IN PROGRESS '.self::$db_del_in_progress);
+            return false;
+        }
+        
+        self::$db_del_in_progress = $database_name; 
         
         $mysqli = self::$mysqli;
         $system = self::$system;
         
         if($database_name==null) $database_name = HEURIST_DBNAME;
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
+        $msg_prefix = "Unable to delete <b> $database_name </b>. ";
         
         if($database_name!=HEURIST_DBNAME){ //switch to database
            $connected = mysql__usedatabase($mysqli, $database_name_full);
@@ -147,23 +159,26 @@ class DbUtils {
         $archiveFolder = HEURIST_FILESTORE_ROOT."DELETED_DATABASES/";        
 
         if(!$connected){
-            $msg = 'Failed to connect to database '.$database_name;
+            $msg = $msg_prefix.'Failed to connect to database '.$database_name.'  '.$createArchive;
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
             if($verbose) echo '<br>'.$msg;
+            self::$db_del_in_progress = null;
+            return false;
         }else 
         if($createArchive) {
-
             // Create DELETED_DATABASES directory if needed
             if(!folderCreate($archiveFolder, true)){
-                    $system->addError(HEURIST_SYSTEM_CONFIG, 'Cannot create folder for deleteted databases');                
+                    $system->addError(HEURIST_SYSTEM_CONFIG, 
+                        $msg_prefix.'Cannot create archive folder for database to be deleteted.');                
+                    self::$db_del_in_progress = null;
                     return false;
             }
-            
             if($dumpData){
                 if (DbUtils::databaseDump( $verbose, $database_name )===false) {
-                    $msg = "Failed to dump database $database_name to a .sql file";
-                    self::$system->addError(HEURIST_ERROR, $msg);                
+                    $msg = $msg_prefix."Failed to dump database to a .sql file";
+                    self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
                     if($verbose) echo '<br/>'.$msg;
+                    self::$db_del_in_progress = null;
                     return false;
                 }
             }
@@ -172,20 +187,31 @@ class DbUtils {
         // Zip $source to $file
         $source = HEURIST_FILESTORE_ROOT.$database_name.'/'; //HEURIST_FILESTORE_DIR;  database upload folder
         $destination = $archiveFolder.$database_name."_".time().".zip";
+        $archOK = true;
+        
+        if($createArchive){
+            $archOK = createZipArchive($source, null, $destination, $verbose);
+            if(!$archOK){
+                $msg = $msg_prefix."Can not create archive with database folder. Failed to zip $source to $destination";
+                self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
+                if($verbose) echo '<br/>'.$msg;
+                self::$db_del_in_progress = null;
+                return false;
+            }
+        }
             
-        if(!$createArchive || createZipArchive($source, null, $destination, $verbose)) {
+        if($archOK){
             
                 // Delete database from MySQL server
                 if(!mysql__drop_database($mysqli, $database_name_full)){
                     
-                    $msg = 'Error on database drop '.$database_name;
+                    $msg = $msg_prefix.' Database error on sql drop operation. ';
                     self::$system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
                     if($verbose) echo '<br/>'.$msg;
                     return false;
                 }
                 
                 if($verbose) echo "<br/>Database ".$database_name." has been dropped";
-                
                 // Delete $source folder
                 folderDelete($source);
                 if($verbose) echo "<br/>Folder ".$source." has been deleted";
@@ -195,14 +221,12 @@ class DbUtils {
                 $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysUsers` WHERE sus_Database="'.$database_name_full.'"');
                 */
                 
+            self::$db_del_in_progress = null;
             return true;
-        }else{
-            $msg = "Failed to zip $source to $destination";
-            self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
-            if($verbose) echo '<br/>'.$msg;
         }
         
-                
+            
+        self::$db_del_in_progress = null;
         return false;
 
     }    

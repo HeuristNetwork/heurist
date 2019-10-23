@@ -903,9 +903,9 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                     //was @$_REQUEST['fixdates']=="1" && count($recids)>0 && in_array($row['dtl_RecID'], $recids)){
 
                     if($row['new_value']!=null && $row['new_value']!=''){
-                       $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
+//                       $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
                     }else if($row['new_value']=='remove'){
-                        $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
+//                        $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
                     }
 
                     $wascorrected++;
