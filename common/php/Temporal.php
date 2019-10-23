@@ -188,15 +188,19 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         $date = array('year'=>$value);
     }else{
 
+        $cnt_dots = substr_count($value,'.');  //try to convert from format with . fullstops
         $cnt_slash = substr_count($value,'/');  //try to convert from format with / separator
         if( $cnt_slash>0){  // 6/2006  =  1-6-2006
-            if($cnt_slash==1){
+            /*if($cnt_slash==1){
                 $value = '1-'.$value;
                 $need_day = false;
-            }
+            }*/
             $value = str_replace('/','-',$value);
-
-        }else if(substr_count($value,'-')==1) {
+        }else if( $cnt_dots>0){  // 4.3.2006  =  4-3-2006
+            $value = str_replace('.','-',$value);
+        }
+        
+        if(substr_count($value,'-')==1) {
             $need_day = false;
             list($m, $y) = explode('-', $value);
             if(strlen($m)<3 && $m<13 && strlen($y)>2){

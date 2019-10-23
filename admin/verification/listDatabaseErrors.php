@@ -886,7 +886,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             }
             while ($row = $res->fetch_assoc()){
 
-                if(!($row['dtl_Value']==null || $row['dtl_Value']=='')){ //empty dates are not allowed
+                if(!($row['dtl_Value']==null || trim($row['dtl_Value'])=='')){ //empty dates are not allowed
                     //parse and validate value
                     $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added']);
                     if($row['new_value']=='Temporal'){
@@ -898,30 +898,29 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                     $row['new_value'] = 'remove';
                 }
 
-                //remove wrong dates
-                if(@$_REQUEST['fixdates']=="1" && count($recids)>0 && in_array($row['dtl_RecID'], $recids)){
+                //correct wrong dates and remove empty values
+                if(true){ //now autocorrection
+                    //was @$_REQUEST['fixdates']=="1" && count($recids)>0 && in_array($row['dtl_RecID'], $recids)){
 
                     if($row['new_value']!=null && $row['new_value']!=''){
-                        $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
+                       $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
                     }else if($row['new_value']=='remove'){
                         $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
                     }
 
                     $wascorrected++;
-                }else{
+                //autocorrection }else{
                     array_push($bibs, $row);
-                    $ids[$row['dtl_RecID']] = 1;
-                    array_push($dtl_ids, $row['dtl_ID']);
+                    $ids[$row['dtl_RecID']] = 1;  //all record ids -to show as search result
+                    array_push($dtl_ids, $row['dtl_ID']); //not used
                 }
             }
 
 
             print '<a name="date_values"/>';
+            
             if(count($bibs)==0){
                 print '<div><h3>All records have recognisable Date values</h3></div>';
-                if($wascorrected>1){
-                    print "<div>$wascorrected Date fields were corrected</div>";
-                }
             }
             else
             {
@@ -929,16 +928,23 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
 
                 <div>
                     <h3>Records with incorrect Date fields</h3>
+                    <?php
+                    if($wascorrected>1){
+                            print "<div style='margin-bottom:10px'>$wascorrected Date fields were corrected. (gray color in the list)</div>";
+                    }
+                    ?>
                     <span>
                         <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                             (show results as search)</a>
                         <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
                     </span>
+<!--                    
                     <div>To fix faulty date values as suggested, mark desired records and please click here:
                         <button
 onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&recids='+ids,'_self')}else{ window.hWin.HEURIST4.msg.showMsgDlg('Mark at least one record to correct'); }}">
                             Correct</button>
                     </div>
+-->                    
                 </div>
 
                 <table>
@@ -950,8 +956,8 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
                 <?php
                 foreach ($bibs as $row) {
                     ?>
-                    <tr>
-                        <td><?php if($row['new_value']) 
+                    <tr<?=(($row['new_value'])?' style="color:gray"':'');?>>
+                        <td><?php if(true || $row['new_value']) 
                              print '<input type=checkbox name="recCB5" value='.$row['dtl_RecID'].'>';
                             ?>
                         </td>
