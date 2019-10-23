@@ -473,8 +473,8 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
             "Go to the address below to review further details:\n".
             HEURIST_BASE_URL."?db=".$targetdbname;
 
-            $email_title = 'New database: '.$targetdbname_full.' by '.$fullName.' ['.$user_record['ugr_eMail'].'] '
-                .'Cloned from  '.($isCloneTemplate?'template ':'database ').$source_database_full;
+            $email_title = 'CloneDB: '.$targetdbname_full.' by '.$fullName.' ['.$user_record['ugr_eMail'].'] '
+                .' from  '.($isCloneTemplate?'template ':'').$source_database_full;
 
             $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
     }

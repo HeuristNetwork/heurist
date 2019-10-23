@@ -246,7 +246,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             "Go to the address below to review further details:\n".
             HEURIST_BASE_URL."?db=".$database_name;
 
-            $email_title = 'New database: '.$database_name.' by '.$fullName.' ['.$user_record['ugr_eMail'].']';
+            $email_title = 'NewDB: '.$database_name.' by '.$fullName.' ['.$user_record['ugr_eMail'].']';
             //($cloned_from_db?('Cloned '.($isCloneTemplate?'from template ':'')):'New').' database: '.$newDatabaseName.' by '.$ugr_FullName.' ['.$ugr_eMail.']';
 
             $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
