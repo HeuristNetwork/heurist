@@ -180,7 +180,7 @@ private static function hmlToJson($filename){
                 
                 if($db_url==null){
                     $db_url = ''.$xml_rec->citeAs; 
-                    $db_url = substr($db_url,0,strpos($db_url,'?'));
+                    if($db_url!='') $db_url = substr($db_url,0,strpos($db_url,'?'));
                 }
                 
                 foreach($xml_rec->children() as $xml_det){
@@ -234,7 +234,7 @@ private static function hmlToJson($filename){
                            'fileid'=>''.$xml_det->file->nonce);
                            
                            $file_url = ''.$xml_det->file->url;
-                           if($file_url && strpos($file_url,$db_url)===false){
+                           if($file_url && ($db_url=='' || $db_url==null || strpos($file_url, $db_url)===false)){
                                 $detail['file']['ulf_ExternalFileReference'] = $file_url;
                            }
                        }
@@ -296,7 +296,7 @@ public static function getDefintions($filename){
             $imp_rectypes[$rtid]['target_RecTypeID'] = $local_id;
         }
         
-        $dbsource_is_same = ((!(@$data['heurist']['database']['id']>0)) || 
+        $dbsource_is_same = defined('HEURIST_DBID') && ((!(@$data['heurist']['database']['id']>0)) || 
                             @$data['heurist']['database']['id']==HEURIST_DBID);
         
         $imp_detailtypes = null;
@@ -431,7 +431,10 @@ EOD;
     
         $execution_counter = 0;
         
-        $tot_count = count(@$data['heurist']['database']['records']);
+        $tot_count = 0;
+        if(is_array(@$data['heurist']['database']['records'])){
+            $tot_count = count(@$data['heurist']['database']['records']);
+        }
         if(!($tot_count>0)){
             $tot_count = count($data['heurist']['records']);  
         } 
@@ -452,7 +455,7 @@ EOD;
         // if database not defined or the same
         // it is assumed that all local codes in $data are already found and exists in 
         // target database, elements without local codes or if not found will be ignored
-        $dbsource_is_same = ((!(@$data['heurist']['database']['id']>0)) || 
+        $dbsource_is_same = defined('HEURIST_DBID') && ((!(@$data['heurist']['database']['id']>0)) || 
                             @$data['heurist']['database']['id']==HEURIST_DBID);
         
         if($dbsource_is_same){
@@ -540,12 +543,12 @@ EOD;
             
             if(!@$record_src['rec_ID']){ //if not defined assign arbitrary unique
                 $record_src['rec_ID'] = uniqid(); //''.microtime();
-            }else if(!ctype_digit($record_src['rec_ID'])){
+            }else if((!ctype_digit($record_src['rec_ID'])) || strlen($record_src['rec_ID'])>9 ){  //4 957 948 868
                 $rec_id_an = strtolower($record_src['rec_ID']);
                 if(@$records_corr_alphanum[$rec_id_an]){ //aplhanum->random int
                     $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_an];
                 }else{
-                    $rand_id = random_int(999999999,9999999999);
+                    $rand_id = random_int(900000000,999999999);
                     $records_corr_alphanum[$rec_id_an] = $rand_id;
                     $record_src['rec_ID'] = $rand_id; 
                 }
@@ -754,11 +757,11 @@ EOD;
 
                        }else{                       
 
-                           if(!ctype_digit($value)){ 
+                           if((!ctype_digit($value)) || strlen($value)>9 ){  //8 724 803 625
                                if(@$records_corr_alphanum[$value]){
                                    $value = $records_corr_alphanum[$value];
                                }else{
-                                   $rand_id = random_int(999999999,9999999999);
+                                   $rand_id = random_int(900000000,999999999);
                                    $records_corr_alphanum[$value] = $rand_id;
                                    $value = $rand_id; 
                                }
@@ -794,6 +797,7 @@ EOD;
             $out = recordSave(self::$system, $record, false, true);  //see db_records.php
 
             if ( @$out['status'] != HEURIST_OK ) {
+//error_log(print_r($record,true));                
                 //$origninal_RecID = $record_src['rec_ID'];
                 //error_log('NOT SAVED');
                 //error_log(print_r($record, true));
