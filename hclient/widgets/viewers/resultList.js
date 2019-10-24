@@ -1363,11 +1363,14 @@ $.widget( "heurist.resultList", {
         var exp_div = this.div_content.find('.record-expand-info');
         
         if(exp_div.length>0){
+            exp_div.remove();
+            /*
             var rdiv2 = exp_div.parent();
             exp_div.remove();
             var tmp_parent = rdiv2.parent('.tmp_parent');
             rdiv2.css({'height':'','width':''}).insertBefore(tmp_parent);
             tmp_parent.remove();
+            */
         }
     },
     
@@ -1554,16 +1557,19 @@ $.widget( "heurist.resultList", {
         
         //$.isFunction(this.options.renderer) && 
         if(this.options.recordview_onselect=='inline'){ // && this.options.view_mode=='list'
-            
-            var is_already_opened = $rdiv.find('.record-expand-info').length>0;
+
+            var exp_div = this.div_content.find('.record-expand-info');
+            var is_already_opened = (exp_div.attr('data-recid')==$rdiv.attr('recid'));
             //close other expanded recordDivs
             this._closeExpandedDivs();
             
             if(!is_already_opened){
                 
+                /*
                 var tmp_parent = $('<div class="list tmp_parent">').insertBefore($rdiv);
                 $rdiv.appendTo( tmp_parent );
                 $rdiv.css({'height':'auto','width':'auto'});
+                */
             
                 //expand selected recordDiv and draw record details inline
                 if($.isFunction(this.options.rendererExpandDetails)){
@@ -1573,8 +1579,18 @@ $.widget( "heurist.resultList", {
                     
                     //expand header
                     var ele = $('<div>')
+                        .attr('data-recid', $rdiv.attr('recid'))
                         .css({'width':'100%','max-height':'400px','overflow':'hidden','padding-top':'5px','height':'25px'})
-                        .addClass('record-expand-info').appendTo($rdiv);
+                        .addClass('record-expand-info');
+                    if(this.options.view_mode=='list'){
+                        ele.appendTo($rdiv);
+                    }else{
+                        ele.css({'box-shadow':'0px 3px 8px #666','margin':'8px',
+                                 'width':'97%',
+                                 'border-radius': '3px 3px 3px 3px',
+                                 'border':'2px solid #62A7F8'}).insertAfter($rdiv);
+                    }
+                        
                     
                     var infoURL;
                     
@@ -1601,7 +1617,8 @@ $.widget( "heurist.resultList", {
                             var h = $(this.contentWindow.document).height();
                             
                             var h = Math.min(h+10, 400);
-                            ele2.removeClass('loading').animate({height:h},300);});
+                            ele2.removeClass('loading').animate({height:h},300);
+                        });
                         
                     }  
                     
