@@ -194,7 +194,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
                     if(file_exists($thumbnail_file)){
                         unlink($thumbnail_file);
                     }
-                    $im->writeImage($thumbfile);
+                    $im->writeImage($thumbnail_file);
                 }
             }
             header('Content-Type: image/png');
