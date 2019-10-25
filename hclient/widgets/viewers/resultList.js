@@ -1586,7 +1586,7 @@ $.widget( "heurist.resultList", {
                         ele.appendTo($rdiv);
                     }else{
                         ele.css({'box-shadow':'0px 3px 8px #666','margin':'8px',
-                                 'width':'97%',
+                                 'width':'97%', padding:'5px',
                                  'border-radius': '3px 3px 3px 3px',
                                  'border':'2px solid #62A7F8'}).insertAfter($rdiv);
                     }

@@ -140,6 +140,7 @@ $.widget( "heurist.search_faceted", {
         params: {},
         ispreview: false,
         showclosebutton: true,
+        showresetbutton: true,
         onclose: null,
         search_realm: null,
         preliminary_filter:null,
@@ -338,7 +339,9 @@ $.widget( "heurist.search_faceted", {
         }else{
             if(hasHistory) {
                 //if(this.div_title) this.div_title.css('width','45%');
-                this.btn_reset.show()   
+                if(this.options.showresetbutton){
+                    this.btn_reset.show()   
+                }
                 //this.btn_save.show();  //@todo
             }else{
                 //if(this.div_title) this.div_title.css({'width':'auto', 'max-width':'90%'});
@@ -1016,7 +1019,7 @@ $.widget( "heurist.search_faceted", {
                     window.hWin.HEURIST4.msg.showMsgErr('Define at least one search criterion');
                 }
                 return;
-            }else if(!this.options.ispreview){
+            }else if(!this.options.ispreview && this.options.showresetbutton){
                 //this.div_title.css('width','45%');
                 this.btn_reset.show()   
                 //@todo this.btn_save.show(); 

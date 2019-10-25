@@ -143,6 +143,7 @@ $.widget( "heurist.recordListExt", {
         if(!this.options.reload_for_recordset){
             this._refresh();
         }
+        this._trigger( 'loadcomplete', null, null );
     },
     
     //

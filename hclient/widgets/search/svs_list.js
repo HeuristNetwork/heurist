@@ -1698,6 +1698,7 @@ $.widget( "heurist.svs_list", {
                         svs_ID: svs_ID,
                         query_name:qname, 
                         params:params, 
+                        showresetbutton:this.options.showresetbutton,
                         search_realm:this.options.search_realm};
                     
                     
@@ -1709,7 +1710,8 @@ $.widget( "heurist.svs_list", {
 
                             if(that.search_faceted.is(':visible')){
                                
-                                $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:that.options.search_realm} ]);  //global app event to clear views
+                                $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ 
+                                    {reset:true, search_realm:that.options.search_realm} ]);  //global app event to clear views
 
                                 that.search_faceted.hide();
                                 that.search_tree.show();
