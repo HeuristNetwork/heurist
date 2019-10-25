@@ -142,7 +142,7 @@ $.widget( "heurist.mapping", {
     
     //
     drawnItems: null,
-    //deffau draw style
+    //default draw style
     map_draw_style: {color: '#3388ff',
              weight: 4,
              opacity: 0.5,
@@ -1362,7 +1362,8 @@ $.widget( "heurist.mapping", {
             }
             def_style = this.setStyleDefaultValues(def_style, true);
         }else{
-            def_style = {iconType:'rectype', color:'#00b0f0', weight:3, opacity:1, fillOpacity:0.2, iconSize:18};
+            def_style = {iconType:'rectype', color:'#00b0f0', fillColor:'#00b0f0', weight:3, opacity:1, 
+                    fillOpacity:0.2, iconSize:18, stroke:true, fill:true};
         }
         
         
@@ -1370,9 +1371,15 @@ $.widget( "heurist.mapping", {
         if(!style.iconType || style.iconType=='default') style.iconType = def_style.iconType;
         style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize; //((style.iconType=='circle')?9:18);
         style.color = (style.color?style.color:def_style.color);   //light blue
+        style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
         style.weight = style.weight>0 ?style.weight :def_style.weight;
-        style.opacity = style.opacity>0 ?style.opacity :def_style.opacity;
-        style.fillOpacity = style.fillOpacity>0 ?style.fillOpacity :def_style.fillOpacity;
+        style.opacity = style.opacity>=0 ?style.opacity :def_style.opacity;
+        style.fillOpacity = style.fillOpacity>=0 ?style.fillOpacity :def_style.fillOpacity;
+        
+        style.fill = window.hWin.HEURIST4.util.isnull(style.fill)?def_style.fill:style.fill;
+        style.fill = window.hWin.HEURIST4.util.istrue(style.fill);
+        style.stroke = window.hWin.HEURIST4.util.isnull(style.stroke)?def_style.stroke :style.stroke;
+        style.stroke = window.hWin.HEURIST4.util.istrue(style.stroke);
         
         if(!style.iconFont && def_style.iconFont){
             style.iconFont = def_style.iconFont;

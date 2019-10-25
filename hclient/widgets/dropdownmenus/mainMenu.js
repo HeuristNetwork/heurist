@@ -1066,6 +1066,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
 
             //map symbology editor            
+            $dlg.find('#map_default_style').attr('readonly','readonly');
             var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
                 .addClass('smallbutton btn_add_term')
                 .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})

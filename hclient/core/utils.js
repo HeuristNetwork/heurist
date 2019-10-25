@@ -46,6 +46,23 @@ window.hWin.HEURIST4.util = {
         }
 
     },
+
+    istrue: function(val, def){
+        
+        def = window.hWin.HEURIST4.util.isnull(def)?true:def;
+        
+        if(window.hWin.HEURIST4.util.isnull(val)){
+            return def;
+        }else if(val===true){
+            return true;
+        }else if(typeof obj==='string'){
+            val =  val.toLowerCase();
+            return val=='yes' || val=='y'  || val=='true' || val=='t' || val=='1';
+        }else{
+            return val==1;
+        }
+    },
+
     
     //
     //remove ian's trailing &gt; used to designate a pointer field and replace consistently with >>

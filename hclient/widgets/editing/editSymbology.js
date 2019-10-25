@@ -56,6 +56,11 @@ function editSymbology(current_value, mode_edit, callback){
 
     }});
     
+    if(current_value){
+        current_value.fill = window.hWin.HEURIST4.util.istrue(current_value.fill)?'1':'0';
+        current_value.stroke = window.hWin.HEURIST4.util.istrue(current_value.stroke)?'1':'0';
+    }
+    
     var recdata = current_value ? new hRecordSet({count:1, order:[1], 
         records:{1:current_value}, 
         fields: {'stub':0}}) :null;
@@ -293,7 +298,7 @@ function editSymbology(current_value, mode_edit, callback){
     //
     edit_dialog = popup_dlg.dialog({
         autoOpen: true,
-        height: (mode_edit==2)?300:800,
+        height: (mode_edit==2)?300:700,
         width:  740,
         modal:  true,
         title: window.hWin.HR('Define Symbology'),
