@@ -1373,6 +1373,9 @@ $.widget( "heurist.search_faceted", {
                         field.history.push(field.selectedvalue);
                     }
                     
+                    //
+                    //draw show more/less toggler for long lists
+                    //
                     function __drawToggler($facet_values, display_mode){
                         
                         $('<div class="bor-filter-expand bor-toggler">'
@@ -1422,12 +1425,15 @@ if(!detailtypes[dtID]){
                         
                         //field.selectedvalue = {text:label, value:value, step:step};                    
                         
-                        
+                        //
+                        // verify that term is in response - take count from response
+                        //
                         function __checkTerm(term){
                                 var j;
                                 for (j=0; j<response.data.length; j++){
                                     if(response.data[j][0] == term.id){
-                                        return {text:term.text, value:term.id, count:response.data[j][1]};
+                                        return {text:term.text, 
+                                             value:term.id, count:parseInt(response.data[j][1])};
                                         //var f_link = that._createFacetLink(facet_index, {text:term.text, value:term.id, count:response.data[j][1]} );
                                         //return $("<div>").css({"display":"block","padding":"0 5px"}).append(f_link).appendTo($container);
                                     }
@@ -1445,9 +1451,12 @@ if(!detailtypes[dtID]){
                                 //draw itslef - draw children
                                 if(term.value){
                                     
-                                        if((field['isfacet']==that._FT_COLUMN) || (field['isfacet']==that._FT_LIST)){                                    
+                                        if((field['isfacet']==that._FT_COLUMN) || (field['isfacet']==that._FT_LIST)){                          //LIST          
                                             var display_mode = (field['isfacet']==that._FT_COLUMN)?'block':'inline-block';
-                                            f_link = that._createFacetLink( facet_index, {text:term.text, value:term.value, count:term.count}, display_mode );
+                                            f_link = that._createFacetLink( facet_index, 
+                                                term,
+                                                //{text:term.text, value:term.value, count:term.count}, 
+                                                display_mode );
                                             
                                             terms_drawn++;  //global
                                             
@@ -1462,6 +1471,7 @@ if(!detailtypes[dtID]){
                                             }                    
                                             
                                         }else{
+                                        //SELECTOR/DROPDOWN
                                             that._createOption( facet_index, level, {text:term.text, value:term.value, count:term.count} ).appendTo($container);
                                         }
                                 }
@@ -1481,31 +1491,37 @@ if(!detailtypes[dtID]){
                         }//__drawTerm
                         
                         //
-                        //calc number of terms with values
+                        // returns counts for itself and children
                         //
                         function __calcTerm(term, level, groupby){
                             
                             var res_count = 0;
-                            
+                            term.supress_count_draw = false;
                             
                             if(window.hWin.HEURIST4.util.isArrayNotEmpty(term.children)){ //is root or has children
 
-                                var k;
+                                //find total count for this term and its children
+                                var k, ch_cnt=0;
                                 if(term.children)
                                 for (k=0; k<term.children.length; k++){
                                     var cnt = __calcTerm(term.children[k], level+1, groupby);
-                                    res_count = res_count + cnt;
+                                    if(cnt>0){
+                                        res_count = res_count + cnt;    
+                                        ch_cnt++;
+                                    }
                                 }
                                 
-                                //note: sometimes value may be equal to header
-                                var headerData = __checkTerm(term);
-                                if(headerData!=null){
-                                        term.value = headerData.value;
-                                        term.count = headerData.count;
-                                        res_count++;
-                                }else if(res_count>0){
+                                term.supress_count_draw = (ch_cnt==1);
+                                
+                                //
+                                // some of children have counts 
+                                // creates
+                                //
+                                //old way
+                                /*
+                                var term_value = null;
+                                if(res_count>0){ 
                                     
-                                    var term_value = '';
                                     if(term.termssearch){
                                         if(term.termssearch.indexOf(term.id)<0){
                                             term.termssearch.push(term.id);
@@ -1514,7 +1530,6 @@ if(!detailtypes[dtID]){
                                     }else{
                                         term_value = term.id;
                                     }
-                                    
                                     if(!window.hWin.HEURIST4.util.isempty(term_value) || 
                                         !window.hWin.HEURIST4.util.isnull(field.selectedvalue)){                               
                                     
@@ -1522,21 +1537,63 @@ if(!detailtypes[dtID]){
                                         term.count = 0;
                                         res_count++;
                                     
-                                    } 
+                                    }
                                 }
+                                */ 
+                                
+                                //note: sometimes value may be equal to header
+                                var headerData = __checkTerm(term);
+                                
+                                
+                                if(headerData!=null){//this term itself has counts
+                                
+                                        //search for this term only
+                                        //term.value_0 = '='+headerData.value;
+                                        //term.count_0 = headerData.count;
+
+                                        //search for this term and all its children
+                                        
+                                        if(res_count>0){
+                                            term.children.unshift({text:'unspecified', count:headerData.count, value:'='+headerData.value});
+                                            term.value = term.termssearch?term.termssearch:term.id;
+                                            term.count = res_count + headerData.count;  
+                                        } else {
+                                            term.value = '='+headerData.value;
+                                            term.count = headerData.count;
+                                        }
+
+                                        //res_count++;
+                                }else{
+                                    
+                                        //term.value_0 = null;
+                                        //term.count_0 = 0;
+                                        if(res_count>0){
+                                            term.value = term.termssearch?term.termssearch:term.id;
+                                            term.count = res_count;
+                                        }else{
+                                            term.value = null;
+                                            term.count = 0;
+                                        }
+                                    
+                                }
+                                
                                 
                             }
                             else {
+                                //no children
                                 var termData =__checkTerm(term);
                                 if(termData!=null){
                                     //leave
                                     term.value = termData.value;
                                     term.count = termData.count;
                                     res_count = 1; 
+                                }else{
+                                    term.value = null;
+                                    term.count = 0;
                                 }
                             }
                             
-                            return res_count;
+                            return term.count; //res_count;
                         }//__calcTerms
                         
                         
@@ -2073,11 +2130,22 @@ if(!detailtypes[dtID]){
         //---
         if(cterm.count=='reset' || cterm.count>0){
             //.css('float','right')
-            var dcount = $('<span>').addClass('badge').text(cterm.count=='reset'?'X':cterm.count);
-            if(display_mode=='inline-block'){
-                 dcount.appendTo(f_link).appendTo(f_link_content);
-            }else{
-                 dcount.appendTo(f_link).css({float:'right'});
+            var txt = '';
+            if(cterm.count=='reset'){
+                txt = 'X';
+            }else if(cterm.count>0 && cterm.supress_count_draw!==true){
+                    txt = cterm.count;
+            }
+            
+            if(txt!=''){
+            
+                var dcount = $('<span>').addClass('badge').text(txt);
+                
+                if(display_mode=='inline-block'){
+                     dcount.appendTo(f_link).appendTo(f_link_content);
+                }else{
+                     dcount.appendTo(f_link).css({float:'right'});
+                }
             }
         }
         

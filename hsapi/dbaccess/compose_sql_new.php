@@ -1512,7 +1512,12 @@ class HPredicate {
                     .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
             }else if(intval($this->value)>0){
                 $res = ' in (select trm_ID from defTerms where trm_ID='
-                    .$this->value.' or trm_ParentTermID='.$this->value.')';
+                    .$this->value;
+                if(!$this->exact){
+                    $res = $res . ' or trm_ParentTermID='.$this->value;   
+                }
+                $res = $res.')';
+                    
             }else{
                 $value = $mysqli->real_escape_string($this->value);
                 $res  = ' in (select trm_ID from defTerms where trm_Label ';
