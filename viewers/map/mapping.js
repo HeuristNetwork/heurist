@@ -34,6 +34,7 @@ Thematic mapping
 * 
 * notimeline - hide timeline (map only)
 * nomap - timeline only
+* show_tooltip
 * 
 * events:
 * onselect
@@ -113,7 +114,9 @@ $.widget( "heurist.mapping", {
         ondrawend:null,
         
         isEditAllowed: true,
-        isPublished: false
+        isPublished: false,
+        
+        show_tooltip: false
     },
     
     //reference to google or leaflet map
@@ -615,6 +618,12 @@ $.widget( "heurist.mapping", {
                 })*/
                 .addTo( this.nativemap );            
 
+             if(that.options.show_tooltip){
+                new_layer.bindTooltip(function (layer) {
+                    return layer.feature.properties.rec_Title;
+                })
+             }                
+
 
             /* not implemented - idea was store template in mapdocument and excute is on _onLayerClick    
             if(popup_template){
@@ -1077,6 +1086,13 @@ $.widget( "heurist.mapping", {
                         //CircleMarker <> Marker
                         layer.parent_layer = parent_layer;  
                     }
+                    
+                    if(that.options.show_tooltip){
+                        layer.bindTooltip(function (layer) {
+                            return layer.feature.properties.rec_Title;
+                        })
+                    }                
+
                     that.all_markers[layer_id].push( layer );
                 }
 
@@ -1163,7 +1179,13 @@ $.widget( "heurist.mapping", {
                         layer = null;
                     }
                     new_layer.on('click', function(e){that._onLayerClick(e)});
-                    
+                 
+                    if(that.options.show_tooltip){
+                        new_layer.bindTooltip(function (layer) {
+                            return layer.feature.properties.rec_Title;
+                        })
+                    }                
+
                 }
             
         });
@@ -1787,6 +1809,8 @@ $.widget( "heurist.mapping", {
         this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
         this.options.isPublished = __parseval(params['published']);
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
+        
+        this.options.show_tooltip = __parseval(params['show_tooltip']);
         
         //show/hide map or timeline
         var nomap = __parseval(params['nomap']);
