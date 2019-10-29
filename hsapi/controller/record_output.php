@@ -67,7 +67,8 @@
     $defRecTypes = null;
     $defDetailtypes = null;
     $defTerms = null;
-    
+    $find_places_for_geo = ($system->user_GetPreference('deriveMapLocation', 1)==1);
+
     if(@$_REQUEST['postdata']){
         //in export csv all parameters send as json array in postdata 
         $params = json_decode($_REQUEST['postdata'], true);
@@ -1406,7 +1407,7 @@ function array_to_xml( $data, &$xml_data ) {
 //
 function getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_minimum_fields=false){
 
-    global $system, $defRecTypes, $defDetailtypes, $defTerms;
+    global $system, $defRecTypes, $defDetailtypes, $defTerms, $find_places_for_geo;
 
     if($extended){
         if($defRecTypes==null) $defRecTypes = dbs_GetRectypeStructures($system, null, 2);
@@ -1464,40 +1465,10 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_m
                     }else if($value['geo']['type']='c'){
                     //@todo convert circle to polygone
                     }*/
-
-                    $geom = geoPHP::load($wkt, 'wkt');
-                    if(!$geom->isEmpty()){
-
-                        /*The GEOS-php extension needs to be installed for these functions to be available 
-                        if($simplify)$geom->simplify(0.0001, TRUE);
-                        */
-
-                        $geojson_adapter = new GeoJSON(); 
-                        $json = $geojson_adapter->write($geom, true); 
-
-                        if(count($json['coordinates'])>0){
-
-                            if($simplify){
-                                if($json['type']=='LineString'){
-
-                                    simplifyCoordinates($json['coordinates']);
-
-                                } else if($json['type']=='Polygon'){
-                                    for($idx=0; $idx<count($json['coordinates']); $idx++){
-                                        simplifyCoordinates($json['coordinates'][$idx]);
-                                    }
-                                } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
-                                {
-                                    for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
-                                        for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
-                                            simplifyCoordinates($json['coordinates'][$idx][$idx2]);
-                                }
-                            }
-
-                            $geovalues[] = $json;
-                        }
-                    }//isEmpty
-
+                    $json = getJsonFromWkt($wkt, $simplify);
+                    if($json){
+                       $geovalues[] = $json; 
+                    }
 
                     $val = $wkt;
                     continue;  //it will be included into separate geometry property  
@@ -1556,7 +1527,20 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_m
         $res['properties']['details'] = null;
         unset($res['properties']['details']);
     }
-   
+    
+    if(count($geovalues)==0 && $find_places_for_geo){
+        //this record does not have geo value - find it in related/linked places
+        $geodetails = recordSearchGeoDetails($system, $record['rec_ID']);    
+        foreach ($geodetails as $dty_ID=>$field_details) {
+            foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
+                    $wkt = $value['geo']['wkt'];
+                    $json = getJsonFromWkt($wkt, $simplify);
+                    if($json){
+                       $geovalues[] = $json; 
+                    }
+            }
+        }
+    }
 
     if(count($geovalues)>1){
         $res['geometry'] = array('type'=>'GeometryCollection','geometries'=>$geovalues);
@@ -1586,6 +1570,47 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_m
     return $res;
 
 }
+
+//
+//
+//
+function getJsonFromWkt($wkt, $simplify=true)
+{
+        $geom = geoPHP::load($wkt, 'wkt');
+        if(!$geom->isEmpty()){
+
+            /*The GEOS-php extension needs to be installed for these functions to be available 
+            if($simplify)$geom->simplify(0.0001, TRUE);
+            */
+
+            $geojson_adapter = new GeoJSON(); 
+            $json = $geojson_adapter->write($geom, true); 
+
+            if(count($json['coordinates'])>0){
+
+                if($simplify){
+                    if($json['type']=='LineString'){
+
+                        simplifyCoordinates($json['coordinates']);
+
+                    } else if($json['type']=='Polygon'){
+                        for($idx=0; $idx<count($json['coordinates']); $idx++){
+                            simplifyCoordinates($json['coordinates'][$idx]);
+                        }
+                    } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
+                    {
+                        for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
+                            for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
+                                simplifyCoordinates($json['coordinates'][$idx][$idx2]);
+                    }
+                }
+
+                return $json;
+            }
+        }//isEmpty
+        return null;
+}
+
 
 
 //

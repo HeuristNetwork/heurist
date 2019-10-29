@@ -1991,6 +1991,56 @@ $loop_cnt++;
         }
         $record["details"] = $details;
     }
+    
+    //
+    // find geo in linked places 
+    //
+    function recordSearchGeoDetails($system, $recID) {
+
+        $details = array();        
+        if($system->defineConstant('RT_PLACE') && $system->defineConstant('DT_GEO_OBJECT')){
+
+            //$recID = $record["rec_ID"];     
+            $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,AsWKT(dtl_Geo) as dtl_Geo, rl_TargetID,dtl_ID'
+                                        .' FROM recDetails, recLinks, Records '
+                                        .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
+                                        .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID='.RT_PLACE
+                                        //'in ('. join(',', $rectypes_as_place)
+                                        .' AND rl_SourceID = '.$recID; 
+                                        //'in (' . join(',', $chunk_rec_ids) . ')';
+
+            $mysqli = $system->get_mysqli();
+            $res = $mysqli->query($squery);
+
+            
+            if($res){
+                while ($rd = $res->fetch_assoc()) {
+
+                            if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
+                                $detailValue = array(
+                                    "geo" => array(
+                                        "type" => $rd["dtl_Value"],
+                                        "wkt" => $rd["dtl_Geo"],
+                                        "placeID" => $rd["rl_TargetID"]
+                                    )
+                                );
+                                $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
+                            }
+                }
+                $res->close();
+                
+                /*
+                if(!@$record["details"]){
+                    $record["details"] = $details;
+                }else{
+                    $record["details"] = array_merge($record["details"],$details);
+                }
+                */
+            
+            }
+        }
+        return $details;
+    }
 
     //
     // load personal tags (current user) for given record ID
