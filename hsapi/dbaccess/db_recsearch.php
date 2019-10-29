@@ -855,7 +855,7 @@
 //DEBUG error_log('timemap fields '.$fieldtypes_ids);
 
              //find places linked to result records for geo field
-             if(@$params['suppres_derivemaplocation']!=1){ //for producation sites - such as boro or DH
+             if(@$params['suppres_derivemaplocation']!=1){ //for production sites - such as boro or DH
                 $find_places_for_geo = count($rectypes_as_place)>0 && 
                                         ($system->user_GetPreference('deriveMapLocation', 1)==1);
              }
@@ -1436,7 +1436,7 @@
 $loop_cnt=1;                            
                     while ($offset<$res_count){   
                             
-//here was as problem, since chunk size for mapping can be 5000 or more we got memory overflow here
+//here was a problem, since chunk size for mapping can be 5000 or more we got memory overflow here
 //reason the list of ids in SELECT is bigger than mySQL limit
 //solution - we perfrom the series of request for details by 1000 records
                             $chunk_rec_ids = array_slice($all_rec_ids, $offset, 1000); 

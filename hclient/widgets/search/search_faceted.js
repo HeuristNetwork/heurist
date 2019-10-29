@@ -1040,6 +1040,7 @@ $.widget( "heurist.search_faceted", {
             
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
             if(window.hWin.HAPI4.database=='johns_hamburg' &&
+                //special order by date fields 
                 window.hWin.HEURIST4.util.findArrayIndex(this.options.svs_ID,[21,23,24])>=0){
                     
                 this._current_query.push({sortby:'hie'});

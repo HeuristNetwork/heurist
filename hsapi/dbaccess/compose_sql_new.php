@@ -473,11 +473,11 @@ class HQuery {
 
                     if(!in_array('hie', $sort_fields)) {
                         $sort_expr[] = 
-    '(select LEAST(getTemporalDateString(ifnull(sd2.dtl_Value,\'9999\')), getTemporalDateString(ifnull(sd3.dtl_Value,\'9999\')))' 
+    '(select GREATEST(getTemporalDateString(ifnull(sd2.dtl_Value,\'0\')), getTemporalDateString(ifnull(sd3.dtl_Value,\'0\')))' 
                         .' from recDetails sd1'
                         .' left join recDetails sd2 on sd1.dtl_Value=sd2.dtl_RecID and sd2.dtl_DetailTypeID=9'
                         .' left join recDetails sd3 on sd1.dtl_Value=sd3.dtl_RecID and sd3.dtl_DetailTypeID=10'
-                        .' where r0.rec_ID=sd1.dtl_RecID and sd1.dtl_DetailTypeID=293 limit 1)';                    
+                        .' where r0.rec_ID=sd1.dtl_RecID and sd1.dtl_DetailTypeID=293 limit 1) DESC';                    
                         $sort_fields[] = 'hie';   
                     }
                     
