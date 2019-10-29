@@ -244,7 +244,7 @@ $.widget( "heurist.mapping", {
         {
             layout_opts.center__minHeight = 30;
             layout_opts.center__minWidth = 200;
-            layout_opts.north__size = 30;
+            layout_opts.north__size = 0;//30;
             layout_opts.north__spacing_open = 0;
             /*
             var th = Math.floor($(this.options.element_layout).height*0.2);
@@ -2036,7 +2036,7 @@ $.widget( "heurist.mapping", {
         //   legend: [basemaps,search,mapdocs|onedoc]
         this.mapManager.updatePanelVisibility(__splitval(params['legend']));
         
-        $('#map-settingup-message').text('EXPERIMENTAL');
+        //$('#map-settingup-message').text('EXPERIMENTAL');
         
         // basemap: name of initial basemap
         if(params['basemap']){

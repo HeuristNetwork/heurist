@@ -278,7 +278,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
         </div>
 
         <!-- Toolbar -->
-        <div class="ui-layout-north" id="mapToolbarDiv" style="display: block !important; height: 30px; z-index:999;">
+        <div class="ui-layout-north" id="mapToolbarDiv" style="display: none; height: 30px; z-index:999;">
 
             <span id="map-settingup-message" style="padding-left:1em;line-height:2em;color:red">
                 Setting up map ...
