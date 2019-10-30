@@ -1394,7 +1394,7 @@ $.widget( "heurist.mapping", {
         style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize; //((style.iconType=='circle')?9:18);
         style.color = (style.color?style.color:def_style.color);   //light blue
         style.fillColor = (style.fillColor?style.fillColor:def_style.fillColor);   //light blue
-        style.weight = style.weight>0 ?style.weight :def_style.weight;
+        style.weight = style.weight>=0 ?style.weight :def_style.weight;
         style.opacity = style.opacity>=0 ?style.opacity :def_style.opacity;
         style.fillOpacity = style.fillOpacity>=0 ?style.fillOpacity :def_style.fillOpacity;
         
