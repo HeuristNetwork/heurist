@@ -193,7 +193,9 @@ function editCMS(home_page_record_id, main_callback){
                         '<p>To save you time we have created a set of commonly used menu entries and web pages with dummy content.</p>'
                         +'<p>Please use <b>Menu &amp; pages</b> on the left to delete the menu entries you don\'t need or to rename them '
                         +'(don\'t forget to change the title of the page which is generally a longer version of the menu label). You can also add new ones.</p>'
-                        +'<p>The pages can be edited by navigating to the page and clicking <b>Edit page content</b>.</p>');                            
+                        +'<p>The pages can be edited by navigating to the page in the preview above and clicking '
+                        +'<b>Edit page content</b> (either the button on the left or the link on the right of the page)</p>');
+   
 
                         _initWebSiteEditor( true, { q:"ids:"+response.data.ids.join(',') } );
 

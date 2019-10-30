@@ -2577,7 +2577,9 @@ console.log('onpaste');
         }else{    
             //related entity                 
             if(window.hWin.HEURIST4.util.isempty(value)) value = [];
-            value = $.isArray(value)?value:value.split(',');
+            value = $.isArray(value)?value
+                :((typeof  value==='string')?value.split(','):[value]);
+                
             if(value.length==0){
                 ele.empty();
                 ele.hide();

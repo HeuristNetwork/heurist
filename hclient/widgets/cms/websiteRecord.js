@@ -920,6 +920,7 @@ console.log('>>>')+bg_color;
                             };
 
                             ele.editing_input(ed_options);
+                            ele.editing_input('setValue','5');
                             ele.parent().css('display','block');
                             ele.find('.header').css({'width':'150px','text-align':'right'});
                            
