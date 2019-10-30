@@ -93,7 +93,7 @@
     COMMENT 'Specifies the way that the output will be formatted, eg. which values to display, layout and so forth',
       uan_DocumentationURL text 
     COMMENT 'An external URL providing further information about the analysis',
-      uan_Added date NOT NULL default '0000-00-00' 
+      uan_Added date NOT NULL default '1000-01-01' 
     COMMENT 'Date and time analysis added',
       uan_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP 
     COMMENT 'Date and time analysis last modified',

@@ -214,6 +214,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         
         if(this.options.edit_mode=='editonly'){
         
+            //reminder
             var val = this._getField('rem_StartDate');
             
             var isManual = window.hWin.HEURIST4.util.isempty(val) || val=='0000-00-00';

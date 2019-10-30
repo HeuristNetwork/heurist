@@ -387,7 +387,7 @@ CREATE TABLE defURLPrefixes (
 CREATE TABLE usrSavedSearches (
   svs_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Saved search ID, used in publishing, primary key',
   svs_Name varchar(128) NOT NULL COMMENT 'The display name for this saved search',
-  svs_Added date NOT NULL default '0000-00-00' COMMENT 'Date and time saves search added',
+  svs_Added date NOT NULL default '1000-01-01' COMMENT 'Date and time saves search added',
   svs_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time saves search last modified',
   svs_Query text NOT NULL COMMENT 'The text of the saved search - added to search URL',
   svs_UGrpID smallint(5) unsigned NOT NULL COMMENT 'The creator/owner or workgroup for the saved search',

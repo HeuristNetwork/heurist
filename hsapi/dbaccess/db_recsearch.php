@@ -1375,7 +1375,8 @@
                         
                         //convert add and modified date to UTC
                         if($date_add_index!==false) {
-                            if($row[$date_add_index]=='0000-00-00 00:00:00'){ //not defined
+                            if($row[$date_add_index]=='0000-00-00 00:00:00' 
+                               || $row[$date_add_index]=='1000-01-01 00:00:00'){ //not defined
                                 $row[$date_add_index] = '';    
                             }else{
                                 $row[$date_add_index] = DateTime::createFromFormat('Y-m-d H:i:s', $row[$date_add_index])

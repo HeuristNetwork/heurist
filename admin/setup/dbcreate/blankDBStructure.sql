@@ -47,7 +47,7 @@
 CREATE TABLE Records (
   rec_ID int(10) unsigned NOT NULL auto_increment COMMENT 'The primary record ID, also called, historically, bib_id',
   rec_URL varchar(2000) default NULL COMMENT 'The primary URL pointed to by this record (particularly for Internet bookmarks)',
-  rec_Added datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'Date and time record added',
+  rec_Added datetime NOT NULL default '1000-01-01 00:00:00' COMMENT 'Date and time record added',
   rec_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time the record was modified',
   rec_Title varchar(1023) NOT NULL default '' COMMENT 'Composite (constructed) title of the record, used for display and search',
   rec_ScratchPad text COMMENT 'Scratchpad, mainly for text captured with bookmarklet',
@@ -492,7 +492,7 @@ CREATE TABLE recThreadedComments (
   cmt_ID int(10) unsigned NOT NULL auto_increment COMMENT 'Comment ID, primary key for comments',
   cmt_Text varchar(5000) NOT NULL COMMENT 'Text of comment',
   cmt_OwnerUgrpID smallint(5) unsigned NOT NULL COMMENT 'User ID of user making comment',
-  cmt_Added datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'Date and time of creation of comment',
+  cmt_Added datetime NOT NULL default '1000-01-01 00:00:00' COMMENT 'Date and time of creation of comment',
   cmt_ParentCmtID int(10) unsigned default NULL COMMENT 'Parent comment of this comment',
   cmt_Deleted tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flag deleted comments',
   cmt_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time of modification of comment',
@@ -513,7 +513,7 @@ CREATE TABLE recUploadedFiles (
   ulf_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'A unique numeric file ID used as filename to store the data on disk and should be different ids if shared',
   ulf_OrigFileName varchar(255) NOT NULL COMMENT 'The original name of the file uploaded',
   ulf_UploaderUGrpID smallint(5) unsigned default NULL COMMENT 'The user who uploaded the file',
-  ulf_Added datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'The date and time the file was uploaded',
+  ulf_Added datetime NOT NULL default '1000-01-01 00:00:00' COMMENT 'The date and time the file was uploaded',
   ulf_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date of last modification of the file description record, automatic update',
   ulf_ObfuscatedFileID varchar(40) default NULL COMMENT 'SHA-1 hash of ulf_ID and random number to block sequential file harvesting',
   ulf_ExternalFileReference varchar(1000) default NULL COMMENT 'URI of an external file, which may or may not be cached locally',
@@ -662,7 +662,7 @@ CREATE TABLE sysLocks (
 
 CREATE TABLE sysTableLastUpdated (
   tlu_TableName varchar(40) NOT NULL COMMENT 'Name of table for which we are recording time of last update',
-  tlu_DateStamp datetime NOT NULL default '0000-00-00 00:00:00' COMMENT 'Date and time of last update of table',
+  tlu_DateStamp datetime NOT NULL default '1000-01-01 00:00:00' COMMENT 'Date and time of last update of table',
   tlu_CommonObj tinyint(1) unsigned NOT NULL default '1' COMMENT 'Indicates tables which contain data defs required in common-obj',
   PRIMARY KEY  (tlu_TableName)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Datestamp, determines if updates since definitions loaded in';
@@ -873,7 +873,7 @@ CREATE TABLE usrReportSchedule (
 CREATE TABLE usrSavedSearches (
   svs_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Saved search ID, used in publishing, primary key',
   svs_Name varchar(128) NOT NULL COMMENT 'The display name for this saved search',
-  svs_Added date NOT NULL default '0000-00-00' COMMENT 'Date and time saves search added',
+  svs_Added date NOT NULL default '1000-01-01' COMMENT 'Date and time saves search added',
   svs_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time saves search last modified',
   svs_Query text NOT NULL COMMENT 'The text of the saved search - added to search URL',
   svs_UGrpID smallint(5) unsigned NOT NULL COMMENT 'The creator/owner or workgroup for the saved search',
@@ -997,26 +997,26 @@ CREATE TABLE woots (
 
 -- These are critical to the working of the definitions caching system, without these
 -- the system will not 'see' stuff which is addded to the definitions''
-INSERT INTO `sysTableLastUpdated` VALUES ('defCalcFunctions', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defCrosswalk', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defDetailTypeGroups', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defDetailTypes', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defFileExtToMimetype', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defLanguages', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defOntologies', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defRecStructure', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defRecTypeGroups', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defRecTypes', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defRelationshipConstraints', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defTerms', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defTranslations', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defURLPrefixes', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('sysDBNameCache', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('sysIdentification', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('sysUGrps', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('sysUsrGrpLinks', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('usrHyperlinkFilters', '0000-00-00 00:00:00', 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('usrTags', '0000-00-00 00:00:00', 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defCalcFunctions', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defCrosswalk', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defDetailTypeGroups', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defDetailTypes', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defFileExtToMimetype', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defLanguages', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defOntologies', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defRecStructure', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defRecTypeGroups', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defRecTypes', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defRelationshipConstraints', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defTerms', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defTranslations', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('defURLPrefixes', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('sysDBNameCache', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('sysIdentification', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('sysUGrps', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('sysUsrGrpLinks', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('usrHyperlinkFilters', CURRENT_TIMESTAMP, 1);
+INSERT INTO `sysTableLastUpdated` VALUES ('usrTags', CURRENT_TIMESTAMP, 1);
 
 
 -- The owners of the database - always group 1
@@ -1051,9 +1051,18 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Type,ugr_
  UPDATE sysUGrps set ugr_ID = 0 where ugr_ID = 4;
 -- cannot insert 0 straight up, it gets appended
 
--- Insert a row to define the link between group 1 (dbowners) and group 3 (other users) and user 2 (the first admin)
+-- An extra group of users to give people the idea
+ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
+ VALUES (5,'Website filters',
+ 'Group to work with saved filters for Web search layout',
+ 'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=5','y','other','users');
+
+
+
+-- Insert a row to define the link between group 1 (dbowners), group 3 (other users) and group 5 (website filters) and user 2 (the first admin)
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,1,'admin');
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,3,'admin');
+INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,5,'admin');
 
 
 -- defRectypegroups and defDetailtypeGroups are now inserted by coreDefinitions.txt
