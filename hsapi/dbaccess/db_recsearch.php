@@ -1375,6 +1375,7 @@
                         
                         //convert add and modified date to UTC
                         if($date_add_index!==false) {
+                            // zero date not allowed by default since MySQL 5.7, default date changed to 1000
                             if($row[$date_add_index]=='0000-00-00 00:00:00' 
                                || $row[$date_add_index]=='1000-01-01 00:00:00'){ //not defined
                                 $row[$date_add_index] = '';    

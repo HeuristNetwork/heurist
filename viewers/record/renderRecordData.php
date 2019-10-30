@@ -651,6 +651,7 @@ function print_private_details($bib) {
     
     $add_date = DateTime::createFromFormat('Y-m-d H:i:s', $bib['rec_Added']); //get form database in server time
     
+    //zero date not allowed by default since MySQL 5.7 default date changed to 1000
     if($add_date && $bib['rec_Added']!='0000-00-00 00:00:00' && $bib['rec_Added']!='1000-01-01 00:00:00') {
         $add_date = $add_date->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'); //convert to UTC
         $add_date_local = ' (<span id="lt0"></span><script type="text/javascript">printLTime("'.  //output in js in local time
