@@ -2157,7 +2157,7 @@ if(!detailtypes[dtID]){
         this._on( f_link, {
             click: function(event) { 
 
-                var link = $(event.target).parent();
+                var link = $(event.target).parents('.facet_link');
                 var facet_index = Number(link.attr('facet_index'));
                 var value = link.attr('facet_value');                  
                 var label = link.attr('facet_label');                  
