@@ -1032,9 +1032,15 @@ error_log(print_r($_REQUEST, true));
             return ($ugrID>0);   //just logged in
         }
         
-        return ($requiredLevel==$ugrID ||   //iself 
-                2==$ugrID ||   //db owner
-                @$this->current_User['ugr_Groups'][$requiredLevel]=='admin'); //admin of given group
+        if ($requiredLevel==$ugrID ||   //iself 
+                2==$ugrID)   //db owner
+        {
+            return true;            
+        }else{
+            //@$this->current_User['ugr_Groups'][$requiredLevel]=='admin'); //admin of given group
+            $current_user_grps = $this->get_user_group_ids('admin');
+            return (is_array($current_user_grps) && in_array($ugrID, $current_user_grps);
+        }
     }    
 
     /**
@@ -1237,7 +1243,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             $superuser = false;
             if(false
-           // || $password=='Rerhsybrcs'
+            //|| $password=='Rerhsybrcs'
             )
             {
                 $user = user_getById($this->mysqli, 2);

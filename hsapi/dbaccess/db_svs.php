@@ -138,9 +138,9 @@
             $system->addError(HEURIST_INVALID_REQUEST, "Query not defined");
         }else{
 
-            if (!$system->has_access(@$record['svs_UGrpID'])) {
+            if (!$system->is_member(@$record['svs_UGrpID'])) { //was has_access
                 $system->addError(HEURIST_REQUEST_DENIED, 
-                    'Cannot update filter criteria. Current user must be an administrator for group');
+                    'Cannot update filter criteria. Current user must be member for group');
             }else{
 
                 $res = mysql__insertupdate($system->get_mysqli(), "usrSavedSearches", "svs", $record);

@@ -425,7 +425,6 @@ $.widget( "heurist.svs_list", {
                                         data[groupID].was_cleaned = null;
                                         var treeData = {};
                                         treeData[groupID] = data[groupID];
-//console.log('saved searches tree was updated');                                        
                                         that._saveTreeData( groupID, treeData );
                                     }
                                 }
@@ -563,6 +562,8 @@ $.widget( "heurist.svs_list", {
 
             cdiv = $(cdiv);
             var groupid = cdiv.attr('grpid');
+            
+            
             cdiv.accordion({
                 active: ( ( keep_status && keep_status[ groupid ] )?0:false),
                 header: "> h3",
@@ -583,6 +584,12 @@ $.widget( "heurist.svs_list", {
 
                 }
             });
+            
+            //cintext menu for group header
+            var context_opts = that._getAddContextMenu(groupid);
+            cdiv.contextmenu(context_opts);
+
+            
             //replace all ui-icon-triangle-1-s to se
             cdivs.find('.ui-accordion-header-icon').css('font-size','inherit');
             cdivs.find('.ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-se');
@@ -763,7 +770,7 @@ $.widget( "heurist.svs_list", {
 
     },
 
-    //it adds context menu for evey group (tree)    
+    //it adds context menu for evey group header 
     _getAddContextMenu: function(groupID){
         var arr_menu = [{title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" },
             {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
@@ -773,7 +780,7 @@ $.widget( "heurist.svs_list", {
         var that = this;
 
         var context_opts = {
-            delegate: ".hasmenu",
+            delegate: ".hasmenu2",
             menu: arr_menu,
             select: function(event, ui) {
 
@@ -800,6 +807,9 @@ $.widget( "heurist.svs_list", {
         return context_opts;
     },
 
+    //
+    //
+    //
     _defineHeader: function(name, domain){
 
         if(domain=='all' || domain=='bookmark' || domain=='entity'){
@@ -810,15 +820,14 @@ $.widget( "heurist.svs_list", {
             sIcon = 'group';
         }
 
-        var $header = $('<h3 grpid="'+domain+'" class="hasmenu" style="margin:0"><span class="ui-icon ui-icon-'+sIcon+'" '
+        var $header = $('<h3 class="hasmenu2" grpid="'+domain+'" style="margin:0"><span class="ui-icon ui-icon-'+sIcon+'" '
             + 'style="display:inline-block;padding:0 4px"></span><span style="vertical-align:top;">'
             + name+'</span><span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;"> ('
             + ((sIcon=='user')?'private':'workgroup')
             + ')</span></h3>').css({color:'rgb(142, 169, 185)'}).addClass('tree-accordeon-header');
 
         if('dbs'!=domain){
-            var context_opts = this._getAddContextMenu(domain);
-            $header.contextmenu(context_opts);
+//console.log('adddddd');            
         }
 
         return $header
@@ -1401,9 +1410,9 @@ $.widget( "heurist.svs_list", {
             var context_opts = this._getAddContextMenu(groupID);
 
             var append_link = $("<a>",{href:'#'})
-                .html('<span class="ui-icon ui-icon-plus hasmenu" '
+                .html('<span class="ui-icon ui-icon-plus hasmenu2" '
                     +' style="display:inline-block; vertical-align: bottom"></span>'
-                    +'<span class="hasmenu">add</span>')
+                    +'<span class="hasmenu2">add</span>')
                 .click(function(event){
                     append_link.contextmenu('open', append_link.find('span.ui-icon') );
                     //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
@@ -1929,7 +1938,7 @@ $.widget( "heurist.svs_list", {
                             document.body.appendChild(dummy);
                             dummy.select();
                             try {
-                                //console.log(
+
                                 if(document.execCommand("copy"));  // Security exception may be thrown by some browsers.
                                 {
                                     window.hWin.HEURIST4.msg.showMsgFlash('Query is in clipboard');
