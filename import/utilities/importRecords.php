@@ -109,7 +109,7 @@ $file_max_size = get_php_bytes('upload_max_filesize');
             <a href="#" class="tsv_download">List of elements  in source file</a> (will download a tab-separated file).</p>
             
            <p class="st1_D import-rem">All entity types are recognised. However it is not guaranteed that they are identical.  
-            It is recommened to download the list of elements to be imported and verify matches.
+            We recommend downloading the list of elements to be imported and verify matches.
             <a href="#" class="tsv_download">List of elements in source file</a> (will download a tab-separated file)</p>
             
            <div id="div_tsv" style="display:none"></div>
@@ -125,13 +125,11 @@ The source database MUST be registered with the Heurist Master Index BEFORE the 
 If the download of listed entity types fails to clear this message, please click on Help > Bug report and let us know. We will get back to you within 24 hours and help you import your data.
            </p>
            
-           <br><br>
            <button id="btn_ImportRt" class="import-rem">Download listed entity types</button>
         </div>
         
         <!-- STEP 2  - start donwload -->
         <div id="divStep2" style="display:none">
-<br>
 <p id="st2_B" class="import-rem">All entity types are recognised and synched.</p>
 <p>Importing <span id="spanRecCount"></span> items as new records.</p>
 <p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please <?php echo CONTACT_HEURIST_TEAM;?> for assistance (support at heuristnetwork dot org or use the bug report function)</p>

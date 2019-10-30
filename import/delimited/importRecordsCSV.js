@@ -2924,7 +2924,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         var res = imp_session['validation'];
                         
                         if(res['missed_required_fields_map'] && res['missed_required_fields_map'].length>0){
-                                window.hWin.HEURIST4.msg.showMsgDlg('The following fields are required fields. It is recommended to map them to incoming data before you can import new records:<br><br>'
+                                window.hWin.HEURIST4.msg.showMsgDlg('The following fields are required fields. We recommend mapping them to incoming data before you can import new records:<br><br>'
                                 +res['missed_required_fields_map'].join(', '),null,{title:'Warning'});
                         }
                         
