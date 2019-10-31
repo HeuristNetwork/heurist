@@ -2476,11 +2476,19 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
-    // show record action dialog
+    // show map style edit dialog
     //
     showEditSymbologyDialog: function(current_value, needName, callback){
         //todo optionally load dynamically editSymbology.js
         editSymbology(current_value, needName, callback);
+    },
+
+    //
+    // show heurist theme dialog
+    //
+    showEditThemeDialog: function(current_value, needName, callback){
+        //todo optionally load dynamically editTheme.js
+        editTheme(current_value, callback);
     },
 
     //

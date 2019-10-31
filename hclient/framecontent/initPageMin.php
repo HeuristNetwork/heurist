@@ -65,6 +65,7 @@ if(!$layout_theme) $layout_theme = 'heurist';
 
 if($layout_theme=="heurist" || $layout_theme=="base"){
     //default BASE or HEURIST theme
+    $layout_theme = "base";
     $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
 }else{
     //load one of standard themes from jquery web resource

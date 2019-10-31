@@ -838,7 +838,7 @@ function hLayout(args) {
             if(app.hasheader){
                 var $header = $("<div>");
                 $header.append(window.hWin.HR(app.name || application.name))
-                .addClass('ui-widget-header')
+                //.addClass('ui-widget-header')
                 .addClass('ui-corner-all')
                 .addClass('header'+app.appid+'_'+app_counter)
                 .appendTo($d);
@@ -846,8 +846,8 @@ function hLayout(args) {
 
             appAddContent($d, application, app);
 
-            $d.addClass('ui-widget-content')
-            .addClass('ui-corner-all');
+            $d.addClass('ui-widget-content');
+            //.addClass('ui-corner-all');
             //.css('padding','0.2em');
         }
 
@@ -1308,7 +1308,7 @@ function hLayout(args) {
                 $(tabb).children('.ui-tabs-panel[layout_id!="FAP"]').css({position:'absolute', top:'5.01em',
                         left:0,bottom:'0.2em',right:0, 'min-width':'75em',overflow:'hidden'});
                 
-                tabheader.find('a').css({'width':'100%','outline':0}); //, 'color': 'rgb(142, 169, 185)'
+                tabheader.find('a').css({'width':'100%','outline':0}); 
                 
                 var lis = tabheader.children('li');
                 var count_lis = lis.length;

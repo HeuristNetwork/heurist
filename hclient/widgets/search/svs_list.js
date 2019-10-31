@@ -98,7 +98,8 @@ $.widget( "heurist.svs_list", {
         if(window.hWin.HAPI4.sysinfo['layout']!='original' && !this.options.buttons_mode){
             toppos = toppos + 4;
             $('<div>'+window.hWin.HR('Saved Filters')+'</div>')
-            .css({'padding': '0.5em 1em', 'font-size': '1.4em', 'font-weight': 'bold', 'color':'rgb(142, 169, 185)'})
+            .css({'padding': '0.5em 1em', 'font-size': '1.4em', 'font-weight': 'bold'})
+            .addClass('svs-header')
             .appendTo(this.div_header);
 
             if(this.options.btn_visible_save){
@@ -127,7 +128,8 @@ $.widget( "heurist.svs_list", {
             this.helper_top = $( '<div>'+window.hWin.HR('right-click in list for menu')+'</div>' )
             //.addClass('logged-in-only heurist-helper1')
             .appendTo( $( "<div>" )
-                .css({'padding':'0.2em 0 0 1.2em','color':'rgb(142, 169, 185)','font-size':'1em','font-style':'italic'})
+                .css({'padding':'0.2em 0 0 1.2em','font-size':'1em','font-style':'italic'})
+                .addClass('svs-header')
                 .appendTo(this.div_header) );
         }
 
@@ -824,7 +826,7 @@ $.widget( "heurist.svs_list", {
             + 'style="display:inline-block;padding:0 4px"></span><span style="vertical-align:top;">'
             + name+'</span><span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;"> ('
             + ((sIcon=='user')?'private':'workgroup')
-            + ')</span></h3>').css({color:'rgb(142, 169, 185)'}).addClass('tree-accordeon-header');
+            + ')</span></h3>').addClass('tree-accordeon-header svs-header');
 
         if('dbs'!=domain){
 //console.log('adddddd');            

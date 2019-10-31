@@ -94,6 +94,7 @@ if(!$layout_theme) $layout_theme = 'heurist';
 
 if($layout_theme=="heurist" || $layout_theme=="base"){
     //default BASE or HEURIST theme
+    $layout_theme = 'base';
     $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
 }else{
     //load one of standard themes from jquery web resource
@@ -187,6 +188,13 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
 <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
+
+<style id="user_custom_color_theme">
+<?php
+// it is possible to include it via link/href, however it will cause additional system init 
+include dirname(__FILE__).'/../../hclient/framecontent/initPageTheme.php';
+?>
+</style>
 
 <script type="text/javascript">
 

@@ -53,7 +53,7 @@ require_once(dirname(__FILE__)."/initPage.php");
 </style>
 </head>
 
-<body style="background-color:white;font-size:0.8em">
+<body class="ui-heurist-bg-light" style="font-size:0.8em">
     <div style="top:0;bottom:0;left:0;position:absolute;padding:10px;font-size:1.2em">
 
         <h2>File export</h2>

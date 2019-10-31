@@ -278,7 +278,7 @@
     }
 
     /**
-    * Get set of properties from SESSION
+    * Get set of properties from SESSION and to database
     */
     function user_setPreferences($system, $params){
         

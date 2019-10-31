@@ -175,7 +175,7 @@ function hMapManager( _options )
         
         var $header = $('<h3 grpid="'+domain+'" class="hasmenu">' + sIcon + '<span style="vertical-align:top;">'
             + name + '</span>')
-            .css({color:'rgb(142, 169, 185)'}).addClass('tree-accordeon-header outline_suppress');
+            .addClass('tree-accordeon-header outline_suppress svs-header');
 
         /*    
         if('dbs'!=domain){

@@ -181,9 +181,9 @@ $.widget( "heurist.search_faceted", {
         
         if(!this.options.ispreview){                       //padding-top:1.4em;
             this.div_title = $('<div>')
-            .css({padding:'0.5em 0em 0.5em 1em','font-size':'1.4em','font-weight':'bold',color:'rgb(142, 169, 185)','max-width':'90%'})
+            .css({padding:'0.5em 0em 0.5em 1em','font-size':'1.4em','font-weight':'bold','max-width':'90%'})
 //style='text-align:left;margin:4px 0 0 0!important;padding-left:1em;width:auto, max-width:90%'></h3")
-                    .addClass('truncate').appendTo( this.div_header );
+                    .addClass('truncate svs-header').appendTo( this.div_header );
         }
 
         //"font-size":"0.7em",

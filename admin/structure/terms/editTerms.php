@@ -75,11 +75,6 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
             ul.fancytree-container li {
                 width:100%;
             }
-            /*
-            ul.fancytree-container li:hover {
-                background-color: rgb(142, 169, 185); 
-            }
-            */
             #term_tree{
                  background:none;
                  border:none;

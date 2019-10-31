@@ -60,6 +60,7 @@ if(!isset($layout_theme)) $layout_theme = 'heurist';
 
 if($layout_theme=="heurist" || $layout_theme=="base"){
     //default BASE or HEURIST theme
+    $layout_theme = "base";
     $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
 }else{
     //load one of standard themes from jquery web resource
@@ -78,6 +79,12 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
         <link rel="stylesheet" href="<?php echo $cssLink;?>" />
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
+        <style id="user_custom_color_theme">
+        <?php
+        // it is possible to include it via link/href, however it will cause additional system init 
+        include dirname(__FILE__).'/../../hclient/framecontent/initPageTheme.php';
+        ?>
+        </style>
     </head>
     <body style="padding:44px;" class="ui-heurist-header1">
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">

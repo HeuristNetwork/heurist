@@ -91,16 +91,6 @@ P {
     text-decoration: none;
 }
 
-/*  UI THEME FIX */
-.ui-button .ui-button-text {
-    line-height: 1em;
-}
-.ui-selectmenu-button span.ui-selectmenu-text{
-    padding: 0.1em 2.1em 0.2em 0.2em;
-}
-.ui-front{
-    z-index: 59999; /*999999;*/
-}
 /*  LAYOUT */
 .ui-layout-pane {
     padding: 0 !important;
@@ -154,23 +144,6 @@ P {
 #layout_panes{
     height: 100%;
     width: 100%;
-}
-
-/* overwrite ui */
-.ui-tabs-panel {
-    overflow: auto;
-    clear:both;
-    /*position: absolute;
-    top: 46px;
-    bottom: 2px;*/
-    padding: 0px !important;
-}
-.ui-tabs .ui-tabs-nav li a {
-    padding: 0.2em 0.5em !important;
-}
-
-.ui-resizable-resizing {
-    z-index: 99999 !important;
 }
 
 .tab_ctrl{
@@ -362,14 +335,7 @@ input.text, select.text {
     padding-bottom: 0.2em;
 }
 
-.readonly {
-    color: #999999;
-}
-.required,  .required>label{
-    color: #CC0000 !important;
-    font-weight: bold;
-}
-.recommended {
+.required, .required>label, .recommended {
     font-weight: bold;
 }
 
@@ -553,21 +519,6 @@ div.recordDiv > .rec_action_link{
     right: 0px;
 }
 
-
-
-/*
-h3 > #rec_edit_link{
-display: none;
-height: 16px;
-width: 16px;
-float: right;
-#selectable .ui-selecting { background: #FECA40; }
-}
-.ui-selecting{
-    border-color: #62A7F8;
-}
-, .ui-selected
-*/
 div .selected, div .selected:hover{
     background: -moz-linear-gradient(center top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent;
     background: -webkit-gradient(linear, left top, left bottom, from(#E6F8FD), to(#BEE4F8));
@@ -1063,10 +1014,6 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     text-decoration:underline;
 }
 
-.ui-accordion .ui-accordion-content {
-    padding: 0.1em;
-}
-
 /* for yox viewer */
 .thumbnails a
 {
@@ -1128,9 +1075,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     background:none !important;
     padding:0;
 }
-.ui-menu{
-    z-index: 99 !important;
-}
+
 .horizontalmenu > .ui-menu-item {
     display: inline-block;
     float: left;
@@ -1159,11 +1104,6 @@ Allow use of icon-large to be properly aligned
 }
 .ui-icon.icon-large {
     margin-top: -0.75em;
-}
-
-
-.fancytree-active > .fancytree-title{
-    background: #95A7B7 !important;
 }
 
 .fancytree-container{
@@ -1238,6 +1178,7 @@ ul.fancytree-container ul{
     font-size:0.9em;
     opacity: 0.55;
 }
+
 .prompt {
     color: #999999;
     font-size: 10px;
@@ -1269,11 +1210,6 @@ ul.fancytree-container ul{
     top:2px;
     font-size:0.9em;
     width:1em;
-}
-
-span.fancytree-node:hover{
-    background: #95A7B7 !important;
-    color: white !important;
 }
 
 ul > li:hover > div.svs-contextmenu{ /*, ul > li.leaves:hover > div.svs-contextmenu2*/
@@ -1331,11 +1267,8 @@ div > .svs-contextmenu {
                 width:100%;
                 cursor: pointer;
             }
-            span.fancytree-node.fancytree-active{
-                background: #95A7B7 !important;
-                color: white !important;
-            }
-             div.svs-contextmenu4{
+            
+            div.svs-contextmenu4{
                 cursor:pointer;
                 position:absolute;
                 right:7px;
@@ -1368,10 +1301,6 @@ background: #8ea9b9
     text-align:right
 }
 
-.mandatory > label{
-    color:red;
-}
-
 .loading{
    background: url('hclient/assets/loading-animation-white.gif') no-repeat center center !important;
 }
@@ -1402,53 +1331,30 @@ background: #8ea9b9
 
 .ent_wrapper{position:absolute;top:0;bottom:0;left:0;right: 1px;overflow:hidden;}
 .ent_header, .ent_footer, .ent_content, .ent_content_full{position:absolute; left:0; right:1px;}
-.ent_header{top:0;height:2.2em; padding:0.2em 0.5em;} /* border-bottom:lightgray solid 1px; background-color:#faa;, .ent_content_full*/
+.ent_header{top:0;height:2.2em; padding:0.2em 0.5em;}
 .ent_content{top:2.8em;bottom:3.5em; overflow-y:auto;}
 
 .ent_content_full{position:absolute;top:2.8em;bottom: 0;left:0;right: 1;overflow-y:auto;}
 .ent_footer{bottom:0px;height:2.6em;}
 
-.ent_wrapper.editor{
-    background-color:#ECF1FB !important; /*rgba(142,169,185,0.8);*/
-    font-size:0.9em;
-}
-
 .ent_wrapper.editor fieldset > div{
-    /*border-bottom: 1px solid RGBA(255,255,255,0.5);*/
     display: table;
     padding-top: 0.5em;
 }
-
-.ent_wrapper.editor .header, .header>label{
-    color:#6A7C99; /*#354F75*/
-}
-
-
 .ent_wrapper.editor .text{
-    background: none repeat scroll 0 0 #FFF  !important;
-    border: 1px solid rgba(0, 0, 0, 0.2);
     margin: 2px 0;
     padding: 3px;    
 }
-
-.ent_wrapper.editor .separator{
-    text-transform: uppercase;
-    color:#999;
-    border-top: 1px solid #A4B4CB;
-    margin-top: 5px;
-    padding-top: 10px;    
-}
-
-.ent_wrapper.editor .smallbutton{
-    color:black;
-}
-
 .ent_wrapper.editor .heurist-helper1{
-    color: #999999;
     font-style: normal;
     font-size: 10px;
     font-weight: normal;
     padding-top: 0.1em;    
+}
+.ent_wrapper.editor .separator{
+    text-transform: uppercase;
+    margin-top: 5px;
+    padding-top: 10px;    
 }
 
 
@@ -1530,7 +1436,7 @@ background: #8ea9b9
     cursor: pointer;
 }
 
-
+    /* NOT USED? */
     .menu-list {
         list-style: none;
         margin: 0;
@@ -1795,7 +1701,6 @@ option {padding-left:15px;}
     font-weight: bold;
     opacity: 1;
 }
-
     
 .recordList > .table_header{
     height: 1.2em;
@@ -1940,11 +1845,114 @@ input[type="file"] {
 .ui-map-document { background-image: url('hclient/assets/mapdocument.png') !important;}
 .ui-map-layer { background-image: url('hclient/assets/maplayer.png') !important;}
 
+/* bih red opem layout pane button */
+.prominent-cardinal-toggler{
+    background: red !important;
+    color: white;
+}
+
+.tree-accordeon-header{
+    background:none !important;
+    border: none !important;
+    font-weight:bold !important;
+    padding-bottom: 0 !important;
+    padding-left: 1.2em !important;
+}
+
+.tree-accordeon-header > .ui-accordion-header-icon{
+    left: 0 !important;
+    margin-top: -4px !important;
+}
+
+/*  UI BASE THEME FIX */
+.ui-accordion .ui-accordion-content {
+    padding: 0.1em;
+}
+.ui-menu{
+    z-index: 99 !important;
+}
+
+.ui-button .ui-button-text {
+    line-height: 1em;
+}
+.ui-selectmenu-button span.ui-selectmenu-text{
+    padding: 0.1em 2.1em 0.2em 0.2em;
+}
+.ui-front{
+    z-index: 59999; /*999999;*/
+}
+.ui-tabs-panel {
+    overflow: auto;
+    clear:both;
+    /*position: absolute;
+    top: 46px;
+    bottom: 2px;*/
+    padding: 0px !important;
+}
+.ui-tabs .ui-tabs-nav li a {
+    padding: 0.2em 0.5em !important;
+}
+
+.ui-resizable-resizing {
+    z-index: 99999 !important;
+}
+
 .ui-dialog .ui-dialog-buttonpane{
     margin-top:0.1em;
 }
 
-.prominent-cardinal-toggler{
-    background: red !important;
-    color: white;
+.ui-menu-item  > div{  /*heurist*/
+    font-weight: normal;
+    line-height: 1.5;
+    min-height: 0;
+    padding: 2px 0.4em;
+} 
+.ui-menu .ui-menu-item{
+    position: relative;
+    min-height: 0;    
+}
+.ui-menu .ui-menu-item a { /*heurist*/
+    display: block;
+    /* padding: 3px 1em 3px .4em; */
+    font-weight: normal;
+    line-height: 1.5;
+    min-height: 0;
+    padding: 2px 1em;
+    text-decoration: none;
+}
+.ui-menu .ui-menu-divider { /*heurist*/
+    height: 1px;
+    margin: 5px -2px;    
+}
+.ui-menu-icons .ui-menu-item {
+    padding-left: 2em !important;
+}
+.ui-accordion .ui-accordion-header {
+    padding: .5em .5em .5em 2.2em;
+}
+.ui-resizable-w {
+    left: 0px; /* was -5px */
+}
+
+/* chrome, safari - size of scrollbar  todo: MOVE to theme!!!! */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: #bac4cb;
+    /*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);*/
+}
+::-webkit-scrollbar-thumb:window-inactive {
+    background: rgba(142,169,185,0.4); 
 }

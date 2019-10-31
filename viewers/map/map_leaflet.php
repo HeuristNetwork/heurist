@@ -159,7 +159,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
         color:black;/*#95A7B7;*/
     }
 
-    leaflet-control-browser-print{
+    .leaflet-control-browser-print{
         width: 22px !important;
         height: 22px !important;
     }

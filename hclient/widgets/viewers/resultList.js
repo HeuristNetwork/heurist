@@ -530,8 +530,8 @@ $.widget( "heurist.resultList", {
                 text: window.hWin.HR('Save Filter'),
                 title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
             })
-            .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none', color: 'rgb(142, 169, 185)'})
-            .addClass('ui-state-focus')
+            .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none'})
+            .addClass('ui-state-focus svs-header')
             .appendTo( btndiv )
             .button({icons: {
                 primary: 'ui-icon-arrowthick-1-w'
@@ -558,8 +558,8 @@ $.widget( "heurist.resultList", {
                 text: window.hWin.HR('Re-order and Save'),
                 title: window.hWin.HR('Allows manual reordering of the current results and saving as a fixed list of ordered records')
             })
-            .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none', color: 'rgb(142, 169, 185)', float:'right'})
-            .addClass('ui-state-focus')
+            .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none', float:'right'})
+            .addClass('ui-state-focus svs-header')
             .appendTo( btndiv )
             .button().hide();
             

@@ -1065,6 +1065,24 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             });
             
 
+            //custom/user heurist theme
+            var $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open theme editor'})
+                .addClass('smallbutton btn_add_term')
+                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                .appendTo( $dlg.find('#custom_theme_div') );
+
+            function __openThemeDialog(){
+                    var current_val = window.hWin.HEURIST4.util.isJSON( $dlg.find('#custom_theme').val() );
+                    if(!current_val) current_val = {};
+                    window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
+                        $dlg.find('#custom_theme').val(JSON.stringify(new_value));
+                    });
+            }
+                
+            $dlg.find('#custom_theme').attr('readonly','readonly').on({ click: __openThemeDialog });
+            $btn_edit_switcher2.on( { click: __openThemeDialog });
+            
+            
             //map symbology editor            
             $dlg.find('#map_default_style').attr('readonly','readonly');
             var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
