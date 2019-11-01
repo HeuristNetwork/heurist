@@ -132,11 +132,6 @@ $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 
 $site_css = __getValue($rec, DT_CMS_CSS);
 
-$layout_theme = 'heurist';//'le-frog'; //__getValue($rec, DT_CMS_THEME);
-if(!$layout_theme) $layout_theme = 'heurist';
-$cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-
-
 //
 // returns link to uploaded file
 //
@@ -195,9 +190,10 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 ?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.layout/jquery.layout-latest.js"></script>
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-    <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
-    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
     
+    <!-- CSS -->
+    <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+   
     <!-- link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/tinymce/skins/lightgray/content.min.css"/ -->
 
 <script>

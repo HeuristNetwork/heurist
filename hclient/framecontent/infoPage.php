@@ -18,7 +18,6 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 $is_inlcuded = false;
-    
 
 if(!defined('PDIR')) {
     $is_inlcuded = true;
@@ -50,24 +49,6 @@ if(!isset($message)){
         $message ='Unknown error.';
     }
 }
-
-if(isset($system) && $system->is_inited()){
-    $user = $system->getCurrentUser();
-    $layout_theme = @$user['ugr_Preferences']['layout_theme'];
-}
-if(!isset($layout_theme)) $layout_theme = 'heurist';
-
-
-if($layout_theme=="heurist" || $layout_theme=="base"){
-    //default BASE or HEURIST theme
-    $layout_theme = "base";
-    $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-}else{
-    //load one of standard themes from jquery web resource
-    $cssLink = 'https://code.jquery.com/ui/1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-}
-
-
 ?>
 <html>
     <head>
@@ -76,15 +57,9 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
 
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
-        <link rel="stylesheet" href="<?php echo $cssLink;?>" />
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css">
+        <!-- CSS -->
+        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
-        <style id="user_custom_color_theme">
-        <?php
-        // it is possible to include it via link/href, however it will cause additional system init 
-        include dirname(__FILE__).'/../../hclient/framecontent/initPageTheme.php';
-        ?>
-        </style>
     </head>
     <body style="padding:44px;" class="ui-heurist-header1">
         <div class="ui-corner-all ui-widget-content" style="text-align:left; width:70%; min-width:220px; margin:0px auto; padding: 0.5em;">

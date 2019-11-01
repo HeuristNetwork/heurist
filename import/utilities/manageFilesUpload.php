@@ -44,9 +44,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-        
+
+        <!-- CSS -->
+        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
 
         <!-- Demo styles -->
         <link rel="stylesheet" href="../../external/jquery-file-upload/css/demo.css">

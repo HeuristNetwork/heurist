@@ -184,6 +184,7 @@
 
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
+        <!-- CSS -->
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
         
         <link rel="icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">

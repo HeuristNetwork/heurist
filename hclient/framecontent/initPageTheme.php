@@ -17,37 +17,81 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+
+/*
+
+There are 3 color themes in Heurist. 
+Main (gray) with option of different bg (white) for lists and popups
+Editor (light blue)
+Header (iron head flower color)
+Each theme has its own set for text/label, background, inputs bg and border colors.  Main and Editor share the same Color for buttons/clickable elements (default:lightgray; focus:gray with border; pressed:blue). Header’s buttons are always the same color as main background.
+There are still some exception:
+Result list color scheme - may I uniform colors with our general scheme?
+Optgroup (group header in dropdown)  bg: #ECF1FB - can be changed to #95A7B7 (headers)
+Resource selector (in edit form)  bg: #F4F2F4 - can be changed to button light gray or pressed button (light blue)
+Select linked record button   bg:#f0ecf0 - can be changed to button light gray or pressed button (light blue)
+Scrollbar tracks and thumbs  rgba(0,0,0,0.3)/#bac4cb
+Admin section/smarty editor - use H3 styles from admin/global.css
+
+*/
 require_once(dirname(__FILE__)."/../../hsapi/System.php");
 
 if(!isset($system)){
-
-    $error_msg = '';
-    $isSystemInited = false;
 
     // init main system class
     $system = new System();
 
     if(@$_REQUEST['db']){
         //if database is defined then connect to given database
-        $isSystemInited = $system->init(@$_REQUEST['db']);
-    }
-
-    if(!$isSystemInited){
-        exit();
+        $system->init(@$_REQUEST['db']);
     }
 }
-
-$user = $system->getCurrentUser();
-$ut = @$user['ugr_Preferences']['custom_theme'];
-if($ut!=null){
-    $ut = json_decode($ut, true);    
+if($system->is_inited()){
+    $user = $system->getCurrentUser();
+    $ut = @$user['ugr_Preferences']['custom_theme'];
+    if($ut!=null){
+        $ut = json_decode($ut, true);    
+    }
 }
-if(!is_array($ut)){
+if(!isset($ut) || !is_array($ut)){
     $ut = array();    
 }
+
 $def_ut = array(
 'cd_bg'=>'#e0dfe0',
-'cd_input'=>'F4F2F4'
+'cl_bg'=>'#ffffff',
+'cd_input'=>'#F4F2F4',
+'cd_color'=>'#333333',
+'cd_input'=>'#F4F2F4',
+'cd_border'=>'#95A7B7',
+
+'ca_bg'=>'#364050',
+'ca_color'=>'#ffffff',
+'ca_input'=>'#536077',
+
+'ce_bg' =>'#ECF1FB',
+'ce_color'=>'#6A7C99',
+'ce_input'=>'#ffffff',
+'ce_helper'=>'#999999',
+'ce_readonly'=>'#999999',
+'ce_mandatory'=>'#CC0000',
+
+'cd_corner'=>'0',
+
+'sd_color' =>'#555555',
+'sd_bg'    =>'#f2f2f2',
+
+'sh_border' =>'#999999',
+'sh_color'  =>'#2b2b2b',
+'sh_bg'     =>'#95A7B7',
+
+'sa_border' =>'#aaaaaa',
+'sa_bg'     =>'#95A7B7',
+'sa_color'  =>'#212121', 
+
+'sp_border' =>'#003eff', 
+'sp_color'  =>'#ffffff', 
+'sp_bg'     =>'#9CC4D9'
 
 );    
 
@@ -60,15 +104,7 @@ function uout($idx, $def){
     }
 }
 ?>
-/* 
-Main content
-
-border      #e0dfe0  header-border: #dddddd;
-background: #e0dfe0  header-background: #e9e9e9
-color       #333333  /*dark gray */
-input       #F4F2F4
-*/
-
+/* MAIN SCHEME */
 .ui-dialog .ui-dialog-buttonpane button.ui-state-hover,
 .ui-dialog .ui-dialog-buttonpane button.ui-state-focus  {
     background: none;
@@ -85,19 +121,10 @@ textarea.ui-widget-content, input.ui-widget-content, select.ui-widget-content{
 .ui-widget-content a {
     color: <?php uout('cd_color', '#333333');?>;  
 }
-/* NOT USED @todo remove
-.ui-widget-header {
-    border: 1px solid  <?php uout('cd_bg', '#dddddd');?>;  
-    background: <?php uout('cd_bg', '#e9e9e9');?>;  
-    color: <?php uout('cd_color', '#333333');?>;  
-    font-weight: bold;
+.ui-heurist-bg-light{
+    background-color: <?php uout('cl_bg', '#ffffff');?> !important;
 }
-.ui-widget-header a {
-    color: <?php uout('cd_color', '#333333');?>;  
-}
- */
- 
-/* BORDERS AND DIALOG TITLE */ 
+/* BORDERS, HEADERS AND DIALOG TITLE */ 
 .ui-dialog {
     border: 2px solid <?php uout('cd_border', '#95A7B7');?> !important;
 }
@@ -121,15 +148,7 @@ textarea.ui-widget-content, input.ui-widget-content, select.ui-widget-content{
 .svs-header{
     color: <?php uout('cd_border', '#95A7B7');?>;
 }
-
-/* ALTERNATIVE CONTENT (HEURIST HEADER (NAVY) OR LIGHT COLOR BG) 
-
-border      none
-background: #364050
-color       #ffffff
-input       #536077
-
-*/
+/* ALTERNATIVE SCHEME (HEURIST HEADER) */
 select.ui-heurist-header2, input.ui-heurist-header2{
     background-color:<?php uout('ca_input', '#536077');?> !important;    
 }                                                  
@@ -144,35 +163,19 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 .ui-heurist-header2 a{
     color:<?php uout('ca_color', '#ffffff');?> !important;
 }
-.ui-heurist-bg-light{
-    background-color: <?php uout('cl_bg', '#ffffff');?> !important;
-}
 
-/* EDITOR CONTENT
-
-background: #ECF1FB
-color       #6A7C99
-input       #ffffff
-input border = cd_bg
-helper1/sepearator  #999999
-ce_readonly/
-ce_mandatory  #CC0000
-*/
-
+/* EDITOR CONTENT */
 .ent_wrapper.editor{
     background-color:<?php uout('ce_bg', '#ECF1FB');?> !important;
     font-size:0.9em;
 }
-
 .ent_wrapper.editor .header, .header>label{
     color: <?php uout('ce_color', '#6A7C99');?>;
 }
-
 .ent_wrapper.editor .text{
     background: none repeat scroll 0 0 <?php uout('ce_input', '#ffffff');?>  !important;
     border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?>;;
 }
-
 .ent_wrapper.editor .separator{
     color: <?php uout('ce_helper', '#999999');?>;
     border-top: 1px solid <?php uout('cd_border', '#95A7B7');?>;
@@ -217,10 +220,7 @@ ce_mandatory  #CC0000
 }
 
 
-/* Interaction states
-sd_color #555555
-sd_bg    #f2f2f2
-----------------------------------*/
+/* CLICKABLE: DEFAULT */
 .ui-state-default,
 .ui-widget-content .ui-state-default,
 .ui-widget-header .ui-state-default,
@@ -246,15 +246,7 @@ a:visited.ui-button,
     text-decoration: none;
 }
 
-/*
-hover and focus
-
-sh_border#999999  gray teal (as header)
-sh_color #2b2b2b  dark gray
-sh_bg    #95A7B7
-
-*/
-
+/*  CLICKABLE: HOVER AND FOCUS */
 .ui-button:hover,
 .ui-button:focus {
     border: 1px solid <?php uout('sh_border', '#999999');?>;  /*for buttons change border only*/
@@ -288,18 +280,7 @@ a.ui-button:focus {
     box-shadow: 0 0 3px 1px rgb(94, 158, 214);
 }
 
-/*
-active
-
-sa_border #aaaaaa 
-sa_bg:    #95A7B7
-sa_color  #212121 
-
-sp_border #003eff 
-sp_color #ffffff 
-sp_bg #9CC4D9
-*/
-
+/*  CLICKABLE: ACTIVE */
 .ui-state-active,
 .ui-widget-content .ui-state-active,
 .ui-widget-header .ui-state-active{
@@ -308,7 +289,7 @@ sp_bg #9CC4D9
     color: <?php uout('sa_color', '#212121');?>;
     font-weight: normal;
 }
-/* pressed button */
+/*  CLICKABLE: PRESED */
 a.ui-button:active,
 .ui-button:active,
 .ui-button.ui-state-active:hover {
@@ -328,7 +309,6 @@ a.ui-button:active,
     color: <?php uout('sa_color', '#212121');?>;
     text-decoration: none;
 }
-
 .fancytree-active > .fancytree-title{
     background: <?php uout('sa_bg', '#95A7B7');?> !important;
 }

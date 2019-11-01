@@ -104,8 +104,9 @@ require_once(dirname(__FILE__).'/../saveStructureLib.php');
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        
+        <!-- CSS -->
+        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
 
         <style type="text/css">
             .dtyField {

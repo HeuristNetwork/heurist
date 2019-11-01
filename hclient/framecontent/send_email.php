@@ -26,6 +26,9 @@
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
 
+define('PDIR','../../');  //need for proper path to js and css    
+
+require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_mail.php');
 
 // POST request
@@ -62,9 +65,11 @@ if(isset($_POST['data'])) {
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <title>Bulk email sender</title>
 
-  <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-  <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-themes-1.12.1/themes/heurist/jquery-ui.css" />
-  <link rel="stylesheet" type="text/css" href="../../h4styles.css">
+  <!-- CSS -->
+  <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+
+  <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+  <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
   <style>
     #btn_redo {
@@ -79,7 +84,6 @@ if(isset($_POST['data'])) {
 
   </style>
   
-  <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>  
 </head>
 
 <body class="ui-heurist-bg-light" onload="setup()">

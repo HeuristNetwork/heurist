@@ -83,9 +83,8 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
         
-        <!-- Heurist CSS -->
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>">
+        <!-- CSS -->
+        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
 
         <!-- Heurist JS -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        

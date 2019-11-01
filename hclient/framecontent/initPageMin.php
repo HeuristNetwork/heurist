@@ -57,20 +57,6 @@ if(isset($message)){
     include ERROR_REDIR;
     exit();
 }
-//$system->defineConstants(); //init constants for record and field types
-
-$user = $system->getCurrentUser();
-$layout_theme = @$user['ugr_Preferences']['layout_theme'];
-if(!$layout_theme) $layout_theme = 'heurist';
-
-if($layout_theme=="heurist" || $layout_theme=="base"){
-    //default BASE or HEURIST theme
-    $layout_theme = "base";
-    $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-}else{
-    //load one of standard themes from jquery web resource
-    $cssLink = 'https://code.jquery.com/ui/1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-}
 
 function echo_flush($msg){
     ob_start();

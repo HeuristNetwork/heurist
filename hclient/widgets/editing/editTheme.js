@@ -1,5 +1,6 @@
 /*
 * editTheme.js - define Heurist color theme
+* refer initPageTheme.php for documentaton about heurist color themes
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -65,10 +66,19 @@ function editTheme(current_value, callback){
                 "dtFields":{
                     "dty_Type":"freetext",
                     "rst_DisplayName": "Background:",
-                    "rst_DisplayHelpText": "Widgets BG",
+                    "rst_DisplayHelpText": "Background colot for most of widgets",
                     "rst_FieldConfig":{"colorpicker":"colorpicker"},
                     "rst_DefaultValue": "#e0dfe0"
             }},
+            {"dtID": "cl_bg",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "rst_DisplayName": "Light background:",
+                    "rst_DisplayHelpText": "Background color for lists and popups.",
+                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
+                    "rst_DefaultValue": "#364050"
+            }},
+            
             {"dtID": "cd_color",
                 "dtFields":{
                     "dty_Type":"freetext",
@@ -130,14 +140,6 @@ function editTheme(current_value, callback){
                     "rst_DisplayHelpText": "Background color for input elements on header panels",
                     "rst_FieldConfig":{"colorpicker":"colorpicker"},
                     "rst_DefaultValue": "#536077"
-            }},
-            {"dtID": "cl_bg",
-                "dtFields":{
-                    "dty_Type":"freetext",
-                    "rst_DisplayName": "Light color background:",
-                    "rst_DisplayHelpText": "Background color for lists and popups. Text, input and other color are taken from default color scheme",
-                    "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#364050"
             }}
         ]},
         {

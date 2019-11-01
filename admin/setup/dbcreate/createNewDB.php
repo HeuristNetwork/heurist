@@ -47,22 +47,9 @@ if(@$_REQUEST['db']){
     $registrationRequired = false;
     
     $current_user = $system->getCurrentUser();
-    $layout_theme = @$current_user['ugr_Preferences']['layout_theme'];
-    
 }else{
-    $layout_theme = null;
     $registrationRequired = true;
 }
-
-if(!$layout_theme) $layout_theme = 'heurist';
-if($layout_theme=="heurist" || $layout_theme=="base"){
-    //default BASE or HEURIST theme
-    $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-}else{
-    //load one of standard themes from jquery web resource
-    $cssLink = 'https://code.jquery.com/ui/1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-}
-
 ?>
 <html>
     <head>
@@ -74,10 +61,9 @@ if($layout_theme=="heurist" || $layout_theme=="base"){
         <!-- jQuery UI -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-        
-        <!-- Heurist CSS -->
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>">
+
+        <!-- CSS -->
+        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
 
         <!-- Heurist JS -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        

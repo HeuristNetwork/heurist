@@ -35,17 +35,6 @@ $system = new System();
 if(!(@$_REQUEST['db'] && $system->init(@$_REQUEST['db']))){
     exit;
 }
-
-/*
-TODO: Remove, enable or explain
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="../../h4styles.css">
-</head>
-<body>
-</body>
-</html>
-*/
 ?>
 
 

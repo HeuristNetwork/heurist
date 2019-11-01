@@ -32,8 +32,9 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Delete Current Heurist Database</title>
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
-        <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        
+        <!-- CSS -->
+        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>

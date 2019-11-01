@@ -23,7 +23,7 @@
 define('MANAGER_REQUIRED',1);   
 define('PDIR','../../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
+require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPageMin.php");
 ?>
 <html>
     <head>
@@ -40,12 +40,13 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
         <link rel="stylesheet" type="text/css" href="../../../external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
         <script type="text/javascript" src="../../../external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
-        <!-- <script type="text/javascript" src="https://github.com/mar10/fancytree/src/jquery.fancytree.wide.js"></script> -->
-<!--
-        <link rel="stylesheet" type="text/css" href="../../../common/css/global.css">
-        <link rel="stylesheet" type="text/css" href="../../../common/css/admin.css">
--->        
-        <link rel="stylesheet" type="text/css" href="../../../h4styles.css">
+
+        <!-- CSS -->
+        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        
+        
+        
         <style type="text/css">
             .dtyField {
                 padding-bottom: 3px;

@@ -40,7 +40,8 @@
 	<head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
+        <!-- CSS -->
+        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
         
         <link rel="icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">

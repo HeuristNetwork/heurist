@@ -104,8 +104,9 @@ $mysqli = $system->get_mysqli();
 
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-        <link rel="stylesheet" type="text/css" href="<?echo $cssLink;?>">
+        
+        <!-- CSS -->
+        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
 
         <style type="text/css">
             .success { font-weight: bold; color: green; margin-left: 3px; }

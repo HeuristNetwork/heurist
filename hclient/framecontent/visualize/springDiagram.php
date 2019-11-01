@@ -21,10 +21,7 @@
 
 if(!defined('PDIR')) define('PDIR','../../../');
 require_once(dirname(__FILE__)."/../initPage.php");
-
-//common/css/global.css
 ?>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css">
         <style>
             body, html {
                 background-color: #fff;

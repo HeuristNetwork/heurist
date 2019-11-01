@@ -52,8 +52,6 @@ if(!$isSystemInited){
     exit();
 }
 
-$login_warning = 'To perform this action you must be logged in';
-
 //
 // to limit access to particular page
 // define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
@@ -63,7 +61,7 @@ if(defined('LOGIN_REQUIRED') && !$system->has_access()){
     //$message = $login_warning
     //include ERROR_REDIR;
     exit();
-}else if(defined('MANAGER_REQUIRED') && !$system->is_admin() ){ //A member should also be able to create and open database
+}else if(defined('MANAGER_REQUIRED') && !$system->is_admin()){ //A member should also be able to create and open database
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
     include ERROR_REDIR;
     exit();
@@ -87,19 +85,6 @@ if(defined('IS_INDEX_PAGE')){
 }
 
 //$system->defineConstants(); //init constants for record and field types
-
-$user = $system->getCurrentUser();
-$layout_theme = @$user['ugr_Preferences']['layout_theme'];
-if(!$layout_theme) $layout_theme = 'heurist';
-
-if($layout_theme=="heurist" || $layout_theme=="base"){
-    //default BASE or HEURIST theme
-    $layout_theme = 'base';
-    $cssLink = PDIR.'external/jquery-ui-themes-1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-}else{
-    //load one of standard themes from jquery web resource
-    $cssLink = 'https://code.jquery.com/ui/1.12.1/themes/'.$layout_theme.'/jquery-ui.css';
-}
 
 // BASE tag is convenient however it does not suit
 // reason: some jquery widgets uses href (tabcontrol for example)
@@ -134,7 +119,6 @@ if(defined('IS_INDEX_PAGE')){
 
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 
 <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
@@ -186,15 +170,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/digital_harlem/google_analytics.js"></script>
 <?php } ?>
 
-<link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>" /> <!-- theme css -->
-<link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />  <!-- base css -->
-
-<style id="user_custom_color_theme">
-<?php
-// it is possible to include it via link/href, however it will cause additional system init 
-include dirname(__FILE__).'/../../hclient/framecontent/initPageTheme.php';
-?>
-</style>
+<!-- CSS -->
+<?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
 
 <script type="text/javascript">
 

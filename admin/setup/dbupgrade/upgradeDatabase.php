@@ -49,12 +49,13 @@ if(!defined('PDIR')){
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         
         <link rel=icon href="<?php echo PDIR?>favicon.ico" type="image/x-icon">
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR?>external/jquery-ui-themes-1.12.1/themes/heurist/jquery-ui.css"/>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR?>h4styles.css">
         
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
+        <!-- CSS -->
+        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
