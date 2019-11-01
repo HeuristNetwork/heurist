@@ -66,7 +66,7 @@ function editTheme(current_value, callback){
                 "dtFields":{
                     "dty_Type":"freetext",
                     "rst_DisplayName": "Background:",
-                    "rst_DisplayHelpText": "Background colot for most of widgets",
+                    "rst_DisplayHelpText": "Background color for most of widgets",
                     "rst_FieldConfig":{"colorpicker":"colorpicker"},
                     "rst_DefaultValue": "#e0dfe0"
             }},
@@ -76,7 +76,7 @@ function editTheme(current_value, callback){
                     "rst_DisplayName": "Light background:",
                     "rst_DisplayHelpText": "Background color for lists and popups.",
                     "rst_FieldConfig":{"colorpicker":"colorpicker"},
-                    "rst_DefaultValue": "#364050"
+                    "rst_DefaultValue": "#ffffff"
             }},
             
             {"dtID": "cd_color",
@@ -151,7 +151,7 @@ function editTheme(current_value, callback){
                 "dtFields":{
                     "dty_Type":"freetext",
                     "rst_DisplayName": "Background:",
-                    "rst_DisplayHelpText": "Background color editor form",
+                    "rst_DisplayHelpText": "Background color for editor form",
                     "rst_FieldConfig":{"colorpicker":"colorpicker"},
                     "rst_DefaultValue": "#ECF1FB"
             }},
@@ -191,7 +191,7 @@ function editTheme(current_value, callback){
                 "dtFields":{
                     "dty_Type":"freetext",
                     "rst_DisplayName": "Helper and prompts:",
-                    "rst_DisplayHelpText": "Color for helper and prompts",
+                    "rst_DisplayHelpText": "Color for helpers and prompts",
                     "rst_FieldConfig":{"colorpicker":"colorpicker"},
                     "rst_DefaultValue": "#999999"
             }}

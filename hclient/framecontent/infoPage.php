@@ -52,7 +52,7 @@ if(!isset($message)){
 ?>
 <html>
     <head>
-        <title><?echo defined('HEURIST_TITLE')?HEURIST_TITLE:"Heurist"; ?></title>
+        <title><?php print defined('HEURIST_TITLE')?HEURIST_TITLE:"Heurist"; ?></title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">

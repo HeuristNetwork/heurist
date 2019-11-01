@@ -53,7 +53,7 @@ if($layout_theme==null || $layout_theme=='' || $layout_theme=="heurist" || $layo
 <!-- Heurist CSS -->
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 <!-- Heurist Color Themes -->
-<style id="user_custom_color_theme">
+<style id="heurist_color_theme">
 <?php
     include PDIR.'hclient/framecontent/initPageTheme.php';
 ?>

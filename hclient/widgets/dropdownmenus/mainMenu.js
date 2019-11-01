@@ -1066,11 +1066,18 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
 
             //custom/user heurist theme
+            var custom_theme_div = $dlg.find('#custom_theme_div');
             var $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open theme editor'})
                 .addClass('smallbutton btn_add_term')
                 .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                .appendTo( $dlg.find('#custom_theme_div') );
+                .appendTo( custom_theme_div );
 
+            var $btn_edit_clear2 = $( '<span>reset colors</span>', {title: 'Reset default color settings'})
+                .addClass('smallbutton btn_add_term')
+                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                .appendTo(custom_theme_div )
+                .on( { click: function(){ $dlg.find('#custom_theme').val(''); } });
+                
             function __openThemeDialog(){
                     var current_val = window.hWin.HEURIST4.util.isJSON( $dlg.find('#custom_theme').val() );
                     if(!current_val) current_val = {};
@@ -1135,8 +1142,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             var prefs = window.hWin.HAPI4.currentUser['ugr_Preferences'];
                             
                             var ask_reload = (prefs['layout_language'] != request['layout_language'] ||
-                                prefs['layout_theme'] != request['layout_theme'] ||
+                                //prefs['layout_theme'] != request['layout_theme'] ||
                                 prefs['layout_id'] != request['layout_id']);
+                                
+                            var reload_color_css = (prefs['custom_theme'] != request['custom_theme']);
 
                             var reload_map = (prefs['mapcluster_grid'] != request['mapcluster_grid'] ||    
                                 prefs['mapcluster_on'] != request['mapcluster_on'] || 
@@ -1192,6 +1201,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                 }
                                 
                                 window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                                
+                                //reload color scheme
+                                if(reload_color_css){
+                                    $('head').find('#heurist_color_theme')
+                                        .load( window.hWin.HAPI4.baseURL 
+                                        + 'hclient/framecontent/initPageTheme.php?db='
+                                        + window.hWin.HAPI4.database);
+                                }
                             }
 
                         }else{
