@@ -1879,7 +1879,7 @@ if(!detailtypes[dtID]){
                                         max = __roundNumericLabel(max);
                                     }
                                     $( "#facet_range"+facet_index )
-                                        .text( min + " - " + max + ((cnt>0)?" ("+cnt+")":"") );
+                                        .text( min + " - " + max ); //+ ((cnt>0)?" ("+cnt+")":"") );
                                 }
                             }
                             

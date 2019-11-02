@@ -343,6 +343,12 @@ $.widget( "heurist.mapping", {
         var ele = $('#'+map_element_id);
         if(this.mapManager) this.mapManager.setHeight(ele.height()-50); //adjust legend height    
     
+    
+    //invalidateSize
+    },
+    
+    invalidateSize: function(){
+        if(this.nativemap) this.nativemap.invalidateSize();
     },
     
     
@@ -620,7 +626,9 @@ $.widget( "heurist.mapping", {
 
              if(that.options.show_tooltip){
                 new_layer.bindTooltip(function (layer) {
-                    return layer.feature.properties.rec_Title;
+                    if(layer.feature && layer.feature.properties){
+                        return layer.feature.properties.rec_Title;
+                    }
                 })
              }                
 

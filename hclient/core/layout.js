@@ -261,6 +261,8 @@ function hLayout(args) {
     //
     function _initLayoutCardinal(layout, $container){
         
+console.log('init cardinal');
+        
         var layout_opts =  {
             applyDefaultStyles: true,
             maskContents:        true,
@@ -644,6 +646,9 @@ function hLayout(args) {
                     layout_opts['togglerContent_closed'] = '&nbsp;';
                     layout_opts['spacing_open'] = 6;
                     layout_opts['spacing_closed'] = 16;
+                    layout_opts['onresize_end'] = function(){
+                            $(document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
+                    };
 
 
                     if(!$pane.is(':visible')){

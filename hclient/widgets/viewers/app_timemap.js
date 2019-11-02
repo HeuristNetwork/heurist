@@ -53,6 +53,8 @@ $.widget( "heurist.app_timemap", {
     map_curr_search_inited: false,
     map_cache_got: false, 
 
+    map_resize_timer: 0,
+    
     // the constructor
     _create: function() {
 
@@ -81,6 +83,7 @@ $.widget( "heurist.app_timemap", {
         if(this.options.eventbased){
 
             this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS
+            + ' ' + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
             + ' ' + window.hWin.HAPI4.Event.ON_SYSTEM_INITED
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
@@ -96,6 +99,21 @@ $.widget( "heurist.app_timemap", {
                         that._refresh();
                     }
 
+                }else if(e.type == window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE){
+                    
+                    if(that.options.leaflet && that.mapframe[0].contentWindow){
+                        var mapping = that.mapframe[0].contentWindow.mapping;
+                        if(mapping) {
+                            if(that.map_resize_timer>0) clearTimeout(that.map_resize_timer);
+                            that.map_resize_timer = setTimeout(function(){
+                                that.map_resize_timer = 0;
+                                mapping.mapping('invalidateSize');         
+                            },400);
+                            
+                        }
+                    }
+            
+                    
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                     //accept events from the same realm only
                     if(!((data && data.search_realm=='mapping_recordset') || 
@@ -292,6 +310,7 @@ console.log(re);
                 setTimeout(function(){ that._initmap(cnt_call); }, 1000); //bad idea
                 return;
             }
+            
 
             if(this.map_inited && cnt_call>0) return;
             
