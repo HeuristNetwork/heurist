@@ -493,7 +493,7 @@ You can edit the record type structure by clicking on the name in the list below
                                     <?= $row['dtl_RecID'] ?>
                                     <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                 </a></td>
-                            <td><?= htmlspecialchars($row['rec_Title']) ?></td>
+                            <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                             <td><?= $row['dty_Name'] ?></td>
                         </tr>
                         <?php
@@ -551,7 +551,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                                     </a></td>
                                 <td><?= $row['dty_Name'] ?></td>
                                 <td>points to</td>
-                                <td><?= $row['rec_ID'] ?> (<?= $row['rty_Name'] ?>) - <?= htmlspecialchars(substr($row['rec_Title'], 0, 50)) ?></td>
+                                <td><?= $row['rec_ID'] ?> (<?= $row['rty_Name'] ?>) - <?=(substr(strip_tags($row['rec_Title']), 0, 50)) ?></td>
                             </tr>
                             <?php
                         }
@@ -851,7 +851,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                                 <?= $row['dtl_RecID'] ?>
                                 <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
-                        <td><?= htmlspecialchars(substr($row['rec_Title'],0,50)) ?></td>
+                        <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>                            
                         <td><?= $row['dty_Name'] ?></td>
                     </tr>
                     <?php
@@ -968,7 +968,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
                                 <?= $row['dtl_RecID'] ?>
                                 <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
-                        <td><?= htmlspecialchars(substr($row['rec_Title'],0,50)) ?></td>
+                        <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                         <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
                         <td><?= ($row['new_value']?('=>&nbsp;&nbsp;'.$row['new_value']):'<no auto fix>') ?></td>
                     </tr>
@@ -976,6 +976,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
                 }
                 print '</table>';
             }
+exit();            
             ?>
 
             <hr>
@@ -1062,7 +1063,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
                                 <?= $row['dtl_RecID'] ?>
                                 <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                             </a></td>
-                        <td><?= htmlspecialchars(substr($row['rec_Title'],0,50)) ?></td>
+                        <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>                        
                         <td><?= $row['dty_Name'] ?></td>
                     </tr>
                     <?php
@@ -1129,7 +1130,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                             <td style="width:15ex;padding-left:5px;"><?= $row['dty_Name'] ?></td>
                             <!-- >Artem TODO: Need to render the value as the term label, not the numeric value -->
                             <td style="width: 23ex;padding-left: 5px;"><?= $row['dtl_Value'].'&nbsp;'.$row['trm_Label'] ?></td>
-                            <td style="padding-left: 25px;"><?= htmlspecialchars(substr($row['rec_Title'], 0, 500)) ?></td>
+                            <td class="truncate" style="padding-left:25px;max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                         </tr>
                     <?php
                     //array_push($bibs, $row);    // MEMORY EXHAUSTION happens here
@@ -1215,7 +1216,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                                     <?= $row['dtl_RecID'] ?></a>
                                     <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                 </td>
-                                <td><?= htmlspecialchars($row['rec_Title']) ?>
+                                <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                                 </td>
                                 <?php
                                 $rec_id = $row['dtl_RecID'];
@@ -1303,8 +1304,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;
                                         <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                     </a>
                                 </td>
-                                <td>
-                                <?= htmlspecialchars($row['rec_Title']) ?></td>
+                                <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                                 <?php
                                 $rec_id = $row['rec_ID'];
                             }else{
@@ -1396,9 +1396,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;
                                         </a>
                                     </td>
                                     
-                                    <td width="400px" style="max-width:400px" class="truncate">
-                                        <?php echo htmlspecialchars($row['rec_Title']);?>
-                                    </td>
+                                    <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>                      
                                     <?php
                                     $rec_id = $row['rec_ID'];
                                 }else{
@@ -1408,7 +1406,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;
 
                                 <td><?= $row['dty_ID'] ?></td>
                                 <td width="100px" style="max-width:100px" class="truncate"><?= $row['dty_Name'] ?></td>
-                                <td><?= htmlspecialchars($row['dtl_Value']) ?></td>
+                                <td><?= strip_tags($row['dtl_Value']) ?></td>
                             </tr>
                             <?php
                         }
