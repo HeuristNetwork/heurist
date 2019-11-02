@@ -1659,12 +1659,22 @@ $.widget( "heurist.editing_input", {
                         showTrigger: '<span class="ui-icon ui-icon-calendar trigger" style="display:inline-block" alt="Popup"></span>'}
                     );     
                            
-                }else{                                       // we use jquery datepicker
-                        var $datepicker = $input.datepicker({
+                }else{ // we use jquery datepicker
+                
+                        
+                        var $tinpt = $('<input type="hidden">').val($input.val()).appendTo( $inputdiv );
+
+                        var $btn_datepicker = $( '<span>', {title: 'Show calendar'})
+                            .addClass('smallicon ui-icon ui-icon-calendar')
+                            .appendTo( $inputdiv );
+                            
+                        
+                        var $datepicker = $tinpt.datepicker({
                             /*showOn: "button",
+                            showButtonPanel: false,
                             buttonImage: "ui-icon-calendar",
                             buttonImageOnly: true,*/
-                            showButtonPanel: true,
+                            showButtonPanel: false,
                             changeMonth: true,
                             changeYear: true,
                             dateFormat: 'yy-mm-dd',
@@ -1679,45 +1689,63 @@ $.widget( "heurist.editing_input", {
                                     $datepicker.datepicker( "option", "defaultDate", prev_dp_value); 
                                 }else if(cv!='' && cv.indexOf('-')<0){
                                     $datepicker.datepicker( "option", "defaultDate", cv+'-01-01'); 
+                                }else if(cv!='') {
+                                    $tinpt.val($input.val());
+                                    //$datepicker.datepicker( "option", "setDate", cv); 
                                 }
                             
                             },
                             onClose: function(dateText, inst){
-                                __onDateChange();
                                 
-                                if($input.val()!='')
+                                if($tinpt.val()!=''){
+                                    $input.val($tinpt.val());
                                     window.hWin.HAPI4.save_pref('edit_record_last_entered_date', $input.val());
-                                //$input.change();
-                            }
-                            /*,beforeShow : function(dateText, inst){
-                                $(inst.dpDiv[0]).find('.ui-datepicker-current').click(function(){
-                                    console.log('today '+$datepicker.datepicker( 'getDate' ));  
-                                });
-                            }*/
-                        });
-                        
-                        this._on( $input, {keyup: function(event){
-                            if(!isNaN(String.fromCharCode(event.which))){
-                                var cv = $input.val();
-                                if(cv!='' && cv.indexOf('-')<0){
-                                    $datepicker.datepicker( "setDate", cv+'-01-01');   
-                                    $input.val(cv);
-                                    /*var wg = $datepicker.datepicker( "widget" );
-                                    wg.find('.ui-datepicker-year').val(cv);*/
+                                    __onDateChange();
+                                }else{
+                                    $tinpt.val($input.val());
                                 }
                             }
-                        }});
+                        });
+                        
+                        this._on( $input, {
+                            keyup: function(event){
+                                if(!isNaN(String.fromCharCode(event.which))){
+                                    var cv = $input.val();
+                                    if(cv!='' && cv.indexOf('-')<0){
+                                        $datepicker.datepicker( "setDate", cv+'-01-01');   
+                                        $input.val(cv);
+                                    }
+                                }
+                            },
+                            keypress: function (e) {
+                                var code = e.charCode || e.keyCode;
+                                var charValue = String.fromCharCode(code);
+                                var valid = false;
 
-                        var $btn_datepicker = $( '<span>', {title: 'Show calendar'})
-                            .addClass('smallicon ui-icon ui-icon-calendar')
-                            .appendTo( $inputdiv );
+                                if(charValue=='-'){
+                                    valid = true;
+                                }else{
+                                    valid = /^[0-9]+$/.test(charValue);
+                                }
+
+                                if(!valid){
+                                    window.hWin.HEURIST4.util.stopEvent(e);
+                                    e.preventDefault();
+                                }
+
+                            },
+                            dblclick: function(){
+                                $btn_datepicker.click();
+                            }
+                        });
+
                         //.button({icons:{primary: 'ui-icon-calendar'},text:false});
                        
                         
                         this._on( $btn_datepicker, { click: function(){
                             
                                 if(that.is_disabled) return;
-
+                                
                                 $datepicker.datepicker( 'show' ); 
                                 $("#ui-datepicker-div").css("z-index", "999999 !important"); 
                                 //$(".ui-datepicker").css("z-index", "999999 !important");   
