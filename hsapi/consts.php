@@ -31,7 +31,7 @@ define('HEURIST_MIN_DBVERSION', "1.2.0"); //minimal version of db for current ve
 define('HEURIST_MAIN_SERVER', 'https://heuristplus.sydney.edu.au');
 define('HEURIST_INDEX_BASE_URL', 'https://heuristplus.sydney.edu.au/heurist/'); //central index database url
 define('HEURIST_INDEX_DBREC', 22);
-/*
+/*debug
 define('HEURIST_MAIN_SERVER', 'http://127.0.0.1');
 define('HEURIST_INDEX_BASE_URL', 'http://127.0.0.1/h5-ao/'); //central index database url
 define('HEURIST_INDEX_DBREC', 49);

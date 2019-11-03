@@ -75,7 +75,7 @@ $indexdb_user_id = 0; // Flags problem if not reset
 
 // Get parameters passed from registration request
 // @ preceding $_REQUEST avoids errors, sets Null if parameter missing
-$serverURL = $_REQUEST["serverURL"];
+$serverURL = strtolower($_REQUEST["serverURL"]);
 $dbReg = $_REQUEST["dbReg"];
 $dbTitle = $_REQUEST["dbTitle"];
 $dbVersion = @$_REQUEST["dbVer"];

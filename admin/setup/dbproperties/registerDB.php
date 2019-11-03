@@ -333,7 +333,9 @@ function registerDatabase() {
                                         .$system->get_system('sys_dbSubVersion').'.'
                                         .$system->get_system('sys_dbSubSubVersion');
 
-                $reg_url =   HEURIST_INDEX_BASE_URL  . "admin/setup/dbproperties/getNextDBRegistrationID.php" .
+                                        //HEURIST_INDEX_BASE_URL
+                $reg_url =   HEURIST_INDEX_BASE_URL
+                .'admin/setup/dbproperties/getNextDBRegistrationID.php' .
                 "?db=".HEURIST_INDEX_DATABASE."&dbReg=" . $heuristDBname . "&dbVer=" . $dbVersion .
                 "&dbTitle=" . $dbDescriptionEncoded . "&usrPassword=" . $usrPassword .
                 "&usrName=" . $usrName . "&usrFirstName=" . $usrFirstName .
