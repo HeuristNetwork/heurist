@@ -213,6 +213,7 @@ $.widget( "heurist.recordListExt", {
                 }
             }
             if(newurl==null){
+                this._current_url = null;
                 if(this.options.is_frame_based){
                     this.dosframe.attr('src', null);
                 }else{
