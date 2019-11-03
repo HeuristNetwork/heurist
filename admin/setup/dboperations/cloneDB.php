@@ -1,10 +1,6 @@
 <?php
-
-//TODO: what does this mean???
-//MOVE TO H4
-
 /**
-* cloneDatabase.php: Copies an entire database verbatim
+* cloneDB.php: Copies an entire database verbatim
 *                    Note that the cloning method was changed in 2014, using our own SQL dump function, to give more control
 *
 * @package     Heurist academic knowledge management system
@@ -43,6 +39,7 @@ define('PDIR','../../../');  //need for proper path to js and css
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
+require_once('welcomeEmail.php');
 
 //require_once(dirname(__FILE__).'/../../../hsapi/utilities/utils_db_load_script.php');
 
@@ -222,7 +219,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 if(@$_REQUEST['mode']!='2' || !@$_REQUEST['targetdbname']){
                     ?>
                     <div class="separator_row" style="margin:20px 0;"></div>
-                    <form name='selectdb' action='cloneDatabase.php' method='get' onsubmit="{return onSubmit(event);}">
+                    <form name='selectdb' action='cloneDB.php' method='get' onsubmit="{return onSubmit(event);}">
                         <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
                         <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
                         <?php
@@ -456,26 +453,8 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
          .' FROM sysUGrps WHERE ugr_ID='.($isCloneTemplate?'2':$user_id));
 
     if($user_record){
-    
-            $fullName = $user_record['ugr_FullName'];
-            
-            // email the system administrator to tell them a new database has been created
-            $email_text =
-            "There is new Heurist database.\n".
-            "Database name: ".$targetdbname_full."\n\n".
-            //($cloned_from_db?('Cloned from '.($isCloneTemplate?'template ':'').'database '.$cloned_from_db."\n"):'').
-            'The user who created the new database is:'.$user_record['ugr_Name']."\n".
-            "Full name:    ".$fullName."\n".
-            "Email address: ".$user_record['ugr_eMail']."\n".
-            "Organisation:  ".$user_record['ugr_Organisation']."\n".
-            "Research interests:  ".$user_record['ugr_Interests']."\n".
-            "Go to the address below to review further details:\n".
-            HEURIST_BASE_URL."?db=".$targetdbname;
-
-            $email_title = 'CloneDB: '.$targetdbname_full.' by '.$fullName.' ['.$user_record['ugr_eMail'].'] '
-                .' from  '.($isCloneTemplate?'template ':'').$source_database_full;
-
-            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
+            sendEmail_NewDatabase($user_record, $targetdbname_full, 
+                ' from  '.($isCloneTemplate?'template ':'').$source_database_full);
     }
     
     return true;

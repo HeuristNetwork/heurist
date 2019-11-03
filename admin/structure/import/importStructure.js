@@ -794,7 +794,7 @@ $.widget( "heurist.importStructure", {
 
             }else if(action=='clone'){
 
-                var cloneURL = window.hWin.HAPI4.baseURL + 'admin/setup/dboperations/cloneDatabase.php'
+                var cloneURL = window.hWin.HAPI4.baseURL + 'admin/setup/dboperations/cloneDB.php'
                 +'?db='+window.hWin.HAPI4.database
                 +'&templatedb='+dbName;
 

@@ -56,7 +56,7 @@
     buildAllIndices() -> whenever a database upgrade has occurred or when a database has been cloned
     - uses deleteIndexForRectype()
     - uses buildAllIndices()
-    - cloneDatabase.php
+    - cloneDB.php
     - rebuildLuceneIndices.php
 
     */

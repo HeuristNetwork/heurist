@@ -261,8 +261,6 @@ function hLayout(args) {
     //
     function _initLayoutCardinal(layout, $container){
         
-console.log('init cardinal');
-        
         var layout_opts =  {
             applyDefaultStyles: true,
             maskContents:        true,

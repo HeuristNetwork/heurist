@@ -23,6 +23,7 @@ require_once(dirname(__FILE__).'/../../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/utils_file.php');
 require_once(dirname(__FILE__).'/../../../admin/structure/import/importDefintions.php');
+require_once('welcomeEmail.php');
 
 header('Content-type: text/javascript');
 
@@ -234,25 +235,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             $mysqli->query("insert into `Heurist_DBs_index`.`sysUsers` (sus_Email, sus_Database, sus_Role) "
                     .'values("'.$user_record['ugr_eMail'].'","'.$database_name_full.'","owner")');
 */            
-            $fullName = $user_record['ugr_FirstName'].' '.$user_record['ugr_LastName'];
-            
-            // email the system administrator to tell them a new database has been created
-            $email_text =
-            "There is new Heurist database.\n".
-            "Database name: ".$database_name."\n\n".
-            //($cloned_from_db?('Cloned from '.($isCloneTemplate?'template ':'').'database '.$cloned_from_db."\n"):'').
-            'The user who created the new database is:'.$user_record['ugr_Name']."\n".
-            "Full name:    ".$fullName."\n".
-            "Email address: ".$user_record['ugr_eMail']."\n".
-            "Organisation:  ".$user_record['ugr_Organisation']."\n".
-            "Research interests:  ".$user_record['ugr_Interests']."\n".
-            "Go to the address below to review further details:\n".
-            HEURIST_BASE_URL."?db=".$database_name;
-
-            $email_title = 'NewDB: '.$database_name.' by '.$fullName.' ['.$user_record['ugr_eMail'].']';
-            //($cloned_from_db?('Cloned '.($isCloneTemplate?'from template ':'')):'New').' database: '.$newDatabaseName.' by '.$ugr_FullName.' ['.$ugr_eMail.']';
-
-            $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null);
+            sendEmail_NewDatabase($user_record, $database_name, null);
             
             //add sample data
             if($dataInsertionSQLFile!=null && file_exists($dataInsertionSQLFile)){
@@ -261,7 +244,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
                 }
             }
         }
-        
+
         $res = true;
     }else{
         $system->addError(HEURIST_INVALID_REQUEST, 'Name of new database not defined');
