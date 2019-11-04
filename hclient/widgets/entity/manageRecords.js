@@ -2164,6 +2164,37 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 }catch(e){
                     fields = null;
                 }
+                
+                var rectypeID = this._getField('rec_RecTypeID');
+                var rfr = window.hWin.HEURIST4.rectypes.typedefs[rectypeID].dtFields;
+                var fieldIndexMap = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+            
+            
+                
+                //verify max lengtn in 64kB per value
+                for (var dtyID in fields){
+                    if(parseInt(dtyID)>0){
+                        
+                        if(rfr[dtyID][fieldIndexMap['dty_Type']]=='geo') continue;
+                        
+                        var values = fields[dtyID];
+                        if(!$.isArray(values)) values = [values];
+                        for (var k=0; k<values.length; k++){
+                            var len = window.hWin.HEURIST4.util.byteLength(values[k]);
+                            if(len > 65535){
+                                var sMsg = 'Data is too large for the field ('+len+' > 64K)';
+                                window.hWin.HEURIST4.msg.showMsgFlash(sMsg,1500);
+                                
+                                var inpt = this._editing.getFieldByName(idx);
+                                if(inpt){
+                                    inpt.editing_input('showErrorMsg', sMsg);
+                                    $(this.editForm.find('input.ui-state-error')[0]).focus();   
+                                }
+                                return;
+                            }
+                        }
+                    }
+                }//verify max size
             }
             
             if(fields==null) return; //validation failed

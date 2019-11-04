@@ -445,6 +445,7 @@
         //ADD DETAILS
         $addedByImport = ($modeImport?1:0);
         
+        
         $query = 'INSERT INTO recDetails '.
         '(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo) '.
         "VALUES ($recID, ?, ?, $addedByImport, ?, geomfromtext(?) )";
@@ -1450,6 +1451,10 @@
                 "rst_DetailTypeID",
                 "rst_RecTypeID=$rectype and rst_CreateChildIfRecPtr=1");
         
+        
+        //$query_size = 'select LENGTH(?)';
+        //$stmt_size = $mysqli->prepare($query_size);
+        
         //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
         $insertValues = array();
         $errorValues = array();
@@ -1466,13 +1471,29 @@
                 $dtl_Geo = null;
                 $isValid = false;
                 $err_msg = '';
+                $len = strlen(trim($dtl_Value));
                 
+                /*
+                if($len>10000){
+                    $stmt_size->bind_param('s', $dtl_Value);
+                    if($stmt_size->execute()){
+                        $stmt_size->bind_result($str_size);
+                        $stmt_size->fetch();
+                        if($str_size>65535){
+                            $len = $str_size;
+                        }
+                    }
+                }
+                */
+                if($det_types[$dtyID]!='geo' && $len>65535){ //65535){
+                    $err_msg = 'Data is too large for the field ('.$len.' > 64K)';;
+                }else
                 switch ($det_types[$dtyID]) {
 
                     case "freetext":
                     case "blocktext":
                     case "date":
-                        $isValid = (strlen(trim($dtl_Value)) > 0); //preg_match("/\\S/", $dtl_Value);
+                        $isValid = ($len > 0); //preg_match("/\\S/", $dtl_Value);
                         if(!$isValid ){
                             $err_msg = 'Value is empty';  
                         }else if($det_types[$dtyID]=='date'){
@@ -1695,6 +1716,9 @@
             }//for values
         }//for detail types
 
+        //$stmt_size->close();
+        
+        
         $res = false;
 
         //there is undefined required details
