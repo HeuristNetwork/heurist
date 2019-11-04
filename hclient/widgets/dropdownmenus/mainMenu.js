@@ -1153,6 +1153,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                 prefs['mapcluster_count'] != request['mapcluster_count'] ||   
                                 prefs['mapcluster_zoom'] != request['mapcluster_zoom'] ||
                                 prefs['deriveMapLocation'] != request['deriveMapLocation'] || 
+                                prefs['map_rollover'] != request['map_rollover'] || 
                                 prefs['mapcontrols'] != request['mapcontrols']);
                                 
                             //check help toggler and bookmark search - show/hide

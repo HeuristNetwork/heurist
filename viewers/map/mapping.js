@@ -34,7 +34,7 @@ Thematic mapping
 * 
 * notimeline - hide timeline (map only)
 * nomap - timeline only
-* show_tooltip
+* map_rollover
 * 
 * events:
 * onselect
@@ -116,7 +116,7 @@ $.widget( "heurist.mapping", {
         isEditAllowed: true,
         isPublished: false,
         
-        show_tooltip: false
+        map_rollover: false
     },
     
     //reference to google or leaflet map
@@ -624,7 +624,7 @@ $.widget( "heurist.mapping", {
                 })*/
                 .addTo( this.nativemap );            
 
-             if(that.options.show_tooltip){
+             if(that.options.map_rollover){
                 new_layer.bindTooltip(function (layer) {
                     if(layer.feature && layer.feature.properties){
                         return layer.feature.properties.rec_Title;
@@ -1095,7 +1095,7 @@ $.widget( "heurist.mapping", {
                         layer.parent_layer = parent_layer;  
                     }
                     
-                    if(that.options.show_tooltip){
+                    if(that.options.map_rollover){
                         layer.bindTooltip(function (layer) {
                             return layer.feature.properties.rec_Title;
                         })
@@ -1188,7 +1188,7 @@ $.widget( "heurist.mapping", {
                     }
                     new_layer.on('click', function(e){that._onLayerClick(e)});
                  
-                    if(that.options.show_tooltip){
+                    if(that.options.map_rollover){
                         new_layer.bindTooltip(function (layer) {
                             return layer.feature.properties.rec_Title;
                         })
@@ -1801,9 +1801,10 @@ $.widget( "heurist.mapping", {
             return res;
         }
         
-        if(window.hWin.HEURIST4.util.isempty(params)){
+        if(window.hWin.HEURIST4.util.isempty(params) || params['published']==0){
             //this is not publish take params from preferences
             params = {};
+            params['map_rollover'] = (window.hWin.HAPI4.get_prefs_def('map_rollover', 0)==1);
             params['template'] = window.hWin.HAPI4.get_prefs_def('map_template', null);
             params['nocluster'] = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)!=1);
             params['controls'] = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'all');
@@ -1812,13 +1813,13 @@ $.widget( "heurist.mapping", {
             this.markerClusterGridSize = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 50));
             this.markerClusterMaxZoom = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 18));
         }
-        
+
         //maxClusterRadius
         this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
         this.options.isPublished = __parseval(params['published']);
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
         
-        this.options.show_tooltip = __parseval(params['show_tooltip']);
+        this.options.map_rollover = __parseval(params['map_rollover']);
         
         //show/hide map or timeline
         var nomap = __parseval(params['nomap']);

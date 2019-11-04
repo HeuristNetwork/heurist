@@ -531,6 +531,7 @@ console.log('>>>')+bg_color;
                     layout_params['notimeline'] = !$dlg.find("#use_timeline").is(':checked');
                     layout_params['nocluster'] = !$dlg.find("#use_cluster").is(':checked');
                     layout_params['editstyle'] = $dlg.find("#editstyle").is(':checked');
+                    layout_params['map_rollover'] = $dlg.find("#map_rollover").is(':checked');
                     //@todo select basemap from selector
                     //layout_params['basemap']
                     
@@ -702,6 +703,7 @@ console.log('>>>')+bg_color;
                     
                     if(opts.layout_params){
                         $dlg.find("#use_timeline").prop('checked', !opts.layout_params.notimeline);    
+                        $dlg.find("#map_rollover").prop('checked', !opts.layout_params.map_rollover);    
                         $dlg.find("#use_cluster").prop('checked', !opts.layout_params.nocluster);    
                         $dlg.find("#editstyle").prop('checked', opts.layout_params.editstyle);    
                         var ctrls = (opts.layout_params.controls)?opts.layout_params.controls.split(','):[];

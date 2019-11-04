@@ -224,7 +224,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
         layout_params['template'] = __gp('template'); //smarty template for popup info
         
         layout_params['published'] = __gp('published');
-        layout_params['show_tooltip'] = __gp('show_tooltip');
+        layout_params['map_rollover'] = __gp('map_rollover');
         
         mapping = $('#mapping').mapping({
             element_layout: '#mapping',
