@@ -483,7 +483,7 @@ $.widget( "heurist.svs_list", {
 
         //add db summary as a first entry
         if(this.helper_btm && this.options.btn_visible_dbstructure){
-            //8ea9b9
+            
             this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'dbs').addClass('svs-acordeon')
@@ -498,7 +498,6 @@ $.widget( "heurist.svs_list", {
             this.helper_btm.before(
                 $('<div>')
                 .addClass('svs-acordeon-group')
-                .css({"border-bottom": '#8ea9b9 1px solid'})
                 .html('&nbsp;')); //window.hWin.HR('PERSONAL')
 
             this.helper_btm.before(
@@ -1388,13 +1387,11 @@ $.widget( "heurist.svs_list", {
                     $(item).mouseenter(
                         function(event){
                             var ele = $(item).find('.svs-contextmenu2');
-                            //ele.css('color','red');
                             ele.css('display','inline-block');
                             //ele.show();
                     }).mouseleave(
                         function(event){
                             var ele = $(item).find('.svs-contextmenu2');
-                            //ele.css('color','black');
                             ele.hide();
                     });
                     /*

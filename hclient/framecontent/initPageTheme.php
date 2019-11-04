@@ -129,7 +129,7 @@ textarea.ui-widget-content, input.ui-widget-content, select.ui-widget-content{
     border: 2px solid <?php uout('cd_border', '#95A7B7');?> !important;
 }
 /* .ui-heurist-header1 - rare use @todo remove */
-.ui-dialog .ui-dialog-buttonpane, .ui-heurist-header1 {
+.ui-dialog .ui-dialog-buttonpane, .ui-heurist-header1, optgroup {
     background-color: <?php uout('cd_border', '#95A7B7');?> !important;
 }
 .ui-dialog-titlebar, .ui-progressbar-value {
@@ -142,7 +142,7 @@ textarea.ui-widget-content, input.ui-widget-content, select.ui-widget-content{
 .ui-menu-divider {
     border-top: 1px solid <?php uout('cd_border', '#95A7B7');?> !important;
 }
-.svs-acordeon{
+.svs-acordeon, .svs-acordeon-group{
     border-bottom: <?php uout('cd_border', '#95A7B7');?> 1px solid;
 }
 .svs-header{
@@ -183,13 +183,13 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 .ent_wrapper.editor .smallbutton{
     color:<?php uout('cd_color', '#333333');?>;
 }
-.ent_wrapper.editor .heurist-helper1{
+.ent_wrapper.editor .heurist-helper1, .prompt{
     color: <?php uout('ce_helper', '#999999');?>;
 }
 .mandatory > label, .required, .required > label{
     color: <?php uout('ce_mandatory', '#CC0000');?>;
 }
-.readonly{
+.readonly, .graytext, .smallicon{
     color: <?php uout('ce_readonly', '#999999');?>;
 }
 

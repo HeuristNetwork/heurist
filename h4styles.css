@@ -42,19 +42,6 @@ body {
 a{
 outline: 0;
 }
-/* A11
-H2 {
-    color: #6A7C99;
-    font-size:1.2em;
-}
-
-P {
-    color: #333333;
-    font-size: 11px;
-    line-height: 21px;
-}
-
-*/
 
 .logo {
     background-image: url("hclient/assets/h4logo_small.png") !important;
@@ -185,14 +172,13 @@ input[type=checkbox], input[type=radio]{
 
 }
 
+/* special input elements in editing_input */
 input.rec_URL {
     text-decoration: underline;
-    color: blue;
     cursor: pointer;
     border: 1px solid rgba(0, 0, 0, 0.2);
     margin: 2px 0;
     padding: 3px;
-    background:#F4F2F4 !important;
 }
 
 input.Temporal, .list_div {
@@ -200,7 +186,6 @@ input.Temporal, .list_div {
     border: 1px solid rgba(0, 0, 0, 0.2);
     margin: 2px 0;
     padding: 3px;
-    background:#F4F2F4 !important;
 }
 
 .entity_selector {
@@ -208,13 +193,11 @@ input.Temporal, .list_div {
     border: 1px solid rgba(0, 0, 0, 0.2);
     padding: 3px 10px 3px 30px;
     overflow-y: auto;
-    background:#F4F2F4 !important;
     line-height: 18px;
     max-height: 120px;
     height: auto;
     min-height: 20px;    
 }
-
 
 /* INPUT FORM ----------------------------------   */
 fieldset {
@@ -324,12 +307,6 @@ img.image_input{
     min-width: 200px;
 }
 
-/* select linked record button */
-.sel_link2{
-    background:rgb(240,236,240);
-}
-
-
 /* margin-bottom:2px; */
 input.text, select.text {
     padding-bottom: 0.2em;
@@ -353,48 +330,17 @@ input.text, select.text {
 .smallicon{
     display: inline-block;
     vertical-align:middle;
-    color:gray;
 }
 
 /* FOR SELECT */
 
+/* not used since hmtl select replaced to seletmenu */
 optgroup {
     font-style: normal;
     font-weight:bold;
-    background-color: #ECF1FB;
     padding:0;
-    /*border-top:1px solid #A4B4CB;-*/
     margin-top:5px;
     text-indent: 5px;
-}
-
-.termHeader {
-    font-weight: bold;
-    color: black;
-}
-.depth0 {
-    margin-left: 0px;
-}
-.depth1 {
-    margin-left: 10px;
-}
-.depth2 {
-    margin-left: 20px;
-}
-.depth3 {
-    margin-left: 30px;
-}
-.depth4 {
-    margin-left: 40px;
-}
-.depth5 {
-    margin-left: 50px;
-}
-.depth6 {
-    margin-left: 60px;
-}
-.depth7 {
-    margin-left: 70px;
 }
 
 /* -------------------------------------------- */
@@ -414,6 +360,7 @@ optgroup {
     cursor: pointer;
 }
 
+/*-------------------------------------------------------------------------------*/
 /* main element for various lists it may be in 4 states list, icon, thumb, thumbs3 */
 .recordDiv {
     -moz-user-select: none;
@@ -985,6 +932,7 @@ div .selected_last{
 div .dashboard.selected_last{
     border: none !important;
 }
+/* END RESULT LIST ---------------------------------------- */
 
 
 /* SAVED SEARCHES */
@@ -1151,10 +1099,7 @@ span.fancytree-checkbox{
 .tree-csv .fancytree-expander, .tree-facets .fancytree-expander{
     display:none;
 }
-/*.tree-csv .graytext, .tree-facets .graytext*/
-.graytext{
-    color: #AAA;
-}
+
 
 /* indent for folders */
 ul.fancytree-container ul{
@@ -1180,21 +1125,17 @@ ul.fancytree-container ul{
 }
 
 .prompt {
-    color: #999999;
     font-size: 10px;
     font-weight: normal;
     padding-top: 0.3em;
 }
-
 .svs-acordeon{
-    border-bottom: #8ea9b9 1px solid;
     font-size: 0.97em;
     margin-left: 7px;
 }
 .svs-acordeon > h3 > .ui-accordion-header-icon{
     top:40% !important;
 }
-
 .svs-acordeon-group{
     padding-top:1em;
     font-size: 1em;
@@ -1255,8 +1196,6 @@ div > .svs-contextmenu {
                 padding: 2 2 0 2;
                 display:none;
                 color:black !important;
-                /*background:white;
-                color:#95A7B7;*/
                 border-radius:2px;
             }
             span.fancytree-node{
@@ -1401,6 +1340,7 @@ background: #8ea9b9
     background:-webkit-gradient(linear, left top, left bottom, from(rgba(150, 150, 150, 0.2)), to(rgba(150, 150, 150, 0.5)));
 }
 
+/* reports in import terms,csv */
 .tbmain th
 {
     border-left: 1px solid lightgray;
@@ -1435,61 +1375,7 @@ background: #8ea9b9
 .rename{
     cursor: pointer;
 }
-
-    /* NOT USED? */
-    .menu-list {
-        list-style: none;
-        margin: 0;
-        display: block;
-        outline: none;
-        padding: 0 !important;
-        border: none !important;
-        background:none;
-    }        
-    .menu-list .ui-menu-item{    
-        position: relative;
-        margin: 0;
-        padding: 3px 1em 3px .4em;
-        cursor: pointer;
-        min-height: 0;
-        border-top: 1px solid #999999;
-        background: #95A7B7;
-        color: white;
-    }
-    .menu-list .ui-menu-item a{    
-        display: block;
-        font-weight: normal;
-        line-height: 1.5;
-        min-height: 0;
-        padding: 2px 0.4em 0 20px;
-        margin-right: 10px;
-        text-decoration: none;
-        color: white;
-        outline: 0;
-    }        
-    .item-selected{    
-        background:#9CC4D9 !important;
-    }
-
-    /* main menu on front */
-    
-.accordion_pnl > .ui-accordion-header{
-        font-weight:bold;
-        border-top: 1px solid black !important;
-        margin:0;
-        padding-left:.7em;
-}    
-.accordion_pnl > .ui-accordion-header > .ui-accordion-header-icon{
-    position: inherit !important;
-    float: right;
-    font-size: 1.5em;
-    height: 30px;
-    margin-right: 0.5em;
-}
-.accordion_pnl > div > ul > .ui-menu-item  {
-    padding-left:35px;
-}
-    
+ 
 /* for popup on map for renderRecordData.php */
 #recID {
     float: right;
@@ -1721,11 +1607,9 @@ option {padding-left:15px;}
 }
 
 /*  rounded gray element to edit user role/membership see manageSysUsers, manageSysGroups */
-
 .user-list > div, .user-list-member > div{
     display:inline-block;
 }
-
 .user-list-edit{
     border-radius:8px;
     color:white;
@@ -1796,6 +1680,7 @@ body.popup A:link {
     color: #6A7C99;    
 }
 */
+/* h3 styles */
 body.popup h3 {
     color: #DC8501;
     font-size: 12px;    

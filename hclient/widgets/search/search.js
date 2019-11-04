@@ -146,15 +146,16 @@ $.widget( "heurist.search", {
         
         if(this.options.menu_entity_filter){
             this.filter_by_entity = $('<span title="Show list of entities to filter">'
-            +'by usage <span class="ui-icon ui-icon-triangle-1-s"></span></span>')                                          //
-            .css({'text-decoration':'none','color':'gray','padding':'0 10px','outline':0,'font-weight':'bold', 'font-size': '12px',cursor:'pointer'})
+            +'by usage <span class="ui-icon ui-icon-triangle-1-s"></span></span>')  
+            .addClass('graytext')
+            .css({'text-decoration':'none','padding':'0 10px','outline':0,'font-weight':'bold', 'font-size': '12px',cursor:'pointer'})
             .appendTo( $d2 ); //was div_search_help_links
         }
         
         
         this.btns_by_entity = $('<button>').button({label: window.hWin.HR("Show list of entities to filter"), 
                   showLabel:false, icon:'ui-icon-gear'})
-        .css({'font-size':'1.1em'}).appendTo($d2);        
+        .appendTo($d2);         //.css({'font-size':'1.1em'})
         $d2.appendTo(this.div_entity_btns);
         
         //selector with checkboxes to select filter by entity buttons
@@ -227,7 +228,8 @@ $.widget( "heurist.search", {
         
         this.input_search_prompt = $( "<span>" )
         .text(this._is_publication?'':window.hWin.HR("enter search/filter or use filter builder at right"))
-        .css({'color':'gray','font-size':'0.8em', 'margin': '22px 0 0 0.5em',
+        .addClass('graytext')
+        .css({'font-size':'0.8em', 'margin': '22px 0 0 0.5em',
               'position': 'absolute'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt, {click: function(){
@@ -270,7 +272,8 @@ $.widget( "heurist.search", {
 
             var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
             +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')                
-            .css({'text-decoration':'none','color':'gray', 'outline':0, cursor:'pointer'})
+            .addClass('graytext')
+            .css({'text-decoration':'none','outline':0, cursor:'pointer'})
             .appendTo(div_search_help_links);
             
             this._on( link, {  click: function(){
