@@ -660,6 +660,7 @@ $.widget( "heurist.expertnation_nav", {
                     $(app1.widget).dh_search('option', 'search_at_init', svsID);        
                     hdoc.find('.bor-page-search').show();
                 }
+                $(app1.widget).dh_search('option', 'uni_ID', this.options.uni_ID);        
             }              
 
             hdoc.scrollTop(0);
@@ -770,8 +771,12 @@ $.widget( "heurist.expertnation_nav", {
         //search for all related person to given entity
         if(entType=='place'){
 
+            //1. finds eventlet,edu inst,mil service,death,occupation  liked to place
+                //2a. person linked to event,insti,death,occup
+                //2b tertiary and school linked to inst  (27,31)
+                    //3 persons linked to tertiary and school
             request['q'] = 'ids:'+recID;
-            request['rules'] = [{"query":"t:24,26,29,33,37 linked_to:25 ", //eventlet,edu inst,mil service,death,occupation  liked to person
+            request['rules'] = [{"query":"t:24,26,29,33,37 linked_to:25 ", 
                 "levels":[{"query":"t:10 linkedfrom:24,29,33,37 f:196:"+this.options.uni_ID}, //persons only form UnySyd
                     {"query":"t:4 linkedfrom:37-21"}, //organization linked to occupat.event
                     //persons with tertiary and schooling

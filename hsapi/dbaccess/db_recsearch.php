@@ -1071,7 +1071,8 @@
                     $response = recordSearch($system, $params3);
 
                     if($response['status'] == HEURIST_OK){
-
+                            
+                            if(!$rule['ignore']){
                             //merge with final results
                             if($is_ids_only){
 
@@ -1105,6 +1106,7 @@
                                     }
                                 }
                                 */
+                            }
                             }
 
                             if(!$is_last){ //add top ids for next level
@@ -1745,6 +1747,7 @@ $loop_cnt++;
                     $e_rule = array('query'=>@$rule['query'],
                                     'results'=>array(),
                                     'parent'=>$parent_index,
+                                    'ignore'=>(@$rule['ignore']==1), //not include in final result
                                     'islast'=>(!@$rule['levels'] || count($rule['levels'])==0)?1:0 );
                     array_push($flat_rules, $e_rule );
                     _createFlatRule($flat_rules, @$rule['levels'], count($flat_rules)-1);

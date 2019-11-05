@@ -89,7 +89,6 @@
 
     $system = new System();
     
-    
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response
         $response = $system->getError();

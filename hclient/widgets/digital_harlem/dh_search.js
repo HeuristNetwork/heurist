@@ -28,7 +28,8 @@ $.widget( "heurist.dh_search", {
     // default options
     options: {
         UGrpID: 1007, // 1915-1930 user group for 'original' Digital Harlem map. 1010 is Year of the Riot (1935) only
-        search_at_init: false  //open first saved search (if true) or with given Id (if numeric)
+        search_at_init: false,  //open first saved search (if true) or with given Id (if numeric)
+        uni_ID: 0
     },
 
     _currenttype:null,  //obsolete
@@ -374,7 +375,7 @@ $.widget( "heurist.dh_search", {
         //add featured maps
     },
 
-    //
+    // ExpertNation
     // apply search as preliminary filter for current faceted search
     //
     doSearch3: function(search_value){
@@ -405,11 +406,11 @@ $.widget( "heurist.dh_search", {
                     //const regex = /"[^"]+"|(&&|\ OR \b)/gi;
                     for(var i=0;i<matches.length;i++){
                         if(matches[i].toUpperCase() === 'OR'){
-                            if(criteria.length>0){
+                            /*if(criteria.length>0){
                                 hasOR = true;
                                 criteria_or.any.push(criteria.length==1?criteria[0]:criteria);
                                 criteria = [];
-                            }
+                            }*/
                         }else{
                             //strip quotes
                             var val = matches[i].replace(/(^")|("$)/g, '');
@@ -422,43 +423,80 @@ $.widget( "heurist.dh_search", {
                                 //var pred = {any:[{"title":val},{"f:134":val}]};
 
                                 //search  for rec any field and tite of linked records
-                                var pred = {"f":val};
+                                var pred = {"title":val};
                                 
-                                criteria.push(pred); 
+                                criteria.push(val); //was pred
                             }
                         }
-                    }
+                    }//for
+                    /*
                     if(hasOR && criteria.length>0){
                         criteria_or.any.push(criteria.length==1?criteria[0]:criteria);
                     }
-                    
                     search_value = (hasOR)?criteria_or:criteria;
+                    */
 //DEBUG console.log(search_value);  
                 }
                 
-                // OLD WAY
-                //search_value = {any:[{"title":search_value},
-                //    {"f:1":search_value},{"f:18":search_value},{"f:134":search_value}]};
+                
+                //perform search here and set 'add_filter' as array of persons IDs
+                //search person by any field (name,family,description)
+                //search place and institution by title
+                //
+                //search persons linked to school, tertiary that are linked to inst
+                var request = {
+                    db:window.hWin.HAPI4.database,
+                    search: criteria.length>0 ?criteria:search_value, //search_value_original,
+                    uni_ID: this.options.uni_ID};
+                    
+                $('#main_pane').find('.clearfix').hide();     
+                $('.bor-page-loading').show();
+                    
+            
+                window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL 
+                        + 'hclient/widgets/expertnation/searchPersons.php', 
+                        request, null, 
+                            function(response){
+                                
+                                $('.bor-page-loading').hide();
+                                $('#main_pane').find('.bor-page-search').show();
+                                
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    
+                                    var ids = 'ids:'+response.data.records.join(',')
+                                    __applyAddFilter(ids, search_value_original);
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response, true);    
+                                }
+                            }
+                        );                
                
            }
             
-            this.add_filter = search_value;
-            this.add_filter_original = search_value_original;
+           //this.add_filter = search_value;
+           //this.add_filter_original = search_value_original;
        } else {
-            this.add_filter = null;
+           __applyAddFilter(null, null);
+       }
+
+       var that = this;       
+       
+       function __applyAddFilter(search_value, search_value_original){
+           that.add_filter = search_value;
+           that.add_filter_original = search_value_original;
+           if(that.search_faceted.html()==''){ //not inited yet
+
+           }else{
+               //add filter to existing faceted search
+               if(search_value_original!=null){
+                   that.search_faceted.search_faceted('option', 'add_filter_original', search_value_original); 
+                   that.add_filter_original = search_value_original;
+               }
+               that.search_faceted.search_faceted('option', 'add_filter', that.add_filter);
+               that.search_faceted.search_faceted('doReset');
+           }
        }
        
-       if(this.search_faceted.html()==''){ //not inited yet
-            
-       }else{
-            //add filter to existing faceted search
-            if(search_value_original!=null){
-               this.search_faceted.search_faceted('option', 'add_filter_original', search_value_original); 
-               this.add_filter_original = search_value_original;
-            }
-            this.search_faceted.search_faceted('option', 'add_filter', this.add_filter);
-            this.search_faceted.search_faceted('doReset');
-       }
     },
 
     //
