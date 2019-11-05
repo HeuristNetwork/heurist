@@ -2174,15 +2174,23 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 //verify max lengtn in 64kB per value
                 for (var dtyID in fields){
                     if(parseInt(dtyID)>0){
-                        
-                        if(rfr[dtyID][fieldIndexMap['dty_Type']]=='geo') continue;
+                        var dt = rfr[dtyID][fieldIndexMap['dty_Type']];
+                        if(dt=='geo' || dt=='file') continue;
                         
                         var values = fields[dtyID];
                         if(!$.isArray(values)) values = [values];
                         for (var k=0; k<values.length; k++){
+                            
                             var len = window.hWin.HEURIST4.util.byteLength(values[k]);
-                            if(len > 65535){
-                                var sMsg = 'Data is too large for the field ('+len+' > 64K)';
+                            var len2 = values[k].length;
+                            var lim = (len-len2<200)?64000:32768;
+                            var lim2 = (len-len2<200)?64:32;
+                            
+                            if(len>lim){ //65535){  32768
+                                var sMsg = 'The data in field '
+                                +' exceeds the maximum size for a field of '+lim2+'Kbytes. '
+                                +'Note that this does not mean '+lim2+'K characters, '
+                                +'as Unicode uses multiple bytes per character.';
                                 window.hWin.HEURIST4.msg.showMsgFlash(sMsg,1500);
                                 
                                 var inpt = this._editing.getFieldByName(idx);
@@ -2191,7 +2199,9 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                                     $(this.editForm.find('input.ui-state-error')[0]).focus();   
                                 }
                                 return;
+                                
                             }
+
                         }
                     }
                 }//verify max size

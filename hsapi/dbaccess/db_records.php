@@ -1471,23 +1471,35 @@
                 $dtl_Geo = null;
                 $isValid = false;
                 $err_msg = '';
-                $len = strlen(trim($dtl_Value));
                 
-                /*
-                if($len>10000){
-                    $stmt_size->bind_param('s', $dtl_Value);
-                    if($stmt_size->execute()){
-                        $stmt_size->bind_result($str_size);
-                        $stmt_size->fetch();
-                        if($str_size>65535){
-                            $len = $str_size;
+                if(!(is_array($dtl_Value) || $det_types[$dtyID]=='geo' || $det_types[$dtyID]=='file')){
+                    $dtl_Value = trim($dtl_Value);
+                    $len  = strlen($dtl_Value);  //number of bytes
+                    $len2 = mb_strlen($dtl_Value); //number of characters
+                    $lim = ($len-$len2<200)?64000:32768;
+                    $lim2 = ($len-$len2<200)?64:32;
+                    /*
+                    if($len>10000){
+                        $stmt_size->bind_param('s', $dtl_Value);
+                        if($stmt_size->execute()){
+                            $stmt_size->bind_result($str_size);
+                            $stmt_size->fetch();
+                            if($str_size>65535){
+                                $len = $str_size;
+                            }
                         }
                     }
+                    */
+                    if($len>$lim){ //65535){  32768
+                        $err_msg = 'The data in field (#'.$dtyID
+                        .') exceeds the maximum size for a field of '.$lim2.'Kbytes. '
+                        .'Note that this does not mean '.$lim2.'K characters, '
+                        .'as Unicode uses multiple bytes per character.';
+                        break;
+                    }
                 }
-                */
-                if($det_types[$dtyID]!='geo' && $len>65535){ //65535){
-                    $err_msg = 'Data is too large for the field ('.$len.' > 64K)';;
-                }else
+                
+
                 switch ($det_types[$dtyID]) {
 
                     case "freetext":
