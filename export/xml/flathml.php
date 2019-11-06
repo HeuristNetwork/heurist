@@ -142,10 +142,10 @@ if(!defined('PDIR')){
 if(!defined('HEURIST_HML_DIR')){
     /*$path = $system->get_system('sys_hmlOutputDirectory'); //@todo check
     if ($path) {
-        $path = getRelativePath(HEURIST_FILESTORE_DIR, $path);
-        if(folderCreate($path, true)){
-            define('HEURIST_HML_DIR', $path);
-        }
+    $path = getRelativePath(HEURIST_FILESTORE_DIR, $path);
+    if(folderCreate($path, true)){
+    define('HEURIST_HML_DIR', $path);
+    }
     }
     if(!defined('HEURIST_HML_DIR')){*/
     define('HEURIST_HML_DIR', HEURIST_FILESTORE_DIR . 'hml-output/');
@@ -158,18 +158,18 @@ if(!defined('HEURIST_HML_DIR')){
 if(!$intofile){
     if (@$_REQUEST['mode'] != '1') {
         header('Content-type: text/xml; charset=utf-8');
-        
+
         if(@$_REQUEST['file']==1 || @$_REQUEST['file']===true){
             if($rectype_templates){
                 $filename = 'Template_'.$_REQUEST['db'].'_'.date("YmdHis").'.hml';
             }else{
                 $filename = 'Export_'.$_REQUEST['db'].'_'.date("YmdHis").'.hml';    
             }
-            
+
             header('Content-disposition: attachment; filename='.$filename);
             //header('Content-Length: ' . strlen($content));
         }
-        
+
     }
     output( "<?xml version='1.0' encoding='UTF-8'?>\n" );
 }
@@ -500,7 +500,7 @@ function findPointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
                 array_push($recSet['relatedSet'][$row['srcRecID']]['ptrLinks']['byRecIDs'][$row['trgRecID']], $row['ptrDetailTypeID']);
             }
         }//while
-    
+
         $res->close();
     }
     return array_keys($nlrIDs);
@@ -537,52 +537,52 @@ function findReversePointers($qrec_ids, &$recSet, $depth, $rtyIDs, $dtyIDs) {
 
     $res = $mysqli->query($query);
     if($res){ 
-    while ($row = $res->fetch_assoc()) {
-        // if target is not in the result
-        $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
-        if (!array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
-            $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth, 'recID' => $row['trgRecID']);
+        while ($row = $res->fetch_assoc()) {
+            // if target is not in the result
             $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
+            if (!array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
+                $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth, 'recID' => $row['trgRecID']);
+                $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
 
-        } else if ($rtyIDs || $dtyIDs) { // TODO placed here for directed filtering which means we want repeats to be expanded
-            $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
+            } else if ($rtyIDs || $dtyIDs) { // TODO placed here for directed filtering which means we want repeats to be expanded
+                $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
 
+            }
+            if (!@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']) {
+                $recSet['relatedSet'][$row['trgRecID']]['ptrLinks'] = array('byDtlType' => array(), 'byRecIDs' => array()); //create an entry
+
+            }
+
+            if (!@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']]) {
+                $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']] = array($row['srcRecID']);
+            } else if (!in_array($row['srcRecID'], $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']])) {
+                array_push($recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']], $row['srcRecID']);
+            }
+
+            if (!@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']]) {
+                $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']] = array($row['ptrDetailTypeID']);
+            } else if (!in_array($row['ptrDetailTypeID'], $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']])) {
+                array_push($recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']], $row['ptrDetailTypeID']);
+            }
+
+            if (!@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']) {
+                $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks'] = array('byInvDtlType' => array(), 'byRecIDs' => array()); //create an entry
+
+            }
+
+            if (!@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']]) {
+                $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']] = array($row['trgRecID']);
+            } else if (!in_array($row['trgRecID'], $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']])) {
+                array_push($recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']], $row['trgRecID']);
+            }
+
+            if (!@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']]) {
+                $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']] = array($row['ptrDetailTypeID']);
+            } else if (!in_array($row['ptrDetailTypeID'], $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']])) {
+                array_push($recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']], $row['ptrDetailTypeID']);
+            }
         }
-        if (!@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']) {
-            $recSet['relatedSet'][$row['trgRecID']]['ptrLinks'] = array('byDtlType' => array(), 'byRecIDs' => array()); //create an entry
-
-        }
-
-        if (!@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']]) {
-            $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']] = array($row['srcRecID']);
-        } else if (!in_array($row['srcRecID'], $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']])) {
-            array_push($recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byDtlType'][$row['ptrDetailTypeID']], $row['srcRecID']);
-        }
-
-        if (!@$recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']]) {
-            $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']] = array($row['ptrDetailTypeID']);
-        } else if (!in_array($row['ptrDetailTypeID'], $recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']])) {
-            array_push($recSet['relatedSet'][$row['trgRecID']]['ptrLinks']['byRecIDs'][$row['srcRecID']], $row['ptrDetailTypeID']);
-        }
-
-        if (!@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']) {
-            $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks'] = array('byInvDtlType' => array(), 'byRecIDs' => array()); //create an entry
-
-        }
-
-        if (!@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']]) {
-            $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']] = array($row['trgRecID']);
-        } else if (!in_array($row['trgRecID'], $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']])) {
-            array_push($recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byInvDtlType'][$row['ptrDetailTypeID']], $row['trgRecID']);
-        }
-
-        if (!@$recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']]) {
-            $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']] = array($row['ptrDetailTypeID']);
-        } else if (!in_array($row['ptrDetailTypeID'], $recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']])) {
-            array_push($recSet['relatedSet'][$row['srcRecID']]['revPtrLinks']['byRecIDs'][$row['trgRecID']], $row['ptrDetailTypeID']);
-        }
-    }
-    $res->close();
+        $res->close();
     }
     return array_keys($nlrIDs);
 }
@@ -627,73 +627,73 @@ function findRelatedRecords($qrec_ids, &$recSet, $depth, $rtyIDs, $relTermIDs) {
 
     $res = $mysqli->query($query);
     if($res){ 
-    while ($row = $res->fetch_assoc()) {
-        if (!$row['relType'] && !$row['invRelType']) { // no type information invalid relationship
-            continue;
-        }
-        //echo "row is ".print_r($row,true);
-        // if source is not in the result
-        if (!array_key_exists($row['srcRecID'], $recSet['relatedSet'])) {
-            $recSet['relatedSet'][$row['srcRecID']] = array('depth' => $depth, 'recID' => $row['srcRecID']);
-            $nlrIDs[$row['srcRecID']] = 1; //save it for next level query
-        }
+        while ($row = $res->fetch_assoc()) {
+            if (!$row['relType'] && !$row['invRelType']) { // no type information invalid relationship
+                continue;
+            }
+            //echo "row is ".print_r($row,true);
+            // if source is not in the result
+            if (!array_key_exists($row['srcRecID'], $recSet['relatedSet'])) {
+                $recSet['relatedSet'][$row['srcRecID']] = array('depth' => $depth, 'recID' => $row['srcRecID']);
+                $nlrIDs[$row['srcRecID']] = 1; //save it for next level query
+            }
 
-        //if rel rec not in result
-        if (!array_key_exists($row['relID'], $recSet['relatedSet'])) {
-            $recSet['relatedSet'][$row['relID']] = array('depth' => $recSet['relatedSet'][$row['srcRecID']]['depth'] . ".5", 'recID' => $row['relID']);
-        }
+            //if rel rec not in result
+            if (!array_key_exists($row['relID'], $recSet['relatedSet'])) {
+                $recSet['relatedSet'][$row['relID']] = array('depth' => $recSet['relatedSet'][$row['srcRecID']]['depth'] . ".5", 'recID' => $row['relID']);
+            }
 
-        // if target is not in the result
-        if (!array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
-            $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth, 'recID' => $row['trgRecID']);
-            $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
+            // if target is not in the result
+            if (!array_key_exists($row['trgRecID'], $recSet['relatedSet'])) {
+                $recSet['relatedSet'][$row['trgRecID']] = array('depth' => $depth, 'recID' => $row['trgRecID']);
+                $nlrIDs[$row['trgRecID']] = 1; //save it for next level query
 
-        }
+            }
 
-        if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']) {
-            $recSet['relatedSet'][$row['srcRecID']]['relLinks'] =
-            array('byRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
-        }
+            if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']) {
+                $recSet['relatedSet'][$row['srcRecID']]['relLinks'] =
+                array('byRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
+            }
 
-        if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']]) {
-            $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']] = array($row['trgRecID']);
-        } else if (!in_array($row['trgRecID'], $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']])) {
-            array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']], $row['trgRecID']);
-        }
+            if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']]) {
+                $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']] = array($row['trgRecID']);
+            } else if (!in_array($row['trgRecID'], $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']])) {
+                array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRelType'][$row['relType']], $row['trgRecID']);
+            }
 
-        if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']]) {
-            $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']] = array($row['relType']);
-        } else if (!in_array($row['relType'], $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']])) {
-            array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']], $row['relType']);
-        }
+            if (!@$recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']]) {
+                $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']] = array($row['relType']);
+            } else if (!in_array($row['relType'], $recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']])) {
+                array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['byRecIDs'][$row['trgRecID']], $row['relType']);
+            }
 
-        if ($row['relID'] && !in_array($row['relID'], $recSet['relatedSet'][$row['srcRecID']]['relLinks']['relRecIDs'])) {
-            array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['relRecIDs'], $row['relID']);
-        }
+            if ($row['relID'] && !in_array($row['relID'], $recSet['relatedSet'][$row['srcRecID']]['relLinks']['relRecIDs'])) {
+                array_push($recSet['relatedSet'][$row['srcRecID']]['relLinks']['relRecIDs'], $row['relID']);
+            }
 
-        if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']) {
-            $recSet['relatedSet'][$row['trgRecID']]['revRelLinks'] =
-            array('byInvRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
-        }
+            if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']) {
+                $recSet['relatedSet'][$row['trgRecID']]['revRelLinks'] =
+                array('byInvRelType' => array(), 'byRecIDs' => array(), 'relRecIDs' => array()); //create an entry
+            }
 
-        $inverse = $row['invRelType'] ? $row['invRelType'] : "-" . $row['relType'];
-        if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse]) {
-            $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse] = array($row['srcRecID']);
-        } else if (!in_array($row['srcRecID'], $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse])) {
-            array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse], $row['srcRecID']);
-        }
+            $inverse = $row['invRelType'] ? $row['invRelType'] : "-" . $row['relType'];
+            if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse]) {
+                $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse] = array($row['srcRecID']);
+            } else if (!in_array($row['srcRecID'], $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse])) {
+                array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byInvRelType'][$inverse], $row['srcRecID']);
+            }
 
-        if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']]) {
-            $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']] = array($inverse);
-        } else if (!in_array($inverse, $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']])) {
-            array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']], $inverse);
-        }
+            if (!@$recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']]) {
+                $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']] = array($inverse);
+            } else if (!in_array($inverse, $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']])) {
+                array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['byRecIDs'][$row['srcRecID']], $inverse);
+            }
 
-        if ($row['relID'] && !in_array($row['relID'], $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['relRecIDs'])) {
-            array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['relRecIDs'], $row['relID']);
+            if ($row['relID'] && !in_array($row['relID'], $recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['relRecIDs'])) {
+                array_push($recSet['relatedSet'][$row['trgRecID']]['revRelLinks']['relRecIDs'], $row['relID']);
+            }
         }
-    }
-    $res->close();
+        $res->close();
     }
     return array_keys($nlrIDs);
 }
@@ -749,21 +749,21 @@ function buildGraphStructure($rec_ids, &$recSet) {
 // new set of functions to find linkes and related records dynamically
 //
 function _getReversePointers($rec_id, $depth){
-    
+
     global $system, $mysqli, $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $PTRTYPE_FILTERS;
 
     $rtfilter = (@$RECTYPE_FILTERS && array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
     $ptrfilter = (@$PTRTYPE_FILTERS && array_key_exists($depth, $PTRTYPE_FILTERS) ? $PTRTYPE_FILTERS[$depth] : null);
-    
+
     $query = 'SELECT rl_SourceID, rl_TargetID, src.rec_RecTypeID, rl_DetailTypeID FROM recLinks, Records src '
-            .' where rl_TargetID='.$rec_id.' and rl_DetailTypeID>0 '
-            .'  and src.rec_ID = rl_SourceID '
-            . ($rtfilter && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
-            . ($ptrfilter && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', $ptrfilter) . ') ' : '') 
+    .' where rl_TargetID='.$rec_id.' and rl_DetailTypeID>0 '
+    .'  and src.rec_ID = rl_SourceID '
+    . ($rtfilter && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
+    . ($ptrfilter && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', $ptrfilter) . ') ' : '') 
     .(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? ' and (src.rec_OwnerUGrpID in (' .
         join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
     ($system->has_access() && !$PUBONLY ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : '.rec_NonOwnerVisibility = "public")');
-    
+
     $resout = array();
 
     $res = $mysqli->query($query);
@@ -779,7 +779,7 @@ function _getReversePointers($rec_id, $depth){
         }
         $res->close();
     }
-    
+
     return $resout;    
 }
 
@@ -787,28 +787,28 @@ function _getReversePointers($rec_id, $depth){
 //
 //
 function _getForwardPointers($rec_id, $depth){
-    
+
     global $system, $mysqli, $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $PTRTYPE_FILTERS;
 
     $rtfilter = (@$RECTYPE_FILTERS && array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
     $ptrfilter = (@$PTRTYPE_FILTERS && array_key_exists($depth, $PTRTYPE_FILTERS) ? $PTRTYPE_FILTERS[$depth] : null);
-    
+
     $query = 'SELECT rl_SourceID, rl_TargetID, trg.rec_RecTypeID, rl_DetailTypeID FROM recLinks, Records trg '
-            .' where rl_SourceID='.$rec_id.' and rl_DetailTypeID>0 '
-            .'  and trg.rec_ID = rl_TargetID '
-            . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
-            . ($ptrfilter && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', $ptrfilter) . ') ' : '') 
+    .' where rl_SourceID='.$rec_id.' and rl_DetailTypeID>0 '
+    .'  and trg.rec_ID = rl_TargetID '
+    . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
+    . ($ptrfilter && count($ptrfilter) > 0 ? ' and rl_DetailTypeID in (' . join(',', $ptrfilter) . ') ' : '') 
     .(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? ' and (trg.rec_OwnerUGrpID in (' .
         join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
     ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : '.rec_NonOwnerVisibility = "public")');
-    
+
 
     $resout = array();
 
     $res = $mysqli->query($query);
     if($res){ 
         while ($row = $res->fetch_assoc()) {
-    
+
             if(@$resout[$row['rl_TargetID']]){
                 if(!in_array($row['rl_DetailTypeID'], $resout[$row['rl_TargetID']]['dty_IDs'])){ //rare case
                     array_push($resout[$row['rl_TargetID']]['dty_IDs'], $row['rl_DetailTypeID']);
@@ -819,7 +819,7 @@ function _getForwardPointers($rec_id, $depth){
         }
         $res->close();
     }
-    
+
     return $resout;    
 }
 
@@ -827,17 +827,17 @@ function _getForwardPointers($rec_id, $depth){
 //
 //
 function _getRelations($rec_id, $depth){
-    
+
     global $system, $mysqli, $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $RELTYPE_FILTERS;
 
     $rtfilter = (@$RECTYPE_FILTERS && array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
     $relfilter = (@$RELTYPE_FILTERS && array_key_exists($depth, $RELTYPE_FILTERS) ? $RELTYPE_FILTERS[$depth] : null);
-    
+
     $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM recLinks, Records trg '
-            .' where rl_SourceID='.$rec_id.' and rl_RelationTypeID>0 '
-            .'  and trg.rec_ID = rl_TargetID '
-            . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
-            . ($relfilter && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', $relfilter) . ') ' : '') 
+    .' where rl_SourceID='.$rec_id.' and rl_RelationTypeID>0 '
+    .'  and trg.rec_ID = rl_TargetID '
+    . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
+    . ($relfilter && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', $relfilter) . ') ' : '') 
     .(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? ' and (trg.rec_OwnerUGrpID in (' .
         join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
     ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : '.rec_NonOwnerVisibility = "public")');
@@ -851,16 +851,16 @@ function _getRelations($rec_id, $depth){
         }
         $res->close();
     }
-    
+
     $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM recLinks, Records src '
-            .' where rl_TargetID='.$rec_id.' and rl_RelationTypeID>0 '
-            .'  and src.rec_ID = rl_SourceID '
-            . ($rtfilter && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
-            . ($relfilter && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', $relfilter) . ') ' : '') 
+    .' where rl_TargetID='.$rec_id.' and rl_RelationTypeID>0 '
+    .'  and src.rec_ID = rl_SourceID '
+    . ($rtfilter && count($rtfilter) > 0 ? ' and src.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
+    . ($relfilter && count($relfilter) > 0 ? ' and rl_RelationTypeID in (' . join(',', $relfilter) . ') ' : '') 
     .(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY ? ' and (src.rec_OwnerUGrpID in (' .
         join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' : '(') .
     ($system->has_access() && !$PUBONLY ? 'NOT src.rec_NonOwnerVisibility = "hidden")' : '.rec_NonOwnerVisibility = "public")');
-    
+
 
     $res = $mysqli->query($query);
     if($res){ 
@@ -869,7 +869,7 @@ function _getRelations($rec_id, $depth){
         }
         $res->close();
     }
-    
+
     return $resout;    
 }
 
@@ -884,9 +884,9 @@ function _getRelations($rec_id, $depth){
 * returns array of printed out recID=>recTypeID
 * 
 * result = array('count'=>$total_count_rows,
-                 'offset'=>get_offset($params),
-                 'reccount'=>count($records),
-                 'records'=>$records))
+'offset'=>get_offset($params),
+'reccount'=>count($records),
+'records'=>$records))
 * 
 * 
 *
@@ -911,29 +911,29 @@ function outputRecords($result) {
     set_time_limit(0);
     /*
     if(count($rec_ids)>1000){
-        set_time_limit( 30 * count($rec_ids) % 1000 );
+    set_time_limit( 30 * count($rec_ids) % 1000 );
     }
     */
 
     $current_depth_recs_ids = $rec_ids;
     $current_depth = 0;
     $already_out = array(); //result - array of all printed out records recID => recTypeID
-    
+
     if(!$intofile){
         openTag('records');//, array('count' => $recSet['count']));
     }
-    
+
     $relations_rec_ids = array(); //list of all relationship records
-    
+
     while ($current_depth<= $MAX_DEPTH){
         $next_depth_recs_ids = array();
         $relations_rec_ids[$current_depth] = array();
-        
+
         foreach ($current_depth_recs_ids as $recID) {
 
             // output one record - returns recTypeID and array of related records for given record
             $res = outputRecord($recID, $current_depth, $OUTPUT_STUBS);
-            
+
             // close the file if using HuNI manifest + separate files output
             // The file is opened in outputRecord but left open!
             if($intofile && $hunifile){
@@ -942,42 +942,42 @@ function outputRecords($result) {
 
             if($res){
                 //output is successful
-                 
+
                 $already_out[$recID] = $res['recTypeID'];
-                
+
                 $related_rec_ids = $res['related'];
-                
+
                 if(count($res['relationRecs'])>0){
                     $relations_rec_ids[$current_depth] = array_merge($relations_rec_ids[$current_depth], $res['relationRecs']);    
                 }
-                
-                
+
+
                 //add to $next_depth_recs_ids if not already printed out or in current depth
                 foreach ($related_rec_ids as $rel_recID) {
-                   if (!(@$already_out[$rel_recID] || 
-                        in_array($rel_recID, $current_depth_recs_ids) || 
-                        in_array($rel_recID, $next_depth_recs_ids) )) {
-                            
+                    if (!(@$already_out[$rel_recID] || 
+                    in_array($rel_recID, $current_depth_recs_ids) || 
+                    in_array($rel_recID, $next_depth_recs_ids) )) {
+
                         array_push($next_depth_recs_ids, $rel_recID);    
-                   } 
+                    } 
                 }
-                
+
             }else if ($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
                 unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
             }
         }
-        
+
         unset($current_depth_recs_ids);
         $current_depth_recs_ids = $next_depth_recs_ids;
         $current_depth++;
     }//while depth
-    
+
     //print out relationship records with half depth
     $current_depth = 0;
     while ($current_depth<= $MAX_DEPTH){
         foreach ($relations_rec_ids[$current_depth] as $recID) {
             if (!@$already_out[$recID]){
-             
+
                 $res = outputRecord($recID, $current_depth.'.5', $OUTPUT_STUBS);
                 if($res){
                     $already_out[$recID] = $relRT;   
@@ -988,18 +988,18 @@ function outputRecords($result) {
         }
         $current_depth++;
     }
-    
-    
+
+
     if(!$intofile){
         closeTag('records');
     }
     return $already_out;
-    
 
-/* OLD VERSION pre 2016-12-05
+
+    /* OLD VERSION pre 2016-12-05
     foreach ($rec_ids as $recID) {
-        if($recID>0)
-            $recSet['relatedSet'][$recID] = array('depth' => 0, 'recID' => $recID );
+    if($recID>0)
+    $recSet['relatedSet'][$recID] = array('depth' => 0, 'recID' => $recID );
     }
 
     buildGraphStructure($rec_ids, $recSet);
@@ -1008,36 +1008,36 @@ function outputRecords($result) {
     $resout = array();
 
     if(!$intofile){
-        openTag('records', array('count' => $recSet['count']));
+    openTag('records', array('count' => $recSet['count']));
     }
 
     foreach ($recSet['relatedSet'] as $recID => $recInfo) {
-        if (intval($recInfo['depth']) <= $MAX_DEPTH) {
+    if (intval($recInfo['depth']) <= $MAX_DEPTH) {
 
-            // output one record - returns rec_RecTypeID for given record
-            $res = outputRecord($recInfo, $recSet['relatedSet'], $OUTPUT_STUBS);
+    // output one record - returns rec_RecTypeID for given record
+    $res = outputRecord($recInfo, $recSet['relatedSet'], $OUTPUT_STUBS);
 
-            // close the file if using HuNI manifest + separate files output
-            // The file is opened in outputRecord but left open!
-            if($intofile && $hunifile){
-                fclose($hunifile);
-            }
+    // close the file if using HuNI manifest + separate files output
+    // The file is opened in outputRecord but left open!
+    if($intofile && $hunifile){
+    fclose($hunifile);
+    }
 
-            if($res){
-                $resout[$recID] = $res; //$recInfo['record']['rec_RecTypeID'];
-            }else if ($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
-                unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
-            }
-        }
+    if($res){
+    $resout[$recID] = $res; //$recInfo['record']['rec_RecTypeID'];
+    }else if ($intofile && file_exists(HEURIST_HML_DIR.$recID.".xml")){
+    unlink(HEURIST_HML_DIR.$record['rec_ID'].".xml");
+    }
+    }
     }
 
     if(!$intofile){
-        closeTag('records');
+    closeTag('records');
     }
 
     return $resout;
-*/
-    
+    */
+
 }
 
 
@@ -1046,21 +1046,21 @@ function outputRecords($result) {
 //
 // $parentID - NOT USED
 function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
-    
-    
+
+
     global $system, $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL, $already_out,
     $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile, $dbID,
     $EXPAND_REV_PTR, $REVERSE, $rectype_templates;
 
     $hunifile = null;
-    
+
     if($rectype_templates){
         $record = recordTemplateByRecTypeID($system, $recID);//see db_recsearch
     }else{
         $record = recordSearchByID($system, $recID);//see db_recsearch
     }
 
-    
+
     $filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
 
     if (isset($filter) && !in_array($record['rec_RecTypeID'], $filter)) {
@@ -1078,7 +1078,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
             return false;
         }
     }
-    
+
     $resout = array('recTypeID'=>$record['rec_RecTypeID'], 'related'=>array(), 'relationRecs'=>array());
 
     // using separare files per record
@@ -1132,11 +1132,11 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
     if ($rectype_templates){
         output('<!-- Specify the entity identifier in the source database (numeric or alphanumeric) if entity may be the target '
-        ."of a record pointer field, including the target record pointer of a  relationship record.-->\n");   
+            ."of a record pointer field, including the target record pointer of a  relationship record.-->\n");   
     }
-    
+
     makeTag('id', null, $record['rec_ID']);
-    
+
     if ($rectype_templates){
         output("<!-- type specifies the record (entity) type of the record -->\n");
         makeTag('type', array('conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);
@@ -1144,7 +1144,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         makeTag('type', array('id' => $record['rec_RecTypeID'],
             'conceptID' => $conceptID), $RTN[$record['rec_RecTypeID']]);
     }
-    
+
 
     if ($rectype_templates || $record['rec_URL']) {
         makeTag('url', null, $record['rec_URL']);
@@ -1169,73 +1169,73 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
     foreach ($record['details'] as $dt => $details) {
         foreach ($details as $value) {
             outputDetail($dt, $value, $record['rec_RecTypeID'], $depth, $outputStub);
-                        //parentID - not used anymore $record['rec_RecTypeID'] == $relRT ? $parentID : $record['rec_ID']);
+            //parentID - not used anymore $record['rec_RecTypeID'] == $relRT ? $parentID : $record['rec_ID']);
         }
     }
     /* woot is disabled
     if ($WOOT) {
-        $result = loadWoot(array('title' => 'record:' . $record['rec_ID']));
-        if ($result['success'] && is_numeric($result['woot']['id']) && count($result['woot']['chunks']) > 0) {
-            openTag('woot', array('title' => 'record:' . $record['rec_ID']));
-            openCDATA();
-            foreach ($result['woot']['chunks'] as $chunk) {
-                $text = preg_replace("/&nbsp;/", " ", $chunk['text']);
-                output( replaceIllegalChars($text) . "\n" );
-            }
-            closeCDATA();
-            closeTag('woot');
-        }
+    $result = loadWoot(array('title' => 'record:' . $record['rec_ID']));
+    if ($result['success'] && is_numeric($result['woot']['id']) && count($result['woot']['chunks']) > 0) {
+    openTag('woot', array('title' => 'record:' . $record['rec_ID']));
+    openCDATA();
+    foreach ($result['woot']['chunks'] as $chunk) {
+    $text = preg_replace("/&nbsp;/", " ", $chunk['text']);
+    output( replaceIllegalChars($text) . "\n" );
+    }
+    closeCDATA();
+    closeTag('woot');
+    }
     }
     */
-    
-    
+
+
     if(!$rectype_templates && strpos($depth, '.')===false){
 
-    //artem - find reverse pointers dynamically
-    if($REVERSE){
-        $relations = _getReversePointers($recID, $depth+1);
-        foreach ($relations as $rec_id => $rels) {
-            $linkedRecType = $rels['rec_RecTypeID'];
-            foreach ($rels['dty_IDs'] as $dtID) {
-                $attrs = array('id' => $dtID, 'conceptID' => ConceptCode::getDetailTypeConceptID($dtID), 'type' => $DTN[$dtID]);
-                if (array_key_exists($dtID, $RQS[$linkedRecType])) {
-                    $attrs['name'] = $RQS[$linkedRecType][$dtID];
+        //artem - find reverse pointers dynamically
+        if($REVERSE){
+            $relations = _getReversePointers($recID, $depth+1);
+            foreach ($relations as $rec_id => $rels) {
+                $linkedRecType = $rels['rec_RecTypeID'];
+                foreach ($rels['dty_IDs'] as $dtID) {
+                    $attrs = array('id' => $dtID, 'conceptID' => ConceptCode::getDetailTypeConceptID($dtID), 'type' => $DTN[$dtID]);
+                    if (array_key_exists($dtID, $RQS[$linkedRecType])) {
+                        $attrs['name'] = $RQS[$linkedRecType][$dtID];
+                    }
+                    makeTag('reversePointer', $attrs, $rec_id);
                 }
-                makeTag('reversePointer', $attrs, $rec_id);
+            }
+            if($EXPAND_REV_PTR && $depth<$MAX_DEPTH){
+                $resout['related'] = array_merge($resout['related'], array_keys($relations));
             }
         }
-        if($EXPAND_REV_PTR && $depth<$MAX_DEPTH){
+
+        if($depth<$MAX_DEPTH){
+            $relations = _getForwardPointers($recID, $depth+1);
             $resout['related'] = array_merge($resout['related'], array_keys($relations));
         }
-    }
-
-    if($depth<$MAX_DEPTH){
-        $relations = _getForwardPointers($recID, $depth+1);
-        $resout['related'] = array_merge($resout['related'], array_keys($relations));
-    }
 
 
-    $relations = _getRelations($recID, $depth+1);
-    //$resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
-    foreach ($relations as $relRec_id => $attrs) {
-        
-        $trmID = $attrs['termID'];
+        $relations = _getRelations($recID, $depth+1);
+        //$resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
+        foreach ($relations as $relRec_id => $attrs) {
 
-        $attrs['type'] = $TL[$trmID]['trm_Label'];
-        $attrs['termConceptID'] = ConceptCode::getTermConceptID($trmID);
-        if ($TL[$trmID]['trm_Code']) {
-            $attrs['code'] = $TL[$trmID]['trm_Code'];
-        };
-        if (array_key_exists($trmID, $INV) && $INV[$trmID]) {
-            $attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
-            $attrs['invTermID'] = $INV[$trmID];
-            $attrs['invTermConceptID'] = ConceptCode::getTermConceptID($INV[$trmID]);
+            $trmID = $attrs['termID'];
+
+            $attrs['type'] = $TL[$trmID]['trm_Label'];
+            $attrs['termConceptID'] = ConceptCode::getTermConceptID($trmID);
+            if ($TL[$trmID]['trm_Code']) {
+                $attrs['code'] = $TL[$trmID]['trm_Code'];
+            };
+            if (array_key_exists($trmID, $INV) && $INV[$trmID]) {
+                $attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
+                $attrs['invTermID'] = $INV[$trmID];
+                $attrs['invTermConceptID'] = ConceptCode::getTermConceptID($INV[$trmID]);
+            }
+            array_push($resout['related'], $attrs['relatedRecordID']);    
+            array_push($resout['relationRecs'], $relRec_id);
+
+            makeTag('relationship', $attrs, $relRec_id);
         }
-        array_push($resout['related'], $attrs['relatedRecordID']);    
-        array_push($resout['relationRecs'], $relRec_id);
-        
-        makeTag('relationship', $attrs, $relRec_id);
-    }
 
     }
     closeTag('record');
@@ -1274,12 +1274,12 @@ function outputRecordStub($recordStub) {
 
 
 function makeFileContentNode($file) {
-    
+
     if (@$file['fxm_MimeType'] === "application/xml") { // && file_exists($filename)) {
-    
+
         $fiilename = resolveFilePath($file['fullPath']);
         if ($file['ulf_OrigFileName'] !== "_remote" && file_exists($fiilename)) {
-            
+
             $xml = simplexml_load_file( $fiilename );
             if (!$xml) {
                 makeTag('error', null, " Error while attemping to read $filename .");
@@ -1325,14 +1325,14 @@ function makeFileContentNode($file) {
 function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
     global $system,$DTN, $DTT, $TL, $RQS, $INV, $GEO_TYPES, $MAX_DEPTH, $INCLUDE_FILE_CONTENT, $SUPRESS_LOOPBACKS, $relTypDT,
-            $rectype_templates;
-            
+    $rectype_templates;
+
     $attrs = array('conceptID' => ConceptCode::getDetailTypeConceptID($dt));
 
     if (array_key_exists($rt, $RQS) && array_key_exists($dt, $RQS[$rt])) {
         $attrs['name'] = $RQS[$rt][$dt];    
     }
-    
+
     if($rectype_templates){
         if(!@$attrs['name'] && array_key_exists($dt, $DTN)){
             $attrs['name'] = $DTN[$dt];
@@ -1367,17 +1367,17 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
             $external_url = @$file['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
             $file_nonce = @$file['ulf_ObfuscatedFileID'];
-                
+
             $file_URL   = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce; //download
             $file['URL'] = $external_url?$external_url:$file_URL;
-            
+
             //including resources disabled since 2016-12-13
             if (false && @$_REQUEST['includeresources'] == '1' && @$_REQUEST['mode'] == '1') {
 
                 $fiilename = resolveFilePath($file['fullPath']);
-                
+
                 if (file_exists($fiilename)) {
-                    
+
                     $file['URL'] = $fiilename; //relative path to db root    
 
                     //if path is relative then we copy file
@@ -1396,7 +1396,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
 
                     }else{
                         //otherwise skip copy and use downloadURL
-                        
+
                     }
 
                     /* this code is not use anymore - we copy the entire file_uploads folder
@@ -1418,13 +1418,13 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             }
             openTag('detail', $attrs);
             openTag('file');
-            
+
             if($rectype_templates){
                 makeTag('url', null, 'FILE_OR_URL');
                 makeTag('mimeType', null, 'TEXT');
                 makeTag('description', null, 'MEMO_TEXT');
                 makeTag('origName', null, 'TEXT');
-                
+
             }else{
                 makeTag('id', null, $file['ulf_ID']);
                 makeTag('nonce', null, $file['ulf_ObfuscatedFileID']);
@@ -1473,7 +1473,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             outputTemporalDetail($attrs, $value);
             closeTag('detail');
         }
-        
+
     } else if ($DTT[$dt] === 'resource') {
         $attrs['isRecordPointer'] = "true";
         if ($MAX_DEPTH == 0 && $outputStub) {
@@ -1491,13 +1491,13 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
         }else{
             if( array_key_exists($value, $TL) ){
                 $attrs['termConceptID'] =  ConceptCode::getTermConceptID($value);
-                    if (@$TL[$value]['trm_ParentTermID']) {
-                        $attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
-                    }
+                if (@$TL[$value]['trm_ParentTermID']) {
+                    $attrs['ParentTerm'] = $TL[$TL[$value]['trm_ParentTermID']]['trm_Label'];
+                }
             }
             makeTag('detail', $attrs, $TL[$value]['trm_Label']);
         }
-        
+
     } else {
         makeTag('detail', $attrs, replaceIllegalChars($value));
     }
@@ -1732,7 +1732,7 @@ if($rectype_templates){
     $result['reccount'] = count($result['records']);
 }else{
     $result = recordSearch($system, $params); //see db_recsearch.php    
-    
+
     if(@$result['status']==HEURIST_OK){
         $result = $result['data'];
     }else{
@@ -1741,7 +1741,7 @@ if($rectype_templates){
     }
 }
 
-    
+
 
 $query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'woot' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));
 
@@ -1766,16 +1766,16 @@ if($intofile){ // flags HuNI manifest + separate files per record
     }else{
 
         ?>
-<html>
-<head>
-    <style>
-* {
-    font-family: Helvetica,Arial,sans-serif;
-    font-size: 12px;
-}
-    </style>
-    </head>
-            <body>
+        <html>
+        <head>
+            <style>
+                * {
+                    font-family: Helvetica,Arial,sans-serif;
+                    font-size: 12px;
+                }
+            </style>
+        </head>
+        <body>
         <table style='width:500px;'>
             <tr>
                 <td style='width:150px;'><img src='../../common/images/logo_huni.png'></td>
@@ -1783,19 +1783,19 @@ if($intofile){ // flags HuNI manifest + separate files per record
             </tr>
             <tr>
                 <td colspan="2">
-                
-        <p style="margin-top: 1em;">
-            The HuNI project (Humanities Networked Infrastructure, <a href="http://huni.net.au" target="_blank">http://huni.net.au</a>) 
-             funded as a Virtual Laboratory by the Australian National eResearch Collaboration Tools and Resources Project 
-            (<a href="http://nectar.org.au">NeCTAR</a>, has built a central searchable aggregate of metadata harvested from 28 Australian 
-            cultural datasets, including AusStage, AusLit, Dictionary of Art and Architecture Online, Australian Dictionary of Biography, 
-            Circus Oz and Paradisec</p>
 
-        <p style="margin-top: 1em;">
-            Heurist provides a database-on-demand function for HuNI. Databases created using the HuNI Core Metadata template can be immediately
-            exported to a HuNI harvestable format. Other databases can be made available for harvesting by mapping fields to the HuNI Core naming conventions.
-        </p>
-                
+                    <p style="margin-top: 1em;">
+                        The HuNI project (Humanities Networked Infrastructure, <a href="http://huni.net.au" target="_blank">http://huni.net.au</a>) 
+                        funded as a Virtual Laboratory by the Australian National eResearch Collaboration Tools and Resources Project 
+                        (<a href="http://nectar.org.au">NeCTAR</a>, has built a central searchable aggregate of metadata harvested from 28 Australian 
+                        cultural datasets, including AusStage, AusLit, Dictionary of Art and Architecture Online, Australian Dictionary of Biography, 
+                        Circus Oz and Paradisec</p>
+
+                    <p style="margin-top: 1em;">
+                        Heurist provides a database-on-demand function for HuNI. Databases created using the HuNI Core Metadata template can be immediately
+                        exported to a HuNI harvestable format. Other databases can be made available for harvesting by mapping fields to the HuNI Core naming conventions.
+                    </p>
+
                 </td>
             </tr>
         </table>
@@ -1858,46 +1858,71 @@ if($intofile){ // flags HuNI manifest + separate files per record
     openTag('hml', $hmlAttrs);
 
     if($rectype_templates){
-        output( "<!--This file provides a template for preparing an XML file with Heurist schema which can be imported into a Heurist database.
-\n
-The file must indicate a source database. This is added automatically when HML is exported from Heurist. 
-\n
-In the case of data from a non-Heurist source, the file should indicate a database which contains definitions for all the record types 
-and fields to be imported - this can either be the database from which the template is exported or the target database if all 
-the necessary record types and fields have been imported into it (or if the database has been cloned from a suitable source). 
-Heurist will warn at the import stage if required definitions are missing.
-\n
-Values to be replaced are indicated with ALLCAPS, such as WKT (WellKnownText), NUMERIC, TERM, DATE etc.
-\n
-RECORD_REFERENCE may be replaced with a numeric or alphanumeric reference to another record, indicated by the <ID> tag. 
-Note that this reference will be replaced with an automatically generated numeric Heurist record ID (H-ID), 
-which will be different from the reference supplied.
-\n
-If you wish to specify existing Heurist records in the target database as the target of a Record Pointer field, specify 
-their Heurist record ID (H-ID) in the target database in the form H-ID-nnnn, where nnnn  is the H-ID of the target record. 
-Specifying non-existent record IDs will throw an error. The record type of target records are not checked on import; pointers 
-to records of the wrong type can be found later with Verify > Verify integrity. 
-\n
-In the current version of HML import, you cannot import additional data into an existing record (this will be developed later 
-according to demand - in the meantime please use CSV import to update records). If you use an H-ID-nnnn format specification 
-in the <id> tag of a record, it will be regarded as an unknown alphanumeric identifier and will simply create a new record 
-with a new H-ID.
-\n
-<url>URL</url> This record level tag specifies a special URL attached directly to the record which is used to hyperlink record
-lists and for which checking can be automated. Primarily used for internet bookmarks.  
-\n
-Specify date field values in ISO format (yyyy or yyyy-mm or yyyy-mm-dd)
-\n
-termID= specifies any of the following, which are evaluated in order: local ID, concept code, label or standard code.   
-If no match is found, the value will be added as a new term 
-\n
-the XML file may (optionally) specify a Heurist database ID with <database id=??>. If a database ID is specified, synchronisation 
-of definitions from that database will be performed before the data are imported. Since imported files will normally use a template
-for record types and fields exported from the target database, this is only useful for synchronising vocabularies and terms.
--->\n");
- 
+        output( "<!-- for preparing an XML file 
+            with Heurist schema which can be imported into a Heurist database.
+            \n
+            The file must indicate a source database in <database id=nnnn>. 
+            This is added automatically when HML or this template is exported 
+            from a registered Heurist database (it is set to 0 if the 
+            database is not registered). 
+            \n
+            In the case of data from a non-Heurist source, the file should 
+            indicate a database which contains definitions for all the 
+            record types and fields to be imported. This can either be 
+            the database from which this template is exported or zero or the 
+            target database if all the necessary record types and fields 
+            exist in the target (either by being imported into it or through
+            cloning from a suitable source). If definitions are missing Heurist 
+            will update the target database structure from the indicated source
+            (if specified). If required definitions cannot be obtained, it will 
+            report an error indicating the missing definitions.
+            \n
+            Values to be replaced are indicated with ALLCAPS, such as 
+            WKT (WellKnownText), NUMERIC, TERM, DATE etc.
+            \n
+            RECORD_REFERENCE may be replaced with a numeric or alphanumeric 
+            reference to another record, indicated by the <ID> tag. 
+            Note that this reference will be replaced with an automatically 
+            generated numeric Heurist record ID (H-ID), which will be different 
+            from the reference supplied. The reference supplied will be recorded
+            in a field Original ID.
+            \n
+            If you wish to specify existing Heurist records in the target 
+            database as the target (value) of a Record Pointer field, specify 
+            their Heurist record ID (H-ID) in the form H-ID-nnnn, where nnnn
+            is the H-ID of the target record in the target database. Specifying 
+            non-existent record IDs will throw an error. The record type of 
+            target records are not checked on import; pointers to records of
+            the wrong type can be found later with Verify > Verify integrity. 
+            \n
+            In the current version of HML import, you cannot import additional
+            data into an existing record (this will be developed later according 
+            to demand - in the meantime please use CSV import to update records).
+            If you use an H-ID-nnnn format specification in the <id> tag of 
+            a record, it will be regarded as an unknown alphanumeric identifier 
+            and will simply create a new record with a new H-ID.
+            \n
+            <url>URL</url> This record level tag specifies a special URL 
+            attached directly to the record which is used to hyperlink 
+            record lists and for which checking can be automated. 
+            Primarily used for internet bookmarks.  
+            \n
+            Specify date field values in ISO format (yyyy or yyyy-mm or yyyy-mm-dd)
+            \n
+            termID= specifies any of the following, which are evaluated 
+            in order: local ID, concept code, label or standard code.   
+            If no match is found, the value will be added as a new term 
+            \n
+            The XML file may (optionally) specify a Heurist database ID 
+            with <database id=??>. If a database ID is specified, synchronisation 
+            of definitions from that database will be performed before the data 
+            are imported. Since imported files will normally use a template for 
+            record types and fields exported from the target database, this is 
+            only useful for synchronising vocabularies and terms.
+        -->\n");
 
- 
+
+
     }    
     //makeTag('raw',null, $response2 );
 
@@ -1909,7 +1934,7 @@ for record types and fields exported from the target database, this is only usef
     );
     */
     makeTag('database', array('id' => $dbID ), HEURIST_DBNAME);
-    
+
     if(!$rectype_templates){
         makeTag('query', $query_attrs);
         if (count($selectedIDs) > 0) {
@@ -1917,7 +1942,7 @@ for record types and fields exported from the target database, this is only usef
         }
         makeTag('dateStamp', null, date('c'));
     }
-    
+
     if (array_key_exists('error', $result)) {
         makeTag('error', null, $result['error']);
     } else {
