@@ -660,7 +660,6 @@ $.widget( "heurist.expertnation_nav", {
                     $(app1.widget).dh_search('option', 'search_at_init', svsID);        
                     hdoc.find('.bor-page-search').show();
                 }
-                $(app1.widget).dh_search('option', 'uni_ID', this.options.uni_ID);        
             }              
 
             hdoc.scrollTop(0);

@@ -220,7 +220,8 @@ var cfg_layouts = [
        ,search_pane:{dropable:false,css:{},
                 apps:[                           
                 //prod 
-                {appid:'dh_search', options:{UGrpID:48, search_at_init:152}, hasheader:false, css:{border:'none', 'background':'none'} }]       }  
+                {appid:'dh_search', options:{UGrpID:48, search_at_init:152, uni_ID:4705}, 
+                    hasheader:false, css:{border:'none', 'background':'none'} }]       }  
                 //faceted/forms searches
                 //dev
                 //{appid:'dh_search', options:{UGrpID:18, Xsearch_at_init:110}, hasheader:false, css:{border:'none', 'background':'none'} }]}  //faceted/forms searches
@@ -252,7 +253,7 @@ var cfg_layouts = [
        ,search_pane:{dropable:false,css:{},
                 apps:[                           
                 //prod 
-                {appid:'dh_search', options:{UGrpID:55, search_at_init:196}, hasheader:false, 
+                {appid:'dh_search', options:{UGrpID:55, search_at_init:196, uni_ID:4710}, hasheader:false, 
                 css:{border:'none', 'background':'none'} }]         
        }
        ,expertnation_nav:{dropable:false,css:{},

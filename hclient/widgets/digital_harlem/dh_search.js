@@ -471,6 +471,9 @@ $.widget( "heurist.dh_search", {
                             }
                         );                
                
+           }else{
+               //search is not a string - see search by gender in expernation_nav
+               __applyAddFilter(search_value, search_value_original);
            }
             
            //this.add_filter = search_value;
@@ -482,6 +485,7 @@ $.widget( "heurist.dh_search", {
        var that = this;       
        
        function __applyAddFilter(search_value, search_value_original){
+           
            that.add_filter = search_value;
            that.add_filter_original = search_value_original;
            if(that.search_faceted.html()==''){ //not inited yet
