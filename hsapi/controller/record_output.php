@@ -48,6 +48,7 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
@@ -838,7 +839,7 @@ XML;
     }
     
     $idx = 0;
-    while ($idx<count($records)){ //replace to WHILE
+    while ($idx<count($records)){
     
         $recID = $records[$idx];
         $idx++;

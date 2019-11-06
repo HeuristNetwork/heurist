@@ -99,6 +99,9 @@ $file_max_size = get_php_bytes('upload_max_filesize');
         </div>
 
         <!-- STEP 1 - list of missed record types - offer to sync definitions -->
+        <div id="div_sourcedb" style="display:none">
+        </div>
+        
         <div id="divStep1" style="display:none">
            <p class="st1_A import-rem">The following entity (record) types in this file do not yet exist, or require updating
             in the database into which you are importing data:</p>

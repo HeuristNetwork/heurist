@@ -1108,7 +1108,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
     openTag('record', $recAttr);
 
-    if(!$rectype_templates){
+    if(!$rectype_templates && $intofile){
         if (isset($dbID) && ($dbID != 0)) {
             output( "<dbID>".$dbID."</dbID>\n");
         } else {

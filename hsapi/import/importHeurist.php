@@ -299,6 +299,7 @@ public static function getDefintions($filename){
         $dbsource_is_same = defined('HEURIST_DBID') && ((!(@$data['heurist']['database']['id']>0)) || 
                             @$data['heurist']['database']['id']==HEURIST_DBID);
         
+        
         $imp_detailtypes = null;
         
         if($dbsource_is_same){
@@ -318,6 +319,7 @@ public static function getDefintions($filename){
         //return array of $imp_rectypes - record types to be imported
         $res = array(
             'database'=>@$data['heurist']['database']['id'],
+            'database_name'=>@$data['heurist']['database']['db'],
             'rectypes'=>$imp_rectypes,    //need to download/sync rectypes
             'detailtypes'=>$imp_detailtypes  //need to show missed detail fields
         );
@@ -351,6 +353,17 @@ public static function importDefintions($filename, $session_id){
         $importDef = new DbsImport( self::$system );
 
 //$time_debug = microtime(true);        
+
+        if (!(@$data['heurist']['database']['id']>0)) {
+            self::$system->addError(HEURIST_ERROR, '<b>Not possible to determine an origin database id (source of import).</b>'
+.'<br><br><div>Value read = 0 = non-Heurist source or unregistered Heurist database. This will only work if your database already'
+.' contains all the entity types, fields, vocabularies and terms required to hold the incoming data. Please add all required structures'
+.' or set the source database with <database id=xxxx> near the start of the file.</div>', null,
+'Non-Heurist or unregistered Heurist source database'
+            );
+            return false;
+        }
+
         
         //Finds all defintions to be imported
         if($importDef->doPrepare(  array(
@@ -385,7 +398,7 @@ public static function importDefintions($filename, $session_id){
 }
 
 //
-// $is_cms_init - creation of record set for website - id adds info text for webpage content
+// $is_cms_init - if true this is creation of set of records for website - it adds info text for webpage content
 //
 public static function importRecords($filename, $session_id, $is_cms_init=false){
     
@@ -453,10 +466,21 @@ EOD;
         ini_set('max_execution_time', 0);
         
         // if database not defined or the same
-        // it is assumed that all local codes in $data are already found and exists in 
+        // is the same it is assumed that all local codes in $data are already found and exists in 
         // target database, elements without local codes or if not found will be ignored
-        $dbsource_is_same = defined('HEURIST_DBID') && ((!(@$data['heurist']['database']['id']>0)) || 
+        //$dbsource_is_same = defined('HEURIST_DBID') && ((!(@$data['heurist']['database']['id']>0)) || 
+        // @$data['heurist']['database']['id']==HEURIST_DBID);
+        
+        $dbsource_is_registered = (@$data['heurist']['database']['id']>0);
+                            
+        if(defined('HEURIST_DBID')){ //registered
+            $dbsource_is_same = ( !$dbsource_is_registered || 
                             @$data['heurist']['database']['id']==HEURIST_DBID);
+        }else{
+            //if source is registered - source is different
+            $dbsource_is_same = !$dbsource_is_registered;
+        }
+                            
         
         if($dbsource_is_same){
             
@@ -504,6 +528,7 @@ EOD;
         
         $is_rollback = false;
         $keep_autocommit = mysql__begin_transaction($mysqli);    
+        $mysqli->query('SET FOREIGN_KEY_CHECKS = 0');
         
         foreach($records as $record_src){
             
@@ -935,6 +960,8 @@ EOD;
                     $res['ids'] = array_values($records_corr);    
                 }
         }
+        $mysqli->query('SET FOREIGN_KEY_CHECKS = 1');
+
             
         if($session_id!=null){//finish
             mysql__update_progress($mysqli, $session_id, false, 'REMOVE');

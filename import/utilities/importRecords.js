@@ -123,12 +123,14 @@ function hImportRecords(_max_upload_size) {
                                 id: window.hWin.HEURIST4.util.random()
                             };
                                    
+                            //call importController.php                                          
                             window.hWin.HAPI4.doImportAction(request, function( response ){
                                     
                                     if(response.status == window.hWin.ResponseStatus.OK){
                                         //render list of rectypes to be imported
                                         var isAllRecognized = true;
                                         var source_db = response.data.database;
+                                        var source_db_name = response.data.database_name;
                                         var rectypes = response.data.rectypes;
                                         var s = '', tsv = 'type\tsource id\tccode\tname in source\ttarget id\tname in target\n';
                                         var recCount = 0;
@@ -184,6 +186,13 @@ function hImportRecords(_max_upload_size) {
                                         $('#div_RectypeToBeImported').html('<table><tr>'
                                                 +'<td>Code</td><td>Rec count</td><td>Name</td><td>ID in this db</td></tr>'
                                                 +s+'</table>');
+                                        
+                                        $('#div_sourcedb').html('Source database:&nbsp;&nbsp;&nbsp;id: <b>'
+                                        +(source_db>0?source_db:'0 (not registered)')
+                                        +'</b>&nbsp;&nbsp;name: '
+                                        +(window.hWin.HEURIST4.util.isempty(source_db_name)?'(not specified)': ('<b>'+source_db_name+'</b>') ))
+                                        .show();        
+                                                
                                         _showStep(1);   
                                         
                                         $('.import-rem').hide();
@@ -272,7 +281,7 @@ function hImportRecords(_max_upload_size) {
     }
 
     //
-    //
+    // import database definitions before import records
     //
     function _importDefinitions(){
             

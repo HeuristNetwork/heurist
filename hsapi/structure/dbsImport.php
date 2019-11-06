@@ -99,7 +99,7 @@ class DbsImport {
         databaseID - database where to search definition if not defined take db from conceptCode
         conceptCode - unique identifier (optional if definitionID is set)
         
-        definitionID  - id in source database or array of ids   
+        definitionID  - id in source database OR array of ids   
         
       )
     * @return mixed

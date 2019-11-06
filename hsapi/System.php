@@ -726,7 +726,7 @@ error_log(print_r($_REQUEST, true));
     /**
     * keep error message (for further use with getError)
     */
-    public function addError($status, $message='', $sysmsg=null) {
+    public function addError($status, $message='', $sysmsg=null, $title=null) {
 
         if($status==HEURIST_REQUEST_DENIED && $sysmsg==null){
             $sysmsg = $this->get_user_id();
@@ -755,7 +755,7 @@ error_log(print_r($_REQUEST, true));
                 error_log($Title.'  '.$sMsg);     
         }
 
-        $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg);
+        $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);
         return $this->errors;
     }
 

@@ -718,6 +718,8 @@ prof =Profile
             },
             
             //
+            // imports database defintions 
+            //
             import_definitions: function(databaseID, definitionID, callback){
              
                 var request = {databaseID:databaseID, 
