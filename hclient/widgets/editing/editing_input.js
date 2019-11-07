@@ -828,7 +828,7 @@ $.widget( "heurist.editing_input", {
                         + 'admin/structure/terms/editTermForm.php?db='+window.hWin.HAPI4.database
                         + '&treetype='+type+'&parent='+Number(allTerms);
                     
-                    window.hWin.HEURIST4.msg.showDialog(url, {height:320, width:700,
+                    window.hWin.HEURIST4.msg.showDialog(url, {height:340, width:700,
                         title: 'Add Term',
                         noClose: true, //hide close button
                         //class:'ui-heurist-bg-light',
