@@ -25,14 +25,17 @@ define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
     
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_file.php');
 
 $is_csv = (@$_REQUEST['csv']==1);
+
 
 if( $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
     $response = $system->getError();
     print $response['message'];
     exit();
 }
+
 
 $is_delete_allowed = (strlen(@$passwordForDatabaseDeletion) > 14);
 
@@ -101,7 +104,7 @@ if($is_csv){
     if (false === $fd) {
         die('Failed to create temporary file');
     } 
-    $record_row = array('Name','Reg ID','Records','Values','DB Vsn','Data updated','Last modified','Owner','eMail','Institution');
+    $record_row = array('Name','Reg ID','Records','Files(MB)','DB Vsn','Data updated','Last modified','Owner','eMail','Institution');
     fputcsv($fd, $record_row, ',', '"');
 }else{
     $arr_databases = array();
@@ -110,7 +113,7 @@ if($is_csv){
 $i = 0;
 foreach ($dbs as $db){
 
-    //ID  Records     Values    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
+    //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
     
         
 //error_log(substr($db, 4));        
@@ -140,6 +143,9 @@ foreach ($dbs as $db){
     $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
         "FROM ".$db.".sysUGrps where ugr_id=2");
         
+    //$sz = folderSize( HEURIST_FILESTORE_ROOT.substr($db, 4).'/');
+    //$record_row[3] = $sz>0?round($sz/1048576):0;
+        
     if($is_csv){    
         $record_row[] = $owner[0];
         $record_row[] = $owner[1];
@@ -148,10 +154,18 @@ foreach ($dbs as $db){
     }else{
         $record_row[] = implode(' ', $owner);
         $record_row[] = $sysadmin;
-        $arr_databases[] = '"'.implode('","',  str_replace('"','',$record_row)   ).'"';
+       
+        $aitem_quote = function($n)
+        {
+            return is_numeric($n) ?$n :('"'.str_replace('"','\"',$n).'"');
+        };        
+        
+        $record_row = array_map($aitem_quote, $record_row);
+        $arr_databases[] = implode(',',$record_row);//'"'.implode('","',  str_replace('"','',$record_row)   ).'"';
     }
     
     $i++;
+    //if($i>100) break;
 }//foreach
 
 if($is_csv){
@@ -301,7 +315,7 @@ if($is_csv){
                 }},
                 { key: "db_regid", label: "Reg ID", sortable:true, className:'right'},
                 { key: "cnt_recs", label: "Records", sortable:true, className:'right'},
-                { key: "cnt_vals", label: "Values", sortable:true, className:'right'},
+                { key: "cnt_vals", label: "Files(MB)", sortable:true, className:'right'},
                 /* Removed to increase speed - see equivalent section commented out above
                 { key: "cnt_rectype", label: "RecTypes", sortable:true, className:'right'},
                 { key: "cnt_fields", label: "Fields", sortable:true, className:'right'},
