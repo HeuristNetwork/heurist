@@ -374,14 +374,22 @@ $.widget( "heurist.search_faceted_wiz", {
                         */
 
                         $dlg.find("#svs_getCurrentFilter")
-                        .button({icons: {primary: "ui-icon-search"}, text:false})
-                        .attr('title', window.hWin.HR('Get current query'))
-                        .css({'height':'16px', 'width':'16px'})
+                        .button({'label':window.hWin.HR('Get current query')}) //{icons: {primary: "ui-icon-search"}, text:false}
+                        .css({'height':'16px','font-size':'0.8em'})
                         .click(function( event ) {
-                            
-                                var res = window.hWin.HEURIST4.util.hQueryStringify(window.hWin.HEURIST4.current_query_request);
-                                
+                            var res = window.hWin.HEURIST4.util.hQueryStringify(window.hWin.HEURIST4.current_query_request);
+                            if($dlg.find('#svs_Query').val().trim()!=''){
+                                var that_dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                    window.hWin.HR("Are you sure?"),
+                                    function(){ 
+                                        $( that_dlg ).dialog( "close" ); 
+                                        $dlg.find('#svs_Query').val(res).trigger('keyup');    
+                                    });
+                            }else{
                                 $dlg.find('#svs_Query').val(res).trigger('keyup');
+                            }
+                            
+                                
                                 
                         });
 
@@ -1127,7 +1135,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     harchy.push('<b>'+window.hWin.HEURIST4.rectypes.names[ rtid ]+'</b>');
                     
                     if(j==0 && dtid=='title'){
-                       harchy_fields.push(window.hWin.HEURIST4.rectypes.names[ rtid ]);  
+                       harchy_fields.push('Constructed record title'); //was rectype name window.hWin.HEURIST4.rectypes.names[ rtid ]);  
                     }else
                     if(dtid=='modified'){
                        harchy_fields.push("Modified"); 
@@ -1165,7 +1173,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                 :'') );
                         }
                         
-                        }
+                        }//dtid>0
                         
                     }else{
                         

@@ -568,11 +568,19 @@ function EditRecStructure() {
                         var isRequired = (oRecord.getData('rst_RequirementType')==='required');
                         if ( (_isReserved && isRequired) || status === "reserved"){ // || status === "approved"
                             //before it was "lock" icon
+                            statusLock  ='<a href="#delete"><span class="ui-icon ui-icon-trash" '
+                            +'title="Click to remove field from this record type"></span><\/a>';
+                            /*
                             statusLock  ='<a href="#delete"><img src="../../../common/images/cross.png" width="12" height="12" border="0" '+
                             'title="Click to remove field from this record type" /><\/a>';
+                            */
                         }else{
+                            statusLock  ='<a href="#delete"><span class="ui-icon ui-icon-trash" '
+                            +'title="Click to remove field from this record type"></span><\/a>';
+                            /*
                             statusLock = '<a href="#delete"><img src="../../../common/images/cross.png" width="12" height="12" border="0" '+
                             'title="Click to remove field from this record type" /><\/a>';
+                            */
                         }
                         elLiner.innerHTML = statusLock;
                     }
@@ -1061,44 +1069,60 @@ function EditRecStructure() {
                            
                            return;
                     }
-
-                    var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
-
-                    function _onCheckEntries(response)
-                    {
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                            var dty_name = oRecord.getData('dty_Name');
-
-                            var sWarn;
-                            if(response.data[rty_ID]){
-                                sWarn = "This field #"+rst_ID+" '"+dty_name+"' is utilised in the title mask. If you delete it you will need to edit the title mask in the record type definition form (click on the pencil icon for the record type after exiting this popup).\n\n Do you still wish to delete this field?";
-                                var r=confirm(sWarn);
-                            }else{
-                                // unnecessary: sWarn =  "Delete field # "+rst_ID+" '"+dty_name+"' from this record structure?";
-                                var r=1; // force deletion
-                            }
-
-                            if (r) {
-
-                                _doExpliciteCollapse(null ,false); //force collapse this row
-
-                                var callback = __updateAfterDelete;
-                                var request = {method:'deleteRTS', db:window.hWin.HAPI4.database, rtyID:rty_ID, dtyID:rst_ID};
-                                _isServerOperationInProgress = true;
-                                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback); 
-                            }
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }                                        
-                    }
-
                     
-                    var callback = _onCheckEntries;
-                    var request = {method:'checkDTusage', db:window.hWin.HAPI4.database, rtyID:rty_ID, dtyID:rst_ID};
 
-                    window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback); 
+                    function _continueDel(){         
+
+                        var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+
+                        function __onCheckEntries(response)
+                        {
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                
+                                var dty_name = oRecord.getData('dty_Name');
+
+                                var sWarn;
+                                if(response.data[rty_ID]){
+                                    sWarn = "This field #"+rst_ID+" '"+dty_name+"' is utilised in the title mask. If you delete it you will need to edit the title mask in the record type definition form (click on the pencil icon for the record type after exiting this popup).\n\n Do you still wish to delete this field?";
+                                    var r=confirm(sWarn);
+                                }else{
+                                    // unnecessary: sWarn =  "Delete field # "+rst_ID+" '"+dty_name+"' from this record structure?";
+                                    var r=1; // force deletion
+                                }
+
+                                if (r) {
+
+                                    _doExpliciteCollapse(null ,false); //force collapse this row
+
+                                    var callback = __updateAfterDelete;
+                                    var request = {method:'deleteRTS', db:window.hWin.HAPI4.database, rtyID:rty_ID, dtyID:rst_ID};
+                                    _isServerOperationInProgress = true;
+                                    window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback); 
+                                }
+                                
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }                                        
+                        }
+
+                        
+                        var callback = __onCheckEntries;
+                        var request = {method:'checkDTusage', db:window.hWin.HAPI4.database, rtyID:rty_ID, dtyID:rst_ID};
+
+                        window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback); 
+
+                    }                    
+                    
+                    var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2); //beginner default
+
+                    if(exp_level>0){
+                        var that_dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                        'Are you sure you want to remove this field from this record type?',
+                                    function(){ _continueDel(); })
+                    }else{
+                        _continueDel();
+                    }
+                    
                     
                 }
             });

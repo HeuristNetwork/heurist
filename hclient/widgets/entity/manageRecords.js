@@ -2504,7 +2504,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 sheader = sheader + 
                     '&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
                     + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0" class="truncate">'
-                    + this._getField('rec_Title')+'</h3>';            
+                    + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';            
                 
             
             }

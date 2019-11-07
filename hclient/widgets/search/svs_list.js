@@ -655,7 +655,7 @@ $.widget( "heurist.svs_list", {
                                 'Saved filter'+(missed.length>1?'s':'')+' (ID '
                                 + missed.join(', ')
                                 + ') specified in parameters '
-                                + (missed.length>1?'does':'do')+' not exist in the database. Please advise the database owner ('+
+                                + (missed.length>1?'does':'do')+' not exist in the database.<br><br>Please advise the database owner ('
                                 + window.hWin.HAPI4.sysinfo['dbowner_email'] +')');
                             }
                             
