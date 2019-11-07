@@ -323,7 +323,7 @@ function hLayout(args) {
                 Resize:               "Drag to resize panel"
             },
             onresize_end: function(){
-                $(document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
+                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
                 onLayoutResize( $container );
             }
             /*,
