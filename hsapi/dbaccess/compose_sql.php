@@ -2053,14 +2053,14 @@ class BibIDPredicate extends Predicate {
         }else{
             
             $cs_ids = getCommaSepIds($this->value);
-            if ($cs_ids) {  
+            if ($cs_ids && strpos($cs_ids,',')>0) {  
                 
                 $pquery = &$this->getQuery();
                 if(true || $pquery->search_domain == EVERYTHING){
                     $cs_ids = explode(',', $cs_ids);
                     $rsvd = array();
                     foreach($cs_ids as $recid){
-                        array_push($rsvd, recordSearchReplacement($mysqli, $recid));
+                        array_push($rsvd, recordSearchReplacement($mysqli, $recid)); //find new value
                     }
                     $cs_ids = implode(',',$rsvd);
                 }
