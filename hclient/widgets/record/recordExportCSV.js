@@ -69,7 +69,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         var rectype_Ids = this._currentRecordset.getRectypes();
         
         if(rectype_Ids.length>1){
-            window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
+            
+            var opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
+            $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
         
             for (var rty in rectype_Ids){
                 if(rty>=0 && window.hWin.HEURIST4.rectypes.pluralNames[rectype_Ids[rty]]){
@@ -87,7 +89,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     
                 window.hWin.HEURIST4.ui.addoption(selScope,
                     (rectype_Ids.length>1)?'current':rectype_Ids[0],
-                    msg+' (count=' + this._currentRecordset.length()+')');
+                    msg); //+' (count=' + this._currentRecordset.length()+')'
         }
         
         if (this._currentRecordsetSelIds &&  this._currentRecordsetSelIds.length > 0) {
@@ -103,6 +105,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         //this.selectRecordScope.val(this.options.init_scope);    
         //if(selScope.selectedIndex<0) selScope.selectedIndex=0;
         this._onRecordScopeChange();
+        
+        window.hWin.HEURIST4.ui.initHSelect(selScope);
+        
+        var wmenu = $(selScope).hSelect( "menuWidget" );  //was menu
+        //wmenu.find('li.ui-state-disabled').css({'display':'none !important'});
+        //$(selScope).hSelect('widget').text('select...');
+        //this.element.find('li.ui-state-disabled').css({'display':'none !important'});
+        
     },
             
     //
