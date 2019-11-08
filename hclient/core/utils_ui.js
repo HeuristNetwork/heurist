@@ -2616,7 +2616,7 @@ window.hWin.HEURIST4.ui = {
         var charCode = typeof event.which == "number" ? event.which : event.keyCode;
         if (charCode && charCode > 31)
         {
-            var keyChar = String.fromCharCode(charCode);
+            var keyChar = event.key?event.key:String.fromCharCode(charCode);
             // Old test only allowed specific characters, far too restrictive. New test only restrcts characters which will pose a problem
             // if(!/^[a-zA-Z0-9$_<> /,–—]+$/.test(keyChar)){
             var sWarn = '';

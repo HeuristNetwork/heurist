@@ -234,6 +234,36 @@ function EditRecStructure() {
                     return false;
                 }
             }
+            
+            var titleEditor = new YAHOO.widget.TextboxCellEditor({ 
+                            disableBtns:true,
+                            /*validator: function(inputValue, currentValue, editorInstance){
+                               return;  //if returns undefined it restores old value
+                            },
+                            doAfterRender:function(){
+                               console.log(arguments);  
+                            },*/
+                            asyncSubmitter:function(fnCallback, oNewValue){
+                                
+                                var rec = this.getRecord();
+                                if(oNewValue=='') {
+                                    fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
+                                }else{
+                                    var swarn = window.hWin.HEURIST4.ui.validateName(oNewValue, "Prompt (display name)", 255)
+                                    if(swarn!=""){
+                                        alert(swarn);
+                                        fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
+                                    }else{
+                                        _updateSingleField(rec.getData("rst_ID"), 'rst_DisplayName', 
+                                                rec.getData("rst_DisplayName"), oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
+                                    }
+                                }
+                            } 
+                                });
+           titleEditor.subscribe('keydownEvent',function(oArgs){ //editor, event
+                            var event = oArgs.event;
+                            return window.hWin.HEURIST4.ui.preventChars(event);
+                            });                     
 
 
             var myColumnDefs = [
@@ -344,24 +374,7 @@ function EditRecStructure() {
                 {
                     key:"rst_DisplayName", label: "Field prompt in form", width:150, minWidth:150, sortable:false,
                     
-                    editor: new YAHOO.widget.TextboxCellEditor({ 
-                            disableBtns:true,
-                            asyncSubmitter:function(fnCallback, oNewValue){
-                                var rec = this.getRecord();
-                                if(oNewValue=='') {
-                                    fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
-                                }else{
-                                    var swarn = window.hWin.HEURIST4.ui.validateName(oNewValue, "Prompt (display name)", 255)
-                                    if(swarn!=""){
-                                        alert(swarn);
-                                        fnCallback(true, rec.getData("rst_DisplayName")); //restore old value
-                                    }else{
-                                        _updateSingleField(rec.getData("rst_ID"), 'rst_DisplayName', 
-                                                rec.getData("rst_DisplayName"), oNewValue, fnCallback); //fnCallback(bSuccess, oNewValue)   
-                                    }
-                                }
-                            } 
-                                }),
+                    editor: titleEditor,
                             
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = oData;
