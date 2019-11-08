@@ -299,6 +299,7 @@ public static function getDefintions($filename){
         $dbsource_is_same = defined('HEURIST_DBID') && ((!(@$data['heurist']['database']['id']>0)) || 
                             @$data['heurist']['database']['id']==HEURIST_DBID);
         
+        
         $imp_detailtypes = null;
         
         if($dbsource_is_same){
@@ -318,6 +319,7 @@ public static function getDefintions($filename){
         //return array of $imp_rectypes - record types to be imported
         $res = array(
             'database'=>@$data['heurist']['database']['id'],
+            'database_name'=>@$data['heurist']['database']['db'],
             'rectypes'=>$imp_rectypes,    //need to download/sync rectypes
             'detailtypes'=>$imp_detailtypes  //need to show missed detail fields
         );
@@ -351,6 +353,17 @@ public static function importDefintions($filename, $session_id){
         $importDef = new DbsImport( self::$system );
 
 //$time_debug = microtime(true);        
+
+        if (!(@$data['heurist']['database']['id']>0)) {
+            self::$system->addError(HEURIST_ERROR, '<b>Not possible to determine an origin database id (source of import).</b>'
+.'<br><br><div>Value read = 0 = non-Heurist source or unregistered Heurist database. This will only work if your database already'
+.' contains all the entity types, fields, vocabularies and terms required to hold the incoming data. Please add all required structures'
+.' or set the source database with <database id=xxxx> near the start of the file.</div>', null,
+'Non-Heurist or unregistered Heurist source database'
+            );
+            return false;
+        }
+
         
         //Finds all defintions to be imported
         if($importDef->doPrepare(  array(
@@ -385,7 +398,7 @@ public static function importDefintions($filename, $session_id){
 }
 
 //
-// $is_cms_init - creation of record set for website - id adds info text for webpage content
+// $is_cms_init - if true this is creation of set of records for website - it adds info text for webpage content
 //
 public static function importRecords($filename, $session_id, $is_cms_init=false){
     
@@ -398,6 +411,7 @@ public static function importRecords($filename, $session_id, $is_cms_init=false)
     
     $data = self::readDataFile( $filename );
     
+    self::$system->defineConstant('DT_ORIGINAL_RECORD_ID');
     
     if($data!=null){
         
@@ -453,10 +467,21 @@ EOD;
         ini_set('max_execution_time', 0);
         
         // if database not defined or the same
-        // it is assumed that all local codes in $data are already found and exists in 
+        // is the same it is assumed that all local codes in $data are already found and exists in 
         // target database, elements without local codes or if not found will be ignored
-        $dbsource_is_same = defined('HEURIST_DBID') && ((!(@$data['heurist']['database']['id']>0)) || 
+        //$dbsource_is_same = defined('HEURIST_DBID') && ((!(@$data['heurist']['database']['id']>0)) || 
+        // @$data['heurist']['database']['id']==HEURIST_DBID);
+        
+        $dbsource_is_registered = (@$data['heurist']['database']['id']>0);
+                            
+        if(defined('HEURIST_DBID')){ //registered
+            $dbsource_is_same = ( !$dbsource_is_registered || 
                             @$data['heurist']['database']['id']==HEURIST_DBID);
+        }else{
+            //if source is registered - source is different
+            $dbsource_is_same = !$dbsource_is_registered;
+        }
+                            
         
         if($dbsource_is_same){
             
@@ -504,6 +529,7 @@ EOD;
         
         $is_rollback = false;
         $keep_autocommit = mysql__begin_transaction($mysqli);    
+        $mysqli->query('SET FOREIGN_KEY_CHECKS = 0');
         
         foreach($records as $record_src){
             
@@ -537,20 +563,29 @@ EOD;
             $record['ID'] = 0; //add new
             $record['RecTypeID'] = $recTypeID;
             
+            $record_src_original_id = null;
+            
             //if($record['RecTypeID']<1){
             //    $this->system->addError(HEURIST_ERROR, 'Unable to get rectype in this database by ');
             //}    
             
             if(!@$record_src['rec_ID']){ //if not defined assign arbitrary unique
                 $record_src['rec_ID'] = uniqid(); //''.microtime();
-            }else if((!ctype_digit($record_src['rec_ID'])) || strlen($record_src['rec_ID'])>9 ){  //4 957 948 868
-                $rec_id_an = strtolower($record_src['rec_ID']);
-                if(@$records_corr_alphanum[$rec_id_an]){ //aplhanum->random int
-                    $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_an];
-                }else{
-                    $rand_id = random_int(900000000,999999999);
-                    $records_corr_alphanum[$rec_id_an] = $rand_id;
-                    $record_src['rec_ID'] = $rand_id; 
+            }else {
+                
+                $record_src_original_id = ((@$data['heurist']['database']['id']>0)
+                        ?$data['heurist']['database']['id']:'0').'-'
+                        .$record_src['rec_ID'];
+                
+                if((!ctype_digit($record_src['rec_ID'])) || strlen($record_src['rec_ID'])>9 ){  //4 957 948 868
+                    $rec_id_an = strtolower($record_src['rec_ID']);
+                    if(@$records_corr_alphanum[$rec_id_an]){ //aplhanum->random int
+                        $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_an];
+                    }else{
+                        $rand_id = random_int(900000000,999999999);
+                        $records_corr_alphanum[$rec_id_an] = $rand_id;
+                        $record_src['rec_ID'] = $rand_id; 
+                    }
                 }
             }                                             
                                                  
@@ -569,7 +604,6 @@ EOD;
             $record['details'] = array();
             
             foreach($record_src['details'] as $dty_ID => $values){
-                
                 
                 if(is_array($values) && @$values['dty_ID']>0){ //interpreatable format
                     $dty_ID = $values['dty_ID'];
@@ -722,7 +756,8 @@ EOD;
                        
                     }
                     
-                }else if($def_field[$idx_type] == "resource"){ 
+                }
+                else if($def_field[$idx_type] == "resource"){ 
                    
                    $new_values = array(); 
                    //keep source record id to replace it to new target record id 
@@ -789,6 +824,16 @@ EOD;
                 if(count($new_values)>0)
                     $record['details'][$ftId] = $new_values; 
             }
+            
+            
+            //add original id
+            if(defined('DT_ORIGINAL_RECORD_ID') && $record_src_original_id!=null){
+                if(!is_array(@$record['details'][DT_ORIGINAL_RECORD_ID])){
+                    $record['details'][DT_ORIGINAL_RECORD_ID] = array();
+                }
+                $record['details'][DT_ORIGINAL_RECORD_ID][] = $record_src_original_id;
+            }
+            
             
             
             // note: we need to suppress creation of reverse 247 pointer for parent-child links
@@ -935,6 +980,8 @@ EOD;
                     $res['ids'] = array_values($records_corr);    
                 }
         }
+        $mysqli->query('SET FOREIGN_KEY_CHECKS = 1');
+
             
         if($session_id!=null){//finish
             mysql__update_progress($mysqli, $session_id, false, 'REMOVE');

@@ -131,7 +131,11 @@ function c14DateClick(id) {
 	}
 }
 
+//
+// not used - replaced to image
+/*
 function dRangeDraw() {
+
 	var canvas = document.getElementById("dRangeCanvas");
 	if (canvas.getContext) {
 		var ctx = canvas.getContext("2d");
@@ -179,6 +183,7 @@ function dRangeDraw() {
 		ctx.stroke();
 	}
 }
+*/
 
 function drawLabel ( ctx, label, xPos, yPos, maxX) {
 	var pxLen = ctx.measureText(label).width;
@@ -252,7 +257,7 @@ var TemporalPopup = (function () {
 			_updateUIFromTemporal(that.curTemporal, false); //do not dates
             _updateGeorgianDate();
 			return;} );
-		dRangeDraw();
+		//dRangeDraw();
 
         _initJqCalendar(that.curTemporal);
 

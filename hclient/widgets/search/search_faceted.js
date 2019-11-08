@@ -225,12 +225,23 @@ $.widget( "heurist.search_faceted", {
 
         var current_query_request_id;
         
-        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, 
+        //was this.document
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
+            +' '+window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE, 
         
         function(e, data) {
             
+            if(e.type == window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE){
+
+                var w = that.element.width();
+                
+                that.element.find('div.facet-item > a > span.truncate').width(w-80);
+                  
+            }else {
+
             if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
             if(data.reset) return; //ignore
+
 
             if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
             
@@ -253,6 +264,7 @@ $.widget( "heurist.search_faceted", {
                       that._isInited = false;
                       that._recalculateFacets(-1);       
                 }         
+            }
             }
         });
 
@@ -364,7 +376,9 @@ $.widget( "heurist.search_faceted", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         
-        $(this.document).off( window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART );
+        $(this.document).off( window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
+            +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
+            +' '+window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE );
         
         // remove generated elements
         if(this.div_title) this.div_title.remove();
@@ -2107,7 +2121,7 @@ if(!detailtypes[dtID]){
                 if(top_parent.length>0){ //this is web publication 
                     f_link_content.css('width',top_parent.width()*0.6).addClass('truncate');
                 }else{
-                    f_link_content.css('width','80%').addClass('truncate');    //was this.facets_list_container.width()*0.6
+                    f_link_content.css('width',this.element.width()-80).addClass('truncate');    //was this.facets_list_container.width()*0.6
                 }
             
             

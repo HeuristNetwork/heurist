@@ -230,8 +230,8 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
 
         /* Clean up miscellaneous stray punctuation &c. */
         if (! preg_match('/^\\s*[0-9a-z]+:\\S+\\s*$/i', $title)) {    // not a URI
-
-            $puncts = '-:;,.@#|+=&'; // These are stripped from end of title if no field data follows them
+        
+            $puncts = '-:;,.@#|+=&(){}'; // These are stripped from begining and end of title
             $puncts2 = '-:;,@#|+=&'; // same less period
 
             $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
@@ -241,6 +241,8 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
             $title = preg_replace('!^['.$puncts.'/\\s]*(.*?)['.$puncts2.'/\\s]*$!s', '\\1', $title);
             $title = preg_replace('!,\\s*,+!s', ',', $title);
             $title = preg_replace('!\\s+,!s', ',', $title);
+            
+            
         }
         $title = trim(preg_replace('!  +!s', ' ', $title));
 

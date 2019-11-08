@@ -58,8 +58,6 @@ require_once(dirname(__FILE__)."/initPage.php");
 
         <h2>File export</h2>
 
-        <br><br>
-
         <div id="menu-export-csv" class="export-item">
             <button class="export-button">CSV</button>
             <a href="#" oncontextmenu="return false;" 
@@ -68,7 +66,8 @@ require_once(dirname(__FILE__)."/initPage.php");
                 title="Export records as delimited text (comma/tab), applying record type">
                 Comma or tab-separated text file</a>
         </div>
-
+        <br>
+        
         <div id="menu-export-hml-resultset" class="export-item">
             <button class="export-button">XML</button>
             <a href="#" oncontextmenu="return false;" 
@@ -88,8 +87,10 @@ require_once(dirname(__FILE__)."/initPage.php");
                 JSON</a>
            <label><input type="checkbox" id="extendedJSON" checked/>&nbsp;&nbsp;Include concept codes and names</label>  
 
+           <div class="prompt" style="font-style: italic;padding-left:110px;width:400px">XML and JSon exported from a registered Heurist database can be imported directly into any other Heurist database even if the structure is different. Use this to migrate selected or complete data, including between different servers.</div>
         </div>
 
+        <br>
         <div id="menu-export-geojson" class="export-item">
             <button class="export-button">GeoJSON</button>
             <a href="#" oncontextmenu="return false;" 
@@ -110,6 +111,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 KML</a>
         </div>
 
+        <br>
         <div id="menu-export-gephi" class="export-item">
             <button class="export-button">GEPHI</button>
             <a href="#" oncontextmenu="return false;" 
@@ -129,6 +131,7 @@ require_once(dirname(__FILE__)."/initPage.php");
                 HuNI harvestable XML files (file-per-record)</a>
         </div>
         
+        <br>
         <div class="heurist-prompt" style="padding:6px">
             Allow popup window in your browser preferences
         </div>

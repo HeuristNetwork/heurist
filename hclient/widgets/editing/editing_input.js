@@ -233,10 +233,13 @@ $.widget( "heurist.editing_input", {
         } 
         
         //add hidden error message div
+        this.firstdiv = $( "<div>").hide().appendTo( this.input_cell );
+        
         this.error_message = $( "<div>")
         .hide()
         .addClass('heurist-prompt ui-state-error')
         .css({'height': 'auto',
+            'width': 'fit-content',
             'padding': '0.2em',
             'border': 0,
             'margin-bottom': '0.2em'})
@@ -543,7 +546,7 @@ $.widget( "heurist.editing_input", {
         value = window.hWin.HEURIST4.util.isnull(value)?'':value;
 
 
-        var $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.input_prompt);  //.appendTo( this.input_cell );
+        var $inputdiv = $( "<div>" ).addClass('input-div').insertBefore(this.error_message); //was this.input_prompt
 
         if(this.detailType=='blocktext'){//----------------------------------------------------
 
@@ -828,7 +831,7 @@ $.widget( "heurist.editing_input", {
                         + 'admin/structure/terms/editTermForm.php?db='+window.hWin.HAPI4.database
                         + '&treetype='+type+'&parent='+Number(allTerms);
                     
-                    window.hWin.HEURIST4.msg.showDialog(url, {height:320, width:700,
+                    window.hWin.HEURIST4.msg.showDialog(url, {height:340, width:700,
                         title: 'Add Term',
                         noClose: true, //hide close button
                         //class:'ui-heurist-bg-light',
@@ -2909,13 +2912,12 @@ console.log('onpaste');
         this.btn_cancel_reorder.hide();
         
         if(this.options.readonly || this.f('rst_Display')=='readonly') return;
-        var idx, ele_after = this.error_message;
+        var idx, ele_after = this.firstdiv; //this.error_message;
         for (idx in this.inputs) {
             var ele = this.inputs[idx].parents('.input-div');
             ele.insertAfter(ele_after);
             ele_after = ele;
-        }
-    },
+        }    },
     
     //
     // get all values (order is respected)

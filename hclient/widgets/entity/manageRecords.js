@@ -2165,17 +2165,16 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     fields = null;
                 }
                 
-                var rectypeID = this._getField('rec_RecTypeID');
-                var rfr = window.hWin.HEURIST4.rectypes.typedefs[rectypeID].dtFields;
-                var fieldIndexMap = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-            
-            
+                var det_rfr = window.hWin.HEURIST4.detailtypes.typedefs;
+                var fieldIndexMap = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
                 
                 //verify max lengtn in 64kB per value
                 for (var dtyID in fields){
                     if(parseInt(dtyID)>0){
-                        var dt = rfr[dtyID][fieldIndexMap['dty_Type']];
-                        if(dt=='geo' || dt=='file') continue;
+                        if(det_rfr[dtyID]){
+                            var dt = det_rfr[dtyID].commonFields[fieldIndexMap['dty_Type']];
+                            if(dt=='geo' || dt=='file') continue;
+                        }
                         
                         var values = fields[dtyID];
                         if(!$.isArray(values)) values = [values];
@@ -2505,7 +2504,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 sheader = sheader + 
                     '&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
                     + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0" class="truncate">'
-                    + this._getField('rec_Title')+'</h3>';            
+                    + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';            
                 
             
             }

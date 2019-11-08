@@ -185,8 +185,8 @@
 
         $query = "INSERT INTO Records
         ($recid1 rec_AddedByUGrpID, rec_RecTypeID, rec_OwnerUGrpID, rec_NonOwnerVisibility,"
-        ."rec_URL, rec_ScratchPad, rec_Added, rec_AddedByImport, rec_FlagTemporary, rec_Title) "
-        ."VALUES ($recid2 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        ."rec_URL, rec_ScratchPad, rec_Added, rec_Modified, rec_AddedByImport, rec_FlagTemporary, rec_Title) "
+        ."VALUES ($recid2 ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $mysqli->prepare($query);
 
@@ -202,11 +202,11 @@
         
         if(@$record['ID']>0){
             //case: insert csv with predefined ID
-            $stmt->bind_param('iiiissssiis', $rec_id, $currentUserId, $rectype, $owner_grps[0], $access,
-                $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp, $rec_title);
+            $stmt->bind_param('iiiisssssiis', $rec_id, $currentUserId, $rectype, $owner_grps[0], $access,
+                $rec_url, $rec_scr, $data_add, $data_add, $rec_imp, $rec_temp, $rec_title);
         }else{
-            $stmt->bind_param('iiissssiis', $currentUserId, $rectype, $owner_grps[0], $access,
-                $rec_url, $rec_scr, $data_add, $rec_imp, $rec_temp, $rec_title);
+            $stmt->bind_param('iiisssssiis', $currentUserId, $rectype, $owner_grps[0], $access,
+                $rec_url, $rec_scr, $data_add, $data_add, $rec_imp, $rec_temp, $rec_title);
         }
         $stmt->execute();
         $newId = $stmt->insert_id;
@@ -1365,11 +1365,11 @@
         if ($new_title) {
             $new_title = trim($new_title);
             if($new_title!=''){
-                $query = "UPDATE Records set rec_Title=? where rec_ID=".$recID;
+                $query = "UPDATE Records set rec_Modified=?, rec_Title=? where rec_ID=".$recID;
 
                 $stmt = $mysqli->prepare($query);
 
-                $stmt->bind_param('s', $new_title);
+                $stmt->bind_param('ss', date('Y-m-d H:i:s'), $new_title);
                 if(!$stmt->execute()){
                     $syserror = $mysqli->error;
                     $stmt->close();

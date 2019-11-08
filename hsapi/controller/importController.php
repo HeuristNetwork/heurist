@@ -208,7 +208,7 @@ if(!$system->init(@$_REQUEST['db'])){
             //reads import file and returns list of record types to be imported
             $res = ImportHeurist::getDefintions(@$_REQUEST['filename']);
             
-        }else if($action=='import_definitions'){
+        }else if($action=='import_definitions'){ //import defs before import records
             
             //update record types from remote database
             $res = ImportHeurist::importDefintions(@$_REQUEST['filename'], @$_REQUEST['session']);

@@ -38,6 +38,8 @@
     allowWebAccessForForlder
     
     folderContent  - get list of files in folder as search result (record list)
+    folderSize
+    folderTree
     
     fileCopy
     fileSave
@@ -329,6 +331,56 @@
         
     }
     
+    //
+    //
+    //
+    function folderSize2($dir){
+        $size = 0;
+        $arr = glob(rtrim($dir, '/').'/*', GLOB_NOSORT);
+        foreach ($arr as $each) {
+            $size += is_file($each) ? filesize($each) : folderSize($each);
+        }
+        return $size;        
+    }
+    
+    
+    function folderSize($dir)
+    {
+        $dir = rtrim(str_replace('\\', '/', $dir), '/');
+
+        if (is_dir($dir) === true) {
+            $totalSize = 0;
+            $os        = strtoupper(substr(PHP_OS, 0, 3));
+            // If on a Unix Host (Linux, Mac OS)
+            if ($os !== 'WIN') {
+                $io = popen('/usr/bin/du -sb ' . $dir, 'r');
+                if ($io !== false) {
+                    $totalSize = intval(fgets($io, 80));
+                    pclose($io);
+                    return $totalSize;
+                }
+            }
+            // If on a Windows Host (WIN32, WINNT, Windows)
+            if ($os === 'WIN' && extension_loaded('com_dotnet')) {
+                $obj = new \COM('scripting.filesystemobject');
+                if (is_object($obj)) {
+                    $ref       = $obj->getfolder($dir);
+                    $totalSize = $ref->size;
+                    $obj       = null;
+                    return $totalSize;
+                }
+            }
+            // If System calls did't work, use slower PHP 5
+            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+            foreach ($files as $file) {
+                $totalSize += $file->getSize();
+            }
+            return $totalSize;
+        } else if (is_file($dir) === true) {
+            return filesize($dir);
+        }
+    }    
+
     
     /**
      * Creates a tree-structured array of directories and files from a given root folder.
