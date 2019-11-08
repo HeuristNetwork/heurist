@@ -175,7 +175,7 @@ function editCMS(home_page_record_id, main_callback){
                 var session_id = Math.round((new Date()).getTime()/1000); //for progress
 
                 var request = { action: 'import_records',
-                    filename: 'websiteStarterRecords.hml',
+                    filename: 'websiteStarterRecords.xml',
                     is_cms_init: 1,
                     //session: session_id,
                     id: window.hWin.HEURIST4.util.random()

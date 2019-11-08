@@ -66,7 +66,7 @@ private static function readDataFile($filename, $type=null, $validate=true){
    $data=null;
     try{
         if(strpos($filename,'websiteStarterRecords')===0){
-            $filename = HEURIST_DIR.'admin/setup/website/'.$filename;
+            $filename = HEURIST_DIR.'hclient/widgets/cms/'.$filename;
         }else{
             $filename = HEURIST_SCRATCH_DIR.$filename;    
         }
