@@ -14,18 +14,18 @@
             <added>2019-07-21 21:54:06</added>
             <modified>2019-09-07 19:58:17</modified>
             <workgroup id="2">johnson</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">About</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">This page contains a summary of the project aims, theory, methods and results</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Please populate this page with information about the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">About</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">This page contains a summary of the project aims, theory, methods and results</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Please populate this page with information about the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Research project, project description, overview, summary, aims, methods, theory, methodology, results</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">110</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">112</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">114</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">116</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">120</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">140</detail>
+            <detail id="914" conceptID="2-914" basename="Keywords" name="Keywords">Research project, project description, overview, summary, aims, methods, theory, methodology, results</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">110</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">112</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">114</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">116</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">120</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">140</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -37,11 +37,11 @@
             <added>2019-07-31 09:40:20</added>
             <modified>2019-09-07 09:47:19</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Contacts</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to provide contact and location information for the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Contacts</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to provide contact and location information for the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -53,15 +53,15 @@
             <added>2019-07-31 09:08:08</added>
             <modified>2019-09-07 09:09:27</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Contribute</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe ways for the public / other researchers to participate in or contribute to the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Contribute</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to describe ways for the public / other researchers to participate in or contribute to the project.&lt;/p&gt;
                 &lt;p&gt;This could include contact details, descrioption of ways of participating, a request to email information in a specific format, or a direct data entry form (probably as a link or sub-menu).&lt;/p&gt;</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">90</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">122</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">124</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">126</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">90</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">122</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">124</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">126</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -73,12 +73,12 @@
             <added>2019-07-21 21:54:06</added>
             <modified>2019-09-07 09:14:14</modified>
             <workgroup id="2">johnson</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Directors</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">The directors and management staff of the project</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Populate this page with the content of the page describing Directors of the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Directors</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">The directors and management staff of the project</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Populate this page with the content of the page describing Directors of the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Directors, Project leaders, Research project</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="914" conceptID="2-914" basename="Keywords" name="Keywords">Directors, Project leaders, Research project</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">67</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -90,9 +90,9 @@
             <added>2019-07-21 21:54:06</added>
             <modified>2019-09-07 09:45:20</modified>
             <workgroup id="2">johnson</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Discover (search)</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Search functions to search and display contents of the database represented by/in this website</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;This page is set up as a container for database searches.Replace these instructions with your own introduction.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Discover (search)</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">Search functions to search and display contents of the database represented by/in this website</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;This page is set up as a container for database searches.Replace these instructions with your own introduction.&lt;/p&gt;
                 &lt;p&gt;We suggest using a table (supplied below) or if you have the knowledge, &amp;lt;div&amp;gt; ... &amp;lt;/div&amp;gt;, to contain the search field or list of saved searches&lt;br /&gt;and the results list and visualisation (map, timeline, network diagram, report etc.).&lt;/p&gt;
                 &lt;p&gt;Click on [Edit page content] in the website editor, then the &lt;span style=&quot;text-decoration: underline;&quot;&gt;edit&lt;/span&gt; link to set the list of saved searches you want to display on the left, &lt;br /&gt;and to set the parameters of each of the components eg. map in the middle and list of results on the right.&lt;/p&gt;
                 &lt;table style=&quot;height: 500px; width: 100&#37;; border-collapse: collapse; border-color: slateblue;&quot; border=&quot;3&quot;&gt;
@@ -116,8 +116,8 @@
                 &lt;/tr&gt;
                 &lt;/tbody&gt;
                 &lt;/table&gt;</detail>
-            <detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="914" conceptID="2-914" basename="Keywords" name="Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -129,11 +129,11 @@
             <added>2019-07-31 09:45:16</added>
             <modified>2019-09-07 09:16:13</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Employment</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe any positions available with the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Employment</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to describe any positions available with the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">88</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -145,11 +145,11 @@
             <added>2019-07-31 09:57:51</added>
             <modified>2019-09-07 09:12:58</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Events</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to list any events such as seminars, exhibitions, public meetings, consultations etc. organised by the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Events</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to list any events such as seminars, exhibitions, public meetings, consultations etc. organised by the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -161,11 +161,11 @@
             <added>2019-07-31 09:07:05</added>
             <modified>2019-09-07 09:46:04</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">FAQ</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Populate this page with frequently asked questions and responses.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">FAQ</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Populate this page with frequently asked questions and responses.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">104</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -177,12 +177,12 @@
             <added>2019-07-31 09:41:54</added>
             <modified>2019-09-07 09:11:39</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Fieldwork locations</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Locations / sites where fieldwork took place as part of this project</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to map and/or describe any fieldwork/fieldwork locations for the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Fieldwork locations</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">Locations / sites where fieldwork took place as part of this project</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to map and/or describe any fieldwork/fieldwork locations for the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -194,11 +194,11 @@
             <added>2019-07-31 09:46:55</added>
             <modified>2019-09-07 09:16:26</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Fieldwork</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe any fieldwork opportunities available.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Fieldwork</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to describe any fieldwork opportunities available.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">88</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -210,12 +210,12 @@
             <added>2019-07-31 09:04:57</added>
             <modified>2019-09-07 09:17:17</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Gallery</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">A page of outputs from the project - images, videos and other visual project outputs</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;This page could contain a gallery of images, videos or otherproject outputs.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Gallery</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">A page of outputs from the project - images, videos and other visual project outputs</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;This page could contain a gallery of images, videos or otherproject outputs.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -227,11 +227,11 @@
             <added>2019-07-31 09:35:18</added>
             <modified>2019-09-07 09:11:03</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Historical context</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the historical context or intellectual context of the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Historical context</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the historical context or intellectual context of the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -243,15 +243,15 @@
             <added>2019-07-31 09:24:20</added>
             <modified>2019-09-07 09:46:53</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">How to ...</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to provide instructions on how to use the database searches, maps,&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">How to ...</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to provide instructions on how to use the database searches, maps,&lt;/p&gt;
                 &lt;p&gt;timelines or network visualisations, or other interactive resources displayed on the website.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">86</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">106</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">108</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">86</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">106</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">108</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -263,11 +263,11 @@
             <added>2019-07-31 09:10:59</added>
             <modified>2019-09-07 09:10:01</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Information submission</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Add a Heurist data submission form to this page, either directly into the database (but set not to generate public output until reviewed)&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Information submission</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Add a Heurist data submission form to this page, either directly into the database (but set not to generate public output until reviewed)&lt;/p&gt;
                 &lt;p&gt;or into a separate database wher it can be reviewed and later imported into the main database.&lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">88</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -279,11 +279,11 @@
             <added>2019-07-31 09:28:47</added>
             <modified>2019-09-07 09:47:08</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Mapping</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe more advanced uses of the mapping pages.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Mapping</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to describe more advanced uses of the mapping pages.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">104</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -295,9 +295,9 @@
             <added>2019-07-31 09:18:49</added>
             <modified>2019-08-29 21:02:10</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Methods</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Methods</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -309,11 +309,11 @@
             <added>2019-07-31 10:01:35</added>
             <modified>2019-09-07 09:12:14</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">News &amp; Blogs</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page for specific news about the project (might also connect to blog entries).&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">News &amp; Blogs</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page for specific news about the project (might also connect to blog entries).&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -325,16 +325,16 @@
             <added>2019-07-31 09:48:33</added>
             <modified>2019-09-07 09:12:02</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">News and events</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to outline sources of news about the project, the types of events organised, newsletters, blogs and other public information sources.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">News and events</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to outline sources of news about the project, the types of events organised, newsletters, blogs and other public information sources.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">136</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">130</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">132</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">134</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">138</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">136</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">130</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">132</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">134</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">138</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -346,11 +346,11 @@
             <added>2019-07-31 09:50:24</added>
             <modified>2019-09-07 09:12:41</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Newsletters</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to list newsletters if the project produces them. If numerous it may be worth recording them&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Newsletters</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to list newsletters if the project produces them. If numerous it may be worth recording them&lt;/p&gt;
                 &lt;p&gt;in the database (including a PDF) and embedding a custom report here to list them, with links to the PDF.&lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -362,11 +362,11 @@
             <added>2019-07-31 09:59:37</added>
             <modified>2019-09-07 09:13:11</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Of interest</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to connect to third party events which may be of interest.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Of interest</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to connect to third party events which may be of interest.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -378,12 +378,12 @@
             <added>2019-07-31 09:21:45</added>
             <modified>2019-09-07 09:19:24</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Other resources</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to list and/or describe any other resources developed by the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Other resources</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to list and/or describe any other resources developed by the project.&lt;/p&gt;
                 &lt;p&gt;For a list it may be appropriate to embed a Heurist custom report which populates the list from the database.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -395,12 +395,12 @@
             <added>2019-07-31 09:02:42</added>
             <modified>2019-09-07 09:16:42</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Partner 1</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;A specific web page devoted to a project partner.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Partner 1</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;A specific web page devoted to a project partner.&lt;/p&gt;
                 &lt;p&gt;Duplicate fo additional partners.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">78</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -412,11 +412,11 @@
             <added>2019-07-31 09:03:56</added>
             <modified>2019-09-07 09:15:41</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Partner 2</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;A specific web page devoted to a project partner.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Partner 2</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;A specific web page devoted to a project partner.&lt;/p&gt;
                 &lt;p&gt;Duplicate for additional partners.&lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">78</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -428,14 +428,14 @@
             <added>2019-07-31 08:59:05</added>
             <modified>2019-09-07 09:10:15</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Partners</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Acknowledgement and description of project partners (individuals and/or institutions)</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the project partners, including logos where appropriate.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Partners</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">Acknowledgement and description of project partners (individuals and/or institutions)</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the project partners, including logos where appropriate.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">80</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">82</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">80</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">82</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -447,10 +447,10 @@
             <added>2019-07-31 10:03:42</added>
             <modified>2019-09-07 09:13:24</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Press</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to summarise and connect to mentions of the project in the press or other public listings.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Press</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to summarise and connect to mentions of the project in the press or other public listings.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">128</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -462,11 +462,11 @@
             <added>2019-07-31 09:36:45</added>
             <modified>2019-09-07 09:11:15</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project aims</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the aims and intended outcomes of the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Project aims</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the aims and intended outcomes of the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -478,11 +478,11 @@
             <added>2019-07-31 09:31:47</added>
             <modified>2019-09-07 09:10:44</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project background</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page for a description of the background of the project itself.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Project background</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page for a description of the background of the project itself.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -494,18 +494,18 @@
             <added>2019-07-31 09:13:17</added>
             <modified>2019-09-07 09:17:07</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project outputs</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;A page to describe the outputs of the project - may include publications, methods, tools, public websites, community resources etc.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Project outputs</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;A page to describe the outputs of the project - may include publications, methods, tools, public websites, community resources etc.&lt;/p&gt;
                 &lt;p&gt;For larger or more complex projects this page will be an overview and different types of output will probably be represented by subsidiary menu entries/pages.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">84</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">94</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">96</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">98</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">100</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">102</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">84</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">94</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">96</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">98</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">100</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">102</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -517,15 +517,15 @@
             <added>2019-07-21 21:54:06</added>
             <modified>2019-09-07 09:13:59</modified>
             <workgroup id="2">johnson</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project Team</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">A page about members of the team involved in the project.</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page for photos and descriptions of your project team.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Project Team</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">A page about members of the team involved in the project.</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page for photos and descriptions of your project team.&lt;/p&gt;
                 &lt;p&gt;Additional menu entries can link to pages describing different sets of people, eg. Directors, Staff, Volunteers.&lt;/p&gt;</detail>
-            <detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Research team, People, Database, Heurist, Humanities, Digital Humanities,</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">66</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">68</detail>
-            <detail id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">69</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="914" conceptID="2-914" basename="Keywords" name="Keywords">Research team, People, Database, Heurist, Humanities, Digital Humanities,</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">66</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">68</detail>
+            <detail id="917" conceptID="2-917" basename="CMS Menu leaf" name="Submenus of this menu (optional)" isRecordPointer="true">69</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -537,11 +537,11 @@
             <added>2019-07-31 09:38:13</added>
             <modified>2019-09-07 09:11:26</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Project timeline</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the timeline and intended outcomes of the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Project timeline</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to describe the timeline and intended outcomes of the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -553,12 +553,12 @@
             <added>2019-07-31 09:16:00</added>
             <modified>2019-09-07 09:17:34</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Publications</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;This page may be used to list published outputs of the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Publications</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;This page may be used to list published outputs of the project.&lt;/p&gt;
                 &lt;p&gt;These could be entered as content here, or could be listed through a Heurist custom report drawing data from the database.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -570,12 +570,12 @@
             <added>2019-07-31 09:26:17</added>
             <modified>2019-09-07 09:46:31</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Searching</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to provide detailed instructions on the use of the database search functions, including advanced syntax,&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Searching</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to provide detailed instructions on the use of the database search functions, including advanced syntax,&lt;/p&gt;
                 &lt;p&gt;preferably with examples of how to construct a search (particularly if you provide a simple search box which can use&lt;/p&gt;
                 &lt;p&gt;all of Heurist's search capabilities and therefore requires a knowledge of the available syntax).&lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">104</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -587,11 +587,11 @@
             <added>2019-07-31 10:05:54</added>
             <modified>2019-09-07 09:11:50</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Sources</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to reference the sources of information used by the project eg. archives, museums, newspapers, online sources.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Sources</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to reference the sources of information used by the project eg. archives, museums, newspapers, online sources.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">64</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -603,12 +603,12 @@
             <added>2019-07-21 21:54:06</added>
             <modified>2019-09-07 09:14:25</modified>
             <workgroup id="2">johnson</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Staff</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">This page contains information about the staff of the project including academics, research assistants, technicians and other persons employed by the project (potentially including unpaid participants who have an intellectual input rather than purely a volunteering role)</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Enter description of the staff of the project on this page.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Staff</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">This page contains information about the staff of the project including academics, research assistants, technicians and other persons employed by the project (potentially including unpaid participants who have an intellectual input rather than purely a volunteering role)</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Enter description of the staff of the project on this page.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Staff, Employees, Research assistants, Academics</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="914" conceptID="2-914" basename="Keywords" name="Keywords">Staff, Employees, Research assistants, Academics</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">67</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -620,12 +620,12 @@
             <added>2019-07-31 09:20:10</added>
             <modified>2019-09-07 09:19:00</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Teaching resources</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to list and/or describe any teaching resources developed by the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Teaching resources</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to list and/or describe any teaching resources developed by the project.&lt;/p&gt;
                 &lt;p&gt;For a list it may be appropriate to use a Heurist custom report and draw the list from the database.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -637,11 +637,11 @@
             <added>2019-07-31 09:17:48</added>
             <modified>2019-09-07 09:17:46</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Tools</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe tools developed by the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Tools</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to describe tools developed by the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">92</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -653,11 +653,11 @@
             <added>2019-07-31 09:43:48</added>
             <modified>2019-09-07 09:16:01</modified>
             <workgroup id="0">public</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Volunteer</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Use this page to describe opportunities for volunteering with the project.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Volunteer</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Use this page to describe opportunities for volunteering with the project.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="918" conceptID="2-918" type="Target element" name="Target element">main-content</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="918" conceptID="2-918" basename="Target element" name="Target element">main-content</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">88</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -669,12 +669,12 @@
             <added>2019-07-21 21:54:06</added>
             <modified>2019-09-07 09:14:39</modified>
             <workgroup id="2">johnson</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Volunteers</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Volunteers and interns and members of the public who are participating or have participated in this project.</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;Enter the list of project volunteers and interns on this page.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Volunteers</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">Volunteers and interns and members of the public who are participating or have participated in this project.</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;Enter the list of project volunteers and interns on this page.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;</detail>
-            <detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Volunteers, Interns, Public participation, Community, Crowdsourcing</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="914" conceptID="2-914" basename="Keywords" name="Keywords">Volunteers, Interns, Public participation, Community, Crowdsourcing</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page title" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
             <reversePointer id="917" conceptID="2-917" type="CMS Menu leaf" name="Submenus of this menu (optional)">67</reversePointer>
         </record>
         <record depth="0" visibility="public" visnote="no login required" selected="no">
@@ -686,11 +686,11 @@
             <added>2019-07-21 21:54:06</added>
             <modified>2019-09-07 09:59:09</modified>
             <workgroup id="2">johnson</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Website title">Website name here</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Website summary">Enter a concise description of the Heurist database / website here, which will be used eg. in lists of websites and in search engine discovery. 
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Website title">Website name here</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Website summary">Enter a concise description of the Heurist database / website here, which will be used eg. in lists of websites and in search engine discovery. 
 
                 Remember to indicate the institution and/or project, target audience and nature of the content.</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="Website home page content">&lt;p&gt;This is default content generated by the Heurist CMS function. Please edit the web pages in this site to create appropriate content.&lt;/p&gt;
+            <detail id="4" conceptID="2-4" basename="Extended description" name="Website home page content">&lt;p&gt;This is default content generated by the Heurist CMS function. Please edit the web pages in this site to create appropriate content.&lt;/p&gt;
                 &lt;p&gt;The pages may embed images and dynamic components such as facet searches, maps, network diagrams and reports using buttons at the end of the toolbar (when viewed in the website editor).&lt;/p&gt;
                 &lt;p&gt;Please see &lt;a href=&quot;https://heuristplus.sydney.edu.au/HEURIST/heurist/context_help/website_instructions.html&quot;&gt;Heurist CMS instructions&lt;/a&gt; for further information.&lt;/p&gt;
                 &lt;p&gt; &lt;/p&gt;
@@ -712,7 +712,7 @@
                 &lt;p&gt;Heurist allows researchers to design, build, analyse, visualise, publish and archive their own databases without coding or technical support.&lt;/p&gt;
                 &lt;p&gt;Heurist is available as free, non-commercial web services available to researchers worldwide. Please visit the website to find a service in your region.&lt;/p&gt;
                 &lt;p&gt;Heurist has been developed at the University of Sydney, Australia since 2005 in collaboration with dozens of research projects. The source is available on gitHub.&lt;/p&gt;</detail>
-            <detail id="39" conceptID="2-39" type="Representative image or thumbnail" name="Website icon">
+            <detail id="39" conceptID="2-39" basename="Representative image or thumbnail" name="Website icon">
                 <file>
                     <id>18</id>
                     <nonce>68340b50eadbc527a054473b44462de5e4a439a2</nonce>
@@ -723,18 +723,18 @@
                     <url>https://heuristplus.sydney.edu.au/h5-ao/?db=Heurist_Core_Definitions&amp;file=68340b50eadbc527a054473b44462de5e4a439a2</url>
                 </file>
             </detail>
-            <detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Digital Humanities, Heurist, Research, Database, Open Data</detail>
-            <detail id="920" conceptID="2-920" type="Show page title" name="Show page titles" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
-            <detail id="923" conceptID="2-923" type="Main menu location" name="Main menu location" termID="6251" termConceptID="2-6251" ParentTerm="Website main menu location vocab">Top of page, horizontal</detail>
-            <detail id="912" conceptID="2-912" type="CMS Menus" name="Top level menus" isRecordPointer="true">64</detail>
-            <detail id="912" conceptID="2-912" type="CMS Menus" name="Top level menus" isRecordPointer="true">65</detail>
-            <detail id="912" conceptID="2-912" type="CMS Menus" name="Top level menus" isRecordPointer="true">128</detail>
-            <detail id="912" conceptID="2-912" type="CMS Menus" name="Top level menus" isRecordPointer="true">67</detail>
-            <detail id="912" conceptID="2-912" type="CMS Menus" name="Top level menus" isRecordPointer="true">78</detail>
-            <detail id="912" conceptID="2-912" type="CMS Menus" name="Top level menus" isRecordPointer="true">88</detail>
-            <detail id="912" conceptID="2-912" type="CMS Menus" name="Top level menus" isRecordPointer="true">92</detail>
-            <detail id="912" conceptID="2-912" type="CMS Menus" name="Top level menus" isRecordPointer="true">104</detail>
-            <detail id="912" conceptID="2-912" type="CMS Menus" name="Top level menus" isRecordPointer="true">118</detail>
+            <detail id="914" conceptID="2-914" basename="Keywords" name="Keywords">Digital Humanities, Heurist, Research, Database, Open Data</detail>
+            <detail id="920" conceptID="2-920" basename="Show page title" name="Show page titles" termID="6249" termConceptID="2-6249" ParentTerm="Yes-No">Yes</detail>
+            <detail id="923" conceptID="2-923" basename="Main menu location" name="Main menu location" termID="6251" termConceptID="2-6251" ParentTerm="Website main menu location vocab">Top of page, horizontal</detail>
+            <detail id="912" conceptID="2-912" basename="CMS Menus" name="Top level menus" isRecordPointer="true">64</detail>
+            <detail id="912" conceptID="2-912" basename="CMS Menus" name="Top level menus" isRecordPointer="true">65</detail>
+            <detail id="912" conceptID="2-912" basename="CMS Menus" name="Top level menus" isRecordPointer="true">128</detail>
+            <detail id="912" conceptID="2-912" basename="CMS Menus" name="Top level menus" isRecordPointer="true">67</detail>
+            <detail id="912" conceptID="2-912" basename="CMS Menus" name="Top level menus" isRecordPointer="true">78</detail>
+            <detail id="912" conceptID="2-912" basename="CMS Menus" name="Top level menus" isRecordPointer="true">88</detail>
+            <detail id="912" conceptID="2-912" basename="CMS Menus" name="Top level menus" isRecordPointer="true">92</detail>
+            <detail id="912" conceptID="2-912" basename="CMS Menus" name="Top level menus" isRecordPointer="true">104</detail>
+            <detail id="912" conceptID="2-912" basename="CMS Menus" name="Top level menus" isRecordPointer="true">118</detail>
         </record>
     </records>
     <recordCount>39</recordCount>
