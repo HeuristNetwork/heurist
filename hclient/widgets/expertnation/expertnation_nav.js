@@ -250,17 +250,24 @@ $.widget( "heurist.expertnation_nav", {
         this.static_pages = {};
 
         var html = '<ul class="nav navbar-nav">';
+        var html_resource = '';
         var home_page_id;
 
         for(; idx<rec_order.length; idx++) {
             recID = rec_order[idx];
             if(recID && recs[recID]&& recordset.fld(recs[recID], this.DT_ORDER)>0){
                 //var recdiv = this._renderRecord(recs[recID]);
-                var name = recordset.fld(recs[recID], this.DT_NAME)
-                html  += 
-                ('<li><a href="#" class="nav-link" data-id="'+recID+'">'
-                    +name
-                    +'</a></li>');
+                var name = recordset.fld(recs[recID], this.DT_NAME);
+
+                var li_link = ('<li><a href="#" class="nav-link" data-id="'+recID+'">'
+                        +name
+                        +'</a></li>');
+                
+                if(recordset.fld(recs[recID], this.DT_ORDER)>100){
+                    html_resource += li_link;
+                }else{
+                    html  += li_link;
+                }
 
                 that.static_pages[recID] = name.toLowerCase();
 
@@ -330,8 +337,11 @@ $.widget( "heurist.expertnation_nav", {
         +'<spane style="position:relative;" class="ui-icon ui-icon-carat-1-s"></span></a></li>'
 
         if(window.hWin.HAPI4.sysinfo['layout']=='Beyond1914'){ //resources menu for Syndey only
-            html  = html +'<li><a href="#" class="nav-link" data-id="resources">Resources'
-            +'<spane style="position:relative;" class="ui-icon ui-icon-carat-1-s"></span></a></li>';
+            html  = html +'<li>'
+            +'<a href="#" class="nav-link" data-id="resources">Resources'
+            +'<spane style="position:relative;" class="ui-icon ui-icon-carat-1-s"></span></a>'
+            +'</li>';
+            
         }
         html  = html +'</ul>';
 
@@ -361,11 +371,13 @@ $.widget( "heurist.expertnation_nav", {
 
         //add home page as first entry into histort
         this.addToHistory({page_name:'home'});
-
-        menu_ele.find('.nav-link').click(function(event){
-
+        
+        function __onNavMenuClick(event){
 
             var recID = $(event.target).attr('data-id');
+            if(!recID){
+                var recID = $(event.target).find('a.nav-link').attr('data-id');
+            }
             window.hWin.HEURIST4.util.stopEvent(event);
 
             if(recID=='resource' || recID=='search'){
@@ -402,7 +414,9 @@ $.widget( "heurist.expertnation_nav", {
             }
 
 
-        });
+        };
+
+        menu_ele.find('.nav-link').click( __onNavMenuClick );
 
 
         //drop down menu for resources and search--------------------
@@ -426,19 +440,29 @@ $.widget( "heurist.expertnation_nav", {
 
         if(window.hWin.HAPI4.sysinfo['layout']=='Beyond1914'){ //resources menu for Syndey only
 
-            var resource_menu = $('<ul>'
-                +'<li data-resource-id="general"><a href="#" class="nav-link">General resources</a></li>'
+            var resource_menu = $('<ul>' + html_resource
+                //+'<li data-resource-id="general"><a href="#" class="nav-link">General resources</a></li>'
                 //+'<li data-resource-id="education"><a href="#" class="nav-link">Education resources</a></li>'
                 +'</ul>')
             .addClass('top-menu-dropdown').hide()
             .css({'position':'absolute', 'padding':'5px', 'font-size': '15px'})
             .appendTo( that.document.find('body') )
-            .menu({select: function(event, ui){ 
-
+            .menu({select:__onNavMenuClick});
+/*
+            function(event, ui){ 
+                
+                var recID = $(event.target).find('a.nav-link').attr('data-id');
                 window.hWin.HEURIST4.util.stopEvent(event);
 
-                window.open('http://sydney.edu.au/arms/archives/beyond1914_resources.shtml','_blank');
+                var hdoc = $(window.hWin.document);
+                //hide all 
+                hdoc.find('#main_pane > .clearfix').hide(); //hide all
+                //show selected 
+                hdoc.find('.bor-page-'+recID).show();
 
+                //window.hWin.HEURIST4.util.stopEvent(event);
+                //window.open('http://sydney.edu.au/arms/archives/beyond1914_resources.shtml','_blank');
+*/
                 /* TEMP REMARKED as we use static resource page instead of smarty report
 
                 //that.history.push({page_name:'search'});
@@ -464,7 +488,7 @@ $.widget( "heurist.expertnation_nav", {
                 });
                 hdoc.scrollTop(0);
                 */
-            }});
+//            }});
 
             var resource_btn = menu_ele.find('.nav-link[data-id="resources"]');
             resource_btn.on( {
