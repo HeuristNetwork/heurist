@@ -1903,7 +1903,8 @@ $.widget( "heurist.mapping", {
                         });
                     }else
                     if(val=='geocoder'){ //geocoder plugin
-                        that.map_geocoder = L.Control.geocoder({ position: 'topleft' });
+                        that.map_geocoder = L.Control.geocoder({ position: 'topleft', 
+                            geocoder: new L.Control.Geocoder.Google('AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk') });
                     }else
                     //print plugin
                     if(val=='print'){
