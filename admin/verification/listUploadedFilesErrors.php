@@ -83,11 +83,11 @@ $mysqli = $system->get_mysqli();
         <div id="in_porgress" class="coverall-div" style="display:none;"><h2>Repairing....</h2></div>    
     
         <div class="banner">
-            <h2>Check for missed and orphaned files and wrong paths</h2>
+            <h2>Check for missing and orphaned files and incorrect paths</h2>
         </div>
 
         <div><br/><br/>
-            These checks look for errors in record uploaded files.
+            These checks look for errors in uploaded file records.
             <br><br><hr><br><br>
             <div id="linkbar"></div>
         </div>

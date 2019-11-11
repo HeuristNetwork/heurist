@@ -180,7 +180,7 @@ if($filename){ //download from scratch
         }   
 
         //entity id either not defined or requested file doesn't exist
-        //editmode: empty gif (0) or add image gif (1) or default icon/thumb for entity (2), or (check)  'ok' if it exists or '' missed
+        //editmode: empty gif (0) or add image gif (1) or default icon/thumb for entity (2), or (check)  'ok' if it exists or '' missing
         $default_mode = @$_REQUEST['def'] ?$_REQUEST['def']:2;
 
                    

@@ -65,7 +65,10 @@ private static function readDataFile($filename, $type=null, $validate=true){
    
    $data=null;
     try{
-        if(strpos($filename,'websiteStarterRecords')===0){
+        // TODO: This special-casing based on a specific file name, which could be changed in an entirely
+        // different part of the code, is a pretty horrible way of setting a file path. Should be passed directly
+        // and setting default path should only occur where no file path is specified.
+        if(strpos($filename,'websiteStarterRecords')===0 || strpos($filename,'webpageStarterRecords')===0){
             $filename = HEURIST_DIR.'hclient/widgets/cms/'.$filename;
         }else{
             $filename = HEURIST_SCRATCH_DIR.$filename;    
@@ -124,7 +127,7 @@ private static function hmlToJson($filename){
 
     $xml_doc = simplexml_load_file($filename);
     if($xml_doc==null || is_string($xml_doc) || !$xml_doc->database){
-        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that xml is corrupted. Element "database" is missed');
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that xml is corrupted. Element "database" is missing');
         return null;
     }
     

@@ -1128,7 +1128,7 @@ $mysqli->commit();
     /*
      import entire vocabulary (including all children)
      
-     $term_id - term to be imported, if not defined use $this->imp_terms to import all missed vocabs
+     $term_id - term to be imported, if not defined use $this->imp_terms to import all missing vocabs
      $domain - enum or relation
      $children - array of term ids (source)
      $parent_id - parent term id (target)

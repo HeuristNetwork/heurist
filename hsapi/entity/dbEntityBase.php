@@ -602,7 +602,7 @@ class DbEntityBase
         
         
         if(!is_array(@$this->data['fields']) || count($this->data['fields'])<1){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Missed 'fields' parameter. Fields are not defined");
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Missing 'fields' parameter. Fields are not defined");
                 return false;    
         }
         //detect wheter this is multi record save

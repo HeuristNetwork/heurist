@@ -3913,7 +3913,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     window.hWin.HEURIST4.msg.showMsgErr(s+'Please repeat "Prepare" action'); 
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(s+'Check other "error" tabs '
-                                    +'to add missed terms for other enumeration fields. '
+                                    +'to add missing terms for other enumeration fields. '
                                     +'And finally close this dialog and repeat "Prepare" action'); 
                                 }
                             }else{

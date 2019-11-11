@@ -220,7 +220,7 @@ if(!$system->init(@$_REQUEST['db'])){
             $res = ImportHeurist::importRecords(@$_REQUEST['filename'], @$_REQUEST['session'], @$_REQUEST['is_cms_init']==1);
             
         }else{
-            $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missed or wrong");                
+            $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");                
             $res = false;
         }
         

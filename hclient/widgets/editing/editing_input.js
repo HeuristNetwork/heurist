@@ -3129,7 +3129,7 @@ console.log('onpaste');
             disp_value = window.hWin.HEURIST4.ui.getTermValue(value, true);
 
             if(window.hWin.HEURIST4.util.isempty(value)) {
-                disp_value = 'term missed. id '+termID
+                disp_value = 'term missing. id '+termID
             }
         } else if(this.detailType=='file'){
 

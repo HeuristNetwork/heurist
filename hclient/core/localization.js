@@ -276,7 +276,7 @@ regional['ru'] = {
     'Wrong email format': 'Неправильный формат адреса почты',
     'Wrong user name format': 'Недопустимы формат для имени пользовтеля',
     'Wrong password format': 'Недопустимый формат для пароля',
-    'Missed required fields': 'Не опрделены обязательные поля',
+    'Missing required fields': 'Не опрделены обязательные поля',
     'length must be between': 'длина должна быть между',
     'required field': 'обязательное поле'
 };
@@ -451,7 +451,7 @@ regional['fr'] = {
     'Wrong email format': 'Неправильный формат адреса почты',
     'Wrong user name format': 'Недопустимы формат для имени пользовтеля',
     'Wrong password format': 'Недопустимый формат для пароля',
-    'Missed required fields': 'Не опрделены обязательные поля',
+    'Missing required fields': 'Не опрделены обязательные поля',
     'length must be between': 'длина должна быть между',
     'required field': 'обязательное поле'
 };
@@ -606,7 +606,7 @@ regional['nl'] = {
     'Wrong email format': 'Verkeerde email indeling',
     'Wrong user name format': 'Verkeerde gebruikersnaam indeling',
     'Wrong password format': 'Verkeerde wachtwoord indeling',
-    'Missed required fields': 'Verplichte velden zijn niet ingevuld',
+    'Missing required fields': 'Verplichte velden zijn niet ingevuld',
     'length must be between': 'lengte moet tussen',
     'required field': 'verplicht veld'
 

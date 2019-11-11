@@ -76,7 +76,7 @@ class ImportDefinitions {
                 break;
             }
             if($pos2>$pos1){
-                return  "Error: Definition data is invalid: Missed open tag";
+                return  "Definition data is invalid: Missing open tag";
             }
             $offset = $pos2;
         }

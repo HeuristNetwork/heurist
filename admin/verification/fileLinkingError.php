@@ -52,11 +52,11 @@ $mysqli = $system->get_mysqli();
     <body class="popup">
 
         <div class="banner">
-            <h2>Check for missed and orphaned files and wrong paths</h2>
+            <h2>Check for missing and orphaned files and incorrect paths</h2>
         </div>
 
         <div><br/><br/>
-            These checks look for errors in record uploaded files.
+            These checks look for errors in uploaded file records.
         </div>
         <hr>
 

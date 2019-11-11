@@ -450,11 +450,11 @@
                 print implode('',$fileds_differ_terms);
             }
             if(@$_REQUEST['termlists']==1 && count($fileds_missed_terms)>0){
-                print "<p style='padding-left:10px'>Missed terms (they are in defined list of enumeration fields but not found in terms table): "
+                print "<p style='padding-left:10px'>Missing terms (they are in defined the list of enumeration fields but not found in the terms table): "
                     .implode(', ',$fileds_missed_terms).'</p>';
             }
             if(count($fileds_missed_rectypes)>0){
-                print "<p style='padding-left:10px'>Missed record types (however they are presented in constraint of resource fields):</p>"
+                print "<p style='padding-left:10px'>Missing record types (however they are present in the constraint of record pointer field(s)):</p>"
                     ."<p style='padding-left:40px'>"
                     .implode('<br>',$fileds_missed_rectypes).'</p>';
             }

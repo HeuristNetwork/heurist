@@ -53,7 +53,7 @@ public static function saveToTempFile($content, $extension='csv'){
     self::initialize();
 
     if(!$content){
-        self::$system->addError(HEURIST_INVALID_REQUEST, "Parameter 'data' is missed");                
+        self::$system->addError(HEURIST_INVALID_REQUEST, "Parameter 'data' is missing");                
         return false;
     }
         

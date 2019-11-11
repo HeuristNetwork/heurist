@@ -152,7 +152,7 @@
             }
 
             if(!@$params['q']){
-                return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Facet query search request. Missed query parameter");
+                return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Facet query search request. Missing query parameter");
             }
 
             //get SQL clauses for current query
@@ -1230,7 +1230,7 @@
                     }
 
             }else{
-                return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Invalid search request. Missed query parameter 'q'");
+                return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Invalid search request. Missing query parameter 'q'");
             }
 
             if($is_mode_json){
