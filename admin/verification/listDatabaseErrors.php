@@ -976,7 +976,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
                 }
                 print '</table>';
             }
-exit();            
+            
             ?>
 
             <hr>
