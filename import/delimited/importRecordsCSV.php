@@ -149,7 +149,7 @@ If you have missing data for Required fields, you may find it convenient to set 
             <input type="file" id="uploadFile" style="display:none">
             <div id="btnUploadFile" title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
                 Upload File</div>
-            <span>The first line must have field names with correct number of fields</span>  
+            <span class="format-csv">The first line must have field names with correct number of fields</span>  
 
         <h2 style="padding:10 0 10 120">OR</h2>
         

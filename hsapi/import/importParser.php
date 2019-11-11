@@ -726,13 +726,14 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
           }
           elseif ($node_name == 'extendeddata')
           {
+              
             foreach ($child->childNodes as $data) {
               if ($data->nodeName != '#text') {
                 if ($data->nodeName == 'data') {
                   $items = $data->getElementsByTagName('value'); //DOMNodeList 
                   if($items->length>0){
-                        $items->item(0);
-                        $value = preg_replace('/\n\s+/',' ',trim($value->textContent));
+                        //$items->item(0);
+                        $value = preg_replace('/\n\s+/',' ',trim($items[0]->textContent));
                   }else{
                         $value = ''; 
                   }

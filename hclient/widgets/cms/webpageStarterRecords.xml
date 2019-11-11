@@ -15,9 +15,9 @@
             <added>2019-07-21 21:54:06</added>
             <modified>2019-09-07 09:45:20</modified>
             <workgroup id="2">johnson</workgroup>
-            <detail id="1" conceptID="2-1" type="Name / Title" name="Menu label">Discover (search)</detail>
-            <detail id="3" conceptID="2-3" type="Short summary" name="Menu rollover description">Search functions to search and display contents of the database represented by/in this website</detail>
-            <detail id="4" conceptID="2-4" type="Extended description" name="HTML content">&lt;p&gt;This page is set up as a container for database searches.Replace these instructions with your own introduction.&lt;/p&gt;
+            <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Discover (search)</detail>
+            <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">Search functions to search and display contents of the database represented by/in this website</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;This page is set up as a container for database searches.Replace these instructions with your own introduction.&lt;/p&gt;
                 &lt;p&gt;We suggest using a table (supplied below) or if you have the knowledge, &amp;lt;div&amp;gt; ... &amp;lt;/div&amp;gt;, to contain the search field or list of saved searches&lt;br /&gt;and the results list and visualisation (map, timeline, network diagram, report etc.).&lt;/p&gt;
                 &lt;p&gt;Click on [Edit page content] in the website editor, then the &lt;span style=&quot;text-decoration: underline;&quot;&gt;edit&lt;/span&gt; link to set the list of saved searches you want to display on the left, &lt;br /&gt;and to set the parameters of each of the components eg. map in the middle and list of results on the right.&lt;/p&gt;
                 &lt;table style=&quot;height: 500px; width: 100&#37;; border-collapse: collapse; border-color: slateblue;&quot; border=&quot;3&quot;&gt;
@@ -41,8 +41,8 @@
                 &lt;/tr&gt;
                 &lt;/tbody&gt;
                 &lt;/table&gt;</detail>
-            <detail id="914" conceptID="2-914" type="Keywords" name="Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
-            <detail id="928" conceptID="2-928" type="Type of page" name="Type of page" termID="6254" termConceptID="2-6254" ParentTerm="Type of web page/menu">Standalone web page</detail>
+            <detail id="914" conceptID="2-914" basename="Keywords" name="Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
+            <detail id="928" conceptID="2-928" basename="Type of page" name="Type of page" termID="6254" termConceptID="2-6254" ParentTerm="Type of web page/menu">Standalone web page</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
         </record>
      </records>

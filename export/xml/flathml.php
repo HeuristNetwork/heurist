@@ -1197,7 +1197,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
             foreach ($relations as $rec_id => $rels) {
                 $linkedRecType = $rels['rec_RecTypeID'];
                 foreach ($rels['dty_IDs'] as $dtID) {
-                    $attrs = array('id' => $dtID, 'conceptID' => ConceptCode::getDetailTypeConceptID($dtID), 'type' => $DTN[$dtID]);
+                    $attrs = array('id' => $dtID, 'conceptID' => ConceptCode::getDetailTypeConceptID($dtID), 'basename' => $DTN[$dtID]);
                     if (array_key_exists($dtID, $RQS[$linkedRecType])) {
                         $attrs['name'] = $RQS[$linkedRecType][$dtID];
                     }

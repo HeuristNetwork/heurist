@@ -235,7 +235,7 @@ $.widget( "heurist.search_faceted", {
 
                 var w = that.element.width();
                 
-                that.element.find('div.facet-item > a > span.truncate').width(w-80);
+                that.element.find('div.facet-item > a > span.truncate').width(w-100); //was 80
                   
             }else {
 
@@ -2018,7 +2018,9 @@ if(!detailtypes[dtID]){
                                  ditem.addClass('in-viewport');
                             }                    
                             if(i>250){ 
-                                 $("<div>").css({"display":"none","padding":"0 3px"}).html('still more...( '+(response.data.length-i)+' results )').appendTo($facet_values);
+                                $("<div>").css({"display":"none","padding":"0 3px"})
+                                 .addClass('in-viewport')
+                                 .html('still more...( '+(response.data.length-i)+' results )').appendTo($facet_values);
                                  break;       
                             }
                         }
@@ -2121,7 +2123,7 @@ if(!detailtypes[dtID]){
                 if(top_parent.length>0){ //this is web publication 
                     f_link_content.css('width',top_parent.width()*0.6).addClass('truncate');
                 }else{
-                    f_link_content.css('width',this.element.width()-80).addClass('truncate');    //was this.facets_list_container.width()*0.6
+                    f_link_content.css('width',this.element.width()-100).addClass('truncate');    //was 80 this.facets_list_container.width()*0.6
                 }
             
             
