@@ -173,12 +173,23 @@ function hMapLayer2( _options ) {
         window.hWin.HAPI4.RecordMgr.load_shp_as_geojson(request,
             function(response){
                 if(response){
-                    _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                    var dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        
+                        _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                 {geojson_data: response,
                                 timeline_data: null,
                                 layer_style: layer_style,
-                                dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),
+                                dataset_name:dataset_name,
                                 preserveViewport:options.preserveViewport });
+                                
+                    }else{
+                        if(!window.hWin.HEURIST4.util.isempty(response.message)){
+                            response.message = 'Layer : '+dataset_name+'<br><br>'+response.message;
+                        }
+                        window.hWin.HEURIST4.msg.showMsgErr(response);   
+                    }
                     
                 }
             }
@@ -204,12 +215,23 @@ function hMapLayer2( _options ) {
         window.hWin.HAPI4.RecordMgr.load_kml_as_geojson(request,
             function(response){
                 if(response){
-                    _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                    var dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                        _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                 {geojson_data: response,
                                 timeline_data: null,
                                 layer_style: layer_style,
                                 dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),
                                 preserveViewport:options.preserveViewport });
+                                
+                    }else{
+                        if(!window.hWin.HEURIST4.util.isempty(response.message)){
+                            response.message = 'Layer : '+dataset_name+'<br><br>'+response.message;
+                        }
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
                 }
             }
         );          

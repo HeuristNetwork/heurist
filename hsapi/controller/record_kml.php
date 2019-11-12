@@ -83,8 +83,11 @@ error_log('Cannot load remote kml file '.$url);
             if(@$params['format']=='geojson'){
 
                 //@todo use importParser to proper kml parsing and extraction features                
-                
-                $geom = geoPHP::load($kml, 'kml');
+                try{
+                    $geom = geoPHP::load($kml, 'kml');
+                }catch(Exception $e){
+                    $system->error_exit_api('Cannot process kml: '.$e->getMessage(), HEURIST_ERROR);    
+                }
                 if($geom!==false && !$geom->isEmpty()){
                     
                     

@@ -675,10 +675,12 @@ $.widget( "heurist.editing_input", {
                     this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
                     this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){    }*/
                     //what is visible initially
+                if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
                     var nodes = $.parseHTML(value);
                     if(nodes && (nodes.length>1 || nodes[0].nodeName!='#text')){ //if it has html show editor at once
                              setTimeout(__showEditor,500); 
                     }
+                }
                 
             } 
 

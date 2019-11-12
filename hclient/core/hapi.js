@@ -139,13 +139,18 @@ function hAPI(_db, _oninit) { //, _currentUser
             error: function( jqXHR, textStatus, errorThrown ) {
                 
                 _is_callserver_in_progress = false;
-
-                err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
-                                            ?'Error_Connection_Reset':jqXHR.responseText;
                                             
-                var response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
+                var response;                     
+                if(jqXHR.responseJSON && jqXHR.responseJSON.status){
+                    response = jqXHR.responseJSON;
+                }else{
+                    var err_message = (window.hWin.HEURIST4.util.isempty(jqXHR.responseText))
+                                    ?'Error_Connection_Reset':jqXHR.responseText;
+                    response = {status:window.hWin.ResponseStatus.UNKNOWN_ERROR, 
                                         message: err_message, 
                                         request_code:request_code};
+                }
+                                            
 
                 if($.isFunction(callback)){
                     callback(response);
