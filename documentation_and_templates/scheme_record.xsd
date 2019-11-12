@@ -126,7 +126,7 @@ elementFormDefault="qualified">
                                                     </xs:sequence>
                                                     <xs:attribute name="id" type="xs:nonNegativeInteger"/>
                                                     <xs:attribute name="conceptID" type="xs:string"/>          
-                                                    <xs:attribute name="type" type="xs:string"/>          
+                                                    <xs:attribute name="basename" type="xs:string"/>          
                                                     <xs:attribute name="name" type="xs:string"/>          
                                                     <xs:attribute name="isRecordPointer" type="xs:boolean"/>
                                                     
