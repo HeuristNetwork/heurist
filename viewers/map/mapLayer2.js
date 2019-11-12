@@ -175,7 +175,12 @@ function hMapLayer2( _options ) {
                 if(response){
                     var dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
                     
-                    if(response.status == window.hWin.ResponseStatus.OK){
+                    if(response.status && response.status != window.hWin.ResponseStatus.OK){
+                        if(!window.hWin.HEURIST4.util.isempty(response.message)){
+                            response.message = 'Layer : '+dataset_name+'<br><br>'+response.message;
+                        }
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }else{
                         
                         _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                 {geojson_data: response,
@@ -184,11 +189,6 @@ function hMapLayer2( _options ) {
                                 dataset_name:dataset_name,
                                 preserveViewport:options.preserveViewport });
                                 
-                    }else{
-                        if(!window.hWin.HEURIST4.util.isempty(response.message)){
-                            response.message = 'Layer : '+dataset_name+'<br><br>'+response.message;
-                        }
-                        window.hWin.HEURIST4.msg.showMsgErr(response);   
                     }
                     
                 }
@@ -217,7 +217,12 @@ function hMapLayer2( _options ) {
                 if(response){
                     var dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
                     
-                    if(response.status == window.hWin.ResponseStatus.OK){
+                    if(response.status && response.status != window.hWin.ResponseStatus.OK){
+                        if(!window.hWin.HEURIST4.util.isempty(response.message)){
+                            response.message = 'Layer : '+dataset_name+'<br><br>'+response.message;
+                        }
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }else{
                     
                         _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
                                 {geojson_data: response,
@@ -226,11 +231,6 @@ function hMapLayer2( _options ) {
                                 dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),
                                 preserveViewport:options.preserveViewport });
                                 
-                    }else{
-                        if(!window.hWin.HEURIST4.util.isempty(response.message)){
-                            response.message = 'Layer : '+dataset_name+'<br><br>'+response.message;
-                        }
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                 }
             }
