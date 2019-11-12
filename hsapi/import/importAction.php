@@ -1267,7 +1267,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
 
     //7. TODO Verify geo fields
-    if(true && count($geo_fields)>0){
+    if(true && is_array($geo_fields) && count($geo_fields)>0){
         // northing, easting
         $query = "select ".implode(',',$geo_fields)." from $import_table LIMIT 5";
         $res = $mysqli->query($query);
@@ -2253,13 +2253,19 @@ public static function performImport($params, $mode_output){
                                 //verify WKT
                                 $geoType = null;
                                 $r_value = strtoupper($r_value);
-                                //get WKT type
-                                if(strpos($r_value,'POINT')!==false){
-                                    $geoType = "p";
-                                }else if(strpos($r_value,'LINESTRING')!==false){
-                                    $geoType = "l";
-                                }else if(strpos($r_value,'POLYGON')!==false){ //MULTIPOLYGON
-                                    $geoType = "pl";
+                                
+                                if(strpos($r_value,'GEOMETRYCOLLECTION')!==false || strpos($r_value,'MULTI')!==false){
+                                    $geoType = 'm';   
+                                }else{
+                                    
+                                    //get WKT type
+                                    if(strpos($r_value,'POINT')!==false){
+                                        $geoType = "p";
+                                    }else if(strpos($r_value,'LINESTRING')!==false){
+                                        $geoType = "l";
+                                    }else if(strpos($r_value,'POLYGON')!==false){ //MULTIPOLYGON
+                                        $geoType = "pl";
+                                    }
                                 }
 
                                 if($geoType){
@@ -2422,12 +2428,16 @@ public static function performImport($params, $mode_output){
                                 if($need_add){
                                     //always prevent duplications
                                     if(@$details["t:".$field_type]){                                    
-                                        $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
-                                        //duplications not found - can be added
-                                        $need_add = (array_search(trim_lower_accent($value), $details_lc, true)===false);
+                                        if(strlen($value)<200){
+                                            $details_lc = array_map('trim_lower_accent', $details["t:".$field_type]);
+                                            //duplications not found - can be added
+                                            $need_add = (array_search(trim_lower_accent($value), $details_lc, true)===false);
+                                            $cnt = count(@$details["t:".$field_type])+1;
+                                        }
+                                    }else{
+                                        $cnt = 1;
                                     }
                                     if($need_add){
-                                        $cnt = count(@$details["t:".$field_type])+1;
                                         $details["t:".$field_type][$cnt] = $value;
                                     }
                                 }

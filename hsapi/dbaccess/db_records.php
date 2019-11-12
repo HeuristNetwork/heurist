@@ -1365,11 +1365,13 @@
         if ($new_title) {
             $new_title = trim($new_title);
             if($new_title!=''){
+                $date_mod = date('Y-m-d H:i:s');
+                
                 $query = "UPDATE Records set rec_Modified=?, rec_Title=? where rec_ID=".$recID;
 
                 $stmt = $mysqli->prepare($query);
 
-                $stmt->bind_param('ss', date('Y-m-d H:i:s'), $new_title);
+                $stmt->bind_param('ss', $date_mod, $new_title);
                 if(!$stmt->execute()){
                     $syserror = $mysqli->error;
                     $stmt->close();
