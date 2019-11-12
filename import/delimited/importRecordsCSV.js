@@ -2306,7 +2306,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     
                                     var issues = response.data['err_keyfields'][keyfields[i]];
                                 
-                                    $('<tr><td>'+response.data['fields'][keyfields[i]]+'</td>'
+                                    $('<tr><td>'+window.hWin.HEURIST4.util.htmlEscape(response.data['fields'][keyfields[i]])+'</td>'
                                         +'<td>'+(issues[0]>0?issues[0]:'')+'</td><td>'+(issues[1]>0?issues[1]:'')+'</td></tr>').appendTo(tbl);
                                 }         
                             }
@@ -2350,7 +2350,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 if(window.hWin.HEURIST4.util.isArrayNotEmpty(_parseddata[i])){
                                     tr  = '<tr>';
                                     for(j in _parseddata[i]){
-                                        tr = tr+'<td>'+_parseddata[i][j]+'</td>';
+                                        tr = tr+'<td>'+window.hWin.HEURIST4.util.htmlEscape(_parseddata[i][j])+'</td>';
                                     }
                                     tr  = tr+'</tr>';
                                     maxcol = Math.max(maxcol,_parseddata[i].length);

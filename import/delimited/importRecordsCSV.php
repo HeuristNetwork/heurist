@@ -62,6 +62,9 @@ if(!$format) $format='csv';
             {
                 border: 1px solid lightgray;
             }
+            .tbpreview td{
+                vertical-align:top;
+            }
             .tbfields{
                font-size: 0.9em;
                border-collapse: collapse;
