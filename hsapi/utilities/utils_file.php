@@ -56,6 +56,7 @@
     ===
     createZipArchive
     unzipArchive
+    unzipArchiveFlat
     
     ===
     loadRemoteURLContentSpecial tries to avoid curl if url on the same domain
@@ -138,8 +139,27 @@
         }
 
     }
+    
+    function folderExistsVerbose($folder, $testWrite, $folderName){
 
+        $res = folderExists($folder, $testWrite);
+        if($res<0){
+            $s='';
+            if($res==-1){
+                $s = 'Cant find folder "'.$folderName.'" in database directory';
+            }else if($res==-2){
+                $s = 'Folder "'.$folderName.'" in database directory is not writeable';
+            }else if($res==-3){
+                $s = 'Cant create folder "'.$folderName.'" in database directory. It is not possible to delete file with the same name';
+            }
+            
+            return $s;
+        }
 
+        return true;        
+    }
+    
+    
     /**
     *
     *

@@ -65,13 +65,31 @@
                 if($url){
                     $kml = loadRemoteURLContent($url, true);    
                     if($kml===false){
-error_log('Cannot load remote kml file '.$url);
-                      exit(); //@todo error return  
+                      $system->error_exit_api('Cannot load remote kml file '.$url, HEURIST_ERROR);    
                     } 
                 }else {
                     $filepath = resolveFilePath($kml_file['fullPath']);
                     
                     if (file_exists($filepath)) {
+                        
+                        if(strpos(strtolower($filepath),'.kmz')==strlen($filepath)-4){
+                            //check if scratch folder exists
+                            $res = folderExistsVerbose(HEURIST_SCRATCH_DIR, true, 'scratch');
+                            if($res!==true){
+                                $system->error_exit_api('Cannot extract kmz data to "scratch" folder. '.$res, HEURIST_ERROR);    
+                            }
+                            
+                            $files = unzipArchiveFlat($filepath, HEURIST_SCRATCH_DIR);
+                            
+                            foreach($files as $filename){
+                                if(strpos(strtolower($filename),'.kml')==strlen($filename)-4){
+                                    $filepath = $filename;
+                                }else{
+                                    unlink( $filename );
+                                }
+                            }
+                                
+                        }
                         $kml = file_get_contents($filepath);
                     }else{
                         error_log('Cannot load kml file '.$kml_file['fullPath']);                    
@@ -127,6 +145,8 @@ error_log('Cannot load remote kml file '.$url);
                         //header('Content-disposition: attachment; filename=output.json');
                         header('Content-Length: ' . strlen($json));
                         exit($json);
+                }else{
+                    $system->error_exit_api('No coordinates retrieved from kml file', HEURIST_ERROR);
                 }
                 
             }else{

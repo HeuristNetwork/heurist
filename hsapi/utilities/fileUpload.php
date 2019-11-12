@@ -212,7 +212,7 @@ if($response!=null){
             $filename = HEURIST_FILESTORE_DIR.'scratch/'.$file->original_name;
             
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-            $isKML = ($extension=='kml');
+            $isKML = ($extension=='kml' || $extension=='kmz');
             if($isKML){ //no need to detect params for kml
                 $res['files'][$idx]->isKML = true;
             }else{

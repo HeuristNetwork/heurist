@@ -58,22 +58,13 @@ public static function saveToTempFile($content, $extension='csv'){
     }
         
     //check if scratch folder exists
-    $res = folderExists(HEURIST_SCRATCH_DIR, true);
+    $res = folderExistsVerbose(HEURIST_SCRATCH_DIR, true, 'scratch');
 // -1  not exists
 // -2  not writable
 // -3  file with the same name cannot be deleted
     
-    if($res<0){
-        $s='';
-        if($res==-1){
-            $s = 'Cant find folder "scratch" in database directory';
-        }else if($res==-2){
-            $s = 'Folder "scratch" in database directory is not writeable';
-        }else if($res==-3){
-            $s = 'Cant create folder "scratch" in database directory. It is not possible to delete file with the same name';
-        }
-        
-        self::$system->addError(HEURIST_ERROR, 'Cant save temporary file. '.$s);                
+    if($res!==true){
+        self::$system->addError(HEURIST_ERROR, 'Cant save temporary file. '.$res);                
         return false;
     }
 
@@ -119,7 +110,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     }
   
     $extension = strtolower(pathinfo($upload_file_name, PATHINFO_EXTENSION));
-    if($extension=='kml'){
+    if($extension=='kml' || $extension=='kmz'){
         return self::parseAndValidate($upload_file_name, $original_filename, 3, $params);
     }
     
@@ -219,7 +210,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     }
     
     $extension = strtolower(pathinfo($encoded_filename, PATHINFO_EXTENSION));
-    $isKML = ($extension=='kml');
+    $isKML = ($extension=='kml' || $extension=='kmz');
     
     $err_colnums = array();
     $err_encoding = array();
@@ -270,6 +261,21 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     }
 
     if($isKML){
+        
+        if($extension=='kmz'){
+            
+            $files = unzipArchiveFlat($encoded_filename, HEURIST_SCRATCH_DIR);
+            
+            foreach($files as $filename){
+                if(strpos(strtolower($filename),'.kml')==strlen($filename)-4){
+                    $encoded_filename = $filename;
+                }else{
+                    unlink( $filename );
+                }
+            }
+            
+        }
+        
         
         $kml_content = file_get_contents($encoded_filename);
 

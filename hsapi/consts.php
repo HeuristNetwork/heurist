@@ -176,7 +176,7 @@ define("HEURIST_UNITED_TERMS", true);
 // update in parallel in jquery-file-upload/server/php/Uploadhandler.php
 define('HEURIST_ALLOWED_EXT', 
 'jpg,jpeg,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,xsl,xslx,mp3,mp4,mpeg,avi,wmv,wmz,aif,aiff,pdf,mbtiles,'
-.'mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,shp,htm,html,xhtml,ppt,pptx,zip,gzip,tar,json');
+.'mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslt,hml,kml,kmz,shp,htm,html,xhtml,ppt,pptx,zip,gzip,tar,json');
 
 
 /** RECORD TYPE DEFINITIONS */
