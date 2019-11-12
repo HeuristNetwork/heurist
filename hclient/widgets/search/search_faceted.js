@@ -2017,12 +2017,13 @@ if(!detailtypes[dtID]){
                             if(i>this.options.params.viewport-1){
                                  ditem.addClass('in-viewport');
                             }                    
-                            if(i>250){ 
+                            if(i>2000){  //was 250
                                 $("<div>").css({"display":"none","padding":"0 3px"})
                                  .addClass('in-viewport')
                                  .html('still more...( '+(response.data.length-i)+' results )').appendTo($facet_values);
                                  break;       
                             }
+                            
                         }
 
                         //show viewport collapse/exand control
