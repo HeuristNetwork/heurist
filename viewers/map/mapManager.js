@@ -1,5 +1,8 @@
 /**
 * mapManager.js - manage layers and proejcts - map legend
+* 
+* Manager control - map legend
+* Addmapdoc control - addition of new record with type "Map Document"
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -46,7 +49,65 @@ L.control.manager = function(opts) {
     return new L.Control.Manager(opts);
 }
 
+//--------------------------------
 
+L.Control.Addmapdoc = L.Control.extend({
+    
+    _mapwidget: null,
+    
+    initialize: function(options) {
+
+        options = options || {};
+        
+        L.Util.setOptions(this, options);
+        
+        this._mapwidget = options.mapwidget;
+        
+        L.Control.prototype.initialize.call(this, this.options);
+    },
+
+    
+    onAdd: function(map) {
+        
+        var container = L.DomUtil.create('div','leaflet-bar');
+
+        L.DomEvent
+          .disableClickPropagation(container)
+          .disableScrollPropagation(container);
+        
+        this.mapPublish = new hMapPublish({container: $(container), mapwidget:this._mapwidget});
+        
+        $('<a>').attr('title', window.hWin.HR('Create new map document'))
+            .html('<span class="ui-icon ui-map-document" style="width:22px;margin:2px 0px">'
++'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:0px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
+                +'</span>')
+            .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
+            //.addClass('ui-icon ui-map-document')
+            .appendTo(container);
+        
+        L.DomEvent
+            .on(container, 'click', this._onClick, this);
+        
+        return container;
+    },
+
+    onRemove: function(map) {
+        // Nothing to do here
+    },
+    
+    _onClick: function() {
+       //this.mapPublish.openPublishDialog();
+       this._mapwidget.mapManager.createNewMapDocument();
+    }
+});
+
+L.control.addmapdoc = function(opts) {
+    return new L.Control.Addmapdoc(opts);
+}
+
+
+
+//--------------------------------
 //        
 // creates accordion with 3(4) panes
 // loads prededifned list of base layers
@@ -187,10 +248,20 @@ function hMapManager( _options )
          if(domain=='mapdocs'){
              
             var append_link = $('<a title="create new map document">',{href:'#'})
-                .html('<span class="ui-icon ui-map-document"></span>')
+                .html('<span class="ui-icon ui-map-document" style="width:22px">'
++'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
+                +'</span>')
                 .css({height:'14px',float:'right',width: '16px',background: 'none'})
-                .click(function(event){
-                    
+                .click(_createNewMapDocument)
+                .appendTo($header);
+        }
+
+        return $header
+
+    }
+    
+    function _createNewMapDocument(event){
+        
                     window.hWin.HEURIST4.util.stopEvent(event);
                     
                     //edit layer or mapdocument record
@@ -208,12 +279,6 @@ function hMapManager( _options )
                     },
                     new_record_params:{rt:window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']}
                     });
-                    
-                }).appendTo($header);
-        }
-
-        return $header
-
     }
     
     //
@@ -866,6 +931,10 @@ function hMapManager( _options )
                 });
             }
             
+        },
+        
+        createNewMapDocument: function(event){
+            _createNewMapDocument(event);
         },
         
         // 

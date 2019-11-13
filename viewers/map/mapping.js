@@ -381,6 +381,12 @@ $.widget( "heurist.mapping", {
     {
         return this.mapManager.getMapDocuments( mode );
     },
+
+    createNewMapDocument: function( event ) 
+    {
+        this.mapManager.createNewMapDocument( event );
+    },
+
     
     //
     //
@@ -1881,6 +1887,7 @@ $.widget( "heurist.mapping", {
         //map controls {all,none,zoom,bookmark,geocoder,print,publish,legend}
         var controls = __splitval(params['controls']);
         controls.push('zoom'); //zoom is always visible
+        controls.push('addmapdoc'); //add map doc is always visible for "non published" ui
         
         var that = this;
         function __controls(val){
@@ -1913,6 +1920,9 @@ $.widget( "heurist.mapping", {
                     }else
                     if(val=='publish'){ //publish plugin
                         that.map_publish = L.control.publish({ position: 'topleft', mapwidget:that });
+                    }else
+                    if(val=='addmapdoc'){ //addmapdoc plugin
+                        that.map_addmapdoc = L.control.addmapdoc({ position: 'topleft', mapwidget:that });
                     }else
                     if(val=='help'){ //publish plugin
                         that.map_help = L.control.help({ position: 'topleft', mapwidget:that });
@@ -2037,9 +2047,14 @@ $.widget( "heurist.mapping", {
         __controls('bookmark');
         __controls('geocoder');
         __controls('print');
-        if(!this.options.isPublished) __controls('publish');
         //__controls('scale');
-        if(controls.indexOf('draw')>=0) __controls('draw');
+        if(controls.indexOf('draw')>=0){
+             __controls('draw');   
+        }else if(!this.options.isPublished){
+            __controls('publish');
+            __controls('addmapdoc');    
+        }
+
         __controls('help');
         
             
