@@ -78,20 +78,11 @@ $.widget( "heurist.editing_input", {
         if((!(this.options.rectypeID>0)) && this.options.recordset){
             this.options.rectypeID = this.options.recordset.fld(this.options.recordset.getFirstRecord(), 'rec_RecTypeID');
         }
-        
 
         this.configMode = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(this.configMode)){
-            if($.type(this.configMode) === "string"){
-                try{
-                    this.configMode = $.parseJSON(this.configMode);
-                }catch(e){
-                    this.configMode = null;
-                }
-            }
-            if(!$.isPlainObject(this.configMode)){
-                this.configMode = null;
-            }
+            this.configMode = window.hWin.HEURIST4.util.isJSON(this.configMode);
+            if(this.configMode===false) this.configMode = null;
         }
         //by default
         if((this.detailType=="resource" || this.detailType=='file') 
@@ -335,7 +326,13 @@ $.widget( "heurist.editing_input", {
             this.header.css('display','table-cell');//show();
         }else{
             this.header.hide();
-        }        
+        }      
+        
+        var val = this.f('rst_FieldConfig');
+        if(!window.hWin.HEURIST4.util.isempty(val)){
+            this.configMode = window.hWin.HEURIST4.util.isJSON(val);
+            if(this.configMode===false) this.configMode = null;
+        }
     },
     
     _setOptions: function( ) {
@@ -1459,6 +1456,12 @@ $.widget( "heurist.editing_input", {
                     } else {
                         popup_options.selection_on_init = null;    
                     }                                                                                       
+                    if(this.configMode.initial_filter){
+                        popup_options.initial_filter = this.configMode.initial_filter;    
+                    }
+                    if(!window.hWin.HEURIST4.util.isnull(this.configMode.search_form_visible)){
+                        popup_options.search_form_visible = this.configMode.search_form_visible;    
+                    }
                     
                     //init dialog to select related entities
                     window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);

@@ -24,13 +24,14 @@ $.widget( "heurist.svs_list", {
     // default options
     options: {
         isapplication:true,  // send and recieve the global events
-        btn_visible_dbstructure: true,
-        btn_visible_filter: false,
+        btn_visible_dbstructure: true,  //button to open database structure graph
+        btn_visible_filter: false, //filter for treeview
         btn_visible_save: false,
 
         buttons_mode: false,
+        searchTreeMode: -1, //0-buttons, 1- tree, 2-full tree
         allowed_UGrpID: [], // allowed groups
-        allowed_svsIDs: [], // allowed searches
+        allowed_svsIDs: [], // allowed searches - for buttons only
         init_svsID:null,    // launch search on init
         
         onclose_search:null,  //function to be called on close faceted search
@@ -64,6 +65,13 @@ $.widget( "heurist.svs_list", {
             this._setOptionFromUrlParam('allowed_UGrpID', 'groupID');
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_svsIDs))
             this._setOptionFromUrlParam('allowed_svsIDs', 'searchIDs');
+
+        var isPublished = (this.options.searchTreeMode>=0);
+            
+        if( isPublished ){
+            this.options.buttons_mode = (this.options.searchTreeMode==0);
+        }
+            
         if(window.hWin.HAPI4.has_access() && this.options.buttons_mode){
             this._setOptionFromUrlParam('treeview_mode','treeViewLoggedIn', 'bool');
             if(this.options.treeview_mode){
@@ -125,15 +133,19 @@ $.widget( "heurist.svs_list", {
                 //toppos = toppos + 2.5
             }
 
-            this.helper_top = $( '<div>'+window.hWin.HR('right-click in list for menu')+'</div>' )
-            //.addClass('logged-in-only heurist-helper1')
-            .appendTo( $( "<div>" )
-                .css({'padding':'0.2em 0 0 1.2em','font-size':'1em','font-style':'italic'})
-                .addClass('svs-header')
-                .appendTo(this.div_header) );
+            if(!isPublished){
+                this.helper_top = $( '<div>'+window.hWin.HR('right-click in list for menu')+'</div>' )
+                //.addClass('logged-in-only heurist-helper1')
+                .appendTo( $( "<div>" )
+                    .css({'padding':'0.2em 0 0 1.2em','font-size':'1em','font-style':'italic'})
+                    .addClass('svs-header')
+                    .appendTo(this.div_header) );
+            }else{
+                toppos = 2;
+            }
         }
 
-        if(this.options.btn_visible_filter){
+        if(this.options.btn_visible_filter && !isPublished){
 
             this.filter_div = $( "<div>" ).css({'height':'2em', 'width':'100%'}).appendTo( this.search_tree );
 
@@ -163,7 +175,7 @@ $.widget( "heurist.svs_list", {
         var hasHeader = ($(".header"+that.element.attr('id')).length>0);
 
         //if(this.options.btn_visible_dbstructure) toppos = toppos + 3;
-        if(this.options.btn_visible_filter) toppos = toppos + 2;
+        if(this.options.btn_visible_filter && !isPublished) toppos = toppos + 2;
         if(hasHeader) toppos = toppos + 2;
 
         if(this.options.buttons_mode){
@@ -180,7 +192,7 @@ $.widget( "heurist.svs_list", {
 
         this.edit_dialog = null;
 
-        if(this.options.btn_visible_filter){
+        if(this.options.btn_visible_filter && !isPublished){
             // listeners
             this.filter_input.keyup(function(e){
                 var leavesOnly = true; //$("#leavesOnly").is(":checked"),
@@ -480,9 +492,10 @@ $.widget( "heurist.svs_list", {
         }
 
         //all required scripts and data have been loaded - start update
+        var ispublished = (this.options.searchTreeMode>=0);
 
         //add db summary as a first entry
-        if(this.helper_btm && this.options.btn_visible_dbstructure){
+        if(this.helper_btm && this.options.btn_visible_dbstructure && !ispublished){
             
             this.helper_btm.before(
                 $('<div>')
@@ -492,32 +505,43 @@ $.widget( "heurist.svs_list", {
             ) );
 
         }
-
-        if(islogged){
+        
+        if(islogged || ispublished){
 
             this.helper_btm.before(
                 $('<div>')
                 .addClass('svs-acordeon-group')
                 .html('&nbsp;')); //window.hWin.HR('PERSONAL')
 
-            this.helper_btm.before(
-                $('<div>')
-                .attr('grpid',  'bookmark').addClass('svs-acordeon')
-                .addClass('heurist-bookmark-search')  //need tp find from preferences
-                .css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
-                .append( this._defineHeader(window.hWin.HR('My Bookmarks'), 'bookmark'))
-                .append( this._defineContent('bookmark') ) );
+            if(islogged && this.options.searchTreeMode!=1){    
+                
+                this.helper_btm.before(
+                    $('<div>')
+                    .attr('grpid',  'bookmark').addClass('svs-acordeon')
+                    .addClass('heurist-bookmark-search')  //need tp find from preferences
+                    .css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
+                    .append( this._defineHeader(window.hWin.HR('My Bookmarks'), 'bookmark'))
+                    .append( this._defineContent('bookmark') ) );
 
-            this.helper_btm.before(
-                $('<div>')
-                .attr('grpid',  'all').addClass('svs-acordeon')
-                //.css('border','none')
-                .append( this._defineHeader(window.hWin.HR('My Searches'), 'all'))
-                .append( this._defineContent('all') ));
+                this.helper_btm.before(
+                    $('<div>')
+                    .attr('grpid',  'all').addClass('svs-acordeon')
+                    //.css('border','none')
+                    .append( this._defineHeader(window.hWin.HR('My Searches'), 'all'))
+                    .append( this._defineContent('all') ));
+                
+            }
                 
             var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
             for (var groupID in groups)
             if(groupID>0){
+                    if(this.options.searchTreeMode==1 && this.options.allowed_UGrpID.length>0 ) //show only allowed groups
+                    {
+                        if(window.hWin.HEURIST4.util.findArrayIndex(groupID, this.options.allowed_UGrpID)<0){
+                            continue;
+                        }
+                    }
+                
                     var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {   
@@ -587,8 +611,10 @@ $.widget( "heurist.svs_list", {
             });
             
             //cintext menu for group header
-            var context_opts = that._getAddContextMenu(groupid);
-            cdiv.contextmenu(context_opts);
+            if(!ispublished){
+                var context_opts = that._getAddContextMenu(groupid);
+                cdiv.contextmenu(context_opts);
+            }
 
             
             //replace all ui-icon-triangle-1-s to se
@@ -616,6 +642,11 @@ $.widget( "heurist.svs_list", {
         }
         });*/
         this.accordeon.show();
+        
+        //
+        if(ispublished && this.options.init_svsID){
+            this.doSearchByID( this.options.init_svsID );
+        }        
 
     },
 
@@ -908,6 +939,8 @@ $.widget( "heurist.svs_list", {
         ?window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID].children :[];
 
         var tree = $("<div>").addClass('hasmenu').css('padding-bottom','0em');
+        
+        var ispublished = (this.options.searchTreeMode>=0);
 
         var fancytree_options =
         {
@@ -1035,9 +1068,10 @@ $.widget( "heurist.svs_list", {
             }
         };
 
-        if(window.hWin.HAPI4.has_access()){
+        if(window.hWin.HAPI4.has_access() && !ispublished){
 
             fancytree_options['extensions'] = ["edit", "dnd", "filter"];
+            
             fancytree_options['dnd'] = {
                 preventVoidMoves: true,
                 preventRecursiveMoves: true,
@@ -1444,7 +1478,23 @@ $.widget( "heurist.svs_list", {
                 container.append(tree);
                 res = container;
             }
+            
+            $.each( tree.find('span.fancytree-node'), function( idx, item ){
 
+                var ele = $(item); //.find('span.fancytree-node');
+                ele.css({display: 'block', width:'99%'});         
+
+                ele.find('.fancytree-title').css({display: 'inline-block', width:'90%'}).addClass('truncate');
+
+                if($(item).find('span.fancytree-folder').length==0)
+                {
+                    $(item).addClass('leaves');
+                }
+            });            
+            
+            if(ispublished){
+                res.css({background:'none', border:'none'});
+            }
         }
 
         this.treeviews[groupID] = tree.fancytree("getTree");
@@ -1650,6 +1700,9 @@ $.widget( "heurist.svs_list", {
     this.doSearch(qsearch);
     },*/
 
+    //
+    //
+    //
     doSearchByID: function(svs_ID, query_name){
     
         if(window.hWin.HAPI4.currentUser.usr_SavedSearch && 

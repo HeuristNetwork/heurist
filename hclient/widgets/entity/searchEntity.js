@@ -28,6 +28,10 @@ $.widget( "heurist.searchEntity", {
         filter_title: null,
         filter_group_selected:null,
         filter_groups: null,
+        
+        //request for initial filter
+        initial_filter: null,
+        search_form_visible: true,
 
         use_cache: false,
         

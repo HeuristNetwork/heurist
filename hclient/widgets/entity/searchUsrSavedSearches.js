@@ -44,7 +44,7 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
         
         this.btn_add_record = this.element.find('#btn_add_record');
 
-        if(this.options.edit_mode=='none'){
+        if(this.options.edit_mode=='none' || this.options.search_form_visible==false){
             this.btn_add_record.hide();
         }else{
             this.btn_add_record.css({'min-width':'9m','z-index':2})
@@ -86,12 +86,18 @@ $.widget( "heurist.searchUsrSavedSearches", $.heurist.searchEntity, {
             this._super();
             
             var request = {}
-        
+            
+            if(this.options.initial_filter!=null){
+                request = this.options.initial_filter;
+                if(this.options.search_form_visible){
+                    this.options.initial_filter = null;
+                }
+            }
+                
             if(this.input_search.val()!=''){
                 request['svs_Name'] = this.input_search.val();
             }
             
-       
             if(this.input_search_group.val()>0){
                 request['svs_UGrpID'] = this.input_search_group.val();
             }

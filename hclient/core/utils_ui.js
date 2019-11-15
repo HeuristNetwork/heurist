@@ -2410,7 +2410,7 @@ window.hWin.HEURIST4.ui = {
     // checks wether the appropriate javascript is loaded
     //
     showEntityDialog: function(entityName, options){
-
+        
         entityName = entityName.charAt(0).toUpperCase() + entityName.slice(1); //entityName.capitalize();
                             
         var widgetName = 'manage'+entityName;
