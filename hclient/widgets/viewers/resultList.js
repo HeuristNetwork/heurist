@@ -2229,23 +2229,31 @@ $.widget( "heurist.resultList", {
             /* enable but specify entityName to edit in options */
             dblclick: function(event){ //start edit on dblclick
                 if(!$.isFunction(this.options.renderer)){
-                    var $rdiv = $(event.target);
-                    if(!$rdiv.hasClass('recordDiv')){
-                        $rdiv = $rdiv.parents('.recordDiv');
-                    }
-                    var selected_rec_ID = $rdiv.attr('recid');
+                    
+                    if(window.hWin.HAPI4.has_access()){
+                        
+                        var $rdiv = $(event.target);
+                        if(!$rdiv.hasClass('recordDiv')){
+                            $rdiv = $rdiv.parents('.recordDiv');
+                        }
+                        var selected_rec_ID = $rdiv.attr('recid');
 
-                    event.preventDefault();
+                        event.preventDefault();
+                        
+                        var query = null;
+                        if(this._currentRecordset && this._currentRecordset.length()<1000){
+                            query = 'ids:'+this._currentRecordset.getIds().join(',');
+                        }else{
+                            query = this._query_request;
+                        }
 
-                    var query = null;
-                    if(this._currentRecordset && this._currentRecordset.length()<1000){
-                        query = 'ids:'+this._currentRecordset.getIds().join(',');
+                        window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, null);
+                        //@todo callback to change rectitle    
                     }else{
-                        query = this._query_request;
+                        this._recordDivOnClick(event);
                     }
 
-                    window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, null);
-                    //@todo callback to change rectitle
+                    
 
 
                 }
