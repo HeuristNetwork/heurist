@@ -91,7 +91,9 @@ function hCmsEditing(_options) {
                     
                     //adjust height
                     var itop = $('.mce-top-area').height()>0?$('.mce-top-area').height():68;
-                    $('.mce-edit-area > iframe').height( $('.tinymce-body').height() - itop );
+                    var sheight = $('.tinymce-body').height() - itop;
+                    sheight = ($('.tinymce-body').height() - itop<=100)?'90%':(sheight+'px');
+                    $('.mce-edit-area > iframe').height( sheight );
                 });
                 
                 editor.addButton('customHeuristMedia', {
@@ -141,7 +143,7 @@ function hCmsEditing(_options) {
             __alignButtons();
             
             var bg_color = $('#main-header').css('background');
-console.log('>>>')+bg_color;           
+
             //init main menu in header
             var topmenu = $('#main-menu');
             topmenu.attr('data-heurist-app-id','heurist_Navigation');
@@ -176,7 +178,7 @@ console.log('>>>')+bg_color;
             .appendTo(main_content.parent());
         
         $('<a href="#" id="btn_inline_editor">Edit page content</a>')
-                .appendTo($('body')).addClass('ui-front cms-button')
+                .appendTo($('body')).addClass('ui-front cms-button') //was body > .ent_wrapper:first
                 .click( _editPageContent )
                 .show();
 
@@ -263,7 +265,6 @@ console.log('>>>')+bg_color;
                         
                         //assign content to editor
                         $('.tinymce-body').val($('#main-content').html());
-                        
                         //init widgets 
                         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -396,11 +397,20 @@ console.log('>>>')+bg_color;
             $('#btn_inline_editor3').hide();
             $('#btn_inline_editor4').hide();
         }else{
-            $('#btn_inline_editor').position({my:'right top',at:'right-90 top-15',of:$('#main-content')}).show();
-            $('#btn_inline_editor3').position({my:'right top',at:'right-40 top-15',of:$('#main-content')}).show();
+            var tp = $('#main-header').height()-15;
+            var lp = $('#main-header').width();
+            $('#btn_inline_editor').css({position:'absolute',
+                        top:tp,left:lp-190}).show();
+            $('#btn_inline_editor3').css({position:'absolute',
+                        top:tp,left:lp-40}).show();
+            
+            //$('#btn_inline_editor').position({my:'right top',at:'right-90 top-15',of:$('#main-content')}).show();
+            //$('#btn_inline_editor3').position({my:'right top',at:'right-40 top-15',of:$('#main-content')}).show();
+            
+            
             var ele = $('#main-pagetitle > h2');
             if(ele.length>0){
-                var pos = {my:'left top',at:'right+20 top+2',of:$('#main-pagetitle > h2')};   
+                var pos = {my:'left top', at:'right+20 top+2', of:$('#main-pagetitle > h2')};   
                 $('#btn_inline_editor4').position(pos).show();
             }
         }
@@ -949,7 +959,8 @@ console.log('>>>')+bg_color;
                                 showclear_button: true,
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'Show all searches in these workgroups', rst_DisplayHelpText:'',
+                                    rst_DisplayName: 'Show all searches in these workgroups', 
+                                    rst_DisplayHelpText:'',
                                     rst_FieldConfig: {entity:'sysGroups', csv:true}
                                 },
                                 change:function(){
