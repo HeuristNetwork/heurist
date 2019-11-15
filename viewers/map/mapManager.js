@@ -250,8 +250,8 @@ function hMapManager( _options )
             var append_link = $('<a title="create new map document">',{href:'#'})
                 .html('<span class="ui-icon ui-map-document" style="width:22px">'
 +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
-                +'</span>')
-                .css({height:'14px',float:'right',width: '16px',background: 'none'})
+                +'</span>New map document')
+                .css({height:'14px',width: '100%',background: 'none'})
                 .click(_createNewMapDocument)
                 .appendTo($header);
         }
