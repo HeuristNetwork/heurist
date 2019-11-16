@@ -328,10 +328,14 @@ $.widget( "heurist.editing_input", {
             this.header.hide();
         }      
         
+        //refresh filter for resourse popup 
         var val = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(val)){
-            this.configMode = window.hWin.HEURIST4.util.isJSON(val);
-            if(this.configMode===false) this.configMode = null;
+            val = window.hWin.HEURIST4.util.isJSON(val);
+            if(val!==false){
+                this.configMode.initial_filter = val.initial_filter;
+                this.configMode.search_form_visible = val.search_form_visible;
+            }
         }
     },
     
