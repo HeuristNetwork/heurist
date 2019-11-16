@@ -1340,7 +1340,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
     }else{
         $attrs['id'] = $dt;
         if (array_key_exists($dt, $DTN)) {
-            $attrs['type'] = $DTN[$dt];
+            $attrs['basename'] = $DTN[$dt];
         }
     }
 

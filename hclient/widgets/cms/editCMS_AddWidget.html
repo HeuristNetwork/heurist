@@ -52,14 +52,7 @@
     </div>
 
     <!-- search tree -->    
-    <div class="heurist_SearchTree">
-        <div class="header" style="padding:10px 0.4em"><label>Display searches as:</label></div>
-        <label><input id="heurist_SearchTreeMode1" type="radio" name="searchTreeMode" value="0" checked/>Buttons</label>&nbsp;
-        <label><input id="heurist_SearchTreeMode2" type="radio" name="searchTreeMode" value="1"/>Tree</label>
-        <label><input id="heurist_SearchTreeMode3" type="radio" name="searchTreeMode" value="2"/>Full</label>
-    </div>
-
-    <div class="heurist_SearchTree">
+    <div class="heurist_SearchTree"  style="padding-top:10px">
         <!-- <div class="header"><label>Allowed groups</label></div> -->
         <input name="allowed_UGrpID" type="hidden" value=""/>
         <div id="allowed_UGrpID" style="display:table-row"></div>
@@ -76,6 +69,14 @@
         <input name="init_svsID" type="hidden" value=""/>
         <div id="init_svsID" style="display:table-row"></div>
     </div>
+
+    <div class="heurist_SearchTree">
+        <div class="header" style="padding:10px 0.4em"><label>Display selected searches as:</label></div>
+        <label><input id="heurist_SearchTreeMode1" type="radio" name="searchTreeMode" value="0" checked/>Buttons</label>&nbsp;
+        <label><input id="heurist_SearchTreeMode2" type="radio" name="searchTreeMode" value="1"/>Tree</label>
+        <label><input id="heurist_SearchTreeMode3" type="radio" name="searchTreeMode" value="2"/>Tree of all searches (all groups)</label>
+    </div>
+
     
     <!-- result list -->    
     <div  class="heurist_resultList">

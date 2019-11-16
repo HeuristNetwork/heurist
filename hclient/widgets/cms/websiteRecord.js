@@ -918,48 +918,51 @@ function hCmsEditing(_options) {
                        var ele_rb = dele.find('input[name="searchTreeMode"]')
                         .change(function(e){
                             
-                            var selval = '';
-                            $.each(ele_rb, function(idx, item){
-                                item = $(item);
-                                if(item.is(':checked')){
-                                    selval = item.prop('value');
-                                    return false;
-                                }
-                            });
+                            var selval = __getSearchTreeMode();
                             
                             if(selval==0){
                                 //buttons
-                                dele.find('#allowed_UGrpID').show();
-                                dele.find('#allowed_svsIDs').show();
+                                dele.find('#allowed_UGrpID').editing_input('setDisabled', false);
+                                dele.find('#allowed_svsIDs').editing_input('setDisabled', false);
                             }else if(selval==1){
                                 //tree
-                                dele.find('#allowed_UGrpID').show();
-                                dele.find('#allowed_svsIDs').editing_input('setValue','').hide();
+                                dele.find('#allowed_UGrpID').editing_input('setDisabled', false);
+                                dele.find('#allowed_svsIDs').editing_input('setDisabled', true);
                                 dele.find('input[name="allowed_svsIDs"]').val('');
                             }else{
                                 //full
-                                dele.find('#allowed_UGrpID').editing_input('setValue','').hide();
-                                dele.find('#allowed_svsIDs').editing_input('setValue','').hide();
+                                dele.find('#allowed_UGrpID').editing_input('setDisabled', true);
+                                dele.find('#allowed_svsIDs').editing_input('setDisabled', true);
                                 dele.find('input[name="allowed_UGrpID"]').val('');
                                 dele.find('input[name="allowed_svsIDs"]').val('');
                             }
                             
                         });
+                       var selval = __getSearchTreeMode();
+                       if(!(selval==0 || selval==1 || selval==2)){
+                           selval = 0;
+                           ele_rb.value(0);
+                       }
+                       
                        
                        //visible for buttons and tree mode
                        var ele = dele.find('#allowed_UGrpID');
                        if(!ele.editing_input('instance')){
                            
                             var init_val = dele.find('input[name="allowed_UGrpID"]').val();
+                            if(init_val=='' && selval!=2 && dele.find('input[name="allowed_svsIDs"]').val()==''){
+                                init_val==5;//web search  by default
+                            }
+                            
                             var ed_options = {
                                 recID: -1,
                                 dtID: ele.attr('id'), 
-                                values: [init_val==''?'5':init_val], //web search  by default
+                                values: [init_val], 
                                 readonly: false,
                                 showclear_button: true,
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'Show all searches in these workgroups', 
+                                    rst_DisplayName: 'EITHER Show all searches in these workgroups', 
                                     rst_DisplayHelpText:'',
                                     rst_FieldConfig: {entity:'sysGroups', csv:true}
                                 },
@@ -989,7 +992,7 @@ function hCmsEditing(_options) {
                                 showclear_button: true,
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'Choose specific searches', rst_DisplayHelpText:'',
+                                    rst_DisplayName: 'OR Choose specific searches', rst_DisplayHelpText:'',
                                     rst_FieldConfig: {entity:'usrSavedSearches', csv:true}
                                 },
                                 change:function(){
@@ -1016,7 +1019,7 @@ function hCmsEditing(_options) {
                                 showclear_button: true,
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'Initial search', rst_DisplayHelpText:'',
+                                    rst_DisplayName: 'Trigger this search on page load', rst_DisplayHelpText:'',
                                     rst_FieldConfig: {entity:'usrSavedSearches', csv:false} 
                                 }
                             };
@@ -1027,7 +1030,21 @@ function hCmsEditing(_options) {
                             ele.find('.header').css({'width':'150px','text-align':'right'});
                        
                        }
-
+                       
+                       
+                       function __getSearchTreeMode(){
+                            var ele_rb = dele.find('input[name="searchTreeMode"]')
+                            var selval = '';
+                            $.each(ele_rb, function(idx, item){
+                                item = $(item);
+                                if(item.is(':checked')){
+                                    selval = item.prop('value');
+                                    return false;
+                                }
+                            });
+                            return selval
+                       }
+                       
                        function __restFilterForInitSearch(){
                            
                            var ifilter = null; 
