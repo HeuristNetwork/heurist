@@ -27,6 +27,7 @@ $.widget( "heurist.mainMenu", {
     
     menues:{},
     cms_home_records_count:0,
+    sMsgCmsPrivate:'',
 
     _current_query_string:'',
 
@@ -264,16 +265,23 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             var request = {
                     'a'       : 'counts',
                     'entity'  : 'defRecTypes',
-                    'mode'    : 'record_count',
-                    'ugr_ID'  : -1,
-                    'rty_ID'  : RT_CMS_HOME
+                    'mode'    : 'cms_record_count'
+                    //'ugr_ID'  : -1,
+                    //'rty_ID'  : RT_CMS_HOME
                     };
             var that = this;        
                                     
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        that.cms_home_records_count = response.data[RT_CMS_HOME];
+                        that.cms_home_records_count = response.data['all'];
+                        that.sMsgCmsPrivate = (response.data['private']>0)?
+                            ('<div class="ui-state-error" style="margin-top:10px">Database have '
+                            + response.data['private']+' non public cms records. '
+                            +'Please make them public to avoid issues for end users</div>'):'';
+
+
+                        
                         if($.isFunction(callback)) callback(that);
                     }
                 });
@@ -661,7 +669,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(!action_passworded && !window.hWin.HAPI4.has_access(2)) action_passworded = item.attr('data-pwd-nonowner');
         var href = item.attr('data-link');
         var target = item.attr('target');
-
+        
         //  -1 no verification
         //  0 logged (DEFAULT)
         //  groupid  - admin of group  
@@ -698,11 +706,18 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
                 
                 that._getCountWebSiteRecords(function(){
+                    
                     if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
+                        
                         sMsg = 'You already have '+
                             ((that.cms_home_records_count==1)?'a website'
                                     :(that.cms_home_records_count+' websites'))+
                             '. Are you sure you want to create an additional site?';
+                            
+                        if(that.sMsgCmsPrivate!=''){
+                            sMsg = sMsg + that.sMsgCmsPrivate;    
+                        }
+                            
                     }else{
                         sMsg = 'Are you sure you want to create a site?';
                     }
@@ -720,9 +735,18 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
                 that._getCountWebSiteRecords(function(){
                     if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
-                            that._select_CMS_Home( false );
+                        
+                        if(that.sMsgCmsPrivate!=''){
+                            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
+                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( false ); }});
+                        }else{
+                            that._select_CMS_Home( false );    
+                        }
+                        
+                        
+                        
                     }else{
-                            window.hWin.HEURIST4.msg.showMsgDlg(
+                        window.hWin.HEURIST4.msg.showMsgDlg(
                                 'New website will be created. Continue?',
                                 function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
                     }
@@ -733,9 +757,16 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
                 that._getCountWebSiteRecords(function(){
                     if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
+                        
+                        if(that.sMsgCmsPrivate!=''){
+                            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
+                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( true ); }});
+                        }else{
                             that._select_CMS_Home( true );
+                        }
+                        
                     }else{
-                            window.hWin.HEURIST4.msg.showMsgDlg(
+                        window.hWin.HEURIST4.msg.showMsgDlg(
                                 'New website will be created. Continue?',
                                 function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
                     }

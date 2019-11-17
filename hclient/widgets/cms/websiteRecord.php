@@ -55,7 +55,7 @@ if(!($rec_id>0)) $rec_id = @$_REQUEST['id'];
 if(!($rec_id>0))
 {
     $rec_id = mysql__select_value($mysqli, 'select rec_ID from Records '
-    .' WHERE rec_FlagTemporary=0 AND rec_NonOwnerVisibility!="hidden" '
+    .' WHERE rec_FlagTemporary=0 AND rec_NonOwnerVisibility="public" '
     .' AND rec_RecTypeID='.RT_CMS_HOME.' limit 1');
     
     if(!($rec_id>0)){

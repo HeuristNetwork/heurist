@@ -453,6 +453,27 @@ WHERE
             $query = $query . ' WHERE '.$where . ' GROUP BY r0.rec_RecTypeID'; // ORDER BY cnt DESC
           
            $res = mysql__select_assoc2($this->system->get_mysqli(), $query);
+           
+        }else if(@$this->data['mode']=='cms_record_count'){
+            
+            $this->system->defineConstant('RT_CMS_HOME');
+            $this->system->defineConstant('RT_CMS_MENU');
+            
+            $query = 'SELECT count(r0.rec_ID) as cnt '
+                .'FROM Records r0 WHERE (not r0.rec_FlagTemporary) '
+                .'AND (r0.rec_RecTypeID='.RT_CMS_HOME.')';
+            
+            $res = mysql__select_value($this->system->get_mysqli(), $query);
+            
+            $query = 'SELECT count(r0.rec_ID) as cnt '
+                .'FROM Records r0 WHERE (not r0.rec_FlagTemporary) '
+                .'AND (r0.rec_NonOwnerVisibility!="public") '
+                .'AND (r0.rec_RecTypeID in ('.RT_CMS_HOME.','.RT_CMS_MENU.'))';
+
+            $res2 = mysql__select_value($this->system->get_mysqli(), $query);
+            
+            $res = array('all'=>$res, 'private'=>$res2);
+            
         }
         
         return $res;
