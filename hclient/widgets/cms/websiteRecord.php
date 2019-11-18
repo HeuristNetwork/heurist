@@ -6,9 +6,9 @@
     *  Parameters
     *  recID - home page record (99-51) or web page (99-53)
     *          if is is not defined it takes first record of type 'Home page'
-    *  field - if defined it is assumed web page and it returns only DT_EXTENDED_DESCRIPTION
+    *  field - if defined it is assumed web page and it returns value of specified field (by default DT_EXTENDED_DESCRIPTION)
     * 
-    * if home page has defined template file it is loaded as body, otherwise default template
+    * if home page has defined as template file it is loaded as body, otherwise default template
     * that includes header with main-logo, main-title, main-menu and 
     * main-content where content of particular page will be loaded
     *  
@@ -30,6 +30,73 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+    
+//Documentation    
+/* Documentation
+
+Default layout for Heurist CMS web site consists of 3 divs with absolute positions
+.ent_wrapper
+    .ent_header   #main_header
+    .ent_content_full  #main-content-container
+
+Main setting for these elements is height of header. To change it set
+.ent_header{height:180px} .ent_content_full{top:190px}
+
+HEADER:
+    
+#main_header.ent_header is hardcoded in websiteRecord.php. It has the following elements
+    #main-logo      - content defined via field "Site logo" (99-51.2-38). On click it reloads main page
+    #main-logo-alt  - content defined via field "Supplementary logo image" (99-51.2-926)
+    #main-title>h2  - field "Website title" (99-51.2-1)
+    #main-host      - information about host and heurist. Content defined in Heurist settings
+    #main-menu      - generated based on linked Menu/Page records (99-52)
+    #main-pagetitle>.webpageheading - loaded page title "Menu label" (99-52.2-1)
+        
+You may overwrite default styles for these elements in field "Website CSS" (99-51.99-46).
+Background image for #main_header is defiend in field "Banner image" (99-51.99-951).
+
+CONTENT:
+#main-content-container.ent_content_full cosist of one element #main-content
+
+    This element is emptied and reloaded for every page of website. Its content is 
+    arbitrary and defined via CMS editor or direcееly via record editor in field
+    "Website home page content"/"HTML content". (2-4)
+
+    After load, Heurist invokes
+    window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" )
+    This method replaces all div elements with attribute data-heurist-app-id to appropriate
+    Heurist widgets (search, map, result list etc)
+    
+    There are 2 fields per menu/page record "target css" and "target element". They are reserved 
+    for future use. At the moment page content is always loaded into #main-content and applied 
+    general Heurist color scheme unless the style is overdefined for particular 
+    widget.
+        
+Content of website can be defined as custom smarty template in field 99-51.2-922.
+In this case designer has to define at least one element with id #main-content.
+Element with this name will be used as layout container for widget initialization.
+All other elements (#main-xxx) are optional.
+
+
+INITIALIZATION workflow:
+On server side:
+1. It loads Home page record 
+2. If there is DT_POPUP_TEMPLATE field, it executes smarty template, otherwise
+page html structure and cotent of #main-header is generated in websiteRecord.php
+
+On client side
+1. HAPI initialization, DB defintions load -> onHapiInit -> onPageInit
+2. onPageInit: init LayoutMgr, init main menu in #main-menu element
+3. loadHomePageContent(pageid): Loads content of page into #main-content and 
+   calls widget initialization width LayoutMgr.appInitFromContainer
+4. If database configration permits only:
+   After widgets initialization it loads javascript (field 2-927) and incapsulate 
+   this code into afterPageLoad function. The purpose of this script is additional 
+   configuration of widgets on page (that can not be set via cms editor) - mainly
+   addition of event listeners.
+    
+*/    
+    
 if(!defined('PDIR')) define('PDIR','../../../');  //need for proper path to js and css    
 
 
@@ -285,7 +352,7 @@ _time_debug = new Date().getTime() / 1000;
         //init main menu
         //add menu definitions to main-menu
         var bg_color = $('#main-header').css('background');
-console.log('>>>')+bg_color;           
+//console.log('>>>')+bg_color;           
 
         var topmenu = $('#main-menu');
         topmenu.attr('data-heurist-app-id','heurist_Navigation');
@@ -298,8 +365,9 @@ console.log('>>>')+bg_color;
             }} );
             
         $('#main-menu').show();
-        //load home page content
-        $( "#main-logo").click(); 
+        //load home page content $( "#main-logo").click(); 
+        loadHomePageContent(<?php print $rec_id?>);
+        
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
         
         var itop = $('#main-header').height(); //[0].scrollHeight;
@@ -337,7 +405,7 @@ function loadHomePageContent(pageid){
 }
 ?>
 <script>
-var page_scripts = {}; //pageid:functionname
+var page_scripts = {}; //pageid:functionname   cache to avoid call server every time on page load 
 //
 // Executes custom javascript defined in field DT_CMS_SCRIPT
 //
@@ -416,7 +484,7 @@ _time_debug = new Date().getTime() / 1000;
         
         onPageInit(success);
         
-        if(window.hWin.HAPI4.sysinfo.host_logo){
+        if(window.hWin.HAPI4.sysinfo.host_logo && $('#host_info').length>0){
             
             $('<div style="height:40px;background: white;padding-left:4px;float:right">'
                 +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
@@ -471,12 +539,14 @@ $(document).ready(function() {
 body{
     /* A11 font-size:0.7em;*/
 }
+/* not used */
 #main-foooter{
     font-size:0.8em;
     height:20px;
     padding: 5px 20px;
     border-top:1px solid rgb(112,146,190);
 }
+/* page (menu) title it is added to main-pagetitle */
 .webpageheading {
     font-size:1.5em;
     color:black;
