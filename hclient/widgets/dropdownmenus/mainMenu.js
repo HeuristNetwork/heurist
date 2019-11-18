@@ -275,12 +275,22 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         that.cms_home_records_count = response.data['all'];
-                        that.sMsgCmsPrivate = (response.data['private']>0)?
-                            ('<div class="ui-state-error" style="margin-top:10px">Database have '
-                            + response.data['private']+' non public cms records. '
-                            +'Please make them public to avoid issues for end users</div>'):'';
+                        var aPriv = response.data['private'];
 
-
+                        if(aPriv.length>0){
+                            that.sMsgCmsPrivate = 
+                            '<div class="ui-state-error" style="margin-top:10px;padding:4px">'
+                            +'This database has '+aPriv.length
+                            +' CMS records which are hidden from public view - '
+                            +'parts of your website(s) will not be visible to visitors '
+                            +'who are not logged in to the database.<br><br>'
+                            +'<a target="_blank" href="'+window.hWin.HAPI4.baseURL
+                            +'?db='+window.hWin.HAPI4.database+'&q=ids:'+aPriv.join(',')+'">Click here</a>'
+                            +' to view these records and set their visibility '
+                            +'to Public (use Share > Ownership/Visibility)';
+                        }else{
+                            that.sMsgCmsPrivate = '';
+                        }
                         
                         if($.isFunction(callback)) callback(that);
                     }

@@ -465,12 +465,12 @@ WHERE
             
             $res = mysql__select_value($this->system->get_mysqli(), $query);
             
-            $query = 'SELECT count(r0.rec_ID) as cnt '
+            $query = 'SELECT r0.rec_ID '
                 .'FROM Records r0 WHERE (not r0.rec_FlagTemporary) '
                 .'AND (r0.rec_NonOwnerVisibility!="public") '
                 .'AND (r0.rec_RecTypeID in ('.RT_CMS_HOME.','.RT_CMS_MENU.'))';
 
-            $res2 = mysql__select_value($this->system->get_mysqli(), $query);
+            $res2 = mysql__select_list2($this->system->get_mysqli(), $query);
             
             $res = array('all'=>$res, 'private'=>$res2);
             
