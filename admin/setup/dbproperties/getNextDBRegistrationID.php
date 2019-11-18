@@ -75,7 +75,8 @@ $indexdb_user_id = 0; // Flags problem if not reset
 
 // Get parameters passed from registration request
 // @ preceding $_REQUEST avoids errors, sets Null if parameter missing
-$serverURL = strtolower($_REQUEST["serverURL"]);
+$serverURL = $_REQUEST["serverURL"];
+$serverURL_lc = strtolower($_REQUEST["serverURL"]);
 $dbReg = $_REQUEST["dbReg"];
 $dbTitle = $_REQUEST["dbTitle"];
 $dbVersion = @$_REQUEST["dbVer"];
@@ -93,11 +94,12 @@ if (!$serverURL || !$dbReg || !$dbTitle || !$usrEmail || !$usrName || !$usrFirst
     return;
 }
 
-if(strpos($serverURL,'http://')===false && strpos($serverURL,'https://')===false){
+if(strpos($serverURL_lc,'http://')===false && strpos($serverURL_lc,'https://')===false){
     $serverURL = 'http://'.$serverURL;
+    $serverURL_lc = strtolower($serverURL);
 }
 
-if(strpos($serverURL, '//localhost')>0 ||  strpos($serverURL, '//127.0.0.1')>0){
+if(strpos($serverURL_lc, '//localhost')>0 ||  strpos($serverURL_lc, '//127.0.0.1')>0){
     echo '0,Impossible to register database from local server '.$serverURL;
     return;
 }
@@ -106,8 +108,8 @@ define("HEURIST_DB_DESCRIPTOR_RECTYPE", 22); // the record type for database (co
 
 if($newid>0){ 
 
-    if(!(strpos($serverURL, HEURIST_MAIN_SERVER)===0
-        || strpos($serverURL, 'http://heurist.sydney.edu.au')===0)){ 
+    if(!(strpos($serverURL_lc, HEURIST_MAIN_SERVER)===0
+        || strpos($serverURL_lc, 'http://heurist.sydney.edu.au')===0)){ 
     
         echo '0,It is possible to assign arbitrary ID for databases on heurist servers only';
         return;
@@ -189,7 +191,7 @@ if(!($indexdb_user_id>0)) { // did not find the user, create a new one and pass 
 // TODO: Would be good to have a recaptcha style challenge otherwise can be called repeatedly
 // with slight URL variations to spawn multiple registrations of dummy databases
 
-$dbID = mysql__select_value($mysqli, "select rec_ID from Records where `rec_URL`='$serverURL'");
+$dbID = mysql__select_value($mysqli, "select rec_ID from Records where lower(rec_URL)='$serverURL_lc'");
 
 if($dbID>0) { 
     
