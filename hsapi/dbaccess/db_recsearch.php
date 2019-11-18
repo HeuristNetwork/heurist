@@ -1936,7 +1936,7 @@ $loop_cnt++;
                 continue;
             }
 
-            if (! @$details[$rd["w"]]) $details[$rd["dtl_DetailTypeID"]] = array();
+            if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
 
             $detailValue = null;
 
