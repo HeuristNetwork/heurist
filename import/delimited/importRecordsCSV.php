@@ -113,7 +113,7 @@ if(!$format) $format='csv';
                 padding-top:0.5em;
                 margin-left:2em;
                 position: absolute;
-                top: 150px;
+                top: 180px;
             }
         </style>
     </head>
@@ -398,11 +398,11 @@ If you have missing data for Required fields, you may find it convenient to set 
                     title="Return to the upload screen to select a new delimited file to upload to the server for processing">
                     Back to start</div>
                     
-                <div style="font-size:1.1em;padding-top:12px">
-                    Importing: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
+                <div style="font-size:1.1em;padding: 7px 10px;border: 2px blue solid;margin: 8px 0;">
+                    Target entity type: <h2 id="lblPrimaryRecordType" style="display: inline-block;font-weight: bold;"></h2>
                     <a href="#" id="btnSetPrimaryRecType"
                                 title="Change primary record type"
-                    style="margin-left:10px;font-size:0.9em;text-decoration:none;color:gray;font-style:italic">change</a>        
+                    style="margin-left:10px;font-size:0.9em;text-decoration:none;color:blue;font-style:italic">change target</a>        
                                 <!-- display:none; todo restore this feature -->
                 </div>    
             </div>        
@@ -421,7 +421,7 @@ If you have missing data for Required fields, you may find it convenient to set 
     
         </div>
 
-        <fieldset style="position: absolute;left: 0;right: 0;top:60px;">
+        <fieldset style="position: absolute;left: 0;right: 0;top:80px;">
         <div>
             <div class="header optional" style="min-width: 80px; width: 80px;">
                 <label style="vertical-align: top;">Importing:</label><br>
@@ -444,7 +444,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         <img id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none">        
         <img id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:16px;display:none">        
         
-        <div style="padding:1em 0 1em 1em;position: absolute;top:110;" id="divheader">
+        <div style="padding:1em 0 1em 1em;position: absolute;top:130;" id="divheader">
             
             <div  id="divActionsMatching" class="action_buttons step3" style="padding-left: 35px">
                 

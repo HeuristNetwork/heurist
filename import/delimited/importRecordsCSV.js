@@ -1759,13 +1759,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         _redrawArrow();
         
-        var h = 262;
+        var h = 300
         if(currentStep==3){
-            h = 262;
-        }else if(currentStep==4){
-            h = 290;
-        }else if(currentStep==5){
-            h = 362;
+            h = 300
+        }else if(currentStep==4){ //+28
+            h = 328
+        }else if(currentStep==5){ //+100
+            h = 400
         }
 
         $('#divStep3 > .ent_header').height(h);
