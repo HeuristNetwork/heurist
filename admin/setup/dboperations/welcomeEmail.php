@@ -44,7 +44,7 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
         .$database_name.' by '.$fullName.' ['.$user_record['ugr_eMail'].']'
         .(($source_database!=null) ?$source_database:'');
 
-    $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null); 
+    //$rv = sendEmail(HEURIST_MAIL_TO_ADMIN, $email_title, $email_text, null); 
 
     //send an email with attachment
     $message = file_get_contents(dirname(__FILE__).'/welcomeEmail.html');
@@ -55,6 +55,8 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     $message =  str_replace('##GivenNames##',$user_record['ugr_FirstName'],$message);
     $message =  str_replace('##FamilyName##',$user_record['ugr_LastName'],$message);
     $message =  str_replace('##DBURL##','<pre>'.HEURIST_BASE_URL."?db=".$database_name.'</pre>',$message);
+    $message =  str_replace('##Organisation##',$user_record['ugr_Organisation'],$message);
+    $message =  str_replace('##Interests##',$user_record['ugr_Interests'],$message);
     
     if(strtolower(substr($user_record['ugr_eMail'], -3)) === '.fr'){
         $message =  str_replace('&lt;FrenchNoteIfFrance&gt;',
@@ -67,9 +69,10 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     $email = new PHPMailer();
     $email->isHTML(true); 
     $email->SetFrom('no-reply@'.HEURIST_SERVER_NAME, 'Heurist');
-    $email->Subject   = 'Getting up to speed with your Heurist database ('.$database_name.')';
+    $email->Subject   = (($source_database!=null)?'CloneDB: ':'NewDB: ')
+                    .'Getting up to speed with your Heurist database ('.$database_name.')';
     $email->Body      = $message;
-    $email->AddAddress( HEURIST_MAIL_TO_ADMIN );         
+    $email->AddAddress( HEURIST_MAIL_TO_ADMIN ); //         
     $email->addAttachment(dirname(__FILE__).'/Heurist Welcome attachment.pdf');
    
     try{

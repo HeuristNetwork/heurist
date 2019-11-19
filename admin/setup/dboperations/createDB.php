@@ -149,7 +149,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         }else if($reg_url){ //load db structure from registered database - NOT USED
             
             
-        }else if(true){ //set to false to debug workflow without actual db creation
+        }else if(true)  { //set to false to debug workflow without actual db creation
             
             $templateFileName = HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt";
             $templateFoldersContent = 'NOT DEFINED'; //it is used for tempalate database only
