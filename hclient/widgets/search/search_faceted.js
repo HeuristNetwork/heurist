@@ -236,6 +236,9 @@ $.widget( "heurist.search_faceted", {
                 var w = that.element.width();
                 
                 that.element.find('div.facet-item > a > span.truncate').width(w-100); //was 80
+                
+                that.btn_reset.button({showLabel:(w>250)});
+                that.btn_close.button({showLabel:(w>250)});
                   
             }else {
 

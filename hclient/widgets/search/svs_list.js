@@ -52,7 +52,11 @@ $.widget( "heurist.svs_list", {
     // the constructor
     // create filter+button and div for tree
     _create: function() {
-        
+
+        var tab_td = this.element.parents('td');
+        if(tab_td.length>0){
+            $(tab_td[0]).css('height','1px');
+        }
         
         if(this.options.allowed_svsIDs && !$.isArray(this.options.allowed_svsIDs)){
             this.options.allowed_svsIDs = this.options.allowed_svsIDs.split(',');
@@ -702,6 +706,7 @@ $.widget( "heurist.svs_list", {
 
         this.accordeon.hide();
         this.accordeon.empty();
+        this.search_tree.css('overflow','hidden');
         
         
         var i, svsIDs = Object.keys(this.loaded_saved_searches),
@@ -710,7 +715,7 @@ $.widget( "heurist.svs_list", {
             
         if(svsIDs.length>0){ 
             
-            $('<h4 style="padding:20px 0px;margin:0">Focussed searches</h4>').appendTo(this.accordeon);
+            //$('<h4 style="padding:20px 0px;margin:0">Focussed searches</h4>').appendTo(this.accordeon);
 
             for (i=0; i<svsIDs.length; i++)
             {
