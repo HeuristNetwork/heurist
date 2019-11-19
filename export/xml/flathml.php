@@ -1221,7 +1221,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
             $trmID = $attrs['termID'];
 
-            $attrs['type'] = $TL[$trmID]['trm_Label'];
+            $attrs['term'] = $TL[$trmID]['trm_Label'];
             $attrs['termConceptID'] = ConceptCode::getTermConceptID($trmID);
             if ($TL[$trmID]['trm_Code']) {
                 $attrs['code'] = $TL[$trmID]['trm_Code'];

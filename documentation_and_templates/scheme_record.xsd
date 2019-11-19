@@ -155,7 +155,7 @@ elementFormDefault="qualified">
                                                     <xs:simpleContent>
                                                         <xs:extension base="xs:integer">                                                
                                                             <xs:attribute name="useInverse" type="xs:boolean"/>          
-                                                            <xs:attribute name="type" type="xs:string"/>          
+                                                            <xs:attribute name="term" type="xs:string"/>          
                                                             <xs:attribute name="termID" type="xs:nonNegativeInteger"/>          
                                                             <xs:attribute name="termConceptID" type="xs:string"/>          
                                                             <xs:attribute name="relatedRecordID" type="xs:nonNegativeInteger"/>          
