@@ -58,6 +58,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }else{
                 that.element.find('.access-hidden').show();    
             }
+            that._onRecordScopeChange();
             
         });
 
@@ -159,6 +160,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     _createGroupSelectorElement: function(input_id, init_value){
         
         if(window.hWin.HEURIST4.util.isnull(init_value)) init_value = '';
+        
+        var that = this;
 
         var ed_options = {
             recID: -1,
@@ -172,7 +175,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 dty_Type:"resource",
                 rst_DisplayName:'Select Groups:', rst_DisplayHelpText:'',
                 rst_FieldConfig: {entity:'sysGroups', csv:true}
-            }
+            },
+            change: function(){ that._onRecordScopeChange(); }
             //change:_onAddRecordChange
         };
 
