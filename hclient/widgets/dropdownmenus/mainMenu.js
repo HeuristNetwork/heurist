@@ -775,10 +775,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             that._select_CMS_Home( true );
                         }
                         
-                    }else{
+                    }else if( window.hWin.HAPI4.is_admin() ){
                         window.hWin.HEURIST4.msg.showMsgDlg(
                                 'New website will be created. Continue?',
                                 function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgFlash('No websites defined',2000);
                     }
                 });
                 
