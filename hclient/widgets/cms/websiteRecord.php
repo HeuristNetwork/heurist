@@ -50,22 +50,22 @@ HEADER:
     #main-title>h2  - field "Website title" (99-51.2-1)
     #main-host      - information about host and heurist. Content defined in Heurist settings
     #main-menu      - generated based on linked Menu/Page records (99-52)
-    #main-pagetitle>.webpageheading - loaded page title "Menu label" (99-52.2-1)
+    #main-pagetitle>.webpageheading - loaded Page title "Menu label" (99-52.2-1)
         
 You may overwrite default styles for these elements in field "Website CSS" (99-51.99-46).
 Background image for #main_header is defiend in field "Banner image" (99-51.99-951).
 
 CONTENT:
-#main-content-container.ent_content_full cosist of one element #main-content
+#main-content-container.ent_content_full cosists of sole element #main-content
 
     This element is emptied and reloaded for every page of website. Its content is 
-    arbitrary and defined via CMS editor or direcееly via record editor in field
+    arbitrary and defined via CMS editor or directly via record editor in field
     "Website home page content"/"HTML content". (2-4)
 
     After load, Heurist invokes
     window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" )
-    This method replaces all div elements with attribute data-heurist-app-id to appropriate
-    Heurist widgets (search, map, result list etc)
+    This method replaces all div elements with attribute "data-heurist-app-id" to 
+    the appropriate Heurist widgets (search, map, result list etc)
     
     There are 2 fields per menu/page record "target css" and "target element". They are reserved 
     for future use. At the moment page content is always loaded into #main-content and applied 
@@ -73,7 +73,7 @@ CONTENT:
     widget.
         
 Content of website can be defined as custom smarty template in field 99-51.2-922.
-In this case designer has to define at least one element with id #main-content.
+In this case website designer has to define at least one element with id #main-content.
 Element with this name will be used as layout container for widget initialization.
 All other elements (#main-xxx) are optional.
 
@@ -199,7 +199,11 @@ if(defined('DT_CMS_BANNER')) $image_banner = __getFile($rec, DT_CMS_BANNER, null
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 
+//custom styles - mainly to override positions/visibility for #main-xxx elements
 $site_css = __getValue($rec, DT_CMS_CSS);
+
+//color scheme for website
+$site_colors = __getValue($rec, DT_SYMBOLOGY);
 
 //
 // returns link to uploaded file
@@ -486,9 +490,9 @@ _time_debug = new Date().getTime() / 1000;
         
         if(window.hWin.HAPI4.sysinfo.host_logo && $('#host_info').length>0){
             
-            $('<div style="height:40px;background: white;padding-left:4px;float:right">'
+            $('<div style="height:40px;padding-left:4px;float:right">'  //background: white;
                 +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
-                +'" target="_blank" style="text-decoration: none;color:black;">'
+                +'" target="_blank" style="text-decoration:none;color:black;">'
                         +'<label>hosted by: </label>'
                         +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
                         +'" height="40" align="center"></a></div>')
@@ -549,7 +553,7 @@ body{
 /* page (menu) title it is added to main-pagetitle */
 .webpageheading {
     font-size:1.5em;
-    color:black;
+    /*color:black;*/
     position:absolute;
     left:10;
     margin: 0;
@@ -576,7 +580,7 @@ body{
     bottom: 0;
     left: 0;
     right: 0;
-    background: white;
+    /*background: white;*/
     min-height: 19px;
 }
 /*
@@ -606,6 +610,7 @@ div.coverall-div {
 }
 <?php        
 }
+//style from field DT_CMS_CSS of home record 
 if($site_css!=null){
     print $site_css;
 }
@@ -642,7 +647,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
 ?>
 
     <div class="ent_wrapper">
-    <div id="main-header" class="ent_header" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\');background-repeat: repeat-x;background-size:auto 170px;"':'' ?>>
+    <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\');background-repeat: repeat-x;background-size:auto 170px;"':'' ?>>
     
 	    <div style="float:left;min-height:80px;" id="main-logo">
             <a href="#" style="text-decoration:none;">
@@ -657,14 +662,14 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
             :'';?>
         
         <div id="main-title" style="float:left;padding-left:20px;vertical-align:middle;">
-            <h2 style="font-size:1.7em;color:black"><?php print __getValue($rec, DT_NAME);?></h2>
+            <h2 style="font-size:1.7em;"><?php print __getValue($rec, DT_NAME);?></h2>
         </div>
         
         <div id="main-host" style="float:right;margin-top: 15px">
             <div id="host_info" style="float:right;line-height:38px;height:40px;margin-right: 15px;">
             </div>
-            <div style="float:right;padding:0 10px;background: white;height:40px;line-height: 38px;"> 
-            <a href="http://HeuristNetwork.org" target="_blank" style="text-decoration:none;color:black;"
+            <div style="float:right;padding:0 10px;height:40px;line-height: 38px;">  <!-- background: white; color:black;-->
+            <a href="http://HeuristNetwork.org" target="_blank" style="text-decoration:none;"   
             title="This website is generated by Heurist, an academic knowledge management system developed at the University of Sydney Faculty of Arts and Social Sciences under the direction of Dr Ian Johnson, chief programmer Artem Osmakov.">
                 Powered by <img src="<?php echo HEURIST_BASE_URL ?>hclient/assets/h4_icon_16x16.png" style="vertical-align:sub"> Heurist
             </a> 
@@ -683,9 +688,9 @@ if(!$edit_Available && $system->is_member(2)){
         .'style="position:absolute;right:40px; top:100px;" class="cms-button">Web site editor</a>';
 }
     ?>  
-        <div id="main-pagetitle">loading...</div>       
+        <div id="main-pagetitle" class="ui-heurist-bg-light">loading...</div>       
     </div>
-    <div class="ent_content_full" style="top:190px;padding: 5px;" id="main-content-container">
+    <div class="ent_content_full ui-heurist-bg-light" style="top:190px;padding: 5px;" id="main-content-container">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" data-viewonly="<?php print ($hasAccess)?0:1;?>">
         </div>
     </div>

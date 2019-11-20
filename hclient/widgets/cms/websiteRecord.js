@@ -865,16 +865,16 @@ function hCmsEditing(_options) {
                        s = 'background:white;\nposition:relative;\n';
 
                        if(val=='heurist_Search'){
-                            s = s + 'border:0px solid gray;\n'
-                            s = s + 'height:50px;\nwidth:400px;';        
+                            s = s + 'border:0px solid gray;'
+                            s = s + '\nheight:50px;\nwidth:400px;';        
                        }else {
                            s = s + 'border:1px solid gray;'
                            if(val=='heurist_Navigation'){
-                                s = s + 'height:50px;\nwidth:100%;';        
+                                s = s + '\nheight:50px;\nwidth:100%;';        
                            }else if(val=='heurist_SearchTree'){
-                                s = s + 'height:100%;\nwidth:300px;';        
+                                s = s + '\nheight:100%;\nwidth:300px;';        
                            }else{
-                                s = s + 'height:600px;\nwidth:100%';        
+                                s = s + '\nheight:600px;\nwidth:100%';        
                            }
                        }
                        $dlg.find('#widgetCss').val(s);

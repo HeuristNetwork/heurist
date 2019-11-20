@@ -36,59 +36,73 @@ Admin section/smarty editor - use H3 styles from admin/global.css
 */
 require_once(dirname(__FILE__)."/../../hsapi/System.php");
 
-if(!isset($system)){
+// arbitrary color scheme defined in script that includes this one
+// usage: websiteRecord.php takes color scheme from field of CMS_HOME record
+if(isset($site_colors) && $site_colors!=null){ 
+    
+    $ut = json_decode($site_colors, true);    
+    
+}else{
 
-    // init main system class
-    $system = new System();
+    if(!isset($system)){
 
-    if(@$_REQUEST['db']){
-        //if database is defined then connect to given database
-        $system->init(@$_REQUEST['db']);
+        // init main system class
+        $system = new System();
+
+        if(@$_REQUEST['db']){
+            //if database is defined then connect to given database
+            $system->init(@$_REQUEST['db']);
+        }
+    }
+    if($system->is_inited()){
+        $user = $system->getCurrentUser();
+        $ut = @$user['ugr_Preferences']['custom_theme'];
+        if($ut!=null){
+            $ut = json_decode($ut, true);    
+        }
     }
 }
-if($system->is_inited()){
-    $user = $system->getCurrentUser();
-    $ut = @$user['ugr_Preferences']['custom_theme'];
-    if($ut!=null){
-        $ut = json_decode($ut, true);    
-    }
-}
+
 if(!isset($ut) || !is_array($ut)){
     $ut = array();    
 }
 
 $def_ut = array(
+//main scheme
 'cd_bg'=>'#e0dfe0',
 'cl_bg'=>'#ffffff',
 'cd_input'=>'#F4F2F4',
 'cd_color'=>'#333333',
 'cd_input'=>'#F4F2F4',
 'cd_border'=>'#95A7B7',
-
+//alt scheme
 'ca_bg'=>'#364050',
 'ca_color'=>'#ffffff',
 'ca_input'=>'#536077',
-
+//editor
 'ce_bg' =>'#ECF1FB',
 'ce_color'=>'#6A7C99',
 'ce_input'=>'#ffffff',
 'ce_helper'=>'#999999',
 'ce_readonly'=>'#999999',
 'ce_mandatory'=>'#CC0000',
-
+//clickable default
 'cd_corner'=>'0',
 
 'sd_color' =>'#555555',
 'sd_bg'    =>'#f2f2f2',
 
+//clickable hover
 'sh_border' =>'#999999',
 'sh_color'  =>'#2b2b2b',
 'sh_bg'     =>'#95A7B7',
 
+//clickable active
 'sa_border' =>'#aaaaaa',
 'sa_bg'     =>'#95A7B7',
 'sa_color'  =>'#212121', 
 
+//clickable pressed
 'sp_border' =>'#003eff', 
 'sp_color'  =>'#ffffff', 
 'sp_bg'     =>'#9CC4D9'
@@ -123,6 +137,7 @@ textarea.ui-widget-content, input.ui-widget-content, select.ui-widget-content{
 }
 .ui-heurist-bg-light{
     background-color: <?php uout('cl_bg', '#ffffff');?> !important;
+    color: <?php uout('cd_color', '#333333');?>;
 }
 /* BORDERS, HEADERS AND DIALOG TITLE */ 
 .ui-dialog {
