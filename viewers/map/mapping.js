@@ -116,7 +116,9 @@ $.widget( "heurist.mapping", {
         isEditAllowed: true,
         isPublished: false,
         
-        map_rollover: false
+        map_rollover: false,
+        
+        zoomToPointInKM: 5
     },
     
     //reference to google or leaflet map
@@ -1274,7 +1276,7 @@ $.widget( "heurist.mapping", {
                                     $(evt.target).siblings().removeClass('selected');
                                     $(evt.target).addClass('selected');
                                     var layer = selected_layers[leaflet_id];
-                                    that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight
+                                    that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight from popup
                                 }
                             }});
                             
@@ -1499,6 +1501,7 @@ $.widget( "heurist.mapping", {
     
     //
     // triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
+    // is_external - true - public call (from app_timemap for example)
     //    
     setFeatureSelection: function( _selection, is_external ){
         var that = this;
@@ -1541,6 +1544,12 @@ $.widget( "heurist.mapping", {
             this.vistimeline.timeline('setSelection', this.selected_rec_ids);
         }
         
+        //center (and zoom) on map
+        console.log('selected '+this.selected_rec_ids.length+' markers '+this.highlightedMarkers.length);
+        if (is_external===true){
+            this.zoomToSelection();        
+        }
+        
     },
     
     //
@@ -1553,6 +1562,8 @@ $.widget( "heurist.mapping", {
         }
         
         var that = this, bounds = [], bnd;
+        
+        var useRuler = (_selection.length==1);
     
         that.nativemap.eachLayer(function(top_layer){    
             if(top_layer instanceof L.LayerGroup)   //geojson only
@@ -1560,7 +1571,7 @@ $.widget( "heurist.mapping", {
                     if (layer instanceof L.Layer && layer.feature && //(!(layer.cluster_layer_id>0)) &&
                         (window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, _selection)>=0)) 
                     {
-                        bounds.push( that.getLayerBounds(layer) );
+                        bounds.push( that.getLayerBounds(layer, useRuler) );
                     }
                 });
         });
@@ -1598,13 +1609,24 @@ $.widget( "heurist.mapping", {
     //
     //
     //
-    getLayerBounds: function (layer){
+    getLayerBounds: function (layer, useRuler){
         
         if(layer instanceof L.Marker || layer instanceof L.CircleMarker){    
             var ll = layer.getLatLng();
-            var corner1 = L.latLng(ll.lat-0.25, ll.lng-0.25),
-                corner2 = L.latLng(ll.lat+0.25, ll.lng+0.25);
-            return L.latLngBounds(corner1, corner2);            
+            
+            //if field 2-925 is set (zoom to point in km) use it
+            if(useRuler){
+                var ruler = cheapRuler(ll.lat);
+                var bbox = ruler.bufferPoint([ll.lng, ll.lat], this.options.zoomToPointInKM);   //0.01          
+                //w, s, e, n
+                var corner1 = L.latLng(bbox[1], bbox[0]),
+                    corner2 = L.latLng(bbox[3], bbox[2]);
+                return L.latLngBounds(corner1, corner2);            
+            }else{
+                var corner1 = L.latLng(ll.lat-0.02, ll.lng-0.02),
+                    corner2 = L.latLng(ll.lat+0.02, ll.lng+0.02);
+                return L.latLngBounds(corner1, corner2);            
+            }
         }else{
             return layer.getBounds();
         }
@@ -1842,7 +1864,7 @@ $.widget( "heurist.mapping", {
                 this.vistimeline = $(this.element).find('.ui-layout-south').timeline({
                     element_timeline: this.options.element_timeline,
                     onselect: function(selected_rec_ids){
-                        that.setFeatureSelection(selected_rec_ids); //highlight on map
+                        that.setFeatureSelection(selected_rec_ids); //timeline select - highlight on map
                         if($.isFunction(that.options.onselect)){ //trigger global event
                             that.options.onselect.call(that, selected_rec_ids);
                         }

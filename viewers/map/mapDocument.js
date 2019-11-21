@@ -43,6 +43,7 @@ function hMapDocument( _options )
     DT_MAP_BOOKMARK = 0,
     DT_NAME = 0,
     
+    DT_ZOOM_KM_POINT = 0,
     DT_MINIMUM_MAP_ZOOM = 0, //bounds for mapoc and visibility for layers
     DT_MAXIMUM_MAP_ZOOM = 0,
     
@@ -71,7 +72,7 @@ function hMapDocument( _options )
         DT_MAP_BOOKMARK = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK'];
         DT_MINIMUM_MAP_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_MAP_ZOOM'];
         DT_MAXIMUM_MAP_ZOOM = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_MAP_ZOOM'];
-        
+        DT_ZOOM_KM_POINT = window.hWin.HAPI4.sysinfo['dbconst']['DT_ZOOM_KM_POINT'];
         
         //_loadMapDocuments();
     }
@@ -84,10 +85,10 @@ function hMapDocument( _options )
             if(!(RT_MAP_DOCUMENT>0)) return;
             
             var that = this;
-        
+            
             var request = {
                         q: 't:'+RT_MAP_DOCUMENT,w: 'a',
-                        detail: [DT_GEO_OBJECT,DT_MAP_BOOKMARK,DT_SYMBOLOGY], //'header',
+                        detail: [DT_GEO_OBJECT,DT_MAP_BOOKMARK,DT_SYMBOLOGY,DT_ZOOM_KM_POINT], //fields_to_be_downloaded
                         source: 'map_document'};
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
@@ -187,12 +188,20 @@ function hMapDocument( _options )
         
         //get list of layers and datasets
         if(!map_documents_content[mapdoc_id]){
-            //map doc is bot loaded yet
+            //map doc is not loaded yet
             _loadMapDocumentContent(mapdoc_id, deferred);
             return;
         }else if(map_documents_content[mapdoc_id]=='error'){
             //prevent loop
             return;
+        }
+        
+        if(DT_ZOOM_KM_POINT>0){
+            var record2 = map_documents.getById( mapdoc_id );
+            var val = map_documents.fld(record2, DT_ZOOM_KM_POINT);
+            if(parseFloat(val)>0){
+                options.mapwidget.mapping('option','zoomToPointInKM',parseFloat(val));    
+            }
         }
         
         var resdata = map_documents_content[mapdoc_id];
