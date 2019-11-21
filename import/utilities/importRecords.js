@@ -188,9 +188,10 @@ function hImportRecords(_max_upload_size) {
                                                 +s+'</table>');
                                         
                                         $('#div_sourcedb').html('Source database:&nbsp;&nbsp;&nbsp;id: <b>'
-                                        +(source_db>0?source_db:'0 (not registered)')
+                                        +(source_db>0?source_db:'0 <span style="color:red">(not registered)</span>')
                                         +'</b>&nbsp;&nbsp;name: '
-                                        +(window.hWin.HEURIST4.util.isempty(source_db_name)?'(not specified)': ('<b>'+source_db_name+'</b>') ))
+                                        +(window.hWin.HEURIST4.util.isempty(source_db_name)
+                                            ?'<span style="color:red">(not specified)</span>': ('<b>'+source_db_name+'</b>') ))
                                         .show();        
                                                 
                                         _showStep(1);   
@@ -214,14 +215,14 @@ function hImportRecords(_max_upload_size) {
                                             $('#st1_B').show(); //All entity types are recognised. However it is not guaranteed
                                             $("#divStep2").show();
                                         }else{
-                                            //show option A - download - missed definitions
+                                            //show option A - download - missing definitions
                                             $('#btn_ImportRt').show().button('option','label','Download listed entity types');
                                             $('.st1_A').show(); // rectypes in this file do not yet exist in target db
                                         }
 
                                         $('#spanRecCount').text(recCount);
                                         
-                                        //no missed defintions
+                                        //no missing defintions
                                         if(s!=''){
                                         }else{
                                             //all record types are already in target database

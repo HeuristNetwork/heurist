@@ -98,7 +98,7 @@ $file_max_size = get_php_bytes('upload_max_filesize');
         
         </div>
 
-        <!-- STEP 1 - list of missed record types - offer to sync definitions -->
+        <!-- STEP 1 - list of missing record types - offer to sync definitions -->
         <div id="div_sourcedb" style="display:none">
         </div>
         
@@ -117,7 +117,7 @@ $file_max_size = get_php_bytes('upload_max_filesize');
             
            <div id="div_tsv" style="display:none"></div>
            
-           <!-- list of missed definitions -->
+           <!-- list of missing definitions -->
            <div id="div_RectypeToBeImported" style="max-height: 128px;overflow-y: auto;">
            </div>     
 
@@ -138,6 +138,7 @@ If the download of listed entity types fails to clear this message, please click
 <p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please <?php echo CONTACT_HEURIST_TEAM;?> for assistance (support at heuristnetwork dot org or use the bug report function)</p>
            <br><br>
            <button id="btn_ImportRecords">Import Records</button>
+           <span class="st1_C import-rem" style="color:red">Beware: some data will not be imported (see above)</span>
         </div>
        
         <!-- STEP 3 - result  -->
