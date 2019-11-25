@@ -5,7 +5,7 @@
     * Library to search records
     *
     * recordSearchMinMax - Find minimal and maximal values for given detail type and record type
-    * recordSearchFacets
+    * recordSearchFacets - returns counts for facets for given query
     * 
     * recordSearchRelated
     * recordSearchPermissions
@@ -686,21 +686,78 @@
 
     }
     
+
     //
+    // find parent record for rec_ID with given record type
     //
+    function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDetails, $level=0){
+        
+            $query = 'SELECT rec_RecTypeID from Records WHERE rec_ID='.$rec_ID;
+            $rtype = mysql__select_value($system->get_mysqli(), $query);
+            
+            if($rtype==$target_recTypeID){
+                return $rec_ID;
+            }
+        
+            $query = 'SELECT rl_SourceID FROM recLinks '
+                    .'WHERE rl_TargetID='.$rec_ID;
+            if(is_array($allowedDetails)){
+                $query = $query.' AND rl_DetailTypeID IN ('.implode(',',$allowedDetails).')';    
+            }else{
+                $query = $query.' AND rl_DetailTypeID IS NOT NULL';
+            }
+                    
+            $parents = mysql__select_list2($system->get_mysqli(), $query);
+            if(is_array($parents) && count($parents)>0){
+                if($level>5){
+                    $system->addError(HEURIST_ERROR, 'Can not find parent CMS Home record. It appears that menu items refers recursively');         
+                    return false;
+                }
+                return recordSearchFindParent($system, $parents[0], $target_recTypeID, $allowedDetails, $level+1);
+            }else{
+                $system->addError(HEURIST_ERROR, 'Can not find parent CMS Home record');         
+                return false;
+            }
+    }
+    //
+    // $menuitems - record ids
+    // fills $result array recursively with record ids and returns full detail at the end
     //
     function recordSearchMenuItems($system, $menuitems, &$result){
         
+        $menuitems = prepareIds($menuitems);
         $isRoot = (count($result)==0);
         if($isRoot){
-            if(!($system->defineConstant('DT_CMS_MENU') && 
+            if(!($system->defineConstant('RT_CMS_HOME') &&
+                 $system->defineConstant('DT_CMS_MENU') && 
                  $system->defineConstant('DT_CMS_TOP_MENU'))){
                 
                 return $system->addError(HEURIST_ERROR, 'Required field type "Menu" not defined in this database');         
             }
+            //if root record is menu - we have to find parent cms home
+            if(count($menuitems)==1){
+                if($menuitems[0]==0){
+                    //find first home record
+                    $query = 'SELECT rec_ID from Records '
+                    .'WHERE (not r0.rec_FlagTemporary) AND rec_RecTypeID='.RT_CMS_HOME;
+                    $res = mysql__select_value($system->get_mysqli(), $query);
+                    if($res==null){
+                        return $system->addError(HEURIST_ERROR, 
+                            'Can not find website home record');                    
+                    }
+                }else{
+                    //find parent home record
+                    $res = recordSearchFindParent($system, 
+                        $menuitems[0], RT_CMS_HOME, array(DT_CMS_MENU,DT_CMS_TOP_MENU));
+                }
+                if($res===false){
+                    return $system->getError();   
+                }else{    
+                    $menuitems[0] = $res;    
+                }
+            }
         }
 
-        $menuitems = prepareIds($menuitems);
         $rec_IDs = array();
 
         foreach ($menuitems as $rec_ID){   
@@ -711,10 +768,15 @@
         }
          
         if(count($rec_IDs)>0){       
-            
+            /*
             $query = 'SELECT dtl_Value FROM recDetails WHERE dtl_RecID in ('
                     .implode(',',$rec_IDs).') AND (dtl_DetailTypeID='.DT_CMS_MENU
                     .' OR dtl_DetailTypeID='.DT_CMS_TOP_MENU.')';
+            */        
+            $query = 'SELECT rl_TargetID FROM recLinks WHERE rl_SourceID in ('
+                    .implode(',',$rec_IDs).') AND (rl_DetailTypeID='.DT_CMS_MENU
+                    .' OR rl_DetailTypeID='.DT_CMS_TOP_MENU.')';
+                    
             $menuitems2 = mysql__select_list2($system->get_mysqli(), $query);
 
             $menuitems2 = prepareIds( $menuitems2 );

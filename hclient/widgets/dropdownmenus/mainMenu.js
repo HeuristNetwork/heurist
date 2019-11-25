@@ -1385,7 +1385,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     },
     
     //
-    //
+    // show popup with list of web home records - on select either view or edit
     //                
     _select_CMS_Home: function ( is_view_mode ){
         

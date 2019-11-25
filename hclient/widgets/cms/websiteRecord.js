@@ -23,6 +23,7 @@ function hCmsEditing(_options) {
 
     var main_content = $('body').find('#main-content');
     var home_pageid = main_content.attr('data-homepageid'),
+        init_pageid = main_content.attr('data-initid'),
         is_viewonly = (main_content.attr('data-viewonly')==1),
         current_pageid = home_pageid,
         was_modified = false, //was modified and saved - on close need to reinit widgets
@@ -160,7 +161,7 @@ function hCmsEditing(_options) {
             $('#main-menu').show()
             
             //init home page content
-            __iniLoadPageById( home_pageid );
+            __iniLoadPageById( init_pageid>0?init_pageid:home_pageid );
             
             $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
             
@@ -1255,6 +1256,10 @@ function hCmsEditing(_options) {
         
         editWidget: function (wid) {
             __addEditWidget(wid);
+        },
+        
+        loadPageById: function (pageid) {
+            __iniLoadPageById(pageid)
         },
         
         //callback on tinymce opening

@@ -105,7 +105,7 @@
 
         $response = recordSearchRelated($system, $_REQUEST['ids'], @$_REQUEST['direction']);
 
-    }else if(@$_REQUEST['a'] == 'menu'){
+    }else if(@$_REQUEST['a'] == 'cms_menu'){  //retrieve 
         
         $resids = array();
         $response = recordSearchMenuItems($system, $_REQUEST['ids'], $resids);

@@ -17,7 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function editCMS(home_page_record_id, main_callback){
+function editCMS(home_page_record_id, header_or_content_field_id, main_callback){
         
     var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
      RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
@@ -26,7 +26,8 @@ function editCMS(home_page_record_id, main_callback){
      DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
      DT_CMS_PAGE  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'],
 //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
-     DT_NAME      = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+     DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+     DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'];
      
      if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0)){
         var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg('You will need record types '
@@ -48,7 +49,7 @@ function editCMS(home_page_record_id, main_callback){
                                 if($dlg2.dialog('instance')) $dlg2.dialog('close');
 
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                    editCMS(home_page_record_id, main_callback); //call itself again
+                                    editCMS(home_page_record_id, header_or_content_field_id, main_callback); //call itself again
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);     
                                 }
@@ -69,6 +70,7 @@ function editCMS(home_page_record_id, main_callback){
     var web_link, tree_element = null;
     var was_something_edited = false;
     var remove_menu_records = false;
+    var open_page_on_init = -1;
     
     var edit_buttons = [
         {text:window.hWin.HR('Close'), 
@@ -236,6 +238,14 @@ function editCMS(home_page_record_id, main_callback){
         
             if(window.hWin.HEURIST4.util.isnull(request))
             {
+                var request = {a:'cms_menu'};
+                if(home_page_record_id>0){
+                    request['ids'] = home_page_record_id;
+                }else{
+                    request['ids'] = 0; //find first home record
+                }
+                
+                /*
                 request = {q:(home_page_record_id>0 ?{"ids":home_page_record_id}:{'t:':RT_CMS_HOME}),
                     limit: 1,
                     rules: [{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_HOME+'-'+DT_CMS_TOP_MENU, //top menu
@@ -244,11 +254,14 @@ function editCMS(home_page_record_id, main_callback){
                                 "levels":[{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_MENU}]  }]}]}]};  
                             
                             //{"query":'t:'+RT_CMS_PAGE+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_PAGE} pages no need
+                */
+            }else{
+                request['detail'] = 'detail';    
             }
             
             var orig_site_name = '';
         
-            request['detail'] = 'detail';
+            
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
                 function(response){
@@ -293,12 +306,14 @@ function editCMS(home_page_record_id, main_callback){
                             if(idx)
                             {
                                 var record = records[idx];
+                                //find home record
                                 if(resdata.fld(record, 'rec_RecTypeID')== RT_CMS_HOME){
                                     
                                     
                                     no_access = !(window.hWin.HAPI4.is_admin() 
                                                 || window.hWin.HAPI4.is_member(resdata.fld(record,'rec_OwnerUGrpID')));
                                     
+                                    open_page_on_init = (home_page_record_id>0)?home_page_record_id:-1;
                                     home_page_record_id  = resdata.fld(record, 'rec_ID');
                                     orig_site_name = resdata.fld(record, DT_NAME);
                                     
@@ -462,9 +477,22 @@ function editCMS(home_page_record_id, main_callback){
                                         
                                         //reload preview
                                         btn_refresh.button({icon:'ui-icon-refresh'}).click(function(){
+
+                                            var surl = window.hWin.HAPI4.baseURL+
+                                                'hclient/widgets/cms/websiteRecord.php?edit=1&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id;
+                                                
+                                            if (open_page_on_init>0) {
+                                                if(open_page_on_init != home_page_record_id){
+                                            //var preview_frame = edit_dialog.find('#web_preview');
+                                            //preview_frame[0].contentWindow.cmsEditing.loadPageById(open_page_on_init);
+                                                    surl = surl + '&initid='+open_page_on_init;
+                                                }
+                                                open_page_on_init = -1;
+                                            }
+
                                             //load new content to iframe
-                                            edit_dialog.find('#web_preview').attr('src', window.hWin.HAPI4.baseURL+
-                                                'hclient/widgets/cms/websiteRecord.php?edit=1&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id);
+                                            edit_dialog.find('#web_preview').attr('src', surl);                                            
+                                            
                                         });
                                         
                                         var url = window.hWin.HAPI4.baseURL+
@@ -481,7 +509,6 @@ function editCMS(home_page_record_id, main_callback){
                                     if(need_refresh_preview){
                                         btn_refresh.click(); //reload home page    
                                     }
-                                    
                                     
                                     var topmenu = resdata.values(record, DT_CMS_TOP_MENU);
                                     treedata = __getTreeData(home_page_record_id, topmenu);
@@ -849,7 +876,7 @@ function editCMS(home_page_record_id, main_callback){
     }
     
     //
-    //
+    // Add new menu(page) menu_id to  parent_id
     //
     function addMenuEntry(parent_id, menu_id, callback){
 

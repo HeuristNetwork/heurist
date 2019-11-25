@@ -2494,9 +2494,9 @@ window.hWin.HEURIST4.ui = {
     //
     // show record action dialog
     //
-    showEditCMSDialog: function( home_page_record_id, main_callback ){
+    showEditCMSDialog: function( home_page_record_id, header_or_content_field_id, main_callback ){
         //todo optionally load dynamically editCMS.js
-        editCMS(  home_page_record_id, main_callback );
+        editCMS(  home_page_record_id, header_or_content_field_id, main_callback );
     },
     
     //

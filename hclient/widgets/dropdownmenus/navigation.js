@@ -21,7 +21,7 @@
 $.widget( "heurist.navigation", {
 
     options: {
-       menu_recIDs:[],
+       menu_recIDs:[],  //top level menu records
        orientation: 'horizontal', //vertical
        use_next_level: false,
        onmenuselect: null,
@@ -65,6 +65,7 @@ $.widget( "heurist.navigation", {
         }
 
 
+        //find menu contents by top level ids    
         var ids = this.options.menu_recIDs;
         if(ids==null){
             this.options.menu_recIDs = [];
@@ -84,7 +85,7 @@ $.widget( "heurist.navigation", {
             id: window.hWin.HEURIST4.util.random(),
             source:this.element.attr('id') };
             */
-        var request = {ids:ids, a:'menu'};
+        var request = {ids:ids, a:'cms_menu'};
         var that = this;
             
             
@@ -100,6 +101,7 @@ $.widget( "heurist.navigation", {
     
     //
     // callback function on getting menu records
+    // resdata - recordset with menu records (full data)
     //
     _onGetMenuData:function(resdata){
         
@@ -206,7 +208,7 @@ $.widget( "heurist.navigation", {
             return false;
         };
         
-        
+        //init jquery menu widget
         this.divMainMenuItems.menu( opts );
         
         

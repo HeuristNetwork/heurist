@@ -639,25 +639,52 @@ $.widget( "heurist.editing_input", {
       
                 }
 
+
+                var isCMS_content = (( //this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'] || 
+                         this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
+                         this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']) &&
+                        (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'] || 
+                         this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'] ));
+                
+                if( isCMS_content ){
                     
-                this._on( $btn_edit_switcher, { click: function(){
+                    var $cms_dialog = window.hWin.HEURIST4.msg.getPopupDlg();
+                    if($cms_dialog.find('.main_cms').length>0){
+                    
+                        $btn_edit_switcher.hide();
                         
-                        var eid = '#'+$input.attr('id')+'_editor';                    
-                        if($input.is(':visible')){
-                            __showEditor(true);
-                        }else{
-                            $btn_edit_switcher.text('wyswyg');
-                            $input.show();
-                            tinymce.remove(eid);
-                            $(eid).hide();
-                        }
+                    }else{
+                    
+                        $btn_edit_switcher.text('website editor')
+                            .attr('data-cms-edit', 1)
+                            .attr('data-cms-field', this.options.dtID)
+                            .attr('title','Edit website content in the website editor to edit this field');   
+                            
+                    }
+                    /*    
+                    this._on( $btn_edit_switcher, { click: function(){
+                        //save and close
+                        window.hWin.HEURIST4.ui.showEditCMSDialog( this.options.recID, this.options.dtID );    
                     }});
+                    */
+                }else{
+                    
+                    this._on( $btn_edit_switcher, { click: function(){
+                            
+                            var eid = '#'+$input.attr('id')+'_editor';                    
+                            if($input.is(':visible')){
+                                __showEditor(true); //show tinymce editor
+                            }else{
+                                $btn_edit_switcher.text('wyswyg');
+                                $input.show();
+                                tinymce.remove(eid);
+                                $(eid).hide();
+                            }
+                        }});
+                }
                  
-                /*if( this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'] || 
-                    this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
-                    this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']){    }*/
-                    //what is visible initially
-                if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
+                //what is visible initially
+                if( !isCMS_content && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
                     var nodes = $.parseHTML(value);
                     if(nodes && (nodes.length>1 || nodes[0].nodeName!='#text')){ //if it has html show editor at once
                              setTimeout(__showEditor,500); 

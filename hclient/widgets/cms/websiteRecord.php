@@ -116,6 +116,7 @@ $system->defineConstants();
 
 $mysqli = $system->get_mysqli();
 
+$open_page_on_init = @$_REQUEST['initid'];
 $rec_id = @$_REQUEST['recID'];
 if(!($rec_id>0)) $rec_id = @$_REQUEST['recid'];
 if(!($rec_id>0)) $rec_id = @$_REQUEST['id'];
@@ -691,7 +692,9 @@ if(!$edit_Available && $system->is_member(2)){
         <div id="main-pagetitle" class="ui-heurist-bg-light">loading...</div>       
     </div>
     <div class="ent_content_full ui-heurist-bg-light" style="top:190px;padding: 5px;" id="main-content-container">
-        <div id="main-content" data-homepageid="<?php print $rec_id;?>" data-viewonly="<?php print ($hasAccess)?0:1;?>">
+        <div id="main-content" data-homepageid="<?php print $rec_id;?>" 
+            <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?> 
+            data-viewonly="<?php print ($hasAccess)?0:1;?>">
         </div>
     </div>
     </div>

@@ -2386,7 +2386,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
     //
     // 1. show-hide optional fields
     // 2. add menu button on top of screen
-    // 3. add record title at the top 
+    // 3. add record title at the top
+    // 4. init cms open edit listener 
     //    
     _afterInitEditForm: function(){
         
@@ -2538,6 +2539,14 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         //to save space - hide all fieldsets without visible fields
         this._showHideEmptyFieldGroups();
         
+        //init cms open edit listener
+        $(this.element).find('span[data-cms-edit="1"]').click(function(event){
+            that._saveEditAndClose(null, function(){
+                that.closeEditDialog();
+                window.hWin.HEURIST4.ui.showEditCMSDialog( that._currentEditID,  
+                    $(event.target).attr('data-cms-field'));
+            });
+        });
         
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm);
         //show-hide help text below fields - it overrides comptency level
