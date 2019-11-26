@@ -98,12 +98,6 @@
             </u></b><label>&nbsp;to allow bookmarking of web pages</label><br><br>
     </div>
 
-
-    <!-- ================================================= -->
-    <hr/>
-    <!-- ================================================= -->
-    <h3 style="margin:0">Appearance</h3>
-                                   
     <div>
         <div class="header"><label for="userCompetencyLevel">
                 User interface style / level of user
@@ -115,6 +109,12 @@
             <option value="0">Advanced (obscure functions, command strings)</option>
         </select>
     </div>
+
+    <!-- ================================================= -->
+    <hr/>
+    <!-- ================================================= -->
+    <h3 style="margin:0">Mapping</h3>
+                                   
 
     <!-- Allowing this is dangerous b/c you can end up in a style which doesn't allow editing or logout, and is remembered in session -->
     <div style="display: none;">
@@ -158,8 +158,32 @@
             title="The minimum number of markers to be in a cluster before the markers are hidden and a count is shown"/>&nbsp;
 -->         
         <label for="mapcluster_zoom">Disable at zoom: </label>
+        <select id="mapcluster_zoom" name="mapcluster_zoom" style="max-width:80px;"
+            title="The maximum zoom level that a marker can be part of a cluster. Level 1 = ~10,000km (15 deg.) to ~65,000 km (equator). 
+     Level 18 = ~50m (15 deg.) to ~250m (equator)"> 
+            <option value="1">Level 1 (zoomed out)</option>
+            <option value="2">Level 2</option>
+            <option value="3">Level 3</option>
+            <option value="4">Level 4</option>
+            <option value="5">Level 5</option>
+            <option value="6">Level 6</option>
+            <option value="7">Level 7</option>
+            <option value="8">Level 8</option>
+            <option value="9">Level 9</option>
+            <option value="10">Level 10</option>
+            <option value="11">Level 11</option>
+            <option value="12">Level 12</option>
+            <option value="13">Level 13</option>
+            <option value="14">Level 14</option>
+            <option value="15">Level 15</option>
+            <option value="16">Level 16</option>
+            <option value="17">Level 17</option>
+            <option value="18">Level 18 (zoomed in)</option>
+        </select>    
+        <!--
         <input id="mapcluster_zoom" name="mapcluster_zoom" style="max-width: 35px;" type="number" min="1" max="18" step="1" value="18"
             title="The maximum zoom level that a marker can be part of a cluster"/>
+        -->    
     </div>
     <div>
         <div class="header"><label for="deriveMapLocation">Derive map location of non-geolocalised entities from connected Places</label></div>
@@ -182,19 +206,16 @@
     
     <div>
         <div class="header"><label>Map popup template:</label></div>
-        <select id="map_template" name="map_template" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        <select id="map_template" name="map_template" class="text ui-widget-content ui-corner-all" 
+            title="" style="width:300px;min-width:300px;max-width:300px">
         </select>
     </div>
 
     <div id="map_default_style_div">
-        <div class="header"><label>Map symbology:</label></div>
+        <div class="header"><label>Map symbology for Current Query:</label></div>
         <input id="map_default_style" name="map_default_style" class="text ui-widget-content ui-corner-all"/>
     </div>
     
-    <div id="custom_theme_div">
-        <div class="header"><label>Theme:</label></div>
-        <input id="custom_theme" name="custom_theme" class="text ui-widget-content ui-corner-all"/>
-    </div>
     <br/><hr />
 
 
@@ -270,7 +291,7 @@
     
     <!-- ================================================= -->
     <br/><hr />
-    <h3 style="margin:0">Edit</h3>
+    <h3 style="margin:0">Other</h3>
  
  <!-- Appears not to have been implemented in new editing functions 2017, possibly reinstate?
 
@@ -284,6 +305,12 @@
         <div class="header"><label for="defaultRecentPointerSearch">Default to recent records search when editing<br />pointer fields <i>(otherwise All Records)</i></label></div>
         <input type="checkbox" name="defaultRecentPointerSearch" id="defaultRecentPointerSearch" class="text ui-widget-content ui-corner-all"/>
     </div>
+    
+    <div id="custom_theme_div">
+        <div class="header"><label>Interface colour scheme (detailed):</label></div>
+        <input id="custom_theme" name="custom_theme" class="text ui-widget-content ui-corner-all"/>
+    </div>
+    
 
 <!-- 14/4/18: This does not appear to do anything, besides it should really be replaced by proper indexing using Elastic and specification of composite key for each record type 
     <div>
