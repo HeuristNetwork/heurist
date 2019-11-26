@@ -251,7 +251,7 @@ function hMapManager( _options )
                 .html('<span class="ui-icon ui-map-document" style="width:22px">'
 +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
                 +'</span>New map document')
-                .css({height:'14px',width: '100%',background: 'none'})
+                .css({height:'26px',width: '100%',background: 'none'})
                 .click(_createNewMapDocument)
                 .appendTo($header);
         }
